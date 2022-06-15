@@ -1121,6 +1121,7 @@ version = "0.1.0"
 dependencies = [
  "actix-web",
  "env_logger",
+ "lazy_static",
  "tera",
 ]
 
