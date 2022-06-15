@@ -1,4 +1,5 @@
-use std::{net::TcpListener};
+use std::net::TcpListener;
+use actix_files as fs;
 
 #[macro_use]
 extern crate lazy_static;
@@ -28,6 +29,7 @@ pub fn start_blog(listener: TcpListener) -> Result<Server, std::io::Error> {
         App::new()
             .app_data(web::Data::new(TEMPLATES.clone()))
             .wrap(middleware::Logger::default()) // enable logger
+            .service(fs::Files::new("/static", "static/"))
             .service(handlers::index)
     })
     .listen(listener)?
