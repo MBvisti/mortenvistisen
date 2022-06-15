@@ -4,7 +4,7 @@ use actix_files as fs;
 #[macro_use]
 extern crate lazy_static;
 
-use actix_web::{dev::Server, HttpServer, middleware, App, web};
+use actix_web::{dev::Server, HttpServer, middleware, App, web, HttpResponse};
 use tera::Tera;
 
 pub mod handlers;
@@ -29,6 +29,7 @@ pub fn start_blog(listener: TcpListener) -> Result<Server, std::io::Error> {
         App::new()
             .app_data(web::Data::new(TEMPLATES.clone()))
             .wrap(middleware::Logger::default()) // enable logger
+            .route("/status", web::get().to(HttpResponse::Ok))
             .service(fs::Files::new("/static", "static/"))
             .service(handlers::index)
     })
