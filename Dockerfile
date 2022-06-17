@@ -33,6 +33,8 @@ RUN apt-get update -y \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /app/target/release/rust-htmx rust-htmx
+COPY --from=builder /app/templates templates
+COPY --from=builder /app/static static
 
 ENTRYPOINT ["./rust-htmx"]
 EXPOSE 51001

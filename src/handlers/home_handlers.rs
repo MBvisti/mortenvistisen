@@ -7,7 +7,10 @@ pub async fn index(tmpl: web::Data<tera::Tera>) -> impl Responder {
 
     match tmpl.render("index.html", &context) {
         Ok(s) => HttpResponse::Ok().content_type("text/html").body(s),
-        Err(_) => HttpResponse::Ok().body("Hey there!"),
+        Err(e) => {
+            println!("{}", e);
+            HttpResponse::Ok().body("Hey there!")
+        },
     }
 }
 
