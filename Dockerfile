@@ -35,6 +35,7 @@ RUN apt-get update -y \
 COPY --from=builder /app/target/release/rust-htmx rust-htmx
 COPY --from=builder /app/templates templates
 COPY --from=builder /app/static static
+COPY --from=builder /app/posts posts
 
 ENTRYPOINT ["./rust-htmx"]
 EXPOSE 51001
