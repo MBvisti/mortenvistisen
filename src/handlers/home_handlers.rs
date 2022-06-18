@@ -13,6 +13,7 @@ struct FrontMatter {
     thumbnail: String,
     tags: Vec<String>,
     author: String,
+    estimated_reading_time: u32,
 }
 
 #[get("/")]
@@ -75,7 +76,7 @@ pub async fn index(tmpl: web::Data<tera::Tera>) -> impl Responder {
     // println!("{:?}", front_matters);
     context.insert("posts", &front_matters);
     // let c = &Context::from_serialize(front_matters).unwrap();
-    match tmpl.render("index.html", &context) {
+    match tmpl.render("home.html", &context) {
         Ok(s) => HttpResponse::Ok().content_type("text/html").body(s),
         Err(e) => {
             println!("{:?}", e);

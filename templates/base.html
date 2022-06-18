@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    {% block head %}
+    <title>{% block title %}{% endblock title %} - MBV</title>
+    {% endblock head %}
+    <link rel="stylesheet" href="static/css/index.css">
+</head>
+
+<body class="grid grid-rows-[5vh_minmax(90vh,_1fr)_5vh]">
+    <div>{% block header %}{% endblock header %}</div>
+    {% block content %}{% endblock content %}
+    <div class="flex justify-center items-center">
+        {% block footer %}
+        &copy; 2022 by <a class="pl-2" href="https://mortenvistisen.com/">MBV Software</a>.
+        {% endblock footer %}
+    </div>
+</body>
+
+</html>

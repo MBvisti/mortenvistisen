@@ -1,1 +1,13 @@
-<article>{{ post | safe }}</article>
+{% extends "base.html" %}
+
+{% block title %}Article {% endblock title %}
+
+{% block header %}
+<div class="mt-2 ml-4">
+    <a href="/">Go back</a>
+</div>
+{% endblock header %}
+
+{% block content %}
+    <article class="w-screen">{{ post | safe }}</article>
+{% endblock content %}

@@ -29,7 +29,7 @@ pub fn start_blog(listener: TcpListener) -> Result<Server, std::io::Error> {
             .app_data(web::Data::new(TEMPLATES.clone()))
             .wrap(middleware::Logger::default()) // enable logger
             .route("/status", web::get().to(HttpResponse::Ok))
-            .service(fs::Files::new("/static", "static/"))
+            .service(fs::Files::new("/static", "static/").use_last_modified(true))
             .service(handlers::index)
             .service(handlers::render_post)
     })
