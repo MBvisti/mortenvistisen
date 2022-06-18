@@ -1,10 +1,10 @@
-use std::net::TcpListener;
 use actix_files as fs;
+use std::net::TcpListener;
 
 #[macro_use]
 extern crate lazy_static;
 
-use actix_web::{dev::Server, HttpServer, middleware, App, web, HttpResponse};
+use actix_web::{dev::Server, middleware, web, App, HttpResponse, HttpServer};
 use tera::Tera;
 
 pub mod handlers;
@@ -19,7 +19,6 @@ lazy_static! {
             }
         };
         tera.autoescape_on(vec![".html", ".sql"]);
-        // tera.register_filter("do_nothing", do_nothing_filter);
         tera
     };
 }
@@ -32,6 +31,7 @@ pub fn start_blog(listener: TcpListener) -> Result<Server, std::io::Error> {
             .route("/status", web::get().to(HttpResponse::Ok))
             .service(fs::Files::new("/static", "static/"))
             .service(handlers::index)
+            .service(handlers::render_post)
     })
     .listen(listener)?
     .run();

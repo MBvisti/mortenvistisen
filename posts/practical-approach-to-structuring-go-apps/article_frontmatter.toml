@@ -1,0 +1,6 @@
+title = 'A practical approach to structuring Golang applications'
+description = 'A beginners guide to structuring Golang Apps'
+tags = ['golang', 'domain-driven design', 'beginner', 'code-architecture']
+posted = '30-01-2021'
+author = 'Morten Vistisen'
+thumbnail = 'go-logo-blue.png'
