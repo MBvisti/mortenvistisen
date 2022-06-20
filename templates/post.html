@@ -9,5 +9,10 @@
 {% endblock header %}
 
 {% block content %}
-    <article class="w-screen">{{ post | safe }}</article>
+    <article 
+        id="article-content"
+        class="max-w-screen overflow-x-hidden flex flex-col px-96"
+    >
+        {{ post | safe }}
+    </article>
 {% endblock content %}
