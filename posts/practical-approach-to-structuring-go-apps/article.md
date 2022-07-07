@@ -1,4 +1,4 @@
-<img className="my-10" src="https://cdn-images-1.medium.com/max/1600/1*oZ1j-s22SCUMZamIyVeQtQ.jpeg" alt="gopher" />
+<img src="https://cdn-images-1.medium.com/max/1600/1*oZ1j-s22SCUMZamIyVeQtQ.jpeg" alt="gopher" />
 
 Go is an amazing language. It’s simple, easy to reason about and gives you much tooling right out of the box. However, when I started with Go I struggled to figure out how to structure my applications in a way that didn’t use “enterprisey” approaches. This is my take on structuring Golang applications that start out simple, but with the flexibility to grow, and what I would have wanted when I started with Go.
 
@@ -212,7 +212,6 @@ func NewStorage(db *sql.DB) Storage {
 	}
 }
 ```
-/
 
 This allows us to create a new storage component where and whenever we want, as long as it receives a valid db argument of type `*sql.DB`.
 
@@ -240,7 +239,6 @@ func NewUserService(userRepo UserRepository) UserService {
 	}
 }
 ```
-/
 
 Notice that our user service have a repository dependency. We will define repository methods (i.e. database operations) here later on, but the important part is that we only define the methods we need. Since we are not interested in the implementation of these methods, only the behaviour, we can write mock functions that suit a given test case.
 
@@ -287,7 +285,6 @@ func (s *Server) Run() error {
 	return nil
 }
 ```
-/
 
 Next, open `routes.go` and add the following:
 
@@ -309,7 +306,6 @@ func (s *Server) Routes() *gin.Engine {
 	return router
 }
 ```
-/
 
 We are going to take advantage of gin’s group functionality so we can easily group our endpoints after the resources they intend to serve. Next up, let’s add a handler so we can actually make calls to the status endpoint and verify that our application is running. Open up `handlers.go`:
 
@@ -335,7 +331,6 @@ func (s *Server) ApiStatus() gin.HandlerFunc {
 	}
 }
 ```
-/
 
 At this point, we only need to sync a few dependencies: Gin Web Framework and a driver for PostgreSQL. Go ahead and type the following into your terminal: 
 ```sh 
