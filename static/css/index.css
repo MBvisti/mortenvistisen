@@ -780,6 +780,7 @@ video {
 
 #article-content img {
   position: relative;
+  width: 100%;
 }
 
 #article-content h1 {
