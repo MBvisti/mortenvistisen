@@ -1,4 +1,4 @@
-<img className="my-10" src="https://cdn-images-1.medium.com/max/1600/1*oZ1j-s22SCUMZamIyVeQtQ.jpeg" alt="gopher" />
+<img src="https://cdn-images-1.medium.com/max/1600/1*oZ1j-s22SCUMZamIyVeQtQ.jpeg" alt="gopher" />
 
 Go is an amazing language. It’s simple, easy to reason about and gives you much tooling right out of the box. However, when I started with Go I struggled to figure out how to structure my applications in a way that didn’t use “enterprisey” approaches. This is my take on structuring Golang applications that start out simple, but with the flexibility to grow, and what I would have wanted when I started with Go.
 
@@ -50,15 +50,14 @@ This should hopefully give you an overview of the overall structure, a step-by-s
 
 Alright, enough talk, let’s go going. Create a new folder wherever you like to store your projects called *weight-tracker* and run the following command inside the folder:
 
-<StaticCode language="go">
+
 ```go
 go mod init weight-tracker
 ```
-</StaticCode>
 
 The application is going to follow a structure that looks something like this:
 
-<StaticCode language="go">
+
 ```go
 weight-tracker
 - cmd
@@ -75,7 +74,6 @@ weight-tracker
   - repository
     storage.go
 ```
-</StaticCode>
 
 Go ahead and create the above structure in your designated folder.
 
@@ -93,7 +91,7 @@ We will be working with four packages:
 The *main* package should be self-explanatory if you’ve ever done any golang programming before. All of our services, i.e. *user* and *weight* service, are going into the *api* package along with a *definitions* file that will contain all of our structs (we will create this later). In the *app* package, we will have our *server*, *handlers* and *routes*. Lastly, we have *repository* that will contain all of our code related to database operations.
 
 Open up *main.go* and add the following:
-<StaticCode language="go">
+
 ```go
 package main
 
@@ -172,7 +170,6 @@ func setupDatabase(connString string) (*sql.DB, error) {
 	return db, nil
 }
 ```
-</StaticCode>
 
 You should have quite a few errors showing in your IDE now, we are fixing that in a moment.
 But first off, let me explain what is going on here. In our *func main()* we call a method named *run*, that returns an error (or nil, if there is no error). If *run* should return an error our programs exits and gives us an error message. Setting up our *main* function in this way allows us to test it and thereby following the element of a robust service structure, testability. This way of setting up the main function comes from Mat Ryer, who talks more about it in his [blog post](https://pace.dev/blog/2020/02/12/why-you-shouldnt-use-func-main-in-golang-by-mat-ryer.html).
@@ -194,7 +191,7 @@ In rough terms, the inner layers should not know about the outer layers. This al
 To achieve this, we are going to use dependency injection (DI for short). Basically, DI is the idea that services should receive their dependencies when they are created. It allows us to decouple the creation of a service’s dependencies from the creation of the service itself. This will be helpful when we get to testing our code. If you want to read more about DI, I suggest this [article](https://blog.drewolson.org/dependency-injection-in-go).
 
 I learn best by looking at actual code, so let’s start by adding some of the missing code that will make the code in `main.go` make more sense. Open up `storage.go` and add the following:
-<StaticCode language="go">
+
 ```go
 package repository
 
@@ -215,7 +212,6 @@ func NewStorage(db *sql.DB) Storage {
 	}
 }
 ```
-</StaticCode>
 
 This allows us to create a new storage component where and whenever we want, as long as it receives a valid db argument of type `*sql.DB`.
 
@@ -223,7 +219,7 @@ As you may have noticed, we have a lowercase and an uppercase version of `storag
 
 Now, lets set up the base structure of one of our services, `user.go`. This should give you a feel for how the API package is going to be structuring services. You will have to repeat this for the `weight.go` service as well. Just copy-paste the content of `user.go`and change the naming. Open up `user.go` and add the following:
 
-<StaticCode language="go">
+
 ```go
 package api
 
@@ -243,7 +239,6 @@ func NewUserService(userRepo UserRepository) UserService {
 	}
 }
 ```
-</StaticCode>
 
 Notice that our user service have a repository dependency. We will define repository methods (i.e. database operations) here later on, but the important part is that we only define the methods we need. Since we are not interested in the implementation of these methods, only the behaviour, we can write mock functions that suit a given test case.
 
@@ -251,7 +246,7 @@ This might seem a bit fluffy right now but bear with me for now, it will make se
 
 Open up `server.go` and add the following:
 
-<StaticCode language="go">
+
 ```go
 package app
 
@@ -290,11 +285,10 @@ func (s *Server) Run() error {
 	return nil
 }
 ```
-</StaticCode>
 
 Next, open `routes.go` and add the following:
 
-<StaticCode language="go">
+
 ```go
 package app
 
@@ -312,11 +306,10 @@ func (s *Server) Routes() *gin.Engine {
 	return router
 }
 ```
-</StaticCode>
 
 We are going to take advantage of gin’s group functionality so we can easily group our endpoints after the resources they intend to serve. Next up, let’s add a handler so we can actually make calls to the status endpoint and verify that our application is running. Open up `handlers.go`:
 
-<StaticCode language="go">
+
 ```go
 package app
 
@@ -338,20 +331,23 @@ func (s *Server) ApiStatus() gin.HandlerFunc {
 	}
 }
 ```
-</StaticCode>
 
-At this point, we only need to sync a few dependencies: Gin Web Framework and a driver for PostgreSQL. Go ahead and type the following into your terminal: `go get github.com/gin-contrib/cors` , `go get github.com/gin-gonic/gin`and `go get github.com/lib/pg`.
+At this point, we only need to sync a few dependencies: Gin Web Framework and a driver for PostgreSQL. Go ahead and type the following into your terminal: 
+```sh 
+  go get github.com/gin-contrib/cors
+  go get github.com/gin-gonic/gin
+  go get github.com/lib/pg
+```
 
-Everything should be ready now, so go into your terminal and write: `go run cmd/server/main.go`, visit `http://localhost:8080/v1/api/status`, and you should receive a message along the lines of:
+Everything should be ready now, so go into your terminal and write: ```go go run
+cmd/server/main.go```, visit ```sh http://localhost:8080/v1/api/status```, and you should receive a message along the lines of:
 
-<StaticCode language="json">
 ```json
 {
 	"data": "weight tracker API running smoothly",
 	"status": "success"
 }
 ```
-</StaticCode>
 
 If you don’t get the above message, please go back to the previous steps and see if you missed something or checkout the accompanying [GitHub repository](https://github.com/MBvisti/weight-tracker-article).
 
@@ -361,23 +357,20 @@ At this point, we are ready to start building the meat of the application. To do
 
 I won’t cover how to set this up as the article would be too long. For now, go into your terminal, make sure you are in the `repository` folder and run:
 
-<StaticCode language="bash">
 ```sh
 git clone https://gist.github.com/ed090d782dc6ebb35e344ff82aafdddf.git
 ```
-</StaticCode>
 
 This clones the migrations needed for the project. You should also now have a folder named `ed090d782dc6ebb35e344ff82aafdddf`, ****lets change that to migrations by running:
 
-<StaticCode language="bash">
+
 ```sh
 mv ed090d782dc6ebb35e344ff82aafdddf migrations
 ```
-</StaticCode>
 
 The last thing we need now is to add the `RunMigrations` method to `storage.go`:
 
-<StaticCode language="go">
+
 ```go
 // update your imports to look like this:
 import (
@@ -423,11 +416,9 @@ func (s *storage) RunMigrations(connectionString string) error {
 	return nil
 }
 ```
-</StaticCode>
 
 To run the migrations, open up `main.go` and add the following:
 
-<StaticCode language="go">
 ```go
 // everything stays the same, so add this below
 // storage := repository.NewStorage(db)
@@ -442,13 +433,12 @@ if err != nil {
     return err
 }
 ```
-</StaticCode>
 
 You should now have two tables in your database: user and weight. Let’s get started on writing some actual business logic.
 
 We want to let people create an account through our API. So let’s started by defining what a user request is, create a file called under the API folder `definitions.go` and add the following:
 
-<StaticCode language="go">
+
 ```go
 package api
 
@@ -462,11 +452,10 @@ type NewUserRequest struct {
 	Email         string `json:"email"`
 }
 ```
-</StaticCode>
 
 We are defining what a new user request should look like. Note that this might be different from what a user struct would look like, we define our struct to only include the data we need. Next up, open `user.go` and the following to `UserService` and `UserRepository`:
 
-<StaticCode language="go">
+
 ```go
 // user.go
 type UserService interface {
@@ -478,11 +467,10 @@ type UserRepository interface {
     CreateUser(NewUserRequest) error
 }
 ```
-</StaticCode>
 
 Here we define a method on our `UserService`, called `New` and a method on the UserRepository called `CreateUser`. Remember we talked about The Dependency Rule earlier? This is what’s going on with the `CreateUser` method on `UserRepository`, our service does not know about the actual implementation of the method, what type of database it is etc. Just that there is a method called `CreateUser` and takes in a `NewUserRequest` and returns an error. The benefit of this is twofold: we get some indication from our IDE that a method is missing (open up `main.go` and check `api.NewUserService`) and what it needs, and it allows us to easily write unit tests. You should also see an error from `NewUserService`in `user.go`, telling us that we are missing a method. Let’s fixed that, add the following:
 
-<StaticCode language="go">
+
 ```go
 // add these imports after the package declaration
 import (
@@ -518,11 +506,10 @@ func(u * userService) New(user NewUserRequest) error {
     return nil
 }
 ```
-</StaticCode>
 
 We do some basic validations and normalisation, but this method could definitely be improved upon. We still need to add the `CreateUser` method, so open up `storage.go` and add the following to the `CreateUser` method to the `Storage` interface:
 
-<StaticCode language="go">
+
 ```go
 // storage.go
 type Storage interface {
@@ -530,11 +517,10 @@ type Storage interface {
     CreateUser(request api.NewUserRequest) error
 }
 ```
-</StaticCode>
 
 Notice that this makes the error in `main.go` go away, but results in a new error on the `NewStorage` function. We need to implement the method, just like we did with the `UserService`. Add this below `RunMigrations`:
 
-<StaticCode language="go">
+
 ```go
 // add "log" to imports to your imports look like this:
 import (
@@ -567,13 +553,12 @@ func (s *storage) CreateUser(request api.NewUserRequest) error {
 	return nil
 }
 ```
-</StaticCode>
 
 Again, this code could probably do with some improvements, but I’m going to keep it short.
 
 Now, all that is left to do is to expose this through HTTP so that people can actually start using our API and create their accounts. Open handlers.go and add the following:
 
-<StaticCode language="go">
+
 ```go
 // update your imports to look like this
 import (
@@ -615,7 +600,6 @@ func (s *Server) CreateUser() gin.HandlerFunc {
 	}
 }
 ```
-</StaticCode>
 
 We are going to accept a request with a JSON payload and using gin’s ShouldBindJSON method to extract the data. Go ahead and try it out!
 
@@ -623,7 +607,7 @@ It took some time to get here, so let me show you one of the benefits that I kee
 
 Create a file called `user_test.go` under the API folder and add the following:
 
-<StaticCode language="go">
+
 ```go
 package api_test
 
@@ -715,7 +699,6 @@ func TestCreateNewUser(t *testing.T) {
 	}
 }
 ```
-</StaticCode>
 
 A lot of things are happening here so let us go through them step-by-step.
 
@@ -733,7 +716,7 @@ Our application is not worth much right now. We can only create a user but not t
 
 Our application is not worth much right now. We can only create a user but not track our weight or calculate the number of calories we need. Let’s change that!I’m a big fan of test-driven development (TDD) and the way this application is structured makes it really easy to use. We are going to need three methods on our weight service: New, `CalculateBMR` and `DailyIntake` and two on our repository: `CreateWeightEntry` and GetUser. Open `weight.go` and add the following to `WeightService` and `WeightRepository`:
 
-<StaticCode language="go">
+
 ```go
 // weight.go
 
@@ -749,11 +732,10 @@ type WeightRepository interface {
 	GetUser(userID int) (User, error)
 }
 ```
-</StaticCode>
 
 Next, we need to add three structs to our definitions file: `´NewWeightRequest`, `Weight` and `User`. Open up `weight.go` and add the following:
 
-<StaticCode language="go">
+
 ```go
 // add this after the package declaration
 import "time"
@@ -784,11 +766,10 @@ type NewWeightRequest struct {
 	UserID int `json:"user_id"`
 }
 ```
-</StaticCode>
 
 Now, you will see an error on `NewWeightService` about missing methods. We don’t want to write the actual implementation yet, as we are doing TDD, so for now, just add this below `NewWeightService`:
 
-<StaticCode language="go">
+
 ```go
 // add these below NewWeightService
 func (w *weightService) CalculateBMR(height, age, weight int, sex string) (int, error) {
@@ -803,11 +784,10 @@ func (w *weightService) New(request NewWeightRequest) error {
 	panic("implement me")
 }
 ```
-</StaticCode>
 
 Open up `main.go` and you will see that we also have some missing methods on storage passed to `api.NewWeightService`. Open up `storage.go` and add these:
 
-<StaticCode language="go">
+
 ```go
 // add this to the Storage interface
 type Storage interface {
@@ -824,11 +804,10 @@ func (s *storage) GetUser(userID int) (api.User, error) {
 	panic("implement me!")
 }
 ```
-</StaticCode>
 
 Lets now add the tests that we will need, create a file called`weight_test.go` in the API folder and add the following:
 
-<StaticCode language="go">
+
 ```go
 package api_test
 
@@ -1016,13 +995,12 @@ func TestDailyIntake(t *testing.T) {
 	}
 }
 ```
-</StaticCode>
 
 The actual content of the tests is not so important as the fact that we can quickly write tests and mock external dependencies such as the methods to interact with the database.
 
 Run `go test ./...` from the root directory and you should receive a lot of failed tests. We are going to fix this by implementing the logic of these methods, starting with the three in our `WeightService`. Add this below `NewWeightService`:
 
-<StaticCode language="go">
+
 ```go
 // add this after the package declaration
 import "errors"
@@ -1130,13 +1108,12 @@ func (w *weightService) DailyIntake(BMR, activityLevel int, weightGoal string) (
 	return dailyCaloricIntake, nil
 }
 ```
-</StaticCode>
 
 With these methods added all of the tests should pass.
 
 The last thing we need is to add the methods needed to interact with the database. Open `storage.go` and add the following:
 
-<StaticCode language="go">
+
 ```go
 // replace the methods: CreateWeightEntry and GetUser with the code below
 func (s *storage) CreateWeightEntry(request api.Weight) error {
@@ -1174,7 +1151,6 @@ func (s *storage) GetUser(userID int) (api.User, error) {
 	return user, nil
 }
 ```
-</StaticCode>
 
 We didn’t do this in true TDD style, however, it should again paint a picture of how we can structure Go applications and develop them using TDD. Feel free to re-implement this section and do it in true TDD style: create one test, make it pass, create the next one, and so on.
 
