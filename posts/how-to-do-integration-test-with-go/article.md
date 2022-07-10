@@ -1,6 +1,4 @@
-<img className="my-10" 
-    src="/gophers-at-work.jpeg" 
-    alt="gophers hard at work" />
+<img src="https://res.cloudinary.com/practicaldev/image/fetch/s--P1NWBtsb--/c_imagga_scale,f_auto,fl_progressive,h_900,q_auto,w_1600/https://thepracticaldev.s3.amazonaws.com/i/rlyibpr58qk49ci8y1rk.png" alt="gopher" />
 
 Picture this: you've just left Node for the promised land of Go. You've learned
 about composition, interfaces, simplicity, domain-driven design (and understood
@@ -124,7 +122,6 @@ to have completely separate dev and test environment. And after reading this,
 you could yourself try to shorten the docker setup.
 
 ### Docker test environment setup
-<StaticCode language="docker">
 ```docker
 FROM golang:1-alpine
 
@@ -136,10 +133,8 @@ RUN go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate
 
 WORKDIR /app
 ```
-</StaticCode>
 
-
-<StaticCode language="docker">
+And the ```docker-compose.yaml``` file:
 ```yaml
 version: "3.8"
 services:
@@ -181,14 +176,11 @@ volumes:
     test-pgdata:
     test-go-modules:
 ```
-</StaticCode>
 
 With that in place we can now easily run our integration tests, which can be done with:
-<StaticCode language="bash">
 ```bash
 make run-integration-tests
 ```
-</StaticCode>
 
 # Approach 1: Vanilla setup 
 *Side note: if you want to see the code separated from the rest, check out the
@@ -238,7 +230,6 @@ written with the assumption that we have a database with all the latest
 migrations. To achieve this in our tests we will run the up version before each
 test is run. For that we need the following function:
 
-<StaticCode language="go">
 ```golang
 func RunUpMigrations(cfg config.Config) error {
 	_, b, _, _ := runtime.Caller(0)
@@ -269,12 +260,10 @@ func RunUpMigrations(cfg config.Config) error {
 	return nil
 }
 ```
-</StaticCode>
 
 After the test is down, we would like our environment to be clean so we also
 need this function:
 
-<StaticCode language="go">
 ```golang
 func RunDownMigrations(cfg config.Config) error {
 	_, b, _, _ := runtime.Caller(0)
@@ -303,7 +292,6 @@ func RunDownMigrations(cfg config.Config) error {
 	return nil
 }
 ```
-</StaticCode>
 
 Basically, we get a new connection to the database, create a new migrate
 instance where we pass a path to the migrations folder, the database we use and
@@ -315,7 +303,6 @@ pretty big fan of just keeping it in a SQL file and then having a helper
 function run the SQL script against the database. To do that we just need a
 function similar to the two above:
 
-<StaticCode language="go">
 ```golang
 func LoadFixtures(cfg config.Config) error {
 	pathToFile := "/app/fixtures.sql"
@@ -341,7 +328,6 @@ func LoadFixtures(cfg config.Config) error {
 	return nil
 }
 ```
-</StaticCode>
 
 With that setup we are ready to write our first tests. 
 
@@ -353,7 +339,6 @@ example, miss a variable in your .Scan method or have some syntax issue.
 Therefore, I tend to write integration tests for all my database functionality.
 Let's add a test for the CreateUser function. We need the following:
 
-<StaticCode language="go">
 ```golang
 
 // testing the happy path only - to improve upon these tests, we could consider
@@ -436,7 +421,6 @@ func TestIntegration_CreateUser(t *testing.T) {
 	})
 }
 ```
-</StaticCode>
 
 We start by creating a new instance of config and storage (just like we would in
 main.go when running the entire application) and then run the up migrations
@@ -452,7 +436,6 @@ database.
 One more thing you might notice is that we have a psql_test.go file. Open it,
 and you will find the following function:
 
-<StaticCode language="go">
 ```golang
 
 // TestMain gets run before running any other _test.go files in each package
@@ -468,7 +451,6 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 ```
-</StaticCode>
 
 TestMain is a special function that gets called before all other tests in the
 package it's located in. Here, we're being (justifiable, I would say) paranoid
@@ -508,7 +490,6 @@ or gin you might have to google a bit.
 We're not going to be spending much time on this, as you can find the code in
 the repo. Basically, we have this:
 
-<StaticCode language="go">
 ```golang
 type serverConfig interface {
 	GetServerReadTimeOut() time.Duration
@@ -538,7 +519,6 @@ func NewHttp(
 	}
 }
 ```
-</StaticCode>
 
 We set up an HTTP struct that has some dependencies to get our server up and
 running with a router. On that struct, we define some server-specific methods.
@@ -550,7 +530,6 @@ everybody can just spam our server with requests and create a ton of users.
 That's not ideal, but also not really what we care about right now. We just want
 to make sure our API does what it's supposed to do.
 
-<StaticCode language="go">
 ```golang
 
 func TestIntegration_UserHandler_New(t *testing.T) {
@@ -625,7 +604,6 @@ func TestIntegration_UserHandler_New(t *testing.T) {
 	})
 }
 ```
-</StaticCode>
 
 Most of this looks similar to what we had in the repository tests. We set up the
 database, the services and lastly, the server. We create a request, encode it,
@@ -650,7 +628,6 @@ have the entire codebase in your head when it's only this size, but as it grows,
 having the setup and configuration done in one place makes things so much
 easier. Let's see how the setup is done for our handler integration tests:
 
-<StaticCode language="go">
 ```golang
 type HttpTestSuite struct {
 	suite.Suite
@@ -692,14 +669,12 @@ func (s *HttpTestSuite) SetupSuite() {
 	s.TestRouter = r
 }
 ```
-</StaticCode>
 
 We basically take the entire setup step and automate it for each test suite. If
 we check the documentation for the SetupSuite method we see that it's basically
 a method that runs before the test in a suite is run. So the whole setup we did
 with the standard library like here:
 
-<StaticCode language="go">
 ```golang
 
 func TestIntegration_UserHandler_CreateUser(t *testing.T) {
@@ -723,7 +698,6 @@ func TestIntegration_UserHandler_CreateUser(t *testing.T) {
 
 }
 ```
-</StaticCode>
 
 is automated for us, nice! Now, we also did have some other requirements, namely
 that we had a "fresh" environment for each test run. This means that we need to
