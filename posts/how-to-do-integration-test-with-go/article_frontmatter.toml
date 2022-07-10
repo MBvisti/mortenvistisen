@@ -4,6 +4,6 @@ description = 'A beginners guide on how to setup, write and execute integration 
 tags = ['golang', 'test', 'testing', 'docker', 'integration', 'integration tests']
 posted = '24/01/2022'
 estimated_reading_time = 13
-started = '05/11/2021'
 author = 'Morten Vistisen'
 thumbnail = 'go-logo-blue.png'
+order = 2

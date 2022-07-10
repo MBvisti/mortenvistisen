@@ -6,3 +6,4 @@ posted = '30/01/2021'
 estimated_reading_time = 12
 author = 'Morten Vistisen'
 thumbnail = 'go-logo-blue.png'
+order = 1
