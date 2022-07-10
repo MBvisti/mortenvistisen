@@ -8,12 +8,14 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Debug)]
 struct FrontMatter {
     title: String,
+    file_name: String,
     description: String,
     posted: String,
     thumbnail: String,
     tags: Vec<String>,
     author: String,
     estimated_reading_time: u32,
+    order: u64,
 }
 
 #[get("/")]
@@ -73,6 +75,7 @@ pub async fn index(tmpl: web::Data<tera::Tera>) -> impl Responder {
     // let html_output = String::new();
     // html::push_html(&mut html_output, parser);
 
+    front_matters.sort_by(|a, b| b.order.cmp(&a.order));
     // println!("{:?}", front_matters);
     context.insert("posts", &front_matters);
     // let c = &Context::from_serialize(front_matters).unwrap();
