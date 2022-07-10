@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Debug)]
 struct FrontMatter {
     title: String,
+    file_name: String,
     description: String,
     posted: String,
     thumbnail: String,

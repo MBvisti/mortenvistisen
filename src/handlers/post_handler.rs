@@ -1,19 +1,20 @@
 use std::fs;
 
 use actix_web::{get, web, HttpResponse, Responder};
-use pulldown_cmark::{Parser, html, Options};
+use pulldown_cmark::{html, Options, Parser};
 
-#[get("/posts")]
-pub async fn render_post(tmpl: web::Data<tera::Tera>) -> impl Responder {
+#[get("/posts/{post_name}")]
+pub async fn render_post(tmpl: web::Data<tera::Tera>, post_name: web::Path<String>) -> impl Responder {
     let mut context = tera::Context::new();
 
     let options = Options::empty();
 
-    let markdown_input = match fs::read_to_string("./posts/practical-approach-to-structuring-go-apps/article.md") {
-        Ok(s) => s,
-        Err(_) => "hello".to_string(),
-    };
-    
+    let markdown_input =
+        match fs::read_to_string(format!("./posts/{}/article.md", post_name.into_inner())) {
+            Ok(s) => s,
+            Err(_) => "hello".to_string(),
+        };
+
     let parser = Parser::new_ext(&markdown_input, options);
 
     let mut html_output = String::new();
@@ -24,7 +25,9 @@ pub async fn render_post(tmpl: web::Data<tera::Tera>) -> impl Responder {
         Ok(s) => HttpResponse::Ok().content_type("text/html").body(s),
         Err(e) => {
             println!("{:?}", e);
-            HttpResponse::InternalServerError().content_type("text/html").body("")
+            HttpResponse::InternalServerError()
+                .content_type("text/html")
+                .body("")
         }
     }
 }
