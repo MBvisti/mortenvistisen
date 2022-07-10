@@ -1,5 +1,11 @@
 @tailwind base;
 @tailwind components;
+
+@font-face {
+  font-family: 'Montserrat';
+  src: local('Montserrat'), url(../static/fonts/montserrat.ttf) format('ttf');
+}
+
 @tailwind utilities;
 
 #article-content img {

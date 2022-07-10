@@ -1,5 +1,11 @@
 module.exports = {
     content: ["../templates/**/*.{html,js}"],
-    theme: {},
+    theme: {
+        extend: {
+            fontFamily: {
+                'sans': ['Montserrat', 'Helvetica', 'Arial', 'sans-serif']
+            }
+        }
+    },
     plugins: [],
 }
