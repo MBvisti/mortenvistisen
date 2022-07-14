@@ -1,3 +1,4 @@
+use actix_web::{web, HttpResponse, Responder};
 // use actix_web::{error, HttpResponse, http::{header::ContentType, StatusCode}};
 
 // #[derive(Debug)]
@@ -29,3 +30,11 @@
 //     }
 // }
 
+pub async fn not_found(tmpl: web::Data<tera::Tera>) -> impl Responder {
+    let not_found_page = tmpl
+        .render("not_found.html", &tera::Context::new())
+        .unwrap();
+    HttpResponse::InternalServerError()
+        .content_type("text/html")
+        .body(not_found_page)
+}

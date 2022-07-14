@@ -1,4 +1,5 @@
 use actix_files as fs;
+use handlers::not_found;
 use std::net::TcpListener;
 
 #[macro_use]
@@ -32,6 +33,7 @@ pub fn start_blog(listener: TcpListener) -> Result<Server, std::io::Error> {
             .service(fs::Files::new("/static", "static/").use_last_modified(true))
             .service(handlers::index)
             .service(handlers::render_post)
+            .default_service(web::route().to(not_found))
     })
     .listen(listener)?
     .run();

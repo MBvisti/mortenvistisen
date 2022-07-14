@@ -55,7 +55,7 @@ pub async fn index(tmpl: web::Data<tera::Tera>) -> impl Responder {
             let error_page = tmpl.render("error_page.html", &context).unwrap();
             return HttpResponse::InternalServerError()
                 .content_type("text/html")
-                .body(error_page)
+                .body(error_page);
         }
     };
 

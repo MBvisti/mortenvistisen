@@ -17,7 +17,7 @@ pub async fn render_post(
             Ok(s) => s,
             Err(e) => {
                 println!("{:?}", e);
-                let not_found_page = tmpl.render("404_page.html", &context).unwrap();
+                let not_found_page = tmpl.render("not_found.html", &context).unwrap();
                 return HttpResponse::NotFound()
                     .content_type("text/html")
                     .body(not_found_page);
