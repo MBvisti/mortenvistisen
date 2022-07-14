@@ -1,5 +1,7 @@
+mod errors;
 mod home_handlers;
-mod post_handler;
+mod post_handlers;
 
+pub use errors::not_found;
 pub use home_handlers::index;
-pub use post_handler::render_post;
+pub use post_handlers::render_post;

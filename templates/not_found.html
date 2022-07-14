@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block header %}
+<div class="mt-2 ml-4 underline">
+    <a href="/">Go back</a>
+</div>
+{% endblock header %}
+
+{% block title %}Error {% endblock title %}
+
+{% block content %}
+<div class="w-full min-h-[inherit] flex flex-col items-center justify-center">
+    <h1>We could not find what you've requested</h1>
+    <p>To go back to safety, click <a class="underline" href="/">here</a></p>
+</div>
+{% endblock content %}
