@@ -5,7 +5,7 @@ use ignore::WalkBuilder;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
-struct FrontMatter {
+pub struct FrontMatter {
     title: String,
     file_name: String,
     description: String,
