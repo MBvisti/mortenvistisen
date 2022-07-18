@@ -1,14 +1,21 @@
 <img src="https://cdn-images-1.medium.com/max/1600/1*oZ1j-s22SCUMZamIyVeQtQ.jpeg" alt="gopher" />
+2022 update. At the time of writing this update, it's been over a year since I 
+published this article. At the end of this article I promise a part two, which I must 
+admit, will probably never come for a couple of reasons. I no longer use this 
+structure (I still think this article gives people some help to get going, but would 
+like to update it at one point. I suggest you checkout this [repo](https://github.com/bnkamalesh/goapp). 
+Secondly, in regards to integration testing, I've just relased a full-length article 
+about it which you can find [here](https://mortenvistisen.com/posts/how-to-do-integration-test-with-go).
 
 Go is an amazing language. It’s simple, easy to reason about and gives you much tooling right out of the box. However, when I started with Go I struggled to figure out how to structure my applications in a way that didn’t use “enterprisey” approaches. This is my take on structuring Golang applications that start out simple, but with the flexibility to grow, and what I would have wanted when I started with Go.
 
 ## Disclaimer
 
 This article is based on the following people (link to their Twitter):
-- [Mat Ryer,](https://twitter.com/matryer)
+- [Mat Ryer](https://twitter.com/matryer)
 - [Kat Zien](https://twitter.com/kasiazien)
 - [Jon Calhoun](https://twitter.com/joncalhoun)
-- [Robert C. Martin](https://twitter.com/unclebobmartin).
+- [Robert C. Martin](https://twitter.com/unclebobmartin)
 
 All of the above-mentioned people have articles and tutorials that are amazing on their own, which you should definitely checkout.
 
