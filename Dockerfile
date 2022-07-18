@@ -19,7 +19,7 @@ COPY . .
 
 # Build our project
 RUN rustup component add rustfmt
-RUN cargo build --release --bin rust-htmx
+RUN cargo build --release --bin mortenvistisen
 
 FROM debian:bullseye-slim AS runtime
 
@@ -32,10 +32,10 @@ RUN apt-get update -y \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
 
-COPY --from=builder /app/target/release/rust-htmx rust-htmx
+COPY --from=builder /app/target/release/mortenvistisen mortenvistisen
 COPY --from=builder /app/templates templates
 COPY --from=builder /app/static static
 COPY --from=builder /app/posts posts
 
-ENTRYPOINT ["./rust-htmx"]
+ENTRYPOINT ["./mortenvistisen"]
 EXPOSE 51001
