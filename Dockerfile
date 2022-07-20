@@ -38,4 +38,4 @@ COPY --from=builder /app/static static
 COPY --from=builder /app/posts posts
 
 ENTRYPOINT ["./mortenvistisen_blog"]
-EXPOSE 51001
+EXPOSE 8080

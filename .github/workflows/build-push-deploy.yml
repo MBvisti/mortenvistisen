@@ -49,6 +49,10 @@ jobs:
           port: ${{ secrets.PORT }}
           script: |
             docker login -u ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }} -p ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }} registry.digitalocean.com 
+            docker pull $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA)
             # docker stop $(echo $IMAGE_NAME)
             # docker rm $(echo $IMAGE_NAME)
-            docker run -d --restart always --name mortenvistisen_blog registry.digitalocean.com/mortenvistisen/mortenvistisen_blog:$(echo $GITHUB_SHA)
+            docker run -d -p 8080:8080 \
+            --restart always \
+            --name $(echo $IMAGE_NAME)
+            $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA)
