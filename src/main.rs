@@ -1,6 +1,6 @@
 use std::net::TcpListener;
 
-use mortenvistisen::start_blog;
+use mortenvistisen_blog::start_blog;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
