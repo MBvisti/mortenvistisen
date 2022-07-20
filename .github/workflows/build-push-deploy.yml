@@ -12,7 +12,8 @@ env:
 
 jobs:
   build_and_push:
-    runs_on: ubuntu-latest
+    name: Build and push
+    runs-on: ubuntu-latest
     steps:
       - name: checkout repo
         uses: actions/checkout@v2
