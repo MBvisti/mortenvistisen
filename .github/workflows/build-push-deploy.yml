@@ -33,14 +33,6 @@ jobs:
 
       # - name: Remove old images
       #   run: if [ ! -z "$(doctl registry list | grep "$(echo $IMAGE_NAME)")"]; then doctl registry repository delete 
-  # with:
-    # command: |
-    #   cd /tmp
-    #   ls -a
-    # host: ${{ secrets.HOST }}
-    # user: root
-    # key: ${{ secrets.PRIVATE_KEY}}
-
   deploy:
     name: Deploy to prod
     runs-on: ubuntu-latest
@@ -48,14 +40,14 @@ jobs:
 
     steps:
       - name: SSH and run 
-        uses: fifsky/ssh-action@master
+        uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
-          user: ${{ secrets.USERNAME }}
+          username: ${{ secrets.USERNAME }}
           # password: ${{ secrets.PASSWORD }}
           key: ${{ secrets.KEY }}
-          # port: ${{ secrets.PORT }}
-          command: |
+          port: ${{ secrets.PORT }}
+          script: |
             docker login -u ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }} -p ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }} registry.digitalocean.com 
             docker stop $(echo $IMAGE_NAME)
             docker rm $(echo $IMAGE_NAME)
