@@ -6,10 +6,6 @@ name: Build, push and deploy
 
 on: [pull_request]
 
-env:
-  REGISTRY_NAME: "mortenvistisen"
-  IMAGE_NAME: "mortenvistisen_blog"
-
 jobs:
   build_and_push:
     runs-on: ubuntu-latest
@@ -30,8 +26,8 @@ jobs:
           context: .
           push: true
           tags: |
-            echo "registry.digitalocean.com/${REGISTRY_NAME}/${IMAGE_NAME}:latest"
-            echo "registry.digitalocean.com/${REGISTRY_NAME}/${IMAGE_NAME}:sha-${{ github.sha }}"
+            registry.digitalocean.com/mortenvistisen/mortenvistisen_blog:latest
+            registry.digitalocean.com/mortenvistisen/mortenvistisen_blog:sha-${{ github.sha }}
 
   # build_and_push:
   #   name: Build and push
