@@ -30,8 +30,8 @@ jobs:
           context: .
           push: true
           tags: |
-            echo "registry.digitalocean.com/$REGISTRY_NAME/IMAGE_NAME:latest"
-            echo "registry.digitalocean.com/$REGISTRY_NAME/IMAGE_NAME:sha-${{ github.sha }}"
+            echo "registry.digitalocean.com/${REGISTRY_NAME}/${IMAGE_NAME}:latest"
+            echo "registry.digitalocean.com/${REGISTRY_NAME}/${IMAGE_NAME}:sha-${{ github.sha }}"
 
   # build_and_push:
   #   name: Build and push
