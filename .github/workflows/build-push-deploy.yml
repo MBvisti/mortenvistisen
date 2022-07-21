@@ -27,7 +27,7 @@ jobs:
           push: true
           tags: |
             registry.digitalocean.com/mortenvistisen/mortenvistisen_blog:latest
-            registry.digitalocean.com/mortenvistisen/mortenvistisen_blog:sha-${{ github.sha }}
+            # registry.digitalocean.com/mortenvistisen/mortenvistisen_blog:sha-${{ github.sha }}
 
   # build_and_push:
   #   name: Build and push
