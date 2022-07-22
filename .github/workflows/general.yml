@@ -1,4 +1,4 @@
-name: Rust
+name: Test, fmt, clippy and coverage
 
 on: [push, pull_request]
 
