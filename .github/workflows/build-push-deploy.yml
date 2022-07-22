@@ -58,4 +58,4 @@ jobs:
 
             sleep 30 
 
-            curl --silent --fail http://localhost:8080/health
+            curl --silent --fail http://localhost:8080/status
