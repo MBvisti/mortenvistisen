@@ -26,36 +26,15 @@ jobs:
           context: .
           push: true
           tags: |
+            registry.digitalocean.com/mortenvistisen/mortenvistisen_blog:sha-${{ github.sha }}
             registry.digitalocean.com/mortenvistisen/mortenvistisen_blog:latest
-
-  # registry.digitalocean.com/mortenvistisen/mortenvistisen_blog:sha-${{ github.sha }}
-
-  # build_and_push:
-  #   name: Build and push
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: checkout repo
-  #       uses: actions/checkout@v2
-
-  #     - name: Install doctl
-  #       uses: digitalocean/action-doctl@v2
-  #       with:
-  #         token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-      
-  #     - name: Build image
-  #       run: docker build -t $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA) .
-
-  #     - name: Upload image DO container registry
-  #       run: |
-  #         doctl registry login --expiry-seconds 600
-  #         docker push $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA)
-
       # - name: Remove old images
       #   run: if [ ! -z "$(doctl registry list | grep "$(echo $IMAGE_NAME)")"]; then doctl registry repository delete 
+  
   deploy:
     name: Deploy to prod
     runs-on: ubuntu-latest
-    # needs: build_and_push
+    needs: build_and_push
 
     steps:
       - name: SSH and run 
@@ -63,15 +42,22 @@ jobs:
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
-          # password: ${{ secrets.PASSWORD }}
           key: ${{ secrets.KEY }}
           port: ${{ secrets.PORT }}
           script: |
             docker login -u ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }} -p ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }} registry.digitalocean.com 
-            # docker pull $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA)
-            # # docker stop $(echo $IMAGE_NAME)
-            # # docker rm $(echo $IMAGE_NAME)
-            # docker run -d -p 8080:8080 \
-            # --restart always \
-            # --name $(echo $IMAGE_NAME)
-            # $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA)
+
+            docker pull registry.digitalocean.com/mortenvistisen/mortenvistisen_blog:latest
+
+            docker stop mortenvistisen_blog
+
+            docker rm mortenvistisen_blog
+
+            docker run -d -p 8080:8080 \
+            --restart always \
+            --name mortenvistisen_blog \
+            registry.digitalocean.com/mortenvistisen/mortenvistisen_blog:latest
+
+            sleep 30 
+
+            curl --silent --fail http://localhost/health

@@ -1,5 +1,6 @@
-<img src="https://cdn-images-1.medium.com/max/1600/1*oZ1j-s22SCUMZamIyVeQtQ.jpeg" alt="gopher" />
-2022 update. At the time of writing this update, it's been over a year since I 
+<img class="mb-2" src="https://cdn-images-1.medium.com/max/1600/1*oZ1j-s22SCUMZamIyVeQtQ.jpeg" alt="gopher" />
+
+<strong>2022 update</strong>. At the time of writing this update, it's been over a year since I 
 published this article. At the end of this article I promise a part two, which I must 
 admit, will probably never come for a couple of reasons. I no longer use this 
 structure (I still think this article gives people some help to get going, but would 
