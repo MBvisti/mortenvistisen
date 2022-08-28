@@ -14,17 +14,24 @@ pub struct FrontMatter {
     tags: Vec<String>,
     author: String,
     estimated_reading_time: u32,
-    order: u64,
+    order: u32,
 }
 
 fn find_all_front_matter() -> Result<Vec<FrontMatter>, Error> {
     let mut t = ignore::types::TypesBuilder::new();
     t.add_defaults();
-    t.select("toml");
+    let toml = match t.select("toml").build() {
+        Ok(t) => t,
+        Err(e) => {
+            println!("{:}", e); // just print the error for now
+            return Err(Error::new(
+                std::io::ErrorKind::Other,
+                "could not build toml file type matcher",
+            ));
+        }
+    };
 
-    let file_walker = WalkBuilder::new("./posts")
-        .types(t.build().unwrap())
-        .build();
+    let file_walker = WalkBuilder::new("./posts").types(toml).build();
 
     let mut front_matters = Vec::new();
     for front_matter in file_walker {
@@ -37,7 +44,13 @@ fn find_all_front_matter() -> Result<Vec<FrontMatter>, Error> {
                     front_matters.push(front_matter);
                 }
             }
-            Err(_) => todo!(),
+            Err(e) => {
+                println!("{:}", e); // just print the error for now
+                return Err(Error::new(
+                    std::io::ErrorKind::NotFound,
+                    "could not locate frontmatter",
+                ));
+            }
         }
     }
 
