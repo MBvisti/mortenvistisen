@@ -731,11 +731,11 @@ people way smarter than me (you definitely should), check out the resource
 section.
 
 ## Resources
-[Learn go with tests](https://quii.gitbook.io/learn-go-with-tests/) - basically read this entire thing. Chris does an amazing
+  - [Learn go with tests](https://quii.gitbook.io/learn-go-with-tests/): basically read this entire thing. Chris does an amazing
 job showing you how to get started with Go and test-driven development.
 Definitely worth the read.
 
-[HTML forms, databases, integration tests](https://www.lpalmieri.com/posts/2020-08-31-zero-to-production-3-5-html-forms-databases-integration-tests/) - though it's not in Go, but in Rust,
+  - [HTML forms, databases, integration tests](https://www.lpalmieri.com/posts/2020-08-31-zero-to-production-3-5-html-forms-databases-integration-tests/): though it's not in Go, but in Rust,
 Luca does a great job explaining integration testing. Always try to look for
 what concepts transcend programming languages and what doesn't. It's always
 beneficial to have a nuanced view.
