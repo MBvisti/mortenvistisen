@@ -33,8 +33,18 @@
 }
 
 #article-content p {
-    padding-top: 1.5rem; /* 24px */
-    padding-bottom: 1.5rem; /* 24px */
+    padding-top: 1rem; /* 24px */
+    padding-bottom: 1rem; /* 24px */
+}
+
+#article-content p > code {
+    padding-left: 5px; /* 24px */
+    padding-right: 5px; /* 24px */
+    background-color: lightgray;
+}
+
+#article-content > .introImg {
+    max-height: 350px;
 }
 
 /* styles related to codeblock */
