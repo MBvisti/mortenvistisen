@@ -29,16 +29,16 @@ serde_json = "1.0"
 Feel free to use another version than the ones listed above; it's what I used at the time of writing this piece.
 
 Let me briefly touch upon some of these libraries. The main one here is actix-web which is one of the big players in Rust web frameworks. 
-There are multiple other choices (see for example [warp](insert-warp-link), [rocket](insert-rocket-link), [axum](insert-link-here)) but I thoroughly enjoy Actix's API and have built multiple projects using it. Furthermore, 
-it performs really [well](insert-link) and can handle _a lot of_ requests.
+There are multiple other choices (see for example [warp](insert-warp-link), [rocket](insert-rocket-link), [axum](insert-link-here)) but I thoroughly enjoy `actix`'s API and have built multiple projects using it. Furthermore, 
+it performs really well and can handle _a lot of_ requests.
 
-Next is serde which is a library you most likely are familiar with if you've done any Rust programming. If not, it's basically a set of 
+Next is `serde` which is a library you most likely are familiar with if you've done any Rust programming. If not, it's basically a set of 
 methods for serializing and deserializing data structures efficiently and generically. If you can't find an implementation for your desired data structure, 
 you simply implement [the methods](https://serde.rs/custom-serialization.html) for your data structure and you're off to the races.
-For this project, serde will be used for serializing the metadata of a blog post (also named front matter) from a `.toml` file into a Rust struct.
+For this project, `serde` will be used for serializing the metadata of a blog post (also named front matter) from a `.toml` file into a Rust struct.
 
-Lastly, I want to touch upon tera which is the template engine I use for this blog. It's inspired by Jinja2 which you might be familiar with if 
-you've ever done any web development with Django. Back in the day, I started out building web apps using Django and really enjoyed the way it does 
+Lastly, I want to touch upon `tera` which is the template engine I use for this blog. It's inspired by Jinja2 which you might be familiar with if 
+you've ever done any web development with `Django`. Back in the day, I started out building web apps using `Django` and really enjoyed the way it does 
 templating so wanted to replicate that experience in my personal projects. In a world where everything is components and the slightest duplication is a
 death sin, the experience of using "old school" templating has been a relief.
 
@@ -105,7 +105,7 @@ pub fn start_blog(listener: TcpListener) -> Result<Server, std::io::Error> {
 }
 ```
 
-So, we did a little more than just create an `HttpServer`. We also added in the logger defined in `main.rs` and created a route that basically 
+So, we did a little more than just create an `HttpServer`. We also added in the logger defined in `main.rs` and created a route that 
 pings back a `200 Ok` response. 
 
 Most of the above code should make sense to you (assuming familiarity with `rust`) but let's quickly touch upon the `move` keyword.
@@ -238,7 +238,7 @@ the response to, say, `http://awesomeblog.com/` which in the above case would re
 If you try and spin up the application now, not much would be different, so let's implement some handlers/controllers/etc to actually serve some html!
 
 ## The controller/handler layer
-Now we're getting into the actual meat of this thing and starting to write some actual `Rust` code!
+Now we're getting into the actual meat of this thing and starting to write some actual `rust` code!
 
 We need a few things to get started, so go ahead and create a new folder under `src` called `handlers`.
 In that holder, create a file called `mod.rs` and `home_handler.rs`. Let's start simple with some test data to show something when we load the home page. 
@@ -410,7 +410,7 @@ Lastly, open up `package.json` and add the following under scripts:
 }
 ```
 
-Those two scripts basically give you a `cmd` to watch for any changes in development and then build for production when we merge.
+Those two scripts give you a `cmd` to watch for any changes in development and then build for production when we merge.
 That also implies that you would have to remember to run `build-css-prod` before merging to `master`.
 This can definitely be improved upon but since you're the lead (and only) developer on this, it will be fine for our needs.
 
@@ -466,16 +466,16 @@ Now, give `cargo run` a spin, and you should see a much better-looking site.
 Two things are currently missing: 1. a place to store the _actual_ blog posts and 2. a page to show a post in all its glory.
 
 Let's start with the 2nd item on the list since we pretty much already did that. To not bore you with the same thing twice, 
-go ahead and open this [link](https://github.com/mbvisti/awesome-blog/templates/post.html) (link to the repo with the complete code), 
+go ahead and open this [link](https://github.com/MBvisti/awesome-blog/blob/master/templates/post.html) (link to the repo with the complete code), 
 copy the content and create a new file under `templates` called `post.html`.
 
-Next, go to [here](https://github.com/mbvisti/awesome-blog/tailwind/base.css) copy the content and paste it into your `base.css`. 
+Next, go to [here](https://github.com/MBvisti/awesome-blog/blob/master/tailwind/base.css) copy the content and paste it into your `base.css`. 
 Most of this should look familiar to you if you've done any `css` and just applies some rather simple styles to the post page.
 
 ## Steal like an artist (or, copy smarter people than yourself)
 Everything is _mostly_ done, we just need a way to store our awesome blog posts and a way to retrieve them so we can remove the hard coding 
-we did earlier. And the way to do this is heavily inspired from another blog post written by a much smarter guy than myself:
-[fasterthanlime](https://fasterthanli.me/) whom, if you haven't already, should definitely check out. This guy does some *seriously* deep dives and really 
+we did earlier. And the way to do this is heavily inspired by another blog post written by a much smarter guy than myself:
+[fasterthanlime](https://fasterthanli.me/) whom, if you haven't already, should check out. This guy does some *seriously* deep dives and really 
 knows his craft.
 
 Go ahead and make a new folder called `posts` at the same level as the `static` folder. Inside this one, create another folder, give it a 
@@ -546,7 +546,7 @@ For this case, we want it to look in the `posts` directory and look for all file
 
 One thing to note here is that `find_all_frontmatters` returns a `Result` since there are actions that can fail, which means we also have to handle some errors.
 As you might be able to tell, I haven't spent the most time on errors in this function and basically, just log whatever error comes from `ignore` and then return
-the most similar one from `std::io::ErrorKind`. This can definitely be done better using libraries like `anyerror` or `thiserror`. I encourage you to play around 
+the most similar one from `std::io::ErrorKind`. This can be done better using libraries like `anyerror` or `thiserror`. I encourage you to play around 
 with this yourself or open a pull request if you've improvements [here](https://github.com/mbvisti/awesome-blog).
 
 To actually show some dynamic data on the home page, we need to use the above function in our `index` handler so open up `home_handler.rs` and make the following adjustments:
@@ -706,5 +706,4 @@ so I hope you find some further learning!
   - [The rust book](https://doc.rust-lang.org/book/title-page.html)
   - [A new website for 2020](https://fasterthanli.me/articles/a-new-website-for-2020)
   - [Rust by example](https://doc.rust-lang.org/stable/rust-by-example/)
-  - [Docker file for production](https://doc.rust-lang.org/stable/rust-by-example/)
 
