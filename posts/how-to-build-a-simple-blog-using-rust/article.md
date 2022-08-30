@@ -250,7 +250,7 @@ the response to, say, `http://awesomeblog.com/` which in the above case would re
 
 If you try and spin up the application now, not much would be different, so lets implement some handlers/controllers/etc to actually serve some html!
 
-## You get a handler, you get a handler EVERBODY GETS A HANDLER
+## The controller/handler layer
 Now we're getting into the actually meat of this thing and start to write some actual `Rust` code!
 
 We need a few things to get started, so go ahead and create a new folder under `src` called `handlers`.
