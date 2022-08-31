@@ -1,6 +1,3 @@
-<img class="introImg" src="https://www.rust-lang.org/static/images/rust-social.jpg" alt="rustacean" />
-<br />
-
 # How to build a (simple) blog using Rust
 So, you have been reading about rust for quite some time, learned that it’s been the most loved programming language multiple years in a row in Stack Overflow’s annual survey and you want in. But, you’re not a system-level programmer and Reddit keeps telling you to ‘use the right tool for the job’ and ‘rust is more aimed at low-level stuff like writing databases and programming drone’ (the first is actually good advice, I just need it to create a dramatic setting). So you get disheartened and choose to use what you’ve always been using. I think that’s a mistake as rust is an amazing language both in terms of speed of the execution but also developer experience. Not many languages give you a handy pair-programmer, i.e. the compiler, that only gives good advice, and shuts up in the meantime (rust’s compiler is amazing). I’ve been toying with Rust for some time now and overall it’s been a great experience (both learning and developer). So to get my hands a bit more dirty I decided to re-write my blog using Rust which was previously built using Next.js (This has also been a thing coming since I’m doing my best to move away from SPAs and Javascript, but that’s for another post).
 

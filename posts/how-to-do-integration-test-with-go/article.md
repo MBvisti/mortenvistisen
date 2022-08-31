@@ -1,4 +1,4 @@
-<img src="https://res.cloudinary.com/practicaldev/image/fetch/s--P1NWBtsb--/c_imagga_scale,f_auto,fl_progressive,h_900,q_auto,w_1600/https://thepracticaldev.s3.amazonaws.com/i/rlyibpr58qk49ci8y1rk.png" alt="gopher" />
+# How to do integration tests in Go
 
 Picture this: you've just left Node for the promised land of Go. You've learned
 about composition, interfaces, simplicity, domain-driven design (and understood

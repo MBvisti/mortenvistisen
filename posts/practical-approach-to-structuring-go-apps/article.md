@@ -1,4 +1,4 @@
-<img class="mb-2" src="https://cdn-images-1.medium.com/max/1600/1*oZ1j-s22SCUMZamIyVeQtQ.jpeg" alt="gopher" />
+# A practical approach to structuring Go apps
 
 <strong>2022 update</strong>. At the time of writing this update, it's been over a year since I 
 published this article. At the end of this article I promise a part two, which I must 
