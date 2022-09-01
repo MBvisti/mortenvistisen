@@ -21,7 +21,7 @@ pulldown-cmark = { version = "0.9.1", default-features = false }
 ignore = "0.4"
 toml = "0.5"
 serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
+serde_json = "1.0
 ```
 Feel free to use another version than the ones listed above; it's what I used at the time of writing this piece.
 
