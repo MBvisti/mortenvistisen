@@ -42,7 +42,7 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
-          key: ${{ secrets.KEY }}
+          # key: ${{ secrets.KEY }}
           port: ${{ secrets.PORT }}
           script: |
             docker login -u ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }} -p ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }} registry.digitalocean.com 
