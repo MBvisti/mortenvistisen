@@ -1,16 +1,12 @@
 use actix_files as fs;
-use fs::NamedFile;
 use handlers::not_found;
-use std::{net::TcpListener, path::PathBuf};
+use std::net::TcpListener;
 
 #[macro_use]
 extern crate lazy_static;
 
 use actix_web::{
-    dev::Server,
-    get,
-    http::header::{ContentDisposition, DispositionType},
-    middleware, web, App, Error, HttpRequest, HttpResponse, HttpServer,
+    dev::Server, get, middleware, web, App, Error, HttpRequest, HttpResponse, HttpServer,
 };
 use tera::Tera;
 
