@@ -3,8 +3,8 @@
 {% block title %}{{ meta_data.title }} | by {{ meta_data.author }} {% endblock title %}
 
 {% block header %}
-<div class="relative mt-2 ml-4 flex w-full justify-center">
-    <a class="absolute left-0 underline" href="/">Go back</a>
+<div class="absolute left-2">
+    <a class="relative underline" href="/">Go back</a>
 </div>
 {% endblock header %}
 
@@ -29,7 +29,7 @@
     </div>
     <div class="form-control w-96">
         <div class="relative">
-          <input type="text" placeholder="username@site.com" class="input input-bordered w-full sm:pr-12 pr-24" /> 
+          <input type="text" placeholder="username@site.com" class="input input-bordered w-full pr-12 md:pr-32" /> 
           <button class="btn btn-primary absolute top-0 right-0 rounded-l-none umami--click--signup-newsletter-button-{{ meta_data.title }}">Subscribe</button>
         </div>
     </div> 

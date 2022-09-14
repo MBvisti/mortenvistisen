@@ -1,7 +1,7 @@
 module.exports = {
     content: ["../templates/**/*.{html,js}"],
     daisyui: {
-        theme: ['dracular']
+        theme: ['garden', 'dracula']
     },
     theme: {
         extend: {
