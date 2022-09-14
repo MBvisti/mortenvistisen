@@ -2633,6 +2633,15 @@ html {
   box-shadow: calc(var(--handleoffset) * -1) 0 0 2px hsl(var(--b1)) inset, 0 0 0 2px hsl(var(--b1)) inset;
 }
 
+.badge-primary {
+  --tw-border-opacity: 1;
+  border-color: hsl(var(--p) / var(--tw-border-opacity));
+  --tw-bg-opacity: 1;
+  background-color: hsl(var(--p) / var(--tw-bg-opacity));
+  --tw-text-opacity: 1;
+  color: hsl(var(--pc) / var(--tw-text-opacity));
+}
+
 .badge-accent {
   --tw-border-opacity: 1;
   border-color: hsl(var(--a) / var(--tw-border-opacity));
@@ -3809,6 +3818,22 @@ code.hljs{
 .hover\:underline:hover {
   -webkit-text-decoration-line: underline;
           text-decoration-line: underline;
+}
+
+@media (prefers-color-scheme: dark) {
+  .dark\:badge-accent {
+    --tw-border-opacity: 1;
+    border-color: hsl(var(--a) / var(--tw-border-opacity));
+    --tw-bg-opacity: 1;
+    background-color: hsl(var(--a) / var(--tw-bg-opacity));
+    --tw-text-opacity: 1;
+    color: hsl(var(--ac) / var(--tw-text-opacity));
+  }
+
+  .badge-outline.dark\:badge-accent {
+    --tw-text-opacity: 1;
+    color: hsl(var(--a) / var(--tw-text-opacity));
+  }
 }
 
 @media (min-width: 640px) {

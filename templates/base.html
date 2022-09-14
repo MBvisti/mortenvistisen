@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html data-theme="dracula" lang="en">
+<html class="dark" data-theme="dracula" lang="en">
 
 <head>
     <meta charset="UTF-8">
@@ -25,14 +25,14 @@
     class="sm:overflow-x-hidden bg-base-100 flex flex-col overflow-x-hidden justify-between min-h-screen font-sans leading-normal tracking-normal">
     <div class="h-16 max-w-screen flex items-center justify-center mb-4">
         {% block header %}{% endblock header %}
-        <div class="form-control w-64">
-            <label class="label cursor-pointer">
-                <span data-light-theme class="label-text text-base-content invisible">Light mode</span>
-                <input data-theme-selector onchange="changeTheme(this)" type="checkbox" class="toggle toggle-primary" checked />
-                <span data-dark-theme class="label-text text-primary">Dark mode</span>
-            </label>
-        </div>
-        <div></div>
+        <!-- <div class="form-control w-64"> -->
+        <!--     <label class="label cursor-pointer"> -->
+        <!--         <span data-light-theme class="label-text text-base-content invisible">Light mode</span> -->
+        <!--         <input data-theme-selector onchange="changeTheme(this)" type="checkbox" class="toggle toggle-primary" checked /> -->
+        <!--         <span data-dark-theme class="label-text text-primary">Dark mode</span> -->
+        <!--     </label> -->
+        <!-- </div> -->
+        <!-- <div></div> -->
     </div>
 
     <main class="container flex-1 w-full md:max-w-3xl mx-auto overflow-x-hidden">
