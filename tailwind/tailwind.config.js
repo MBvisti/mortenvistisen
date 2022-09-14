@@ -1,5 +1,9 @@
 module.exports = {
+    darkMode: "class",
     content: ["../templates/**/*.{html,js}"],
+    daisyui: {
+        theme: ['garden', 'dracula']
+    },
     theme: {
         extend: {
             fontFamily: {
@@ -7,5 +11,5 @@ module.exports = {
             },
         }
     },
-    plugins: [],
+    plugins: [require("@tailwindcss/typography") ,require('daisyui')],
 }
