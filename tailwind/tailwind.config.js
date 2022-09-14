@@ -1,5 +1,8 @@
 module.exports = {
     content: ["../templates/**/*.{html,js}"],
+    daisyui: {
+        theme: ['dracular']
+    },
     theme: {
         extend: {
             fontFamily: {

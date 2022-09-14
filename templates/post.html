@@ -16,25 +16,24 @@
         {{ post | safe }}
     </article>
 
-    <hr />
+  <div class="divider"></div> 
 
-    <div class="flex flex-col items-center w-full my-4">
-        <p class="text-lg font-bold mt-4 mb-1">Socials</p>
-        <div class="flex justify-between w-64 text-xs items-center">
-            <a class="text-base underline text-green-500"
-                href="https://twitter.com/mbvisti">Twitter</a> |
-            <a class="text-base underline text-green-500"
-                href="https://www.linkedin.com/in/mortenvistisen">LinkedIn</a> |
-            <a class="text-base underline text-green-500"
-                href="https://github.com/mbvisti">GitHub</a> |
-            <a class="text-base underline text-green-500"
-                href="mailto:hi@mortenvistisen.com?subject=hi" target="_blank">Email</a>
-        </div>
-    </div>
 {% endblock content %}
 
 {% block footer %}
-    <div class="flex w-full h-full justify-center items-center py-4">
-        &copy; 2022 by <a class="pl-2" href="https://mortenvistisen.com/">MBV Software</a>.
+<footer class="container footer footer-center py-10 mx-auto bg-base-200 text-base-content rounded">
+    <div class="form-control">
+        <div class="relative">
+            <span class="footer-title">Subscribe to my newsletter</span> 
+        </div>
     </div>
-{% endblock footer %}
+    <div class="form-control w-96">
+        <div class="relative">
+          <input type="text" placeholder="username@site.com" class="input input-bordered w-full sm:pr-12 pr-24" /> 
+          <button class="btn btn-primary absolute top-0 right-0 rounded-l-none umami--click--signup-newsletter-button-{{ meta_data.title }}">Subscribe</button>
+        </div>
+    </div> 
+  <div>
+    <p>Copyright © 2022 - MBV Software</p>
+  </div>
+</footer>{% endblock footer %}

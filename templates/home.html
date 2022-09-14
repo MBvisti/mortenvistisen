@@ -2,31 +2,35 @@
 {% block title %}Personal blog | by Morten Vistisen{% endblock title %}
 
 {% block content %}
-<div class="w-full h-full px-4 md:px-6 text-xl text-gray-800 leading-normal">
-    <h1 class="text-center text-primary">Exploring Software & Technology</h1>
-    <h3 class="text-center text-lg mt-2 text-gray-600">A collection of my personal ramblings about tech, software and startups</h3>
-    <div class="flex flex-col items-center w-full mb-12 md:mb-20">
-        <p class="text-lg font-normal mt-4 mb-1">Socials</p>
-        <div class="flex justify-between w-64 text-xs items-center">
-        <a class="text-base underline text-stone-800"
-            href="https://twitter.com/mbvisti">Twitter</a> |
-        <a class="text-base underline text-stone-800"
-            href="https://www.linkedin.com/in/mortenvistisen">LinkedIn</a> |
-        <a class="text-base underline text-stone-800"
-            href="https://github.com/mbvisti">GitHub</a> |
-        <a class="text-base underline text-stone-700"
-            href="mailto:hi@mortenvistisen.com?subject=hi" target="_blank">Email</a>
+<div class="w-full h-full px-4 md:px-6 text-gray-800 leading-normal">
+    <h1 class="text-3xl text-center text-base-content font-bold">Exploring Software & Technology</h1>
+    <h2 class="text-center text-xl font-normal text-base-content/70 mt-2">A collection of my personal ramblings about tech, software and startups</h2>
+
+    <div class="flex flex-col w-full border-opacity-50 mb-10 mt-6">
+        <div class="divider text-lg text-base-content/80 font-semibold font-normal">Socials</div>
+            <div class="flex justify-center items-center w-full">
+                <div class="flex h-10 justify-around text-xs items-center">
+                    <a class="badge badge-accent badge-outline mr-2 hover:border-accent hover:bg-accent hover:text-accent-content"
+                        href="https://twitter.com/mbvisti">Twitter</a> |
+                    <a class="badge badge-accent badge-outline mr-2 hover:border-accent hover:bg-accent hover:text-accent-content"
+                        href="https://www.linkedin.com/in/mortenvistisen">LinkedIn</a> |
+                    <a class="badge badge-accent badge-outline mr-2 hover:border-accent hover:bg-accent hover:text-accent-content"
+                        href="https://github.com/mbvisti">GitHub</a> |
+                    <a class="badge badge-accent badge-outline mr-2 hover:border-accent hover:bg-accent hover:text-accent-content"
+                        href="mailto:hi@mortenvistisen.com?subject=hi" target="_blank">Email</a>
+                </div>
+            </div>
         </div>
     </div>
-    <button class="btn">Button</button>
+    
     {% for fm in posts %}
-    <a class="mb-3" href="/posts/{{fm.file_name}}">
-        <div class="flex flex-col mb-5 px-4 py-6 cursor-pointer">
-            <h2 class="text-2xl font-semibold hover:underline">{{fm.title}}</h2>
+    <a href="/posts/{{fm.file_name}}">
+        <div class="flex bg-neutral/60 rounded flex-col m-5 mb-10 px-4 py-6 cursor-pointer">
+            <h2 class="text-2xl text-neutral-content font-semibold hover:underline">{{fm.title}}</h2>
             <div class="flex items-center mt-2">
-                <p class="hidden md:block text-base mr-2">{{fm.posted}}</p>
-                <p class="hidden md:block text-base mx-2">{{fm.author}}</p>
-                <p class="text-base ml-0 md:ml-2">Reading time:
+                <p class="hidden md:block text-neutral-content/70 mr-2">{{fm.posted}}</p>
+                <p class="hidden md:block text-neutral-content/70 mx-2">{{fm.author}}</p>
+                <p class="text-neutral-content/70 ml-0 md:ml-2">Reading time:
                 {{fm.estimated_reading_time}} min</p>
             </div>
         </div>
