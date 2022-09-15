@@ -1,5 +1,4 @@
 module.exports = {
-    darkMode: "class",
     content: ["../templates/**/*.{html,js}"],
     daisyui: {
         theme: ['garden', 'dracula']
