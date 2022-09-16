@@ -1,5 +1,3 @@
-# How to do integration tests in Go
-
 Picture this: you've just left Node for the promised land of Go. You've learned
 about composition, interfaces, simplicity, domain-driven design (and understood
 nothing) and unit tests. You feel all grown-up and ready to take on concurrency
