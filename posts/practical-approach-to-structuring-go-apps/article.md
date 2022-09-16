@@ -1,5 +1,3 @@
-# A practical approach to structuring Go apps
-
 <strong>2022 update</strong>. At the time of writing this update, it's been over a year since I 
 published this article. At the end of this article I promise a part two, which I must 
 admit, will probably never come for a couple of reasons. I no longer use this 
