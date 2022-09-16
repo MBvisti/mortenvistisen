@@ -2,10 +2,20 @@
 {% block title %}Personal blog | by Morten Vistisen{% endblock title %}
 
 {% block content %}
+<div class="hero bg-base-100">
+  <div class="hero-content flex-col lg:flex-row-reverse">
+    <img src="/static/images/mig_selv-removebg-preview.png" class="max-w-xs rounded-lg" alt="image of MBvisti" />
+    <div>
+      <h1 class="text-4xl font-bold">Hej, I'm Morten!</h1>
+      <p class="py-6">
+        I'm a software engineer specialized in Rust, Go and Data Science. 
+        I write about my ventures into tech and bootstrapping, sharing what I learn in a simple and practical way.
+      </p>
+      <button class="btn btn-primary">Get Started</button>
+    </div>
+  </div>
+</div>
 <div class="w-full h-full px-4 md:px-6 text-gray-800 leading-normal">
-    <h1 class="text-3xl text-center text-base-content font-bold">Exploring Software & Technology</h1>
-    <h2 class="text-center text-xl font-normal text-base-content/70 mt-2">A collection of my personal ramblings about tech, software and startups</h2>
-
     <div class="flex flex-col w-full border-opacity-50 mb-10 mt-6">
         <div class="divider text-lg text-base-content/80 font-semibold font-normal">Socials</div>
             <div class="flex justify-center items-center w-full">
