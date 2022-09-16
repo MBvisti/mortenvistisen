@@ -5,5 +5,5 @@ tags = ['golang', 'test', 'testing', 'docker', 'integration', 'integration tests
 posted = '24/01/2022'
 estimated_reading_time = 13
 author = 'Morten Vistisen'
-thumbnail = 'go-logo-blue.png'
+thumbnail = 'gophers-tinkering.jpeg'
 order = 2
