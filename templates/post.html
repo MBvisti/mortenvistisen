@@ -1,6 +1,13 @@
 {% extends "base.html" %}
 
-{% block title %}{{ meta_data.title }} | by {{ meta_data.author }} {% endblock title %}
+{% block title %}
+    {{ meta_data.title }} | by {{ meta_data.author }} 
+    <meta name="twitter:card" content="{{ meta_data.description }}">
+    <meta property="og:title" content="{{ meta_data.title }}">
+    <meta property="og:description" content="{{ meta_data.description }}">
+    <meta property="og:image" content="https://mortenvistisen.com/static/images/{{ meta_data.thumbnail }}">
+    <meta property="og:url" content="https://mortenvistisen.com">
+{% endblock title %}
 
 {% block header %}
 <div class="absolute left-2">
