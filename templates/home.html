@@ -2,10 +2,35 @@
 {% block title %}Personal blog | by Morten Vistisen{% endblock title %}
 
 {% block content %}
+<div class="lg:hidden hero bg-base-100">
+  <div class="hero-content text-center">
+    <div class="max-w-md">
+      <h1 class="text-4xl font-bold">Hej, I'm Morten!</h1>
+      <p class="py-6 text-base-content/80 text-justify">
+        A software engineer trying to escape 9-to-5 by bootstrapping a one-man businesses online.
+        I write about my ventures into tech and bootstrapping, sharing what I learn along the way. You'll most likely find stuff 
+        about Rust, Go and ML as well as mediatations on the process of building businesses on the internet.
+      </p>
+      <button class="btn btn-primary">Latest post</button>
+    </div>
+  </div>
+</div>
+<div class="hidden lg:flex hero bg-base-100">
+  <div class="hero-content flex-col lg:flex-row-reverse">
+    <img src="/static/images/mig_selv-removebg-preview.png" class="max-w-xs" alt="image of MBvisti" />
+    <div>
+      <h1 class="text-4xl font-bold">Hej, I'm Morten!</h1>
+      <p class="py-6 text-base-content/80 text-left">
+        A software engineer trying to escape 9-to-5, (huge) proponent of remote work and bootstrapping one-man businesses online.
+        I write about my ventures into tech and bootstrapping, sharing what I learn along the way. You'll most likely find stuff 
+        about Rust, Go and ML as well as mediatations on the process of building businesses on the internet.
+      </p>
+      <a class="btn btn-primary umami--click--socials-twitter"
+        href="posts/how-to-build-a-simple-blog-using-rust">Latest Post</a> 
+    </div>
+  </div>
+</div>
 <div class="w-full h-full px-4 md:px-6 text-gray-800 leading-normal">
-    <h1 class="text-3xl text-center text-base-content font-bold">Exploring Software & Technology</h1>
-    <h2 class="text-center text-xl font-normal text-base-content/70 mt-2">A collection of my personal ramblings about tech, software and startups</h2>
-
     <div class="flex flex-col w-full border-opacity-50 mb-10 mt-6">
         <div class="divider text-lg text-base-content/80 font-semibold font-normal">Socials</div>
             <div class="flex justify-center items-center w-full">
