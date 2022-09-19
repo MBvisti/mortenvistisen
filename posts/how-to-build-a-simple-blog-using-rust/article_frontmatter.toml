@@ -5,5 +5,5 @@ tags = ['rust', 'blog', 'actix_web']
 posted = '29/08/2022'
 estimated_reading_time = 13
 author = 'Morten Vistisen'
-thumbnail = 'rusty-logo.jpg'
+thumbnail = 'rusty-logo.png'
 order = 3
