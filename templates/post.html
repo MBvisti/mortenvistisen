@@ -1,11 +1,16 @@
 {% extends "base.html" %}
 
 {% block meta %}
-    <meta name="twitter:card" content="{{ meta_data.description }}">
     <meta property="og:title" content="{{ meta_data.title }}">
     <meta property="og:description" content="{{ meta_data.description }}">
     <meta property="og:image" content="https://mortenvistisen.com/static/images/{{ meta_data.thumbnail }}">
     <meta property="og:url" content="https://mortenvistisen.com/posts/{{ meta_data.title | lower | slugify }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@MBvisti">
+    <meta name="twitter:creator" content="@MBvisti">
+    <meta name="twitter:title" content="{{ meta_data.title }}">
+    <meta name="twitter:description" content="{{ meta_data.description }}">
+    <meta name="twitter:image" content="https://mortenvistisen.com/static/images/{{ meta_data.thumbnail }}">
 {% endblock meta %}
 
 {% block title %}
