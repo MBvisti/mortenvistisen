@@ -25,7 +25,7 @@ serde_json = "1.0
 Feel free to use another version than the ones listed above; it's what I used at the time of writing this piece.
 
 Let me briefly touch upon some of these libraries. The main one here is actix-web which is one of the big players in Rust web frameworks. 
-There are multiple other choices (see for example [warp](insert-warp-link), [rocket](insert-rocket-link), [axum](insert-link-here)) but I thoroughly enjoy `actix`'s API and have built multiple projects using it. Furthermore, 
+There are multiple other choices (see for example [warp](https://github.com/seanmonstar/warp), [rocket](https://github.com/SergioBenitez/Rocket), [axum](https://github.com/tokio-rs/axum)) but I thoroughly enjoy `actix`'s API and have built multiple projects using it. Furthermore, 
 it performs really well and can handle _a lot of_ requests.
 
 Next is `serde` which is a library you most likely are familiar with if you've done any Rust programming. If not, it's basically a set of 
