@@ -32,6 +32,12 @@ async fn robots_text(_req: HttpRequest) -> Result<fs::NamedFile, Error> {
     Ok(file.use_last_modified(true))
 }
 
+#[get("/sitemap.xml")]
+async fn sitemap_text(_req: HttpRequest) -> Result<fs::NamedFile, Error> {
+    let file = fs::NamedFile::open_async("static/sitemap.xml").await?;
+    Ok(file.use_last_modified(true))
+}
+
 pub fn start_blog(listener: TcpListener) -> Result<Server, std::io::Error> {
     let tmpl = web::Data::new(TEMPLATES.clone());
     let srv = HttpServer::new(move || {
@@ -40,6 +46,7 @@ pub fn start_blog(listener: TcpListener) -> Result<Server, std::io::Error> {
             .wrap(middleware::Logger::default()) // enable logger
             .route("/status", web::get().to(HttpResponse::Ok))
             .service(robots_text)
+            .service(sitemap_text)
             .service(fs::Files::new("/static", "static/").use_last_modified(true))
             // .service(fs::Files::new("/static", "static/robots.txt").use_last_modified(true))
             .service(handlers::index)
