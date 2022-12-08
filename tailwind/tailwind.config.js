@@ -1,8 +1,5 @@
 module.exports = {
     content: ["../templates/**/*.{html,js}"],
-    daisyui: {
-        theme: ['garden', 'dracula']
-    },
     theme: {
         extend: {
             fontFamily: {
@@ -11,4 +8,7 @@ module.exports = {
         }
     },
     plugins: [require("@tailwindcss/typography") ,require('daisyui')],
+    daisyui: {
+        theme: ['lofi']
+    },
 }
