@@ -5,5 +5,5 @@ tags = ['indiehacking', 'entreprenuership', 'wantrepreneurship', 'tutorials']
 posted = '03/01/2023'
 estimated_reading_time = 6
 author = 'Morten Vistisen'
-thumbnail = 'golang-logo.png'
+thumbnail = 'wantrepreneurship.jpg'
 order = 4
