@@ -1,7 +1,7 @@
 New year, new me bullshit is on everybody's mind right now as we're kicking off the first week of the new year. This is 
-not going to be one of those "I'm going to start exercising 5 times per week" posts, but more a continuation of what I 
-started upon last year. This post is mainly going to be rambling about entrepreneurship and software engineering;
-hopefully there will be some good stuff in there, but this post is **provided as is**. Alright, here we go.
+not going to be one of those "I'm going to start exercising 5 times per week" posts, but a thoughts about reaching a
+goal of mine, which I've had for multiple years. The idea is to provide my thoughts on the subject of entrepreneurship
+and then review it after the month of Januar 2023, is over. Alright, here we go!
 
 ## Create __something__, put it on the internet and have people pay me money for it
 For the last few years, my main goal has been to create something using software and have people on the internet pay 
