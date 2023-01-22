@@ -2,7 +2,7 @@ use std::net::TcpListener;
 
 use mortenvistisen_blog::start_blog;
 
-#[actix_web::main]
+#[tokio::main]
 async fn main() -> std::io::Result<()> {
     std::env::set_var("RUST_LOG", "actix_web=info");
     env_logger::init();

@@ -11,6 +11,8 @@ use actix_web::{
 use tera::Tera;
 
 pub mod handlers;
+pub mod repository;
+pub mod domain;
 
 lazy_static! {
     pub static ref TEMPLATES: Tera = {
@@ -51,6 +53,8 @@ pub fn start_blog(listener: TcpListener) -> Result<Server, std::io::Error> {
             // .service(fs::Files::new("/static", "static/robots.txt").use_last_modified(true))
             .service(handlers::index)
             .service(handlers::render_post)
+            .service(handlers::subscribe)
+            .service(handlers::verify_subscription)
             .default_service(web::route().to(not_found))
     })
     .listen(listener)?
