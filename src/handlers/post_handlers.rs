@@ -1,6 +1,6 @@
 use std::fs;
 
-use actix_web::{get, web, HttpResponse, Responder, post};
+use actix_web::{get, web, HttpResponse, Responder};
 use pulldown_cmark::{html, Options, Parser};
 
 use crate::handlers::FrontMatter;

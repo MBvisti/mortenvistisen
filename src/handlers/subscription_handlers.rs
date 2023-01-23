@@ -1,13 +1,30 @@
-use actix_web::{post, web, HttpResponse, Responder};
+use actix_web::{get, post, web, HttpResponse, Responder};
+use rand::distributions::Alphanumeric;
+use rand::{thread_rng, Rng};
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
+use uuid::Uuid;
 
+use crate::email_client::EmailClient;
 use crate::{domain::Email, repository};
 
 #[derive(Debug, Serialize)]
 struct SubscribeMetaData {
     has_error: bool,
     error_msg: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+struct ConfirmSubscribeMetaData {
+    has_error: bool,
+    already_verified: bool,
+    error_msg: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+struct ConfirmSubEmail {
+    app_base_url: String,
+    token: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -37,6 +54,7 @@ async fn render_subscribe_err(
     error_msg: String,
     mut context: tera::Context,
     tmpl: web::Data<tera::Tera>,
+    template_name: &str,
 ) -> HttpResponse {
     context.insert(
         "meta_data",
@@ -46,7 +64,7 @@ async fn render_subscribe_err(
         },
     );
 
-    match tmpl.render("_subscribe_response.html", &context) {
+    match tmpl.render(template_name, &context) {
         Ok(s) => return HttpResponse::Ok().content_type("text/html").body(s),
         Err(e) => {
             println!("{:?}", e);
@@ -57,13 +75,24 @@ async fn render_subscribe_err(
         }
     }
 }
+
+fn generate_subcription_token() -> String {
+    let mut rng = thread_rng();
+    std::iter::repeat_with(|| rng.sample(Alphanumeric))
+        .map(char::from)
+        .take(25)
+        .collect()
+}
+
 #[post("/subscribe")]
 pub async fn subscribe(
     tmpl: web::Data<tera::Tera>,
     form: web::Form<SubscribeFormData>,
     pool: web::Data<PgPool>,
+    email_client: web::Data<EmailClient>,
 ) -> impl Responder {
     let mut context = tera::Context::new();
+    let mut email_context = tera::Context::new();
 
     let payload: NewSubscriberPayload = match form.0.try_into() {
         Ok(p) => p,
@@ -73,6 +102,7 @@ pub async fn subscribe(
                 "I fucked up somehow, sorry. Please try again".to_string(),
                 context,
                 tmpl,
+                "_subscribe_response.html",
             )
             .await;
         }
@@ -86,24 +116,85 @@ pub async fn subscribe(
                 "I fucked up somehow, sorry. Please try again".to_string(),
                 context,
                 tmpl,
+                "_subscribe_response.html",
             )
             .await;
         }
     };
-
     if email_exists {
-        return render_subscribe_err("Email already registered".to_string(), context, tmpl).await;
+        return render_subscribe_err(
+            "Email already registered".to_string(),
+            context,
+            tmpl,
+            "_subscribe_response.html",
+        )
+        .await;
     }
-
-    if let Err(e) = repository::create_new_subscriber(&pool, &payload.email, &payload.referer).await
+    let new_sub_id = Uuid::new_v4();
+    if let Err(e) =
+        repository::create_new_subscriber(&pool, &payload.email, &payload.referer, new_sub_id).await
     {
         println!("{:?}", e);
         return render_subscribe_err(
             "I fucked up somehow, sorry. Please try again".to_string(),
             context,
             tmpl,
+            "_subscribe_response.html",
         )
         .await;
+    };
+    let new_sub_token = generate_subcription_token();
+    if let Err(e) = repository::create_new_subscriber_token(&pool, new_sub_id, &new_sub_token).await
+    {
+        println!("{:?}", e);
+        return render_subscribe_err(
+            "I fucked up somehow, sorry. Please try again".to_string(),
+            context,
+            tmpl,
+            "_subscribe_response.html",
+        )
+        .await;
+    };
+
+    email_context.insert(
+        "meta_data",
+        &ConfirmSubEmail {
+            app_base_url: email_client.app_base_url.clone(),
+            token: new_sub_token,
+        },
+    );
+    let html_content = match tmpl.render("confirm_sub_email.html", &email_context) {
+        Ok(html) => html,
+        Err(e) => {
+            println!("{:?}", e);
+            return render_subscribe_err(
+                "I fucked up somehow, sorry. Please try again".to_string(),
+                context,
+                tmpl,
+                "_subscribe_response.html",
+            )
+            .await;
+        }
+    };
+    match email_client
+        .send_email(
+            payload.email,
+            "Thanks for subscribing to my newsletter!",
+            &html_content,
+        )
+        .await
+    {
+        Ok(_) => (),
+        Err(e) => {
+            println!("{:?}", e);
+            return render_subscribe_err(
+                "I fucked up somehow, sorry. Please try again".to_string(),
+                context,
+                tmpl,
+                "_subscribe_response.html",
+            )
+            .await;
+        }
     };
 
     context.insert(
@@ -122,24 +213,105 @@ pub async fn subscribe(
                 "I fucked up somehow, sorry. Please try again".to_string(),
                 context,
                 tmpl,
+                "_subscribe_response.html",
             )
             .await;
         }
     }
 }
 
-#[post("/subscribe/verify")]
-pub async fn verify_subscription(tmpl: web::Data<tera::Tera>) -> impl Responder {
-    let context = tera::Context::new();
+#[derive(serde::Deserialize)]
+pub struct Parameters {
+    token: String,
+}
 
-    match tmpl.render("post.html", &context) {
+#[get("/subscribe/verify")]
+pub async fn verify_subscription(
+    tmpl: web::Data<tera::Tera>,
+    pool: web::Data<PgPool>,
+    params: web::Query<Parameters>,
+) -> impl Responder {
+    let mut context = tera::Context::new();
+
+    let id = match repository::get_subscriber_id_from_token(&pool, &params.token).await {
+        Ok(id) => id,
+        Err(e) => {
+            println!("{:?}", e);
+            return render_subscribe_err(
+                "I fucked up somehow, sorry. Please try again".to_string(),
+                context,
+                tmpl,
+                "confirm_subscription.html",
+            )
+            .await;
+        }
+    };
+
+    let is_verified = match repository::is_user_verified(&pool, id).await {
+        Ok(is_verified) => is_verified,
+        Err(e) => {
+            println!("{:?}", e);
+            return render_subscribe_err(
+                "I fucked up somehow, sorry. Please try again".to_string(),
+                context,
+                tmpl,
+                "confirm_subscription.html",
+            )
+            .await;
+        }
+    };
+
+    if is_verified {
+        match tmpl.render("confirm_subscription.html", &context) {
+            Ok(s) => {
+                context.insert(
+                    "meta_data",
+                    &ConfirmSubscribeMetaData {
+                        already_verified: true,
+                        has_error: false,
+                        error_msg: None,
+                    },
+                );
+                return HttpResponse::Ok().content_type("text/html").body(s);
+            }
+            Err(e) => {
+                println!("{:?}", e);
+                return render_subscribe_err(
+                    "I fucked up somehow, sorry. Please try again".to_string(),
+                    context,
+                    tmpl,
+                    "confirm_subscription.html",
+                )
+                .await;
+            }
+        }
+    }
+
+    match repository::update_email_to_verified(&pool, id).await {
+        Ok(_) => (),
+        Err(e) => {
+            println!("{:?}", e);
+            return render_subscribe_err(
+                "I fucked up somehow, sorry. Please try again".to_string(),
+                context,
+                tmpl,
+                "confirm_subscription.html",
+            )
+            .await;
+        }
+    };
+
+    match tmpl.render("confirm_subscription.html", &context) {
         Ok(s) => HttpResponse::Ok().content_type("text/html").body(s),
         Err(e) => {
             println!("{:?}", e);
-            let error_page = tmpl.render("error_page.html", &context).unwrap();
-            HttpResponse::InternalServerError()
-                .content_type("text/html")
-                .body(error_page)
+            return render_subscribe_err(
+                "I fucked up somehow, sorry. Please try again".to_string(),
+                context,
+                tmpl,
+                "confirm_subscription.html",
+            )
+            .await;
         }
     }
 }
