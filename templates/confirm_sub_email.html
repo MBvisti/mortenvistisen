@@ -30,8 +30,10 @@
         </div>
     </div>
     <footer class="footer footer-center mt-4 p-8 bg-base-100 text-base-content rounded">
-        <div>
+        <div class="flex flex-col">
             <p>Copyright © 2023 - All right reserved by <a href="https://mortenvistisen.com">MBV Software</a></p>
+            <a href="{{ meta_data.app_base_url }}/subscribe/delete?token={{ meta_data.token }}"
+                class="px-2 py-2 text-blue-200 bg-blue-600 rounded">Delete it!</a>
         </div>
     </footer>
 </body>

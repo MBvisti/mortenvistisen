@@ -62,6 +62,7 @@ pub fn start_blog(listener: TcpListener, db_pool: PgPool, email_client: web::Dat
             .service(handlers::render_post)
             .service(handlers::subscribe)
             .service(handlers::verify_subscription)
+            .service(handlers::delete_subscriber)
             .default_service(web::route().to(not_found))
     })
     .listen(listener)?

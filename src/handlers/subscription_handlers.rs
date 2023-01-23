@@ -315,3 +315,87 @@ pub async fn verify_subscription(
         }
     }
 }
+
+#[get("/subscribe/delete")]
+pub async fn delete_subscriber(
+    tmpl: web::Data<tera::Tera>,
+    pool: web::Data<PgPool>,
+    params: web::Query<Parameters>,
+) -> impl Responder {
+    let context = tera::Context::new();
+
+    let id = match repository::get_subscriber_id_from_token(&pool, &params.token).await {
+        Ok(id) => id,
+        Err(e) => {
+            println!("{:?}", e);
+            match e { // TODO: add message that it has already been deleted
+                sqlx::Error::RowNotFound => {
+                    match tmpl.render("delete_subscription.html", &context) {
+                        Ok(s) => return HttpResponse::Ok().content_type("text/html").body(s),
+                        Err(e) => {
+                            println!("{:?}", e);
+                            return render_subscribe_err(
+                                "I fucked up somehow, sorry. Please try again".to_string(),
+                                context,
+                                tmpl,
+                                "confirm_subscription.html",
+                            )
+                            .await;
+                        }
+                    }
+                }
+                _ => {
+                    return render_subscribe_err(
+                        "I fucked up somehow, sorry. Please try again".to_string(),
+                        context,
+                        tmpl,
+                        "delete_subscription.html",
+                    )
+                    .await
+                }
+            }
+        }
+    };
+
+    match repository::delete_subscriber_token(&pool, &params.token).await {
+        Ok(_) => (),
+        Err(e) => {
+            println!("{:?}", e);
+            return render_subscribe_err(
+                "I fucked up somehow, sorry. Please try again".to_string(),
+                context,
+                tmpl,
+                "delete_subscription.html",
+            )
+            .await;
+        }
+    };
+
+    match repository::delete_subscriber(&pool, id).await {
+        Ok(_) => (),
+        Err(e) => {
+            println!("{:?}", e);
+            return render_subscribe_err(
+                "I fucked up somehow, sorry. Please try again".to_string(),
+                context,
+                tmpl,
+                "delete_subscription.html",
+            )
+            .await;
+        }
+    };
+
+    match tmpl.render("delete_subscription.html", &context) {
+        Ok(s) => HttpResponse::Ok().content_type("text/html").body(s),
+        Err(e) => {
+            println!("{:?}", e);
+            return render_subscribe_err(
+                "I fucked up somehow, sorry. Please try again".to_string(),
+                context,
+                tmpl,
+                "confirm_subscription.html",
+            )
+            .await;
+        }
+    }
+}

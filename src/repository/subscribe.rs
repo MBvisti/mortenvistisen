@@ -134,3 +134,37 @@ pub async fn update_email_to_verified(
     .await?;
     Ok(())
 }
+
+pub async fn delete_subscriber(
+    pool: &PgPool,
+    id: Uuid,
+    // using the () type, known as unit type, and has the purpose of being useless. I.e.
+    // we don't have anything meaningful to return
+) -> Result<(), sqlx::Error> {
+    sqlx::query!(
+        r#"
+            DELETE from subscriptions  where id = $1
+        "#,
+        id,
+    )
+    .execute(pool)
+    .await?;
+    Ok(())
+}
+
+pub async fn delete_subscriber_token(
+    pool: &PgPool,
+    tkn: &str,
+    // using the () type, known as unit type, and has the purpose of being useless. I.e.
+    // we don't have anything meaningful to return
+) -> Result<(), sqlx::Error> {
+    sqlx::query!(
+        r#"
+            DELETE from subscription_token  where subscription_token = $1
+        "#,
+        tkn,
+    )
+    .execute(pool)
+    .await?;
+    Ok(())
+}
