@@ -1,0 +1,129 @@
+{
+  "db": "PostgreSQL",
+  "1a31cfbb463050c99c8fba392626af442089edb11191fa205951614a0597de43": {
+    "describe": {
+      "columns": [
+        {
+          "name": "exists",
+          "ordinal": 0,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "\n            select EXISTS(select email from subscriptions where email = $1) as \"exists\"\n        "
+  },
+  "2e73d4b1513d80fe443706886ad214c3a045f8f9a824b549865fad86d736f9e6": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Bool"
+        ]
+      }
+    },
+    "query": "\n            UPDATE subscriptions set is_verified = $2 where id = $1\n        "
+  },
+  "76d1d4ef3c860cd661a1c205320553e865928bec5a2ac346bb35a347d2ffde76": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n            DELETE from subscriptions  where id = $1\n        "
+  },
+  "a3c5beb43583893b20751130f972c025d7508c6e65fd29fcaa9c81458f59c39c": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n            INSERT INTO subscription_token (subscription_token, subscription_id)\n            VALUES ($1, $2)     \n        "
+  },
+  "a95d484f3cea75aa0e107f0f01b466a2d3e318c3bc7b60ff5cb34d341a7a873a": {
+    "describe": {
+      "columns": [
+        {
+          "name": "subscription_id",
+          "ordinal": 0,
+          "type_info": "Uuid"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "\n            select subscription_id from subscription_token where subscription_token = $1\n        "
+  },
+  "d8b6f6833b38ccf3da3bf4aae32b2ce9e29c3f6dde3ec94e9a7d2c5c242c17d8": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "\n            DELETE from subscription_token  where subscription_token = $1\n        "
+  },
+  "de7d941ec73723cf584976df6d19d1bbf71a7f68489da3d0cd54542acb06ff88": {
+    "describe": {
+      "columns": [
+        {
+          "name": "is_verified",
+          "ordinal": 0,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      }
+    },
+    "query": "\n            select is_verified from subscriptions where id = $1\n        "
+  },
+  "fc6451ad8a4130308dbdbbe3007c1a21fedab8fab12397413190107cb6a2b93c": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text",
+          "Timestamptz",
+          "Bool"
+        ]
+      }
+    },
+    "query": "\n            INSERT INTO subscriptions (id, email, referer, subscribed_at, is_verified)\n            VALUES ($1, $2, $3, $4, $5)\n        "
+  }
+}
