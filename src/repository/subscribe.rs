@@ -71,7 +71,7 @@ pub async fn does_email_exists(
                     false
                 }
             };
-             Ok(exists)
+            Ok(exists)
         }
         Err(e) => Err(e),
     }
@@ -93,7 +93,7 @@ pub async fn is_user_verified(
     .await
     {
         Ok(record) => Ok(record.is_verified),
-        Err(e) =>  Err(e),
+        Err(e) => Err(e),
     }
 }
 
@@ -113,7 +113,7 @@ pub async fn get_subscriber_id_from_token(
     .await
     {
         Ok(record) => Ok(record.subscription_id),
-        Err(e) =>  Err(e),
+        Err(e) => Err(e),
     }
 }
 

@@ -328,7 +328,8 @@ pub async fn delete_subscriber(
         Ok(id) => id,
         Err(e) => {
             println!("{:?}", e);
-            match e { // TODO: add message that it has already been deleted
+            match e {
+                // TODO: add message that it has already been deleted
                 sqlx::Error::RowNotFound => {
                     match tmpl.render("delete_subscription.html", &context) {
                         Ok(s) => return HttpResponse::Ok().content_type("text/html").body(s),

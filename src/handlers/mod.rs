@@ -6,4 +6,4 @@ mod subscription_handlers;
 pub use errors::not_found;
 pub use home_handlers::{index, FrontMatter};
 pub use post_handlers::render_post;
-pub use subscription_handlers::{subscribe, verify_subscription, delete_subscriber};
+pub use subscription_handlers::{delete_subscriber, subscribe, verify_subscription};

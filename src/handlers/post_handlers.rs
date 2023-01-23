@@ -66,4 +66,3 @@ pub async fn render_post(
         }
     }
 }
-

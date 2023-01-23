@@ -2,10 +2,7 @@ use std::net::TcpListener;
 
 use actix_web::web;
 use mortenvistisen_blog::{
-    configuration::get_config,
-    domain::Email,
-    email_client::EmailClient,
-    start_blog,
+    configuration::get_config, domain::Email, email_client::EmailClient, start_blog,
 };
 use sqlx::postgres::PgPoolOptions;
 
@@ -40,7 +37,7 @@ async fn main() -> std::io::Result<()> {
 
     let listener = match TcpListener::bind(format!("{}:{}", cfg.server.host, cfg.server.port)) {
         Ok(l) => l,
-        Err(e) => panic!("{}", e)
+        Err(e) => panic!("{}", e),
     };
 
     start_blog(listener, db_conn_pool, web::Data::new(email_client))?.await?;

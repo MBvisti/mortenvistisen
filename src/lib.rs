@@ -12,11 +12,11 @@ use actix_web::{
 };
 use tera::Tera;
 
-pub mod handlers;
-pub mod repository;
+pub mod configuration;
 pub mod domain;
 pub mod email_client;
-pub mod configuration;
+pub mod handlers;
+pub mod repository;
 
 lazy_static! {
     pub static ref TEMPLATES: Tera = {
@@ -44,7 +44,11 @@ async fn sitemap_text(_req: HttpRequest) -> Result<fs::NamedFile, Error> {
     Ok(file.use_last_modified(true))
 }
 
-pub fn start_blog(listener: TcpListener, db_pool: PgPool, email_client: web::Data<EmailClient>) -> Result<Server, std::io::Error> {
+pub fn start_blog(
+    listener: TcpListener,
+    db_pool: PgPool,
+    email_client: web::Data<EmailClient>,
+) -> Result<Server, std::io::Error> {
     let db_conn_pool = web::Data::new(db_pool);
     let tmpl = web::Data::new(TEMPLATES.clone());
     let srv = HttpServer::new(move || {

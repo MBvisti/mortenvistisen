@@ -18,4 +18,3 @@ impl AsRef<str> for Email {
         &self.0
     }
 }
-
