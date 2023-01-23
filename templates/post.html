@@ -38,17 +38,15 @@
 {% endblock content %}
 
 {% block footer %}
-<footer class="container footer footer-center py-10 mx-auto bg-base-200 text-base-content rounded">
+<footer class="container footer footer-center min-w-[100vw] py-10 bg-base-200 text-base-content rounded">
     <div class="form-control">
-        <div class="relative">
-            <span class="footer-title">Get notified when a new post is released!</span> 
+        <div class="relative flex flex-col">
+            <span class="footer-title">Get notified about new posts</span> 
+            <span class="px-16">No spam, no selling your email, unsub (i.e delete your email from my system) anytime.</span>
         </div>
     </div>
-    <div class="form-control w-96">
-        <div class="relative">
-          <input type="text" placeholder="username@site.com" class="input input-bordered w-full pr-20 md:pr-32" /> 
-          <button class="btn btn-primary absolute top-0 right-0 rounded-l-none umami--click--newsletter-post-{{ meta_data.order }}">Subscribe</button>
-        </div>
+    <div class="form-control min-w-fit">
+        {% include '_subscribe_form.html' %}
     </div> 
   <div>
     <p>Copyright © 2022 - MBV Software</p>

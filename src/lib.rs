@@ -1,5 +1,7 @@
 use actix_files as fs;
+use email_client::EmailClient;
 use handlers::not_found;
+use sqlx::PgPool;
 use std::net::TcpListener;
 
 #[macro_use]
@@ -10,7 +12,11 @@ use actix_web::{
 };
 use tera::Tera;
 
+pub mod configuration;
+pub mod domain;
+pub mod email_client;
 pub mod handlers;
+pub mod repository;
 
 lazy_static! {
     pub static ref TEMPLATES: Tera = {
@@ -38,11 +44,18 @@ async fn sitemap_text(_req: HttpRequest) -> Result<fs::NamedFile, Error> {
     Ok(file.use_last_modified(true))
 }
 
-pub fn start_blog(listener: TcpListener) -> Result<Server, std::io::Error> {
+pub fn start_blog(
+    listener: TcpListener,
+    db_pool: PgPool,
+    email_client: web::Data<EmailClient>,
+) -> Result<Server, std::io::Error> {
+    let db_conn_pool = web::Data::new(db_pool);
     let tmpl = web::Data::new(TEMPLATES.clone());
     let srv = HttpServer::new(move || {
         App::new()
             .app_data(web::Data::clone(&tmpl))
+            .app_data(db_conn_pool.clone())
+            .app_data(email_client.clone())
             .wrap(middleware::Logger::default()) // enable logger
             .route("/status", web::get().to(HttpResponse::Ok))
             .service(robots_text)
@@ -51,6 +64,9 @@ pub fn start_blog(listener: TcpListener) -> Result<Server, std::io::Error> {
             // .service(fs::Files::new("/static", "static/robots.txt").use_last_modified(true))
             .service(handlers::index)
             .service(handlers::render_post)
+            .service(handlers::subscribe)
+            .service(handlers::verify_subscription)
+            .service(handlers::delete_subscriber)
             .default_service(web::route().to(not_found))
     })
     .listen(listener)?
