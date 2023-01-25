@@ -1,8 +1,10 @@
 use std::{fs, io::Error};
 
-use actix_web::{get, web, HttpResponse, Responder};
+use actix_web::{get, HttpResponse, Responder};
 use ignore::WalkBuilder;
 use serde::{Deserialize, Serialize};
+
+use crate::template::{render_internal_error_tmpl, render_template};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct FrontMatter {
@@ -58,32 +60,24 @@ fn find_all_front_matter() -> Result<Vec<FrontMatter>, Error> {
 }
 
 #[get("/")]
-pub async fn index(tmpl: web::Data<tera::Tera>) -> impl Responder {
+pub async fn index() -> impl Responder {
     let mut context = tera::Context::new();
 
     let mut front_matters = match find_all_front_matter() {
         Ok(fm) => fm,
         Err(e) => {
             println!("{:?}", e);
-            let error_page = tmpl.render("error_page.html", &context).unwrap();
+
             return HttpResponse::InternalServerError()
                 .content_type("text/html")
-                .body(error_page);
+                .body(render_internal_error_tmpl(None));
         }
     };
 
     front_matters.sort_by(|a, b| b.order.cmp(&a.order));
-
     context.insert("posts", &front_matters);
 
-    match tmpl.render("home.html", &context) {
-        Ok(s) => HttpResponse::Ok().content_type("text/html").body(s),
-        Err(e) => {
-            println!("{:?}", e);
-            let error_page = tmpl.render("error_page.html", &context).unwrap();
-            HttpResponse::InternalServerError()
-                .content_type("text/html")
-                .body(error_page)
-        }
-    }
+    HttpResponse::Ok()
+        .content_type("text/html")
+        .body(render_template("home.html", &context))
 }
