@@ -3420,16 +3420,6 @@ body[dir="rtl"] .checkbox:checked,
   margin-right: 0.5rem;
 }
 
-.my-auto {
-  margin-top: auto;
-  margin-bottom: auto;
-}
-
-.mx-4 {
-  margin-left: 1rem;
-  margin-right: 1rem;
-}
-
 .mb-10 {
   margin-bottom: 2.5rem;
 }
@@ -3474,12 +3464,12 @@ body[dir="rtl"] .checkbox:checked,
   margin-bottom: 1.5rem;
 }
 
-.mt-8 {
-  margin-top: 2rem;
-}
-
 .mb-1 {
   margin-bottom: 0.25rem;
+}
+
+.mt-8 {
+  margin-top: 2rem;
 }
 
 .block {
@@ -3692,16 +3682,6 @@ body[dir="rtl"] .checkbox:checked,
   padding-right: 4rem;
 }
 
-.py-\[25\%\] {
-  padding-top: 25%;
-  padding-bottom: 25%;
-}
-
-.py-32 {
-  padding-top: 8rem;
-  padding-bottom: 8rem;
-}
-
 .pr-20 {
   padding-right: 5rem;
 }
@@ -3828,6 +3808,10 @@ body[dir="rtl"] .checkbox:checked,
   width: 100%;
 }
 
+#article-content > h1 {
+  text-align: center;
+}
+
 #article-content > .introImg {
   max-height: 375px;
 }
@@ -3938,18 +3922,8 @@ code.hljs{
 }
 
 @media (min-width: 640px) {
-  .sm\:mx-4 {
-    margin-left: 1rem;
-    margin-right: 1rem;
-  }
-
   .sm\:overflow-x-hidden {
     overflow-x: hidden;
-  }
-
-  .sm\:px-4 {
-    padding-left: 1rem;
-    padding-right: 1rem;
   }
 }
 
