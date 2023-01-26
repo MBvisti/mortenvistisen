@@ -25,7 +25,7 @@ fn find_all_front_matter() -> Result<Vec<FrontMatter>, Error> {
     let toml = match t.select("toml").build() {
         Ok(t) => t,
         Err(e) => {
-            println!("{:}", e); // just print the error for now
+            println!("{e:}"); // just print the error for now
             return Err(Error::new(
                 std::io::ErrorKind::Other,
                 "could not build toml file type matcher",
@@ -47,7 +47,7 @@ fn find_all_front_matter() -> Result<Vec<FrontMatter>, Error> {
                 }
             }
             Err(e) => {
-                println!("{:}", e); // just print the error for now
+                println!("{e:}"); // just print the error for now
                 return Err(Error::new(
                     std::io::ErrorKind::NotFound,
                     "could not locate frontmatter",
@@ -66,7 +66,7 @@ pub async fn index() -> impl Responder {
     let mut front_matters = match find_all_front_matter() {
         Ok(fm) => fm,
         Err(e) => {
-            println!("{:?}", e);
+            println!("{e:}"); // just print the error for now
 
             return HttpResponse::InternalServerError()
                 .content_type("text/html")

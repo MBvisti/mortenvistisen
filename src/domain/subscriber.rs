@@ -8,7 +8,7 @@ impl Email {
     pub fn parse(s: String) -> Result<Email, String> {
         match validate_email(&s) {
             true => Ok(Self(s)),
-            false => Err(format!("{} not a valid email", s)),
+            false => Err(format!("{s} not a valid email")),
         }
     }
 }

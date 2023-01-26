@@ -13,10 +13,10 @@ pub async fn render_post(post_name: web::Path<String>) -> impl Responder {
     let mut context = tera::Context::new();
 
     let options = Options::empty();
-    let markdown_input = match fs::read_to_string(format!("./posts/{}/article.md", post_name)) {
+    let markdown_input = match fs::read_to_string(format!("./posts/{post_name}/article.md")) {
         Ok(s) => s,
         Err(e) => {
-            println!("{:?}", e);
+            println!("{e:?}");
 
             return HttpResponse::NotFound()
                 .content_type("text/html")
@@ -25,10 +25,10 @@ pub async fn render_post(post_name: web::Path<String>) -> impl Responder {
     };
 
     let front_matter_input =
-        match fs::read_to_string(format!("./posts/{}/article_frontmatter.toml", post_name)) {
+        match fs::read_to_string(format!("./posts/{post_name}/article_frontmatter.toml")) {
             Ok(s) => s,
             Err(e) => {
-                println!("{:?}", e);
+                println!("{e:?}");
 
                 return HttpResponse::NotFound()
                     .content_type("text/html")
@@ -39,7 +39,7 @@ pub async fn render_post(post_name: web::Path<String>) -> impl Responder {
     let front_matter: FrontMatter = match toml::from_str(&front_matter_input) {
         Ok(fm) => fm,
         Err(e) => {
-            println!("{:?}", e);
+            println!("{e:?}");
 
             return HttpResponse::NotFound()
                 .content_type("text/html")

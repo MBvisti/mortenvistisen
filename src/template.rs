@@ -5,7 +5,7 @@ lazy_static! {
         let mut tera = match Tera::new("templates/**/*.html") {
             Ok(t) => t,
             Err(e) => {
-                println!("Parsing error(s): {}", e);
+                println!("Parsing error(s): {e}");
                 ::std::process::exit(1);
             }
         };
@@ -18,7 +18,7 @@ pub fn render_template(template_name: &str, context: &Context) -> Result<String,
     match TEMPLATES.render(template_name, context) {
         Ok(tmpl) => Ok(tmpl),
         Err(e) => {
-            println!("error rendering template: {}", e);
+            println!("Parsing error(s): {e}");
             Err(e)
         }
     }
