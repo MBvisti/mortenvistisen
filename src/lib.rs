@@ -36,10 +36,8 @@ pub fn start_blog(
     email_client: web::Data<EmailClient>,
 ) -> Result<Server, std::io::Error> {
     let db_conn_pool = web::Data::new(db_pool);
-    //let tmpl = web::Data::new(TEMPLATES.clone());
     let srv = HttpServer::new(move || {
         App::new()
-            //.app_data(web::Data::clone(&tmpl))
             .app_data(db_conn_pool.clone())
             .app_data(email_client.clone())
             .wrap(middleware::Logger::default()) // enable logger
