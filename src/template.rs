@@ -29,11 +29,11 @@ pub fn render_internal_error_tmpl(provided_context: Option<&Context>) -> String 
     if let Some(provided_context) = provided_context {
         return TEMPLATES
             .render("500.html", provided_context)
-            .unwrap_or("something horrible happend if you see this".to_string());
+            .unwrap_or_else(|_| "something horrible happend if you see this".to_string());
     }
     TEMPLATES
         .render("500.html", &context)
-        .unwrap_or("something horrible happend if you see this".to_string())
+        .unwrap_or_else(|_| "something horrible happend if you see this".to_string())
 }
 
 pub fn render_not_found_error_tmpl(provided_context: Option<&Context>) -> String {
@@ -41,9 +41,9 @@ pub fn render_not_found_error_tmpl(provided_context: Option<&Context>) -> String
     if let Some(provided_context) = provided_context {
         return TEMPLATES
             .render("error_templates/404.html", provided_context)
-            .unwrap_or("<html>something horrible happend if you see this</html>".to_string());
+            .unwrap_or_else(|_| "something horrible happend if you see this".to_string());
     }
     TEMPLATES
         .render("error_templates/404.html", &context)
-        .unwrap_or("<html>something horrible happend if you see this</htm>".to_string())
+        .unwrap_or_else(|_| "something horrible happend if you see this".to_string())
 }

@@ -9,9 +9,7 @@ use crate::{
 };
 
 #[get("/posts/{post_name}")]
-pub async fn render_post(
-    post_name: web::Path<String>,
-) -> impl Responder {
+pub async fn render_post(post_name: web::Path<String>) -> impl Responder {
     let mut context = tera::Context::new();
 
     let options = Options::empty();

@@ -10,7 +10,6 @@ extern crate lazy_static;
 use actix_web::{
     dev::Server, get, middleware, web, App, Error, HttpRequest, HttpResponse, HttpServer,
 };
-use tera::Tera;
 
 pub mod configuration;
 pub mod domain;
@@ -18,7 +17,6 @@ pub mod email_client;
 pub mod handlers;
 pub mod repository;
 pub mod template;
-
 
 #[get("/robots.txt")]
 async fn robots_text(_req: HttpRequest) -> Result<fs::NamedFile, Error> {
