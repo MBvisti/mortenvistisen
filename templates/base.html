@@ -19,7 +19,7 @@
 <body hx-ext="loading-states"
     class="sm:overflow-x-hidden bg-base-100 flex flex-col overflow-x-hidden justify-between 
         min-h-screen font-sans leading-normal tracking-normal">
-    <div class="h-16 max-w-screen flex items-center justify-center mb-4">
+    <div class="h-16 max-w-screen flex items-center justify-center">
         {% block header %}{% endblock header %}
         <!-- <div class="form-control w-64"> -->
         <!--     <label class="label cursor-pointer"> -->
@@ -35,11 +35,6 @@
         {% block content %}{% endblock content %}
     </main>
     {% block footer %}
-    <footer class="footer footer-center mt-4 p-8 bg-base-100 text-base-content rounded">
-        <div>
-            <p>Copyright © 2023 - All right reserved by <a href="https://mortenvistisen.com">MBV Software</a></p>
-        </div>
-    </footer>
     {% endblock footer %}
 </body>
 

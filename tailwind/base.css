@@ -12,6 +12,9 @@
   position: relative;
   width: 100%;
 }
+#article-content > h1 {
+  text-align: left;
+}
 
 #article-content > .introImg {
     max-height: 375px;

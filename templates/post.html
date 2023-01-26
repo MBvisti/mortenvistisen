@@ -26,9 +26,13 @@
 {% block content %}
     <article 
         id="article-content"
-        class="prose lg:prose-xl mb-6 px-4 md:px-6 h-full w-full leading-normal"
+        class=" text-justify prose lg:prose-xl mb-6 px-4 md:px-6 h-full w-full leading-normal"
     >
-    <h1>{{ meta_data.title }}</h1>
+    <time datetime="{{ meta_data.posted }}" class="mb-8 order-first flex items-center text-base text-zinc-400 dark:text-zinc-500">
+        <span class="h-4 w-0.5 rounded-full bg-zinc-200 dark:bg-zinc-500"></span>
+        <span class="ml-3">{{ meta_data.posted }}</span>
+    </time>
+    <h1 class="tracking-tight">{{ meta_data.title }}</h1>
         {% include '_socials.html'%}
         {{ post | safe }}
     </article>
@@ -49,6 +53,7 @@
         {% include '_subscribe_form.html' %}
     </div> 
   <div>
-    <p>Copyright © 2022 - MBV Software</p>
+    <p>Copyright © 2023 - MBV Software</p>
   </div>
-</footer>{% endblock footer %}
+</footer>
+{% endblock footer %}

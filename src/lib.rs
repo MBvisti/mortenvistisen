@@ -10,27 +10,13 @@ extern crate lazy_static;
 use actix_web::{
     dev::Server, get, middleware, web, App, Error, HttpRequest, HttpResponse, HttpServer,
 };
-use tera::Tera;
 
 pub mod configuration;
 pub mod domain;
 pub mod email_client;
 pub mod handlers;
 pub mod repository;
-
-lazy_static! {
-    pub static ref TEMPLATES: Tera = {
-        let mut tera = match Tera::new("templates/**/*.html") {
-            Ok(t) => t,
-            Err(e) => {
-                println!("Parsing error(s): {}", e);
-                ::std::process::exit(1);
-            }
-        };
-        tera.autoescape_on(vec![".html", ".sql"]);
-        tera
-    };
-}
+pub mod template;
 
 #[get("/robots.txt")]
 async fn robots_text(_req: HttpRequest) -> Result<fs::NamedFile, Error> {
@@ -50,10 +36,8 @@ pub fn start_blog(
     email_client: web::Data<EmailClient>,
 ) -> Result<Server, std::io::Error> {
     let db_conn_pool = web::Data::new(db_pool);
-    let tmpl = web::Data::new(TEMPLATES.clone());
     let srv = HttpServer::new(move || {
         App::new()
-            .app_data(web::Data::clone(&tmpl))
             .app_data(db_conn_pool.clone())
             .app_data(email_client.clone())
             .wrap(middleware::Logger::default()) // enable logger

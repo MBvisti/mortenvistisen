@@ -3,47 +3,47 @@ use std::fs;
 use actix_web::{get, web, HttpResponse, Responder};
 use pulldown_cmark::{html, Options, Parser};
 
-use crate::handlers::FrontMatter;
+use crate::{
+    handlers::FrontMatter,
+    template::{render_internal_error_tmpl, render_not_found_error_tmpl, render_template},
+};
 
 #[get("/posts/{post_name}")]
-pub async fn render_post(
-    tmpl: web::Data<tera::Tera>,
-    post_name: web::Path<String>,
-) -> impl Responder {
+pub async fn render_post(post_name: web::Path<String>) -> impl Responder {
     let mut context = tera::Context::new();
 
     let options = Options::empty();
-    let markdown_input = match fs::read_to_string(format!("./posts/{}/article.md", post_name)) {
+    let markdown_input = match fs::read_to_string(format!("./posts/{post_name}/article.md")) {
         Ok(s) => s,
         Err(e) => {
-            println!("{:?}", e);
-            let not_found_page = tmpl.render("not_found.html", &context).unwrap();
+            println!("{e:?}");
+
             return HttpResponse::NotFound()
                 .content_type("text/html")
-                .body(not_found_page);
+                .body(render_not_found_error_tmpl(None));
         }
     };
 
     let front_matter_input =
-        match fs::read_to_string(format!("./posts/{}/article_frontmatter.toml", post_name)) {
+        match fs::read_to_string(format!("./posts/{post_name}/article_frontmatter.toml")) {
             Ok(s) => s,
             Err(e) => {
-                println!("{:?}", e);
-                let not_found_page = tmpl.render("not_found.html", &context).unwrap();
+                println!("{e:?}");
+
                 return HttpResponse::NotFound()
                     .content_type("text/html")
-                    .body(not_found_page);
+                    .body(render_not_found_error_tmpl(None));
             }
         };
 
     let front_matter: FrontMatter = match toml::from_str(&front_matter_input) {
         Ok(fm) => fm,
         Err(e) => {
-            println!("{:?}", e);
-            let not_found_page = tmpl.render("not_found.html", &context).unwrap();
+            println!("{e:?}");
+
             return HttpResponse::NotFound()
                 .content_type("text/html")
-                .body(not_found_page);
+                .body(render_not_found_error_tmpl(None));
         }
     };
 
@@ -55,14 +55,10 @@ pub async fn render_post(
     context.insert("post", &html_output);
     context.insert("meta_data", &front_matter);
 
-    match tmpl.render("post.html", &context) {
-        Ok(s) => HttpResponse::Ok().content_type("text/html").body(s),
-        Err(e) => {
-            println!("{:?}", e);
-            let error_page = tmpl.render("error_page.html", &context).unwrap();
-            HttpResponse::InternalServerError()
-                .content_type("text/html")
-                .body(error_page)
-        }
-    }
+    let tmpl = match render_template("post.html", &context) {
+        Ok(t) => t,
+        Err(_) => render_internal_error_tmpl(None),
+    };
+
+    HttpResponse::Ok().content_type("text/html").body(tmpl)
 }

@@ -6,6 +6,7 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::email_client::EmailClient;
+use crate::template::{render_internal_error_tmpl, render_template};
 use crate::{domain::Email, repository};
 
 #[derive(Debug, Serialize)]
@@ -53,7 +54,6 @@ impl TryFrom<SubscribeFormData> for NewSubscriberPayload {
 async fn render_subscribe_err(
     error_msg: String,
     mut context: tera::Context,
-    tmpl: web::Data<tera::Tera>,
     template_name: &str,
 ) -> HttpResponse {
     context.insert(
@@ -64,16 +64,12 @@ async fn render_subscribe_err(
         },
     );
 
-    match tmpl.render(template_name, &context) {
-        Ok(s) => return HttpResponse::Ok().content_type("text/html").body(s),
-        Err(e) => {
-            println!("{:?}", e);
-            let error_page = tmpl.render("error_page.html", &context).unwrap();
-            return HttpResponse::InternalServerError()
-                .content_type("text/html")
-                .body(error_page);
-        }
-    }
+    let tmpl = match render_template(template_name, &context) {
+        Ok(t) => t,
+        Err(_) => render_internal_error_tmpl(None),
+    };
+
+    HttpResponse::Ok().content_type("text/html").body(tmpl)
 }
 
 fn generate_subcription_token() -> String {
@@ -86,7 +82,6 @@ fn generate_subcription_token() -> String {
 
 #[post("/subscribe")]
 pub async fn subscribe(
-    tmpl: web::Data<tera::Tera>,
     form: web::Form<SubscribeFormData>,
     pool: web::Data<PgPool>,
     email_client: web::Data<EmailClient>,
@@ -97,11 +92,10 @@ pub async fn subscribe(
     let payload: NewSubscriberPayload = match form.0.try_into() {
         Ok(p) => p,
         Err(e) => {
-            println!("{:?}", e);
+            println!("{e:?}");
             return render_subscribe_err(
                 "I fucked up somehow, sorry. Please try again".to_string(),
                 context,
-                tmpl,
                 "_subscribe_response.html",
             )
             .await;
@@ -111,11 +105,10 @@ pub async fn subscribe(
     let email_exists = match repository::does_email_exists(&pool, &payload.email).await {
         Ok(exists) => exists,
         Err(e) => {
-            println!("{:?}", e);
+            println!("{e:?}");
             return render_subscribe_err(
                 "I fucked up somehow, sorry. Please try again".to_string(),
                 context,
-                tmpl,
                 "_subscribe_response.html",
             )
             .await;
@@ -125,7 +118,6 @@ pub async fn subscribe(
         return render_subscribe_err(
             "Email already registered".to_string(),
             context,
-            tmpl,
             "_subscribe_response.html",
         )
         .await;
@@ -134,11 +126,10 @@ pub async fn subscribe(
     if let Err(e) =
         repository::create_new_subscriber(&pool, &payload.email, &payload.referer, new_sub_id).await
     {
-        println!("{:?}", e);
+        println!("{e:?}");
         return render_subscribe_err(
             "I fucked up somehow, sorry. Please try again".to_string(),
             context,
-            tmpl,
             "_subscribe_response.html",
         )
         .await;
@@ -146,11 +137,10 @@ pub async fn subscribe(
     let new_sub_token = generate_subcription_token();
     if let Err(e) = repository::create_new_subscriber_token(&pool, new_sub_id, &new_sub_token).await
     {
-        println!("{:?}", e);
+        println!("{e:?}");
         return render_subscribe_err(
             "I fucked up somehow, sorry. Please try again".to_string(),
             context,
-            tmpl,
             "_subscribe_response.html",
         )
         .await;
@@ -163,17 +153,12 @@ pub async fn subscribe(
             token: new_sub_token,
         },
     );
-    let html_content = match tmpl.render("confirm_sub_email.html", &email_context) {
-        Ok(html) => html,
-        Err(e) => {
-            println!("{:?}", e);
-            return render_subscribe_err(
-                "I fucked up somehow, sorry. Please try again".to_string(),
-                context,
-                tmpl,
-                "_subscribe_response.html",
-            )
-            .await;
+    let html_content = match render_template("confirm_sub_email.html", &email_context) {
+        Ok(t) => t,
+        Err(_) => {
+            return HttpResponse::InternalServerError()
+                .content_type("text/html")
+                .body(render_internal_error_tmpl(None))
         }
     };
     match email_client
@@ -186,11 +171,10 @@ pub async fn subscribe(
     {
         Ok(_) => (),
         Err(e) => {
-            println!("{:?}", e);
+            println!("{e:?}");
             return render_subscribe_err(
                 "I fucked up somehow, sorry. Please try again".to_string(),
                 context,
-                tmpl,
                 "_subscribe_response.html",
             )
             .await;
@@ -205,19 +189,12 @@ pub async fn subscribe(
         },
     );
 
-    match tmpl.render("_subscribe_response.html", &context) {
-        Ok(s) => HttpResponse::Ok().content_type("text/html").body(s),
-        Err(e) => {
-            println!("{:?}", e);
-            return render_subscribe_err(
-                "I fucked up somehow, sorry. Please try again".to_string(),
-                context,
-                tmpl,
-                "_subscribe_response.html",
-            )
-            .await;
-        }
-    }
+    let tmpl = match render_template("_subscribe_response.html", &context) {
+        Ok(t) => t,
+        Err(_) => render_internal_error_tmpl(None),
+    };
+
+    HttpResponse::Ok().content_type("text/html").body(tmpl)
 }
 
 #[derive(serde::Deserialize)]
@@ -236,11 +213,10 @@ pub async fn verify_subscription(
     let id = match repository::get_subscriber_id_from_token(&pool, &params.token).await {
         Ok(id) => id,
         Err(e) => {
-            println!("{:?}", e);
+            println!("{e:?}");
             return render_subscribe_err(
                 "I fucked up somehow, sorry. Please try again".to_string(),
                 context,
-                tmpl,
                 "confirm_subscription.html",
             )
             .await;
@@ -250,11 +226,10 @@ pub async fn verify_subscription(
     let is_verified = match repository::is_user_verified(&pool, id).await {
         Ok(is_verified) => is_verified,
         Err(e) => {
-            println!("{:?}", e);
+            println!("{e:?}");
             return render_subscribe_err(
                 "I fucked up somehow, sorry. Please try again".to_string(),
                 context,
-                tmpl,
                 "confirm_subscription.html",
             )
             .await;
@@ -275,11 +250,10 @@ pub async fn verify_subscription(
                 return HttpResponse::Ok().content_type("text/html").body(s);
             }
             Err(e) => {
-                println!("{:?}", e);
+                println!("{e:?}");
                 return render_subscribe_err(
                     "I fucked up somehow, sorry. Please try again".to_string(),
                     context,
-                    tmpl,
                     "confirm_subscription.html",
                 )
                 .await;
@@ -290,11 +264,10 @@ pub async fn verify_subscription(
     match repository::update_email_to_verified(&pool, id).await {
         Ok(_) => (),
         Err(e) => {
-            println!("{:?}", e);
+            println!("{e:?}");
             return render_subscribe_err(
                 "I fucked up somehow, sorry. Please try again".to_string(),
                 context,
-                tmpl,
                 "confirm_subscription.html",
             )
             .await;
@@ -304,11 +277,10 @@ pub async fn verify_subscription(
     match tmpl.render("confirm_subscription.html", &context) {
         Ok(s) => HttpResponse::Ok().content_type("text/html").body(s),
         Err(e) => {
-            println!("{:?}", e);
+            println!("{e:?}");
             return render_subscribe_err(
                 "I fucked up somehow, sorry. Please try again".to_string(),
                 context,
-                tmpl,
                 "confirm_subscription.html",
             )
             .await;
@@ -327,18 +299,17 @@ pub async fn delete_subscriber(
     let id = match repository::get_subscriber_id_from_token(&pool, &params.token).await {
         Ok(id) => id,
         Err(e) => {
-            println!("{:?}", e);
+            println!("{e:?}");
             match e {
                 // TODO: add message that it has already been deleted
                 sqlx::Error::RowNotFound => {
                     match tmpl.render("delete_subscription.html", &context) {
                         Ok(s) => return HttpResponse::Ok().content_type("text/html").body(s),
                         Err(e) => {
-                            println!("{:?}", e);
+                            println!("{e:?}");
                             return render_subscribe_err(
                                 "I fucked up somehow, sorry. Please try again".to_string(),
                                 context,
-                                tmpl,
                                 "confirm_subscription.html",
                             )
                             .await;
@@ -349,7 +320,6 @@ pub async fn delete_subscriber(
                     return render_subscribe_err(
                         "I fucked up somehow, sorry. Please try again".to_string(),
                         context,
-                        tmpl,
                         "delete_subscription.html",
                     )
                     .await
@@ -361,11 +331,10 @@ pub async fn delete_subscriber(
     match repository::delete_subscriber_token(&pool, &params.token).await {
         Ok(_) => (),
         Err(e) => {
-            println!("{:?}", e);
+            println!("{e:?}");
             return render_subscribe_err(
                 "I fucked up somehow, sorry. Please try again".to_string(),
                 context,
-                tmpl,
                 "delete_subscription.html",
             )
             .await;
@@ -375,11 +344,10 @@ pub async fn delete_subscriber(
     match repository::delete_subscriber(&pool, id).await {
         Ok(_) => (),
         Err(e) => {
-            println!("{:?}", e);
+            println!("{e:?}");
             return render_subscribe_err(
                 "I fucked up somehow, sorry. Please try again".to_string(),
                 context,
-                tmpl,
                 "delete_subscription.html",
             )
             .await;
@@ -389,11 +357,10 @@ pub async fn delete_subscriber(
     match tmpl.render("delete_subscription.html", &context) {
         Ok(s) => HttpResponse::Ok().content_type("text/html").body(s),
         Err(e) => {
-            println!("{:?}", e);
+            println!("{e:?}");
             return render_subscribe_err(
                 "I fucked up somehow, sorry. Please try again".to_string(),
                 context,
-                tmpl,
                 "confirm_subscription.html",
             )
             .await;

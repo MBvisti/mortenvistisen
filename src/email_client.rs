@@ -53,7 +53,7 @@ impl EmailClient {
         {
             Ok(_) => (),
             Err(e) => {
-                println!("this is the err: {}", e);
+                println!("this is the err: {e}");
                 return Err(e);
             }
         };

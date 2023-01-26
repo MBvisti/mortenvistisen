@@ -33,7 +33,7 @@ impl TryFrom<String> for Env {
             "dev" => Ok(Self::Dev),
             "test" => Ok(Self::Test),
             "prod" => Ok(Self::Prod),
-            other => Err(format!("{} is not a supported env", other)),
+            other => Err(format!("{other} is not a supported env")),
         }
     }
 }
@@ -85,7 +85,7 @@ pub fn get_config() -> Result<AppConfiguration, config::ConfigError> {
     {
         Ok(cfg) => cfg,
         Err(e) => {
-            println!("{}", e);
+            println!("{e}");
             return Err(e);
         }
     };
