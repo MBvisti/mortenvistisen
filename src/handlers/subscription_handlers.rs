@@ -155,7 +155,11 @@ pub async fn subscribe(
     );
     let html_content = match render_template("confirm_sub_email.html", &email_context) {
         Ok(t) => t,
-        Err(_) => return HttpResponse::InternalServerError().content_type("text/html").body(render_internal_error_tmpl(None))
+        Err(_) => {
+            return HttpResponse::InternalServerError()
+                .content_type("text/html")
+                .body(render_internal_error_tmpl(None))
+        }
     };
     match email_client
         .send_email(

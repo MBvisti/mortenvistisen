@@ -5,7 +5,7 @@ use pulldown_cmark::{html, Options, Parser};
 
 use crate::{
     handlers::FrontMatter,
-    template::{render_not_found_error_tmpl, render_template, render_internal_error_tmpl},
+    template::{render_internal_error_tmpl, render_not_found_error_tmpl, render_template},
 };
 
 #[get("/posts/{post_name}")]
@@ -57,7 +57,7 @@ pub async fn render_post(post_name: web::Path<String>) -> impl Responder {
 
     let tmpl = match render_template("post.html", &context) {
         Ok(t) => t,
-        Err(_) => render_internal_error_tmpl(None)
+        Err(_) => render_internal_error_tmpl(None),
     };
 
     HttpResponse::Ok().content_type("text/html").body(tmpl)

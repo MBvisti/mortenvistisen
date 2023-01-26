@@ -1,4 +1,4 @@
-use tera::{Context, Tera, Error};
+use tera::{Context, Error, Tera};
 
 lazy_static! {
     static ref TEMPLATES: Tera = {
