@@ -9,9 +9,9 @@
       <p class="py-6 text-base-content/80 text-justify">
         A software engineer trying to escape 9-to-5 by bootstrapping a one-man businesses online.
         I write about my ventures into tech and bootstrapping, sharing what I learn along the way. You'll most likely find stuff 
-        about Rust, Go and ML as well as mediatations on the process of building businesses on the internet.
+        about Rust, Go and ML as well as meditations on the process of building businesses on the internet.
       </p>
-      <a class="btn btn-primary umami--click--socials-twitter"
+      <a class="btn btn-primary"
         href="posts/wantrepreneurship-and-getting-out-of-tutorial-hell">Latest Post</a> 
     </div>
   </div>
@@ -20,14 +20,14 @@
   <div class="hero-content flex-col lg:flex-row-reverse">
     <img src="/static/images/mig_selv-removebg-preview.png" class="max-w-xs" alt="image of MBvisti" />
     <div>
-      <h1 class="text-4xl font-bold">Hej, I'm Morten!</h1>
-      <p class="py-6 text-base-content/80 text-left">
+      <h1 class="text-4xl font-bold">Hi, I'm Morten!</h1>
+      <p class="py-6 text-base-content/80 text-left text-lg">
         A software engineer trying to escape 9-to-5, (huge) proponent of remote work and bootstrapping one-man businesses online.
         I write about my ventures into tech and bootstrapping, sharing what I learn along the way. You'll most likely find stuff 
         about Rust, Go and ML as well as mediatations on the process of building businesses on the internet.
       </p>
       <a class="btn btn-primary umami--click--socials-twitter"
-        href="posts/how-to-build-a-simple-blog-using-rust">Latest Post</a> 
+        href="posts/wantrepreneurship-and-getting-out-of-tutorial-hell">Latest Post</a> 
     </div>
   </div>
 </div>
@@ -48,3 +48,20 @@
     {% endfor %}
 </div>
 {% endblock content %}
+
+{% block footer %}
+<footer class="container footer footer-center min-w-[100vw] py-10 bg-base-200 text-base-content rounded">
+    <div class="form-control">
+        <div class="relative flex flex-col">
+            <span class="footer-title">Get notified about new posts</span> 
+            <span class="px-16">No spam, no selling your email, unsub (i.e delete your email from my system) anytime.</span>
+        </div>
+    </div>
+    <div class="form-control min-w-fit">
+        {% include '_subscribe_form.html' %}
+    </div> 
+    <div>
+      <p>Copyright © 2023 - MBV Software</p>
+    </div>
+</footer>
+{% endblock footer %}
