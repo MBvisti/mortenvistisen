@@ -13,7 +13,7 @@
   width: 100%;
 }
 #article-content > h1 {
-  text-align: center;
+  text-align: left;
 }
 
 #article-content > .introImg {
