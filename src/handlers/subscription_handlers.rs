@@ -6,7 +6,7 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::email_client::EmailClient;
-use crate::template::render_template;
+use crate::template::{render_internal_error_tmpl, render_template};
 use crate::{domain::Email, repository};
 
 #[derive(Debug, Serialize)]
@@ -64,9 +64,12 @@ async fn render_subscribe_err(
         },
     );
 
-    HttpResponse::Ok()
-        .content_type("text/html")
-        .body(render_template(template_name, &context))
+    let tmpl = match render_template(template_name, &context) {
+        Ok(t) => t,
+        Err(_) => render_internal_error_tmpl(None),
+    };
+
+    HttpResponse::Ok().content_type("text/html").body(tmpl)
 }
 
 fn generate_subcription_token() -> String {
@@ -123,7 +126,7 @@ pub async fn subscribe(
     if let Err(e) =
         repository::create_new_subscriber(&pool, &payload.email, &payload.referer, new_sub_id).await
     {
-        println!("$$$$$$$$$$$$$$$$$$$$$$$$$$$$ YOYOY: {:?}", e);
+        println!("{:?}", e);
         return render_subscribe_err(
             "I fucked up somehow, sorry. Please try again".to_string(),
             context,
@@ -134,7 +137,7 @@ pub async fn subscribe(
     let new_sub_token = generate_subcription_token();
     if let Err(e) = repository::create_new_subscriber_token(&pool, new_sub_id, &new_sub_token).await
     {
-        println!("$$$$$$$$$$$$$$$$$$$$$$$$$$$$ YOYOY: {:?}", e);
+        println!("{:?}", e);
         return render_subscribe_err(
             "I fucked up somehow, sorry. Please try again".to_string(),
             context,
@@ -150,7 +153,10 @@ pub async fn subscribe(
             token: new_sub_token,
         },
     );
-    let html_content = render_template("confirm_sub_email.html", &email_context);
+    let html_content = match render_template("confirm_sub_email.html", &email_context) {
+        Ok(t) => t,
+        Err(_) => return HttpResponse::InternalServerError().content_type("text/html").body(render_internal_error_tmpl(None))
+    };
     match email_client
         .send_email(
             payload.email,
@@ -161,7 +167,7 @@ pub async fn subscribe(
     {
         Ok(_) => (),
         Err(e) => {
-            println!("$$$$$$$$$$$$$$$$$$$$$$$$$$$$ YOYOY: {:?}", e);
+            println!("{:?}", e);
             return render_subscribe_err(
                 "I fucked up somehow, sorry. Please try again".to_string(),
                 context,
@@ -179,9 +185,12 @@ pub async fn subscribe(
         },
     );
 
-    HttpResponse::Ok()
-        .content_type("text/html")
-        .body(render_template("_subscribe_response.html", &context))
+    let tmpl = match render_template("_subscribe_response.html", &context) {
+        Ok(t) => t,
+        Err(_) => render_internal_error_tmpl(None),
+    };
+
+    HttpResponse::Ok().content_type("text/html").body(tmpl)
 }
 
 #[derive(serde::Deserialize)]

@@ -1,4 +1,4 @@
-use tera::{Context, Tera};
+use tera::{Context, Tera, Error};
 
 lazy_static! {
     static ref TEMPLATES: Tera = {
@@ -14,12 +14,12 @@ lazy_static! {
     };
 }
 
-pub fn render_template(template_name: &str, context: &Context) -> String {
+pub fn render_template(template_name: &str, context: &Context) -> Result<String, Error> {
     match TEMPLATES.render(template_name, context) {
-        Ok(tmpl) => tmpl,
+        Ok(tmpl) => Ok(tmpl),
         Err(e) => {
             println!("error rendering template: {}", e);
-            render_internal_error_tmpl(None)
+            Err(e)
         }
     }
 }
