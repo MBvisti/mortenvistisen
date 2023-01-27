@@ -2,7 +2,7 @@ use std::net::TcpListener;
 
 use actix_web::web;
 use mortenvistisen_blog::{
-    configuration::get_config, domain::Email, email_client::EmailClient, start_blog,
+    configuration::get_config, email_client::EmailClient, start_blog, subscriber::Email,
 };
 use sqlx::postgres::PgPoolOptions;
 
