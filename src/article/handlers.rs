@@ -1,10 +1,9 @@
-use std::fs;
-
 use actix_web::{get, web, HttpResponse, Responder};
 use pulldown_cmark::{html, Options, Parser};
+use std::fs;
 
 use crate::{
-    handlers::FrontMatter,
+    article::domain::FrontMatter,
     template::{render_internal_error_tmpl, render_not_found_error_tmpl, render_template},
 };
 

@@ -1,7 +1,7 @@
 use reqwest::Client;
 use secrecy::{ExposeSecret, Secret};
 
-use crate::domain::Email;
+use crate::subscriber::Email;
 
 pub struct EmailClient {
     http_client: Client,

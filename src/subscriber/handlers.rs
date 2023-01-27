@@ -1,54 +1,18 @@
 use actix_web::{get, post, web, HttpResponse, Responder};
-use rand::distributions::Alphanumeric;
-use rand::{thread_rng, Rng};
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::email_client::EmailClient;
+use crate::repository;
+use crate::subscriber::domain::{ConfirmSubEmail, NewSubscriberPayload};
+use crate::subscriber::service::generate_subcription_token;
 use crate::template::{render_internal_error_tmpl, render_template};
-use crate::{domain::Email, repository};
 
 #[derive(Debug, Serialize)]
 struct SubscribeMetaData {
     has_error: bool,
     error_msg: Option<String>,
-}
-
-#[derive(Debug, Serialize)]
-struct ConfirmSubscribeMetaData {
-    has_error: bool,
-    already_verified: bool,
-    error_msg: Option<String>,
-}
-
-#[derive(Debug, Serialize)]
-struct ConfirmSubEmail {
-    app_base_url: String,
-    token: String,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct SubscribeFormData {
-    pub email: String,
-    pub referer: String,
-}
-
-pub struct NewSubscriberPayload {
-    pub email: Email,
-    pub referer: String,
-}
-
-impl TryFrom<SubscribeFormData> for NewSubscriberPayload {
-    type Error = String;
-
-    fn try_from(value: SubscribeFormData) -> Result<Self, Self::Error> {
-        let email = Email::parse(value.email)?;
-        Ok(Self {
-            email,
-            referer: value.referer,
-        })
-    }
 }
 
 async fn render_subscribe_err(
@@ -72,12 +36,10 @@ async fn render_subscribe_err(
     HttpResponse::Ok().content_type("text/html").body(tmpl)
 }
 
-fn generate_subcription_token() -> String {
-    let mut rng = thread_rng();
-    std::iter::repeat_with(|| rng.sample(Alphanumeric))
-        .map(char::from)
-        .take(25)
-        .collect()
+#[derive(Debug, Deserialize)]
+pub struct SubscribeFormData {
+    pub email: String,
+    pub referer: String,
 }
 
 #[post("/subscribe")]
@@ -200,6 +162,13 @@ pub async fn subscribe(
 #[derive(serde::Deserialize)]
 pub struct Parameters {
     token: String,
+}
+
+#[derive(Debug, Serialize)]
+struct ConfirmSubscribeMetaData {
+    has_error: bool,
+    already_verified: bool,
+    error_msg: Option<String>,
 }
 
 #[get("/subscribe/verify")]
