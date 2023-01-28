@@ -14,6 +14,7 @@ use sqlx::postgres::PgPoolOptions;
 
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
+    println!("Starting yo");
     let cfg = match get_config() {
         Ok(cfg) => cfg,
         Err(e) => panic!("{}", e),
