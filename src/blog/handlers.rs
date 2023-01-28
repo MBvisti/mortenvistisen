@@ -5,14 +5,16 @@ use crate::{
     template::{render_internal_error_tmpl, render_template},
 };
 
+#[tracing::instrument(name = "visit home page")]
 #[get("/")]
 pub async fn index() -> impl Responder {
     let mut context = tera::Context::new();
+    tracing::error!("failed to find all frontmatters");
 
     let mut front_matters = match find_all_front_matter() {
         Ok(fm) => fm,
         Err(e) => {
-            println!("{e:}"); // just print the error for now
+            tracing::error!("failed to find all frontmatters: {:?}", e);
 
             return HttpResponse::InternalServerError()
                 .content_type("text/html")

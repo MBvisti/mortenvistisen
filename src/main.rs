@@ -1,6 +1,12 @@
+use secrecy::ExposeSecret;
 use std::net::TcpListener;
+use tracing::dispatcher::set_global_default;
+use tracing_log::LogTracer;
 
 use actix_web::web;
+use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
+use tracing_subscriber::{layer::SubscriberExt, EnvFilter, Registry};
+
 use mortenvistisen_blog::{
     configuration::get_config, email_client::EmailClient, start_blog, subscriber::Email,
 };
@@ -8,7 +14,6 @@ use sqlx::postgres::PgPoolOptions;
 
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
-    std::env::set_var("RUST_LOG", "actix_web=info");
     let cfg = match get_config() {
         Ok(cfg) => cfg,
         Err(e) => panic!("{}", e),
@@ -33,7 +38,30 @@ async fn main() -> std::io::Result<()> {
         cfg.email_client.auth_token,
     );
 
-    env_logger::init();
+    let _guard = sentry::init((
+        cfg.server.sentry_dns.expose_secret().to_string(),
+        sentry::ClientOptions {
+            traces_sample_rate: 0.2,
+            release: sentry::release_name!(),
+            max_breadcrumbs: 50,
+            debug: false, // <- this should only be used during development
+            ..Default::default()
+        },
+    ));
+
+    LogTracer::init().expect("failed to set logger");
+
+    let env_filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));
+    let log_formatting_layer =
+        BunyanFormattingLayer::new("mortenvistisen_blog".into(), std::io::stdout);
+
+    let log_subscriber = Registry::default()
+        .with(env_filter)
+        .with(JsonStorageLayer)
+        .with(log_formatting_layer)
+        .with(sentry_tracing::layer());
+
+    set_global_default(log_subscriber.into()).expect("failed to set log subscriber");
 
     let listener = match TcpListener::bind(format!("{}:{}", cfg.server.host, cfg.server.port)) {
         Ok(l) => l,

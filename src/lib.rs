@@ -2,12 +2,13 @@ use actix_files as fs;
 use email_client::EmailClient;
 use sqlx::PgPool;
 use std::net::TcpListener;
+use tracing_actix_web::TracingLogger;
 
 #[macro_use]
 extern crate lazy_static;
 
 use actix_web::{
-    dev::Server, get, middleware, web, App, Error, HttpRequest, HttpResponse, HttpServer, Responder,
+    dev::Server, get, web, App, Error, HttpRequest, HttpResponse, HttpServer, Responder,
 };
 
 pub mod article;
@@ -49,7 +50,7 @@ pub fn start_blog(
         App::new()
             .app_data(db_conn_pool.clone())
             .app_data(email_client.clone())
-            .wrap(middleware::Logger::default()) // enable logger
+            .wrap(TracingLogger::default()) // enable logger
             .route("/status", web::get().to(HttpResponse::Ok))
             .service(robots_text)
             .service(sitemap_text)
