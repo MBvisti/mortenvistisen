@@ -1,24 +1,9 @@
-FROM lukemathwalker/cargo-chef:latest-rust-1.58.0 as chef
+FROM rust:1.65 AS builder
+
 WORKDIR /app
 
-FROM chef as planner
-
 COPY . .
 
-# Compute a lock-like file for our project
-RUN cargo chef prepare  --recipe-path recipe.json
-
-FROM chef as builder
-
-COPY --from=planner /app/recipe.json recipe.json
-
-# Build our project dependencies, not our application!
-RUN cargo chef cook --release --recipe-path recipe.json
-
-COPY . .
-
-# Build our project
-RUN rustup component add rustfmt
 RUN cargo build --release --bin mortenvistisen_blog
 
 FROM debian:bullseye-slim AS runtime
