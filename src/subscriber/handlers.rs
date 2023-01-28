@@ -42,6 +42,13 @@ pub struct SubscribeFormData {
     pub referer: String,
 }
 
+#[tracing::instrument(
+    name = "adding new subscriber", 
+    skip(form, pool, email_client)
+    fields(
+        subscriber_email = %form.email
+    )
+)]
 #[post("/subscribe")]
 pub async fn subscribe(
     form: web::Form<SubscribeFormData>,
@@ -171,6 +178,13 @@ struct ConfirmSubscribeMetaData {
     error_msg: Option<String>,
 }
 
+#[tracing::instrument(
+    name = "verifying subscriber", 
+    skip(pool, tmpl, params)
+    fields(
+        token = %params.token
+    )
+)]
 #[get("/subscribe/verify")]
 pub async fn verify_subscription(
     tmpl: web::Data<tera::Tera>,
@@ -257,6 +271,13 @@ pub async fn verify_subscription(
     }
 }
 
+#[tracing::instrument(
+    name = "delete subscriber", 
+    skip(pool, tmpl, params)
+    fields(
+        token = %params.token
+    )
+)]
 #[get("/subscribe/delete")]
 pub async fn delete_subscriber(
     tmpl: web::Data<tera::Tera>,
