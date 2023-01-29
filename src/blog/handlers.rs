@@ -9,7 +9,6 @@ use crate::{
 #[get("/")]
 pub async fn index() -> impl Responder {
     let mut context = tera::Context::new();
-    tracing::error!("failed to find all frontmatters");
 
     let mut front_matters = match find_all_front_matter() {
         Ok(fm) => fm,
