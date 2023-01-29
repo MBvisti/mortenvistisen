@@ -1,4 +1,4 @@
-FROM rust:1.65 AS builder
+FROM rust:1.67 AS builder
 
 WORKDIR /app
 
@@ -6,7 +6,7 @@ COPY . .
 
 RUN cargo build --release --bin mortenvistisen_blog
 
-FROM debian:bullseye-slim AS runtime
+FROM debian:buster-slim
 
 WORKDIR /app
 
