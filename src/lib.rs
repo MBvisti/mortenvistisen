@@ -17,6 +17,7 @@ pub mod configuration;
 pub mod email_client;
 pub mod repository;
 pub mod subscriber;
+pub mod telemetry;
 pub mod template;
 
 #[get("/robots.txt")]
