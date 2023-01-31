@@ -12,6 +12,7 @@ use actix_web::{
 };
 
 pub mod article;
+pub mod telemetry;
 pub mod blog;
 pub mod configuration;
 pub mod email_client;
