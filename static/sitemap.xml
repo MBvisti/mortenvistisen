@@ -9,30 +9,34 @@
 
 <url>
   <loc>https://mortenvistisen.com/</loc>
-  <lastmod>2023-01-03T15:09:22+00:00</lastmod>
+  <lastmod>2023-02-01T12:21:21+00:00</lastmod>
   <priority>1.00</priority>
 </url>
 <url>
-  <loc>https://mortenvistisen.com/posts/how-to-build-a-simple-blog-using-rust</loc>
-  <lastmod>2023-01-03T15:09:22+00:00</lastmod>
+  <loc>https://mortenvistisen.com/posts/wantrepreneurship-and-getting-out-of-tutorial-hell</loc>
+  <lastmod>2023-02-01T12:21:21+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
-  <loc>https://mortenvistisen.com/posts/wantrepreneurship-and-getting-out-of-tutorial-hell</loc>
-  <lastmod>2023-01-03T15:09:22+00:00</lastmod>
+  <loc>https://mortenvistisen.com/posts/one-month-one-dollar-part-one</loc>
+  <lastmod>2023-02-01T12:21:21+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://mortenvistisen.com/posts/how-to-build-a-simple-blog-using-rust</loc>
+  <lastmod>2023-02-01T12:21:21+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://mortenvistisen.com/posts/how-to-do-integration-test-with-go</loc>
-  <lastmod>2023-01-03T15:09:22+00:00</lastmod>
+  <lastmod>2023-02-01T12:21:21+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://mortenvistisen.com/posts/practical-approach-to-structuring-go-apps</loc>
-  <lastmod>2023-01-03T15:09:22+00:00</lastmod>
+  <lastmod>2023-02-01T12:21:21+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 
 
 </urlset>
-
