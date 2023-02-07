@@ -49,7 +49,9 @@ pub fn start_blog(
 ) -> Result<Server, std::io::Error> {
     let db_conn_pool = web::Data::new(db_pool);
     let srv = HttpServer::new(move || {
-        let cors = Cors::default().allowed_origin("https://mortenvistisen.com").max_age(3600);
+        let cors = Cors::default()
+            .allowed_origin("https://mortenvistisen.com")
+            .max_age(3600);
 
         App::new()
             .wrap(cors)
