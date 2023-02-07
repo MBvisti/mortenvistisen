@@ -1,3 +1,4 @@
+use actix_cors::Cors;
 use actix_files as fs;
 use email_client::EmailClient;
 use sqlx::PgPool;
@@ -48,7 +49,12 @@ pub fn start_blog(
 ) -> Result<Server, std::io::Error> {
     let db_conn_pool = web::Data::new(db_pool);
     let srv = HttpServer::new(move || {
+        let cors = Cors::default()
+            .allowed_origin("https://mortenvistisen.com")
+            .max_age(3600);
+
         App::new()
+            .wrap(cors)
             .app_data(db_conn_pool.clone())
             .app_data(email_client.clone())
             .wrap(TracingLogger::default()) // enable logger
