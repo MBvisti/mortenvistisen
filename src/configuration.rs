@@ -45,6 +45,7 @@ pub struct ServerConfig {
     pub port: u16,
     pub base_url: String,
     pub sentry_dns: Secret<String>,
+    pub password_salt: Secret<String>,
 }
 
 #[derive(serde::Deserialize)]

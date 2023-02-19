@@ -1,6 +1,7 @@
 use actix_files as fs;
 use email_client::EmailClient;
 use reqwest::StatusCode;
+use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use std::net::TcpListener;
 use tracing_actix_web::TracingLogger;
@@ -9,20 +10,26 @@ use tracing_actix_web::TracingLogger;
 extern crate lazy_static;
 
 use actix_web::{
-    dev::Server, get, web, App, Error, HttpRequest, HttpResponse, HttpServer, Responder, post, 
+    dev::Server, get, post, web, App, Error, HttpRequest, HttpResponse, HttpServer, Responder,
 };
 
-use crate::template::{render_template, render_internal_error_tmpl};
+use crate::{
+    auth_stuff::verify_hashed_password,
+    repository::get_user_hashed_password,
+    subscriber::Email,
+    template::{render_internal_error_tmpl, render_template},
+};
 
 pub mod article;
+pub mod auth_stuff;
 pub mod blog;
 pub mod configuration;
+pub mod dashboard;
 pub mod email_client;
 pub mod repository;
 pub mod subscriber;
 pub mod telemetry;
 pub mod template;
-pub mod dashboard;
 
 #[get("/robots.txt")]
 async fn robots_text(_req: HttpRequest) -> Result<fs::NamedFile, Error> {
@@ -36,11 +43,25 @@ async fn sitemap_text(_req: HttpRequest) -> Result<fs::NamedFile, Error> {
     Ok(file.use_last_modified(true))
 }
 
+#[derive(Debug, Serialize)]
+struct LoginMetaData {
+    error_msg: Option<String>,
+    has_error: bool,
+    is_success: bool,
+}
 #[get("/login")]
 async fn login_handler(_req: HttpRequest) -> impl Responder {
-    let context = tera::Context::new();
+    let mut context = tera::Context::new();
+    context.insert(
+        "meta_data",
+        &LoginMetaData {
+            error_msg: None,
+            has_error: false,
+            is_success: true,
+        },
+    );
 
-        let tmpl = match render_template("login.html", &context) {
+    let tmpl = match render_template("login.html", &context) {
         Ok(t) => t,
         Err(_) => render_internal_error_tmpl(None),
     };
@@ -48,9 +69,59 @@ async fn login_handler(_req: HttpRequest) -> impl Responder {
     HttpResponse::Ok().content_type("text/html").body(tmpl)
 }
 
+#[get("/auth-redirect")]
+async fn auth_redirect_handler(_req: HttpRequest) -> impl Responder {
+    HttpResponse::Ok().append_header(("HX-Redirect", "/dashboard")).finish()
+}
+
+#[derive(Debug, Deserialize)]
+pub struct LoginFormData {
+    pub email: String,
+    pub password: String,
+}
 #[post("/login")]
-async fn authenticate_handler(_req: HttpRequest) -> impl Responder {
-    web::Redirect::to("/dashboard").using_status_code(StatusCode::FOUND)
+async fn authenticate_handler(
+    _req: HttpRequest,
+    form: web::Form<LoginFormData>,
+
+    pool: web::Data<PgPool>,
+) -> impl Responder {
+    let email = match Email::parse(form.email.to_string()) {
+        Ok(email) => email,
+        Err(e) => {
+            tracing::error!("could not parse email bc: {:?}", e);
+            return web::Redirect::to("/login").using_status_code(StatusCode::BAD_REQUEST);
+        }
+    };
+
+    let user_hp = match get_user_hashed_password(&pool, &email).await {
+        Ok(user_hp) => user_hp,
+        Err(e) => match e {
+            sqlx::Error::RowNotFound => {
+                return web::Redirect::to("/login").using_status_code(StatusCode::BAD_REQUEST)
+            }
+            _ => {
+                tracing::error!("could not get user hashed password bc: {:?}", e);
+                return web::Redirect::to("/login")
+                    .using_status_code(StatusCode::INTERNAL_SERVER_ERROR);
+            }
+        },
+    };
+
+    match verify_hashed_password(&user_hp, &form.password) {
+        Ok(is_verified) => {
+            if is_verified {
+                return web::Redirect::to("/dashboard").using_status_code(StatusCode::FOUND);
+            } else {
+                return web::Redirect::to("/login").using_status_code(StatusCode::UNAUTHORIZED);
+            }
+        }
+        Err(e) => {
+            tracing::error!("could not get user hashed password bc: {:?}", e);
+            return web::Redirect::to("/login")
+                .using_status_code(StatusCode::INTERNAL_SERVER_ERROR);
+        }
+    }
 }
 
 async fn not_found(tmpl: web::Data<tera::Tera>) -> impl Responder {
@@ -80,6 +151,7 @@ pub fn start_blog(
             // .service(fs::Files::new("/static", "static/robots.txt").use_last_modified(true))
             .service(login_handler)
             .service(authenticate_handler)
+            .service(auth_redirect_handler)
             .service(blog::index)
             .service(article::render_post)
             .service(subscriber::subscribe)

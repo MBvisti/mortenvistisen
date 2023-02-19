@@ -6,6 +6,18 @@
     <div>
       <h2 class="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">Sign in to your account</h2>
     </div>
+
+    {% if meta_data.has_error %}
+    <div class="w-full text-center flex flex-col">
+        <p class="text-red-900">Wrong email or password</p>
+        <p>Please try again.</p>
+    </div>
+    {% endif %}
+    {% if meta_data.is_success %}
+    <div hx-get="/auth-redirect" hx-trigger="load delay:1500ms" class="w-full text-center flex flex-col">
+        <p class="text-green-800">Authenticated!</p>
+    </div>
+    {% endif %}
     <form class="mt-8 space-y-6" action="/login" method="POST">
       <div class="-space-y-px rounded-md shadow-sm">
         <div>
