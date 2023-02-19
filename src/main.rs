@@ -18,7 +18,7 @@ async fn main() -> std::io::Result<()> {
 
     let subscriber = get_subscriber(
         "mortenvistisen_blog".into(),
-        "info".into(),
+        "error".into(),
         std::io::stdout,
         cfg.server.sentry_dns,
     );

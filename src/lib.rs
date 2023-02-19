@@ -1,6 +1,6 @@
-use actix_cors::Cors;
 use actix_files as fs;
 use email_client::EmailClient;
+use reqwest::StatusCode;
 use sqlx::PgPool;
 use std::net::TcpListener;
 use tracing_actix_web::TracingLogger;
@@ -9,8 +9,10 @@ use tracing_actix_web::TracingLogger;
 extern crate lazy_static;
 
 use actix_web::{
-    dev::Server, get, web, App, Error, HttpRequest, HttpResponse, HttpServer, Responder,
+    dev::Server, get, web, App, Error, HttpRequest, HttpResponse, HttpServer, Responder, post, 
 };
+
+use crate::template::{render_template, render_internal_error_tmpl};
 
 pub mod article;
 pub mod blog;
@@ -20,6 +22,7 @@ pub mod repository;
 pub mod subscriber;
 pub mod telemetry;
 pub mod template;
+pub mod dashboard;
 
 #[get("/robots.txt")]
 async fn robots_text(_req: HttpRequest) -> Result<fs::NamedFile, Error> {
@@ -31,6 +34,23 @@ async fn robots_text(_req: HttpRequest) -> Result<fs::NamedFile, Error> {
 async fn sitemap_text(_req: HttpRequest) -> Result<fs::NamedFile, Error> {
     let file = fs::NamedFile::open_async("static/sitemap.xml").await?;
     Ok(file.use_last_modified(true))
+}
+
+#[get("/login")]
+async fn login_handler(_req: HttpRequest) -> impl Responder {
+    let context = tera::Context::new();
+
+        let tmpl = match render_template("login.html", &context) {
+        Ok(t) => t,
+        Err(_) => render_internal_error_tmpl(None),
+    };
+
+    HttpResponse::Ok().content_type("text/html").body(tmpl)
+}
+
+#[post("/login")]
+async fn authenticate_handler(_req: HttpRequest) -> impl Responder {
+    web::Redirect::to("/dashboard").using_status_code(StatusCode::FOUND)
 }
 
 async fn not_found(tmpl: web::Data<tera::Tera>) -> impl Responder {
@@ -49,12 +69,7 @@ pub fn start_blog(
 ) -> Result<Server, std::io::Error> {
     let db_conn_pool = web::Data::new(db_pool);
     let srv = HttpServer::new(move || {
-        let cors = Cors::default()
-            .allowed_origin("https://mortenvistisen.com")
-            .max_age(3600);
-
         App::new()
-            .wrap(cors)
             .app_data(db_conn_pool.clone())
             .app_data(email_client.clone())
             .wrap(TracingLogger::default()) // enable logger
@@ -63,11 +78,14 @@ pub fn start_blog(
             .service(sitemap_text)
             .service(fs::Files::new("/static", "static/").use_last_modified(true))
             // .service(fs::Files::new("/static", "static/robots.txt").use_last_modified(true))
+            .service(login_handler)
+            .service(authenticate_handler)
             .service(blog::index)
             .service(article::render_post)
             .service(subscriber::subscribe)
             .service(subscriber::verify_subscription)
             .service(subscriber::delete_subscriber)
+            .service(dashboard::index)
             .default_service(web::route().to(not_found))
     })
     .listen(listener)?
