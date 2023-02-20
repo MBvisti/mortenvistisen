@@ -1,4 +1,6 @@
 use actix_files as fs;
+use actix_identity::{Identity, IdentityMiddleware};
+use actix_session::{config::PersistentSession, storage::CookieSessionStore, SessionMiddleware};
 use email_client::EmailClient;
 use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
@@ -10,7 +12,9 @@ use tracing_actix_web::TracingLogger;
 extern crate lazy_static;
 
 use actix_web::{
-    dev::Server, get, post, web, App, Error, HttpRequest, HttpResponse, HttpServer, Responder,
+    cookie::{time::Duration, Key},
+    dev::Server,
+    get, post, web, App, Error, HttpMessage, HttpRequest, HttpResponse, HttpServer, Responder,
 };
 
 use crate::{
@@ -50,7 +54,7 @@ struct LoginMetaData {
     is_success: bool,
 }
 #[get("/login")]
-async fn login_handler(_req: HttpRequest) -> impl Responder {
+async fn login_handler(req: HttpRequest) -> impl Responder {
     let mut context = tera::Context::new();
     context.insert(
         "meta_data",
@@ -61,6 +65,7 @@ async fn login_handler(_req: HttpRequest) -> impl Responder {
         },
     );
 
+    Identity::login(&req.extensions(), "user1".to_owned()).unwrap();
     let tmpl = match render_template("login.html", &context) {
         Ok(t) => t,
         Err(_) => render_internal_error_tmpl(None),
@@ -71,7 +76,9 @@ async fn login_handler(_req: HttpRequest) -> impl Responder {
 
 #[get("/auth-redirect")]
 async fn auth_redirect_handler(_req: HttpRequest) -> impl Responder {
-    HttpResponse::Ok().append_header(("HX-Redirect", "/dashboard")).finish()
+    HttpResponse::Ok()
+        .append_header(("HX-Redirect", "/dashboard"))
+        .finish()
 }
 
 #[derive(Debug, Deserialize)]
@@ -139,11 +146,22 @@ pub fn start_blog(
     email_client: web::Data<EmailClient>,
 ) -> Result<Server, std::io::Error> {
     let db_conn_pool = web::Data::new(db_pool);
+    let session_key = Key::generate();
     let srv = HttpServer::new(move || {
+        let session =
+            SessionMiddleware::builder(CookieSessionStore::default(), session_key.clone())
+                .cookie_name("mbv_auth".to_string())
+                .cookie_secure(false)
+                .session_lifecycle(
+                    PersistentSession::default().session_ttl(Duration::seconds(60 * 60 * 24 * 7)),
+                )
+                .build();
         App::new()
             .app_data(db_conn_pool.clone())
             .app_data(email_client.clone())
             .wrap(TracingLogger::default()) // enable logger
+            .wrap(IdentityMiddleware::default())
+            .wrap(session)
             .route("/status", web::get().to(HttpResponse::Ok))
             .service(robots_text)
             .service(sitemap_text)
