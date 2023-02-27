@@ -14,13 +14,13 @@ use std::net::TcpListener;
 
 async fn ensure_admin_user_exists(pool: &PgPool, hp: String) {
     let email = Email::parse("mbv@mortenvistisen.com".to_string()).unwrap();
-    let exsits = match does_user_exists(&pool, &email).await {
+    let exsits = match does_user_exists(pool, &email).await {
         Ok(exists) => exists,
         Err(e) => panic!("{}", e),
     };
 
     if !exsits {
-        if let Err(create_err) = create_new_user(&pool, &email, &hp).await {
+        if let Err(create_err) = create_new_user(pool, &email, &hp).await {
             panic!("{}", create_err)
         }
     }
