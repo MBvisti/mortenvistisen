@@ -20,6 +20,20 @@
     },
     "query": "\n            select EXISTS(select email from subscriptions where email = $1) as \"exists\"\n        "
   },
+  "1dad419b40ac6152d57d30368291ca2fd0d81dda96210e4b827b140c70b22329": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Text"
+        ]
+      }
+    },
+    "query": "\n            INSERT INTO \"user\" (id, email, hashed_password)\n            VALUES ($1, $2, $3)\n        "
+  },
   "2e73d4b1513d80fe443706886ad214c3a045f8f9a824b549865fad86d736f9e6": {
     "describe": {
       "columns": [],
@@ -32,6 +46,26 @@
       }
     },
     "query": "\n            UPDATE subscriptions set is_verified = $2 where id = $1\n        "
+  },
+  "504006cac9d3fdaf5c18b838092c49bdf1b2128113778471deb5ac99b8cb1e5f": {
+    "describe": {
+      "columns": [
+        {
+          "name": "exists",
+          "ordinal": 0,
+          "type_info": "Bool"
+        }
+      ],
+      "nullable": [
+        null
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "\n            select EXISTS(select email from \"user\" where email = $1) as \"exists\"\n        "
   },
   "76d1d4ef3c860cd661a1c205320553e865928bec5a2ac346bb35a347d2ffde76": {
     "describe": {
@@ -109,6 +143,26 @@
       }
     },
     "query": "\n            select is_verified from subscriptions where id = $1\n        "
+  },
+  "ee6d169d7dda9bd136c7a809507f229a7e006fc8a8a15d628747dd298b3da50c": {
+    "describe": {
+      "columns": [
+        {
+          "name": "hashed_password",
+          "ordinal": 0,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      }
+    },
+    "query": "\n            select hashed_password from \"user\" where email = $1;\n        "
   },
   "fc6451ad8a4130308dbdbbe3007c1a21fedab8fab12397413190107cb6a2b93c": {
     "describe": {

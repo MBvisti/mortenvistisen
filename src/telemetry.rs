@@ -30,7 +30,7 @@ where
             traces_sample_rate: 0.2,
             release: sentry::release_name!(),
             max_breadcrumbs: 50,
-            debug: false, // <- this should only be used during development
+            debug: true, // <- this should only be used during development
             ..Default::default()
         },
     ));
