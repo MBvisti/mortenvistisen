@@ -1,20 +1,18 @@
 use actix_web::{cookie::Key, web};
 use mortenvistisen_blog::{
+    auth_stuff,
     configuration::get_config,
     email_client::EmailClient,
     repository::{create_new_user, does_user_exists},
     start_blog,
     subscriber::Email,
-    telemetry::{get_subscriber, init_subscriber}, auth_stuff,
+    telemetry::{get_subscriber, init_subscriber},
 };
 use secrecy::{ExposeSecret, Secret};
 use sqlx::{postgres::PgPoolOptions, PgPool};
 use std::net::TcpListener;
 
-async fn ensure_admin_user_exists(
-    pool: &PgPool,
-    hp: String,
-) {
+async fn ensure_admin_user_exists(pool: &PgPool, hp: String) {
     let email = Email::parse("mbv@mortenvistisen.com".to_string()).unwrap();
     let exsits = match does_user_exists(&pool, &email).await {
         Ok(exists) => exists,

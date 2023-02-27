@@ -1,8 +1,11 @@
-use actix_web::http::header::LOCATION;
 use actix_identity::Identity;
+use actix_web::http::header::LOCATION;
 use actix_web::{get, HttpResponse, Responder};
 
-use crate::{template::{render_internal_error_tmpl, render_template}, auth_stuff::validate_cookie_identity};
+use crate::{
+    auth_stuff::validate_cookie_identity,
+    template::{render_internal_error_tmpl, render_template},
+};
 
 #[get("/dashboard")]
 pub async fn index(identity: Option<Identity>) -> impl Responder {
@@ -10,9 +13,9 @@ pub async fn index(identity: Option<Identity>) -> impl Responder {
         Ok(id) => id,
         Err(_e) => {
             return HttpResponse::SeeOther()
-            .insert_header((LOCATION, "/login"))
-            .finish()
-        },
+                .insert_header((LOCATION, "/login"))
+                .finish()
+        }
     };
     let context = tera::Context::new();
 

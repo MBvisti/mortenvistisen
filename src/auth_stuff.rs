@@ -3,7 +3,6 @@ use argon2::{
     password_hash::{PasswordHasher, PasswordVerifier, SaltString},
     Argon2, ParamsBuilder, PasswordHash,
 };
-//use rand::rngs::OsRng;
 use secrecy::{ExposeSecret, Secret};
 
 lazy_static::lazy_static! {
@@ -11,7 +10,7 @@ lazy_static::lazy_static! {
     pub static ref SALT: String = std::env::var("APP_SERVER__PASSWORD_SALT").unwrap_or_else(|_| "salty".to_string());
 }
 
-fn build_argon2_instance() ->  Argon2<'static> {
+fn build_argon2_instance() -> Argon2<'static> {
     Argon2::new_with_secret(
         SECRET_KEY.as_bytes(),
         argon2::Algorithm::Argon2id,

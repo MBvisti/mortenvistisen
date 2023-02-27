@@ -1,5 +1,5 @@
-use sqlx::PgPool;
 use crate::subscriber::Email;
+use sqlx::PgPool;
 use uuid::Uuid;
 
 pub async fn create_new_user(
