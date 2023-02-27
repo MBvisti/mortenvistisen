@@ -46,6 +46,8 @@ pub struct ServerConfig {
     pub base_url: String,
     pub sentry_dns: Secret<String>,
     pub password_salt: Secret<String>,
+    pub password_hash_key: Secret<String>,
+    pub cookie_signing_key: Secret<String>,
 }
 
 #[derive(serde::Deserialize)]

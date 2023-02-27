@@ -1,12 +1,11 @@
-use actix_web::web;
+use actix_web::{cookie::Key, web};
 use mortenvistisen_blog::{
-    auth_stuff::create_hashed_password_from_string,
     configuration::get_config,
     email_client::EmailClient,
     repository::{create_new_user, does_user_exists},
     start_blog,
     subscriber::Email,
-    telemetry::{get_subscriber, init_subscriber},
+    telemetry::{get_subscriber, init_subscriber}, auth_stuff,
 };
 use secrecy::{ExposeSecret, Secret};
 use sqlx::{postgres::PgPoolOptions, PgPool};
@@ -14,8 +13,7 @@ use std::net::TcpListener;
 
 async fn ensure_admin_user_exists(
     pool: &PgPool,
-    salty: Secret<String>,
-    password: Secret<String>,
+    hp: String,
 ) {
     let email = Email::parse("mbv@mortenvistisen.com".to_string()).unwrap();
     let exsits = match does_user_exists(&pool, &email).await {
@@ -24,8 +22,6 @@ async fn ensure_admin_user_exists(
     };
 
     if !exsits {
-        let hp =
-            create_hashed_password_from_string(password.expose_secret(), salty.expose_secret());
         if let Err(create_err) = create_new_user(&pool, &email, &hp).await {
             panic!("{}", create_err)
         }
@@ -38,6 +34,8 @@ async fn main() -> std::io::Result<()> {
         Ok(cfg) => cfg,
         Err(e) => panic!("{}", e),
     };
+
+    let session_key = Key::from(cfg.server.cookie_signing_key.expose_secret().as_bytes());
 
     let subscriber = get_subscriber(
         "mortenvistisen_blog".into(),
@@ -56,7 +54,11 @@ async fn main() -> std::io::Result<()> {
         Err(e) => panic!("{}", e),
     };
 
-    ensure_admin_user_exists(&db_conn_pool, cfg.server.password_salt, Secret::new("yEkh9zS85DD7xcMmB9li".to_string())).await;
+    ensure_admin_user_exists(
+        &db_conn_pool,
+        auth_stuff::hash_password(Secret::new("yEkh9zS85DD7xcMmB9li".to_string())),
+    )
+    .await;
 
     let sender = match Email::parse(cfg.email_client.sender) {
         Ok(s) => s,
@@ -74,6 +76,12 @@ async fn main() -> std::io::Result<()> {
         Err(e) => panic!("{}", e),
     };
 
-    start_blog(listener, db_conn_pool, web::Data::new(email_client))?.await?;
+    start_blog(
+        listener,
+        db_conn_pool,
+        web::Data::new(email_client),
+        session_key,
+    )?
+    .await?;
     Ok(())
 }

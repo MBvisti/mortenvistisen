@@ -2,7 +2,6 @@ use actix_files as fs;
 use actix_identity::{Identity, IdentityMiddleware};
 use actix_session::{config::PersistentSession, storage::CookieSessionStore, SessionMiddleware};
 use email_client::EmailClient;
-use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use std::net::TcpListener;
@@ -14,11 +13,12 @@ extern crate lazy_static;
 use actix_web::{
     cookie::{time::Duration, Key},
     dev::Server,
-    get, post, web, App, Error, HttpMessage, HttpRequest, HttpResponse, HttpServer, Responder,
+    get, post,
+    web::{self, Data},
+    App, Error, HttpMessage, HttpRequest, HttpResponse, HttpServer, Responder,
 };
 
 use crate::{
-    auth_stuff::verify_hashed_password,
     repository::get_user_hashed_password,
     subscriber::Email,
     template::{render_internal_error_tmpl, render_template},
@@ -26,6 +26,7 @@ use crate::{
 
 pub mod article;
 pub mod auth_stuff;
+pub use auth_stuff::{hash_password, validate_cookie_identity, verify_password};
 pub mod blog;
 pub mod configuration;
 pub mod dashboard;
@@ -54,18 +55,17 @@ struct LoginMetaData {
     is_success: bool,
 }
 #[get("/login")]
-async fn login_handler(req: HttpRequest) -> impl Responder {
+async fn login_handler(_req: HttpRequest) -> impl Responder {
     let mut context = tera::Context::new();
     context.insert(
         "meta_data",
         &LoginMetaData {
             error_msg: None,
             has_error: false,
-            is_success: true,
+            is_success: false,
         },
     );
 
-    Identity::login(&req.extensions(), "user1".to_owned()).unwrap();
     let tmpl = match render_template("login.html", &context) {
         Ok(t) => t,
         Err(_) => render_internal_error_tmpl(None),
@@ -88,16 +88,31 @@ pub struct LoginFormData {
 }
 #[post("/login")]
 async fn authenticate_handler(
-    _req: HttpRequest,
+    req: HttpRequest,
     form: web::Form<LoginFormData>,
-
-    pool: web::Data<PgPool>,
+    pool: Data<PgPool>,
 ) -> impl Responder {
+    let mut context = tera::Context::new();
+
     let email = match Email::parse(form.email.to_string()) {
         Ok(email) => email,
         Err(e) => {
             tracing::error!("could not parse email bc: {:?}", e);
-            return web::Redirect::to("/login").using_status_code(StatusCode::BAD_REQUEST);
+
+            context.insert(
+                "meta_data",
+                &LoginMetaData {
+                    error_msg: None,
+                    has_error: true,
+                    is_success: false,
+                },
+            );
+            let tmpl = match render_template("login.html", &context) {
+                Ok(t) => t,
+                Err(_) => render_internal_error_tmpl(None),
+            };
+
+            return HttpResponse::Ok().content_type("text/html").body(tmpl);
         }
     };
 
@@ -105,33 +120,82 @@ async fn authenticate_handler(
         Ok(user_hp) => user_hp,
         Err(e) => match e {
             sqlx::Error::RowNotFound => {
-                return web::Redirect::to("/login").using_status_code(StatusCode::BAD_REQUEST)
+                context.insert(
+                    "meta_data",
+                    &LoginMetaData {
+                        error_msg: None,
+                        has_error: true,
+                        is_success: false,
+                    },
+                );
+                let tmpl = match render_template("login.html", &context) {
+                    Ok(t) => t,
+                    Err(_) => render_internal_error_tmpl(None),
+                };
+
+                return HttpResponse::Ok().content_type("text/html").body(tmpl);
             }
             _ => {
                 tracing::error!("could not get user hashed password bc: {:?}", e);
-                return web::Redirect::to("/login")
-                    .using_status_code(StatusCode::INTERNAL_SERVER_ERROR);
+                context.insert(
+                    "meta_data",
+                    &LoginMetaData {
+                        error_msg: None,
+                        has_error: true,
+                        is_success: false,
+                    },
+                );
+                let tmpl = match render_template("login.html", &context) {
+                    Ok(t) => t,
+                    Err(_) => render_internal_error_tmpl(None),
+                };
+
+                return HttpResponse::Ok().content_type("text/html").body(tmpl);
             }
         },
     };
 
-    match verify_hashed_password(&user_hp, &form.password) {
-        Ok(is_verified) => {
-            if is_verified {
-                return web::Redirect::to("/dashboard").using_status_code(StatusCode::FOUND);
-            } else {
-                return web::Redirect::to("/login").using_status_code(StatusCode::UNAUTHORIZED);
-            }
+    match verify_password(&form.password, &user_hp) {
+        true => {
+            println!("YO 1");
+            context.insert(
+                "meta_data",
+                &LoginMetaData {
+                    error_msg: None,
+                    has_error: false,
+                    is_success: true,
+                },
+            );
+            let tmpl = match render_template("login.html", &context) {
+                Ok(t) => t,
+                Err(_) => render_internal_error_tmpl(None),
+            };
+
+            Identity::login(&req.extensions(), "user1".to_owned()).unwrap();
+
+            return HttpResponse::Ok().content_type("text/html").body(tmpl);
         }
-        Err(e) => {
-            tracing::error!("could not get user hashed password bc: {:?}", e);
-            return web::Redirect::to("/login")
-                .using_status_code(StatusCode::INTERNAL_SERVER_ERROR);
+        false => {
+            println!("YO 2");
+            context.insert(
+                "meta_data",
+                &LoginMetaData {
+                    error_msg: None,
+                    has_error: true,
+                    is_success: false,
+                },
+            );
+            let tmpl = match render_template("login.html", &context) {
+                Ok(t) => t,
+                Err(_) => render_internal_error_tmpl(None),
+            };
+
+            return HttpResponse::Ok().content_type("text/html").body(tmpl);
         }
     }
 }
 
-async fn not_found(tmpl: web::Data<tera::Tera>) -> impl Responder {
+async fn not_found(tmpl: Data<tera::Tera>) -> impl Responder {
     let not_found_page = tmpl
         .render("not_found.html", &tera::Context::new())
         .unwrap();
@@ -143,10 +207,10 @@ async fn not_found(tmpl: web::Data<tera::Tera>) -> impl Responder {
 pub fn start_blog(
     listener: TcpListener,
     db_pool: PgPool,
-    email_client: web::Data<EmailClient>,
+    email_client: Data<EmailClient>,
+    session_key: Key,
 ) -> Result<Server, std::io::Error> {
-    let db_conn_pool = web::Data::new(db_pool);
-    let session_key = Key::generate();
+    let db_conn_pool = Data::new(db_pool);
     let srv = HttpServer::new(move || {
         let session =
             SessionMiddleware::builder(CookieSessionStore::default(), session_key.clone())
