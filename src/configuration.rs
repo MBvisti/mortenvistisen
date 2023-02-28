@@ -13,7 +13,6 @@ pub enum Env {
     Dev,
     Test,
     Prod,
-    LittleBrother,
 }
 
 impl Env {
@@ -22,7 +21,6 @@ impl Env {
             Env::Dev => "dev",
             Env::Test => "test",
             Env::Prod => "prod",
-            Env::LittleBrother => "little shit",
         }
     }
 }
