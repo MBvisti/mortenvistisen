@@ -4,7 +4,26 @@ The goal of the rewrite is to get _something_ out which could serve as a learnin
 
 _Side note_: I write Go for a living and have been coding professionally for the last ~5 years, so while I’m confident in my overall skills this tutorial might not always show idiomatic Rust and best practices. There’re a bunch of much more rust-abled developers than me who have written some great material, much of which lay the foundation for what I’m about to show you. At the end of the article, you’ll find a resource list that you can check out after reading (and hopefully coding along) this article. If you’re just interested in seeing the code you can find the repo here.
 
-PRs are welcome!
+---
+<div class="form-control min-w-fit">
+    <h6 class="text-lg font-semibold">Want to get notified whenever I release a new post?</h6>
+    <h6 class="text-lg">Consider subscribing to my newsletter</h6>
+    <form hx-post="/subscribe" hx-target="this" hx-swap="outerHTML" method="POST" action="/subscribe" class="mt-2 relative min-w-[20rem]"
+        data-loading-target="#loading" data-loading-class-remove="hidden">
+        <input type="hidden" name="referer" value="{%if meta_data%}{{ meta_data.title }}{%else%}home-page{%endif%}" />
+        <input data-loading-disable required name="email" autocomplete="email" type="email"
+            placeholder="username@domain.com" class="input input-bordered w-full pr-20 md:pr-32" />
+        <button data-loading-disable type="submit"
+            class="btn btn-primary absolute top-0 right-0 rounded-l-none umami--click--newsletter-{% if meta_data%}post-{{ meta_data.order }}{%else%}home-page{%endif%}">
+            Subscribe
+        </button>
+        <div id="loading" class="hidden flex fixed top-0 right-0 left-0">
+            <span class="loader"></span>
+        </div>
+    </form>
+</div> 
+
+---
 
 ## Kicking things off
 So, to build your new blog using Rust, you're going to have Rust installed on your system and then run `cargo new awesome-blog`.
