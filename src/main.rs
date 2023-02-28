@@ -28,7 +28,6 @@ async fn ensure_admin_user_exists(pool: &PgPool, hp: String) {
 
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
-    println!("hello from the other side");
     let cfg = match get_config() {
         Ok(cfg) => cfg,
         Err(e) => panic!("{}", e),
