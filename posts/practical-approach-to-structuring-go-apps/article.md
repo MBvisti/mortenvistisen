@@ -38,11 +38,11 @@ Now, I’m assuming some familiarity with Golang and programming in general, as 
     <h6 class="text-lg">Consider subscribing to my newsletter</h6>
     <form hx-post="/subscribe" hx-target="this" hx-swap="outerHTML" method="POST" action="/subscribe" class="mt-2 relative min-w-[20rem]"
         data-loading-target="#loading" data-loading-class-remove="hidden">
-        <input type="hidden" name="referer" value="{%if meta_data%}{{ meta_data.title }}{%else%}home-page{%endif%}" />
+        <input type="hidden" name="referer" value="practical-approach-to-structuring-go-apps" />
         <input data-loading-disable required name="email" autocomplete="email" type="email"
             placeholder="username@domain.com" class="input input-bordered w-full pr-20 md:pr-32" />
         <button data-loading-disable type="submit"
-            class="btn btn-primary absolute top-0 right-0 rounded-l-none umami--click--newsletter-{% if meta_data%}post-{{ meta_data.order }}{%else%}home-page{%endif%}">
+            class="btn btn-primary absolute top-0 right-0 rounded-l-none umami--click--newsletter-practical-approach-to-structuring-go-apps">
             Subscribe
         </button>
         <div id="loading" class="hidden flex fixed top-0 right-0 left-0">
