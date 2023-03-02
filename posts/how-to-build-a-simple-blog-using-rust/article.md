@@ -8,14 +8,14 @@ _Side note_: I write Go for a living and have been coding professionally for the
 <div class="form-control min-w-fit">
     <h6 class="text-lg font-semibold">Want to get notified whenever I release a new post?</h6>
     <h6 class="text-lg">Consider subscribing to my newsletter</h6>
-    <form hx-post="/subscribe" hx-target="this" hx-swap="outerHTML" method="POST" action="/subscribe" class="mt-2 relative min-w-[20rem]"
+    <form hx-post="/subscribe" hx-target="this" hx-swap="outerHTML" method="POST" action="/subscribe" class="mt-4 relative min-w-[20rem]"
         data-loading-target="#loading" data-loading-class-remove="hidden">
         <input type="hidden" name="referer" value="how-to-build-a-simple-blog-using-rust" />
         <input data-loading-disable required name="email" autocomplete="email" type="email"
-            placeholder="username@domain.com" class="input input-bordered w-full pr-20 md:pr-32" />
+            placeholder="Enter email to start" class="input input-bordered w-full text-lg pr-20 md:pr-32" />
         <button data-loading-disable type="submit"
             class="btn btn-primary absolute top-0 right-0 rounded-l-none umami--click--newsletter-how-to-build-a-simple-blog-using-rust">
-            Subscribe
+            Get Notified
         </button>
         <div id="loading" class="hidden flex fixed top-0 right-0 left-0">
             <span class="loader"></span>

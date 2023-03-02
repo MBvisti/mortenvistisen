@@ -40,10 +40,10 @@ Now, I’m assuming some familiarity with Golang and programming in general, as 
         data-loading-target="#loading" data-loading-class-remove="hidden">
         <input type="hidden" name="referer" value="practical-approach-to-structuring-go-apps" />
         <input data-loading-disable required name="email" autocomplete="email" type="email"
-            placeholder="username@domain.com" class="input input-bordered w-full pr-20 md:pr-32" />
+            placeholder="Enter email to start" class="input input-bordered w-full text-lg pr-20 md:pr-32" />
         <button data-loading-disable type="submit"
             class="btn btn-primary absolute top-0 right-0 rounded-l-none umami--click--newsletter-practical-approach-to-structuring-go-apps">
-            Subscribe
+            Get Notified
         </button>
         <div id="loading" class="hidden flex fixed top-0 right-0 left-0">
             <span class="loader"></span>

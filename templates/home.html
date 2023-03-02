@@ -33,8 +33,8 @@
         I write about my ventures into tech and bootstrapping, sharing what I learn along the way. You'll most likely find stuff 
         about Rust, Go and ML as well as meditations on the process of building businesses on the internet.
       </p>
-      <a class="btn btn-primary"
-        href="posts/wantrepreneurship-and-getting-out-of-tutorial-hell">Latest Post</a> 
+      <a class="btn btn-primary text-white"
+        href="posts/one-month-one-dollar-part-two">Latest Post</a> 
     </div>
   </div>
 </div>
@@ -57,12 +57,12 @@
     {% include '_socials.html' %}
     {% for fm in posts %}
     <a href="/posts/{{fm.file_name}}">
-        <div class="flex bg-neutral/60 rounded flex-col m-5 mb-10 px-4 py-6 cursor-pointer">
-            <h2 class="text-2xl text-neutral-content font-semibold hover:underline">{{fm.title}}</h2>
+        <div class="flex bg-neutral-content border rounded flex-col m-5 mb-10 px-4 py-6 cursor-pointer">
+            <h2 class="text-2xl text-neutral-focus font-semibold hover:underline">{{fm.title}}</h2>
             <div class="flex items-center mt-2">
-                <p class="hidden md:block text-neutral-content/70 mr-2">{{fm.posted}}</p>
-                <p class="hidden md:block text-neutral-content/70 mx-2">{{fm.author}}</p>
-                <p class="text-neutral-content/70 ml-0 md:ml-2">Reading time:
+                <p class="hidden md:block text-neutral mr-2">{{fm.posted}}</p>
+                <p class="hidden md:block text-neutral mx-2">{{fm.author}}</p>
+                <p class="text-neutral ml-0 md:ml-2">Reading time:
                 {{fm.estimated_reading_time}} min</p>
             </div>
         </div>
