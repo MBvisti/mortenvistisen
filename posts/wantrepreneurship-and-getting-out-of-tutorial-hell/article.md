@@ -42,10 +42,10 @@ re-visit a month or two in the future.
         data-loading-target="#loading" data-loading-class-remove="hidden">
         <input type="hidden" name="referer" value="wantrepreneurship-and-getting-out-of-tutorial-hell" />
         <input data-loading-disable required name="email" autocomplete="email" type="email"
-            placeholder="username@domain.com" class="input input-bordered w-full pr-20 md:pr-32" />
+            placeholder="Enter email to start" class="input input-bordered w-full text-lg pr-20 md:pr-32" />
         <button data-loading-disable type="submit"
             class="btn btn-primary absolute top-0 right-0 rounded-l-none umami--click--newsletter-wantrepreneurship-and-getting-out-of-tutorial-hell">
-            Subscribe
+            Get Notified
         </button>
         <div id="loading" class="hidden flex fixed top-0 right-0 left-0">
             <span class="loader"></span>

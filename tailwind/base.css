@@ -8,6 +8,10 @@
 
 @tailwind utilities;
 
+#article-content {
+    color: hsl(var(--nf));
+}
+
 #article-content img {
   position: relative;
   width: 100%;
