@@ -51,7 +51,7 @@ But, basically, it can be boiled down to:
 2. Write down your assumptions from the beginning | continuously test and adjust them to new information 
 3. Reach out to people even when you have a half-baked notion of your product 
 
-The first two points are pretty self-explanatory, if you're not sure what is meant by point 2, check out the [original post](https://mortenvistisen.com/posts/one-month-one-dollar-challenge-part-one).
+The first two points are pretty self-explanatory, if you're not sure what is meant by point 2, check out the [original post](https://mortenvistisen.com/posts/one-month-one-dollar-part-one).
 I do think the third point is the main learning from this challenge. You got to focus on what actually moves the needle
 and pushes you towards a profitable product, which means getting people to give you money. It's extremely comfortable to
 just build build build (especially as software engineers) while having wet dreams about all the monthly reoccurring
@@ -89,7 +89,7 @@ felt like nothing was actually occurring to me, and I was left with no viable pr
 build anything. Making a habit out of writing down 10 ideas a day did work, however, so if you're struggling with this 
 give it a try. You'll soon start thinking about potential products consistently.
 
-# Change of direction
+## Change of direction
 Is it over? No, but we're making some adjustments. It will no longer be 1 Month 1 Dollar challenge but instead:
 **1 Year 1 Noodle**.
 

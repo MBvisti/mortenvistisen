@@ -702,7 +702,7 @@ Last thing, we need to include the new handler in `lib.rs` and our `handlers/mod
 
 After adding that, give `cargo run` a spin again and you should be able to click on the article from the home page, be re-directed to the post page and see your article!
 
-# Closing thoughts
+## Closing thoughts
 
 I hope you enjoyed the walk-through and are interested in doing more web development with `rust`, it's in a really good state right now, with an exciting future ahead.
 Yes, the beginning might be a little bit frustrating and getting your head wrapped around ownership, borrowing and referencing can take some time.
@@ -714,7 +714,7 @@ The more you write the easier it becomes.
 It has quickly become my go-to language for writing small services as it plays very nice with `aws lambda`s and due to how fast it is, cold starts are not even an issue anymore.
 So, please take what you have here and extend it as much as you want.
 
-# Resources
+## Resources
 Here is a collection of all the materials I've used to get started with `rust`. Some of it is free and some of it is paid, but all of them are highly recommendable
 so I hope you find some further learning!
   - [Zero 2 Production](https://www.zero2prod.com/)
