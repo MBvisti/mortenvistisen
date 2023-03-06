@@ -180,14 +180,14 @@ struct ConfirmSubscribeMetaData {
 
 #[tracing::instrument(
     name = "verifying subscriber", 
-    skip(pool, tmpl, params)
+    skip(pool, params)
     fields(
         token = %params.token
     )
 )]
 #[get("/subscribe/verify")]
 pub async fn verify_subscription(
-    tmpl: web::Data<tera::Tera>,
+    //tmpl: web::Data<tera::Tera>,
     pool: web::Data<PgPool>,
     params: web::Query<Parameters>,
 ) -> impl Responder {
@@ -220,7 +220,7 @@ pub async fn verify_subscription(
     };
 
     if is_verified {
-        match tmpl.render("confirm_subscription.html", &context) {
+        match render_template("confirm_subscription.html", &context) {
             Ok(s) => {
                 context.insert(
                     "meta_data",
@@ -257,7 +257,7 @@ pub async fn verify_subscription(
         }
     };
 
-    match tmpl.render("confirm_subscription.html", &context) {
+    match render_template("confirm_subscription.html", &context) {
         Ok(s) => HttpResponse::Ok().content_type("text/html").body(s),
         Err(e) => {
             println!("{e:?}");

@@ -35,12 +35,7 @@ async fn main() -> std::io::Result<()> {
 
     let session_key = Key::from(cfg.server.cookie_signing_key.expose_secret().as_bytes());
 
-    let subscriber = get_subscriber(
-        "mortenvistisen_blog".into(),
-        "error".into(),
-        std::io::stdout,
-        cfg.server.sentry_dns,
-    );
+    let subscriber = get_subscriber("mortenvistisen_blog".into(), "info".into(), std::io::stdout);
     init_subscriber(subscriber);
 
     let db_conn_pool = match PgPoolOptions::new()
