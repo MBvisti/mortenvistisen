@@ -64,7 +64,7 @@ following:
 - Go 
 - Docker
 
-# There are more than one way to skin a cat
+## There are more than one way to skin a cat
 As with everything in software, there are a lot of ways of doing the same thing
 and even more opinions about how to do that thing. With integration testing, we
 might discuss how to set up/configure the test suite, what library (if any) to
@@ -128,7 +128,7 @@ services behave as expected.
 
 You can find the repo [here](https://github.com/MBvisti/integration-test-in-go).
 
-# "Infrastructure" Setup
+## "Infrastructure" Setup
 Much of modern web development uses Docker and this tutorial will be no
 exception. This is not a tutorial on Docker so I won't be going into much detail
 about the setup, but provide some foundations on how to get started. There are
@@ -199,7 +199,7 @@ With that in place we can now easily run our integration tests, which can be don
 make run-integration-tests
 ```
 
-# Approach 1: Vanilla setup 
+## Approach 1: Vanilla setup 
 *Side note: if you want to see the code separated from the rest, check out the
 branch `vanilla-approach/running-integration-tests-using-std-library`*
 
@@ -637,7 +637,7 @@ didn't have to copy-paste all of this and take a long hot bath after each test
 run because we violated DRY. We could do this ourselves of course, or we could
 use *Approach 2 - using test suites with Testify*.
 
-# Approach 2 - using Testify to run our integration tests
+## Approach 2 - using Testify to run our integration tests
 For this, we are going to use the testify package which I have used for quite
 some time now. The main thing this does for us is save some lines on
 configuration and ensuring consistency in our tests suites. It's easy enough to
@@ -731,7 +731,7 @@ as few as possible is desirable. So you could, if you wanted, make one large
 integration test suite. I just prefer to split things up, each to their
 own.
 
-# In conclusion
+## In conclusion
 Will the above steps prevent you from the disaster we went through at the
 beginning of the article? Maybe, it depends (every senior developer's favourite
 reply). But, it will definitely increase the amount of confidence you can have

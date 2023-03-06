@@ -5,6 +5,7 @@
     <meta property="og:description" content="{{ meta_data.description }}">
     <meta property="og:image" content="https://mortenvistisen.com/static/images/{{ meta_data.thumbnail }}">
     <meta property="og:url" content="https://mortenvistisen.com/posts/{{ meta_data.title | lower | slugify }}">
+    <meta property="og:type" content="article" />
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:site" content="@MBvisti">
     <meta name="twitter:creator" content="@MBvisti">
@@ -14,7 +15,7 @@
 {% endblock meta %}
 
 {% block title %}
-    {{ meta_data.title }} | by {{ meta_data.author }} 
+    {{ meta_data.title }}
 {% endblock title %}
 
 {% block header %}
