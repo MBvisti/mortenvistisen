@@ -1,4 +1,3 @@
-use secrecy::{ExposeSecret, Secret};
 use tracing::subscriber::set_global_default;
 use tracing::Subscriber;
 use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
@@ -16,7 +15,6 @@ pub fn get_subscriber<Sink>(
     name: String,
     env_filter: String,
     sink: Sink,
-    sentry_dns: Secret<String>,
 ) -> impl Subscriber + Sync + Send
 where
     Sink: for<'a> MakeWriter<'a> + Send + Sync + 'static,
@@ -24,21 +22,10 @@ where
     let env_filter =
         EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new(env_filter));
     let formatting_layer = BunyanFormattingLayer::new(name, sink);
-    let _guard = sentry::init((
-        sentry_dns.expose_secret().to_string(),
-        sentry::ClientOptions {
-            traces_sample_rate: 0.2,
-            release: sentry::release_name!(),
-            max_breadcrumbs: 50,
-            debug: false, // <- this should only be used during development
-            ..Default::default()
-        },
-    ));
     Registry::default()
         .with(env_filter)
         .with(JsonStorageLayer)
         .with(formatting_layer)
-        .with(sentry_tracing::layer())
 }
 
 /// Register a subscriber as global default to process span data.
