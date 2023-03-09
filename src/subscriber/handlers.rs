@@ -261,12 +261,12 @@ pub async fn verify_subscription(
         Ok(s) => HttpResponse::Ok().content_type("text/html").body(s),
         Err(e) => {
             println!("{e:?}");
-            return render_subscribe_err(
+            render_subscribe_err(
                 "I fucked up somehow, sorry. Please try again".to_string(),
                 context,
                 "confirm_subscription.html",
             )
-            .await;
+            .await
         }
     }
 }
@@ -348,12 +348,12 @@ pub async fn delete_subscriber(
         Ok(s) => HttpResponse::Ok().content_type("text/html").body(s),
         Err(e) => {
             println!("{e:?}");
-            return render_subscribe_err(
+            render_subscribe_err(
                 "I fucked up somehow, sorry. Please try again".to_string(),
                 context,
                 "confirm_subscription.html",
             )
-            .await;
+            .await
         }
     }
 }
