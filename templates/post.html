@@ -34,11 +34,25 @@
         <span class="ml-3">{{ meta_data.posted }}</span>
     </time>
     <h1 class="tracking-tight">{{ meta_data.title }}</h1>
-        {% include '_socials.html'%}
+        <div class="divider"></div> 
         {{ post | safe }}
     </article>
 
-  <div class="divider"></div> 
+    <div class="divider"></div> 
+    <div class="flex flex-col w-full items-center border-opacity-50 mb-10 mt-6">
+        <p class="font-semibold mb-4">Help me reach more people by sharing this post</p>
+            <div class="flex justify-center items-center w-full">
+                <div class="flex h-10 justify-around text-xs items-center">
+                    <a target="_blank" class="umami--click--social-share-twitter-{{ meta_data.title | lower | slugify }} badge badge-primary p-3 mr-4 hover:border-primary-focus hover:bg-primary-focus  hover:shadow-xl"
+                       href="https://twitter.com/intent/tweet?text=Check out this article&url=https://mortenvistisen.com/posts/{{ meta_data.title | lower | slugify }}">
+                        Twitter
+                    </a>
+                    <a target="_blank" class="umami--click--social-share-linkedin-{{ meta_data.title | lower | slugify }} badge badge-primary p-3 mr-4 hover:border-primary-focus hover:bg-primary-focus hover:shadow-xl"
+                        href="https://www.linkedin.com/shareArticle?mini=true&url={{ meta_data.title | lower | slugify }}" target="_blank">LinkedIn</a>
+       </div>
+         </div>
+    </div>
+
 
 {% endblock content %}
 
