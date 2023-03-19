@@ -157,7 +157,6 @@ async fn authenticate_handler(
 
     match verify_password(&form.password, &user_hp) {
         true => {
-            println!("YO 1");
             context.insert(
                 "meta_data",
                 &LoginMetaData {
@@ -176,7 +175,6 @@ async fn authenticate_handler(
             return HttpResponse::Ok().content_type("text/html").body(tmpl);
         }
         false => {
-            println!("YO 2");
             context.insert(
                 "meta_data",
                 &LoginMetaData {
