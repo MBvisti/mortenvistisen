@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html data-theme="lofi" lang="en">
+<html data-theme="lofi" lang="en" class="h-full">
 
 <head>
     <meta charset="UTF-8">
@@ -14,18 +14,52 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/static/images/favicon-16x16.png">
 </head>
 
-<body hx-ext="loading-states"
-    class="sm:overflow-x-hidden bg-base-100 flex flex-col overflow-x-hidden 
-        min-h-screen font-sans leading-normal tracking-normal">
-    <div class="h-16 max-w-screen flex items-center justify-center">
-        <h1>MBV admin</h1>
+<body hx-ext="loading-states" class="sm:overflow-x-hidden bg-base-100 flex flex-col overflow-x-hidden 
+        min-h-screen font-sans leading-normal tracking-normal h-full">
+    <div class="min-h-full">
+        <nav class="bg-gray-800">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="flex h-16 items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <p class="text-white">mortenvistisen</p>
+                        </div>
+                        <div class="hidden md:block">
+                            <div class="ml-10 flex items-baseline space-x-4">
+                                <a href="#"
+                                    class="bg-gray-900 text-white rounded-md px-3 py-2 text-sm font-medium">Home</a>
+
+                                <a href="/posts"
+                                    class="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">Posts</a>
+                                <a href="/account"
+                                    class="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium">Account</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hidden md:block">
+                        <div class="ml-4 flex items-center md:ml-6">
+                            <button class="text-white border rounded p-1 bg-gray-900">Logout</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <header class="bg-white shadow">
+            <div class="mx-auto max-w-7xl py-3 px-4 sm:px-6 lg:px-8">
+                <h1 class="text-2xl font-bold tracking-tight text-gray-900">Home</h1>
+            </div>
+        </header>
+        <main>
+            <div class="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
+                {% block content %}{% endblock content %}
+            </div>
+        </main>
     </div>
 
-    <main class="container flex-1 w-full md:max-w-3xl mx-auto overflow-x-hidden">
-        {% block content %}{% endblock content %}
-    </main>
 </body>
 
 <script src="/static/htmx/htmx.min.js"></script>
 <script src="/static/htmx/loading-states.min.js"></script>
+
 </html>
