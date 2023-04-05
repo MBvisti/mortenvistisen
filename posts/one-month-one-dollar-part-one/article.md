@@ -1,4 +1,4 @@
-# High-stakes cash games in Vegas
+## High-stakes cash games in Vegas
 
 When I was a younger and slightly dumber man I was captivated by the allure of online poker and high-stakes No-limit
 Hold em. Going to Vegas and battling it out for million of dollars with all the high-rollers, was a big dream of mine.

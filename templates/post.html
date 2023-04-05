@@ -12,10 +12,11 @@
     <meta name="twitter:title" content="{{ meta_data.title }}">
     <meta name="twitter:description" content="{{ meta_data.description }}">
     <meta name="twitter:image" content="https://mortenvistisen.com/static/images/{{ meta_data.thumbnail }}">
+    <link rel="canonical" href="https://mortenvistisen.com/posts/{{ meta_data.title | lower | slugify }}">
 {% endblock meta %}
 
 {% block title %}
-    {{ meta_data.title }}
+    {{ meta_data.title }} - Morten Vistisen
 {% endblock title %}
 
 {% block header %}
