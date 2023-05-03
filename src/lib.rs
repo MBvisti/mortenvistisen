@@ -48,6 +48,12 @@ async fn sitemap_text(_req: HttpRequest) -> Result<fs::NamedFile, Error> {
     Ok(file.use_last_modified(true))
 }
 
+#[get("/sitemap_index.xml")]
+async fn sitemap_index_text(_req: HttpRequest) -> Result<fs::NamedFile, Error> {
+    let file = fs::NamedFile::open_async("static/sitemap-index.xml").await?;
+    Ok(file.use_last_modified(true))
+}
+
 #[derive(Debug, Serialize)]
 struct LoginMetaData {
     error_msg: Option<String>,
@@ -227,8 +233,8 @@ pub fn start_blog(
             .route("/status", web::get().to(HttpResponse::Ok))
             .service(robots_text)
             .service(sitemap_text)
+            .service(sitemap_index_text)
             .service(fs::Files::new("/static", "static/").use_last_modified(true))
-            // .service(fs::Files::new("/static", "static/robots.txt").use_last_modified(true))
             .service(login_handler)
             .service(authenticate_handler)
             .service(auth_redirect_handler)
