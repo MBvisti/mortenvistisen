@@ -50,7 +50,7 @@ async fn sitemap_text(_req: HttpRequest) -> Result<fs::NamedFile, Error> {
 
 #[get("/sitemap_index.xml")]
 async fn sitemap_index_text(_req: HttpRequest) -> Result<fs::NamedFile, Error> {
-    let file = fs::NamedFile::open_async("static/sitemap-index.xml").await?;
+    let file = fs::NamedFile::open_async("static/sitemapindex.xml").await?;
     Ok(file.use_last_modified(true))
 }
 
@@ -231,10 +231,10 @@ pub fn start_blog(
             .wrap(IdentityMiddleware::default())
             .wrap(session)
             .route("/status", web::get().to(HttpResponse::Ok))
+            .service(fs::Files::new("/static", "static/").use_last_modified(true))
             .service(robots_text)
             .service(sitemap_text)
             .service(sitemap_index_text)
-            .service(fs::Files::new("/static", "static/").use_last_modified(true))
             .service(login_handler)
             .service(authenticate_handler)
             .service(auth_redirect_handler)
