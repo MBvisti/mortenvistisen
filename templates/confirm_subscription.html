@@ -16,7 +16,11 @@ Morten Vistisen | Email confirmation
         <div class="max-w-md">
             <h1 class="text-3xl lg:text-5xl font-bold mb-10">
                 {% if meta_data.has_error %}
-                Oh no, something went wrong...
+                    {% if meta_data.title %}
+                        {{ meta_data.title }}
+                    {% else %}
+                        Oh no, something went wrong.
+                    {% endif %}
                 {% else %}
                 You're all good!
                 {% endif %}

@@ -13,10 +13,12 @@ use crate::template::{render_internal_error_tmpl, render_template};
 struct SubscribeMetaData {
     has_error: bool,
     error_msg: Option<String>,
+    title: Option<String>,
 }
 
 async fn render_subscribe_err(
     error_msg: String,
+    title: Option<String>,
     mut context: tera::Context,
     template_name: &str,
 ) -> HttpResponse {
@@ -24,6 +26,7 @@ async fn render_subscribe_err(
         "meta_data",
         &SubscribeMetaData {
             error_msg: Some(error_msg),
+            title,
             has_error: true,
         },
     );
@@ -57,6 +60,7 @@ pub async fn subscribe(
                 println!("origin wrong: {:?}", v);
                 return render_subscribe_err(
                     "I fucked up somehow, sorry. Please try again".to_string(),
+                    None,
                     context,
                     "_subscribe_response.html",
                 )
@@ -66,6 +70,7 @@ pub async fn subscribe(
         None => {
             return render_subscribe_err(
                 "I fucked up somehow, sorry. Please try again".to_string(),
+                None,
                 context,
                 "_subscribe_response.html",
             )
@@ -79,6 +84,7 @@ pub async fn subscribe(
                 println!("origin wrong: {:?}", v);
                 return render_subscribe_err(
                     "I fucked up somehow, sorry. Please try again".to_string(),
+                    None,
                     context,
                     "_subscribe_response.html",
                 )
@@ -88,6 +94,7 @@ pub async fn subscribe(
         None => {
             return render_subscribe_err(
                 "I fucked up somehow, sorry. Please try again".to_string(),
+                None,
                 context,
                 "_subscribe_response.html",
             )
@@ -103,6 +110,7 @@ pub async fn subscribe(
             println!("{e:?}");
             return render_subscribe_err(
                 "I fucked up somehow, sorry. Please try again".to_string(),
+                None,
                 context,
                 "_subscribe_response.html",
             )
@@ -116,6 +124,7 @@ pub async fn subscribe(
             println!("{e:?}");
             return render_subscribe_err(
                 "I fucked up somehow, sorry. Please try again".to_string(),
+                None,
                 context,
                 "_subscribe_response.html",
             )
@@ -125,6 +134,7 @@ pub async fn subscribe(
     if email_exists {
         return render_subscribe_err(
             "Email already registered".to_string(),
+            None,
             context,
             "_subscribe_response.html",
         )
@@ -137,6 +147,7 @@ pub async fn subscribe(
         println!("{e:?}");
         return render_subscribe_err(
             "I fucked up somehow, sorry. Please try again".to_string(),
+            None,
             context,
             "_subscribe_response.html",
         )
@@ -148,6 +159,7 @@ pub async fn subscribe(
         println!("{e:?}");
         return render_subscribe_err(
             "I fucked up somehow, sorry. Please try again".to_string(),
+            None,
             context,
             "_subscribe_response.html",
         )
@@ -182,6 +194,7 @@ pub async fn subscribe(
             println!("{e:?}");
             return render_subscribe_err(
                 "I fucked up somehow, sorry. Please try again".to_string(),
+                None,
                 context,
                 "_subscribe_response.html",
             )
@@ -192,6 +205,7 @@ pub async fn subscribe(
     context.insert(
         "meta_data",
         &SubscribeMetaData {
+            title: None,
             error_msg: None,
             has_error: false,
         },
@@ -238,6 +252,7 @@ pub async fn verify_subscription(
             println!("{e:?}");
             return render_subscribe_err(
                 "I fucked up somehow, sorry. Please try again".to_string(),
+                None,
                 context,
                 "confirm_subscription.html",
             )
@@ -251,6 +266,7 @@ pub async fn verify_subscription(
             println!("{e:?}");
             return render_subscribe_err(
                 "I fucked up somehow, sorry. Please try again".to_string(),
+                None,
                 context,
                 "confirm_subscription.html",
             )
@@ -275,6 +291,7 @@ pub async fn verify_subscription(
                 println!("{e:?}");
                 return render_subscribe_err(
                     "I fucked up somehow, sorry. Please try again".to_string(),
+                    None,
                     context,
                     "confirm_subscription.html",
                 )
@@ -289,6 +306,7 @@ pub async fn verify_subscription(
             println!("{e:?}");
             return render_subscribe_err(
                 "I fucked up somehow, sorry. Please try again".to_string(),
+                None,
                 context,
                 "confirm_subscription.html",
             )
@@ -302,6 +320,7 @@ pub async fn verify_subscription(
             println!("{e:?}");
             render_subscribe_err(
                 "I fucked up somehow, sorry. Please try again".to_string(),
+                None,
                 context,
                 "confirm_subscription.html",
             )
@@ -310,16 +329,9 @@ pub async fn verify_subscription(
     }
 }
 
-#[tracing::instrument(
-    name = "delete subscriber", 
-    skip(pool, tmpl, params)
-    fields(
-        token = %params.token
-    )
-)]
 #[get("/subscribe/delete")]
 pub async fn delete_subscriber(
-    tmpl: web::Data<tera::Tera>,
+    // tmpl: web::Data<tera::Tera>,
     pool: web::Data<PgPool>,
     params: web::Query<Parameters>,
 ) -> impl Responder {
@@ -332,22 +344,19 @@ pub async fn delete_subscriber(
             match e {
                 // TODO: add message that it has already been deleted
                 sqlx::Error::RowNotFound => {
-                    match tmpl.render("delete_subscription.html", &context) {
-                        Ok(s) => return HttpResponse::Ok().content_type("text/html").body(s),
-                        Err(e) => {
-                            println!("{e:?}");
-                            return render_subscribe_err(
-                                "I fucked up somehow, sorry. Please try again".to_string(),
-                                context,
-                                "confirm_subscription.html",
-                            )
-                            .await;
-                        }
-                    }
+                    println!("{e:?}");
+                    return render_subscribe_err(
+                        "Email already deleted".to_string(),
+                        Some(String::from("You're all set")),
+                        context,
+                        "confirm_subscription.html",
+                    )
+                    .await;
                 }
                 _ => {
                     return render_subscribe_err(
                         "I fucked up somehow, sorry. Please try again".to_string(),
+                        None,
                         context,
                         "delete_subscription.html",
                     )
@@ -363,6 +372,7 @@ pub async fn delete_subscriber(
             println!("{e:?}");
             return render_subscribe_err(
                 "I fucked up somehow, sorry. Please try again".to_string(),
+                None,
                 context,
                 "delete_subscription.html",
             )
@@ -376,6 +386,7 @@ pub async fn delete_subscriber(
             println!("{e:?}");
             return render_subscribe_err(
                 "I fucked up somehow, sorry. Please try again".to_string(),
+                None,
                 context,
                 "delete_subscription.html",
             )
@@ -383,16 +394,11 @@ pub async fn delete_subscriber(
         }
     };
 
-    match tmpl.render("delete_subscription.html", &context) {
-        Ok(s) => HttpResponse::Ok().content_type("text/html").body(s),
-        Err(e) => {
-            println!("{e:?}");
-            render_subscribe_err(
-                "I fucked up somehow, sorry. Please try again".to_string(),
-                context,
-                "confirm_subscription.html",
-            )
-            .await
-        }
-    }
+    render_subscribe_err(
+        "Email deleted".to_string(),
+        Some(String::from("You're all set")),
+        context,
+        "delete_subscription.html",
+    )
+    .await
 }
