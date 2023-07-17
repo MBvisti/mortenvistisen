@@ -398,7 +398,7 @@ pub async fn delete_subscriber(
         "Email deleted".to_string(),
         Some(String::from("You're all set")),
         context,
-        "delete_subscription.html",
+        "confirm_subscription.html",
     )
     .await
 }
