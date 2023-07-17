@@ -1,4 +1,5 @@
-use actix_web::{get, post, web, HttpResponse, Responder};
+use actix_web::http::header::Header;
+use actix_web::{get, post, web, HttpRequest, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use uuid::Uuid;
@@ -42,20 +43,59 @@ pub struct SubscribeFormData {
     pub referer: String,
 }
 
-#[tracing::instrument(
-    name = "adding new subscriber", 
-    skip(form, pool, email_client)
-    fields(
-        subscriber_email = %form.email
-    )
-)]
 #[post("/subscribe")]
 pub async fn subscribe(
+    req: HttpRequest,
     form: web::Form<SubscribeFormData>,
     pool: web::Data<PgPool>,
     email_client: web::Data<EmailClient>,
 ) -> impl Responder {
     let mut context = tera::Context::new();
+
+    match req.headers().get("origin") {
+        Some(v) => {
+            if v != "https://mortenvistisen.com" {
+                println!("origin wrong: {:?}", v);
+                return render_subscribe_err(
+                    "I fucked up somehow, sorry. Please try again".to_string(),
+                    context,
+                    "_subscribe_response.html",
+                )
+                .await;
+            };
+        }
+        None => {
+                return render_subscribe_err(
+                    "I fucked up somehow, sorry. Please try again".to_string(),
+                    context,
+                    "_subscribe_response.html",
+                )
+                .await;
+        },
+    };
+
+    match req.headers().get("referer") {
+        Some(v) => {
+            if !v.to_str().unwrap().contains("https://mortenvistisen.com" ) {
+                println!("origin wrong: {:?}", v);
+                return render_subscribe_err(
+                    "I fucked up somehow, sorry. Please try again".to_string(),
+                    context,
+                    "_subscribe_response.html",
+                )
+                .await;
+            };
+        }
+        None => {
+                return render_subscribe_err(
+                    "I fucked up somehow, sorry. Please try again".to_string(),
+                    context,
+                    "_subscribe_response.html",
+                )
+                .await;
+        },
+    };
+
     let mut email_context = tera::Context::new();
 
     let payload: NewSubscriberPayload = match form.0.try_into() {
