@@ -1,4 +1,3 @@
-use actix_web::http::header::Header;
 use actix_web::{get, post, web, HttpRequest, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
@@ -65,18 +64,18 @@ pub async fn subscribe(
             };
         }
         None => {
-                return render_subscribe_err(
-                    "I fucked up somehow, sorry. Please try again".to_string(),
-                    context,
-                    "_subscribe_response.html",
-                )
-                .await;
-        },
+            return render_subscribe_err(
+                "I fucked up somehow, sorry. Please try again".to_string(),
+                context,
+                "_subscribe_response.html",
+            )
+            .await;
+        }
     };
 
     match req.headers().get("referer") {
         Some(v) => {
-            if !v.to_str().unwrap().contains("https://mortenvistisen.com" ) {
+            if !v.to_str().unwrap().contains("https://mortenvistisen.com") {
                 println!("origin wrong: {:?}", v);
                 return render_subscribe_err(
                     "I fucked up somehow, sorry. Please try again".to_string(),
@@ -87,13 +86,13 @@ pub async fn subscribe(
             };
         }
         None => {
-                return render_subscribe_err(
-                    "I fucked up somehow, sorry. Please try again".to_string(),
-                    context,
-                    "_subscribe_response.html",
-                )
-                .await;
-        },
+            return render_subscribe_err(
+                "I fucked up somehow, sorry. Please try again".to_string(),
+                context,
+                "_subscribe_response.html",
+            )
+            .await;
+        }
     };
 
     let mut email_context = tera::Context::new();
