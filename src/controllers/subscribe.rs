@@ -43,7 +43,7 @@ impl TryInto<NewSubscriberPayload> for SubscribeFormData {
 }
 
 #[post("/subscribe")]
-pub async fn subscribe(
+pub async fn subscribe_to_newsletter(
     // req: HttpRequest,
     form: web::Form<SubscribeFormData>,
     pool: web::Data<PgPool>,

@@ -14,18 +14,14 @@ use actix_web::{
     dev::Server,
     get, 
     web::{self, Data},
-    App, Error,  HttpRequest, HttpResponse, HttpServer, Responder,
+    App, Error,  HttpRequest, HttpResponse, HttpServer,
 };
 
-pub mod article;
 pub mod auth_stuff;
 pub use auth_stuff::{hash_password, validate_cookie_identity, verify_password};
-pub mod blog;
 pub mod configuration;
-pub mod dashboard;
 pub mod email_client;
 pub mod repository;
-pub mod subscriber;
 pub mod telemetry;
 pub mod template;
 pub mod controllers;
@@ -234,36 +230,12 @@ pub fn start_blog(
             // .service(login_handler)
             // .service(authenticate_handler)
             // .service(auth_redirect_handler)
-            .service(web::redirect(
-                "https://mortenvistisen.com/posts/one-month-one-dollar-challenge-part-one",
-                "https://mortenvistisen.com/posts/one-month-one-dollar-part-one",
-            ))
-            .service(web::redirect(
-                "https://mortenvistisen.com/posts/how",
-                "https://mortenvistisen.com/posts/how-to-build-a-simple-blog-using-rust",
-            ))
-            .service(web::redirect(
-                "https://mortenvistisen.com/posts/how-to-build-a-simple-blog-us",
-                "https://mortenvistisen.com/posts/how-to-build-a-simple-blog-using-rust",
-            ))
-            .service(web::redirect(
-                "https://mortenvistisen.com/posts/how-to-build-a-simple-b",
-                "https://mortenvistisen.com/posts/how-to-build-a-simple-blog-using-rust",
-            ))
-            .service(web::redirect(
-                "https://www.mortenvistisen.com/posts/insert-rocket-link",
-                "https://mortenvistisen.com/posts/how-to-build-a-simple-blog-using-rust",
-            ))
-            .service(web::redirect(
-                "https://mortenvistisen.com/blog/an-easy-and-practical-approach-to-structuring-golang-applications",
-                "https://mortenvistisen.com/posts/practical-approach-to-structuring-go-apps",
-            ))
-            .service(blog::index)
-            .service(article::render_post)
-            .service(subscriber::subscribe)
-            .service(subscriber::verify_subscription)
-            .service(subscriber::delete_subscriber)
-            .service(dashboard::index)
+            .service(controllers::home_index)
+            // .service(article::render_post)
+            .service(controllers::subscribe_to_newsletter)
+            .service(controllers::verify_subscription)
+            // .service(controllers::delete_subscriber)
+            // .service(dashboard::index)
             // .default_service(web::route().to(not_found))
     })
     .listen(listener)?
