@@ -1,6 +1,9 @@
+use actix_web::{HttpResponse, Responder};
 use tera::{Context, Tera};
 
-const INTERNAL_SERVER_ERR_TMPL: String = "templates/errors/500.html".to_string();
+use crate::views::View;
+
+// const INTERNAL_SERVER_ERR_TMPL: String = "templates/errors/500.html".to_string();
 const NOT_FOUND_ERR_TMPL: String = "templates/errors/404.html".to_string();
 
 lazy_static! {
@@ -17,9 +20,9 @@ lazy_static! {
     };
 }
 
-pub fn render_template(template_name: &str, context: &Context) -> String {
-    match TEMPLATES.render(template_name, context) {
-        Ok(tmpl) => tmpl,
+pub fn render_template(view: impl View) -> HttpResponse {
+    match TEMPLATES.render(view.template_path(), view.get_context()) {
+        Ok(tmpl) => HttpResponse::Ok().content_type("text/html").body(tmpl),
         Err(e) => {
             println!("Parsing error(s): {e}");
             render_internal_error_tmpl(None)
@@ -27,14 +30,26 @@ pub fn render_template(template_name: &str, context: &Context) -> String {
     }
 }
 
-pub fn render_internal_error_tmpl(provided_context: Option<&Context>) -> String {
-    let context = &tera::Context::new();
+// pub fn render_template(view: impl View) -> String {
+//     match TEMPLATES.render(view.template_path(), view.get_context()) {
+//         Ok(tmpl) => HttpResponse::Ok().content_type("text/html").body(tmpl),
+//         Err(e) => {
+//             println!("Parsing error(s): {e}");
+//             render_internal_error_tmpl(None)
+//         }
+//     }
+// }
+
+pub fn render_internal_error_tmpl(provided_context: Option<&Context>) -> HttpResponse {
+    let mut context = &tera::Context::new();
 
     if let Some(provided_context) = provided_context {
         context = provided_context;
     }
 
-    Tera::one_off(&INTERNAL_SERVER_ERR_TMPL, context, true).unwrap()
+    HttpResponse::InternalServerError()
+        .content_type("text/html")
+        .body(Tera::one_off("templates/errors/500.html", context, true).unwrap())
 }
 
 pub fn render_not_found_error_tmpl(provided_context: Option<&Context>) -> String {

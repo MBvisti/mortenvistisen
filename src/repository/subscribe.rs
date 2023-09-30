@@ -2,7 +2,7 @@ use chrono::Utc;
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::subscriber::Email;
+use crate::entities::Email;
 
 pub async fn create_new_subscriber(
     pool: &PgPool,
