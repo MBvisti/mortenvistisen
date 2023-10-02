@@ -1,7 +1,7 @@
-{% extends "base.html" %}
+{% extends "layouts/base.html" %}
 
 {% block title %}
-Morten Vistisen | Email confirmation
+Morten Vistisen | Email verification
 {% endblock title %}
 
 {% block header %}
@@ -15,9 +15,9 @@ Morten Vistisen | Email confirmation
     <div class="hero-content text-center">
         <div class="max-w-md">
             <h1 class="text-3xl lg:text-5xl font-bold mb-10">
-                {% if meta_data.has_error %}
-                    {% if meta_data.title %}
-                        {{ meta_data.title }}
+                {% if has_error %}
+                    {% if title %}
+                        {{ title }}
                     {% else %}
                         Oh no, something went wrong.
                     {% endif %}
@@ -25,8 +25,10 @@ Morten Vistisen | Email confirmation
                 You're all good!
                 {% endif %}
             </h1>
-            {% if meta_data.has_error %}
-            <p class="text-justify lg:text-xl">{{ meta_data.error_msg }}</p>
+            {% if has_error %}
+            <p class="text-justify lg:text-xl">{{ error_msg }}</p>
+            {% elif email_deleted %}
+            <p>You're email subscription has been deleted.</p>
             {% else %}
             <p class="text-justify lg:text-xl">You're registered and will receive updates every time I release a new post.
                 Should you ever want to stop receive these emails, you can always find a link

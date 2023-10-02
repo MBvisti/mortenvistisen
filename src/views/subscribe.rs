@@ -41,6 +41,7 @@ impl View for SubscribeVerify {
 }
 
 pub struct SubscribeVerifyData {
+    pub email_deleted: bool,
     pub has_error: bool,
     pub already_verified: bool,
     pub error_msg: Option<String>,
@@ -50,8 +51,9 @@ impl SubscribeVerify {
         let mut ctx = tera::Context::new();
         ctx.insert("has_error", &payload.has_error);
         ctx.insert("error_msg", &payload.error_msg);
+        ctx.insert("email_deleted", &payload.email_deleted);
 
-        let view_data = ViewData::new(String::from("subscribe/confirm.html"), ctx);
+        let view_data = ViewData::new(String::from("subscribe/email_confirm.html"), ctx);
         return Self { 0: view_data };
     }
 }

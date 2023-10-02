@@ -13,7 +13,8 @@ pub async fn home_index() -> impl Responder {
     let mut front_matters = match find_all_front_matter() {
         Ok(fm) => fm,
         Err(e) => {
-            tracing::error!("failed to find all frontmatters: {:?}", e);
+            println!("failed to find all frontmatters: {:?}", e);
+            // tracing::error!("failed to find all frontmatters: {:?}", e);
 
             return render_internal_error_tmpl(None);
         }

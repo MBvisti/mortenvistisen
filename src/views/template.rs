@@ -30,6 +30,10 @@ pub fn render_template(view: impl View) -> HttpResponse {
     }
 }
 
+pub fn render_email_template(template_path: &str, ctx: &tera::Context) -> String {
+    TEMPLATES.render(template_path, ctx).unwrap()
+}
+
 pub fn render_internal_error_tmpl(provided_context: Option<&Context>) -> HttpResponse {
     let mut context = &tera::Context::new();
 

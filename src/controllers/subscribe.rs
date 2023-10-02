@@ -1,10 +1,11 @@
-use actix_web::{get, post, web,  Responder};
+use actix_web::{get, post, web, Responder};
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::entities::{Email, NewSubscriberPayload};
-use crate::views::{render_internal_error_tmpl, render_template};
+use crate::email_client::EmailClient;
+use crate::entities::{ConfirmSubEmail, Email, NewSubscriberPayload};
+use crate::views::{render_email_template, render_internal_error_tmpl, render_template};
 use crate::{repository, views};
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
@@ -47,7 +48,7 @@ pub async fn subscribe_to_newsletter(
     // req: HttpRequest,
     form: web::Form<SubscribeFormData>,
     pool: web::Data<PgPool>,
-    // email_client: web::Data<EmailClient>,
+    email_client: web::Data<EmailClient>,
 ) -> impl Responder {
     let payload: NewSubscriberPayload = match form.0.try_into() {
         Ok(p) => p,
@@ -94,41 +95,29 @@ pub async fn subscribe_to_newsletter(
         return render_internal_error_tmpl(None);
     };
 
-    // email_context.insert(
-    //     "meta_data",
-    //     &ConfirmSubEmail {
-    //         app_base_url: email_client.app_base_url.clone(),
-    //         token: new_sub_token,
-    //     },
-    // );
-    // let html_content = match render_template("confirm_sub_email.html", &email_context) {
-    //     Ok(t) => t,
-    //     Err(_) => {
-    //         return HttpResponse::InternalServerError()
-    //             .content_type("text/html")
-    //             .body(render_internal_error_tmpl(None))
-    //     }
-    // };
-    // match email_client
-    //     .send_email(
-    //         payload.email,
-    //         "Thanks for subscribing to my newsletter!",
-    //         &html_content,
-    //     )
-    //     .await
-    // {
-    //     Ok(_) => (),
-    //     Err(e) => {
-    //         println!("{e:?}");
-    //         return render_subscribe_err(
-    //             "I fucked up somehow, sorry. Please try again".to_string(),
-    //             None,
-    //             context,
-    //             "_subscribe_response.html",
-    //         )
-    //         .await;
-    //     }
-    // };
+    let mut email_context = tera::Context::new();
+    email_context.insert(
+        "meta_data",
+        &ConfirmSubEmail {
+            app_base_url: email_client.app_base_url.clone(),
+            token: new_sub_token,
+        },
+    );
+    let html_content = render_email_template("confirm_sub_email.html", &email_context);
+    match email_client
+        .send_email(
+            payload.email,
+            "Thanks for subscribing to my newsletter!",
+            &html_content,
+        )
+        .await
+    {
+        Ok(_) => (),
+        Err(e) => {
+            println!("################################### could not send email{e:?}");
+            return render_internal_error_tmpl(None);
+        }
+    };
 
     let sub_res_view = views::SubscribeResponse::new(views::SubscribeResponseData {
         has_error: false,
@@ -158,7 +147,7 @@ pub async fn verify_subscription(
     let id = match repository::get_subscriber_id_from_token(&pool, &params.token).await {
         Ok(id) => id,
         Err(e) => {
-            println!("{e:?}");
+            println!("################################### 1{e:?}");
             return render_internal_error_tmpl(None);
         }
     };
@@ -166,13 +155,14 @@ pub async fn verify_subscription(
     let is_verified = match repository::is_user_verified(&pool, id).await {
         Ok(is_verified) => is_verified,
         Err(e) => {
-            println!("{e:?}");
+            println!("################################### 2{e:?}");
             return render_internal_error_tmpl(None);
         }
     };
 
     if is_verified {
         let subscribe_verify_view = views::SubscribeVerify::new(views::SubscribeVerifyData {
+        email_deleted: false,
             has_error: false,
             already_verified: true,
             error_msg: None,
@@ -183,89 +173,57 @@ pub async fn verify_subscription(
     match repository::update_email_to_verified(&pool, id).await {
         Ok(_) => (),
         Err(e) => {
-            println!("{e:?}");
+            println!("################################### 3{e:?}");
             return render_internal_error_tmpl(None);
         }
     };
 
     let sub_verify_view = views::SubscribeVerify::new(views::SubscribeVerifyData {
+        email_deleted: false,
         has_error: false,
         already_verified: false,
         error_msg: None,
     });
+
     render_template(sub_verify_view)
 }
 
-// #[get("/subscribe/delete")]
-// pub async fn delete_subscriber(
-//     // tmpl: web::Data<tera::Tera>,
-//     pool: web::Data<PgPool>,
-//     params: web::Query<Parameters>,
-// ) -> impl Responder {
-//     let context = tera::Context::new();
+#[get("/subscribe/delete")]
+pub async fn delete_subscriber(
+    pool: web::Data<PgPool>,
+    params: web::Query<Parameters>,
+) -> impl Responder {
+    let id = match repository::get_subscriber_id_from_token(&pool, &params.token).await {
+        Ok(id) => id,
+        Err(e) => {
+            tracing::error!("could not get sub id: {e:?}");
+            return render_internal_error_tmpl(None);
+        }
+    };
 
-//     let id = match repository::get_subscriber_id_from_token(&pool, &params.token).await {
-//         Ok(id) => id,
-//         Err(e) => {
-//             println!("{e:?}");
-//             match e {
-//                 // TODO: add message that it has already been deleted
-//                 sqlx::Error::RowNotFound => {
-//                     println!("{e:?}");
-//                     return render_subscribe_err(
-//                         "Email already deleted".to_string(),
-//                         Some(String::from("You're all set")),
-//                         context,
-//                         "confirm_subscription.html",
-//                     )
-//                     .await;
-//                 }
-//                 _ => {
-//                     return render_subscribe_err(
-//                         "I fucked up somehow, sorry. Please try again".to_string(),
-//                         None,
-//                         context,
-//                         "delete_subscription.html",
-//                     )
-//                     .await
-//                 }
-//             }
-//         }
-//     };
+    match repository::delete_subscriber_token(&pool, &params.token).await {
+        Ok(_) => (),
+        Err(e) => {
+            tracing::error!("could not get sub id: {e:?}");
+            return render_internal_error_tmpl(None);
+        }
+    };
 
-//     match repository::delete_subscriber_token(&pool, &params.token).await {
-//         Ok(_) => (),
-//         Err(e) => {
-//             println!("{e:?}");
-//             return render_subscribe_err(
-//                 "I fucked up somehow, sorry. Please try again".to_string(),
-//                 None,
-//                 context,
-//                 "delete_subscription.html",
-//             )
-//             .await;
-//         }
-//     };
+    match repository::delete_subscriber(&pool, id).await {
+        Ok(_) => (),
+        Err(e) => {
+            println!("{e:?}");
+            tracing::error!("could not get sub id: {e:?}");
+            return render_internal_error_tmpl(None);
+        }
+    };
 
-//     match repository::delete_subscriber(&pool, id).await {
-//         Ok(_) => (),
-//         Err(e) => {
-//             println!("{e:?}");
-//             return render_subscribe_err(
-//                 "I fucked up somehow, sorry. Please try again".to_string(),
-//                 None,
-//                 context,
-//                 "delete_subscription.html",
-//             )
-//             .await;
-//         }
-//     };
+    let sub_verify_view = views::SubscribeVerify::new(views::SubscribeVerifyData {
+        email_deleted: true,
+        has_error: false,
+        already_verified: false,
+        error_msg: None,
+    });
 
-//     render_subscribe_err(
-//         "Email deleted".to_string(),
-//         Some(String::from("You're all set")),
-//         context,
-//         "confirm_subscription.html",
-//     )
-//     .await
-// }
+    render_template(sub_verify_view)
+}
