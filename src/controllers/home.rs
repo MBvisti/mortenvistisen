@@ -1,10 +1,11 @@
+use crate::services::find_all_front_matter;
 use actix_web::{get, Responder};
 
 use crate::{
     // article::find_all_front_matter,
-    template::{render_internal_error_tmpl, render_template},
     views::{self, HomeIndexData},
 };
+use crate::views::{render_internal_error_tmpl, render_template};
 
 #[tracing::instrument(name = "visit home page")]
 #[get("/")]

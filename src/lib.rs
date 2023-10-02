@@ -6,9 +6,6 @@ use sqlx::PgPool;
 use std::net::TcpListener;
 use tracing_actix_web::TracingLogger;
 
-#[macro_use]
-extern crate lazy_static;
-
 use actix_web::{
     cookie::{time::Duration, Key},
     dev::Server,
@@ -17,16 +14,17 @@ use actix_web::{
     App, Error,  HttpRequest, HttpResponse, HttpServer,
 };
 
-pub mod auth_stuff;
-pub use auth_stuff::{hash_password, validate_cookie_identity, verify_password};
+#[macro_use]
+extern crate lazy_static;
+
 pub mod configuration;
 pub mod email_client;
 pub mod repository;
 pub mod telemetry;
-pub mod template;
 pub mod controllers;
 pub mod views;
 pub mod entities;
+pub mod services;
 
 #[get("/robots.txt")]
 async fn robots_text(_req: HttpRequest) -> Result<fs::NamedFile, Error> {

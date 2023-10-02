@@ -1,4 +1,4 @@
-use crate::subscriber::Email;
+use crate::entities::Email;
 use sqlx::PgPool;
 use uuid::Uuid;
 

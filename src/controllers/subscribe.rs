@@ -4,7 +4,7 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::entities::{Email, NewSubscriberPayload};
-use crate::template::{render_internal_error_tmpl, render_template};
+use crate::views::{render_internal_error_tmpl, render_template};
 use crate::{repository, views};
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};

@@ -3,7 +3,7 @@ use mortenvistisen_blog::{
     configuration::get_config,
     email_client::EmailClient,
     start_blog,
-    subscriber::Email,
+    entities::Email,
     telemetry::{get_subscriber, init_subscriber},
 };
 use secrecy::ExposeSecret;
