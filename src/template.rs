@@ -1,9 +1,10 @@
-use crate::views::View;
 use actix_web::HttpResponse;
 use tera::{Context, Tera};
 
-const INTERNAL_SERVER_ERR_TMPL: &str = "errors/500.html";
-const NOT_FOUND_ERR_TMPL: &str = "errors/404.html";
+use crate::views::View;
+
+const INTERNAL_SERVER_ERR_TMPL: String = "templates/errors/500.html".to_string();
+const NOT_FOUND_ERR_TMPL: String = "templates/errors/404.html".to_string();
 
 lazy_static! {
     static ref TEMPLATES: Tera = {
@@ -24,7 +25,6 @@ pub fn render_template(view: impl View) -> HttpResponse {
         Ok(tmpl) => HttpResponse::Ok().content_type("text/html").body(tmpl),
         Err(e) => {
             println!("Parsing error(s): {e}");
-
             render_internal_error_tmpl(None)
         }
     }
@@ -39,17 +39,17 @@ pub fn render_internal_error_tmpl(provided_context: Option<&Context>) -> HttpRes
 
     HttpResponse::InternalServerError()
         .content_type("text/html")
-        .body(TEMPLATES.render(INTERNAL_SERVER_ERR_TMPL, context).unwrap())
+        .body(Tera::one_off(INTERNAL_SERVER_ERR_TMPL, context, true).unwrap())
 }
 
 pub fn render_not_found_error_tmpl(provided_context: Option<&Context>) -> HttpResponse {
-    let mut context = &tera::Context::new();
+    let context = &tera::Context::new();
 
     if let Some(provided_context) = provided_context {
         context = provided_context;
     }
 
-    HttpResponse::Ok()
+    HttpResponse::NotFound()
         .content_type("text/html")
-        .body(TEMPLATES.render(NOT_FOUND_ERR_TMPL, context).unwrap())
+        .body(Tera::one_off(NOT_FOUND_ERR_TMPL, context, true).unwrap())
 }

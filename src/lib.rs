@@ -229,7 +229,7 @@ pub fn start_blog(
             // .service(authenticate_handler)
             // .service(auth_redirect_handler)
             .service(controllers::home_index)
-            // .service(article::render_post)
+            .service(controllers::render_post)
             .service(controllers::subscribe_to_newsletter)
             .service(controllers::verify_subscription)
             // .service(controllers::delete_subscriber)
