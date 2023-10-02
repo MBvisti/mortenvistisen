@@ -5,8 +5,8 @@ use actix_web::{get, web, Responder};
 use pulldown_cmark::{html, Options, Parser};
 
 use crate::{
-    views::{render_internal_error_tmpl, render_not_found_error_tmpl, render_template},
     views::Post,
+    views::{render_internal_error_tmpl, render_not_found_error_tmpl, render_template},
 };
 
 #[tracing::instrument(name = "visit article")]

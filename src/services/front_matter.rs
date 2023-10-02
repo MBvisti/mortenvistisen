@@ -41,4 +41,3 @@ pub fn find_all_front_matter() -> Result<Vec<FrontMatter>, Error> {
 
     Ok(front_matters)
 }
-

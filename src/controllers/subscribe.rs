@@ -162,7 +162,7 @@ pub async fn verify_subscription(
 
     if is_verified {
         let subscribe_verify_view = views::SubscribeVerify::new(views::SubscribeVerifyData {
-        email_deleted: false,
+            email_deleted: false,
             has_error: false,
             already_verified: true,
             error_msg: None,

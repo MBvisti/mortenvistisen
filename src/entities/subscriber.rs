@@ -1,7 +1,6 @@
 use serde::{Deserialize, Serialize};
 use validator::validate_email;
 
-
 #[derive(Debug, Deserialize)]
 pub struct Email(String);
 

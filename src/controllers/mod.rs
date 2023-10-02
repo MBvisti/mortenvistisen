@@ -1,7 +1,7 @@
-mod home;
-mod subscribe;
-mod post;
 mod dashboard;
+mod home;
+mod post;
+mod subscribe;
 
 pub use home::*;
 pub use post::*;

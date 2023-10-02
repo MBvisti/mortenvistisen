@@ -1,6 +1,6 @@
-use serde::{Serialize, Deserialize};
-use crate::entities::FrontMatter;
 use super::{views::ViewData, View};
+use crate::entities::FrontMatter;
+use serde::{Deserialize, Serialize};
 
 pub struct HomeIndex(ViewData);
 

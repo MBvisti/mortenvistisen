@@ -15,7 +15,6 @@ impl View for SubscribeResponse {
 pub struct SubscribeResponseData {
     pub has_error: bool,
     pub error_msg: String,
-
 }
 impl SubscribeResponse {
     pub fn new(payload: SubscribeResponseData) -> Self {

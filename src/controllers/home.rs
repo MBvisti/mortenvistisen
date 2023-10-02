@@ -1,10 +1,7 @@
 use crate::services::find_all_front_matter;
 use actix_web::{get, Responder};
 
-use crate::{
-    // article::find_all_front_matter,
-    views::{self, HomeIndexData},
-};
+use crate::views::{self, HomeIndexData};
 use crate::views::{render_internal_error_tmpl, render_template};
 
 #[tracing::instrument(name = "visit home page")]
@@ -21,7 +18,7 @@ pub async fn home_index() -> impl Responder {
     };
 
     front_matters.sort_by(|a, b| b.order.cmp(&a.order));
-    
+
     let home_index_view = views::HomeIndex::new(HomeIndexData {
         posts: front_matters,
     });

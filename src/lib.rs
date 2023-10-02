@@ -9,22 +9,22 @@ use tracing_actix_web::TracingLogger;
 use actix_web::{
     cookie::{time::Duration, Key},
     dev::Server,
-    get, 
+    get,
     web::{self, Data},
-    App, Error,  HttpRequest, HttpResponse, HttpServer,
+    App, Error, HttpRequest, HttpResponse, HttpServer,
 };
 
 #[macro_use]
 extern crate lazy_static;
 
 pub mod configuration;
-pub mod email_client;
-pub mod repository;
-pub mod telemetry;
 pub mod controllers;
-pub mod views;
+pub mod email_client;
 pub mod entities;
+pub mod repository;
 pub mod services;
+pub mod telemetry;
+pub mod views;
 
 #[get("/robots.txt")]
 async fn robots_text(_req: HttpRequest) -> Result<fs::NamedFile, Error> {
@@ -230,7 +230,7 @@ pub fn start_blog(
             .service(controllers::subscribe_to_newsletter)
             .service(controllers::verify_subscription)
             .service(controllers::delete_subscriber)
-            // .default_service(web::route().to(not_found))
+        // .default_service(web::route().to(not_found))
     })
     .listen(listener)?
     .run();
