@@ -1,10 +1,10 @@
-use super::{views::ViewData, View};
+use super::{ViewData, View};
 
 pub struct SubscribeResponse(ViewData);
 
 impl View for SubscribeResponse {
     fn template_path(&self) -> &str {
-        &self.0.path.as_ref()
+        self.0.path.as_ref()
     }
 
     fn get_context(&self) -> &tera::Context {
@@ -23,7 +23,7 @@ impl SubscribeResponse {
         ctx.insert("error_msg", &payload.error_msg);
 
         let view_data = ViewData::new(String::from("subscribe/_response.html"), ctx);
-        return Self { 0: view_data };
+        Self(view_data)
     }
 }
 
@@ -31,7 +31,7 @@ pub struct SubscribeVerify(ViewData);
 
 impl View for SubscribeVerify {
     fn template_path(&self) -> &str {
-        &self.0.path.as_ref()
+        self.0.path.as_ref()
     }
 
     fn get_context(&self) -> &tera::Context {
@@ -53,6 +53,6 @@ impl SubscribeVerify {
         ctx.insert("email_deleted", &payload.email_deleted);
 
         let view_data = ViewData::new(String::from("subscribe/email_confirm.html"), ctx);
-        return Self { 0: view_data };
+        Self(view_data)
     }
 }

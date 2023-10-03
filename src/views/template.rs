@@ -1,6 +1,7 @@
-use crate::views::View;
 use actix_web::HttpResponse;
 use tera::{Context, Tera};
+
+use super::View;
 
 const INTERNAL_SERVER_ERR_TMPL: &str = "errors/500.html";
 const NOT_FOUND_ERR_TMPL: &str = "errors/404.html";

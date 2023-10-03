@@ -1,14 +1,13 @@
 use serde::{Deserialize, Serialize};
-
 use crate::entities::FrontMatter;
 
-use super::{views::ViewData, View};
+use super::{ViewData, View};
 
 pub struct Post(ViewData);
 
 impl View for Post {
     fn template_path(&self) -> &str {
-        &self.0.path.as_ref()
+        self.0.path.as_ref()
     }
 
     fn get_context(&self) -> &tera::Context {
@@ -29,6 +28,6 @@ impl Post {
         ctx.insert("meta_data", &data.meta_data);
 
         let view_data = ViewData::new(String::from("post/post.html"), ctx);
-        return Self { 0: view_data };
+        Self(view_data)
     }
 }

@@ -1,12 +1,13 @@
-use super::{views::ViewData, View};
 use crate::entities::FrontMatter;
 use serde::{Deserialize, Serialize};
+
+use super::{ViewData, View};
 
 pub struct HomeIndex(ViewData);
 
 impl View for HomeIndex {
     fn template_path(&self) -> &str {
-        &self.0.path.as_ref()
+        self.0.path.as_ref()
     }
 
     fn get_context(&self) -> &tera::Context {
@@ -25,6 +26,6 @@ impl HomeIndex {
         ctx.insert("posts", &data.posts);
 
         let view_data = ViewData::new(String::from("home/index.html"), ctx);
-        return Self { 0: view_data };
+        Self(view_data)
     }
 }
