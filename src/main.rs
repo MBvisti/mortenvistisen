@@ -2,8 +2,8 @@ use actix_web::{cookie::Key, web};
 use mortenvistisen_blog::{
     configuration::get_config,
     email_client::EmailClient,
+    entities::Email,
     start_blog,
-    subscriber::Email,
     telemetry::{get_subscriber, init_subscriber},
 };
 use secrecy::ExposeSecret;

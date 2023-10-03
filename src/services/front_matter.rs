@@ -1,7 +1,6 @@
+use crate::entities::FrontMatter;
 use ignore::WalkBuilder;
 use std::{fs, io::Error};
-
-use super::domain::FrontMatter;
 
 pub fn find_all_front_matter() -> Result<Vec<FrontMatter>, Error> {
     let mut t = ignore::types::TypesBuilder::new();

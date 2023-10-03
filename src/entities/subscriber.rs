@@ -1,8 +1,6 @@
 use serde::{Deserialize, Serialize};
 use validator::validate_email;
 
-use super::handlers::SubscribeFormData;
-
 #[derive(Debug, Deserialize)]
 pub struct Email(String);
 
@@ -24,18 +22,6 @@ impl AsRef<str> for Email {
 pub struct NewSubscriberPayload {
     pub email: Email,
     pub referer: String,
-}
-
-impl TryFrom<SubscribeFormData> for NewSubscriberPayload {
-    type Error = String;
-
-    fn try_from(value: SubscribeFormData) -> Result<Self, Self::Error> {
-        let email = Email::parse(value.email)?;
-        Ok(Self {
-            email,
-            referer: value.referer,
-        })
-    }
 }
 
 #[derive(Debug, Serialize)]

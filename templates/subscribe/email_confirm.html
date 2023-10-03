@@ -1,0 +1,40 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}
+Morten Vistisen | Email verification
+{% endblock title %}
+
+{% block header %}
+<div class="absolute left-4">
+    <a class="relative text-primary hover:underline hover:text-primary-focus" href="/">Go back</a>
+</div>
+{% endblock header %}
+
+{% block content %}
+<div class="hero mt-32 lg:mt-64">
+    <div class="hero-content text-center">
+        <div class="max-w-md">
+            <h1 class="text-3xl lg:text-5xl font-bold mb-10">
+                {% if has_error %}
+                    {% if title %}
+                        {{ title }}
+                    {% else %}
+                        Oh no, something went wrong.
+                    {% endif %}
+                {% else %}
+                You're all good!
+                {% endif %}
+            </h1>
+            {% if has_error %}
+            <p class="text-justify lg:text-xl">{{ error_msg }}</p>
+            {% elif email_deleted %}
+            <p>You're email subscription has been deleted.</p>
+            {% else %}
+            <p class="text-justify lg:text-xl">You're registered and will receive updates every time I release a new post.
+                Should you ever want to stop receive these emails, you can always find a link
+                at the bottom of any email send to have your email wiped from our system.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock content %}

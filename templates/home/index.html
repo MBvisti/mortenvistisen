@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "layouts/base.html" %}
 
 {% block meta %}
 <!-- Primary Meta Tags -->
@@ -54,7 +54,7 @@
   </div>
 </div>
 <div class="w-full h-full px-4 md:px-6 text-gray-800 leading-normal">
-    {% include '_socials.html' %}
+    {% include 'components/_socials.html' %}
     {% for fm in posts %}
     <a href="/posts/{{fm.file_name}}">
         <div class="flex bg-neutral-content border rounded flex-col m-5 mb-10 px-4 py-6 cursor-pointer">

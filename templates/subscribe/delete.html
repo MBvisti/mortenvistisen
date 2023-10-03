@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "layouts/base.html" %}
 
 {% block title %}
 Morten Vistisen | Email confirmation
@@ -22,15 +22,18 @@ Morten Vistisen | Email confirmation
                         Oh no, something went wrong.
                     {% endif %}
                 {% else %}
-                You're all good!
+                Sad to see you go.
                 {% endif %}
             </h1>
             {% if meta_data.has_error %}
-            <p class="text-justify lg:text-xl">{{ meta_data.error_msg }}</p>
+            <p class="text-justify lg:text-xl">
+                I'm sorry this didn't go smoothly and will look into it immediately. In the meantime, could you send me 
+                and email at: hi@mortenvistisen.com and tell me what email to delete and I will take care of it. Once
+                again super sorry about this!
+            </p>
             {% else %}
-            <p class="text-justify lg:text-xl">You're registered and will receive updates every time I release a new post.
-                Should you ever want to stop receive these emails, you can always find a link
-                at the bottom of any email send to have your email wiped from our system.</p>
+            <p class="text-justify lg:text-xl">I'm sad to see you go but no hard feelings, your email have been deleted.
+            You're always welcome to subscribe once more.</p>
             {% endif %}
         </div>
     </div>
