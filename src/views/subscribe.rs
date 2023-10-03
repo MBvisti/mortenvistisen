@@ -1,4 +1,4 @@
-use super::{ViewData, View};
+use super::{View, ViewData};
 
 pub struct SubscribeResponse(ViewData);
 
