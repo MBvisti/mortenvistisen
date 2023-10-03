@@ -189,15 +189,6 @@ async fn sitemap_index_text(_req: HttpRequest) -> Result<fs::NamedFile, Error> {
 //     }
 // }
 
-// async fn not_found(tmpl: Data<tera::Tera>) -> impl Responder {
-//     let not_found_page = tmpl
-//         .render("not_found.html", &tera::Context::new())
-//         .unwrap();
-//     HttpResponse::InternalServerError()
-//         .content_type("text/html")
-//         .body(not_found_page)
-// }
-
 pub fn start_blog(
     listener: TcpListener,
     db_pool: PgPool,
@@ -230,7 +221,7 @@ pub fn start_blog(
             .service(controllers::subscribe_to_newsletter)
             .service(controllers::verify_subscription)
             .service(controllers::delete_subscriber)
-        // .default_service(web::route().to(not_found))
+            .default_service(web::route().to(controllers::not_found))
     })
     .listen(listener)?
     .run();
