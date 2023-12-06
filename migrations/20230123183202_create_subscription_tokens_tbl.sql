@@ -1,6 +1,0 @@
--- Add migration script here
-CREATE TABLE subscription_token (
-    subscription_token TEXT NOT NULL,
-    subscription_id uuid NOT NULL REFERENCES subscriptions (id),
-    PRIMARY KEY (subscription_id)
-);

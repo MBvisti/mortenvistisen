@@ -1,24 +1,72 @@
 set dotenv-load
 
-alias c := cargo-check
-alias r := cargo-run
-alias w := cargo-watch
+# alias
+alias r := run
+
 alias wc := watch-css
+
+alias sm := serve-mails
+alias cmd := compile-mails-dev
+alias cmp := compile-mails-prod
+
+alias mm := make-migration
+alias um := up-migrations
+alias dm := down-migrations
+alias dmt := down-migrations-to
+alias rdb := reset-db
+alias gdf := generate-db-functions
+alias mpts := copy-preline-to-static
+
+alias ct := compile-templates
 
 default:
     @just --list
 
-cargo-check:
-    cargo c
-
-cargo-run:
-    cargo r
-
-cargo-watch:
-    cargo watch -x run
-
-cargo-watch-html:
-    cargo watch --workdir=templates -x run
-
+# CSS
 watch-css:
-    cd tailwind && npm run watch-css
+    npx tailwindcss -i ./resources/css/base.css -o ./static/css/output.css --watch
+
+# Preline
+copy-preline-to-static:
+    @cp -r ./node_modules/preline/dist/ ./static/js/preline
+
+# Mails
+compile-mails-prod:
+    @cd resources/mails && npm run build
+
+compile-mails-dev:
+    @cd resources/mails && npm run dev
+
+serve-mails:
+    @cd resources/mails && npm run serve
+
+# Database 
+make-migration name:
+	@goose -dir migrations $DATABASE_KIND $DATABASE_URL create {{name}} sql
+
+up-migrations:
+	@goose -dir migrations $DATABASE_KIND $DATABASE_URL up
+
+down-migrations:
+	@goose -dir migrations $DATABASE_KIND $DATABASE_URL down
+
+down-migrations-to version:
+	@goose -dir migrations $DATABASE_KIND $DATABASE_URL down-to {{version}}
+
+reset-db:
+	@goose -dir migrations $DATABASE_KIND $DATABASE_URL reset
+
+generate-db-functions:
+	sqlc compile && sqlc generate
+
+# Application
+run:
+    air -c .air.toml
+
+# Worker
+run-worker:
+    @go run ./cmd/worker/main.go
+
+# templates
+compile-templates:
+    templ generate 
