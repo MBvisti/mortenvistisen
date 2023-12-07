@@ -2,7 +2,7 @@ Confirm your email address
 
 Please confirm your email address in order to activate your account.
 
-http://localhost:8000
+http0.0.0.0:8000
 
 Hi,
 
@@ -14,18 +14,18 @@ To continue, please confirm your email address by clicking the button below:
 
 Confirm email address →
 
-http://localhost:8000/verify-email?token={{.Token}}
+http0.0.0.0:8000/verify-email?token={{.Token}}
 
 ‍
 
-If you didn't sign up for Grafto, we apologize. Click the button below, and we'll remove
+If you didn't sign up for Morten Vistisen, we apologize. Click the button below, and we'll remove
 email:
 
 Remove email address →
 
-http://localhost:8000/remove-email?token={{.Token}}
+http0.0.0.0:8000/remove-email?token={{.Token}}
 
-Thanks, The Grafto Team
+Thanks, The Morten Vistisen Team
 
 ‍
 
