@@ -4,4 +4,4 @@ SELECT
 FROM
     tags
 WHERE
-    tags.id = ANY($1);
+    tags.id in (select unnest(@tag_ids::uuid[]));
