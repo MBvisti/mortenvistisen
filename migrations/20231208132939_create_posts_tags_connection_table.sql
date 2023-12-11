@@ -2,9 +2,9 @@
 -- +goose StatementBegin
 SELECT 'up SQL query';
 create table posts_tags (
-    id serial primary key,
-    post_id integer not null references posts(id),
-    tag_id integer not null references tags(id)
+    id uuid primary key,
+    post_id uuid not null references posts(id),
+    tag_id uuid not null references tags(id)
 );
 -- +goose StatementEnd
 

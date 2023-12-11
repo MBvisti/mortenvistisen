@@ -25,7 +25,7 @@ type Job struct {
 }
 
 type Post struct {
-	ID         int32
+	ID         uuid.UUID
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
 	Title      string
@@ -38,13 +38,13 @@ type Post struct {
 }
 
 type PostsTag struct {
-	ID     int32
-	PostID int32
-	TagID  int32
+	ID     uuid.UUID
+	PostID uuid.UUID
+	TagID  uuid.UUID
 }
 
 type Tag struct {
-	ID   int32
+	ID   uuid.UUID
 	Name string
 }
 

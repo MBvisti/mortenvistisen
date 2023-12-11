@@ -11,17 +11,19 @@ import (
 	"github.com/google/uuid"
 )
 
-const getTags = `-- name: GetTags :many
+const getTagsForPost = `-- name: GetTagsForPost :many
 SELECT
     tags.id, tags.name
 FROM
     tags
+LEFT JOIN
+    posts_tags ON posts_tags.tag_id = tags.id
 WHERE
-    tags.id in (select unnest($1::uuid[]))
+    posts_tags.post_id = $1
 `
 
-func (q *Queries) GetTags(ctx context.Context, tagIds []uuid.UUID) ([]Tag, error) {
-	rows, err := q.db.Query(ctx, getTags, tagIds)
+func (q *Queries) GetTagsForPost(ctx context.Context, postID uuid.UUID) ([]Tag, error) {
+	rows, err := q.db.Query(ctx, getTagsForPost, postID)
 	if err != nil {
 		return nil, err
 	}

@@ -2,7 +2,7 @@
 -- +goose StatementBegin
 SELECT 'up SQL query';
 create table tags (
-    id serial primary key,
+    id uuid primary key,
     name varchar(255) not null
 );
 -- +goose StatementEnd

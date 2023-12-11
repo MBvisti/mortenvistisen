@@ -1,4 +1,4 @@
-## |WIP| Grafto - full-stack web development in Go
+|WIP| Grafto - full-stack web development in Go
 The kickstarter repository for full-stack Go apps, using your grandfather's technology.
 
 Still work in progress

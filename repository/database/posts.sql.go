@@ -7,10 +7,6 @@ package database
 
 import (
 	"context"
-	"database/sql"
-	"time"
-
-	"github.com/google/uuid"
 )
 
 const getLatestPosts = `-- name: GetLatestPosts :many
@@ -24,45 +20,26 @@ SELECT
     posts.excerpt,
     posts.draft,
     posts.released_at,
-    posts.read_time,
-    array_agg(tags)::uuid[] AS tag_ids
+    posts.read_time
 FROM
     posts
-INNER JOIN
-    posts_tags ON posts.id = posts_tags.post_id
-RIGHT JOIN
-    tags ON tags.id = posts_tags.tag_id
 WHERE
-    released_at IS NOT NULL && draft = false
+    released_at IS NOT NULL AND draft = false
 ORDER BY
     released_at DESC
 LIMIT
     5
 `
 
-type GetLatestPostsRow struct {
-	ID         int32
-	CreatedAt  time.Time
-	UpdatedAt  time.Time
-	Title      string
-	Filename   string
-	Slug       string
-	Excerpt    string
-	Draft      bool
-	ReleasedAt sql.NullTime
-	ReadTime   sql.NullInt32
-	TagIds     []uuid.UUID
-}
-
-func (q *Queries) GetLatestPosts(ctx context.Context) ([]GetLatestPostsRow, error) {
+func (q *Queries) GetLatestPosts(ctx context.Context) ([]Post, error) {
 	rows, err := q.db.Query(ctx, getLatestPosts)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetLatestPostsRow
+	var items []Post
 	for rows.Next() {
-		var i GetLatestPostsRow
+		var i Post
 		if err := rows.Scan(
 			&i.ID,
 			&i.CreatedAt,
@@ -74,7 +51,6 @@ func (q *Queries) GetLatestPosts(ctx context.Context) ([]GetLatestPostsRow, erro
 			&i.Draft,
 			&i.ReleasedAt,
 			&i.ReadTime,
-			&i.TagIds,
 		); err != nil {
 			return nil, err
 		}

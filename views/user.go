@@ -1,6 +1,7 @@
 package views
 
 import (
+	"github.com/MBvisti/grafto/views/internal/components"
 	"github.com/MBvisti/grafto/views/internal/layouts"
 	"github.com/MBvisti/grafto/views/internal/pages"
 	"github.com/go-playground/validator/v10"
@@ -20,10 +21,11 @@ func SignupPage(ctx echo.Context, data SignupPageData) error {
 		CsrfToken: csrf.Token(ctx.Request()),
 	}
 
+	head := components.Head{}.Default()
 	containsErrors := len(data.Errors) > 0
 
 	if !data.WasSuccessful && !containsErrors {
-		return layouts.Base(signup.Page()).Render(extractRenderDeps(ctx))
+		return layouts.Base(signup.Page(), head).Render(extractRenderDeps(ctx))
 	}
 
 	if containsErrors {
@@ -73,5 +75,5 @@ func VerifyEmail(ctx echo.Context, tokenInvalid bool) error {
 		TokenInvalid: tokenInvalid,
 	}
 
-	return layouts.Base(view.Page()).Render(extractRenderDeps(ctx))
+	return layouts.Base(view.Page(), components.Head{}.Default()).Render(extractRenderDeps(ctx))
 }

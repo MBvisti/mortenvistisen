@@ -2,7 +2,7 @@
 -- +goose StatementBegin
 SELECT 'up SQL query';
 create table posts (
-    id serial primary key,
+    id uuid primary key,
     created_at timestamp not null,
     updated_at timestamp not null,
     title varchar(255) not null,

@@ -2,6 +2,7 @@ package views
 
 import (
 	"github.com/MBvisti/grafto/pkg/telemetry"
+	"github.com/MBvisti/grafto/views/internal/components"
 	"github.com/MBvisti/grafto/views/internal/layouts"
 	"github.com/MBvisti/grafto/views/internal/pages"
 	"github.com/go-playground/validator/v10"
@@ -21,16 +22,17 @@ func LoginPage(ctx echo.Context, data LoginPageData) error {
 		CouldNotAuthenticate: data.CouldNotAuthenticate,
 		CsrfToken:            csrf.Token(ctx.Request()),
 	}
+	head := components.Head{}.Default()
 
 	if !data.WasSuccess {
-		return layouts.Base(login.Page()).Render(extractRenderDeps(ctx))
+		return layouts.Base(login.Page(), head).Render(extractRenderDeps(ctx))
 	}
 
 	if data.CouldNotAuthenticate || data.EmailNotVerified {
-		return layouts.Base(login.Form()).Render(extractRenderDeps(ctx))
+		return layouts.Base(login.Form(), head).Render(extractRenderDeps(ctx))
 	}
 
-	return layouts.Base(login.Response()).Render(extractRenderDeps(ctx))
+	return layouts.Base(login.Response(), head).Render(extractRenderDeps(ctx))
 }
 
 type ForgottenPasswordPageData struct {
@@ -46,7 +48,8 @@ func ForgottenPasswordPage(ctx echo.Context, data ForgottenPasswordPageData) err
 		return forgottenPW.Response().Render(extractRenderDeps(ctx))
 	}
 
-	return layouts.Base(forgottenPW.Page()).Render(extractRenderDeps(ctx))
+	head := components.Head{}.Default()
+	return layouts.Base(forgottenPW.Page(), head).Render(extractRenderDeps(ctx))
 }
 
 type ResetPasswordData struct {
@@ -63,10 +66,11 @@ func ResetPasswordPage(ctx echo.Context, data ResetPasswordData) error {
 		ResetToken:   data.Token,
 	}
 
+	head := components.Head{}.Default()
 	hasErrors := len(data.Errors) > 0
 
 	if !data.WasSuccess && !hasErrors && !data.TokenInvalid {
-		return layouts.Base(resetPassword.Page()).Render(extractRenderDeps(ctx))
+		return layouts.Base(resetPassword.Page(), head).Render(extractRenderDeps(ctx))
 	}
 
 	telemetry.Logger.Info("status", "success", data.WasSuccess, "errors", hasErrors, "token", data.TokenInvalid)
