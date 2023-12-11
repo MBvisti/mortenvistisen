@@ -39,3 +39,11 @@ func (c *Controller) HomeIndex(ctx echo.Context) error {
 		Posts: posts,
 	})
 }
+
+func (c *Controller) About(ctx echo.Context) error {
+	return views.About(ctx)
+}
+
+func (c *Controller) Newsletter(ctx echo.Context) error {
+	return views.Newsletter(ctx)
+}

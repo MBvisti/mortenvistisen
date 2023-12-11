@@ -32,3 +32,23 @@ func HomeIndex(ctx echo.Context, data HomePageData) error {
 
 	return layouts.Base(pages.HomeIndex(posts), components.Head{}.Default()).Render(extractRenderDeps(ctx))
 }
+
+func About(ctx echo.Context) error {
+	header := components.Head{
+		Title:       "About mortenvistisen.com",
+		Description: "Short description of me, Morten, my projects and approach to building software",
+		Slug:        "https://mortenvistisen/about",
+		MetaType:    "website",
+	}
+	return layouts.Base(pages.About(), header).Render(extractRenderDeps(ctx))
+}
+
+func Newsletter(ctx echo.Context) error {
+	header := components.Head{
+		Title:       "Newsletter mortenvistisen.com",
+		Description: "The subscribe page for the newsletter",
+		Slug:        "https://mortenvistisen/newsletter",
+		MetaType:    "website",
+	}
+	return layouts.Base(pages.Newsletter(), header).Render(extractRenderDeps(ctx))
+}
