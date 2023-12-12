@@ -5,7 +5,9 @@ import (
 	"embed"
 
 	"github.com/MBvisti/grafto/pkg/telemetry"
+	chromahtml "github.com/alecthomas/chroma/v2/formatters/html"
 	"github.com/yuin/goldmark"
+	highlighting "github.com/yuin/goldmark-highlighting/v2"
 	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/renderer/html"
@@ -21,7 +23,16 @@ type PostManager struct {
 
 func NewPostManager() PostManager {
 	md := goldmark.New(
-		goldmark.WithExtensions(extension.GFM),
+		goldmark.WithExtensions(
+			extension.GFM,
+			highlighting.NewHighlighting(
+				highlighting.WithStyle("gruvbox"),
+				highlighting.WithFormatOptions(
+					chromahtml.WithLineNumbers(true),
+					chromahtml.TabWidth(4),
+				),
+			),
+		),
 		goldmark.WithParserOptions(
 			parser.WithAutoHeadingID(),
 			parser.WithAttribute(),
@@ -29,6 +40,7 @@ func NewPostManager() PostManager {
 		goldmark.WithRendererOptions(
 			html.WithHardWraps(),
 			html.WithXHTML(),
+			html.WithUnsafe(),
 		),
 	)
 
@@ -39,7 +51,7 @@ func NewPostManager() PostManager {
 }
 
 func (pm *PostManager) GetPost(name string) (string, error) {
-	source, err := pm.posts.ReadFile(name + ".md")
+	source, err := pm.posts.ReadFile(name)
 	if err != nil {
 		telemetry.Logger.Info("failed to read markdown file", "error", err)
 		return "", err
@@ -49,7 +61,7 @@ func (pm *PostManager) GetPost(name string) (string, error) {
 }
 
 func (pm *PostManager) Parse(name string) (string, error) {
-	source, err := pm.posts.ReadFile(name + ".md")
+	source, err := pm.posts.ReadFile(name)
 	if err != nil {
 		telemetry.Logger.Info("failed to read markdown file", "error", err)
 		return "", err

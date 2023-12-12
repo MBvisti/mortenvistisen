@@ -4,9 +4,9 @@
 
 When I was a younger and slightly dumber man I was captivated by the allure of online poker and high-stakes No-limit Hold em. 
 
-Going to Vegas and battling it out for million of dollars with all the high-rollers, was a big dream of mine.
-I would watch all the tutorials I could get my hands on, read whatever poker book was available to me, and, binge every
-poker show out there. Now, this was a few years after the golden age of online poker which was kicked off by Chris, I
+Going to Vegas and battling it out for million of dollars with all the high-rollers, was a big dream of mine. I would watch all the tutorials I could get my hands on, read whatever poker book was available to me, and, binge every poker show out there. 
+
+Now, this was a few years after the golden age of online poker which was kicked off by Chris, I
 shit you not, Moneymaker. An accountant from Nashville and hobby poker player whom is said to be responsible for online
 poker exploding, after he won the WSOP Main Event, gaining entry based on a satellite tournament he played online. For 
 the unfamiliar with online poker, a satellite tournament is basically a (often much) lower priced tournament that gives

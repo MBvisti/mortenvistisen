@@ -15,13 +15,14 @@ func (c *Controller) Article(ctx echo.Context) error {
 		return err
 	}
 
-	postContent, err := c.postManager.Parse(post.Slug)
+	postContent, err := c.postManager.Parse(post.Filename)
 	if err != nil {
 		return err
 	}
 
 	return views.Article(ctx, views.ArticlePageData{
-		Content: postContent,
+		Content:     postContent,
+		ReleaseDate: post.ReleasedAt.Time,
 		Meta: views.ArticleMetaData{
 			Title:       post.Title,
 			Description: post.Excerpt,
