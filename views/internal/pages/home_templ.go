@@ -35,7 +35,7 @@ func HomeIndex(posts []Post) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<main id=\"content\" role=\"main\" class=\"my-auto\"><div class=\"text-center py-5 px-4 sm:px-6 md:px-32 2xl:px-56\"><h1 class=\"block text-2xl font-bold text-white sm:text-4xl\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<main id=\"content\" role=\"main\" class=\"my-auto\"><div class=\"text-center py-5 px-4 sm:px-6 md:px-32 2xl:px-56\"><h1 class=\"block text-2xl font-bold text-white sm:text-4xl xl:mt-10\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -48,12 +48,12 @@ func HomeIndex(posts []Post) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var3 := `I write about my ventures into tech and bootstrapping`
+		templ_7745c5c3_Var3 := `I write about my ventures into technology and bootstrapping`
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var3)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><hr class=\"border-gray-500 my-5 md:mx-14 xl:mx-64\"><div class=\"flex flex-col w-full border-opacity-50 mb-10 md:px-12 xl:px-64\"><div class=\"w-full flex h-10 justify-around text-xs items-center\"><a href=\"https://twitter.com/mbvisti\"><span class=\"inline-flex items-center gap-x-1.5 py-1.5 px-3 rounded-full text-xs font-medium \n                            bg-white/[.05] text-white\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><hr class=\"border-gray-500 my-5 md:mx-14 xl:mx-80\"><div class=\"flex flex-col w-full border-opacity-50 mb-10 md:px-12 xl:px-80\"><div class=\"w-full flex h-10 justify-around text-xs items-center\"><a href=\"https://twitter.com/mbvisti\"><span class=\"inline-flex items-center gap-x-1.5 py-1.5 px-3 rounded-full text-xs font-medium \n                            bg-white/[.05] text-white\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -89,7 +89,7 @@ func HomeIndex(posts []Post) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</span></a></div></div><h1 class=\"block text-xl font-bold text-white mb-5\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</span></a></div></div><h1 class=\"block text-xl font-bold text-white mb-5 xl:my-10\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

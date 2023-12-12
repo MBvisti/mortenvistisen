@@ -1,0 +1,16 @@
+package pages
+
+func unsafe(html string) templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
+		_, err = io.WriteString(w, html)
+		return
+	})
+}
+
+templ Article(post string) {
+	<article
+ 		class="text-left bg-base-100 prose lg:prose-xl mb-6 px-4 md:px-6 h-full w-full leading-normal"
+	>
+		@unsafe(post)
+	</article>
+}

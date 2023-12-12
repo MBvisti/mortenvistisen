@@ -12,6 +12,7 @@ import (
 	"github.com/MBvisti/grafto/pkg/queue"
 	"github.com/MBvisti/grafto/pkg/telemetry"
 	"github.com/MBvisti/grafto/pkg/tokens"
+	"github.com/MBvisti/grafto/posts"
 	"github.com/MBvisti/grafto/repository/database"
 	"github.com/MBvisti/grafto/routes"
 	"github.com/labstack/echo/v4"
@@ -42,8 +43,9 @@ func main() {
 
 	mailClient := mail.NewMail(&postmark)
 	tokenManager := tokens.NewManager()
+	postManager := posts.NewPostManager()
 
-	controllers := controllers.NewController(*db, mailClient, *tokenManager, *q)
+	controllers := controllers.NewController(*db, mailClient, *tokenManager, *q, postManager)
 
 	server := routes.NewServer(router, controllers, logger)
 

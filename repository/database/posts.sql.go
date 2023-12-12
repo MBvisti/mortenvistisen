@@ -61,3 +61,39 @@ func (q *Queries) GetLatestPosts(ctx context.Context) ([]Post, error) {
 	}
 	return items, nil
 }
+
+const getPostBySlug = `-- name: GetPostBySlug :one
+SELECT
+    posts.id,
+    posts.created_at,
+    posts.updated_at,
+    posts.title,
+    posts.filename,
+    posts.slug,
+    posts.excerpt,
+    posts.draft,
+    posts.released_at,
+    posts.read_time
+FROM
+    posts
+WHERE
+    slug = $1
+`
+
+func (q *Queries) GetPostBySlug(ctx context.Context, slug string) (Post, error) {
+	row := q.db.QueryRow(ctx, getPostBySlug, slug)
+	var i Post
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Title,
+		&i.Filename,
+		&i.Slug,
+		&i.Excerpt,
+		&i.Draft,
+		&i.ReleasedAt,
+		&i.ReadTime,
+	)
+	return i, err
+}

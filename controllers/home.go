@@ -31,7 +31,7 @@ func (c *Controller) HomeIndex(ctx echo.Context) error {
 			Title:       d.Title,
 			ReleaseDate: d.ReleasedAt.Time.String(),
 			Tags:        tags,
-			Slug:        d.Slug,
+			Slug:        c.formatArticleSlug(d.Slug),
 		})
 	}
 

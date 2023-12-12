@@ -9,6 +9,7 @@ import (
 	"github.com/MBvisti/grafto/pkg/mail"
 	"github.com/MBvisti/grafto/pkg/queue"
 	"github.com/MBvisti/grafto/pkg/tokens"
+	"github.com/MBvisti/grafto/posts"
 	"github.com/MBvisti/grafto/repository/database"
 	"github.com/MBvisti/grafto/views"
 	"github.com/go-playground/validator/v10"
@@ -16,15 +17,16 @@ import (
 )
 
 type Controller struct {
-	db         database.Queries
-	mail       mail.Mail
-	validate   *validator.Validate
-	tknManager tokens.Manager
-	queue      queue.Queue
+	db          database.Queries
+	mail        mail.Mail
+	validate    *validator.Validate
+	tknManager  tokens.Manager
+	postManager posts.PostManager
+	queue       queue.Queue
 }
 
 func NewController(
-	db database.Queries, mail mail.Mail, tknManager tokens.Manager, queue queue.Queue) Controller {
+	db database.Queries, mail mail.Mail, tknManager tokens.Manager, queue queue.Queue, pm posts.PostManager) Controller {
 	validate := validator.New(validator.WithRequiredStructEnabled())
 
 	return Controller{
@@ -32,6 +34,7 @@ func NewController(
 		mail,
 		validate,
 		tknManager,
+		pm,
 		queue,
 	}
 }
@@ -66,4 +69,8 @@ func (c *Controller) Redirect(ctx echo.Context) error {
 	ctx.Response().Writer.Header().Add("HX-Redirect", fmt.Sprintf("/%s", toLocation))
 
 	return nil
+}
+
+func (c *Controller) formatArticleSlug(slug string) string {
+	return fmt.Sprintf("http://localhost:8000/posts/%s", slug)
 }

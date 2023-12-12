@@ -40,6 +40,7 @@ func About(ctx echo.Context) error {
 		Slug:        "https://mortenvistisen/about",
 		MetaType:    "website",
 	}
+
 	return layouts.Base(pages.About(), header).Render(extractRenderDeps(ctx))
 }
 
