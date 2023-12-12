@@ -5,23 +5,27 @@ The goal of the rewrite is to get _something_ out which could serve as a learnin
 _Side note_: I write Go for a living and have been coding professionally for the last ~5 years, so while I’m confident in my overall skills this tutorial might not always show idiomatic Rust and best practices. There’re a bunch of much more rust-abled developers than me who have written some great material, much of which lay the foundation for what I’m about to show you. At the end of the article, you’ll find a resource list that you can check out after reading (and hopefully coding along) this article. If you’re just interested in seeing the code you can find the repo here.
 
 ---
-<div class="form-control min-w-fit">
-    <h6 class="text-lg font-semibold">Want to get notified whenever I release a new post?</h6>
-    <h6 class="text-lg">Consider subscribing to my newsletter</h6>
-    <form hx-post="/subscribe" hx-target="this" hx-swap="outerHTML" method="POST" action="/subscribe" class="mt-4 relative min-w-[20rem]"
-        data-loading-target="#loading" data-loading-class-remove="hidden">
-        <input type="hidden" name="referer" value="how-to-build-a-simple-blog-using-rust" />
-        <input data-loading-disable required name="email" autocomplete="email" type="email"
-            placeholder="Enter email to start" class="input input-bordered w-full text-lg pr-20 md:pr-32" />
-        <button data-loading-disable type="submit"
-            class="btn btn-primary absolute top-0 right-0 rounded-l-none umami--click--newsletter-how-to-build-a-simple-blog-using-rust">
-            Get Notified
+
+<div class="max-w-6xl py-10 px-4 sm:px-6 lg:px-8 lg:py-16 mx-auto">
+  <div class="max-w-xl text-center mx-auto">
+    <div class="mb-5">
+      <h3 class="text-2xl font-bold md:text-3xl md:leading-tight text-white">Consider subscribing to my newsletter</h2>
+    </div>
+    <form hx-post="/subscribe" hx-target="this" hx-swap="outerHTML" method="POST" action="/subscribe" >
+      <div class="mt-5 lg:mt-8 flex flex-col items-center gap-2 sm:flex-row sm:gap-3">
+        <input type="text" id="hero-input" name="hero-input" class="py-3 px-4 block w-full border-gray-200 rounded-lg 
+            text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none 
+            bg-slate-900 border-gray-700 text-gray-400 focus:ring-gray-600" placeholder="Enter your email">
+        <button type="submit" class="w-full sm:w-auto whitespace-nowrap py-3 px-4 inline-flex justify-center 
+            items-center gap-x-2 text-sm font-semibold rounded-lg border bg-slate-600 
+            text-white hover:bg-slate-900 disabled:opacity-50 disabled:pointer-events-none focus:outline-none 
+            focus:ring-1 focus:ring-gray-600">
+          Subscribe
         </button>
-        <div id="loading" class="hidden flex fixed top-0 right-0 left-0">
-            <span class="loader"></span>
-        </div>
+      </div>
     </form>
-</div> 
+  </div>
+</div>
 
 ---
 
