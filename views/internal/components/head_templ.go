@@ -10,6 +10,10 @@ import "context"
 import "io"
 import "bytes"
 
+import (
+	"os"
+)
+
 type Head struct {
 	Title       string
 	Description string
@@ -98,16 +102,26 @@ func (h Head) Render() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><script async src=\"https://mbv-analytics.fly.dev/script.js\" data-website-id=\"234f6bd6-823d-41e5-b84f-f351301f0e33\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var3 := ``
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var3)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
+		if os.Getenv("ENVIRONMENT") == "production" {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<script async src=\"https://mbv-analytics.fly.dev/script.js\" data-website-id=\"234f6bd6-823d-41e5-b84f-f351301f0e33\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Var3 := ``
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var3)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</script>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</script></head>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</head>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
