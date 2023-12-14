@@ -72,5 +72,5 @@ func (c *Controller) Redirect(ctx echo.Context) error {
 }
 
 func (c *Controller) formatArticleSlug(slug string) string {
-	return fmt.Sprintf("http://localhost:8000/posts/%s", slug)
+	return fmt.Sprintf("posts/%s", slug)
 }

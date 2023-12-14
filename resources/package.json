@@ -6,7 +6,7 @@
   "scripts": {
     "serve-mails": "maizzle serve",
     "dev-mails": "cd mails && maizzle build",
-    "build-mails": "maizzle build production",
+    "build-mails": "cd mails && maizzle build production",
     "watch-css": "npx tailwindcss -c ./tailwind/config.js -i ./tailwind/base.css -o ../static/css/output.css --watch",
     "build-css": "npx tailwindcss -c ./tailwind/config.js -i ./tailwind/base.css -o ../static/css/output.css --minify"
   },

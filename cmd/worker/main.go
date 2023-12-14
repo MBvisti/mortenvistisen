@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 
+	"github.com/MBvisti/grafto/pkg/config"
 	"github.com/MBvisti/grafto/pkg/mail"
 	"github.com/MBvisti/grafto/pkg/queue"
 	"github.com/MBvisti/grafto/pkg/telemetry"
@@ -13,7 +14,7 @@ import (
 func main() {
 	ctx := context.Background()
 
-	databaseConnection := database.SetupDatabaseConnection(os.Getenv("DATABASE_URL"))
+	databaseConnection := database.SetupDatabaseConnection(config.Cfg.GetDatabaseURL())
 	defer databaseConnection.Close(ctx)
 
 	postmark := mail.NewPostmark(os.Getenv("POSTMARK_API_TOKEN"))

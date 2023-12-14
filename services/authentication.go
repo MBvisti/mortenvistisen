@@ -17,7 +17,7 @@ import (
 )
 
 var (
-	passwordPepper   = config.GetPwdPepper()
+	passwordPepper   = config.Cfg.GetPwdPepper()
 	authSessionStore = sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")), []byte(os.Getenv("SESSION_ENCRYPTION_KEY")))
 )
 
@@ -85,7 +85,7 @@ func CreateAuthenticatedSession(r *http.Request, w http.ResponseWriter, userID u
 	}
 
 	session.Options.HttpOnly = true
-	session.Options.Domain = os.Getenv("HOST")
+	session.Options.Domain = os.Getenv("APP_HOST")
 	session.Options.Secure = true
 	session.Options.MaxAge = 86400
 
