@@ -31,7 +31,10 @@ func main() {
 	router.Use(slogecho.New(logger))
 	router.Use(middleware.Recover())
 
-	conn := database.SetupDatabaseConnection(config.Cfg.GetDatabaseURL())
+	dbCtx := context.Background()
+	conn := database.SetupDatabaseConnection(dbCtx, config.Cfg.GetDatabaseURL())
+	defer conn.Close(dbCtx)
+
 	db := database.New(conn)
 
 	q := queue.New(db)

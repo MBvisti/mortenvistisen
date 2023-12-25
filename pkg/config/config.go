@@ -30,9 +30,9 @@ func setupConfiguration() Config {
 }
 
 func (c Config) GetDatabaseURL() string {
-	return fmt.Sprintf("%s://%s:%s@%s:%s/%s",
+	return fmt.Sprintf("%s://%s:%s@%s:%s/%s?sslmode=%s",
 		c.database.DatabaseKind, c.database.User, c.database.Password, c.database.Host, c.database.Port,
-		c.database.Name,
+		c.database.Name, c.database.SSL_MODE,
 	)
 }
 
