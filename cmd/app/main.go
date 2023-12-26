@@ -32,8 +32,8 @@ func main() {
 	router.Use(middleware.Recover())
 
 	dbCtx := context.Background()
-	conn := database.SetupDatabaseConnection(dbCtx, config.Cfg.GetDatabaseURL())
-	defer conn.Close(dbCtx)
+	conn := database.SetupDatabasePool(dbCtx, config.Cfg.GetDatabaseURL())
+	defer conn.Close()
 
 	db := database.New(conn)
 

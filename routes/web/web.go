@@ -22,6 +22,6 @@ func (w *Web) SetupWebRoutes() {
 
 	w.PostRoutes()
 	w.HomeRoutes()
-	w.UserRoutes()
+	// w.UserRoutes()
 	w.DashboardRoutes()
 }
