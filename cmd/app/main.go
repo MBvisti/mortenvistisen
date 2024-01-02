@@ -2,9 +2,8 @@ package main
 
 import (
 	"context"
-	"os"
-
 	"log/slog"
+	"os"
 
 	"github.com/MBvisti/grafto/controllers"
 	"github.com/MBvisti/grafto/pkg/config"

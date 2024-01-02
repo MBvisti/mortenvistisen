@@ -27,7 +27,7 @@ func (c *Controller) Article(ctx echo.Context) error {
 			Title:       post.Title,
 			Description: post.Excerpt,
 			Image:       "",
-			Slug:        fmt.Sprintf("http://localhost:8000/%s/%s", "posts", post.Slug),
+			Slug:        fmt.Sprintf("https://mortenvistisen.com/%s/%s", "posts", post.Slug), // TOOD: add base url as env var
 		},
 	})
 }

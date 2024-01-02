@@ -17,6 +17,12 @@ func NewWeb(router *echo.Echo, controllers controllers.Controller) Web {
 	}
 }
 
+func (w *Web) miscRoutes() {
+	w.router.GET("/sitemap.xml", func(c echo.Context) error {
+		return nil
+	})
+}
+
 func (w *Web) SetupWebRoutes() {
 	w.UtilityRoutes()
 
