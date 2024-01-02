@@ -4,11 +4,11 @@ import (
 	"context"
 	"os"
 
-	"github.com/MBvisti/grafto/pkg/config"
-	"github.com/MBvisti/grafto/pkg/mail"
-	"github.com/MBvisti/grafto/pkg/queue"
-	"github.com/MBvisti/grafto/pkg/telemetry"
-	"github.com/MBvisti/grafto/repository/database"
+	"github.com/MBvisti/mortenvistisen/pkg/config"
+	"github.com/MBvisti/mortenvistisen/pkg/mail"
+	"github.com/MBvisti/mortenvistisen/pkg/queue"
+	"github.com/MBvisti/mortenvistisen/pkg/telemetry"
+	"github.com/MBvisti/mortenvistisen/repository/database"
 )
 
 func main() {

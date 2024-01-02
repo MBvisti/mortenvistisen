@@ -6,12 +6,12 @@ import (
 	"os"
 	"strings"
 
-	"github.com/MBvisti/grafto/pkg/mail"
-	"github.com/MBvisti/grafto/pkg/queue"
-	"github.com/MBvisti/grafto/pkg/tokens"
-	"github.com/MBvisti/grafto/posts"
-	"github.com/MBvisti/grafto/repository/database"
-	"github.com/MBvisti/grafto/views"
+	"github.com/MBvisti/mortenvistisen/pkg/mail"
+	"github.com/MBvisti/mortenvistisen/pkg/queue"
+	"github.com/MBvisti/mortenvistisen/pkg/tokens"
+	"github.com/MBvisti/mortenvistisen/posts"
+	"github.com/MBvisti/mortenvistisen/repository/database"
+	"github.com/MBvisti/mortenvistisen/views"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 )
@@ -73,4 +73,8 @@ func (c *Controller) Redirect(ctx echo.Context) error {
 
 func (c *Controller) formatArticleSlug(slug string) string {
 	return fmt.Sprintf("posts/%s", slug)
+}
+
+func (c *Controller) buildURLFromSlug(slug string) string {
+	return fmt.Sprintf("%s://%s/%s", os.Getenv("APP_SCHEME"), os.Getenv("APP_HOST"), slug)
 }

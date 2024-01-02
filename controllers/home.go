@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"github.com/MBvisti/grafto/pkg/telemetry"
-	"github.com/MBvisti/grafto/views"
+	"github.com/MBvisti/mortenvistisen/pkg/telemetry"
+	"github.com/MBvisti/mortenvistisen/views"
 	"github.com/labstack/echo/v4"
 )
 
@@ -13,7 +13,7 @@ func (c *Controller) HomeIndex(ctx echo.Context) error {
 		return err
 	}
 
-	posts := make([]views.Post, 0, 5)
+	posts := make([]views.Post, 0, len(data))
 
 	for _, d := range data {
 		tagsData, err := c.db.GetTagsForPost(ctx.Request().Context(), d.ID)
@@ -35,15 +35,13 @@ func (c *Controller) HomeIndex(ctx echo.Context) error {
 		})
 	}
 
-	return views.HomeIndex(ctx, views.HomePageData{
-		Posts: posts,
-	})
+	return views.HomePage(posts).Render(views.ExtractRenderDeps(ctx))
 }
 
-func (c *Controller) About(ctx echo.Context) error {
-	return views.About(ctx)
-}
-
-func (c *Controller) Newsletter(ctx echo.Context) error {
-	return views.Newsletter(ctx)
-}
+// func (c *Controller) About(ctx echo.Context) error {
+// 	return views.About(ctx)
+// }
+//
+// func (c *Controller) Newsletter(ctx echo.Context) error {
+// 	return views.Newsletter(ctx)
+// }

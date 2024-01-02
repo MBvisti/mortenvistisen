@@ -3,7 +3,7 @@ package api
 import (
 	"log/slog"
 
-	"github.com/MBvisti/grafto/controllers"
+	"github.com/MBvisti/mortenvistisen/controllers"
 	"github.com/labstack/echo/v4"
 )
 

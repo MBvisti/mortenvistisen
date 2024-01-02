@@ -8,8 +8,8 @@ import (
 	"hash/fnv"
 	"time"
 
-	"github.com/MBvisti/grafto/pkg/telemetry"
-	"github.com/MBvisti/grafto/repository/database"
+	"github.com/MBvisti/mortenvistisen/pkg/telemetry"
+	"github.com/MBvisti/mortenvistisen/repository/database"
 	"github.com/google/uuid"
 )
 

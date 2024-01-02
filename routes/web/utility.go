@@ -1,7 +1,7 @@
 package web
 
 import (
-	"github.com/MBvisti/grafto/pkg/telemetry"
+	"github.com/MBvisti/mortenvistisen/pkg/telemetry"
 	"github.com/labstack/echo/v4"
 )
 
@@ -23,5 +23,9 @@ func (w *Web) UtilityRoutes() {
 
 	w.router.GET("/redirect", func(c echo.Context) error {
 		return w.controllers.Redirect(c)
+	})
+
+	w.router.Any("/*", func(c echo.Context) error {
+		return w.controllers.InternalError(c)
 	})
 }

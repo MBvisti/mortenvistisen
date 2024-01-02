@@ -9,11 +9,11 @@ import (
 
 	"log/slog"
 
-	"github.com/MBvisti/grafto/controllers"
-	"github.com/MBvisti/grafto/routes/api"
+	"github.com/MBvisti/mortenvistisen/controllers"
+	"github.com/MBvisti/mortenvistisen/routes/api"
 	"github.com/gorilla/csrf"
 
-	"github.com/MBvisti/grafto/routes/web"
+	"github.com/MBvisti/mortenvistisen/routes/web"
 	"github.com/labstack/echo/v4"
 )
 
@@ -43,7 +43,8 @@ func NewServer(
 		panic("server port env variable empty")
 	}
 
-	if os.Getenv("ENV") == "development" {
+	router.Debug = false
+	if os.Getenv("ENVIRONMENT") == "development" {
 		router.Debug = true
 	}
 

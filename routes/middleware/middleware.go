@@ -3,8 +3,8 @@ package middleware
 import (
 	"net/http"
 
-	"github.com/MBvisti/grafto/pkg/telemetry"
-	"github.com/MBvisti/grafto/services"
+	"github.com/MBvisti/mortenvistisen/pkg/telemetry"
+	"github.com/MBvisti/mortenvistisen/services"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )

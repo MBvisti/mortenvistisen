@@ -1,9 +1,9 @@
 package views
 
 // import (
-// 	"github.com/MBvisti/grafto/views/internal/components"
-// 	"github.com/MBvisti/grafto/views/internal/layouts"
-// 	"github.com/MBvisti/grafto/views/internal/pages"
+// 	"github.com/MBvisti/mortenvistisen/views/internal/components"
+// 	"github.com/MBvisti/mortenvistisen/views/internal/layouts"
+// 	"github.com/MBvisti/mortenvistisen/views/internal/pages"
 // 	"github.com/go-playground/validator/v10"
 // 	"github.com/gorilla/csrf"
 // 	"github.com/labstack/echo/v4"

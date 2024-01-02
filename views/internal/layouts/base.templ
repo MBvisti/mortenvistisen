@@ -1,52 +1,14 @@
 package layouts
 
 import ( 
-	"os"
-	"github.com/MBvisti/grafto/views/internal/components" 
+	"github.com/MBvisti/mortenvistisen/views/internal/components" 
 )
 
-type MetaComponent struct {
-	Name     string
-	Content  string
-	Property string
-}
 
-type HeadData struct {
-	MetaComponents []MetaComponent
-	Title	       string
-	Slug           string
-}
-
-templ BaseTwo(headData HeadData) {
+templ Base(head templ.Component) {
 	<!DOCTYPE html>
 	<html lang="en" class="h-full">
-		<head>
-			<meta charset="UTF-8"/>
-			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-			<meta name="twitter:card" content="summary_large_image"/>
-			<meta name="twitter:creator" content="@MBvisti"/>
-			<title>
-				if headData.Title == "" {
-						Morten Vistisen
-				} else  {
-					 { headData.Title } | Morten Vistisen
-				}
-			</title>
-			<link href="/static/css/output.css" rel="stylesheet"/>
-			<link rel="apple-touch-icon" sizes="180x180" href="/static/images/apple-touch-icon.png"/>
-			<link rel="icon" type="image/png" sizes="32x32" href="/static/images/favicon-32x32.png"/>
-			<link rel="icon" type="image/png" sizes="16x16" href="/static/images/favicon-16x16.png"/>
-			for _, metaComponent := range headData.MetaComponents {
-				<meta name={ metaComponent.Name } content={ metaComponent.Content } property={ metaComponent.Property } />
-			}
-			<link
- 				rel="canonical"
- 				href={ headData.Slug }
-			/>
-			if os.Getenv("ENVIRONMENT") == "production" {
-				<script async src="https://mbv-analytics.fly.dev/script.js" data-website-id="234f6bd6-823d-41e5-b84f-f351301f0e33"></script>
-			}
-		</head>
+		@head
 		<body class="container mx-auto h-full bg-gray-800">
 			@components.Nav()
 			{ children... }

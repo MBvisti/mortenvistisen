@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/MBvisti/grafto/pkg/telemetry"
+	"github.com/MBvisti/mortenvistisen/pkg/telemetry"
 	"github.com/robfig/cron/v3"
 )
 

@@ -9,15 +9,15 @@ func (w *Web) HomeRoutes() {
 		return w.controllers.HomeIndex(c)
 	})
 
-	w.router.GET("/about", func(c echo.Context) error {
-		return w.controllers.About(c)
-	})
-
-	w.router.GET("/newsletter", func(c echo.Context) error {
-		return w.controllers.Newsletter(c)
-	})
-
-	w.router.GET("/projects", func(c echo.Context) error {
-		return w.controllers.Projects(c)
-	})
+	// w.router.GET("/about", func(c echo.Context) error {
+	// 	return w.controllers.About(c)
+	// })
+	//
+	// w.router.GET("/newsletter", func(c echo.Context) error {
+	// 	return w.controllers.Newsletter(c)
+	// })
+	//
+	// w.router.GET("/projects", func(c echo.Context) error {
+	// 	return w.controllers.Projects(c)
+	// })
 }

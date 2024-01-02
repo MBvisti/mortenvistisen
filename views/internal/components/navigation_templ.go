@@ -11,7 +11,7 @@ import "io"
 import "bytes"
 
 import (
-	"github.com/MBvisti/grafto/routes/middleware"
+	"github.com/MBvisti/mortenvistisen/routes/middleware"
 )
 
 func extractAuthStatus(ctx context.Context) bool {

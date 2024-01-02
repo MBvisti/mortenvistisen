@@ -1,7 +1,7 @@
 package web
 
 import (
-	"github.com/MBvisti/grafto/controllers"
+	"github.com/MBvisti/mortenvistisen/controllers"
 	"github.com/labstack/echo/v4"
 )
 

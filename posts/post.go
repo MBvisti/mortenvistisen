@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"embed"
 
-	"github.com/MBvisti/grafto/pkg/telemetry"
+	"github.com/MBvisti/mortenvistisen/pkg/telemetry"
 	chromahtml "github.com/alecthomas/chroma/v2/formatters/html"
 	"github.com/yuin/goldmark"
 	highlighting "github.com/yuin/goldmark-highlighting/v2"
