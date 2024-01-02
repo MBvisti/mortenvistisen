@@ -26,8 +26,8 @@ func (w *Web) miscRoutes() {
 func (w *Web) SetupWebRoutes() {
 	w.UtilityRoutes()
 
-	w.PostRoutes()
-	w.HomeRoutes()
+	w.ArticleRoutes()
+	w.SiteRoutes()
 	// w.UserRoutes()
 	w.DashboardRoutes()
 }

@@ -38,10 +38,20 @@ func (c *Controller) HomeIndex(ctx echo.Context) error {
 	return views.HomePage(posts).Render(views.ExtractRenderDeps(ctx))
 }
 
-// func (c *Controller) About(ctx echo.Context) error {
-// 	return views.About(ctx)
-// }
-//
-// func (c *Controller) Newsletter(ctx echo.Context) error {
-// 	return views.Newsletter(ctx)
-// }
+func (c *Controller) About(ctx echo.Context) error {
+	return views.AboutPage(views.Head{
+		Title:       "About",
+		Description: "Contains information about the site owner, Morten Vistisen",
+		Slug:        c.buildURLFromSlug("/about"),
+		MetaType:    "website",
+	}).Render(views.ExtractRenderDeps(ctx))
+}
+
+func (c *Controller) Newsletter(ctx echo.Context) error {
+	return views.NewsletterPage(views.Head{
+		Title:       "Newsletter",
+		Description: "Signup page for joining Morten's newsletter",
+		Slug:        c.buildURLFromSlug("/newsletter"),
+		MetaType:    "website",
+	}).Render(views.ExtractRenderDeps(ctx))
+}
