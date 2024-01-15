@@ -1,0 +1,21 @@
+Subscriber report
+
+New subcriber activity
+
+http://0.0.0.0:8000
+
+Hi,
+
+there is a new subscription event:
+
+‍
+{{ . }}
+
+‍
+
+The kickstarter repository for full-stack Go apps, using your grandfather's technology.
+
+Github
+https://github.com/MBvisti/grafto
+•
+Twitter https://twitter.com/mbvisti

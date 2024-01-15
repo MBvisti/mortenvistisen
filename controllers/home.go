@@ -41,8 +41,9 @@ func (c *Controller) HomeIndex(ctx echo.Context) error {
 func (c *Controller) About(ctx echo.Context) error {
 	return views.AboutPage(views.Head{
 		Title:       "About",
-		Description: "Contains information about the site owner, Morten Vistisen",
-		Slug:        c.buildURLFromSlug("/about"),
+		Description: "Contains information about the site owner, Morten Vistisen, the purpose of the site and the technologies used to build it.",
+		Slug:        c.buildURLFromSlug("about"),
+		Image:       "https://mortenvistisen.com/static/images/mbv.png",
 		MetaType:    "website",
 	}).Render(views.ExtractRenderDeps(ctx))
 }
@@ -50,8 +51,9 @@ func (c *Controller) About(ctx echo.Context) error {
 func (c *Controller) Newsletter(ctx echo.Context) error {
 	return views.NewsletterPage(views.Head{
 		Title:       "Newsletter",
-		Description: "Signup page for joining Morten's newsletter",
-		Slug:        c.buildURLFromSlug("/newsletter"),
+		Description: "Signup page for joining Morten's newsletter where he shares his thoughts on software development, business and life.",
+		Slug:        c.buildURLFromSlug("newsletter"),
 		MetaType:    "website",
+		Image:       "https://mortenvistisen.com/static/images/mbv.png",
 	}).Render(views.ExtractRenderDeps(ctx))
 }

@@ -6,26 +6,7 @@ _Side note_: I write Go for a living and have been coding professionally for the
 
 ---
 
-<div class="max-w-6xl py-10 px-4 sm:px-6 lg:px-8 lg:py-16 mx-auto">
-  <div class="max-w-xl text-center mx-auto">
-    <div class="mb-5">
-      <h3 class="text-2xl font-bold md:text-3xl md:leading-tight text-white">Consider subscribing to my newsletter</h2>
-    </div>
-    <form hx-post="/subscribe" hx-target="this" hx-swap="outerHTML" method="POST" action="/subscribe" >
-      <div class="mt-5 lg:mt-8 flex flex-col items-center gap-2 sm:flex-row sm:gap-3">
-        <input type="text" id="hero-input" name="hero-input" class="py-3 px-4 block w-full border-gray-200 rounded-lg 
-            text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none 
-            bg-slate-900 border-gray-700 text-gray-400 focus:ring-gray-600" placeholder="Enter your email">
-        <button type="submit" class="w-full sm:w-auto whitespace-nowrap py-3 px-4 inline-flex justify-center 
-            items-center gap-x-2 text-sm font-semibold rounded-lg border bg-slate-600 
-            text-white hover:bg-slate-900 disabled:opacity-50 disabled:pointer-events-none focus:outline-none 
-            focus:ring-1 focus:ring-gray-600">
-          Subscribe
-        </button>
-      </div>
-    </form>
-  </div>
-</div>
+<div id="subscribe-form" class="max-w-6xl py-10 px-4 sm:px-6 lg:px-8 lg:py-16 mx-auto"></div>
 
 ---
 

@@ -1,7 +1,11 @@
 package controllers
 
 import (
+	"log"
+
+	"github.com/MBvisti/mortenvistisen/pkg/telemetry"
 	"github.com/MBvisti/mortenvistisen/views"
+	"github.com/gorilla/csrf"
 	"github.com/labstack/echo/v4"
 )
 
@@ -32,15 +36,31 @@ func (c *Controller) Article(ctx echo.Context) error {
 		}
 	}
 
+	latestArticles, err := c.db.GetLatestPosts(ctx.Request().Context())
+	if err != nil {
+		return err
+	}
+
+	otherArticles := make(map[string]string, len(latestArticles))
+
+	for _, article := range latestArticles {
+		if article.Slug != post.Slug {
+			otherArticles[article.Title] = c.buildURLFromSlug("posts/" + post.Slug)
+		}
+	}
+
 	return views.ArticlePage(views.ArticlePageData{
-		Content:     postContent,
-		Title:       post.Title,
-		ReleaseDate: post.ReleasedAt.Time,
+		Content:           postContent,
+		Title:             post.Title,
+		ReleaseDate:       post.ReleasedAt.Time,
+		OtherArticleLinks: otherArticles,
+		CsrfToken:         csrf.Token(ctx.Request()),
 	}, views.Head{
 		Title:       post.Title,
 		Description: post.Excerpt,
-		Slug:        c.buildURLFromSlug(post.Slug),
+		Slug:        c.buildURLFromSlug("posts/" + post.Slug),
 		MetaType:    "article",
+		Image:       "https://mortenvistisen.com/static/images/mbv.png",
 		ExtraMeta: []views.MetaContent{
 			{
 				Content: "Morten Vistisen",
@@ -60,4 +80,25 @@ func (c *Controller) Article(ctx echo.Context) error {
 			},
 		},
 	}).Render(views.ExtractRenderDeps(ctx))
+}
+
+type SubscriptionEventForm struct {
+	Email string `form:"hero-input"`
+	Title string `form:"article-title"`
+}
+
+func (c *Controller) SubscriptionEvent(ctx echo.Context) error {
+	var form SubscriptionEventForm
+	if err := ctx.Bind(&form); err != nil {
+		if err := c.mail.Send(ctx.Request().Context(), "hi@mortenvistisen.com", "sub-blog@mortenvistisen.com", "Failed to subscribe", "sub_report", err.Error()); err != nil {
+			telemetry.Logger.Error("Failed to send email", "error", err)
+		}
+		return ctx.String(200, "You're now subscribed!")
+	}
+	log.Println(form.Email)
+	if err := c.mail.Send(ctx.Request().Context(), "hi@mortenvistisen.com", "sub-blog@mortenvistisen.com", "New subscriber", "sub_report", form); err != nil {
+		telemetry.Logger.Error("Failed to send email", "error", err)
+	}
+
+	return ctx.String(200, "You're now subscribed!")
 }

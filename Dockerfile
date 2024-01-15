@@ -1,7 +1,7 @@
 FROM node:18.16.1 AS build-resources
 
 ENV CI=true
-ENV APP_HOST=mbv-blog.fly.dev
+ENV APP_HOST=mortenvistisen.com
 ENV APP_SCHEME=https
 
 WORKDIR /
@@ -41,5 +41,6 @@ COPY --from=build-go /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=build-go app app
 COPY --from=build-go worker worker
 COPY --from=build-go static static 
+COPY --from=build-go resources/seo resources/seo
 
 CMD ["app", "worker"]

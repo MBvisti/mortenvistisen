@@ -1,10 +1,4 @@
-<strong>2022 update</strong>. At the time of writing this update, it's been over a year since I 
-published this article. At the end of this article I promise a part two, which I must 
-admit, will probably never come for a couple of reasons. I no longer use this 
-structure (I still think this article gives people some help to get going, but would 
-like to update it at one point. I suggest you checkout this [repo](https://github.com/bnkamalesh/goapp). 
-Secondly, in regards to integration testing, I've just relased a full-length article 
-about it which you can find [here](https://mortenvistisen.com/posts/how-to-do-integration-test-with-go).
+<strong>2022 update</strong>. At the time of writing this update, it's been over a year since I  published this article. At the end of this article I promise a part two, which I must  admit, will probably never come for a couple of reasons. I no longer use this  structure (I still think this article gives people some help to get going, but would  like to update it at one point. I suggest you checkout this [repo](https://github.com/bnkamalesh/goapp).  Secondly, in regards to integration testing, I've just relased a full-length article about it which you can find [here](https://mortenvistisen.com/posts/integration-tests-with-docker-and-go).
 
 Go is an amazing language. It’s simple, easy to reason about and gives you much tooling right out of the box. However, when I started with Go I struggled to figure out how to structure my applications in a way that didn’t use “enterprisey” approaches. This is my take on structuring Golang applications that start out simple, but with the flexibility to grow, and what I would have wanted when I started with Go.
 
@@ -104,7 +98,7 @@ weight-tracker
 
 Go ahead and create the above structure in your designated folder.
 
-Most go projects seem to be following a convention of having a *cmd* and a *pkg* directory. The *cmd* will be the entry point into the program and gives you the flexibility to interact with the program in several ways. The *pkg* directory will contain everything else:
+Most go projects seem to be following a convention of having a *cmd* and a *pkg* directory. The *cmd* will be the entry point into the program and gives you the flexibility to interact with the program in several ways.  he *pkg* directory will contain everything else:
 - routes
 - database interactions
 - services etc.
@@ -198,8 +192,7 @@ func setupDatabase(connString string) (*sql.DB, error) {
 }
 ```
 
-You should have quite a few errors showing in your IDE now, we are fixing that in a moment.
-But first off, let me explain what is going on here. In our *func main()* we call a method named *run*, that returns an error (or nil, if there is no error). If *run* should return an error our programs exits and gives us an error message. Setting up our *main* function in this way allows us to test it and thereby following the element of a robust service structure, testability. This way of setting up the main function comes from Mat Ryer, who talks more about it in his [blog post](https://pace.dev/blog/2020/02/12/why-you-shouldnt-use-func-main-in-golang-by-mat-ryer.html).
+You should have quite a few errors showing in your IDE now, we are fixing that in a moment. But first off, let me explain what is going on here. In our *func main()* we call a method named *run*, that returns an error (or nil, if there is no error). If *run* should return an error our programs exits and gives us an error message. Setting up our *main* function in this way allows us to test it and thereby following the element of a robust service structure, testability. This way of setting up the main function comes from Mat Ryer, who talks more about it in his [blog post](https://pace.dev/blog/2020/02/12/why-you-shouldnt-use-func-main-in-golang-by-mat-ryer.html).
 
 The next two topics we need to discuss are **Clean Architecture** and **Dependency Injection**. You might have heard about Clean Architecture under a different name, as a few people wrote about it around the same time. The majority of my inspiration comes from [Robert C. Martin](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html) so this is who I will be referencing.
 
@@ -366,8 +359,7 @@ At this point, we only need to sync a few dependencies: Gin Web Framework and a 
   go get github.com/lib/pg
 ```
 
-Everything should be ready now, so go into your terminal and write: ```go go run
-cmd/server/main.go```, visit ```sh http://localhost:8080/v1/api/status```, and you should receive a message along the lines of:
+Everything should be ready now, so go into your terminal and write: ```go go run cmd/server/main.go```, visit ```sh http://localhost:8080/v1/api/status```, and you should receive a message along the lines of:
 
 ```json
 {
