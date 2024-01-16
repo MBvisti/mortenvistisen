@@ -27,8 +27,6 @@ WHERE
     released_at IS NOT NULL AND draft = false
 ORDER BY
     released_at DESC
-LIMIT
-    5
 `
 
 func (q *Queries) GetLatestPosts(ctx context.Context) ([]Post, error) {

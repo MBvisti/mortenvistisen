@@ -42,6 +42,16 @@ type PostsTag struct {
 	TagID  uuid.UUID
 }
 
+type Subscriber struct {
+	ID           uuid.UUID
+	CreatedAt    pgtype.Timestamptz
+	UpdatedAt    pgtype.Timestamptz
+	Email        sql.NullString
+	SubscribedAt pgtype.Timestamptz
+	Referer      sql.NullString
+	IsVerified   pgtype.Bool
+}
+
 type Tag struct {
 	ID   uuid.UUID
 	Name string

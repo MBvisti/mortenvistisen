@@ -45,7 +45,7 @@ func (c *Controller) Article(ctx echo.Context) error {
 
 	for _, article := range latestArticles {
 		if article.Slug != post.Slug {
-			otherArticles[article.Title] = c.buildURLFromSlug("posts/" + post.Slug)
+			otherArticles[article.Title] = c.buildURLFromSlug("posts/" + article.Slug)
 		}
 	}
 

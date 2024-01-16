@@ -17,7 +17,7 @@ include_ext = ["go", "templ", "md"]
  # Ignore these filename extensions or directories.
 exclude_dir = ["tmp", "static"]
 # Watch these directories if you specified.
-include_dir = ["posts"]
+include_dir = []
 # Watch these files.
 include_file = []
 # Exclude files.

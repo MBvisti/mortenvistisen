@@ -28,6 +28,21 @@
   <priority>0.80</priority>
 </url>
 <url>
+  <loc>https://mortenvistisen.com/posts/one-month-one-dollar-part-two</loc>
+  <lastmod>2024-01-15T17:01:54+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://mortenvistisen.com/posts/one-month-one-dollar-part-one</loc>
+  <lastmod>2024-01-15T17:01:54+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://mortenvistisen.com/posts/wantrepreneurship-and-getting-out-of-tutorial-hell</loc>
+  <lastmod>2024-01-15T17:01:54+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
   <loc>https://mortenvistisen.com/posts/how-to-build-a-simple-blog-using-rust</loc>
   <lastmod>2024-01-03T09:43:09+00:00</lastmod>
   <priority>0.80</priority>
@@ -42,6 +57,4 @@
   <lastmod>2024-01-03T09:43:09+00:00</lastmod>
   <priority>0.80</priority>
 </url>
-
-
 </urlset>

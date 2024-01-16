@@ -1,5 +1,3 @@
-# One Month One Dollar
-
 ## High-stakes cash games in Vegas
 
 When I was a younger and slightly dumber man I was captivated by the allure of online poker and high-stakes No-limit Hold em. 
@@ -26,26 +24,7 @@ business partner to do the challenge with me. So, from the 1st of February 2023,
 and I will be attempting at starting completely from scratch and after 30 days of work, have a product that will have 
 made more than 1 dollar. A million seemed to bit too ambitious.
 
----
-<div class="form-control min-w-fit">
-    <h6 class="text-lg font-semibold">Want to get notified whenever I release a new post?</h6>
-    <h6 class="text-lg">Consider subscribing to my newsletter</h6>
-    <form hx-post="/subscribe" hx-target="this" hx-swap="outerHTML" method="POST" action="/subscribe" class="mt-2 relative min-w-[20rem]"
-        data-loading-target="#loading" data-loading-class-remove="hidden">
-        <input type="hidden" name="referer" value="one-month-one-dollar-part-one" />
-        <input data-loading-disable required name="email" autocomplete="email" type="email"
-            placeholder="Enter email to start" class="input input-bordered w-full text-lg pr-20 md:pr-32" />
-        <button data-loading-disable type="submit"
-            class="btn btn-primary absolute top-0 right-0 rounded-l-none umami--click--newsletter-one-month-one-dollar-part-one">
-            Get Notified
-        </button>
-        <div id="loading" class="hidden flex fixed top-0 right-0 left-0">
-            <span class="loader"></span>
-        </div>
-    </form>
-</div> 
-
----
+<div id="subscribe-form" class="max-w-6xl pt-2 pb-5 px-4 sm:px-6 lg:px-8 mx-auto"></div>
 
 ## Isn't this just 12 month 12 start-ups but shorter
 

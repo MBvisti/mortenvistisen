@@ -15,9 +15,7 @@ FROM
 WHERE
     released_at IS NOT NULL AND draft = false
 ORDER BY
-    released_at DESC
-LIMIT
-    5;
+    released_at DESC;
 
 -- name: GetPostBySlug :one
 SELECT

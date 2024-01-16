@@ -23,15 +23,12 @@ func NewWeb(router *echo.Echo, controllers controllers.Controller) Web {
 
 func (w *Web) miscRoutes() {
 	w.router.GET("/robots.txt", func(c echo.Context) error {
-		// Send the sitemap file
 		return c.File("./resources/seo/robots.txt")
 	})
 	w.router.GET("/sitemap.xml", func(c echo.Context) error {
-		// Send the sitemap file
 		return c.File("./resources/seo/sitemap.xml")
 	})
 	w.router.GET("/static/css/output.css", func(c echo.Context) error {
-
 		// Set cache headers for one year (adjust as needed)
 		cacheTime := time.Now().AddDate(0, 0, 1)
 

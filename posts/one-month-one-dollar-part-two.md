@@ -22,26 +22,7 @@ our value proposition. Both good and bad, we have new information we can react t
 direction. However, we didn't get any new calls or follow-ups after this. It could be due to people just being busy 
 but I would guess more that we didn't pursue this aggressively enough.
 
----
-<div class="form-control min-w-fit">
-    <h6 class="text-lg font-semibold">Want to get notified whenever I release a new post?</h6>
-    <h6 class="text-lg">Consider subscribing to my newsletter</h6>
-    <form hx-post="/subscribe" hx-target="this" hx-swap="outerHTML" method="POST" action="/subscribe" class="mt-2 relative min-w-[20rem]"
-        data-loading-target="#loading" data-loading-class-remove="hidden">
-        <input type="hidden" name="referer" value="one-month-one-dollar-part-two" />
-        <input data-loading-disable required name="email" autocomplete="email" type="email"
-            placeholder="Enter email to start" class="input input-bordered w-full text-lg pr-20 md:pr-32" />
-        <button data-loading-disable type="submit"
-            class="btn btn-primary absolute top-0 right-0 rounded-l-none umami--click--newsletter-one-month-one-dollar-part-two">
-            Get Notified
-        </button>
-        <div id="loading" class="hidden flex fixed top-0 right-0 left-0">
-            <span class="loader"></span>
-        </div>
-    </form>
-</div> 
-
----
+<div id="subscribe-form" class="max-w-6xl pt-2 pb-5 px-4 sm:px-6 lg:px-8 mx-auto"></div>
 
 ## What did we learn
 There is something about learning a new skill where it only really manifest itself in your mind, when you try to 

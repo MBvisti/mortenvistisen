@@ -38,7 +38,9 @@ templ (h Head) Build() {
 			<title>
 				if h.Title == "" {
 						Morten Vistisen
-				} else  {
+				} else if h.MetaType == "article" {
+					 { h.Title }
+				} else {
 					 { h.Title } | Morten Vistisen
 				}
 			</title>

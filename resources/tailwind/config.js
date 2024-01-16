@@ -7,6 +7,7 @@ module.exports = {
     "../posts/**/*.md",
     "node_modules/preline/dist/*.js",
   ],
+  darkMode: 'class',
   plugins: [
     require('@tailwindcss/forms'),
     require("@tailwindcss/typography"),

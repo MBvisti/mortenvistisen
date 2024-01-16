@@ -34,26 +34,7 @@ ideation process (market analysis, problem area and feasibility etc.), by actual
 of some of the most common practices and advice I see, when trying to learn about this topic. Should make for a fun 
 re-visit a month or two in the future.
 
----
-<div class="form-control min-w-fit">
-    <h6 class="text-lg font-semibold">Want to get notified whenever I release a new post?</h6>
-    <h6 class="text-lg">Consider subscribing to my newsletter</h6>
-    <form hx-post="/subscribe" hx-target="this" hx-swap="outerHTML" method="POST" action="/subscribe" class="mt-2 relative min-w-[20rem]"
-        data-loading-target="#loading" data-loading-class-remove="hidden">
-        <input type="hidden" name="referer" value="wantrepreneurship-and-getting-out-of-tutorial-hell" />
-        <input data-loading-disable required name="email" autocomplete="email" type="email"
-            placeholder="Enter email to start" class="input input-bordered w-full text-lg pr-20 md:pr-32" />
-        <button data-loading-disable type="submit"
-            class="btn btn-primary absolute top-0 right-0 rounded-l-none umami--click--newsletter-wantrepreneurship-and-getting-out-of-tutorial-hell">
-            Get Notified
-        </button>
-        <div id="loading" class="hidden flex fixed top-0 right-0 left-0">
-            <span class="loader"></span>
-        </div>
-    </form>
-</div> 
-
----
+<div id="subscribe-form" class="max-w-6xl pt-2 pb-5 px-4 sm:px-6 lg:px-8 mx-auto"></div>
 
 ### The indiehacking/entrepreneurial process
 **Warning**: there is a massive amount of postulation here, all of this is to be tested over the coming months.
