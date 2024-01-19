@@ -1,9 +1,0 @@
-title = 'How to build a (simple) blog using Rust'
-file_name = 'how-to-build-a-simple-blog-using-rust'
-description = 'An introduction to writing rust for the web by building a blog'
-tags = ['rust', 'blog', 'actix_web']
-posted = '29/08/2022'
-estimated_reading_time = 13
-author = 'Morten Vistisen'
-thumbnail = 'rusty-logo.png'
-order = 3

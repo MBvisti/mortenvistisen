@@ -1,0 +1,30 @@
+package layouts
+
+import ( 
+	"github.com/MBvisti/mortenvistisen/views/internal/components" 
+)
+
+script currentYear() {
+	const year =  new Date().getFullYear();
+
+	document.getElementById("cur-year-footer").innerHTML = year;
+}
+
+templ Base(head templ.Component) {
+	<!DOCTYPE html>
+	<html lang="en" data-theme="dracula" class="max-w-screen">
+		@head
+		<body>
+			@components.Nav()
+			{ children... }
+			<footer class="flex justify-center mt-10 pb-10 container mx-auto px-20 footer bg-base-100 text-base-content">
+				<aside>
+					<p>Copyright © <span id="cur-year-footer"></span> - All right reserved by MBV Labs</p>
+				</aside>	
+			</footer>
+			@currentYear()
+			<script src="/static/js/htmx.min.js"></script>
+			<script src="/static/js/alpine.js"></script>
+		</body>
+	</html>
+}

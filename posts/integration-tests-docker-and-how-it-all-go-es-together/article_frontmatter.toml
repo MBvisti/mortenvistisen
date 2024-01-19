@@ -1,9 +1,0 @@
-title = 'Integration tests, docker and how it all Go(es) together'
-file_name = 'integration-tests-docker-and-how-it-all-go-es-together '
-description = 'A beginners guide on how to setup, write and execute integration tests in golang'
-tags = ['golang', 'test', 'testing', 'docker', 'integration', 'integration tests']
-posted = '24/01/2022'
-estimated_reading_time = 13
-author = 'Morten Vistisen'
-thumbnail = 'gophers-tinkering.jpeg'
-order = 2
