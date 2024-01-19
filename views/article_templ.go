@@ -34,14 +34,14 @@ func unsafe(html string) templ.Component {
 
 func renderSubscribeForm(csrfToken, title string) templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_renderSubscribeForm_eccf`,
-		Function: `function __templ_renderSubscribeForm_eccf(csrfToken, title){const targetDiv = document.querySelector("#subscribe-form");
+		Name: `__templ_renderSubscribeForm_21cc`,
+		Function: `function __templ_renderSubscribeForm_21cc(csrfToken, title){const targetDiv = document.querySelector("#subscribe-form");
 
 	targetDiv.innerHTML = ` + "`" + `
 		<div class="max-w-xl text-center mx-auto">
 			<div class="mb-5">
 				<h3 class="text-2xl font-bold md:text-3xl md:leading-tight text-white">Monthly technical deep dives.</h3>
-				<p class="text-base">I work with everything from backend dev, systems designs to devops and machine learning. I share my learnings twice a month in tutorial from, so you can pick up new concept faster and expand your technical tool belt.</p>
+				<p class="text-base">I work with everything from backend dev, systems designs to devops and machine learning. I share my learnings twice a month in tutorial form, so you can pick up new concept faster and expand your technical tool belt.</p>
   			</div>
   			<form hx-post="/subscribe" hx-target="this" hx-swap="outerHTML" method="POST" action="/subscribe" >
 				<input type="hidden" name="gorilla.csrf.Token" value="${csrfToken}"/>
@@ -60,8 +60,8 @@ func renderSubscribeForm(csrfToken, title string) templ.ComponentScript {
 			</form>
   		</div>
   ` + "`" + `;}`,
-		Call:       templ.SafeScript(`__templ_renderSubscribeForm_eccf`, csrfToken, title),
-		CallInline: templ.SafeScriptInline(`__templ_renderSubscribeForm_eccf`, csrfToken, title),
+		Call:       templ.SafeScript(`__templ_renderSubscribeForm_21cc`, csrfToken, title),
+		CallInline: templ.SafeScriptInline(`__templ_renderSubscribeForm_21cc`, csrfToken, title),
 	}
 }
 

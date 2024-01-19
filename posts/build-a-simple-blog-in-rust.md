@@ -6,7 +6,7 @@ _Side note_: I write Go for a living and have been coding professionally for the
 
 ---
 
-<div id="subscribe-form" class="max-w-6xl py-10 px-4 sm:px-6 lg:px-8 lg:py-16 mx-auto"></div>
+<div id="subscribe-form" class="max-w-6xl px-4 sm:px-6 lg:px-8 mx-auto"></div>
 
 ---
 

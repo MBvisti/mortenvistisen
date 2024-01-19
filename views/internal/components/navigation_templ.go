@@ -35,7 +35,7 @@ func Nav() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<header class=\"container flex flex-wrap sm:justify-start sm:flex-nowrap z-50 w-full text-sm py-4 bg-gray-800\"><nav class=\"max-w-[85rem] w-full mx-auto px-4 sm:flex sm:items-center sm:justify-between\" aria-label=\"Global\"><div class=\"flex items-center justify-between\"><a class=\"flex-none text-xl font-semibold text-white\" href=\"/\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<nav class=\"container navbar mx-auto px-20 bg-base-100\"><div class=\"flex-1\"><a href=\"/\" class=\"btn btn-ghost text-xl\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -44,62 +44,70 @@ func Nav() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a><div class=\"sm:hidden\"><button type=\"button\" class=\"hs-collapse-toggle p-2 inline-flex justify-center items-center gap-x-2 rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none bg-transparent border-gray-700 text-white hover:bg-white/10 focus:outline-none focus:ring-1 focus:ring-gray-600\" data-hs-collapse=\"#navbar-collapse-with-animation\" aria-controls=\"navbar-collapse-with-animation\" aria-label=\"Toggle navigation\"><svg class=\"hs-collapse-open:hidden flex-shrink-0 w-4 h-4\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"3\" x2=\"21\" y1=\"6\" y2=\"6\"></line><line x1=\"3\" x2=\"21\" y1=\"12\" y2=\"12\"></line><line x1=\"3\" x2=\"21\" y1=\"18\" y2=\"18\"></line></svg> <svg class=\"hs-collapse-open:block hidden flex-shrink-0 w-4 h-4\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M18 6 6 18\"></path><path d=\"m6 6 12 12\"></path></svg></button></div></div><div id=\"navbar-collapse-with-animation\" class=\"hs-collapse hidden overflow-hidden transition-all duration-300 basis-full grow sm:block\"><div class=\"flex flex-col gap-5 mt-5 sm:flex-row sm:items-center sm:justify-end sm:mt-0 sm:ps-5\"><a class=\"font-medium text-blue-500 focus:outline-none focus:ring-1 focus:ring-gray-600\" href=\"/\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a></div><div class=\"flex-none\"><ul class=\"menu menu-horizontal px-1 md:hidden\"><li><details><summary>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var3 := `Home`
+		templ_7745c5c3_Var3 := `Nav`
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var3)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a> <a class=\"font-medium hover:text-gray-400 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-600\" href=\"/newsletter\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</summary><ul class=\"p-2 bg-base-100 rounded-t-none\"><li><a>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var4 := `Newsletter`
+		templ_7745c5c3_Var4 := `Link 1`
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var4)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a> <a class=\"font-medium hover:text-gray-400 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-600\" href=\"/projects\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a></li><li><a>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var5 := `Projects`
+		templ_7745c5c3_Var5 := `Link 2`
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a> <a class=\"font-medium hover:text-gray-400 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-600\" href=\"/about\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a></li></ul></details></li></ul><ul class=\"menu menu-horizontal px-1 hidden md:flex\"><li><a href=\"/\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var6 := `About`
+		templ_7745c5c3_Var6 := `Home`
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var6)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a> ")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a></li><li><a href=\"/newsletter\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if extractAuthStatus(ctx) {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<a class=\"font-medium text-gray-400 hover:text-gray-500\" href=\"/user/logout\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Var7 := `logout`
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
+		templ_7745c5c3_Var7 := `Newsletter`
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div></nav></header>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a></li><li><a href=\"/projects\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Var8 := `Projects`
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var8)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a></li><li><a href=\"/about\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Var9 := `About`
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var9)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a></li></ul></div></nav>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -109,3 +117,28 @@ func Nav() templ.Component {
 		return templ_7745c5c3_Err
 	})
 }
+
+//<header class="container flex flex-wrap sm:justify-start sm:flex-nowrap z-50 w-full text-sm py-4 bg-gray-800">
+//	<nav class="max-w-[85rem] w-full mx-auto px-4 sm:flex sm:items-center sm:justify-between" aria-label="Global">
+//		<div class="flex items-center justify-between">
+//			<a class="flex-none text-xl font-semibold text-white" href="/">MBV</a>
+//			<div class="sm:hidden">
+//				<button type="button" class="hs-collapse-toggle p-2 inline-flex justify-center items-center gap-x-2 rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none bg-transparent border-gray-700 text-white hover:bg-white/10 focus:outline-none focus:ring-1 focus:ring-gray-600" data-hs-collapse="#navbar-collapse-with-animation" aria-controls="navbar-collapse-with-animation" aria-label="Toggle navigation">
+//					<svg class="hs-collapse-open:hidden flex-shrink-0 w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" x2="21" y1="6" y2="6"></line><line x1="3" x2="21" y1="12" y2="12"></line><line x1="3" x2="21" y1="18" y2="18"></line></svg>
+//					<svg class="hs-collapse-open:block hidden flex-shrink-0 w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+//				</button>
+//			</div>
+//		</div>
+//		<div id="navbar-collapse-with-animation" class="hs-collapse hidden overflow-hidden transition-all duration-300 basis-full grow sm:block">
+//			<div class="flex flex-col gap-5 mt-5 sm:flex-row sm:items-center sm:justify-end sm:mt-0 sm:ps-5">
+//				<a class="font-medium text-blue-500 focus:outline-none focus:ring-1 focus:ring-gray-600" href="/">Home</a>
+//				<a class="font-medium hover:text-gray-400 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-600" href="/newsletter">Newsletter</a>
+//				<a class="font-medium hover:text-gray-400 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-600" href="/projects">Projects</a>
+//            <a class="font-medium hover:text-gray-400 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-600" href="/about">About</a>
+//				if  extractAuthStatus(ctx) {
+//					<a class="font-medium text-gray-400 hover:text-gray-500" href="/user/logout">logout</a>
+//				}
+//			</div>
+//		</div>
+//	</nav>
+//</header>
