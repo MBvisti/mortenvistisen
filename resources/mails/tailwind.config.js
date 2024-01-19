@@ -125,6 +125,7 @@ module.exports = {
     preflight: false,
     backgroundOpacity: false,
     borderOpacity: false,
+    boxShadow: false,
     divideOpacity: false,
     placeholderOpacity: false,
     textOpacity: false,

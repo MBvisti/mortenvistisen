@@ -2,14 +2,18 @@ Subscriber report
 
 New subcriber activity
 
-http://0.0.0.0:8000
+undefined://undefined
 
 Hi,
 
 there is a new subscription event:
 
 ‍
-{{ . }}
+Email:
+
+{{ .Email }}
+
+on article: {{ .Title }}
 
 ‍
 

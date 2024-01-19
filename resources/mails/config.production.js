@@ -19,7 +19,7 @@ module.exports = {
       },
     },
   },
-  inlineCSS: true,
+  shorthandInlineCSS: true,
   removeUnusedCSS: true,
   shorthandCSS: true,
   prettify: true,
