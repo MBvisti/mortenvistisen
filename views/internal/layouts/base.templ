@@ -14,7 +14,7 @@ templ Base(head templ.Component) {
 	<!DOCTYPE html>
 	<html lang="en" data-theme="dracula" class="max-w-screen">
 		@head
-		<body>
+		<body class="min-h-screen flex flex-col">
 			@components.Nav()
 			{ children... }
 			<footer class="flex justify-center mt-10 pb-10 container mx-auto px-20 footer bg-base-100 text-base-content">

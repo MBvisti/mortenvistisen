@@ -3158,10 +3158,6 @@ html {
   margin-top: 0.5rem;
 }
 
-.mt-20 {
-  margin-top: 5rem;
-}
-
 .mt-4 {
   margin-top: 1rem;
 }
@@ -3172,6 +3168,10 @@ html {
 
 .mt-7 {
   margin-top: 1.75rem;
+}
+
+.mb-12 {
+  margin-bottom: 3rem;
 }
 
 .block {
@@ -3232,6 +3232,10 @@ html {
 
 .h-full {
   height: 100%;
+}
+
+.h-screen {
+  height: 100vh;
 }
 
 .min-h-screen {
@@ -3629,11 +3633,6 @@ html {
   padding-bottom: 0.25rem;
 }
 
-.py-10 {
-  padding-top: 2.5rem;
-  padding-bottom: 2.5rem;
-}
-
 .py-2 {
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
@@ -3657,11 +3656,6 @@ html {
 .py-6 {
   padding-top: 1.5rem;
   padding-bottom: 1.5rem;
-}
-
-.py-0 {
-  padding-top: 0px;
-  padding-bottom: 0px;
 }
 
 .pb-0 {
@@ -4647,11 +4641,6 @@ article > pre {
   .lg\:px-8 {
     padding-left: 2rem;
     padding-right: 2rem;
-  }
-
-  .lg\:py-16 {
-    padding-top: 4rem;
-    padding-bottom: 4rem;
   }
 
   .lg\:ps-72 {

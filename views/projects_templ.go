@@ -31,7 +31,7 @@ func ProjectsPage(head Head) templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<main id=\"content\" role=\"main\" class=\"my-auto\"><div class=\"text-center py-5 px-4 sm:px-6 md:px-32 2xl:px-56\"><h1 class=\"block text-2xl font-bold text-white sm:text-4xl\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"my-auto flex flex-col text-center py-5 px-4 sm:px-6 md:px-32 2xl:px-56\"><h1 class=\"mb-12 block text-2xl font-bold text-white sm:text-4xl\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -40,7 +40,16 @@ func ProjectsPage(head Head) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h1></div></main>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h1><p>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Var4 := `This page is still under construction.`
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var4)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
