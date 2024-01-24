@@ -16,6 +16,7 @@ import (
 	"github.com/golang-module/carbon/v2"
 	"github.com/gosimple/slug"
 	"time"
+	"unicode/utf8"
 )
 
 type ArticlePageData struct {
@@ -66,6 +67,22 @@ func renderSubscribeForm(csrfToken, title, slugTitle string) templ.ComponentScri
 	}
 }
 
+func truncateSlug(slug string, maxLength int) string {
+	// Calculate the rune count in the slug
+	runeCount := utf8.RuneCountInString(slug)
+
+	// If the slug is within the allowed length, return it as is
+	if runeCount <= maxLength {
+		return slug
+	}
+
+	// If the slug is longer, truncate it to the allowed length
+	runes := []rune(slug)
+	truncatedSlug := string(runes[:maxLength])
+
+	return truncatedSlug
+}
+
 func ArticlePage(data ArticlePageData, head Head) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
@@ -92,7 +109,7 @@ func ArticlePage(data ArticlePageData, head Head) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(data.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 60, Col: 34}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 77, Col: 34}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -106,7 +123,7 @@ func ArticlePage(data ArticlePageData, head Head) templ.Component {
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s %v, %v", carbon.CreateFromStdTime(data.ReleaseDate).ToShortMonthString(),
 				carbon.CreateFromStdTime(data.ReleaseDate).DayOfMonth(), carbon.CreateFromStdTime(data.ReleaseDate).Year()))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 63, Col: 109}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 80, Col: 109}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -168,7 +185,7 @@ func ArticlePage(data ArticlePageData, head Head) templ.Component {
 				var templ_7745c5c3_Var9 string
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 74, Col: 18}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 91, Col: 18}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
@@ -183,7 +200,7 @@ func ArticlePage(data ArticlePageData, head Head) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = renderSubscribeForm(data.CsrfToken, data.Title, slug.Make(data.Title)).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = renderSubscribeForm(data.CsrfToken, data.Title, truncateSlug(slug.Make(data.Title), 37)).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
