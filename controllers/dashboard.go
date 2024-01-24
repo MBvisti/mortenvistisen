@@ -45,3 +45,7 @@ func (c *Controller) DeleteSubscriber(ctx echo.Context) error {
 
 	return ctx.Redirect(http.StatusSeeOther, "/dashboard/subscribers")
 }
+
+func (c *Controller) DashboardArticles(ctx echo.Context) error {
+	return dashboard.Articles().Render(views.ExtractRenderDeps(ctx))
+}
