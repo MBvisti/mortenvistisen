@@ -12,7 +12,7 @@ import "bytes"
 
 import "github.com/MBvisti/mortenvistisen/views/internal/layouts"
 
-func NewsletterPage(head Head) templ.Component {
+func NewsletterPage(head Head, csrfToken string) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -31,16 +31,42 @@ func NewsletterPage(head Head) templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<main id=\"content\" role=\"main\" class=\"my-auto\"><div class=\"text-center py-5 px-4 sm:px-6 md:px-32 2xl:px-56\"><h1 class=\"block text-2xl font-bold text-white sm:text-4xl\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<main id=\"content\" role=\"main\" class=\"my-auto\"><div class=\"max-w-xl text-center mx-auto\"><div class=\"mb-5\"><h3 class=\"text-2xl font-bold md:text-3xl md:leading-tight text-white mb-4\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Var3 := `Newsletter`
+			templ_7745c5c3_Var3 := `Monthly technical deep dives.`
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var3)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h1></div></main>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h3><p class=\"text-base\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Var4 := `I work with everything from backend dev, systems designs to devops and machine learning. I share my learnings twice a month in tutorial form, so you can pick up new concept faster and expand your technical tool belt.`
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var4)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></div><form hx-post=\"/subscribe\" hx-target=\"this\" hx-swap=\"outerHTML\" method=\"POST\" action=\"/subscribe\"><input type=\"hidden\" name=\"gorilla.csrf.Token\" value=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(csrfToken))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><div class=\"mt-5 lg:mt-8 flex flex-col items-center gap-2 sm:flex-row sm:gap-3\"><input required type=\"email\" id=\"hero-input\" name=\"hero-input\" class=\"py-3 px-4 block w-full border-gray-200 rounded-lg \n  				          text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none \n  				          bg-slate-900 border-gray-700 text-gray-400 focus:ring-gray-600\" placeholder=\"deep-dives@mortenvistisen.com\"> <button data-umami-event=\"newsletter--newsletter-page\" type=\"submit\" class=\"w-full sm:w-auto whitespace-nowrap py-3 px-4 inline-flex justify-center \n  				          items-center gap-x-2 text-sm font-semibold rounded-lg border bg-slate-600 \n  				          text-white hover:bg-slate-900 disabled:opacity-50 disabled:pointer-events-none focus:outline-none \n  				          focus:ring-1 focus:ring-gray-600\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Var5 := `Receive Updates`
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</button></div></form></div></main>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

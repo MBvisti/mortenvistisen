@@ -3174,6 +3174,10 @@ html {
   margin-bottom: 3rem;
 }
 
+.mb-4 {
+  margin-bottom: 1rem;
+}
+
 .block {
   display: block;
 }
