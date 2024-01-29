@@ -27,23 +27,8 @@ Now, I’m assuming some familiarity with Golang and programming in general, as 
 - Your favorite IDE (could be Goland or VS code — I highly suggest Goland, it’s amazing)
 
 ---
-<div class="form-control min-w-fit">
-    <h6 class="text-lg font-semibold">Want to get notified whenever I release a new post?</h6>
-    <h6 class="text-lg">Consider subscribing to my newsletter</h6>
-    <form hx-post="/subscribe" hx-target="this" hx-swap="outerHTML" method="POST" action="/subscribe" class="mt-2 relative min-w-[20rem]"
-        data-loading-target="#loading" data-loading-class-remove="hidden">
-        <input type="hidden" name="referer" value="practical-approach-to-structuring-go-apps" />
-        <input data-loading-disable required name="email" autocomplete="email" type="email"
-            placeholder="Enter email to start" class="input input-bordered w-full text-lg pr-20 md:pr-32" />
-        <button data-loading-disable type="submit"
-            class="btn btn-primary absolute top-0 right-0 rounded-l-none umami--click--newsletter-practical-approach-to-structuring-go-apps">
-            Get Notified
-        </button>
-        <div id="loading" class="hidden flex fixed top-0 right-0 left-0">
-            <span class="loader"></span>
-        </div>
-    </form>
-</div> 
+
+<div id="subscribe-form" class="max-w-6xl px-4 sm:px-6 lg:px-8 mx-auto"></div>
 
 ---
 

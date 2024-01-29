@@ -22,7 +22,11 @@ our value proposition. Both good and bad, we have new information we can react t
 direction. However, we didn't get any new calls or follow-ups after this. It could be due to people just being busy 
 but I would guess more that we didn't pursue this aggressively enough.
 
-<div id="subscribe-form" class="max-w-6xl pt-2 pb-5 px-4 sm:px-6 lg:px-8 mx-auto"></div>
+---
+
+<div id="subscribe-form" class="max-w-6xl px-4 sm:px-6 lg:px-8 mx-auto"></div>
+
+---
 
 ## What did we learn
 There is something about learning a new skill where it only really manifest itself in your mind, when you try to 

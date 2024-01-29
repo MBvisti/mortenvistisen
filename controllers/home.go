@@ -3,6 +3,7 @@ package controllers
 import (
 	"github.com/MBvisti/mortenvistisen/pkg/telemetry"
 	"github.com/MBvisti/mortenvistisen/views"
+	"github.com/gorilla/csrf"
 	"github.com/labstack/echo/v4"
 )
 
@@ -56,5 +57,5 @@ func (c *Controller) Newsletter(ctx echo.Context) error {
 		Slug:        c.buildURLFromSlug("newsletter"),
 		MetaType:    "website",
 		Image:       "https://mortenvistisen.com/static/images/mbv.png",
-	}).Render(views.ExtractRenderDeps(ctx))
+	}, csrf.Token(ctx.Request())).Render(views.ExtractRenderDeps(ctx))
 }
