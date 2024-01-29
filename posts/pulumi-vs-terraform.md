@@ -1,17 +1,8 @@
----
-title: "Pulumi vs Terraform yada yada"
-focus: "compare pulumi and terraform from a developer perspective, include current experiences and a short guide for setting up pulumi and go. Section about optimizing for humans/team, not necessarily purely technical reason. Size of team, infrastructure needs, team experience level."
-keywords: ['terraform alternative', 'terraform vs pulumi', 'pulumi tutorial', 'pulumi aws', 'infrastructure as code tools']
----
+I've started a new contract, where I'm tasked with consolidating the company's infrastructure under aws. They (the company) are starting to see some serious growth, have a team in-place currently using a PaaS and various other cloud providers. Infrastructure as code tools have been popular for a long time; I've mostly been a bit skeptical about using them given a small team size, often the ui is more than enough. But, when you need to start spinning up multiple environments (dev, staging, prod, demo etc), this start to become a lot of overhead. An issue I've often seen is that it becomes the responsibility of one or two developers to maintain this, as the rest of the team is not familiar with the tool and language syntax. Obviously, this is not ideal, so I wanted to research the space to see if there was a middle way where you can get the benefits of IaC, without the overhead of having to learn a new language and tool.
 
-I've started a new contract, where I'm tasked with consolidating the company's infrastructure under AWS. They (the company) are starting to see some serious growth, both in terms of reveneue but also in terms of the team, so my natural reaction was to begin researching infrastructure as code tools (IaC tools). I've previously used terraform in other companies I've done work for, but never from scratch and always found the experience rather frustrating. So, I began to search for terraform alternatives and stumbled upon pulumi, which lets you provision resources using a number of programming languages (including Go) and has excellent support for aws providers.
+I've previously used terraform in other companies I've done work for but never from scratch and (full disclosure) always found the experience rather frustrating. So, I began to search for terraform alternatives and stumbled upon pulumi, which lets you provision resources using a number of programming languages (including Go) and pulumi's aws provider support is excellent.
 
-But, as in any other situation where you are considering marrying yourself to a new tool, it's very worthwhile to do some research and preferably build some small proof of concept before you commit. Since this is what I've been doing for the past many weeks, I wanted to share my experience, and provide you with a small tutorial for deploying a small Go app, using the following AWS service:
-- ECR
-- ECS
-- Fargate
-
-both in terraform and pulumi.
+But, as in any other situation where you are considering marrying yourself to a new tool, it's very worthwhile to do some research and preferably build some small proof of concept before you commit. I've had some interesting discoveries through this process, why I choose pulumi over terraform and when I would consider terraform over pulumi.
 
 ## Short intro to terraform
 
@@ -57,381 +48,43 @@ Pulumi is also "true open source", in the sense that they operate with an Apache
 
 However, it isn't all sunshine and rainbows. Pulumi is still young, so documentation is still not great when actually writing code. Their general purpose docs do make up for this, but it can be frustrating having to jump in and out of the editor to look up what you're currently working on.
 
+## Building the POC
 
-## What we're building
+All of the applications are containerized being we can take full advantage of aws's elastic container service, so the POC was a simple hello world api packed in a docker image, served using fargate and a load balancer in front. I've been aware of ECS and fargate (plus, vpc, subnets, security groups etc), but never used them, so there was also some learning involved.
 
-Containerization is pretty much the standard these days, and when working with Go, this becomes even easier (try to deploy a ml model using python and docker; it's a totally different experience..). So we'll build a simply api that just returns "word" whenever you ping the endpoint `/hello`.
+The first thing that became clear, terraform has a lot of great documentation and tutorial available. While pulumi does also have documentation and available tutorials, they are not as "complete" as what you find with terraform. However, I would find myself hitting a problem in the infrastructure setup with terraform, switch to pulumi and even with less available information, I was able to reason my way out of the problem because I simply had to read Go code. The overhead of a new language and platform would be frustrating, but staying in something I already knew, removed one leg of complexity and the aws concepts was now the only thing I had to figure out. I suspect that would be one of the main feelings of other engineers that don't do full-time devOps as well.
 
-As eluded to in the introduction, we'll deploy this using ECS and Fargate, and we'll use ECR to store our docker image. On the Go side, we will use `chi/v5` as our router.
+I managed getting the poc running using both tools but a big help came from staying in an environment I was already familiar with. I'm a heavy (neo)vim user and while there are lots of good plugins for terraform, the Go environment is something I'm in everyday so nothing new were needed.
 
-If you're coding along, go ahead and create a new folder, initialize a go module and create the folder structure `cmd/app/main.go`. In `main.go`, add the following:
+If I dedicated the time, I don't suspect it would take super long to get familiar with hcl and terraform to the point where the environment would feel close to as familiar as Go. But, given that I wouldn't have to work everyday with terraform after getting the initial setup done, that familiarity would soon start to fade. Meaning, every time a new infrastructure part had to be added, I would need to re-familiarize myself. And, for the rest of the team, this would be same but with the added overhead of getting into a part of the code they didn't help write. This could be mitigated by involving everyone from the get-go, but this is also a business, there are other priorities that needs building too.
 
-```go
-package main
+Documentation might be the answer some of you are screaming at the screen right now, and I hear you, but documentation quickly goes stale. This is especially true in smaller teams where things move fast, if the majority can be documented by the code itself, you save yourself much trouble.
 
-import (
-	"net/http"
+## Why I choose pulumi over terraform
 
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-)
+I ended up going with pulumi. I know from experience that the "correctness" of these choices only show its true self after you're well passed the point of making the switch to the other candidate feasible. But, from my current point of view, this is what will best benefit the team I'm currently working with.
 
-func main() {
-	r := chi.NewRouter()
-	
-	r.Use(middleware.Logger)
-	r.Get("/hello", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("world"))
-	})
+Two questions kept coming up, as I were trying to decide on which tool to use:
+1. What are our infrastructure requirements now and in the future? (i.e. are we ever going to need a full-time devOps)
+2. What does the current team know? (i.e. programming languages, cloud providers etc.)
 
-	http.ListenAndServe(":8000", r)
-}
-```
+The first might seem arbitrary, but the likely hood of finding a full-time devOps engineer that knows terraform is properly much higher, than them knowing Go and pulumi. Given that the needed infrastructure now and in the foreseeable future most likely will not require a full-time devOps role, terraform begins to feel a bit overkill. It's a new language, everybody on the team would need to learn as well as any best practices that comes with it. All the while, getting into the nitty gritty of aws which will also be a new learning experience for the team (myself included).
 
-Quite straightforward, but we also need to create a docker image to run our app. So, create a `Dockerfile` in the root of your project, and add:
+The second, to me, was very important since I've, from multiple experiences, seen what happens when you have a big terraform setup that maybe one engineer was in charge of creating. Most of the time, it ends up being that one person that has to maintain and fix it, effectively making them a devOps person (which might be against their will -> they switch job -> team is fucked). The rest of the team, despite the person writing documentation, making presentations etc etc, are still very reluctant to touch it. It's something they are unfamiliar with, the infrastructure system can be quite difficult to "have in your head", you can potentially take down everything without knowing how to get back to a running state. It creates a lot of friction. 
 
-```dockerfile
-FROM golang:1.21 AS build
+You might argue: "well, they will just have to learn it" and I agree, that would be a sensible path forward. But we're not trying to solve a technical problem right now, but rather, a human one. And without allocating the time for people to learn it, it probably will not happen. So, in lieu of a devOps team, you need to optimize for what gets people to actually want to learn infrastructure. Over the two weeks I spend researching and building some POCs, I would often find very good tutorials and materials on setting up infrastructure with terraform. But as soon as I hit my head against wall, not knowing a specific syntax/setup/approach used in the tutorial or what the specific aws services was about, it become very hard to move on. Multiple times, I switched back to pulumi where their docs had examples in Go code, which was much easier for me to wrap my head around since I already knew Go. I "only" had to figure out the aws part. After, I would switch back to terraform and fix the thing with my new understanding from pulumi/go. But it's important to note where that knowledge originated from, by reading code, which most of us are doing pretty much every day.
 
-WORKDIR /app
+Taking away the overhead of both having to learn a new language and a cloud provider, to only the cloud provider, helps a tremendous amount. You also get the added benefit of already knowing best practices, when and why to break those practices. You get an api from pulumi so you can start provisioning infrastructure directly in your application(s), which makes spinning up demo environments for sales processes trivial. 
 
-COPY go.* ./
-RUN go mod download
+## When I would choose terraform
 
-COPY . .
+Up to a certain point, something becomes a standard because of it quality and appeal to a large part of the tools target group. After that point, better alternatives might actually exists but since the standard requirement is to know said tool, everyone else just continues learning that (I'm looking at you, React. Switch those frontends back to html and use htmx for interactivity!). If that's whats going on here with terraform and pulumi is hard to say. I actually had a much better experience exploring terraform, compared to previous experiences, where I only had to tweak it a little bit.
 
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -mod=readonly -v -o /main cmd/app/main.go
+If your team includes members that already know terraform or you know that you have some large scale infrastructure needs in the near future, that will include a dedicated devOps team, terraform still seem like the better choice. I did pick terraform and hcl up rather quickly, but I'm still quite confident that this would fade again after not using it daily, so if you don't have that limitation, terraform would win for me.
 
-FROM scratch
+The main argument from my side here is to remove friction from your team when they don't deal with infrastructure on a daily basis, learning a new language while your PM is blasting new tickets your way like his life depended on it, is tough. And having to wait for the one team member who truly knows the infrastructure code coming back from holiday to fix things, is very sub-optimal.
 
-WORKDIR /app
+## Was this a good decision
 
-COPY --from=build /main /
+It's too early to tell, I will revisit this in a few months once we've had some more production experience with it and the team has started working more with it as well.
 
-CMD ["/main"]
-EXPOSE 8000
-```
-
-I'm not going to dive too much into details about docker, we're simply utilizing a multi-step build process, where we copy the files into the container, install the dependencies and build our binary. Then, we copy this into a layer that is based on "scratch", which creates a very small image, roughly ~4mb.
-
-## Getting started with Terraform
-
-To make this run, in a more realistic example, we're going to need quite a few things so buckle up, no half-baked "hello world" tutorials here. After all my years in business school and finance, I learned one thing, a visual representation of a topic can really help with understanding (or, in the finance world, make you seem knowledable about an area you just googled yesterday). Anyway, this is what we'll need:
-
-![app infrastructure](/static/images/pulumi-vs-terraform-infrastructure.svg)
-
-### First steps
-
-Before we dive in, we need to setup some things first, so, in the root of the project, add a `main.tf` file and add:
-
-```hcl
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.10.0"
-    }
-  }
-}
-
-provider "aws" {
-  region = "eu-west-1"
-}
-```
-
-We need to initialize terraform, so, in the root of the project go ahead and run(assuming you already installedit, ofc, if not, please go and do that now):
-
-```bash
-terraform init
-```
-
-This will download an install the aws provider, and we're ready to go.
-
-### Networking & Security
-
-I'm by no means an expert in those subjects, by I'm rather good at google and reading documentation, so we'll try our best here to follow best practices from aws when setting up our app. And for that, we need a VPC, some subnets, security groups, gateways and load balancers or in other words, quite a few things.
-
-In `main.tf`, add:
-
-```hcl
-resoruce "aws_vpc" "vpc" {
-  cidr_block = "10.0.0.0/16"
-  enable_dns_hostnames = true
-  enable_dns_support = true
-  tags = {
-    Name = "pulumi-vs-terraform-vpc"
-  }
-
-resource "aws_subnet" "subnet_public_a" {
-  vpc_id                  = aws_vpc.vpc.id
-  cidr_block              = "10.0.16.0/20"
-  availability_zone       = "eu-west-1a"
-
-  tags = {
-    name = "subnet_public_a"
-  }
-}
-
-resource "aws_subnet" "subnet_public_b" {
-  vpc_id                  = aws_vpc.vpc.id
-  cidr_block              = "10.0.0.0/20"
-  availability_zone       = "eu-west-1b"
-
-  tags = {
-    name = "subnet_public_b"
-  }
-}
-
-resource "aws_subnet" "subnet_private_a" {
-  vpc_id            = aws_vpc.vpc.id
-  cidr_block        = "10.0.144.0/20"
-  availability_zone = "eu-west-1a"
-
-  tags = {
-    name = "subnet_private_a"
-  }
-}
-
-resource "aws_subnet" "subnet_private_b" {
-  vpc_id            = aws_vpc.vpc.id
-  cidr_block           =  "10.0.32.0/20"
-  availability_zone = "eu-west-1b"
-
-  tags = {
-    name = "subnet_private_b"
-  }
-}
-```
-
-We add a VPC, which if you check the diagram is the red box an isolates everything else within. Nothing comes in or out unless we give it permission. Next, we follow some best practices for high availability and create 2 public and 2 private subnets,  Next, we follow some best practices for high availability and create 2 public and 2 private subnet, both in different availability zones (the green and blue lines in the diagram).
-
-Next, we add the internet gateway, route table and their associations (not depicted but necessary):
-
-```hcl
-resource "aws_internet_gateway" "internet_gateway" {
-  vpc_id = aws_vpc.vpc.id
-
-  tags = {
-    name = "internet_gateway"
-  }
-}
-
-resource "aws_route_table" "public_route_table" {
-  vpc_id = aws_vpc.vpc.id
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.internet_gateway.id
-  }
-
-  tags = {
-    name = "public_route_table"
-  }
-}
-
-resource "aws_route_table_association" "public_route_table_association_a" {
-  subnet_id      = aws_subnet.subnet_public_a.id
-  route_table_id = aws_route_table.public_route_table.id
-}
-
-resource "aws_route_table_association" "public_route_table_association_b" {
-  subnet_id      = aws_subnet.subnet_public_b.id
-  route_table_id = aws_route_table.public_route_table.id
-}
-
-resource "aws_route_table_association" "private_route_table_association_a" {
-  subnet_id      = aws_subnet.subnet_private_a.id
-  route_table_id = aws_route_table.private_route_table.id
-}
-
-resource "aws_route_table_association" "private_route_table_association_b" {
-  subnet_id      = aws_subnet.subnet_private_b.id
-  route_table_id = aws_route_table.private_route_table.id
-}
-
-resource "aws_eip" "elastic_ip" {
-  tags = {
-    name = "nat_gateway"
-  }
-}
-
-resource "aws_nat_gateway" "nat_gateway" {
-  allocation_id = aws_eip.elastic_ip.id
-  subnet_id     = aws_subnet.subnet_public_a.id
-
-  tags = {
-    name = "nat_gateway"
-  }
-}
-
-resource "aws_route_table" "private_route_table" {
-  vpc_id = aws_vpc.vpc.id
-
-  route {
-    cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.nat_gateway.id
-  }
-
-  tags = {
-    Name = "private_route_table"
-  }
-}
-```
-
-Lastly, we add some security groups, which will be used to control traffic in and out of our app. We need one for our upcoming load balancer and one for ECS:
-
-```hcl
-resource "aws_security_group" "ecs_sg" {
-  name   = "ecs_sg"
-  vpc_id = aws_vpc.vpc.id
-
-  ingress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    name = "ecs_sg"
-  }
-}
-
-resource "aws_security_group" "alb_sg" {
-  name   = "alb_sg"
-  vpc_id = aws_vpc.vpc.id
-
-  ingress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = -1
-    self        = "false"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "any"
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-```
-
-If you're currently thinking "but, they have the exact same properties but with different names", you're absolutely right. We're cutting corners a bit, but in a real world app, you would most likely need different security groups with different ingress and egress paramters, so that's what we're simulating.
-
-Thats, quite a mouthful, especially if you're not familiar with HCL, but all we've done is specifying what resources we need and how they should be connected.
-
-### Load balancer
-
-We're almost at the point where we can begin setting up ECS and deploy our app, we just need to setup our load balancer, so we can actually access this thing once it's live.
-
-```hcl
-resource "aws_alb" "app_alb" {
-  name_prefix        = "app_alb"
-  internal           = false
-  load_balancer_type = "application"
-  idle_timeout       = 60
-  security_groups    = [aws_security_group.alb_sg.id]
-  subnets            = [aws_subnet.subnet_public_a.id, aws_subnet.subnet_public_b.id]
-
-  tags = {
-    Name = app-alb-public"
-  }
-}
-
-resource "aws_alb_listener" "ecs_alb_listener" {
-  load_balancer_arn = aws_alb.app_alb.arn
-  port              = 80
-  protocol          = "HTTP"
-
-  default_action {
-    type             = "forward"
-    target_group_arn = aws_alb_target_group.public_tg.arn
-  }
-}
-
-resource "aws_alb_target_group" "public_tg" {
-  name        = "ecs-target-group"
-  port        = 8000
-  protocol    = "HTTP"
-  target_type = "ip"
-  vpc_id      = aws_vpc.vpc.id
-
-  health_check {
-    path = "/"
-  }
-}
-
-output "lb_dns" {
-  description = "The DNS name of the load balancer"
-  value       = "http://${aws_alb.app_alb.dns_name}"
-}
-```
-
-### ECX
-
-With that in place, we need some of the elastic something something services setup and first on the agenda is ECR: elastic container registry, so we have a place to host our image(s).
-
-```hcl
-resource "aws_ecr_repository" "repo" {
-  name                 = "repo"
-  image_tag_mutability = "MUTABLE"
-  force_delete         = true
-
-  tags = {
-    "Name" = "repo"
-  }
-}
-
-output "repo_url" {
-  value = aws_ecr_repository.repo.repository_url
-}
-```
-
-And we've arrived at a chicken or egg situation since we need to build and push our image to ECR, before we can successfully setup ECS and Fargate. So, assuming you've an AWS account that can provision new resources open up a terminal and run:
-
-```bash
-terrform apply
-```
-
-This will create a plan for what to provision, show you a summary and if you agree, simply type 'yes' and enter.
-
-Assuming everything went through without any issues, you should now be able to get the url of the repo so you can push a docker image to it. A little bash scripting never hurts, so if you want, you can utilize this so build, tag and push to the repo. Just remember to update the image name, tag and registry url:
-
-```bash
-#!/bin/bash
-
-# Set your Docker image name and tag
-IMAGE_NAME="app"
-TAG_LATEST="latest"
-DOCKERFILE="Dockerfile"
-REGISTRY_URL="1234567890.dkr.ecr.eu-west-1.amazonaws.com/repo"
-
-# Build the Docker image
-docker build -t "${REGISTRY_URL}" -f "${DOCKERFILE}" .
-
-# Tag the Docker image
-docker tag "${REGISTRY_URL}"  "${REGISTRY_URL}:${TAG_LATEST}"
-
-aws ecr get-login-password | docker login --username AWS --password-stdin ${REGISTRY_URL}
-
-# Push the Docker image
-docker push "${REGISTRY_URL}:${TAG_LATEST}"
-
-# Clean up local images (optional)
-docker image prune -f
-```
-
-Verify that your image is in the repo and lets continue.
-
-
-### ECS
