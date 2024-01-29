@@ -28,6 +28,11 @@
   <priority>0.80</priority>
 </url>
 <url>
+  <loc>https://mortenvistisen.com/posts/pulumi-vs-terraform</loc>
+  <lastmod>2024-01-29T10:46:42+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
   <loc>https://mortenvistisen.com/posts/one-month-one-dollar-part-two</loc>
   <lastmod>2024-01-15T17:01:54+00:00</lastmod>
   <priority>0.80</priority>
