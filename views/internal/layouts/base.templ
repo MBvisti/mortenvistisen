@@ -1,7 +1,7 @@
 package layouts
 
-import ( 
-	"github.com/MBvisti/mortenvistisen/views/internal/components" 
+import (
+	"github.com/MBvisti/mortenvistisen/views/internal/components"
 )
 
 script currentYear() {
@@ -20,7 +20,7 @@ templ Base(head templ.Component) {
 			<footer class="flex justify-center mt-10 pb-10 container mx-auto px-20 footer bg-base-100 text-base-content">
 				<aside>
 					<p>Copyright © <span id="cur-year-footer"></span> - All right reserved by MBV Labs</p>
-				</aside>	
+				</aside>
 			</footer>
 			@currentYear()
 			<script src="/static/js/htmx.min.js"></script>
