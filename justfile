@@ -10,6 +10,7 @@ alias cmd := compile-mails-dev
 alias cmp := compile-mails-prod
 
 alias mm := make-migration
+alias gms := get-migration-status
 alias um := up-migrations
 alias dm := down-migrations
 alias dmt := down-migrations-to
@@ -41,6 +42,9 @@ serve-mails:
     @cd resources && npm run serve-mails
 
 # Database 
+get-migration-status: 
+	@goose -dir migrations $DATABASE_KIND $DATABASE_URL status
+
 make-migration name:
 	@goose -dir migrations $DATABASE_KIND $DATABASE_URL create {{name}} sql
 
