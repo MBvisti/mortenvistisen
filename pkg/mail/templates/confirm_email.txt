@@ -2,7 +2,7 @@ Confirm your email address
 
 Please confirm your email address in order to activate your account.
 
-undefined://undefined
+http://0.0.0.0:8000
 
 Hi,
 
@@ -14,18 +14,18 @@ To continue, please confirm your email address by clicking the button below:
 
 Confirm email address →
 
-undefined://undefined/verify-email?token={{.Token}}
+http://0.0.0.0:8000/verify-email?token={{.Token}}
 
 ‍
 
-If you didn't sign up for undefined, we apologize. Click the button below, and we'll remove
+If you didn't sign up for Morten Vistisen, we apologize. Click the button below, and we'll remove
 email:
 
 Remove email address →
 
-undefined://undefined/remove-email?token={{.Token}}
+http://0.0.0.0:8000/remove-email?token={{.Token}}
 
-Thanks, The undefined Team
+Thanks, The Morten Vistisen Team
 
 ‍
 

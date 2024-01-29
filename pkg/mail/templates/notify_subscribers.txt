@@ -1,0 +1,37 @@
+I just released a new article!
+
+A new article have been released on Morten Vistisen.
+
+http://0.0.0.0:8000
+
+Hi,
+
+Hope you're doing well!
+
+I just released a new article: {{ .Title }}
+
+You can view it right here →
+
+{{ .Slug }}
+
+‍
+
+If you didn't sign up for this newsletter, I apologize. Click the button below, and I will remove your
+email:
+
+Remove email address →
+
+http://0.0.0.0:8000/remove-email?email={{.Email}}
+
+Thanks,
+
+Morten from http://0.0.0.0:8000
+
+‍
+
+The kickstarter repository for full-stack Go apps, using your grandfather's technology.
+
+Github
+https://github.com/MBvisti/grafto
+•
+Twitter https://twitter.com/mbvisti

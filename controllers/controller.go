@@ -13,6 +13,7 @@ import (
 	"github.com/MBvisti/mortenvistisen/repository/database"
 	"github.com/MBvisti/mortenvistisen/views"
 	"github.com/go-playground/validator/v10"
+	"github.com/gorilla/sessions"
 	"github.com/labstack/echo/v4"
 )
 
@@ -24,6 +25,10 @@ type Controller struct {
 	postManager posts.PostManager
 	queue       queue.Queue
 }
+
+var (
+	flashStore = sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")), []byte(os.Getenv("SESSION_ENCRYPTION_KEY")))
+)
 
 func NewController(
 	db database.Queries, mail mail.Mail, tknManager tokens.Manager, queue queue.Queue, pm posts.PostManager) Controller {

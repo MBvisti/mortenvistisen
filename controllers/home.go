@@ -7,7 +7,7 @@ import (
 )
 
 func (c *Controller) HomeIndex(ctx echo.Context) error {
-	data, err := c.db.GetLatestPosts(ctx.Request().Context())
+	data, err := c.db.QueryLatestPosts(ctx.Request().Context())
 	if err != nil {
 		telemetry.Logger.Error("failed to get posts", "error", err)
 		return err

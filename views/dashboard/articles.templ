@@ -1,111 +1,82 @@
 package dashboard
 
 import "github.com/MBvisti/mortenvistisen/views/internal/layouts"
+import "fmt"
 
-templ table() {
-	<section class="container px-4 mx-auto">
-		<h2 class="text-lg font-medium text-neutral-content">Articles</h2>
-		<div class="flex flex-col mt-6">
-			<div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-				<div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-					<div class="overflow-hidden border border-neutral md:rounded-lg">
+type ArticleViewData struct {
+	Slug    string
+	Title   string
+	Tags    []string
+	InDraft bool
+}
+
+templ ArticleTable(data []ArticleViewData) {
+	<tbody class="divide-y divide-gray-700">
+		for _, article := range data {
+			<tr>
+				<td class="cursor-pointer px-6 py-4 whitespace-nowrap text-sm font-medium">
+					<a href={ templ.URL(fmt.Sprintf("article/%v/details", article.Slug)) } class="btn text-gray-200 hover:text-green-400">
+						Details
+					</a>
+				</td>
+				<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-200">{ article.Title }</td>
+				<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-200">
+					for i, tag := range article.Tags {
+						if i == len(article.Tags) - 1 {
+							<span class="text-white">{ tag }</span>
+						} else {
+							<span class="text-white mr-1">{ tag } - </span>
+						}
+					}
+				</td>
+				if article.InDraft {
+					<td class="px-6 py-4 whitespace-nowrap text-sm text-red-200">
+						Yes
+					</td>
+				} else {
+					<td class="px-6 py-4 whitespace-nowrap text-sm text-green-200">
+						No
+					</td>
+				}
+			</tr>
+		}
+	</tbody>
+}
+
+templ Articles(data []ArticleViewData, tkn string, flashMessages []string) {
+	@layouts.Dashboard() {
+		<span class="mb-4 mt-11 col-start-3 col-end-11 flex justify-between justify-center">
+			<h2 class="my-auto text-2xl">Articles</h2>
+		</span>
+		<div class="col-start-3 col-end-11">
+			<div class="-m-1.5 overflow-x-auto">
+				<div class="p-1.5 min-w-full inline-block align-middle">
+					<div class="border rounded-lg overflow-hidden border-gray-700">
 						<table class="min-w-full divide-y divide-gray-700">
-							<thead class="bg-base-300">
+							<thead class="bg-gray-700">
 								<tr>
-									<th scope="col" class="py-3.5 px-4 text-sm font-normal text-left text-neutral-content">
-										Title
-									</th>
-									<th scope="col" class="py-3.5 px-4 text-sm font-normal text-left text-neutral-content">
-										Posted
-									</th>
-									<th scope="col" class="py-3.5 px-4 text-sm font-normal text-left text-neutral-content">
-										Draft
-									</th>
-									<th scope="col" class="relative py-3.5 px-4">
-										<span class="sr-only">Edit</span>
-									</th>
+									<th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase"></th>
+									<th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Title</th>
+									<th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">Tags</th>
+									<th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase">In Draft</th>
+									<th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase"></th>
 								</tr>
 							</thead>
-							<tbody class="divide-y divide-gray-700 bg-base-300">
-								<tr>
-									<td class="px-4 py-4 text-sm font-medium whitespace-nowrap">
-										<div>
-											<h2 class="font-medium text-white ">Catalog</h2>
-											<p class="text-sm font-normal text-gray-400">catalogapp.io</p>
-										</div>
-									</td>
-									<td class="px-12 py-4 text-sm font-medium whitespace-nowrap">
-										<div class="inline px-3 py-1 text-sm font-normal rounded-full text-emerald-500 gap-x-2 bg-gray-800">
-											Customer
-										</div>
-									</td>
-									<td class="px-4 py-4 text-sm whitespace-nowrap">
-										<div>
-											<h4 class="text-gray-200">Content curating app</h4>
-											<p class="text-gray-400">Brings all your news into one place</p>
-										</div>
-									</td>
-									<td class="px-4 py-4 text-sm whitespace-nowrap">
-										<button class="px-1 py-1 text-gray-500 transition-colors duration-200 rounded-lg dark:text-gray-300 hover:bg-gray-100">
-											<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-												<path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z"></path>
-											</svg>
-										</button>
-									</td>
-								</tr>
-							</tbody>
+							@ArticleTable(data)
 						</table>
 					</div>
 				</div>
 			</div>
-		</div>
-		<div class="flex items-center justify-between mt-6">
-			<a href="/dashboard/articles?page=1&size=10">
-				<button class="btn btn-neutral">
-					previous
-					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 rtl:-scale-x-100">
-						<path stroke-linecap="round" stroke-linejoin="round" d="M6.75 15.75L3 12m0 0l3.75-3.75M3 12h18"></path>
-					</svg>
-				</button>
-			</a>
-			<div class="items-center hidden md:flex gap-x-3">
-				<a href="#" class="px-2 py-1 text-sm text-neutral rounded-md bg-neutral-content">1</a>
-				<a href="#" class="px-2 py-1 text-sm text-neutral-content rounded-md hover:bg-base-content hover:text-neutral bg-base-100">2</a>
-			</div>
-			<a href="/dashboard/articles?page=2&size=10">
-				<button class="btn btn-neutral">
-					Next
-					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 rtl:-scale-x-100">
-						<path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3"></path>
-					</svg>
-				</button>
-			</a>
-		</div>
-	</section>
-}
-
-type Article struct {
-	Title  string
-	Posted string
-	Draft  string
-}
-
-type Page struct {
-	Number int32
-	Size   int32
-}
-
-type ArticlesViewData struct {
-	Articles     []Article
-	Pages        int32
-	NextPage     Page
-	PreviousPage Page
-}
-
-templ Articles() {
-	@layouts.Dashboard() {
-		<div class="container w-full mx-auto mt-20">
-			@table()
+			if len(flashMessages) > 0 {
+				<div class="toast toast-end">
+					for _, flashMsg := range flashMessages {
+						<div class="alert alert-info">
+							<span>{ flashMsg }</span>
+						</div>
+					}
+				</div>
+			}
+			@addCSRFTkn(tkn)
 		</div>
 	}
 }

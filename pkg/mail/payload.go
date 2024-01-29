@@ -16,3 +16,9 @@ type ForgottonPassword struct {
 type ConfirmPassword struct {
 	Token string
 }
+
+type ArticleNotification struct {
+	Title string
+	Slug  string
+	Email string
+}

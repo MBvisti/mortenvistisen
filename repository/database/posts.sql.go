@@ -7,9 +7,82 @@ package database
 
 import (
 	"context"
+	"database/sql"
+
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const getLatestPosts = `-- name: GetLatestPosts :many
+const queryAllPost = `-- name: QueryAllPost :many
+SELECT 
+    posts.id,
+    posts.created_at,
+    posts.updated_at,
+    posts.title,
+    posts.filename,
+    posts.slug,
+    posts.excerpt,
+    posts.draft,
+    posts.released_at,
+    posts.read_time,
+    ARRAY_AGG(tags.name)::text[] as tags
+FROM 
+    posts
+JOIN 
+    posts_tags ON posts_tags.post_id = posts.id
+JOIN
+    tags on tags.id = posts_tags.tag_id
+GROUP BY
+    posts.id
+`
+
+type QueryAllPostRow struct {
+	ID         uuid.UUID
+	CreatedAt  pgtype.Timestamp
+	UpdatedAt  pgtype.Timestamp
+	Title      string
+	Filename   string
+	Slug       string
+	Excerpt    string
+	Draft      bool
+	ReleasedAt pgtype.Timestamp
+	ReadTime   sql.NullInt32
+	Tags       []string
+}
+
+func (q *Queries) QueryAllPost(ctx context.Context) ([]QueryAllPostRow, error) {
+	rows, err := q.db.Query(ctx, queryAllPost)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []QueryAllPostRow
+	for rows.Next() {
+		var i QueryAllPostRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Title,
+			&i.Filename,
+			&i.Slug,
+			&i.Excerpt,
+			&i.Draft,
+			&i.ReleasedAt,
+			&i.ReadTime,
+			&i.Tags,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const queryLatestPosts = `-- name: QueryLatestPosts :many
 SELECT
     posts.id,
     posts.created_at,
@@ -29,8 +102,8 @@ ORDER BY
     released_at DESC
 `
 
-func (q *Queries) GetLatestPosts(ctx context.Context) ([]Post, error) {
-	rows, err := q.db.Query(ctx, getLatestPosts)
+func (q *Queries) QueryLatestPosts(ctx context.Context) ([]Post, error) {
+	rows, err := q.db.Query(ctx, queryLatestPosts)
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +133,7 @@ func (q *Queries) GetLatestPosts(ctx context.Context) ([]Post, error) {
 	return items, nil
 }
 
-const getPostBySlug = `-- name: GetPostBySlug :one
+const queryPostBySlug = `-- name: QueryPostBySlug :one
 SELECT
     posts.id,
     posts.created_at,
@@ -71,16 +144,37 @@ SELECT
     posts.excerpt,
     posts.draft,
     posts.released_at,
-    posts.read_time
+    posts.read_time,
+    ARRAY_AGG(tags.name)::text[] as tags
 FROM
     posts
+JOIN 
+    posts_tags ON posts_tags.post_id = posts.id
+JOIN
+    tags on tags.id = posts_tags.tag_id
 WHERE
     slug = $1
+GROUP BY
+    posts.id
 `
 
-func (q *Queries) GetPostBySlug(ctx context.Context, slug string) (Post, error) {
-	row := q.db.QueryRow(ctx, getPostBySlug, slug)
-	var i Post
+type QueryPostBySlugRow struct {
+	ID         uuid.UUID
+	CreatedAt  pgtype.Timestamp
+	UpdatedAt  pgtype.Timestamp
+	Title      string
+	Filename   string
+	Slug       string
+	Excerpt    string
+	Draft      bool
+	ReleasedAt pgtype.Timestamp
+	ReadTime   sql.NullInt32
+	Tags       []string
+}
+
+func (q *Queries) QueryPostBySlug(ctx context.Context, slug string) (QueryPostBySlugRow, error) {
+	row := q.db.QueryRow(ctx, queryPostBySlug, slug)
+	var i QueryPostBySlugRow
 	err := row.Scan(
 		&i.ID,
 		&i.CreatedAt,
@@ -92,6 +186,7 @@ func (q *Queries) GetPostBySlug(ctx context.Context, slug string) (Post, error) 
 		&i.Draft,
 		&i.ReleasedAt,
 		&i.ReadTime,
+		&i.Tags,
 	)
 	return i, err
 }

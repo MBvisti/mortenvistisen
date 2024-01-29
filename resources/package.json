@@ -4,7 +4,7 @@
   "author": "",
   "license": "ISC",
   "scripts": {
-    "serve-mails": "maizzle serve",
+    "serve-mails": "cd mails && maizzle serve",
     "dev-mails": "cd mails && maizzle build",
     "build-mails": "cd mails && maizzle build production",
     "watch-css": "npx tailwindcss -c ./tailwind/config.js -i ./tailwind/base.css -o ../static/css/output.css --watch",

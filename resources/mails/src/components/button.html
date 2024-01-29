@@ -11,6 +11,9 @@
     msoPb: props['mso-pb'] || '30px',
     msoPl: props['mso-pl'] || '32px',
     bgColor: props['bg-color'] || 'rgb(67 56 202)',
+    padY: props['pad-y'] || 'py-2',
+    padX: props['pad-x'] || 'px-2',
+    textSize: props['text-size'] || 'text-base',
   }
 </script>
 
@@ -19,7 +22,7 @@
     attributes
     href="{{ href }}"
     style="background: {{bgColor}};"
-    class="inline-block py-4 px-6 text-base leading-none font-semibold rounded text-slate-50 [text-decoration:none]"
+    class="inline-block {{padY}} {{padX}} {{textSize}} leading-none font-semibold rounded text-slate-50 [text-decoration:none]"
   >
     <outlook>
       <i

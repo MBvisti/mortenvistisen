@@ -76,6 +76,5 @@ func (w *Web) SetupWebRoutes() {
 	w.ArticleRoutes()
 	w.SiteRoutes()
 	w.SubscribeRoutes()
-	// w.UserRoutes()
 	w.DashboardRoutes()
 }

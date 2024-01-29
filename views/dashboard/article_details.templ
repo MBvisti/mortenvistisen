@@ -1,0 +1,54 @@
+package dashboard
+
+import "github.com/MBvisti/mortenvistisen/views/internal/layouts"
+import "fmt"
+
+type ArticleDetailsViewData struct {
+	ID      string
+	Title   string
+	Excerpt string
+	Tags    []string
+	InDraft bool
+	Slug    string
+}
+
+templ ArticleDetails(data ArticleDetailsViewData, tkn string) {
+	@layouts.Dashboard() {
+		<h2 class="mb-8 mt-48 col-start-4 col-span-2 my-auto text-2xl">Article Details</h2>
+		<div class="col-start-4 col-end-9 flex flex-col">
+			<div class="form-control">
+				<label class="cursor-pointer label p-0">
+					<span class="text-base label-text mb-4">In draft</span>
+					if !data.InDraft {
+						<input type="checkbox" checked="checked" class="checkbox checkbox-success"/>
+					} else {
+						<input type="checkbox" class="checkbox checkbox-danger"/>
+					}
+				</label>
+			</div>
+			<span class="flex flex-col mb-8">
+				<p class="mb-2">Title: </p>
+				<input type="text" value={ data.Title } class="input input-bordered w-full max-w-xs"/>
+			</span>
+			<span class="flex flex-col mb-8">
+				<p class="mb-2">Excerpt: </p>
+				<textarea class="textarea textarea-bordered">{ data.Excerpt }</textarea>
+			</span>
+			<span class="flex mb-8">
+				<p class="mr-4">Tags: </p>
+				for i, tag := range data.Tags {
+					if i == len(data.Tags) - 1 {
+						<p class="text-white">{ tag }</p>
+					} else {
+						<p class="text-white mr-1">{ tag } - </p>
+					}
+				}
+			</span>
+			<div class="flex justify-around">
+				<button class="btn btn-outline btn-success">Update</button>
+				<button hx-replace-url="true" hx-post={ fmt.Sprintf("/dashboard/article/%s/notify-subscribers", data.Slug) } class="btn btn-outline btn-warning">Notify Subscribers</button>
+			</div>
+		</div>
+		@addCSRFTkn(tkn)
+	}
+}

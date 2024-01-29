@@ -6,4 +6,7 @@ func (w *Web) SubscribeRoutes() {
 	w.router.POST("/subscribe", func(c echo.Context) error {
 		return w.controllers.SubscriptionEvent(c)
 	})
+	w.router.GET("/remove-email", func(c echo.Context) error {
+		return w.controllers.RemoveSubscriptionEvent(c)
+	})
 }

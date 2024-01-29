@@ -19,4 +19,10 @@ func (w *Web) DashboardRoutes() {
 	adminGroup.GET("/articles", func(c echo.Context) error {
 		return w.controllers.DashboardArticles(c)
 	})
+	adminGroup.GET("/article/:slug/details", func(c echo.Context) error {
+		return w.controllers.DashboardArticleDetails(c)
+	})
+	adminGroup.POST("/article/:slug/notify-subscribers", func(c echo.Context) error {
+		return w.controllers.DashboardNotifySubscribers(c)
+	})
 }
