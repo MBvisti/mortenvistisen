@@ -1,11 +1,17 @@
 package web
 
 import (
+	"os"
+
+	"github.com/MBvisti/mortenvistisen/routes/middleware"
 	"github.com/labstack/echo/v4"
 )
 
 func (w *Web) DashboardRoutes() {
 	adminGroup := w.router.Group("/dashboard")
+	if os.Getenv("ENVIRONMENT") != "development" {
+		adminGroup.Use(middleware.AuthOnly)
+	}
 
 	adminGroup.GET("", func(c echo.Context) error {
 		return w.controllers.DashboardIndex(c)

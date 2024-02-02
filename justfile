@@ -27,10 +27,6 @@ default:
 watch-css:
     @cd resources && npm run watch-css
 
-# Preline
-copy-preline-to-static:
-    @cp -r ./resources/node_modules/preline/dist/ ./static/js/preline
-
 # Mails
 compile-mails-prod:
     @cd resources && npm run build-mails

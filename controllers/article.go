@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"fmt"
+
 	"github.com/MBvisti/mortenvistisen/views"
 	"github.com/gorilla/csrf"
 	"github.com/labstack/echo/v4"
@@ -48,7 +50,7 @@ func (c *Controller) Article(ctx echo.Context) error {
 
 	return views.ArticlePage(views.ArticlePageData{
 		Content:           postContent,
-		Title:             post.Title,
+		Title:             fmt.Sprintf("mortenvistisen: %v", post.Title),
 		ReleaseDate:       post.ReleasedAt.Time,
 		OtherArticleLinks: otherArticles,
 		CsrfToken:         csrf.Token(ctx.Request()),

@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/MBvisti/mortenvistisen/pkg/telemetry"
@@ -33,6 +34,7 @@ func (a *AdminContext) GetAdminStatus() bool {
 
 func AuthOnly(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
+		log.Print("tototototot")
 		authenticated, userID, err := services.IsAuthenticated(c.Request())
 		if err != nil {
 			telemetry.Logger.Error("could not get authenticated status", "error", err)
@@ -43,7 +45,7 @@ func AuthOnly(next echo.HandlerFunc) echo.HandlerFunc {
 			ctx := &AuthContext{c, userID, true}
 			return next(ctx)
 		} else {
-			return c.Redirect(http.StatusPermanentRedirect, "/login")
+			return c.Redirect(http.StatusSeeOther, "/") // TODO: Redirect to login page
 		}
 	}
 }

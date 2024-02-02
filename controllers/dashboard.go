@@ -141,7 +141,7 @@ func (c *Controller) DashboardNotifySubscribers(ctx echo.Context) error {
 	sess.Options.MaxAge = 5
 
 	for _, email := range emailList {
-		if err := c.mail.Send(ctx.Request().Context(), email, "newsletter@mortenvistisen.com", "I just released a new article", "notify_subscribers", mail.ArticleNotification{
+		if err := c.mail.Send(ctx.Request().Context(), email, "newsletter@mortenvistisen.com", "MBV Newsletter: I just released a new article", "notify_subscribers", mail.ArticleNotification{
 			Title: article.Title,
 			Slug:  c.buildURLFromSlug("posts/" + article.Slug),
 			Email: email,
