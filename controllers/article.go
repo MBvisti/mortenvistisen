@@ -50,12 +50,12 @@ func (c *Controller) Article(ctx echo.Context) error {
 
 	return views.ArticlePage(views.ArticlePageData{
 		Content:           postContent,
-		Title:             fmt.Sprintf("mortenvistisen: %v", post.Title),
+		Title:             post.Title,
 		ReleaseDate:       post.ReleasedAt.Time,
 		OtherArticleLinks: otherArticles,
 		CsrfToken:         csrf.Token(ctx.Request()),
 	}, views.Head{
-		Title:       post.Title,
+		Title:       fmt.Sprintf("mortenvistisen: %v", post.Title),
 		Description: post.Excerpt,
 		Slug:        c.buildURLFromSlug("posts/" + post.Slug),
 		MetaType:    "article",
