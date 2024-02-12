@@ -44,6 +44,7 @@ func (p *Postmark) SendMail(ctx context.Context, payload MailPayload) error {
 		To:       payload.To,
 		Subject:  payload.Subject,
 		HtmlBody: payload.HtmlBody,
+		TextBody: payload.TextBody,
 	})
 	if err != nil {
 		return err
