@@ -155,7 +155,7 @@ rds, err := rds.NewInstance(ctx, "grafto-rds-psql", &rds.InstanceArgs{
 	InstanceClass:       pulumi.String("db.t2.micro"),
 	ParameterGroupName:  pulumi.String("default.postgres15"),
 	DbSubnetGroupName:   rdsSubnetGroup.Name,  
-	VpcSecurityGroupIds: []pulumi.StringInput{
+	VpcSecurityGroupIds: pulumi.StringArray{
 		rdsSecurityGroup.ID(),
 	},
 	SkipFinalSnapshot:   pulumi.Bool(true),
@@ -167,4 +167,49 @@ ctx.Export("grafto-db-address", rds.Address)
 
 ## Load balancing
 
+```go
+loadBalancer, err := lb.NewLoadBalancer(ctx, "grafto-load-balancer", &lb.LoadBalancerArgs{
+	Internal:                 pulumi.Bool(false),
+	LoadBalancerType:         pulumi.String("application"),
+	SecurityGroups:           pulumi.StringArray{
+			albSecurityGroup.ID(),
+	},
+	Subnets:                 pulumi.StringArray{
+		subnets["public"][0].ID(),
+		subnets["public"][1].ID(),
+	}, 
+	EnableDeletionProtection: pulumi.Bool(false),
+})
+```
+
+```go
+targetGroup, err := lb.NewTargetGroup(ctx, "target-group", &lb.TargetGroupArgs{
+	HealthCheck: &lb.TargetGroupHealthCheckArgs{
+		Path: pulumi.String("/api/health"),
+		Protocol: pulumi.String(payload.protocol),
+	},
+	Name: pulumi.String(payload.name),
+	Port: pulumi.Int(payload.port),
+	Protocol:        pulumi.String(payload.protocol),
+	TargetType: pulumi.String(payload.targetType),
+	VpcId:      payload.vpcID,
+})
+```
+
+```go
+listener, err := lb.NewListener(ctx, payload.resourceName, &lb.ListenerArgs{
+	DefaultActions: lb.ListenerDefaultActionArray{
+		lb.ListenerDefaultActionArgs{
+			TargetGroupArn: targetGroup.Arn,
+			Type:           pulumi.String("forward"),
+		},
+	},
+	LoadBalancerArn: loadBalancer.Arn,
+	Port:     pulumi.Int(80),
+	Protocol: pulumi.String("HTTP"),
+})
+```
+
 ## ECS
+
+
