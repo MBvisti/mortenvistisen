@@ -3,7 +3,7 @@ module github.com/MBvisti/mortenvistisen
 go 1.21
 
 require (
-	github.com/a-h/templ v0.2.513
+	github.com/a-h/templ v0.2.543
 	github.com/alecthomas/chroma/v2 v2.2.0
 	github.com/caarlos0/env/v10 v10.0.0
 	github.com/go-playground/validator/v10 v10.15.4
