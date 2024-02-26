@@ -52,6 +52,22 @@ script renderSubscribeForm(csrfToken, title, slugTitle string) {
   `;
 }
 
+script triggerModal(articleName string) {
+	const cookieValue = document.cookie
+		.split("; ")
+  		.find((row) => row.startsWith("hideModal="))
+  		?.split("=")[1];
+
+	if (cookieValue !== "true") {
+		const headers = document.querySelectorAll("h2");
+		headers[3].insertAdjacentHTML(
+			"beforeBegin", 
+			`<div hx-swap="outerHTML" hx-target="this" hx-get="/modal?article-name=${articleName}" 
+			hx-trigger="revealed"></div>`
+		);
+	}
+}
+
 func truncateSlug(slug string, maxLength int) string {
 	// Calculate the rune count in the slug
 	runeCount := utf8.RuneCountInString(slug)
@@ -96,6 +112,10 @@ templ ArticlePage(data ArticlePageData, head Head) {
 				</ul>
 			</div>
 		</article>
-		@renderSubscribeForm(data.CsrfToken, data.Title, truncateSlug(slug.Make(data.Title), 37))
+		if data.Title != "How to build a (simple) blog using Rust" {
+			@renderSubscribeForm(data.CsrfToken, data.Title, truncateSlug(slug.Make(data.Title), 37))
+		} else {
+			@triggerModal(data.Title)
+		}
 	}
 }

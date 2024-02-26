@@ -68,6 +68,28 @@ func renderSubscribeForm(csrfToken, title, slugTitle string) templ.ComponentScri
 	}
 }
 
+func triggerModal(articleName string) templ.ComponentScript {
+	return templ.ComponentScript{
+		Name: `__templ_triggerModal_8a55`,
+		Function: `function __templ_triggerModal_8a55(articleName){const cookieValue = document.cookie
+		.split("; ")
+  		.find((row) => row.startsWith("hideModal="))
+  		?.split("=")[1];
+
+	if (cookieValue !== "true") {
+		const headers = document.querySelectorAll("h2");
+		headers[3].insertAdjacentHTML(
+			"beforeBegin", 
+			` + "`" + `<div hx-swap="outerHTML" hx-target="this" hx-get="/modal?article-name=${articleName}" 
+			hx-trigger="revealed"></div>` + "`" + `
+		);
+	}
+}`,
+		Call:       templ.SafeScript(`__templ_triggerModal_8a55`, articleName),
+		CallInline: templ.SafeScriptInline(`__templ_triggerModal_8a55`, articleName),
+	}
+}
+
 func truncateSlug(slug string, maxLength int) string {
 	// Calculate the rune count in the slug
 	runeCount := utf8.RuneCountInString(slug)
@@ -110,7 +132,7 @@ func ArticlePage(data ArticlePageData, head Head) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(data.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 76, Col: 34}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 92, Col: 34}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -124,7 +146,7 @@ func ArticlePage(data ArticlePageData, head Head) templ.Component {
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s %v, %v", carbon.CreateFromStdTime(data.ReleaseDate).ToShortMonthString(),
 				carbon.CreateFromStdTime(data.ReleaseDate).DayOfMonth(), carbon.CreateFromStdTime(data.ReleaseDate).Year()))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 80, Col: 109}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 96, Col: 109}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -159,7 +181,7 @@ func ArticlePage(data ArticlePageData, head Head) templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 92, Col: 18}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 108, Col: 18}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -174,9 +196,16 @@ func ArticlePage(data ArticlePageData, head Head) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = renderSubscribeForm(data.CsrfToken, data.Title, truncateSlug(slug.Make(data.Title), 37)).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
+			if data.Title != "How to build a (simple) blog using Rust" {
+				templ_7745c5c3_Err = renderSubscribeForm(data.CsrfToken, data.Title, truncateSlug(slug.Make(data.Title), 37)).Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			} else {
+				templ_7745c5c3_Err = triggerModal(data.Title).Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
 			}
 			if !templ_7745c5c3_IsBuffer {
 				_, templ_7745c5c3_Err = io.Copy(templ_7745c5c3_W, templ_7745c5c3_Buffer)
