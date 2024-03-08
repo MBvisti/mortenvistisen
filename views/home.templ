@@ -17,65 +17,70 @@ type Post struct {
 // HomePage renders the page at '/'
 templ HomePage(posts []Post) {
 	@layouts.Base(Head{}.Default().Build()) {
-		<div class="container flex flex-col w-full md:w-2/3 2xl:w-1/3 mt-4 md:mt-12 lg:mt-28 mx-auto hero">
-			<div class="hero-content text-center pb-0">
-				<div>
-					<h1 class="text-5xl font-bold">Hi, I'm Morten</h1>
-					<p class="py-6 md:py-0 md:pb-2 md:mt-4 text-xl md:px-20">I write about technology and indiehacking; mainly focused around Go and full-stack development.</p>
+		<div
+			class="flex flex-col md:grid md:grid-flow-col md:grid-rows-[300px_100px_1fr] md:grid-cols-12 
+			w-full px-4 md:px-0 md:w-2/3 mt-4 mx-auto hero"
+		>
+			<div class="flex flex-col hero-content text-center pb-0 col-start-3 col-end-11 row-start-1 row-end-2">
+				<h1 class="text-5xl font-bold mb-2">Hi, I'm Morten</h1>
+				<p class="text-xl">I write about technology and indiehacking; mainly focused around Go and full-stack development.</p>
+			</div>
+			<div class="h-full w-full mb-10 row-start-2 row-end-3 col-start-3 col-end-11 flex flex-col justify-center">
+				<div class="divider divider-accent font-bold">Socials</div>
+				<div class="flex flex-col w-full">
+					<div class="flex h-10 justify-around text-xs items-center md:px-20">
+						<a href="https://twitter.com/mbvisti">
+							<span
+								class="badge badge-neutral"
+							>Twitter</span>
+						</a>
+						<a href="https://www.linkedin.com/in/mortenvistisen">
+							<span
+								class="badge badge-neutral"
+							>Linkedin</span>
+						</a>
+						<a href="https://github.com/mbvisti">
+							<span
+								class="badge badge-neutral"
+							>Github</span>
+						</a>
+						<a
+							href="mailto:hi@mortenvistisen.com?subject=hi"
+							target="_blank"
+						>
+							<span
+								class="badge badge-neutral"
+							>Email</span>
+						</a>
+					</div>
 				</div>
 			</div>
-			<div class="divider divider-accent font-bold px-6 md:px-20">Socials</div>
-			<div class="flex flex-col w-full mt-4 md:mt-0 mb-10 px-6 md:px-0">
-				<div class="flex h-10 justify-around text-xs items-center md:px-20">
-					<a href="https://twitter.com/mbvisti">
-						<span
-							class="badge badge-neutral"
-						>Twitter</span>
-					</a>
-					<a href="https://www.linkedin.com/in/mortenvistisen">
-						<span
-							class="badge badge-neutral"
-						>Linkedin</span>
-					</a>
-					<a href="https://github.com/mbvisti">
-						<span
-							class="badge badge-neutral"
-						>Github</span>
-					</a>
-					<a
-						href="mailto:hi@mortenvistisen.com?subject=hi"
-						target="_blank"
-					>
-						<span
-							class="badge badge-neutral"
-						>Email</span>
-					</a>
-				</div>
-			</div>
-			<h2 class="block text-2xl font-bold text-white mb-5 xl:my-8">Latest posts</h2>
-			<div class="w-full px-6 md:px-20">
-				for _, post := range posts {
-					<a href={ templ.URL(post.Slug) }>
-						<div class="mb-10 max-w-2xl mx-auto px-8 py-4 rounded-lg shadow-md bg-base-300">
-							<div class="flex items-center justify-between">
-								<span class="text-sm font-light text-gray-400">
-									{ fmt.Sprintf("%s %v, %v", carbon.Parse(post.ReleaseDate).ToShortMonthString(), carbon.Parse(post.ReleaseDate).DayOfMonth(), carbon.Parse(post.ReleaseDate).Year()) }
-								</span>
-							</div>
-							<div class="mt-2">
-								<p class="text-xl font-bold text-white hover:text-gray-200 hover:underline">{post.Title}</p>
-								<p class="mt-2 text-gray-300">{ post.Excerpt }</p>
-							</div>
-							<div class="flex items-center justify-between mt-4">
-								<div class="flex items-center overflow-x-auto overflow-y-hidden py-2">
-									for _, tag := range post.Tags {
-										<span class="px-3 py-1 text-sm font-bold text-gray-100 transition-colors duration-300 transform bg-gray-600 rounded cursor-pointer hover:bg-gray-500 mr-2">{ tag }</span>
-									}
+			<div class="h-full w-full row-start-3 row-end-4 col-start-3 col-end-11 flex flex-col justify-center">
+				<h2 class="block text-2xl font-bold text-white mb-5 xl:my-8">Latest posts</h2>
+				<div class="w-full">
+					for _, post := range posts {
+						<a href={ templ.URL(post.Slug) }>
+							<div class="mb-10 w-full px-8 py-4 rounded-lg shadow-md bg-base-300">
+								<div class="flex items-center justify-between">
+									<span class="text-sm font-light text-gray-400">
+										{ fmt.Sprintf("%s %v, %v", carbon.Parse(post.ReleaseDate).ToShortMonthString(), carbon.Parse(post.ReleaseDate).DayOfMonth(), carbon.Parse(post.ReleaseDate).Year()) }
+									</span>
+								</div>
+								<div class="mt-2">
+									<p class="text-xl font-bold text-white hover:text-gray-200 hover:underline">{ post.Title }</p>
+									<p class="mt-2 text-gray-300">{ post.Excerpt }</p>
+								</div>
+								<div class="flex items-center justify-between mt-4">
+									<div class="flex items-center overflow-x-auto overflow-y-hidden py-2">
+										for _, tag := range post.Tags {
+											<span class="px-3 py-1 text-sm font-bold text-gray-100 transition-colors duration-300 transform bg-gray-600 rounded cursor-pointer hover:bg-gray-500 mr-2">{ tag }</span>
+										}
+									</div>
 								</div>
 							</div>
-						</div>
-					</a>
-				}
+						</a>
+					}
+				</div>
 			</div>
 		</div>
 	}
