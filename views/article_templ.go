@@ -125,14 +125,14 @@ func ArticlePage(data ArticlePageData, head Head) templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex flex-col md:grid md:grid-flow-col md:gap-y-8 md:grid-rows-[200px_1fr] md:grid-cols-12 \n			w-full px-4 md:px-0 md:w-2/3 mt-12 mx-auto hero\"><div class=\"w-full col-start-3 col-end-11 row-start-1 row-end-2 flex flex-col\"><h1 class=\"mx-auto text-center text-6xl mb-2\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex flex-col md:grid md:grid-flow-col md:gap-y-8 md:grid-rows-[200px_1fr] md:grid-cols-12 \n			w-full px-4 md:px-0 md:w-2/3 mt-6 md:mt-12 mx-auto hero\"><div class=\"mb-6 md:mb-0 w-full col-start-3 col-end-11 row-start-1 row-end-2 flex flex-col\"><h1 class=\"mx-auto text-center text-4xl md:text-6xl mb-2\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(data.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 93, Col: 62}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 93, Col: 74}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -152,7 +152,7 @@ func ArticlePage(data ArticlePageData, head Head) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><p class=\"text-gray-500 mr-2\">|</p><p class=\"text-gray-500\">MBV</p></div></div><article class=\"col-start-3 col-end-11 text-left mb-6 leading-normal prose lg:prose-xl row-start-2\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><p class=\"text-gray-500 mr-2\">|</p><p class=\"text-gray-500\">MBV</p></div></div><article class=\"w-full col-start-3 col-end-11 text-left leading-normal prose lg:prose-xl row-start-2\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

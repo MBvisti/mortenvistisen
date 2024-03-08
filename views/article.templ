@@ -88,10 +88,10 @@ templ ArticlePage(data ArticlePageData, head Head) {
 	@layouts.Base(head.Build()) {
 		<div
 			class="flex flex-col md:grid md:grid-flow-col md:gap-y-8 md:grid-rows-[200px_1fr] md:grid-cols-12 
-			w-full px-4 md:px-0 md:w-2/3 mt-12 mx-auto hero"
+			w-full px-4 md:px-0 md:w-2/3 mt-6 md:mt-12 mx-auto hero"
 		>
-			<div class="w-full col-start-3 col-end-11 row-start-1 row-end-2 flex flex-col">
-				<h1 class="mx-auto text-center text-6xl mb-2">{ data.Title }</h1>
+			<div class="mb-6 md:mb-0 w-full col-start-3 col-end-11 row-start-1 row-end-2 flex flex-col">
+				<h1 class="mx-auto text-center text-4xl md:text-6xl mb-2">{ data.Title }</h1>
 				<div class="flex mx-auto text-xl">
 					<p class="text-gray-500 mr-2">
 						{ fmt.Sprintf("%s %v, %v", carbon.CreateFromStdTime(data.ReleaseDate).ToShortMonthString(),
@@ -102,7 +102,7 @@ templ ArticlePage(data ArticlePageData, head Head) {
 				</div>
 			</div>
 			<article
-				class="col-start-3 col-end-11 text-left mb-6 leading-normal prose lg:prose-xl row-start-2"
+				class="w-full col-start-3 col-end-11 text-left leading-normal prose lg:prose-xl row-start-2"
 			>
 				@unsafe(data.Content)
 				<div class="mt-10 pb-10">
