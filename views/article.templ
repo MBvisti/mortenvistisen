@@ -86,12 +86,13 @@ func truncateSlug(slug string, maxLength int) string {
 
 templ ArticlePage(data ArticlePageData, head Head) {
 	@layouts.Base(head.Build()) {
-		<article
-			class="mt-12 mx-auto text-left lg:prose-xl mb-6 px-4 md:px-6 h-full w-full leading-normal prose prose-invert"
+		<div
+			class="flex flex-col md:grid md:grid-flow-col md:gap-y-8 md:grid-rows-[200px_1fr] md:grid-cols-12 
+			w-full px-4 md:px-0 md:w-2/3 mt-12 mx-auto hero"
 		>
-			<div class="flex flex-col">
-				<h1 class="!mb-0">{ data.Title }</h1>
-				<div class="flex">
+			<div class="w-full col-start-3 col-end-11 row-start-1 row-end-2 flex flex-col">
+				<h1 class="mx-auto text-center text-6xl mb-2">{ data.Title }</h1>
+				<div class="flex mx-auto text-xl">
 					<p class="text-gray-500 mr-2">
 						{ fmt.Sprintf("%s %v, %v", carbon.CreateFromStdTime(data.ReleaseDate).ToShortMonthString(),
 		carbon.CreateFromStdTime(data.ReleaseDate).DayOfMonth(), carbon.CreateFromStdTime(data.ReleaseDate).Year()) }
@@ -100,22 +101,26 @@ templ ArticlePage(data ArticlePageData, head Head) {
 					<p class="text-gray-500">MBV</p>
 				</div>
 			</div>
-			@unsafe(data.Content)
-			<div class="mt-10 pb-10">
-				<p>Thanks for reading. Please checkout some of my other articles, if you enjoyed this one:</p>
-				<ul>
-					for title, slug := range data.OtherArticleLinks {
-						<a href={ templ.URL(slug) } class="text-base text-blue-500 hover:text-blue-700">
-							<li>{ title }</li>
-						</a>
-					}
-				</ul>
-			</div>
-		</article>
-		if data.Title != "How to build a (simple) blog using Rust" {
-			@renderSubscribeForm(data.CsrfToken, data.Title, truncateSlug(slug.Make(data.Title), 37))
-		} else {
-			@triggerModal(data.Title)
-		}
+			<article
+				class="col-start-3 col-end-11 text-left mb-6 leading-normal prose lg:prose-xl row-start-2"
+			>
+				@unsafe(data.Content)
+				<div class="mt-10 pb-10">
+					<p>Thanks for reading. Please checkout some of my other articles, if you enjoyed this one:</p>
+					<ul>
+						for title, slug := range data.OtherArticleLinks {
+							<a href={ templ.URL(slug) } class="text-base text-blue-500 hover:text-blue-700">
+								<li>{ title }</li>
+							</a>
+						}
+					</ul>
+				</div>
+			</article>
+			if data.Title != "How to build a (simple) blog using Rust" {
+				@renderSubscribeForm(data.CsrfToken, data.Title, truncateSlug(slug.Make(data.Title), 37))
+			} else {
+				@triggerModal(data.Title)
+			}
+		</div>
 	}
 }

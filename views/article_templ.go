@@ -125,20 +125,20 @@ func ArticlePage(data ArticlePageData, head Head) templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<article class=\"mt-12 mx-auto text-left lg:prose-xl mb-6 px-4 md:px-6 h-full w-full leading-normal prose prose-invert\"><div class=\"flex flex-col\"><h1 class=\"!mb-0\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex flex-col md:grid md:grid-flow-col md:gap-y-8 md:grid-rows-[200px_1fr] md:grid-cols-12 \n			w-full px-4 md:px-0 md:w-2/3 mt-12 mx-auto hero\"><div class=\"w-full col-start-3 col-end-11 row-start-1 row-end-2 flex flex-col\"><h1 class=\"mx-auto text-center text-6xl mb-2\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(data.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 92, Col: 34}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 93, Col: 62}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h1><div class=\"flex\"><p class=\"text-gray-500 mr-2\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h1><div class=\"flex mx-auto text-xl\"><p class=\"text-gray-500 mr-2\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -146,13 +146,13 @@ func ArticlePage(data ArticlePageData, head Head) templ.Component {
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s %v, %v", carbon.CreateFromStdTime(data.ReleaseDate).ToShortMonthString(),
 				carbon.CreateFromStdTime(data.ReleaseDate).DayOfMonth(), carbon.CreateFromStdTime(data.ReleaseDate).Year()))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 96, Col: 109}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 97, Col: 109}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><p class=\"text-gray-500 mr-2\">|</p><p class=\"text-gray-500\">MBV</p></div></div>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><p class=\"text-gray-500 mr-2\">|</p><p class=\"text-gray-500\">MBV</p></div></div><article class=\"col-start-3 col-end-11 text-left mb-6 leading-normal prose lg:prose-xl row-start-2\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -181,7 +181,7 @@ func ArticlePage(data ArticlePageData, head Head) templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 108, Col: 18}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 112, Col: 19}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -206,6 +206,10 @@ func ArticlePage(data ArticlePageData, head Head) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
 			}
 			if !templ_7745c5c3_IsBuffer {
 				_, templ_7745c5c3_Err = io.Copy(templ_7745c5c3_W, templ_7745c5c3_Buffer)
