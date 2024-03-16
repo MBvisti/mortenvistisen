@@ -7,7 +7,61 @@ package database
 
 import (
 	"context"
+
+	"github.com/google/uuid"
 )
+
+const getFiveRandomPosts = `-- name: GetFiveRandomPosts :many
+SELECT
+    posts.id,
+    posts.created_at,
+    posts.updated_at,
+    posts.title,
+    posts.filename,
+    posts.slug,
+    posts.excerpt,
+    posts.draft,
+    posts.released_at,
+    posts.read_time
+FROM
+    posts
+WHERE
+    released_at IS NOT NULL AND draft = false AND posts.id != $1
+ORDER BY
+    random()
+limit 5
+`
+
+func (q *Queries) GetFiveRandomPosts(ctx context.Context, id uuid.UUID) ([]Post, error) {
+	rows, err := q.db.Query(ctx, getFiveRandomPosts, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Post
+	for rows.Next() {
+		var i Post
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Title,
+			&i.Filename,
+			&i.Slug,
+			&i.Excerpt,
+			&i.Draft,
+			&i.ReleasedAt,
+			&i.ReadTime,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
 
 const getLatestPosts = `-- name: GetLatestPosts :many
 SELECT

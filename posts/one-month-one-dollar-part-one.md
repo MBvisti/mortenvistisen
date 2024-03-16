@@ -24,12 +24,6 @@ business partner to do the challenge with me. So, from the 1st of February 2023,
 and I will be attempting at starting completely from scratch and after 30 days of work, have a product that will have 
 made more than 1 dollar. A million seemed to bit too ambitious.
 
----
-
-<div id="subscribe-form" class="max-w-6xl px-4 sm:px-6 lg:px-8 mx-auto"></div>
-
----
-
 ## Isn't this just 12 month 12 start-ups but shorter
 
 Maybe, yes, kind of, the chance that an idea is completely original is absolutely minuscule. I've tried to (mentally, 

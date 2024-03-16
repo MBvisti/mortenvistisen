@@ -14,7 +14,6 @@ import (
 	"fmt"
 	"github.com/MBvisti/mortenvistisen/views/internal/layouts"
 	"github.com/golang-module/carbon/v2"
-	"github.com/gosimple/slug"
 	"time"
 	"unicode/utf8"
 )
@@ -70,23 +69,33 @@ func renderSubscribeForm(csrfToken, title, slugTitle string) templ.ComponentScri
 
 func triggerModal(articleName string) templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_triggerModal_8a55`,
-		Function: `function __templ_triggerModal_8a55(articleName){const cookieValue = document.cookie
+		Name: `__templ_triggerModal_44ac`,
+		Function: `function __templ_triggerModal_44ac(articleName){const cookieValue = document.cookie
 		.split("; ")
   		.find((row) => row.startsWith("hideModal="))
   		?.split("=")[1];
 
 	if (cookieValue !== "true") {
 		const headers = document.querySelectorAll("h2");
-		headers[3].insertAdjacentHTML(
+		let targetHeaderNum = 0
+
+		if (headers.length == 0) {
+			return
+		};
+		
+		if (headers.length > 2) {
+			targetHeaderNum = Math.ceil(headers.length*2/3)
+		};
+
+		headers[targetHeaderNum].insertAdjacentHTML(
 			"beforeBegin", 
 			` + "`" + `<div hx-swap="outerHTML" hx-target="this" hx-get="/modal?article-name=${articleName}" 
 			hx-trigger="revealed"></div>` + "`" + `
 		);
 	}
 }`,
-		Call:       templ.SafeScript(`__templ_triggerModal_8a55`, articleName),
-		CallInline: templ.SafeScriptInline(`__templ_triggerModal_8a55`, articleName),
+		Call:       templ.SafeScript(`__templ_triggerModal_44ac`, articleName),
+		CallInline: templ.SafeScriptInline(`__templ_triggerModal_44ac`, articleName),
 	}
 }
 
@@ -132,7 +141,7 @@ func ArticlePage(data ArticlePageData, head Head) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(data.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 93, Col: 74}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 102, Col: 74}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -146,7 +155,7 @@ func ArticlePage(data ArticlePageData, head Head) templ.Component {
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s %v, %v", carbon.CreateFromStdTime(data.ReleaseDate).ToShortMonthString(),
 				carbon.CreateFromStdTime(data.ReleaseDate).DayOfMonth(), carbon.CreateFromStdTime(data.ReleaseDate).Year()))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 97, Col: 109}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 106, Col: 109}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -181,7 +190,7 @@ func ArticlePage(data ArticlePageData, head Head) templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 112, Col: 19}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 121, Col: 19}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -196,16 +205,9 @@ func ArticlePage(data ArticlePageData, head Head) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if data.Title != "How to build a (simple) blog using Rust" {
-				templ_7745c5c3_Err = renderSubscribeForm(data.CsrfToken, data.Title, truncateSlug(slug.Make(data.Title), 37)).Render(ctx, templ_7745c5c3_Buffer)
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			} else {
-				templ_7745c5c3_Err = triggerModal(data.Title).Render(ctx, templ_7745c5c3_Buffer)
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
+			templ_7745c5c3_Err = triggerModal(data.Title).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div>")
 			if templ_7745c5c3_Err != nil {
