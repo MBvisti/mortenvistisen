@@ -48,12 +48,6 @@ Pulumi is also "true open source", in the sense that they operate with an Apache
 
 However, it isn't all sunshine and rainbows. Pulumi is still young, so documentation is still not great when actually writing code. Their general purpose docs do make up for this, but it can be frustrating having to jump in and out of the editor to look up what you're currently working on.
 
----
-
-<div id="subscribe-form" class="max-w-6xl px-4 sm:px-6 lg:px-8 mx-auto"></div>
-
----
-
 ## Building the POC
 
 All of the applications are containerized being we can take full advantage of aws's elastic container service, so the POC was a simple hello world api packed in a docker image, served using fargate and a load balancer in front. I've been aware of ECS and fargate (plus, vpc, subnets, security groups etc), but never used them, so there was also some learning involved.

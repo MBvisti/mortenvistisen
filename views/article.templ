@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/golang-module/carbon/v2"
 	"github.com/MBvisti/mortenvistisen/views/internal/layouts"
-	"github.com/gosimple/slug"
 	"unicode/utf8"
 )
 
@@ -60,7 +59,17 @@ script triggerModal(articleName string) {
 
 	if (cookieValue !== "true") {
 		const headers = document.querySelectorAll("h2");
-		headers[3].insertAdjacentHTML(
+		let targetHeaderNum = 0
+
+		if (headers.length == 0) {
+			return
+		};
+		
+		if (headers.length > 2) {
+			targetHeaderNum = Math.ceil(headers.length*2/3)
+		};
+
+		headers[targetHeaderNum].insertAdjacentHTML(
 			"beforeBegin", 
 			`<div hx-swap="outerHTML" hx-target="this" hx-get="/modal?article-name=${articleName}" 
 			hx-trigger="revealed"></div>`
@@ -116,11 +125,7 @@ templ ArticlePage(data ArticlePageData, head Head) {
 					</ul>
 				</div>
 			</article>
-			if data.Title != "How to build a (simple) blog using Rust" {
-				@renderSubscribeForm(data.CsrfToken, data.Title, truncateSlug(slug.Make(data.Title), 37))
-			} else {
-				@triggerModal(data.Title)
-			}
+			@triggerModal(data.Title)
 		</div>
 	}
 }

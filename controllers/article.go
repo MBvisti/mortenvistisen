@@ -34,17 +34,15 @@ func (c *Controller) Article(ctx echo.Context) error {
 		}
 	}
 
-	latestArticles, err := c.db.GetLatestPosts(ctx.Request().Context())
+	fiveRandomPosts, err := c.db.GetFiveRandomPosts(ctx.Request().Context(), post.ID)
 	if err != nil {
 		return err
 	}
 
-	otherArticles := make(map[string]string, len(latestArticles))
+	otherArticles := make(map[string]string, 5)
 
-	for _, article := range latestArticles {
-		if article.Slug != post.Slug {
-			otherArticles[article.Title] = c.buildURLFromSlug("posts/" + article.Slug)
-		}
+	for _, article := range fiveRandomPosts {
+		otherArticles[article.Title] = c.buildURLFromSlug("posts/" + article.Slug)
 	}
 
 	return views.ArticlePage(views.ArticlePageData{

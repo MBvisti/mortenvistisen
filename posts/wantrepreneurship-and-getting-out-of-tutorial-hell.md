@@ -34,12 +34,6 @@ ideation process (market analysis, problem area and feasibility etc.), by actual
 of some of the most common practices and advice I see, when trying to learn about this topic. Should make for a fun 
 re-visit a month or two in the future.
 
----
-
-<div id="subscribe-form" class="max-w-6xl px-4 sm:px-6 lg:px-8 mx-auto"></div>
-
----
-
 ### The indiehacking/entrepreneurial process
 **Warning**: there is a massive amount of postulation here, all of this is to be tested over the coming months.
 

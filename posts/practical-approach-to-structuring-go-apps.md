@@ -26,12 +26,6 @@ Now, I’m assuming some familiarity with Golang and programming in general, as 
 - Golang-migrate
 - Your favorite IDE (could be Goland or VS code — I highly suggest Goland, it’s amazing)
 
----
-
-<div id="subscribe-form" class="max-w-6xl px-4 sm:px-6 lg:px-8 mx-auto"></div>
-
----
-
 ## Elements of a robust and scalable structure
 
 Spend some time working in software development and you quickly learn how programs sometimes can be brittle and other times rigid. Therefore, I look for these three things in my application structure:

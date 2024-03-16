@@ -25,12 +25,6 @@ If we want a more concrete definition of an integration test we can dust off the
 
 If we borrow some terminology from [clean architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)  we can think of it as when we include code from the infrastructure layer in our tests, we're in the integration testing territory.
 
----
-
-<div id="subscribe-form" class="max-w-6xl px-4 sm:px-6 lg:px-8 mx-auto"></div>
-
----
-
 ## What are we doing
 When I started out writing integration tests in Go; what I struggled the most with was how to configure and set it up for real-world usage. This, again, will also differ based upon the developer/use-case/reality as this approach might not work for well a big multinational company. My criteria for my integration tests are that they should run across different operating systems, be easy to run and play nicely with CI/CD workflows (basically, play nice within a dockerized environment).
 
