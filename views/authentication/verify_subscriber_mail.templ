@@ -14,7 +14,7 @@ templ VerifySubscriberEmailPage(tokenInvalid bool, head views.Head) {
 						Your token is not valid; please request a new one.
 					</p>
 				} else {
-					<p hx-get="/" hx-trigger="load delay:4s" class="text-green-600">
+					<p class="text-green-600">
 						Your email has been validated; thanks for subscribing!
 					</p>
 				}

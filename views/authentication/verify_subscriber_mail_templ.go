@@ -44,7 +44,7 @@ func VerifySubscriberEmailPage(tokenInvalid bool, head views.Head) templ.Compone
 					return templ_7745c5c3_Err
 				}
 			} else {
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<p hx-get=\"/\" hx-trigger=\"load delay:4s\" class=\"text-green-600\">Your email has been validated; thanks for subscribing!</p>")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<p class=\"text-green-600\">Your email has been validated; thanks for subscribing!</p>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
