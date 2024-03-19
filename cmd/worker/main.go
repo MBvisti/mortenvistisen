@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
+	"net"
 	"os"
 	"os/signal"
 	"syscall"
@@ -53,6 +55,16 @@ func main() {
 
 	q := map[string]river.QueueConfig{river.QueueDefault: {MaxWorkers: 100}}
 	riverClient := queue.NewClient(queueDbPool, queue.WithQueues(q), queue.WithWorkers(workers), queue.WithLogger(logger), queue.WithPeriodicJobs(periodicJobs))
+
+	if cfg.App.Environment == "production" {
+		log.Print("listening on :8000")
+		//TODO a way for fly to check health
+		listener, err := net.Listen("tcp", "0.0.0.0:8000")
+		if err != nil {
+			panic(err)
+		}
+		defer listener.Close()
+	}
 
 	if err := riverClient.Start(ctx); err != nil {
 		panic(err)
