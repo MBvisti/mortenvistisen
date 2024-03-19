@@ -47,7 +47,7 @@ func (r *Routes) web() {
 
 func (r *Routes) api() {
 	apiRouter := r.router.Group("/api")
-	apiRoutes(apiRouter, r.controllers, r.middleware)
+	apiRoutes(apiRouter, r.controllers)
 }
 
 func (r *Routes) SetupRoutes() *echo.Echo {
