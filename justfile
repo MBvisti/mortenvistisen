@@ -6,8 +6,6 @@ alias r := run
 alias wc := watch-css
 
 alias sm := serve-mails
-alias cmd := compile-mails-dev
-alias cmp := compile-mails-prod
 
 alias mm := make-migration
 alias gms := get-migration-status
@@ -32,14 +30,8 @@ copy-preline-to-static:
     @cp -r ./resources/node_modules/preline/dist/ ./static/js/preline
 
 # Mails
-compile-mails-prod:
-    @cd resources && npm run build-mails
-
-compile-mails-dev:
-    @cd resources && npm run dev-mails
-
 serve-mails:
-    @cd resources && npm run serve-mails
+    @cd ./pkg/mail/templates && wgo -file=.go -file=.templ -xfile=_templ.go templ generate :: go run ./server/main.go
 
 # Database 
 get-migration-status: 
@@ -74,3 +66,7 @@ run-worker:
 # templates
 compile-templates:
     templ generate 
+
+# river
+river-migrate-up:
+	river migrate-up --database-url $QUEUE_DATABASE_URL
