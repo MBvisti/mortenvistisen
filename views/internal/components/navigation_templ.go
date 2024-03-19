@@ -11,12 +11,12 @@ import "io"
 import "bytes"
 
 import (
-	"github.com/MBvisti/mortenvistisen/routes/middleware"
+	"github.com/MBvisti/mortenvistisen/server/middleware"
 )
 
 func extractAuthStatus(ctx context.Context) bool {
-	if authCtx, ok := ctx.Value(middleware.AuthContext{}).(middleware.AuthContext); ok {
-		return authCtx.GetAuthStatus()
+	if userCtx, ok := ctx.Value(middleware.UserContext{}).(*middleware.UserContext); ok {
+		return userCtx.GetAuthStatus()
 	}
 
 	return false

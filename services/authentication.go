@@ -5,7 +5,6 @@ import (
 	"encoding/gob"
 	"errors"
 	"net/http"
-	"os"
 
 	"github.com/MBvisti/mortenvistisen/entity"
 	"github.com/MBvisti/mortenvistisen/pkg/config"
@@ -13,16 +12,11 @@ import (
 	"github.com/MBvisti/mortenvistisen/repository/database"
 	"github.com/google/uuid"
 	"github.com/gorilla/sessions"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
-var (
-	passwordPepper   = config.Cfg.GetPwdPepper()
-	authSessionStore = sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")), []byte(os.Getenv("SESSION_ENCRYPTION_KEY")))
-)
-
-func hashAndPepperPassword(password string) (string, error) {
+func hashAndPepperPassword(password, passwordPepper string) (string, error) {
 	passwordBytes := []byte(password + passwordPepper)
 	hashedBytes, err := bcrypt.GenerateFromPassword(passwordBytes, bcrypt.DefaultCost)
 	if err != nil {
@@ -37,7 +31,7 @@ type validatePasswordPayload struct {
 	password       string
 }
 
-func validatePassword(data validatePasswordPayload) error {
+func validatePassword(data validatePasswordPayload, passwordPepper string) error {
 	return bcrypt.CompareHashAndPassword([]byte(data.hashedpassword), []byte(data.password+passwordPepper))
 }
 
@@ -46,7 +40,7 @@ type AuthenticateUserPayload struct {
 	Password string
 }
 
-func AuthenticateUser(ctx context.Context, data AuthenticateUserPayload, db userDatabase) (entity.User, error) {
+func AuthenticateUser(ctx context.Context, data AuthenticateUserPayload, db userDatabase, passwordPepper string) (entity.User, error) {
 	user, err := db.QueryUserByMail(ctx, data.Email)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -64,7 +58,7 @@ func AuthenticateUser(ctx context.Context, data AuthenticateUserPayload, db user
 	err = validatePassword(validatePasswordPayload{
 		hashedpassword: user.Password,
 		password:       data.Password,
-	})
+	}, passwordPepper)
 	if err != nil {
 		return entity.User{}, ErrPasswordNotMatch
 	}
@@ -78,15 +72,11 @@ func AuthenticateUser(ctx context.Context, data AuthenticateUserPayload, db user
 	}, nil
 }
 
-func CreateAuthenticatedSession(r *http.Request, w http.ResponseWriter, userID uuid.UUID) error {
+func CreateAuthenticatedSession(session sessions.Session, userID uuid.UUID, cfg config.Cfg) *sessions.Session {
 	gob.Register(uuid.UUID{})
-	session, err := authSessionStore.Get(r, "ua")
-	if err != nil {
-		return err
-	}
 
 	session.Options.HttpOnly = true
-	session.Options.Domain = os.Getenv("APP_HOST")
+	session.Options.Domain = cfg.App.ServerHost
 	session.Options.Secure = true
 	session.Options.MaxAge = 86400
 
@@ -94,12 +84,12 @@ func CreateAuthenticatedSession(r *http.Request, w http.ResponseWriter, userID u
 	session.Values["authenticated"] = true
 	session.Values["is_admin"] = false
 
-	return session.Save(r, w)
+	return &session
 }
 
-func IsAuthenticated(r *http.Request) (bool, uuid.UUID, error) {
+func IsAuthenticated(r *http.Request, authStore *sessions.CookieStore) (bool, uuid.UUID, error) {
 	gob.Register(uuid.UUID{})
-	session, err := authSessionStore.Get(r, "ua")
+	session, err := authStore.Get(r, "ua")
 	if err != nil {
 		return false, uuid.UUID{}, err
 	}
@@ -111,9 +101,9 @@ func IsAuthenticated(r *http.Request) (bool, uuid.UUID, error) {
 	return session.Values["authenticated"].(bool), session.Values["user_id"].(uuid.UUID), nil
 }
 
-func IsAdmin(r *http.Request) (bool, error) {
+func IsAdmin(r *http.Request, authStore *sessions.CookieStore) (bool, error) {
 	gob.Register(uuid.UUID{})
-	session, err := authSessionStore.Get(r, "ua")
+	session, err := authStore.Get(r, "ua")
 	if err != nil {
 		return false, err
 	}
