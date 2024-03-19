@@ -13,10 +13,9 @@ COPY static static
 
 RUN cd resources && npm ci
 
-RUN cd resources && npm run build-css
 RUN cd resources && npm run build-mails
 
-FROM golang:1.21 AS build-go
+FROM golang:1.22 AS build-go
 
 ENV CI=true
 WORKDIR /

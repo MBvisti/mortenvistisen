@@ -25,7 +25,7 @@ type newUserValidation struct {
 	ConfirmPassword string `validate:"required,gte=8"`
 	Name            string `validate:"required,gte=2"`
 	Mail            string `validate:"required,email"`
-	MailRegistered  bool   `validate:"ne=true"` // TODO: why does this fail with 'required'?
+	MailRegistered  bool   `validate:"ne=true"`
 	Password        string `validate:"required,gte=8"`
 }
 
@@ -38,7 +38,7 @@ func passwordMatchValidation(sl validator.StructLevel) {
 }
 
 func NewUser(
-	ctx context.Context, data entity.NewUser, db userDatabase, v *validator.Validate) (entity.User, error) {
+	ctx context.Context, data entity.NewUser, db userDatabase, v *validator.Validate, passwordPepper string) (entity.User, error) {
 	mailAlreadyRegistered, err := db.DoesMailExists(ctx, data.Mail)
 	if err != nil {
 		telemetry.Logger.Error("could not check if email exists", "error", err)
@@ -59,7 +59,7 @@ func NewUser(
 		return entity.User{}, err
 	}
 
-	hashedPassword, err := hashAndPepperPassword(newUserData.Password)
+	hashedPassword, err := hashAndPepperPassword(newUserData.Password, passwordPepper)
 	if err != nil {
 		telemetry.Logger.Error("error hashing and peppering password", "error", err)
 		return entity.User{}, err
@@ -103,7 +103,7 @@ func resetPasswordMatchValidation(sl validator.StructLevel) {
 }
 
 func UpdateUser(
-	ctx context.Context, data entity.UpdateUser, db userDatabase, v *validator.Validate) (entity.User, error) {
+	ctx context.Context, data entity.UpdateUser, db userDatabase, v *validator.Validate, passwordPepper string) (entity.User, error) {
 
 	v.RegisterStructValidation(resetPasswordMatchValidation, updateUserValidation{})
 
@@ -118,12 +118,11 @@ func UpdateUser(
 		return entity.User{}, err
 	}
 
-	hashedPassword, err := hashAndPepperPassword(validatedData.Password)
+	hashedPassword, err := hashAndPepperPassword(validatedData.Password, passwordPepper)
 	if err != nil {
 		telemetry.Logger.Error("error hashing and peppering password", "error", err)
 		return entity.User{}, err
 	}
-	telemetry.Logger.Info("this is id", "id", data.ID)
 
 	updatedUser, err := db.UpdateUser(ctx, database.UpdateUserParams{
 		UpdatedAt: database.ConvertToPGTimestamptz(time.Now()),
