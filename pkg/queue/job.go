@@ -35,7 +35,10 @@ type RepeatableExecutor interface {
 
 type repeatableJob (job)
 
-func newRepeatableJob(scheduledFor time.Time, instructions jobInstructions) (*repeatableJob, error) {
+func newRepeatableJob(
+	scheduledFor time.Time,
+	instructions jobInstructions,
+) (*repeatableJob, error) {
 	if instructions.executor == "" {
 		return nil, ErrExecutorNotSet
 	}

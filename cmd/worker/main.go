@@ -54,7 +54,13 @@ func main() {
 	periodicJobs := []*river.PeriodicJob{}
 
 	q := map[string]river.QueueConfig{river.QueueDefault: {MaxWorkers: 100}}
-	riverClient := queue.NewClient(queueDbPool, queue.WithQueues(q), queue.WithWorkers(workers), queue.WithLogger(logger), queue.WithPeriodicJobs(periodicJobs))
+	riverClient := queue.NewClient(
+		queueDbPool,
+		queue.WithQueues(q),
+		queue.WithWorkers(workers),
+		queue.WithLogger(logger),
+		queue.WithPeriodicJobs(periodicJobs),
+	)
 
 	if cfg.App.Environment == "production" {
 		log.Print("listening on :8000")
@@ -82,7 +88,9 @@ func main() {
 	// completely and exits uncleanly.
 	go func() {
 		<-sigintOrTerm
-		fmt.Printf("Received SIGINT/SIGTERM; initiating soft stop (try to wait for jobs to finish)\n")
+		fmt.Printf(
+			"Received SIGINT/SIGTERM; initiating soft stop (try to wait for jobs to finish)\n",
+		)
 
 		softStopCtx, softStopCtxCancel := context.WithTimeout(ctx, 10*time.Second)
 		defer softStopCtxCancel()
@@ -90,7 +98,9 @@ func main() {
 		go func() {
 			select {
 			case <-sigintOrTerm:
-				fmt.Printf("Received SIGINT/SIGTERM again; initiating hard stop (cancel everything)\n")
+				fmt.Printf(
+					"Received SIGINT/SIGTERM again; initiating hard stop (cancel everything)\n",
+				)
 				softStopCtxCancel()
 			case <-softStopCtx.Done():
 				fmt.Printf("Soft stop timeout; initiating hard stop (cancel everything)\n")
@@ -98,7 +108,8 @@ func main() {
 		}()
 
 		err := riverClient.Stop(softStopCtx)
-		if err != nil && !errors.Is(err, context.DeadlineExceeded) && !errors.Is(err, context.Canceled) {
+		if err != nil && !errors.Is(err, context.DeadlineExceeded) &&
+			!errors.Is(err, context.Canceled) {
 			panic(err)
 		}
 		if err == nil {

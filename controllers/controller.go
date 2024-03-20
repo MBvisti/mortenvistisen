@@ -30,7 +30,12 @@ type Controller struct {
 }
 
 func NewController(
-	db database.Queries, mail mail.Mail, tknManager tokens.Manager, cfg config.Cfg, qc *river.Client[pgx.Tx], pm posts.PostManager,
+	db database.Queries,
+	mail mail.Mail,
+	tknManager tokens.Manager,
+	cfg config.Cfg,
+	qc *river.Client[pgx.Tx],
+	pm posts.PostManager,
 	authSessionStore *sessions.CookieStore,
 ) Controller {
 	validate := validator.New(validator.WithRequiredStructEnabled())

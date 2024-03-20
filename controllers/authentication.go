@@ -107,7 +107,8 @@ func (c *Controller) StorePasswordReset(ctx echo.Context) error {
 			failureOccurred = false
 		}
 
-		return authentication.ForgottenPasswordSuccess(failureOccurred).Render(views.ExtractRenderDeps(ctx))
+		return authentication.ForgottenPasswordSuccess(failureOccurred).
+			Render(views.ExtractRenderDeps(ctx))
 	}
 
 	generatedTkn, err := c.tknManager.GenerateToken()
@@ -115,7 +116,10 @@ func (c *Controller) StorePasswordReset(ctx echo.Context) error {
 		return authentication.ForgottenPasswordSuccess(true).Render(views.ExtractRenderDeps(ctx))
 	}
 
-	resetPWToken := tokens.CreateResetPasswordToken(generatedTkn.PlainTextToken, generatedTkn.HashedToken)
+	resetPWToken := tokens.CreateResetPasswordToken(
+		generatedTkn.PlainTextToken,
+		generatedTkn.HashedToken,
+	)
 
 	if err := c.db.StoreToken(ctx.Request().Context(), database.StoreTokenParams{
 		ID:        uuid.New(),
@@ -209,7 +213,8 @@ func (c *Controller) StoreResetPassword(ctx echo.Context) error {
 		}).Render(views.ExtractRenderDeps(ctx))
 	}
 
-	if database.ConvertFromPGTimestamptzToTime(token.ExpiresAt).Before(time.Now()) && token.Scope != tokens.ScopeResetPassword {
+	if database.ConvertFromPGTimestamptzToTime(token.ExpiresAt).Before(time.Now()) &&
+		token.Scope != tokens.ScopeResetPassword {
 		return authentication.ResetPasswordResponse(authentication.ResetPasswordResponseProps{
 			HasError: true,
 			Msg:      "The token has expired. Please request a new one.",
@@ -314,7 +319,8 @@ func (c *Controller) VerifyEmail(ctx echo.Context) error {
 	if database.ConvertFromPGTimestamptzToTime(
 		token.ExpiresAt).Before(time.Now()) &&
 		token.Scope != tokens.ScopeEmailVerification {
-		return authentication.VerifyEmailPage(true, views.Head{}).Render(views.ExtractRenderDeps(ctx))
+		return authentication.VerifyEmailPage(true, views.Head{}).
+			Render(views.ExtractRenderDeps(ctx))
 	}
 
 	confirmTime := time.Now()
@@ -344,7 +350,12 @@ func (c *Controller) VerifyEmail(ctx echo.Context) error {
 		ctx.Response().Writer.Header().Add("HX-Redirect", "/500")
 		ctx.Response().Writer.Header().Add("PreviousLocation", "/login")
 
-		slog.ErrorContext(ctx.Request().Context(), "could not get authenticated session", "error", err)
+		slog.ErrorContext(
+			ctx.Request().Context(),
+			"could not get authenticated session",
+			"error",
+			err,
+		)
 		return c.InternalError(ctx)
 	}
 
@@ -375,7 +386,8 @@ func (c *Controller) VerifySubscriberEmail(ctx echo.Context) error {
 	token, err := c.db.QuerySubscriberTokenByHash(ctx.Request().Context(), hashedToken)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return authentication.VerifyEmailPage(true, views.Head{}).Render(views.ExtractRenderDeps(ctx))
+			return authentication.VerifyEmailPage(true, views.Head{}).
+				Render(views.ExtractRenderDeps(ctx))
 		}
 
 		ctx.Response().Writer.Header().Add("HX-Redirect", "/500")
@@ -385,8 +397,10 @@ func (c *Controller) VerifySubscriberEmail(ctx echo.Context) error {
 		return c.InternalError(ctx)
 	}
 
-	if database.ConvertFromPGTimestamptzToTime(token.ExpiresAt).Before(time.Now()) && token.Scope != tokens.ScopeEmailVerification {
-		return authentication.VerifyEmailPage(true, views.Head{}).Render(views.ExtractRenderDeps(ctx))
+	if database.ConvertFromPGTimestamptzToTime(token.ExpiresAt).Before(time.Now()) &&
+		token.Scope != tokens.ScopeEmailVerification {
+		return authentication.VerifyEmailPage(true, views.Head{}).
+			Render(views.ExtractRenderDeps(ctx))
 	}
 
 	if err := c.db.ConfirmSubscriberEmail(ctx.Request().Context(), database.ConfirmSubscriberEmailParams{
@@ -400,5 +414,6 @@ func (c *Controller) VerifySubscriberEmail(ctx echo.Context) error {
 		return c.InternalError(ctx)
 	}
 
-	return authentication.VerifySubscriberEmailPage(false, views.Head{}).Render(views.ExtractRenderDeps(ctx))
+	return authentication.VerifySubscriberEmailPage(false, views.Head{}).
+		Render(views.ExtractRenderDeps(ctx))
 }

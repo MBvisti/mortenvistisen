@@ -104,7 +104,9 @@ func miscRoutes(router *echo.Echo) {
 			cacheTime := time.Now().AddDate(0, 0, 1)
 
 			c.Response().Header().Set(echo.HeaderCacheControl, "public, max-age=31536000")
-			c.Response().Header().Set(echo.HeaderLastModified, cacheTime.UTC().Format(http.TimeFormat))
+			c.Response().
+				Header().
+				Set(echo.HeaderLastModified, cacheTime.UTC().Format(http.TimeFormat))
 		}
 
 		return c.File("./static/css/output.css")
@@ -118,7 +120,9 @@ func miscRoutes(router *echo.Echo) {
 			cacheTime := time.Now().AddDate(0, 1, 0)
 
 			c.Response().Header().Set(echo.HeaderCacheControl, "public, max-age=31536000")
-			c.Response().Header().Set(echo.HeaderLastModified, cacheTime.UTC().Format(http.TimeFormat))
+			c.Response().
+				Header().
+				Set(echo.HeaderLastModified, cacheTime.UTC().Format(http.TimeFormat))
 		}
 
 		return c.File(fmt.Sprintf("./static/js/%s", fm))
@@ -132,7 +136,9 @@ func miscRoutes(router *echo.Echo) {
 			cacheTime := time.Now().AddDate(0, 1, 0)
 
 			c.Response().Header().Set(echo.HeaderCacheControl, "public, max-age=31536000")
-			c.Response().Header().Set(echo.HeaderLastModified, cacheTime.UTC().Format(http.TimeFormat))
+			c.Response().
+				Header().
+				Set(echo.HeaderLastModified, cacheTime.UTC().Format(http.TimeFormat))
 		}
 
 		return c.File(fmt.Sprintf("./static/images/%s", fm))
