@@ -43,7 +43,10 @@ func main() {
 
 	tokenManager := tokens.NewManager(cfg.Auth.TokenSigningKey)
 
-	authSessionStore := sessions.NewCookieStore([]byte(cfg.Auth.SessionKey), []byte(cfg.Auth.SessionEncryptionKey))
+	authSessionStore := sessions.NewCookieStore(
+		[]byte(cfg.Auth.SessionKey), 
+		[]byte(cfg.Auth.SessionEncryptionKey),
+	)
 
 	queueDbPool, err := pgxpool.New(context.Background(), cfg.Db.GetQueueUrlString())
 	if err != nil {

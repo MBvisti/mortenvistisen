@@ -3,12 +3,12 @@ package controllers
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/MBvisti/mortenvistisen/entity"
 	"github.com/MBvisti/mortenvistisen/pkg/mail/templates"
 	"github.com/MBvisti/mortenvistisen/pkg/queue"
-	"github.com/MBvisti/mortenvistisen/pkg/telemetry"
 	"github.com/MBvisti/mortenvistisen/pkg/tokens"
 	"github.com/MBvisti/mortenvistisen/repository/database"
 	"github.com/MBvisti/mortenvistisen/services"
@@ -36,7 +36,7 @@ type UserLoginPayload struct {
 func (c *Controller) StoreAuthenticatedSession(ctx echo.Context) error {
 	var payload UserLoginPayload
 	if err := ctx.Bind(&payload); err != nil {
-		telemetry.Logger.ErrorContext(ctx.Request().Context(), "could not parse UserLoginPayload", "error", err)
+		slog.ErrorContext(ctx.Request().Context(), "could not parse UserLoginPayload", "error", err)
 
 		return authentication.LoginResponse(true).Render(views.ExtractRenderDeps(ctx))
 	}
@@ -47,8 +47,6 @@ func (c *Controller) StoreAuthenticatedSession(ctx echo.Context) error {
 			Password: payload.Password,
 		}, &c.db, c.cfg.Auth.PasswordPepper)
 	if err != nil {
-		telemetry.Logger.ErrorContext(ctx.Request().Context(), "could not authenticate user", "error", err)
-
 		errMsg := "An error occurred while trying to authenticate you. Please try again."
 
 		switch err {
@@ -68,7 +66,7 @@ func (c *Controller) StoreAuthenticatedSession(ctx echo.Context) error {
 		ctx.Response().Writer.Header().Add("HX-Redirect", "/500")
 		ctx.Response().Writer.Header().Add("PreviousLocation", "/login")
 
-		telemetry.Logger.ErrorContext(ctx.Request().Context(), "could not get auth session", "error", err)
+		slog.ErrorContext(ctx.Request().Context(), "could not get auth session", "error", err)
 		return c.InternalError(ctx)
 	}
 
@@ -77,9 +75,11 @@ func (c *Controller) StoreAuthenticatedSession(ctx echo.Context) error {
 		ctx.Response().Writer.Header().Add("HX-Redirect", "/500")
 		ctx.Response().Writer.Header().Add("PreviousLocation", "/login")
 
-		telemetry.Logger.ErrorContext(ctx.Request().Context(), "could not save auth session", "error", err)
+		slog.ErrorContext(ctx.Request().Context(), "could not save auth session", "error", err)
 		return c.InternalError(ctx)
 	}
+
+	slog.Info("user authenticated", "auth_session", authSession.Name())
 
 	return authentication.LoginResponse(false).Render(views.ExtractRenderDeps(ctx))
 }
@@ -110,12 +110,12 @@ func (c *Controller) StorePasswordReset(ctx echo.Context) error {
 		return authentication.ForgottenPasswordSuccess(failureOccurred).Render(views.ExtractRenderDeps(ctx))
 	}
 
-	plainText, hashedToken, err := c.tknManager.GenerateToken()
+	generatedTkn, err := c.tknManager.GenerateToken()
 	if err != nil {
 		return authentication.ForgottenPasswordSuccess(true).Render(views.ExtractRenderDeps(ctx))
 	}
 
-	resetPWToken := tokens.CreateResetPasswordToken(plainText, hashedToken)
+	resetPWToken := tokens.CreateResetPasswordToken(generatedTkn.PlainTextToken, generatedTkn.HashedToken)
 
 	if err := c.db.StoreToken(ctx.Request().Context(), database.StoreTokenParams{
 		ID:        uuid.New(),
@@ -192,13 +192,7 @@ func (c *Controller) StoreResetPassword(ctx echo.Context) error {
 		}).Render(views.ExtractRenderDeps(ctx))
 	}
 
-	hashedToken, err := c.tknManager.Hash(payload.Token)
-	if err != nil {
-		return authentication.ResetPasswordResponse(authentication.ResetPasswordResponseProps{
-			HasError: true,
-			Msg:      "An error occurred while trying to reset your password. Please try again.",
-		}).Render(views.ExtractRenderDeps(ctx))
-	}
+	hashedToken := c.tknManager.Hash(payload.Token)
 
 	token, err := c.db.QueryTokenByHash(ctx.Request().Context(), hashedToken)
 	if err != nil {
@@ -240,7 +234,7 @@ func (c *Controller) StoreResetPassword(ctx echo.Context) error {
 	if err != nil {
 		e, ok := err.(validator.ValidationErrors)
 		if !ok {
-			telemetry.Logger.Info("internal error", "ok", ok)
+			slog.ErrorContext(ctx.Request().Context(), "could not infer type ValidationErrors")
 		}
 
 		if len(e) == 0 {
@@ -276,7 +270,7 @@ func (c *Controller) StoreResetPassword(ctx echo.Context) error {
 		ctx.Response().Writer.Header().Add("HX-Redirect", "/500")
 		ctx.Response().Writer.Header().Add("PreviousLocation", "/login")
 
-		telemetry.Logger.ErrorContext(ctx.Request().Context(), "could not query user", "error", err)
+		slog.ErrorContext(ctx.Request().Context(), "could not delete token", "error", err)
 		return c.InternalError(ctx)
 	}
 
@@ -299,29 +293,27 @@ func (c *Controller) VerifyEmail(ctx echo.Context) error {
 		return c.InternalError(ctx)
 	}
 
-	hashedToken, err := c.tknManager.Hash(tkn.Token)
-	if err != nil {
-		ctx.Response().Writer.Header().Add("HX-Redirect", "/500")
-		ctx.Response().Writer.Header().Add("PreviousLocation", "/login")
-
-		telemetry.Logger.ErrorContext(ctx.Request().Context(), "could not query user", "error", err)
-		return c.InternalError(ctx)
-	}
+	hashedToken := c.tknManager.Hash(tkn.Token)
 
 	token, err := c.db.QueryTokenByHash(ctx.Request().Context(), hashedToken)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return authentication.VerifyEmailPage(true, views.Head{}).Render(views.ExtractRenderDeps(ctx))
+			return authentication.VerifyEmailPage(
+				true,
+				views.Head{},
+			).Render(views.ExtractRenderDeps(ctx))
 		}
 
 		ctx.Response().Writer.Header().Add("HX-Redirect", "/500")
 		ctx.Response().Writer.Header().Add("PreviousLocation", "/login")
 
-		telemetry.Logger.ErrorContext(ctx.Request().Context(), "could not query user", "error", err)
+		slog.ErrorContext(ctx.Request().Context(), "could not query token by hash", "error", err)
 		return c.InternalError(ctx)
 	}
 
-	if database.ConvertFromPGTimestamptzToTime(token.ExpiresAt).Before(time.Now()) && token.Scope != tokens.ScopeEmailVerification {
+	if database.ConvertFromPGTimestamptzToTime(
+		token.ExpiresAt).Before(time.Now()) &&
+		token.Scope != tokens.ScopeEmailVerification {
 		return authentication.VerifyEmailPage(true, views.Head{}).Render(views.ExtractRenderDeps(ctx))
 	}
 
@@ -335,7 +327,7 @@ func (c *Controller) VerifyEmail(ctx echo.Context) error {
 		ctx.Response().Writer.Header().Add("HX-Redirect", "/500")
 		ctx.Response().Writer.Header().Add("PreviousLocation", "/login")
 
-		telemetry.Logger.ErrorContext(ctx.Request().Context(), "could not query user", "error", err)
+		slog.ErrorContext(ctx.Request().Context(), "could not confirm user email", "error", err)
 		return c.InternalError(ctx)
 	}
 
@@ -343,7 +335,7 @@ func (c *Controller) VerifyEmail(ctx echo.Context) error {
 		ctx.Response().Writer.Header().Add("HX-Redirect", "/500")
 		ctx.Response().Writer.Header().Add("PreviousLocation", "/login")
 
-		telemetry.Logger.ErrorContext(ctx.Request().Context(), "could not query user", "error", err)
+		slog.ErrorContext(ctx.Request().Context(), "could not deleted token", "error", err)
 		return c.InternalError(ctx)
 	}
 
@@ -352,7 +344,7 @@ func (c *Controller) VerifyEmail(ctx echo.Context) error {
 		ctx.Response().Writer.Header().Add("HX-Redirect", "/500")
 		ctx.Response().Writer.Header().Add("PreviousLocation", "/login")
 
-		telemetry.Logger.ErrorContext(ctx.Request().Context(), "could not query user", "error", err)
+		slog.ErrorContext(ctx.Request().Context(), "could not get authenticated session", "error", err)
 		return c.InternalError(ctx)
 	}
 
@@ -361,7 +353,7 @@ func (c *Controller) VerifyEmail(ctx echo.Context) error {
 		ctx.Response().Writer.Header().Add("HX-Redirect", "/500")
 		ctx.Response().Writer.Header().Add("PreviousLocation", "/login")
 
-		telemetry.Logger.ErrorContext(ctx.Request().Context(), "could not query user", "error", err)
+		slog.ErrorContext(ctx.Request().Context(), "could not save auth session", "error", err)
 		return c.InternalError(ctx)
 	}
 
@@ -378,14 +370,7 @@ func (c *Controller) VerifySubscriberEmail(ctx echo.Context) error {
 		return c.InternalError(ctx)
 	}
 
-	hashedToken, err := c.tknManager.Hash(tkn.Token)
-	if err != nil {
-		ctx.Response().Writer.Header().Add("HX-Redirect", "/500")
-		ctx.Response().Writer.Header().Add("PreviousLocation", "/login")
-
-		telemetry.Logger.ErrorContext(ctx.Request().Context(), "could not query user", "error", err)
-		return c.InternalError(ctx)
-	}
+	hashedToken := c.tknManager.Hash(tkn.Token)
 
 	token, err := c.db.QuerySubscriberTokenByHash(ctx.Request().Context(), hashedToken)
 	if err != nil {
@@ -396,14 +381,13 @@ func (c *Controller) VerifySubscriberEmail(ctx echo.Context) error {
 		ctx.Response().Writer.Header().Add("HX-Redirect", "/500")
 		ctx.Response().Writer.Header().Add("PreviousLocation", "/login")
 
-		telemetry.Logger.ErrorContext(ctx.Request().Context(), "could not query user", "error", err)
+		slog.ErrorContext(ctx.Request().Context(), "could not query subscriber token", "error", err)
 		return c.InternalError(ctx)
 	}
 
 	if database.ConvertFromPGTimestamptzToTime(token.ExpiresAt).Before(time.Now()) && token.Scope != tokens.ScopeEmailVerification {
 		return authentication.VerifyEmailPage(true, views.Head{}).Render(views.ExtractRenderDeps(ctx))
 	}
-
 
 	if err := c.db.ConfirmSubscriberEmail(ctx.Request().Context(), database.ConfirmSubscriberEmailParams{
 		ID:        token.SubscriberID,
@@ -412,7 +396,7 @@ func (c *Controller) VerifySubscriberEmail(ctx echo.Context) error {
 		ctx.Response().Writer.Header().Add("HX-Redirect", "/500")
 		ctx.Response().Writer.Header().Add("PreviousLocation", "/login")
 
-		telemetry.Logger.ErrorContext(ctx.Request().Context(), "could not query user", "error", err)
+		slog.ErrorContext(ctx.Request().Context(), "could not confirm email", "error", err)
 		return c.InternalError(ctx)
 	}
 

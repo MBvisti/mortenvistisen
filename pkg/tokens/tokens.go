@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"hash"
+	"log/slog"
 	"time"
 )
 
@@ -26,28 +27,35 @@ func NewManager(tokenSigningKey string) *Manager {
 	}
 }
 
-func (m *Manager) Hash(token string) (string, error) {
+func (m *Manager) Hash(token string) string {
 	m.hasher.Reset()
 	m.hasher.Write([]byte(token))
 	b := m.hasher.Sum(nil)
 
-	return base64.URLEncoding.EncodeToString(b), nil
+	return base64.URLEncoding.EncodeToString(b)
 }
 
-func (m *Manager) GenerateToken() (plainText string, hashedToken string, err error) {
+type GeneratedTokenDetails struct {
+	PlainTextToken string
+	HashedToken    string
+}
+
+func (m *Manager) GenerateToken() (GeneratedTokenDetails, error) {
 	b := make([]byte, 32)
-	_, err = rand.Read(b)
+	_, err := rand.Read(b)
 	if err != nil {
-		return "", "", err
-	}
-	plainText = base64.URLEncoding.EncodeToString(b)
-
-	hashedToken, err = m.Hash(plainText)
-	if err != nil {
-		return "", "", err
+		slog.Error("could not hash token", "error", err)
+		return GeneratedTokenDetails{}, err
 	}
 
-	return plainText, hashedToken, nil
+	plainText := base64.URLEncoding.EncodeToString(b)
+
+	hashedToken := m.Hash(plainText)
+
+	return GeneratedTokenDetails{
+		plainText,
+		hashedToken,
+	}, nil
 }
 
 type Token struct {

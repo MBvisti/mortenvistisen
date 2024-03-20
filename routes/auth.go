@@ -2,11 +2,10 @@ package routes
 
 import (
 	"github.com/MBvisti/mortenvistisen/controllers"
-	"github.com/MBvisti/mortenvistisen/server/middleware"
 	"github.com/labstack/echo/v4"
 )
 
-func authRoutes(router *echo.Echo, controllers controllers.Controller, middleware middleware.Middleware) {
+func authRoutes(router *echo.Echo, controllers controllers.Controller) {
 	router.GET("/register", func(c echo.Context) error {
 		return controllers.CreateUser(c)
 	})

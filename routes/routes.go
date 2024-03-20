@@ -38,7 +38,7 @@ func NewRoutes(ctrl controllers.Controller, mw middleware.Middleware, cfg config
 }
 
 func (r *Routes) web() {
-	authRoutes(r.router, r.controllers, r.middleware)
+	authRoutes(r.router, r.controllers)
 	errorRoutes(r.router, r.controllers)
 	dashboardRoutes(r.router, r.controllers, r.middleware)
 	appRoutes(r.router, r.controllers)
@@ -142,15 +142,15 @@ func miscRoutes(router *echo.Echo) {
 func dashboardRoutes(router *echo.Echo, ctrl controllers.Controller, mw middleware.Middleware) {
 	dashboardRouter := router.Group("/dashboard", mw.AuthOnly)
 
-	dashboardRouter.GET("/dashboard", func(c echo.Context) error {
+	dashboardRouter.GET("", func(c echo.Context) error {
 		return ctrl.DashboardIndex(c)
 	})
 
-	dashboardRouter.GET("/dashboard/subscribers", func(c echo.Context) error {
+	dashboardRouter.GET("/subscribers", func(c echo.Context) error {
 		return ctrl.DashboardSubscribers(c)
 	})
 
-	dashboardRouter.DELETE("/dashboard/subscriber/:ID", func(c echo.Context) error {
+	dashboardRouter.DELETE("/subscriber/:ID", func(c echo.Context) error {
 		return ctrl.DeleteSubscriber(c)
 	})
 }
