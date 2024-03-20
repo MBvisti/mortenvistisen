@@ -25,7 +25,6 @@ import (
 func main() {
 	ctx := context.Background()
 	router := echo.New()
-
 	logger := telemetry.SetupLogger()
 	slog.SetDefault(logger)
 
@@ -35,7 +34,10 @@ func main() {
 	router.Use(slogecho.New(logger))
 	router.Use(middleware.Recover())
 
-	conn := database.SetupDatabasePool(context.Background(), cfg.Db.GetUrlString())
+	conn := database.SetupDatabasePool(
+		context.Background(),
+		cfg.Db.GetUrlString(),
+	)
 	db := database.New(conn)
 
 	postmark := mail.NewPostmark(cfg.ExternalProviders.PostmarkApiToken)
@@ -44,11 +46,14 @@ func main() {
 	tokenManager := tokens.NewManager(cfg.Auth.TokenSigningKey)
 
 	authSessionStore := sessions.NewCookieStore(
-		[]byte(cfg.Auth.SessionKey), 
+		[]byte(cfg.Auth.SessionKey),
 		[]byte(cfg.Auth.SessionEncryptionKey),
 	)
 
-	queueDbPool, err := pgxpool.New(context.Background(), cfg.Db.GetQueueUrlString())
+	queueDbPool, err := pgxpool.New(
+		context.Background(),
+		cfg.Db.GetQueueUrlString(),
+	)
 	if err != nil {
 		panic(err)
 	}
@@ -61,7 +66,15 @@ func main() {
 
 	postManager := posts.NewPostManager()
 
-	controllers := controllers.NewController(*db, mailClient, *tokenManager, cfg, riverClient, postManager, authSessionStore)
+	controllers := controllers.NewController(
+		*db,
+		mailClient,
+		*tokenManager,
+		cfg,
+		riverClient,
+		postManager,
+		authSessionStore,
+	)
 
 	serverMW := mw.NewMiddleware(authSessionStore)
 

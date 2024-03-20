@@ -44,7 +44,10 @@ func (c *Controller) Article(ctx echo.Context) error {
 		}
 	}
 
-	fiveRandomPosts, err := c.db.GetFiveRandomPosts(ctx.Request().Context(), post.ID)
+	fiveRandomPosts, err := c.db.GetFiveRandomPosts(
+		ctx.Request().Context(),
+		post.ID,
+	)
 	if err != nil {
 		return err
 	}
@@ -52,7 +55,9 @@ func (c *Controller) Article(ctx echo.Context) error {
 	otherArticles := make(map[string]string, 5)
 
 	for _, article := range fiveRandomPosts {
-		otherArticles[article.Title] = c.buildURLFromSlug("posts/" + article.Slug)
+		otherArticles[article.Title] = c.buildURLFromSlug(
+			"posts/" + article.Slug,
+		)
 	}
 
 	return views.ArticlePage(views.ArticlePageData{
@@ -103,21 +108,24 @@ func (c *Controller) SubscriptionEvent(ctx echo.Context) error {
 		return ctx.String(200, "You're now subscribed!")
 	}
 
-	sub, err := c.db.InsertSubscriber(ctx.Request().Context(), database.InsertSubscriberParams{
-		ID:           uuid.New(),
-		CreatedAt:    database.ConvertToPGTimestamptz(time.Now()),
-		UpdatedAt:    database.ConvertToPGTimestamptz(time.Now()),
-		Email:        sql.NullString{
-			String: form.Email,
-			Valid:  true,
+	sub, err := c.db.InsertSubscriber(
+		ctx.Request().Context(),
+		database.InsertSubscriberParams{
+			ID:        uuid.New(),
+			CreatedAt: database.ConvertToPGTimestamptz(time.Now()),
+			UpdatedAt: database.ConvertToPGTimestamptz(time.Now()),
+			Email: sql.NullString{
+				String: form.Email,
+				Valid:  true,
+			},
+			SubscribedAt: database.ConvertToPGTimestamptz(time.Now()),
+			Referer: sql.NullString{
+				String: form.Title,
+				Valid:  true,
+			},
+			IsVerified: pgtype.Bool{Bool: false, Valid: true},
 		},
-		SubscribedAt: database.ConvertToPGTimestamptz(time.Now()),
-		Referer:      sql.NullString{
-			String: form.Title,
-			Valid:  true,
-		},
-		IsVerified:   pgtype.Bool{Bool: false, Valid: true},
-	})
+	)
 	if err != nil {
 		return err
 	}
@@ -127,15 +135,18 @@ func (c *Controller) SubscriptionEvent(ctx echo.Context) error {
 		return err
 	}
 
-	activationToken := tokens.CreateActivationToken(generatedTkn.PlainTextToken, generatedTkn.HashedToken)
+	activationToken := tokens.CreateActivationToken(
+		generatedTkn.PlainTextToken,
+		generatedTkn.HashedToken,
+	)
 
 	if err := c.db.InsertSubscriberToken(ctx.Request().Context(), database.InsertSubscriberTokenParams{
-		ID:        uuid.New(),
-		CreatedAt: database.ConvertToPGTimestamptz(time.Now()),
-		Hash:      activationToken.Hash,
-		ExpiresAt: database.ConvertToPGTimestamptz(activationToken.GetExpirationTime()),
-		Scope:     activationToken.GetScope(),
-		SubscriberID:    sub.ID,
+		ID:           uuid.New(),
+		CreatedAt:    database.ConvertToPGTimestamptz(time.Now()),
+		Hash:         activationToken.Hash,
+		ExpiresAt:    database.ConvertToPGTimestamptz(activationToken.GetExpirationTime()),
+		Scope:        activationToken.GetScope(),
+		SubscriberID: sub.ID,
 	}); err != nil {
 		return err
 	}
@@ -147,7 +158,7 @@ func (c *Controller) SubscriptionEvent(ctx echo.Context) error {
 			c.cfg.App.AppHost,
 			activationToken.GetPlainText(),
 		),
-		UnsubscribeLink:  "",
+		UnsubscribeLink: "",
 	}
 	textVersion, err := newsletterMail.GenerateTextVersion()
 	if err != nil {
@@ -171,7 +182,8 @@ func (c *Controller) SubscriptionEvent(ctx echo.Context) error {
 
 	isModal := ctx.QueryParam("is-modal")
 	if isModal == "true" {
-		return views.SubscribeModalResponse().Render(views.ExtractRenderDeps(ctx))
+		return views.SubscribeModalResponse().
+			Render(views.ExtractRenderDeps(ctx))
 	} else {
 		return ctx.String(200, "You're now subscribed!")
 	}
@@ -179,5 +191,9 @@ func (c *Controller) SubscriptionEvent(ctx echo.Context) error {
 
 func (c *Controller) RenderModal(ctx echo.Context) error {
 	return views.SubscribeModal(
-		csrf.Token(ctx.Request()), ctx.QueryParam("article-name")).Render(views.ExtractRenderDeps(ctx))
+		csrf.Token(
+			ctx.Request(),
+		),
+		ctx.QueryParam("article-name"),
+	).Render(views.ExtractRenderDeps(ctx))
 }
