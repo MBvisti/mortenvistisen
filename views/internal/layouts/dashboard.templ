@@ -65,7 +65,7 @@ templ sideBar() {
 
 templ Dashboard() {
 	<!DOCTYPE html>
-	<html lang="en" data-theme="dark" class="dark h-full">
+	<html lang="en" data-theme="sunset" class="dark h-full">
 		<head>
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -76,13 +76,13 @@ templ Dashboard() {
 			<link rel="icon" type="image/png" sizes="16x16" href="/static/images/favicon-16x16.png"/>
 		</head>
 		<body class="bg-slate-900 max-w-[100rem] flex flex-col mx-auto w-full h-full">
-		<div class="bg-gray-50 dark:bg-slate-900 w-full h-full">
-			@sideBar()
-			{ children... }
-		</div>
-		<script src="/static/js/htmx.min.js"></script>
-		<script src="/static/js/alpine.js"></script>
-		<script src="/static/js/preline/preline.js"></script>
+			<div class="bg-gray-50 dark:bg-slate-900 w-full h-full">
+				@sideBar()
+				{ children... }
+			</div>
+			<script src="/static/js/htmx.min.js"></script>
+			<script src="/static/js/alpine.js"></script>
+			<script src="/static/js/preline/preline.js"></script>
 		</body>
 	</html>
 }

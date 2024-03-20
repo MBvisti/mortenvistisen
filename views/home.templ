@@ -22,26 +22,26 @@ templ HomePage(posts []Post) {
 			w-full px-4 md:px-16 md:w-2/3 mt-4 mx-auto hero"
 		>
 			<div class="flex flex-col hero-content text-center pb-0 col-start-3 col-end-11 row-start-1 row-end-2">
-				<h1 class="text-5xl font-bold mb-2">Hi, I'm Morten</h1>
-				<p class="text-xl">I write about technology and indiehacking; mainly focused around Go and full-stack development.</p>
+				<h1 class="text-5xl font-bold mb-2 text-white">Hi, I'm Morten</h1>
+				<p class="text-xl text-gray-300">I write about technology and indiehacking; mainly focused around Go and full-stack development.</p>
 			</div>
 			<div class="h-full w-full mb-10 row-start-2 row-end-3 col-start-3 col-end-11 flex flex-col justify-center">
-				<div class="divider divider-accent font-bold">Socials</div>
+				<div class="text-white divider divider-accent font-bold">Socials</div>
 				<div class="flex flex-col w-full">
 					<div class="flex h-10 justify-around text-xs items-center md:px-20">
 						<a href="https://twitter.com/mbvisti">
 							<span
-								class="badge badge-neutral"
+								class="text-gray-300 badge badge-neutral"
 							>Twitter</span>
 						</a>
 						<a href="https://www.linkedin.com/in/mortenvistisen">
 							<span
-								class="badge badge-neutral"
+								class="text-gray-300 badge badge-neutral"
 							>Linkedin</span>
 						</a>
 						<a href="https://github.com/mbvisti">
 							<span
-								class="badge badge-neutral"
+								class="text-gray-300 badge badge-neutral"
 							>Github</span>
 						</a>
 						<a
@@ -49,13 +49,13 @@ templ HomePage(posts []Post) {
 							target="_blank"
 						>
 							<span
-								class="badge badge-neutral"
+								class="text-gray-300 badge badge-neutral"
 							>Email</span>
 						</a>
 					</div>
 				</div>
 			</div>
-			<div class="h-full w-full row-start-3 row-end-4 col-start-3 col-end-11 flex flex-col justify-center">
+			<div class="h-full w-full row-start-3 row-end-4 col-start-4 col-end-10 flex flex-col justify-center">
 				<h2 class="block text-2xl font-bold text-white mb-5 xl:my-8">Latest posts</h2>
 				<div class="w-full">
 					for _, post := range posts {
