@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/a-h/templ"
 	"github.com/MBvisti/mortenvistisen/pkg/mail/templates"
-	"github.com/riverqueue/river/rivertype"
+	"github.com/a-h/templ"
 	"github.com/golang-module/carbon/v2"
+	"github.com/riverqueue/river/rivertype"
 )
 
 // main is only in place to develop emails locally
@@ -19,11 +19,11 @@ func main() {
 	}))
 
 	http.Handle("/background-job-mail", templ.Handler(&templates.BackgroundJobErrorMail{
-		JobID:           0,
-		AttemptedAt:     time.Now(),
-		Kind:            "",
-		MetaData:        "",
-		Err:             errors.New("could not finish job"),
+		JobID:       0,
+		AttemptedAt: time.Now(),
+		Kind:        "",
+		MetaData:    "",
+		Err:         errors.New("could not finish job"),
 		AttemptedErrors: []rivertype.AttemptError{
 			{
 				At:      time.Now(),

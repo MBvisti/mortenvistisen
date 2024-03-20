@@ -46,7 +46,12 @@ type AuthenticateUserPayload struct {
 	Password string
 }
 
-func AuthenticateUser(ctx context.Context, data AuthenticateUserPayload, db userDatabase, passwordPepper string) (entity.User, error) {
+func AuthenticateUser(
+	ctx context.Context,
+	data AuthenticateUserPayload,
+	db userDatabase,
+	passwordPepper string,
+) (entity.User, error) {
 	user, err := db.QueryUserByMail(ctx, data.Email)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {

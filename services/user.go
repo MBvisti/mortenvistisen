@@ -33,12 +33,23 @@ func passwordMatchValidation(sl validator.StructLevel) {
 	data := sl.Current().Interface().(newUserValidation)
 
 	if data.ConfirmPassword != data.Password {
-		sl.ReportError(data.ConfirmPassword, "", "ConfirmPassword", "", "confirm password must match password")
+		sl.ReportError(
+			data.ConfirmPassword,
+			"",
+			"ConfirmPassword",
+			"",
+			"confirm password must match password",
+		)
 	}
 }
 
 func NewUser(
-	ctx context.Context, data entity.NewUser, db userDatabase, v *validator.Validate, passwordPepper string) (entity.User, error) {
+	ctx context.Context,
+	data entity.NewUser,
+	db userDatabase,
+	v *validator.Validate,
+	passwordPepper string,
+) (entity.User, error) {
 	mailAlreadyRegistered, err := db.DoesMailExists(ctx, data.Mail)
 	if err != nil {
 		telemetry.Logger.Error("could not check if email exists", "error", err)
@@ -98,12 +109,23 @@ func resetPasswordMatchValidation(sl validator.StructLevel) {
 	data := sl.Current().Interface().(updateUserValidation)
 
 	if data.ConfirmPassword != data.Password {
-		sl.ReportError(data.ConfirmPassword, "", "ConfirmPassword", "", "confirm password must match password")
+		sl.ReportError(
+			data.ConfirmPassword,
+			"",
+			"ConfirmPassword",
+			"",
+			"confirm password must match password",
+		)
 	}
 }
 
 func UpdateUser(
-	ctx context.Context, data entity.UpdateUser, db userDatabase, v *validator.Validate, passwordPepper string) (entity.User, error) {
+	ctx context.Context,
+	data entity.UpdateUser,
+	db userDatabase,
+	v *validator.Validate,
+	passwordPepper string,
+) (entity.User, error) {
 
 	v.RegisterStructValidation(resetPasswordMatchValidation, updateUserValidation{})
 

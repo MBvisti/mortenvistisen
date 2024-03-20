@@ -31,7 +31,25 @@ func ProjectsPage(head Head) templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"my-auto flex flex-col text-center py-5 px-4 sm:px-6 md:px-32 2xl:px-56\"><h1 class=\"mb-12 block text-2xl font-bold text-white sm:text-4xl\">Projects</h1><p>This page is still under construction.</p></div>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex flex-col text-center py-5 px-4 sm:px-6 md:px-32 2xl:px-56\"><h1 class=\"mb-12 block text-2xl font-bold text-white sm:text-4xl\">Projects</h1><div class=\"mx-auto card w-96 bg-base-300 shadow-xl mb-10\"><div class=\"card-body\"><div class=\"mb-4 w-full flex justify-center\"><h2 class=\"card-title\">YouTube - mbv labs</h2></div><p class=\"text-start mb-2\">I've long wanted to get into creating video tutorials and content.</p><p class=\"text-start mb-4\">mbv-labs is meant to be the start of that journey; the channel will contain tutorials, but also videos building features/fixing problems/etc for my other side projects, which can contain code but also higher level discussions on indiehacking and building software.</p><div class=\"card-actions justify-center\"><a rel=\"nofollow\" href=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var3 templ.SafeURL = templ.SafeURL("https://www.youtube.com/@mbvlabs")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var3)))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><button class=\"btn btn-primary\">Check it out</button></a></div></div></div><div class=\"mx-auto card w-96 bg-base-300 shadow-xl\"><div class=\"card-body\"><div class=\"mb-4 w-full flex justify-center\"><h2 class=\"card-title\">This Week On Reddit</h2></div><p class=\"text-start mb-2\">This is an early stage project meant to analyze which problems various communities on Reddit experience.</p><p class=\"text-start mb-4\">By aggregating multiple subreddits into a broader community (e.g. all subreddits related to EVs),  identifying posts where the user experience a pain point and analyzing all those as a whole, you  can achieve a more accurate understanding of the problems users face. Using this, you can build  more relevant products, content etc.</p><div class=\"card-actions justify-center\"><a rel=\"nofollow\" href=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var4 templ.SafeURL = templ.SafeURL("https://www.twor.mbv-labs.com")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var4)))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><button class=\"btn btn-primary\">Check it out</button></a></div></div></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

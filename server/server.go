@@ -25,7 +25,11 @@ type Server struct {
 }
 
 func NewServer(
-	router *echo.Echo, controllers controllers.Controller, logger *slog.Logger, cfg config.Cfg) Server {
+	router *echo.Echo,
+	controllers controllers.Controller,
+	logger *slog.Logger,
+	cfg config.Cfg,
+) Server {
 	host := cfg.App.ServerHost
 	port := cfg.App.ServerPort
 	isProduction := cfg.App.Environment == "production"

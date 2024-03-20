@@ -1,8 +1,8 @@
 package routes
 
 import (
-	"github.com/labstack/echo/v4"
 	"github.com/MBvisti/mortenvistisen/controllers"
+	"github.com/labstack/echo/v4"
 )
 
 func apiRoutes(router *echo.Group, controllers controllers.Controller) {

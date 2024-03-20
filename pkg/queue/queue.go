@@ -6,11 +6,11 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/MBvisti/mortenvistisen/pkg/mail"
 	"github.com/MBvisti/mortenvistisen/pkg/mail/templates"
 	"github.com/MBvisti/mortenvistisen/pkg/telemetry"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/riverqueue/river"
 	"github.com/riverqueue/river/riverdriver/riverpgxv5"
 	"github.com/riverqueue/river/rivertype"
@@ -125,7 +125,11 @@ type MailErrorHandler struct {
 	from       string
 }
 
-func NewMailErrorHandler(logger *slog.Logger, mailClient *mail.Mail, baseSenderSignature, receiverMail string) *MailErrorHandler {
+func NewMailErrorHandler(
+	logger *slog.Logger,
+	mailClient *mail.Mail,
+	baseSenderSignature, receiverMail string,
+) *MailErrorHandler {
 	return &MailErrorHandler{
 		logger:     logger,
 		from:       baseSenderSignature,
@@ -135,7 +139,11 @@ func NewMailErrorHandler(logger *slog.Logger, mailClient *mail.Mail, baseSenderS
 }
 
 // HandleError implements river.ErrorHandler.
-func (m *MailErrorHandler) HandleError(ctx context.Context, job *rivertype.JobRow, err error) *river.ErrorHandlerResult {
+func (m *MailErrorHandler) HandleError(
+	ctx context.Context,
+	job *rivertype.JobRow,
+	err error,
+) *river.ErrorHandlerResult {
 	m.logger.Error("error handling job", "error", err, "job_kind", job.Kind)
 
 	backgroundJobErrorMail := &templates.BackgroundJobErrorMail{
@@ -167,7 +175,11 @@ func (m *MailErrorHandler) HandleError(ctx context.Context, job *rivertype.JobRo
 }
 
 // HandlePanic implements river.ErrorHandler.
-func (m *MailErrorHandler) HandlePanic(ctx context.Context, job *rivertype.JobRow, panicVal any) *river.ErrorHandlerResult {
+func (m *MailErrorHandler) HandlePanic(
+	ctx context.Context,
+	job *rivertype.JobRow,
+	panicVal any,
+) *river.ErrorHandlerResult {
 	m.logger.Error("panic handling job", "panic", panicVal, "job_kind", job.Kind)
 
 	backgroundJobErrorMail := &templates.BackgroundJobErrorMail{

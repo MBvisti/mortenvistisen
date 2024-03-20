@@ -29,7 +29,8 @@ func (c *Controller) DashboardSubscribers(ctx echo.Context) error {
 		})
 	}
 
-	return dashboard.Subscribers(viewData, csrf.Token(ctx.Request())).Render(views.ExtractRenderDeps(ctx))
+	return dashboard.Subscribers(viewData, csrf.Token(ctx.Request())).
+		Render(views.ExtractRenderDeps(ctx))
 }
 
 func (c *Controller) DeleteSubscriber(ctx echo.Context) error {
