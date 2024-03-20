@@ -94,14 +94,14 @@ func (c *Controller) StoreUser(ctx echo.Context) error {
 		return authentication.RegisterForm(props).Render(views.ExtractRenderDeps(ctx))
 	}
 
-	plainText, hashedToken, err := c.tknManager.GenerateToken()
+	generatedTkn, err := c.tknManager.GenerateToken()
 	if err != nil {
 		telemetry.Logger.ErrorContext(ctx.Request().Context(), "could not query user", "error", err)
 
 		return authentication.RegisterResponse("An error occurred", "Please refresh the page an try again.", true).Render(views.ExtractRenderDeps(ctx))
 	}
 
-	activationToken := tokens.CreateActivationToken(plainText, hashedToken)
+	activationToken := tokens.CreateActivationToken(generatedTkn.PlainTextToken, generatedTkn.HashedToken)
 
 	if err := c.db.StoreToken(ctx.Request().Context(), database.StoreTokenParams{
 		ID:        uuid.New(),

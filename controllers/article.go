@@ -122,12 +122,12 @@ func (c *Controller) SubscriptionEvent(ctx echo.Context) error {
 		return err
 	}
 
-	plainText, hashedToken, err := c.tknManager.GenerateToken()
+	generatedTkn, err := c.tknManager.GenerateToken()
 	if err != nil {
 		return err
 	}
 
-	activationToken := tokens.CreateActivationToken(plainText, hashedToken)
+	activationToken := tokens.CreateActivationToken(generatedTkn.PlainTextToken, generatedTkn.HashedToken)
 
 	if err := c.db.InsertSubscriberToken(ctx.Request().Context(), database.InsertSubscriberTokenParams{
 		ID:        uuid.New(),

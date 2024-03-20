@@ -4,11 +4,11 @@ import (
 	"context"
 	"encoding/gob"
 	"errors"
+	"log/slog"
 	"net/http"
 
 	"github.com/MBvisti/mortenvistisen/entity"
 	"github.com/MBvisti/mortenvistisen/pkg/config"
-	"github.com/MBvisti/mortenvistisen/pkg/telemetry"
 	"github.com/MBvisti/mortenvistisen/repository/database"
 	"github.com/google/uuid"
 	"github.com/gorilla/sessions"
@@ -20,6 +20,7 @@ func hashAndPepperPassword(password, passwordPepper string) (string, error) {
 	passwordBytes := []byte(password + passwordPepper)
 	hashedBytes, err := bcrypt.GenerateFromPassword(passwordBytes, bcrypt.DefaultCost)
 	if err != nil {
+		slog.Error("could not hash password", "error", err)
 		return "", err
 	}
 
@@ -32,7 +33,12 @@ type validatePasswordPayload struct {
 }
 
 func validatePassword(data validatePasswordPayload, passwordPepper string) error {
-	return bcrypt.CompareHashAndPassword([]byte(data.hashedpassword), []byte(data.password+passwordPepper))
+	if err := bcrypt.CompareHashAndPassword([]byte(data.hashedpassword), []byte(data.password+passwordPepper)); err != nil {
+		slog.Error("could not validate password", "error", err)
+		return err
+	}
+
+	return nil
 }
 
 type AuthenticateUserPayload struct {
@@ -47,7 +53,7 @@ func AuthenticateUser(ctx context.Context, data AuthenticateUserPayload, db user
 			return entity.User{}, ErrUserNotExist
 		}
 
-		telemetry.Logger.ErrorContext(ctx, "could not query user", "error", err)
+		slog.Error("could not query user by mail", "error", err)
 		return entity.User{}, err
 	}
 
@@ -55,11 +61,10 @@ func AuthenticateUser(ctx context.Context, data AuthenticateUserPayload, db user
 		return entity.User{}, ErrEmailNotValidated
 	}
 
-	err = validatePassword(validatePasswordPayload{
+	if err := validatePassword(validatePasswordPayload{
 		hashedpassword: user.Password,
 		password:       data.Password,
-	}, passwordPepper)
-	if err != nil {
+	}, passwordPepper); err != nil {
 		return entity.User{}, ErrPasswordNotMatch
 	}
 
@@ -72,11 +77,15 @@ func AuthenticateUser(ctx context.Context, data AuthenticateUserPayload, db user
 	}, nil
 }
 
-func CreateAuthenticatedSession(session sessions.Session, userID uuid.UUID, cfg config.Cfg) *sessions.Session {
+func CreateAuthenticatedSession(
+	session sessions.Session,
+	userID uuid.UUID,
+	cfg config.Cfg,
+) *sessions.Session {
 	gob.Register(uuid.UUID{})
 
 	session.Options.HttpOnly = true
-	session.Options.Domain = cfg.App.ServerHost
+	session.Options.Domain = cfg.App.AppHost
 	session.Options.Secure = true
 	session.Options.MaxAge = 86400
 
@@ -91,6 +100,7 @@ func IsAuthenticated(r *http.Request, authStore *sessions.CookieStore) (bool, uu
 	gob.Register(uuid.UUID{})
 	session, err := authStore.Get(r, "ua")
 	if err != nil {
+		slog.Error("could not get session", "error", err)
 		return false, uuid.UUID{}, err
 	}
 
@@ -105,6 +115,7 @@ func IsAdmin(r *http.Request, authStore *sessions.CookieStore) (bool, error) {
 	gob.Register(uuid.UUID{})
 	session, err := authStore.Get(r, "ua")
 	if err != nil {
+		slog.Error("could not get session", "error", err)
 		return false, err
 	}
 
