@@ -27,6 +27,41 @@ templ ProjectsPage(head Head) {
 					</div>
 				</div>
 			</div>
+			<div class="mx-auto card w-96 bg-base-300 shadow-xl mb-10">
+				<div class="card-body">
+					<div class="mb-4 w-full flex justify-center">
+						<h2 class="card-title">Grafto - Go Boilerplate</h2>
+					</div>
+					<p class="text-start mb-2">
+						After hating on php for a long time I finally took some time out to try 
+						it out, more specifically Laravel. Boy was I wrong about php.
+					</p>
+					<p class="text-start mb-4">
+						Laravel is such a great framework with (almost) everything you need out of the box.
+						But I love writing Go, and I've spend too much time in statically typed 
+						languages that going back to dynamically typed languages is a no-go for me.
+					</p>
+					<p class="text-start mb-4">
+						So, I decided to built my own Laravel inspired version in Go which I've called Grafto.
+						It's more of a boilerplate than a framework, but it's a great starting point for building
+						full-stack web applications in Go.
+					</p>
+					<p class="text-start mb-4">
+						Aimed at indiehackers wanting to ship products fully in Go.
+						<br/>
+						<br/>
+						Uses: Go, templ, tailwindcss, daisyui, alpine.js and htmx.
+					</p>
+					<div class="card-actions justify-center">
+						<a rel="nofollow" href={ templ.SafeURL("https://www.github.com/mbv-labs/grafto") }>
+							<button
+								data-umami-event="projects--github-grafto"
+								class="btn btn-primary"
+							>Check it out</button>
+						</a>
+					</div>
+				</div>
+			</div>
 			<div class="mx-auto card w-96 bg-base-300 shadow-xl">
 				<div class="card-body">
 					<div class="mb-4 w-full flex justify-center">
@@ -42,7 +77,7 @@ templ ProjectsPage(head Head) {
 						more relevant products, content etc.
 					</p>
 					<div class="card-actions justify-center">
-						<a rel="nofollow" href={ templ.SafeURL("https://twor.mbv-labs.com") }>
+						<a href={ templ.SafeURL("https://twor.mbv-labs.com") }>
 							<button
 								data-umami-event="projects--this-week-on-reddit"
 								class="btn btn-primary"

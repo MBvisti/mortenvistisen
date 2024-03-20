@@ -40,16 +40,25 @@ func ProjectsPage(head Head) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><button class=\"btn btn-primary\">Check it out</button></a></div></div></div><div class=\"mx-auto card w-96 bg-base-300 shadow-xl\"><div class=\"card-body\"><div class=\"mb-4 w-full flex justify-center\"><h2 class=\"card-title\">This Week On Reddit</h2></div><p class=\"text-start mb-2\">This is an early stage project meant to analyze which problems various communities on Reddit experience.</p><p class=\"text-start mb-4\">By aggregating multiple subreddits into a broader community (e.g. all subreddits related to EVs),  identifying posts where the user experience a pain point and analyzing all those as a whole, you  can achieve a more accurate understanding of the problems users face. Using this, you can build  more relevant products, content etc.</p><div class=\"card-actions justify-center\"><a rel=\"nofollow\" href=\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><button data-umami-event=\"projects--youtube-mbv-labs\" class=\"btn btn-primary\">Check it out</button></a></div></div></div><div class=\"mx-auto card w-96 bg-base-300 shadow-xl mb-10\"><div class=\"card-body\"><div class=\"mb-4 w-full flex justify-center\"><h2 class=\"card-title\">Grafto - Go Boilerplate</h2></div><p class=\"text-start mb-2\">After hating on php for a long time I finally took some time out to try  it out, more specifically Laravel. Boy was I wrong about php.</p><p class=\"text-start mb-4\">Laravel is such a great framework with (almost) everything you need out of the box. But I love writing Go, and I've spend too much time in statically typed  languages that going back to dynamically typed languages is a no-go for me.</p><p class=\"text-start mb-4\">So, I decided to built my own Laravel inspired version in Go which I've called Grafto. It's more of a boilerplate than a framework, but it's a great starting point for building full-stack web applications in Go.</p><p class=\"text-start mb-4\">Aimed at indiehackers wanting to ship products fully in Go.<br><br>Uses: Go, templ, tailwindcss, daisyui, alpine.js and htmx.</p><div class=\"card-actions justify-center\"><a rel=\"nofollow\" href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var4 templ.SafeURL = templ.SafeURL("https://www.twor.mbv-labs.com")
+			var templ_7745c5c3_Var4 templ.SafeURL = templ.SafeURL("https://www.github.com/mbv-labs/grafto")
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var4)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><button class=\"btn btn-primary\">Check it out</button></a></div></div></div></div>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><button data-umami-event=\"projects--github-grafto\" class=\"btn btn-primary\">Check it out</button></a></div></div></div><div class=\"mx-auto card w-96 bg-base-300 shadow-xl\"><div class=\"card-body\"><div class=\"mb-4 w-full flex justify-center\"><h2 class=\"card-title\">This Week On Reddit</h2></div><p class=\"text-start mb-2\">This is an early stage project meant to analyze which problems various communities on Reddit experience.</p><p class=\"text-start mb-4\">By aggregating multiple subreddits into a broader community (e.g. all subreddits related to EVs),  identifying posts where the user experience a pain point and analyzing all those as a whole, you  can achieve a more accurate understanding of the problems users face. Using this, you can build  more relevant products, content etc.</p><div class=\"card-actions justify-center\"><a href=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var5 templ.SafeURL = templ.SafeURL("https://twor.mbv-labs.com")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var5)))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><button data-umami-event=\"projects--this-week-on-reddit\" class=\"btn btn-primary\">Check it out</button></a></div></div></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
