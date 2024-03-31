@@ -64,7 +64,7 @@ func main() {
 
 	if cfg.App.Environment == "production" {
 		log.Print("listening on :8000")
-		//TODO a way for fly to check health
+		// TODO a way for fly to check health
 		listener, err := net.Listen("tcp", "0.0.0.0:8000")
 		if err != nil {
 			panic(err)
