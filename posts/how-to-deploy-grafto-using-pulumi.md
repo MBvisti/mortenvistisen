@@ -1,4 +1,14 @@
+Last year I finally overcame my (unfounded) disstate of PHP and tried out Laravel; the productivity of Laravel was an eye opener especially after being used to having to write or setup most things from scratch, when developing with Go. But, I love writing Go so I wanted to create something similar with purely in Go which resulted in [Grafto](https://github.com/mbv-labs/grafto). It's still, at the time of writing this, a work in progress but has much of what you need. Authentication, emails, background jobs etc.
+
+For one of my clients, I was tasked with consolidating their infrastructure under AWS as they currently use a multiple of cloud providers. IaC tools have long been a thing in the industry with Terraform (in my experience, at least) being the default choice. I often felt that I had to relearn HCL everytime I had to touch infrastructure, which created friction. I wrote a bit about it here [Pulumi vs Terraform](/posts/pulumi-vs-terraform). Since Grafto is focused around Go, and Pulumi has a great SDK for provisioning infrastructure in Go, I wanted to show how you could go about hosting Grafto using Pulumi and AWS.
+
+Since Grafto is containerzed, utilizing services such as ECS and Fargate becomes a breeze. Let's go over how you can setup a production ready infrastructure for Grafto using Pulumi.
+
 ## Networking
+
+We'll be creating a somewhat simple network; it should suffice for a long time and follow some best practics. Our application(s) will be running in a private network, running in 2 > availability zones for high availability. We'll not be digging deep into the details of networks, other people have already created great [material](https://www.youtube.com/watch?v=2doSoMN2xvI) on the subject.
+
+We need a few things: a VPC, some subnets to place our resources in, a load balancer to distribute traffic and some gateways. To allow our applications to reach out to the internet, and for the internet to reach our applcations we need an internet gateway and a nat gateway. The nat gateway is what allows our private subnets to communicate through the public ones. It's also the pricier component, so when though it's recommended to have one for each availability zone, we will only be using one.
 
 ```go
 var availabilityZones = []string{"us-west-2a", "us-west-2b"}
