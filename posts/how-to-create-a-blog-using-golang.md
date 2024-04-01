@@ -59,7 +59,7 @@ type ArticleStorage interface {
 	GetPostBySlug(slug string) (Post, error)
 }
 
-func ArticlePage(ctx echo.Context, storage ArticleStorage) error {
+func ArticleHandler(ctx echo.Context, storage ArticleStorage) error {
 	postSlug := ctx.Param("postSlug")
 	
 	postModel, err := storage.GetPostBySlug(postSlug)
@@ -133,10 +133,10 @@ templ ArticlePage(data ArticlePageData) {
 
 and run `templ generate` once again.
 
-We can now go back and update our ArticlePage handler:
+We can now go back and update our ArticleHandler handler:
 
 ```go
-func ArticlePage(ctx echo.Context, storage ArticleStorage) error {
+func ArticleHandler(ctx echo.Context, storage ArticleStorage) error {
 	postSlug := ctx.Param("postSlug")
 	
 	postModel, err := storage.GetPostBySlug(postSlug)
@@ -166,4 +166,97 @@ If you run your application now, and visit a valid URL, you should see a (rather
 
 ## Making things (slightly) less ugly
 
+In terms of styling things, throwing some tailwind or vanilla css at what we have now will get you a long way. But, we still show raw markdown to the user when they visit our articles. Additionally, we might want to show some nicely formatted code snippets in our articles. Let's fix this now.
 
+For this, we need something that can transform the markdown into HTML components e.g
+
+```markdown
+## Some sub header
+```
+
+into
+
+```html
+<h2>Some sub header</h2>
+```
+
+Luckily, there already are a create library for this: goldmark. So let's refactor the `posts/posts.go` file to parse the content we store using embed.
+
+```go
+//go:embed *.md
+var assets embed.FS // unexport assets
+
+type Manager struct {
+	posts embed.FS
+	markdownParser goldmark.Markdown
+}
+
+func NewManager() Manager {
+	md := goldmark.New(
+		goldmark.WithParserOptions(
+			parser.WithAutoHeadingID(),
+			parser.WithAttribute(),
+		),
+		goldmark.WithRendererOptions(
+			html.WithHardWraps(),
+			html.WithXHTML(),
+			html.WithUnsafe(),
+		),
+	)
+
+	return Manager{
+		posts:           assets,
+		markdownHandler: md,
+	}
+}
+
+func (m *Manager) Parse(name string) (string, error) {
+	source, err := m.posts.ReadFile(name)
+	if err != nil {
+		return "", err
+	}
+
+	// Parse Markdown content
+	var htmlOutput bytes.Buffer
+	if err := m.markdownHandler.Convert(source, &htmlOutput); err != nil {
+		return "", err
+	}
+
+	return htmlOutput.String(), nil
+}
+```
+
+Lastly, update the ArticleHandler to use the Manager:
+
+```go
+func ArticleHandler(
+	ctx echo.Context, 
+	storage ArticleStorage,
+	postManager posts.Manager
+) error {
+	postSlug := ctx.Param("postSlug")
+	
+	postModel, err := storage.GetPostBySlug(postSlug)
+	if err != nil {
+		return err
+	}
+	
+	postContent, err := postManager.Parse(postModel.Filename)
+	if err != nil {
+		return err
+	}
+	
+
+	return views.ArticlePage(
+		views.ArticlePagedata{
+			Title: postModel.Title,
+			Content: postContent,
+		},
+	).Render(
+		ctx.Request().Context(), 
+		ctx.Response().Writer,
+	)
+}
+```
+
+Try and edit your article by adding some code blocks and they will now get nicely formatted.
