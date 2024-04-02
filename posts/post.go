@@ -74,5 +74,5 @@ func (pm *PostManager) Parse(name string) (string, error) {
 		return "", err
 	}
 
-	return string(htmlOutput.Bytes()), nil
+	return htmlOutput.String(), nil
 }
