@@ -71,7 +71,6 @@ func ArticleHandler(ctx echo.Context, storage ArticleStorage) error {
 	if err != nil {
 		return err
 	}
-	
 
 	return ctx.String(http.StatusOK, string(postContent))
 }
@@ -148,7 +147,6 @@ func ArticleHandler(ctx echo.Context, storage ArticleStorage) error {
 	if err != nil {
 		return err
 	}
-	
 
 	return views.ArticlePage(
 		views.ArticlePagedata{
