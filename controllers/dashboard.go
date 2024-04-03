@@ -23,13 +23,15 @@ func (c *Controller) DashboardSubscribers(ctx echo.Context) error {
 	viewData := make([]dashboard.SubscriberViewData, 0, len(subs))
 	for _, sub := range subs {
 		viewData = append(viewData, dashboard.SubscriberViewData{
-			Email:    sub.Email.String,
-			ID:       sub.ID.String(),
-			Verified: sub.IsVerified.Bool,
+			Email:        sub.Email.String,
+			ID:           sub.ID.String(),
+			Verified:     sub.IsVerified.Bool,
+			SubscribedAt: sub.SubscribedAt.Time.String(),
 		})
 	}
 
-	return dashboard.Subscribers(viewData, csrf.Token(ctx.Request())).Render(views.ExtractRenderDeps(ctx))
+	return dashboard.Subscribers(viewData, csrf.Token(ctx.Request())).
+		Render(views.ExtractRenderDeps(ctx))
 }
 
 func (c *Controller) DeleteSubscriber(ctx echo.Context) error {

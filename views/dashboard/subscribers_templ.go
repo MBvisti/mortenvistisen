@@ -11,12 +11,12 @@ import "io"
 import "bytes"
 
 import "github.com/MBvisti/mortenvistisen/views/internal/layouts"
-import "fmt"
 
 type SubscriberViewData struct {
-	Email    string
-	ID       string
-	Verified bool
+	Email        string
+	ID           string
+	Verified     bool
+	SubscribedAt string
 }
 
 func addCSRFTkn(csrfToken string) templ.ComponentScript {
@@ -50,66 +50,66 @@ func Subscribers(data []SubscriberViewData, tkn string) templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"subTable\" class=\"flex flex-col\"><div class=\"-m-1.5 overflow-x-auto\"><div class=\"p-1.5 min-w-full inline-block align-middle\"><div class=\"border rounded-lg overflow-hidden dark:border-gray-700\"><table class=\"min-w-full divide-y divide-gray-200 dark:divide-gray-700\"><thead class=\"bg-gray-50 dark:bg-gray-700\"><tr><th scope=\"col\" class=\"py-3 ps-4\"><div class=\"flex items-center h-5\"><input id=\"hs-table-checkbox-all\" type=\"checkbox\" class=\"border-gray-200 rounded text-blue-600 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800\"> <label for=\"hs-table-checkbox-all\" class=\"sr-only\">Checkbox</label></div></th><th scope=\"col\" class=\"px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase\">Email</th><th scope=\"col\" class=\"px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase\">ID</th><th scope=\"col\" class=\"px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase\">Is Verified</th><th scope=\"col\" class=\"px-6 py-3 text-end text-xs font-medium text-gray-500 uppercase\">Action</th></tr></thead> <tbody class=\"divide-y divide-gray-200 dark:divide-gray-700\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"p-12 w-full flex flex-col\"><div class=\"w-1/2 overflow-x-hidden mx-auto\"><h2 class=\"mb-4\">Subscribers</h2><table class=\"table bg-slate-80 bg-slate-800\"><!-- head --><thead><tr><th></th><th>Email</th><th>Status</th><th>Subscribed</th></tr></thead> <tbody>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			for _, sub := range data {
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<tr><td class=\"py-3 ps-4\"><div class=\"flex items-center h-5\"><input id=\"hs-table-checkbox-1\" type=\"checkbox\" class=\"border-gray-200 rounded text-blue-600 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800\"> <label for=\"hs-table-checkbox-1\" class=\"sr-only\">Checkbox</label></div></td><td class=\"px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800 dark:text-gray-200\">")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<tr><td class=\"py-3 ps-4\"><div class=\"flex items-center h-5\"><input id=\"hs-table-checkbox-1\" type=\"checkbox\" class=\"border-gray-200 rounded text-blue-600 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800\" value=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(sub.ID))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"> <label for=\"hs-table-checkbox-1\" class=\"sr-only\">Checkbox</label></div></td><td class=\"py-4 whitespace-nowrap text-sm text-white\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var3 string
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(sub.Email)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/subscribers.templ`, Line: 47, Col: 117}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/subscribers.templ`, Line: 41, Col: 73}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</td><td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200\">")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</td><td class=\"py-4 whitespace-nowrap text-sm text-white\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				if sub.Verified {
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<span class=\"text-green-500\">Verified</span>")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				} else {
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<span class=\"text-red-500\">Not Verified</span>")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</td><td class=\"py-4 whitespace-nowrap text-sm text-white\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var4 string
-				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(sub.ID)
+				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(sub.SubscribedAt)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/subscribers.templ`, Line: 48, Col: 102}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/subscribers.templ`, Line: 49, Col: 80}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</td><td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200\">")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				if sub.Verified {
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"Verified\"")
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-				} else {
-					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"Not verified\"")
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</td><td class=\"px-6 py-4 whitespace-nowrap text-end text-sm font-medium\"><button hx-swap=\"innerHTML\" hx-target=\"#subTable\" hx-delete=\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(fmt.Sprintf("/dashboard/subscriber/%v", sub.ID)))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" type=\"button\" class=\"inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent text-blue-600 hover:text-blue-800 disabled:opacity-50 disabled:pointer-events-none dark:text-blue-500 dark:hover:text-blue-400 dark:focus:outline-none dark:focus:ring-1 dark:focus:ring-gray-600\">Delete</button></td></tr>")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</td></tr>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</tbody></table></div></div></div>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</tbody></table></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

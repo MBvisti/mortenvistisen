@@ -21,6 +21,50 @@ func (q *Queries) DeleteToken(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
+const insertSubscriberToken = `-- name: InsertSubscriberToken :exec
+insert into subscriber_tokens
+    (id, created_at, hash, expires_at, scope, subscriber_id) values ($1, $2, $3, $4, $5, $6)
+`
+
+type InsertSubscriberTokenParams struct {
+	ID           uuid.UUID
+	CreatedAt    pgtype.Timestamptz
+	Hash         string
+	ExpiresAt    pgtype.Timestamptz
+	Scope        string
+	SubscriberID uuid.UUID
+}
+
+func (q *Queries) InsertSubscriberToken(ctx context.Context, arg InsertSubscriberTokenParams) error {
+	_, err := q.db.Exec(ctx, insertSubscriberToken,
+		arg.ID,
+		arg.CreatedAt,
+		arg.Hash,
+		arg.ExpiresAt,
+		arg.Scope,
+		arg.SubscriberID,
+	)
+	return err
+}
+
+const querySubscriberTokenByHash = `-- name: QuerySubscriberTokenByHash :one
+select id, created_at, hash, expires_at, scope, subscriber_id from subscriber_tokens where hash=$1
+`
+
+func (q *Queries) QuerySubscriberTokenByHash(ctx context.Context, hash string) (SubscriberToken, error) {
+	row := q.db.QueryRow(ctx, querySubscriberTokenByHash, hash)
+	var i SubscriberToken
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.Hash,
+		&i.ExpiresAt,
+		&i.Scope,
+		&i.SubscriberID,
+	)
+	return i, err
+}
+
 const queryTokenByHash = `-- name: QueryTokenByHash :one
 select id, created_at, hash, expires_at, scope, user_id from tokens where hash=$1
 `

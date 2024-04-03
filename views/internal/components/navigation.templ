@@ -1,12 +1,12 @@
 package components
 
 import (
-	"github.com/MBvisti/mortenvistisen/routes/middleware"
+	"github.com/MBvisti/mortenvistisen/server/middleware"
 )
 
 func extractAuthStatus(ctx context.Context) bool {
-	if authCtx, ok := ctx.Value(middleware.AuthContext{}).(middleware.AuthContext); ok {
-		return authCtx.GetAuthStatus()
+	if userCtx, ok := ctx.Value(middleware.UserContext{}).(*middleware.UserContext); ok {
+		return userCtx.GetAuthStatus()
 	}
 
 	return false
@@ -14,8 +14,8 @@ func extractAuthStatus(ctx context.Context) bool {
 
 templ Nav() {
 	<nav class="w-full px-4 flex justify-between md:px-0 md:w-2/3 mt-4 mx-auto navbar md:grid md:grid-cols-12 bg-base-100">
-		<a href="/" class="col-start-3 col-end-4 text-xl px-0">MBV</a>
-		<div class="col-start-10 col-end-11">
+		<a href="/" class="text-white col-start-3 col-end-4 text-xl px-0">MBV</a>
+		<div class="text-white col-start-10 col-end-11">
 			<ul class="menu menu-horizontal px-1">
 				<li>
 					<details>

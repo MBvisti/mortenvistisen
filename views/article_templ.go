@@ -134,7 +134,7 @@ func ArticlePage(data ArticlePageData, head Head) templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex flex-col md:grid md:grid-flow-col md:gap-y-8 md:grid-rows-[200px_1fr] md:grid-cols-12 \n			w-full px-4 md:px-0 md:w-2/3 mt-6 md:mt-12 mx-auto hero\"><div class=\"mb-6 md:mb-0 w-full col-start-3 col-end-11 row-start-1 row-end-2 flex flex-col\"><h1 class=\"mx-auto text-center text-4xl md:text-6xl mb-2\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"text-white flex flex-col md:grid md:grid-flow-col md:gap-y-8 md:grid-rows-[200px_1fr] md:grid-cols-12 \n			w-full px-4 md:px-0 md:w-2/3 mt-6 md:mt-12 mx-auto hero\"><div class=\"mb-6 md:mb-0 w-full col-start-3 col-end-11 row-start-1 row-end-2 flex flex-col\"><h1 class=\"mx-auto text-center text-4xl md:text-6xl mb-2\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -161,7 +161,7 @@ func ArticlePage(data ArticlePageData, head Head) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><p class=\"text-gray-500 mr-2\">|</p><p class=\"text-gray-500\">MBV</p></div></div><article class=\"w-full col-start-3 col-end-11 text-left leading-normal prose lg:prose-xl row-start-2\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><p class=\"text-gray-500 mr-2\">|</p><p class=\"text-gray-500\">MBV</p></div></div><article class=\"text-gray-300 w-full col-start-3 col-end-11 text-left leading-normal prose lg:prose-xl row-start-2\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -169,7 +169,7 @@ func ArticlePage(data ArticlePageData, head Head) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"mt-10 pb-10\"><p>Thanks for reading. Please checkout some of my other articles, if you enjoyed this one:</p><ul>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<hr><div class=\"mt-10 pb-10\"><p>Thanks for reading. Please checkout some of my other articles, if you enjoyed this one:</p><ul>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -190,7 +190,7 @@ func ArticlePage(data ArticlePageData, head Head) templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 121, Col: 19}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 122, Col: 19}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {

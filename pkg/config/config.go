@@ -1,41 +1,41 @@
 package config
 
 import (
-	"fmt"
-
 	"github.com/caarlos0/env/v10"
 )
 
-type Config struct {
-	database       configDatabase
-	authentication configAuthentication
+type Cfg struct {
+	Db                Database
+	Auth              Authentication
+	App               App
+	ExternalProviders ExternalProviders
 }
 
-var Cfg Config = setupConfiguration()
-
-func setupConfiguration() Config {
-	databaseCfg := configDatabase{}
+func New() Cfg {
+	databaseCfg := Database{}
 	if err := env.Parse(&databaseCfg); err != nil {
 		panic(err)
 	}
 
-	authCfg := configAuthentication{}
+	authCfg := Authentication{}
 	if err := env.Parse(&authCfg); err != nil {
 		panic(err)
 	}
-	return Config{
+
+	appCfg := App{}
+	if err := env.Parse(&appCfg); err != nil {
+		panic(err)
+	}
+
+	externalProviders := ExternalProviders{}
+	if err := env.Parse(&externalProviders); err != nil {
+		panic(err)
+	}
+
+	return Cfg{
 		databaseCfg,
 		authCfg,
+		appCfg,
+		externalProviders,
 	}
-}
-
-func (c Config) GetDatabaseURL() string {
-	return fmt.Sprintf("%s://%s:%s@%s:%s/%s?sslmode=%s",
-		c.database.DatabaseKind, c.database.User, c.database.Password, c.database.Host, c.database.Port,
-		c.database.Name, c.database.SSL_MODE,
-	)
-}
-
-func (c Config) GetPwdPepper() string {
-	return c.authentication.pwdPepper
 }
