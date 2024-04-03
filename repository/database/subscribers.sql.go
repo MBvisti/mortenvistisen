@@ -37,7 +37,10 @@ func (q *Queries) DeleteSubscriber(ctx context.Context, id uuid.UUID) error {
 }
 
 const insertSubscriber = `-- name: InsertSubscriber :one
-insert into subscribers (id, created_at, updated_at, email, subscribed_at, referer, is_verified) values ($1, $2, $3, $4, $5, $6, $7)
+insert into subscribers 
+	(id, created_at, updated_at, email, subscribed_at, referer, is_verified) 
+values 
+	($1, $2, $3, $4, $5, $6, $7)
 returning id, created_at, updated_at, email, subscribed_at, referer, is_verified
 `
 

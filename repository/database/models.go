@@ -24,16 +24,17 @@ type Job struct {
 }
 
 type Post struct {
-	ID         uuid.UUID
-	CreatedAt  pgtype.Timestamp
-	UpdatedAt  pgtype.Timestamp
-	Title      string
-	Filename   string
-	Slug       string
-	Excerpt    string
-	Draft      bool
-	ReleasedAt pgtype.Timestamp
-	ReadTime   sql.NullInt32
+	ID          uuid.UUID
+	CreatedAt   pgtype.Timestamp
+	UpdatedAt   pgtype.Timestamp
+	Title       string
+	Filename    string
+	Slug        string
+	Excerpt     string
+	Draft       bool
+	ReleasedAt  pgtype.Timestamp
+	ReadTime    sql.NullInt32
+	HeaderTitle sql.NullString
 }
 
 type PostsTag struct {

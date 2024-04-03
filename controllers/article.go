@@ -62,7 +62,7 @@ func (c *Controller) Article(ctx echo.Context) error {
 
 	return views.ArticlePage(views.ArticlePageData{
 		Content:           postContent,
-		Title:             post.Title,
+		HeaderTitle:       post.HeaderTitle.String,
 		ReleaseDate:       post.ReleasedAt.Time,
 		OtherArticleLinks: otherArticles,
 		CsrfToken:         csrf.Token(ctx.Request()),

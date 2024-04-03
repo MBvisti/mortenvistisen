@@ -29,7 +29,7 @@ func (c *Controller) HomeIndex(ctx echo.Context) error {
 		}
 
 		posts = append(posts, views.Post{
-			Title:       d.Title,
+			Title:       d.HeaderTitle.String,
 			ReleaseDate: d.ReleasedAt.Time.String(),
 			Excerpt:     d.Excerpt,
 			Tags:        tags,
