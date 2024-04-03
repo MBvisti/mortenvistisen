@@ -10,7 +10,7 @@ import (
 
 type ArticlePageData struct {
 	Content           string
-	Title             string
+	HeaderTitle       string
 	CsrfToken         string
 	ReleaseDate       time.Time
 	OtherArticleLinks map[string]string
@@ -100,7 +100,7 @@ templ ArticlePage(data ArticlePageData, head Head) {
 			w-full px-4 md:px-0 md:w-2/3 mt-6 md:mt-12 mx-auto hero"
 		>
 			<div class="mb-6 md:mb-0 w-full col-start-3 col-end-11 row-start-1 row-end-2 flex flex-col">
-				<h1 class="mx-auto text-center text-4xl md:text-6xl mb-2">{ data.Title }</h1>
+				<h1 class="mx-auto text-center text-4xl md:text-6xl mb-2">{ data.HeaderTitle }</h1>
 				<div class="flex mx-auto text-xl">
 					<p class="text-gray-500 mr-2">
 						{ fmt.Sprintf("%s %v, %v", carbon.CreateFromStdTime(data.ReleaseDate).ToShortMonthString(),
@@ -126,7 +126,7 @@ templ ArticlePage(data ArticlePageData, head Head) {
 					</ul>
 				</div>
 			</article>
-			@triggerModal(data.Title)
+			@triggerModal(data.HeaderTitle)
 		</div>
 	}
 }

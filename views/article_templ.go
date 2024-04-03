@@ -20,7 +20,7 @@ import (
 
 type ArticlePageData struct {
 	Content           string
-	Title             string
+	HeaderTitle       string
 	CsrfToken         string
 	ReleaseDate       time.Time
 	OtherArticleLinks map[string]string
@@ -139,9 +139,9 @@ func ArticlePage(data ArticlePageData, head Head) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
-			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(data.Title)
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(data.HeaderTitle)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 102, Col: 74}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 102, Col: 80}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -205,7 +205,7 @@ func ArticlePage(data ArticlePageData, head Head) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = triggerModal(data.Title).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = triggerModal(data.HeaderTitle).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

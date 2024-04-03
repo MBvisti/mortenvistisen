@@ -7,8 +7,10 @@ package database
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const getFiveRandomPosts = `-- name: GetFiveRandomPosts :many
@@ -17,6 +19,7 @@ SELECT
     posts.created_at,
     posts.updated_at,
     posts.title,
+    posts.header_title,
     posts.filename,
     posts.slug,
     posts.excerpt,
@@ -32,20 +35,35 @@ ORDER BY
 limit 5
 `
 
-func (q *Queries) GetFiveRandomPosts(ctx context.Context, id uuid.UUID) ([]Post, error) {
+type GetFiveRandomPostsRow struct {
+	ID          uuid.UUID
+	CreatedAt   pgtype.Timestamp
+	UpdatedAt   pgtype.Timestamp
+	Title       string
+	HeaderTitle sql.NullString
+	Filename    string
+	Slug        string
+	Excerpt     string
+	Draft       bool
+	ReleasedAt  pgtype.Timestamp
+	ReadTime    sql.NullInt32
+}
+
+func (q *Queries) GetFiveRandomPosts(ctx context.Context, id uuid.UUID) ([]GetFiveRandomPostsRow, error) {
 	rows, err := q.db.Query(ctx, getFiveRandomPosts, id)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Post
+	var items []GetFiveRandomPostsRow
 	for rows.Next() {
-		var i Post
+		var i GetFiveRandomPostsRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.Title,
+			&i.HeaderTitle,
 			&i.Filename,
 			&i.Slug,
 			&i.Excerpt,
@@ -69,6 +87,7 @@ SELECT
     posts.created_at,
     posts.updated_at,
     posts.title,
+    posts.header_title,
     posts.filename,
     posts.slug,
     posts.excerpt,
@@ -83,20 +102,35 @@ ORDER BY
     released_at DESC
 `
 
-func (q *Queries) GetLatestPosts(ctx context.Context) ([]Post, error) {
+type GetLatestPostsRow struct {
+	ID          uuid.UUID
+	CreatedAt   pgtype.Timestamp
+	UpdatedAt   pgtype.Timestamp
+	Title       string
+	HeaderTitle sql.NullString
+	Filename    string
+	Slug        string
+	Excerpt     string
+	Draft       bool
+	ReleasedAt  pgtype.Timestamp
+	ReadTime    sql.NullInt32
+}
+
+func (q *Queries) GetLatestPosts(ctx context.Context) ([]GetLatestPostsRow, error) {
 	rows, err := q.db.Query(ctx, getLatestPosts)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Post
+	var items []GetLatestPostsRow
 	for rows.Next() {
-		var i Post
+		var i GetLatestPostsRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.Title,
+			&i.HeaderTitle,
 			&i.Filename,
 			&i.Slug,
 			&i.Excerpt,
@@ -120,6 +154,7 @@ SELECT
     posts.created_at,
     posts.updated_at,
     posts.title,
+    posts.header_title,
     posts.filename,
     posts.slug,
     posts.excerpt,
@@ -132,14 +167,29 @@ WHERE
     slug = $1
 `
 
-func (q *Queries) GetPostBySlug(ctx context.Context, slug string) (Post, error) {
+type GetPostBySlugRow struct {
+	ID          uuid.UUID
+	CreatedAt   pgtype.Timestamp
+	UpdatedAt   pgtype.Timestamp
+	Title       string
+	HeaderTitle sql.NullString
+	Filename    string
+	Slug        string
+	Excerpt     string
+	Draft       bool
+	ReleasedAt  pgtype.Timestamp
+	ReadTime    sql.NullInt32
+}
+
+func (q *Queries) GetPostBySlug(ctx context.Context, slug string) (GetPostBySlugRow, error) {
 	row := q.db.QueryRow(ctx, getPostBySlug, slug)
-	var i Post
+	var i GetPostBySlugRow
 	err := row.Scan(
 		&i.ID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Title,
+		&i.HeaderTitle,
 		&i.Filename,
 		&i.Slug,
 		&i.Excerpt,
