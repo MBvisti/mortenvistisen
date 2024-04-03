@@ -31,7 +31,7 @@ func NewsletterPage(head Head, csrfToken string) templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<main id=\"content\" role=\"main\" class=\"my-auto\"><div class=\"max-w-xl text-center mx-auto\"><div class=\"mb-5\"><h3 class=\"text-2xl font-bold md:text-3xl md:leading-tight text-white mb-4\">Monthly technical deep dives.</h3><p class=\"text-base\">I work with everything from backend dev, systems designs to devops and machine learning. I share my learnings twice a month in tutorial form, so you can pick up new concept faster and expand your technical tool belt.</p></div><form hx-post=\"/subscribe\" hx-target=\"this\" hx-swap=\"outerHTML\" method=\"POST\" action=\"/subscribe\"><input type=\"hidden\" name=\"gorilla.csrf.Token\" value=\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<main id=\"content\" role=\"main\" class=\"my-auto\"><div class=\"max-w-xl text-center mx-auto\"><div class=\"mb-5\"><h1 class=\"text-2xl font-bold md:text-3xl md:leading-tight text-white mb-4\">Monthly technical deep dives.</h1><p class=\"text-base\">I work with everything from backend dev, systems designs to devops and machine learning. I share my learnings twice a month in tutorial form, so you can pick up new concept faster and expand your technical tool belt.</p></div><form hx-post=\"/subscribe\" hx-target=\"this\" hx-swap=\"outerHTML\" method=\"POST\" action=\"/subscribe\"><input type=\"hidden\" name=\"gorilla.csrf.Token\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
