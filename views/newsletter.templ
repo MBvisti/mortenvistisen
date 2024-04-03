@@ -7,8 +7,13 @@ templ NewsletterPage(head Head, csrfToken string) {
 		<main id="content" role="main" class="my-auto">
 			<div class="max-w-xl text-center mx-auto">
 				<div class="mb-5">
-					<h1 class="text-2xl font-bold md:text-3xl md:leading-tight text-white mb-4">Monthly technical deep dives.</h1>
-					<p class="text-base">I work with everything from backend dev, systems designs to devops and machine learning. I share my learnings twice a month in tutorial form, so you can pick up new concept faster and expand your technical tool belt.</p>
+					<h3 class="text-2xl font-bold md:text-3xl md:leading-tight text-white mb-4">Monthly technical deep dives.</h3>
+					<p class="text-base">
+						I work with everything from backend dev, systems designs to devops and machine learning. I share my learnings twice a month in tutorial form, so you can pick up new concept faster and expand your technical tool belt. 
+						<br/>
+						<br/>
+						I promise to not spam you; there is always an option to opt-out of receiving these updates, included in each mail. One click of a button and you are out.
+					</p>
 				</div>
 				<form hx-post="/subscribe" hx-target="this" hx-swap="outerHTML" method="POST" action="/subscribe">
 					<input type="hidden" name="gorilla.csrf.Token" value={ csrfToken }/>
