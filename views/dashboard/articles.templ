@@ -1,0 +1,63 @@
+package dashboard
+
+import (
+	"github.com/MBvisti/mortenvistisen/views/internal/layouts"
+	"fmt"
+	"github.com/golang-module/carbon/v2"
+)
+
+type ArticleViewData struct {
+	ID         string
+	Title      string
+	Draft      bool
+	ReleasedAt string
+	Slug       string
+}
+
+templ Articles(data []ArticleViewData, tkn string) {
+	@layouts.Dashboard() {
+		<div class="p-12 w-full flex flex-col mx-28">
+			<h2 class="mb-4">Articles</h2>
+			<div class="w-full overflow-x-hidden mx-auto">
+				<table class="table bg-slate-80 bg-slate-800">
+					<!-- head -->
+					<thead>
+						<tr>
+							<th></th>
+							<th>Title</th>
+							<th>Slug</th>
+							<th>Status</th>
+							<th>ReleasedAt</th>
+						</tr>
+					</thead>
+					<tbody>
+						for _, article := range data {
+							<tr>
+								<td class="py-3 ps-4">
+									<div class="flex items-center h-5">
+										<a href={ templ.SafeURL(fmt.Sprintf("/dashboard/article/%s/edit", article.Slug)) }><button>Edit</button></a>
+									</div>
+								</td>
+								<td class="py-4 whitespace-nowrap text-sm text-white">{ article.Title }</td>
+								<td class="py-4 whitespace-nowrap text-sm text-white">{ article.Slug }</td>
+								<td class="py-4 whitespace-nowrap text-sm text-white">
+									if !article.Draft {
+										<span class="text-green-500">Released</span>
+									} else {
+										<span class="text-red-500">In draft</span>
+									}
+								</td>
+								if article.Draft {
+									<td class="py-4 whitespace-nowrap text-sm text-white">Not relased yet</td>
+								} else {
+									<td class="py-4 whitespace-nowrap text-sm text-white">{ carbon.Parse(article.ReleasedAt).ToDateString() }</td>
+								}
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+			@addCSRFTkn(tkn)
+		</div>
+	}
+}
