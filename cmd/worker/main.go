@@ -26,8 +26,9 @@ func main() {
 
 	logger := telemetry.SetupLogger()
 
-	postmark := mail.NewPostmark(cfg.ExternalProviders.PostmarkApiToken)
-	mailClient := mail.NewMail(&postmark)
+	// postmark := mail.NewPostmark(cfg.ExternalProviders.PostmarkApiToken)
+	awsSes := mail.NewAwsSimpleEmailService()
+	mailClient := mail.NewMail(&awsSes)
 
 	queueDbPool, err := pgxpool.New(context.Background(), cfg.Db.GetQueueUrlString())
 	if err != nil {
