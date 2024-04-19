@@ -4,7 +4,7 @@
 	"author": "",
 	"license": "ISC",
 	"scripts": {
-		"watch-css": "tailwindcss -c ./tailwind/config.js -i ./tailwind/base.css -o ../static/css/output.css --watch",
+		"watch-css": "tailwind -c ./tailwind/config.js -i ./tailwind/base.css -o ../static/css/output.css --watch",
 		"build-css": "tailwindcss -c ./tailwind/config.js -i ./tailwind/base.css -o ../static/css/output.css --minify"
 	},
 	"repository": {
