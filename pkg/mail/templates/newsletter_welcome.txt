@@ -1,25 +1,23 @@
-Thanks for joining our newsletter!
+Thanks for joining my newsletter!
 
-Grafto ( https://mbv-labs.com )
+mortenvistisen ( https://mortenvistisen.com )
 
 ******************
 Welcome!
 ******************
 
-Thanks for joining our newsletter. We're super excited to share our process with Grafto with you. To receive these updates, we need you to confirm your mail:
+Thanks for joining my newsletter. I'm super excited to have you here. To receive the monthly deep dives, I first need you to confirm your mail:
 
 Confirm your mail: ( {{ .ConfirmationLink }} )
 
-If you have any questions, feel free to email our customer success team ( support@mbv-labs.com ). (We're lightning quick at replying.)
-
 Thanks,
-MBV and the Grafto team
+Morten (https://mortenvistisen.com)
 
 If you’re having trouble with the button above, copy and paste the URL below into your web browser.
 
 {{ .ConfirmationLink }}
 
-If you didn't signup for Grafto, or want to stop receiving these emails, click here:
+If you didn't signup, or want to stop receiving these emails, click here:
 
 {{ .UnsubscribeLink }}
 

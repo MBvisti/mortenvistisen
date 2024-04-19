@@ -32,7 +32,7 @@ func footer(unsubUrl *string) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if unsubUrl != nil {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<table class=\"email-footer\" align=\"center\" width=\"570\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\"><tr><td><p class=\"f-fallback sub\">If you didn't signup for Grafto, or want to stop receiving these emails, click here:</p><p class=\"f-fallback sub\"><a href=\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<table class=\"email-footer\" align=\"center\" width=\"570\" cellpadding=\"0\" cellspacing=\"0\" role=\"presentation\"><tr><td><p class=\"f-fallback sub\">If you didn't signup, or want to stop receiving these emails, click here:</p><p class=\"f-fallback sub\"><a href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
