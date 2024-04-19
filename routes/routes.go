@@ -146,8 +146,7 @@ func miscRoutes(router *echo.Echo) {
 }
 
 func dashboardRoutes(router *echo.Echo, ctrl controllers.Controller, mw middleware.Middleware) {
-	// dashboardRouter := router.Group("/dashboard", mw.AuthOnly)
-	dashboardRouter := router.Group("/dashboard")
+	dashboardRouter := router.Group("/dashboard", mw.AuthOnly)
 
 	dashboardRouter.GET("", func(c echo.Context) error {
 		return ctrl.DashboardIndex(c)
@@ -155,6 +154,9 @@ func dashboardRoutes(router *echo.Echo, ctrl controllers.Controller, mw middlewa
 
 	dashboardRouter.GET("/subscribers", func(c echo.Context) error {
 		return ctrl.DashboardSubscribers(c)
+	})
+	dashboardRouter.POST("/subscriber/:id/send-verification-mail", func(c echo.Context) error {
+		return ctrl.DashboardResendVerificationMail(c)
 	})
 
 	dashboardRouter.GET("/articles", func(c echo.Context) error {

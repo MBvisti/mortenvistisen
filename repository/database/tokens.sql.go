@@ -12,6 +12,15 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const deleteSubscriberTokenBySubscriberID = `-- name: DeleteSubscriberTokenBySubscriberID :exec
+delete from subscriber_tokens where subscriber_id=$1
+`
+
+func (q *Queries) DeleteSubscriberTokenBySubscriberID(ctx context.Context, subscriberID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, deleteSubscriberTokenBySubscriberID, subscriberID)
+	return err
+}
+
 const deleteToken = `-- name: DeleteToken :exec
 delete from tokens where id=$1
 `

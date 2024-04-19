@@ -2,6 +2,7 @@ package dashboard
 
 import (
 	"github.com/MBvisti/mortenvistisen/views/internal/layouts"
+	"fmt"
 	"strconv"
 
 	"time"
@@ -64,13 +65,15 @@ templ Subscribers(data []SubscriberViewData, tkn string) {
 					<div class="stat-value">{ returnSubscribersUnverifiedCount(data) }</div>
 				</div>
 			</div>
-			<h2 class="mb-4 mt-8">Subscribers</h2>
+			<div class="mt-4 w-full flex justify-between">
+				<h2 class="mb-4 mt-8">Subscribers</h2>
+			</div>
 			<div class="w-full overflow-x-hidden mx-auto">
 				<table class="table bg-slate-80 bg-slate-800">
 					<!-- head -->
 					<thead>
 						<tr>
-							<th></th>
+							<th>Send Verification mail</th>
 							<th>Email</th>
 							<th>Subscribed on</th>
 							<th>Status</th>
@@ -82,8 +85,11 @@ templ Subscribers(data []SubscriberViewData, tkn string) {
 							<tr>
 								<td class="py-3 ps-4">
 									<div class="flex items-center h-5">
-										<input id="hs-table-checkbox-1" type="checkbox" class="border-gray-200 rounded text-blue-600 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800" value={ sub.ID }/>
-										<label for="hs-table-checkbox-1" class="sr-only">Checkbox</label>
+										if sub.Verified {
+											<button class="btn btn-xs btn-outline btn-success" disabled>Send</button>
+										} else {
+											<button hx-target="#toast-wrapper" hx-swap="innerHTML" hx-post={ fmt.Sprintf("/dashboard/subscriber/%v/send-verification-mail", sub.ID) } class="btn btn-xs btn-outline btn-success">Send</button>
+										}
 									</div>
 								</td>
 								<td class="py-4 whitespace-nowrap text-sm text-white">{ sub.Email }</td>
@@ -100,8 +106,21 @@ templ Subscribers(data []SubscriberViewData, tkn string) {
 						}
 					</tbody>
 				</table>
+				<div id="toast-wrapper" class="toast toast-end toast-end"></div>
+				@addCSRFTkn(tkn)
 			</div>
-			@addCSRFTkn(tkn)
 		</div>
 	}
+}
+
+templ SuccessMsg(msg string) {
+	<div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)" class="alert alert-success">
+		<span>{ msg }</span>
+	</div>
+}
+
+templ FailureMsg(msg string) {
+	<div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)" class="alert alert-error">
+		<span>{ msg }</span>
+	</div>
 }

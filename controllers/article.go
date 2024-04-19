@@ -171,7 +171,7 @@ func (c *Controller) SubscriptionEvent(ctx echo.Context) error {
 	}
 	_, err = c.queueClient.Insert(ctx.Request().Context(), queue.EmailJobArgs{
 		To:          form.Email,
-		From:        c.cfg.App.DefaultSenderSignature,
+		From:        "noreply@mortenvistisen.com",
 		Subject:     "Thanks for signing up!",
 		TextVersion: textVersion,
 		HtmlVersion: htmlVersion,

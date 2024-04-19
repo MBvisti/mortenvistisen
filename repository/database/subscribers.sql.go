@@ -108,3 +108,22 @@ func (q *Queries) QueryAllSubscribers(ctx context.Context) ([]Subscriber, error)
 	}
 	return items, nil
 }
+
+const querySubscriber = `-- name: QuerySubscriber :one
+select id, created_at, updated_at, email, subscribed_at, referer, is_verified from subscribers where id = $1
+`
+
+func (q *Queries) QuerySubscriber(ctx context.Context, id uuid.UUID) (Subscriber, error) {
+	row := q.db.QueryRow(ctx, querySubscriber, id)
+	var i Subscriber
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Email,
+		&i.SubscribedAt,
+		&i.Referer,
+		&i.IsVerified,
+	)
+	return i, err
+}
