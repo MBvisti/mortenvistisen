@@ -1,12 +1,19 @@
 package dashboard
 
-import "github.com/MBvisti/mortenvistisen/views/internal/layouts"
+import (
+	"github.com/MBvisti/mortenvistisen/views/internal/layouts"
+	"strconv"
+
+	"time"
+	"github.com/golang-module/carbon/v2"
+)
 
 type SubscriberViewData struct {
 	Email        string
 	ID           string
 	Verified     bool
 	SubscribedAt string
+	Refererer    string
 }
 
 script addCSRFTkn(csrfToken string) {
@@ -15,17 +22,57 @@ script addCSRFTkn(csrfToken string) {
 	})
 }
 
+func returnNewSubsForCurrentMonth(data []SubscriberViewData) string {
+	t := carbon.Now()
+	count := 0
+	for _, d := range data {
+		if carbon.Parse(d.SubscribedAt).Month() == t.Month() {
+			count++
+		}
+	}
+
+	return strconv.Itoa(count)
+}
+
+func returnSubscribersUnverifiedCount(data []SubscriberViewData) string {
+	count := 0
+	for _, d := range data {
+		if !d.Verified {
+			count++
+		}
+	}
+
+	return strconv.Itoa(count)
+}
+
 templ Subscribers(data []SubscriberViewData, tkn string) {
 	@layouts.Dashboard() {
-		<div class="p-12 w-full flex flex-col">
-			<div class="w-1/2 overflow-x-hidden mx-auto">
-				<h2 class="mb-4">Subscribers</h2>
+		<div class="p-12 w-full flex flex-col mx-28">
+			<div class="stats shadow mb-4">
+				<div class="stat place-items-center">
+					<div class="stat-title">Total Subscribers</div>
+					<div class="stat-value">{ strconv.Itoa(len(data)) }</div>
+				</div>
+				<div class="stat place-items-center">
+					<div class="stat-title">New subscribers { time.Now().Month().String() }</div>
+					<div class="stat-value text-secondary">
+						{ returnNewSubsForCurrentMonth(data) }
+					</div>
+				</div>
+				<div class="stat place-items-center">
+					<div class="stat-title">Unverified</div>
+					<div class="stat-value">{ returnSubscribersUnverifiedCount(data) }</div>
+				</div>
+			</div>
+			<h2 class="mb-4 mt-8">Subscribers</h2>
+			<div class="w-full overflow-x-hidden mx-auto">
 				<table class="table bg-slate-80 bg-slate-800">
 					<!-- head -->
 					<thead>
 						<tr>
 							<th></th>
 							<th>Email</th>
+							<th>Subscribed on</th>
 							<th>Status</th>
 							<th>Subscribed</th>
 						</tr>
@@ -40,6 +87,7 @@ templ Subscribers(data []SubscriberViewData, tkn string) {
 									</div>
 								</td>
 								<td class="py-4 whitespace-nowrap text-sm text-white">{ sub.Email }</td>
+								<td class="py-4 whitespace-nowrap text-sm text-white">{ sub.Refererer }</td>
 								<td class="py-4 whitespace-nowrap text-sm text-white">
 									if sub.Verified {
 										<span class="text-green-500">Verified</span>
@@ -47,7 +95,7 @@ templ Subscribers(data []SubscriberViewData, tkn string) {
 										<span class="text-red-500">Not Verified</span>
 									}
 								</td>
-								<td class="py-4 whitespace-nowrap text-sm text-white">{ sub.SubscribedAt }</td>
+								<td class="py-4 whitespace-nowrap text-sm text-white">{ carbon.Parse(sub.SubscribedAt).ToDateString() }</td>
 							</tr>
 						}
 					</tbody>

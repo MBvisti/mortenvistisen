@@ -5,7 +5,7 @@ go 1.21.4
 toolchain go1.22.0
 
 require (
-	github.com/a-h/templ v0.2.543
+	github.com/a-h/templ v0.2.663
 	github.com/alecthomas/chroma/v2 v2.2.0
 	github.com/caarlos0/env/v10 v10.0.0
 	github.com/go-playground/validator/v10 v10.15.4
@@ -43,7 +43,7 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/vanng822/css v1.0.1 // indirect
-	golang.org/x/net v0.17.0 // indirect
+	golang.org/x/net v0.19.0 // indirect
 	golang.org/x/sync v0.6.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
