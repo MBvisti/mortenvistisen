@@ -40,8 +40,9 @@ func main() {
 	)
 	db := database.New(conn)
 
-	postmark := mail.NewPostmark(cfg.ExternalProviders.PostmarkApiToken)
-	mailClient := mail.NewMail(&postmark)
+	// postmark := mail.NewPostmark(cfg.ExternalProviders.PostmarkApiToken)
+	awsSes := mail.NewAwsSimpleEmailService()
+	mailClient := mail.NewMail(&awsSes)
 
 	tokenManager := tokens.NewManager(cfg.Auth.TokenSigningKey)
 
