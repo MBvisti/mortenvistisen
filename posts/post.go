@@ -50,6 +50,22 @@ func NewPostManager() PostManager {
 	}
 }
 
+func GetAllFiles() ([]string, error) {
+	entries, err := assets.ReadDir(".")
+	if err != nil {
+		return nil, err
+	}
+
+	var filenames []string
+	for _, entry := range entries {
+		if !entry.IsDir() && entry.Name() != "post.go" {
+			filenames = append(filenames, entry.Name())
+		}
+	}
+
+	return filenames, nil
+}
+
 func (pm *PostManager) GetPost(name string) (string, error) {
 	source, err := pm.posts.ReadFile(name)
 	if err != nil {

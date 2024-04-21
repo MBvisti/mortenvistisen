@@ -200,6 +200,30 @@ func (q *Queries) GetPostBySlug(ctx context.Context, slug string) (GetPostBySlug
 	return i, err
 }
 
+const queryAllFilenames = `-- name: QueryAllFilenames :many
+select filename from posts
+`
+
+func (q *Queries) QueryAllFilenames(ctx context.Context) ([]string, error) {
+	rows, err := q.db.Query(ctx, queryAllFilenames)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []string
+	for rows.Next() {
+		var filename string
+		if err := rows.Scan(&filename); err != nil {
+			return nil, err
+		}
+		items = append(items, filename)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const queryAllPosts = `-- name: QueryAllPosts :many
 SELECT
     posts.id,

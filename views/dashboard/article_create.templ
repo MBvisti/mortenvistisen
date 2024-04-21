@@ -1,0 +1,93 @@
+package dashboard
+
+import (
+	"github.com/MBvisti/mortenvistisen/views/internal/layouts"
+)
+
+type Keyword struct {
+	ID       string
+	Value    string
+	Selected bool
+}
+
+type CreateArticleViewData struct {
+	Keywords  []Keyword
+	Filenames []string
+}
+
+templ CreateArticle(data CreateArticleViewData, tkn string) {
+	@layouts.Dashboard() {
+		<div class="mt-4 container w-full flex flex-col mx-auto">
+			<a class="mb-4 hover:font-bold" href="/dashboard/articles">Back</a>
+			<form class="h-full flex flex-col justify-center">
+				<div class="flex justify-between">
+					<div class="flex flex-col justify-between w-full pr-4">
+						<p class="mb-4 text-xl">Keywords</p>
+						<form class="flex">
+							<label class="mb-4 input input-bordered flex items-center gap-2">
+								New keyword
+								<input id="new-keyword" name="tag-name" type="text" class="grow" placeholder="Keyword"/>
+							</label>
+							<button hx-target="#keywords-grid" hx-swap="innerHTML" hx-post="/dashboard/tag/store" type="submit" class="btn mb-4">Add</button>
+							<div id="keywords-grid" class="max-h-80 overflow-y-scroll p-4 rounded bg-neutral grid grid-cols-2 grid-flow-rows gap-4 form-control">
+								for _, kw := range data.Keywords {
+									<label class="label cursor-pointer">
+										<span class="label-text font-bold">{ kw.Value }</span>
+										<input name="selected-keyword" value={ kw.ID } type="checkbox" class="checkbox"/>
+									</label>
+								}
+							</div>
+						</form>
+					</div>
+					<div class="flex flex-col justify-between w-full pl-4">
+						<p class="mb-4 text-xl">New article</p>
+						<label class="mb-4 input input-bordered flex items-center gap-2">
+							Title
+							<input required name="title" type="text" class="grow" placeholder="SEO Friendly title"/>
+						</label>
+						<label class="mb-4 input input-bordered flex items-center gap-2">
+							Header Title
+							<input required name="header-title" type="text" class="grow" placeholder="SEO Friendly header title"/>
+						</label>
+						<label class="mb-4 input input-bordered flex items-center gap-2">
+							Excerpt
+							<input required name="excerpt" type="text" class="grow" placeholder="Short desc of article"/>
+						</label>
+						<label class="mb-4 input input-bordered flex items-center gap-2">
+							Estimated Read Time
+							<input required name="estimated-read-time" type="number" class="grow" placeholder="5 min"/>
+						</label>
+						<select class="mb-4 select select-bordered w-full max-w-xs">
+							<option disabled selected>Choose file</option>
+							for _, filename := range data.Filenames {
+								<option required name="filename" value="filename">{ filename }</option>
+							}
+						</select>
+						<div class="form-control w-52">
+							<label class="cursor-pointer label">
+								<span class="label-text text-lg font-bold">Release now</span>
+								<input name="release" type="checkbox" class="toggle toggle-success toggle-lg"/>
+							</label>
+						</div>
+						<button type="submit" class="btn">Create Article</button>
+					</div>
+				</div>
+			</form>
+			@addCSRFTkn(tkn)
+		</div>
+	}
+}
+
+templ KeywordsGrid(keywords []Keyword) {
+	for _, kw := range keywords {
+		<label class="label cursor-pointer">
+			<span class="label-text font-bold">{ kw.Value }</span>
+			if kw.Selected {
+				<input value={ kw.ID } type="checkbox" class="checkbox" checked="checked"/>
+			} else {
+				<input value={ kw.ID } type="checkbox" class="checkbox"/>
+			}
+		</label>
+	}
+	<input id="new-keyword" hx-swap-oob="true" name="tag-name" type="text" class="grow" placeholder="Keyword"/>
+}

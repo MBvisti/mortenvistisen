@@ -72,3 +72,6 @@ SELECT
     posts.read_time
 FROM
     posts;
+
+-- name: QueryAllFilenames :many
+select filename from posts;

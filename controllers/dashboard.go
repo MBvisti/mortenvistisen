@@ -3,11 +3,13 @@ package controllers
 import (
 	"fmt"
 	"net/http"
+	"slices"
 	"time"
 
 	"github.com/MBvisti/mortenvistisen/pkg/mail/templates"
 	"github.com/MBvisti/mortenvistisen/pkg/queue"
 	"github.com/MBvisti/mortenvistisen/pkg/tokens"
+	"github.com/MBvisti/mortenvistisen/posts"
 	"github.com/MBvisti/mortenvistisen/repository/database"
 	"github.com/MBvisti/mortenvistisen/views"
 	"github.com/MBvisti/mortenvistisen/views/dashboard"
@@ -137,6 +139,45 @@ func (c *Controller) DashboardArticles(ctx echo.Context) error {
 		Render(views.ExtractRenderDeps(ctx))
 }
 
+func (c *Controller) DashboardArticleCreate(ctx echo.Context) error {
+	tags, err := c.db.QueryAllTags(ctx.Request().Context())
+	if err != nil {
+		return err
+	}
+
+	var keywords []dashboard.Keyword
+	for _, tag := range tags {
+		keywords = append(keywords, dashboard.Keyword{
+			ID:    tag.ID.String(),
+			Value: tag.Name,
+		})
+	}
+
+	filenames, err := posts.GetAllFiles()
+	if err != nil {
+		return err
+	}
+
+	usedFilenames, err := c.db.QueryAllFilenames(ctx.Request().Context())
+	if err != nil {
+		return err
+	}
+
+	var unusedFileNames []string
+	for _, filename := range filenames {
+		if !slices.Contains(usedFilenames, filename) {
+			unusedFileNames = append(unusedFileNames, filename)
+		}
+	}
+
+	return dashboard.CreateArticle(
+		dashboard.CreateArticleViewData{
+			Keywords:  keywords,
+			Filenames: unusedFileNames,
+		},
+		csrf.Token(ctx.Request())).Render(views.ExtractRenderDeps(ctx))
+}
+
 func (c *Controller) DashboardArticleEdit(ctx echo.Context) error {
 	slug := ctx.Param("slug")
 
@@ -194,4 +235,47 @@ func (c *Controller) DeleteSubscriber(ctx echo.Context) error {
 	ctx.Response().Header().Add("HX-Refresh", "true")
 
 	return ctx.Redirect(http.StatusSeeOther, "/dashboard/subscribers")
+}
+
+type NewTagFormPayload struct {
+	Name             string   `form:"tag-name"`
+	SelectedKeywords []string `form:"selected-keyword"`
+}
+
+func (c *Controller) DashboadTagStore(ctx echo.Context) error {
+	var tagPayload NewTagFormPayload
+	if err := ctx.Bind(&tagPayload); err != nil {
+		return err
+	}
+
+	if err := c.db.InsertTag(ctx.Request().Context(), database.InsertTagParams{
+		ID:   uuid.New(),
+		Name: tagPayload.Name,
+	}); err != nil {
+		return err
+	}
+
+	tags, err := c.db.QueryAllTags(ctx.Request().Context())
+	if err != nil {
+		return err
+	}
+
+	var keywords []dashboard.Keyword
+	for _, tag := range tags {
+		selected := false
+		for _, selectedKW := range tagPayload.SelectedKeywords {
+			if selectedKW == tag.ID.String() {
+				selected = true
+			}
+		}
+
+		kw := dashboard.Keyword{
+			ID:       tag.ID.String(),
+			Value:    tag.Name,
+			Selected: selected,
+		}
+		keywords = append(keywords, kw)
+	}
+
+	return dashboard.KeywordsGrid(keywords).Render(views.ExtractRenderDeps(ctx))
 }
