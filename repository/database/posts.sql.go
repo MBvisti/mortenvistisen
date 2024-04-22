@@ -200,6 +200,69 @@ func (q *Queries) GetPostBySlug(ctx context.Context, slug string) (GetPostBySlug
 	return i, err
 }
 
+const insertPost = `-- name: InsertPost :one
+insert into posts (id, created_at, updated_at, title, header_title, filename, slug, excerpt, draft, released_at, read_time)
+values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+returning id
+`
+
+type InsertPostParams struct {
+	ID          uuid.UUID
+	CreatedAt   pgtype.Timestamp
+	UpdatedAt   pgtype.Timestamp
+	Title       string
+	HeaderTitle sql.NullString
+	Filename    string
+	Slug        string
+	Excerpt     string
+	Draft       bool
+	ReleasedAt  pgtype.Timestamp
+	ReadTime    sql.NullInt32
+}
+
+func (q *Queries) InsertPost(ctx context.Context, arg InsertPostParams) (uuid.UUID, error) {
+	row := q.db.QueryRow(ctx, insertPost,
+		arg.ID,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+		arg.Title,
+		arg.HeaderTitle,
+		arg.Filename,
+		arg.Slug,
+		arg.Excerpt,
+		arg.Draft,
+		arg.ReleasedAt,
+		arg.ReadTime,
+	)
+	var id uuid.UUID
+	err := row.Scan(&id)
+	return id, err
+}
+
+const queryAllFilenames = `-- name: QueryAllFilenames :many
+select filename from posts
+`
+
+func (q *Queries) QueryAllFilenames(ctx context.Context) ([]string, error) {
+	rows, err := q.db.Query(ctx, queryAllFilenames)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []string
+	for rows.Next() {
+		var filename string
+		if err := rows.Scan(&filename); err != nil {
+			return nil, err
+		}
+		items = append(items, filename)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const queryAllPosts = `-- name: QueryAllPosts :many
 SELECT
     posts.id,

@@ -72,3 +72,11 @@ SELECT
     posts.read_time
 FROM
     posts;
+
+-- name: QueryAllFilenames :many
+select filename from posts;
+
+-- name: InsertPost :one
+insert into posts (id, created_at, updated_at, title, header_title, filename, slug, excerpt, draft, released_at, read_time)
+values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+returning id;

@@ -165,6 +165,15 @@ func dashboardRoutes(router *echo.Echo, ctrl controllers.Controller, mw middlewa
 	dashboardRouter.GET("/article/:slug/edit", func(c echo.Context) error {
 		return ctrl.DashboardArticleEdit(c)
 	})
+	dashboardRouter.GET("/article/create", func(c echo.Context) error {
+		return ctrl.DashboardArticleCreate(c)
+	})
+	dashboardRouter.POST("/article/store", func(c echo.Context) error {
+		return ctrl.DashboadPostStore(c)
+	})
+	dashboardRouter.POST("/tag/store", func(c echo.Context) error {
+		return ctrl.DashboadTagStore(c)
+	})
 
 	dashboardRouter.DELETE("/subscriber/:ID", func(c echo.Context) error {
 		return ctrl.DeleteSubscriber(c)

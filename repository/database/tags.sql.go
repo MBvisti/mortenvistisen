@@ -11,6 +11,21 @@ import (
 	"github.com/google/uuid"
 )
 
+const associateTagWithPost = `-- name: AssociateTagWithPost :exec
+insert into posts_tags (id, post_id, tag_id) values ($1, $2, $3)
+`
+
+type AssociateTagWithPostParams struct {
+	ID     uuid.UUID
+	PostID uuid.UUID
+	TagID  uuid.UUID
+}
+
+func (q *Queries) AssociateTagWithPost(ctx context.Context, arg AssociateTagWithPostParams) error {
+	_, err := q.db.Exec(ctx, associateTagWithPost, arg.ID, arg.PostID, arg.TagID)
+	return err
+}
+
 const getTagsForPost = `-- name: GetTagsForPost :many
 SELECT
     tags.id, tags.name
@@ -24,6 +39,45 @@ WHERE
 
 func (q *Queries) GetTagsForPost(ctx context.Context, postID uuid.UUID) ([]Tag, error) {
 	rows, err := q.db.Query(ctx, getTagsForPost, postID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Tag
+	for rows.Next() {
+		var i Tag
+		if err := rows.Scan(&i.ID, &i.Name); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const insertTag = `-- name: InsertTag :exec
+insert into tags (id, name)
+values ($1, $2)
+`
+
+type InsertTagParams struct {
+	ID   uuid.UUID
+	Name string
+}
+
+func (q *Queries) InsertTag(ctx context.Context, arg InsertTagParams) error {
+	_, err := q.db.Exec(ctx, insertTag, arg.ID, arg.Name)
+	return err
+}
+
+const queryAllTags = `-- name: QueryAllTags :many
+select id, name from tags
+`
+
+func (q *Queries) QueryAllTags(ctx context.Context) ([]Tag, error) {
+	rows, err := q.db.Query(ctx, queryAllTags)
 	if err != nil {
 		return nil, err
 	}

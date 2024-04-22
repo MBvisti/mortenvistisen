@@ -43,7 +43,7 @@ func Articles(data []ArticleViewData, tkn string) templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"p-12 w-full flex flex-col mx-28\"><h2 class=\"mb-4\">Articles</h2><div class=\"w-full overflow-x-hidden mx-auto\"><table class=\"table bg-slate-80 bg-slate-800\"><!-- head --><thead><tr><th></th><th>Title</th><th>Slug</th><th>Status</th><th>ReleasedAt</th></tr></thead> <tbody>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"p-12 w-full flex flex-col mx-28\"><div class=\"mb-4 w-full flex items-center justify-between\"><h2 class=\"text-xl\">Articles</h2><a href=\"/dashboard/article/create\" class=\"btn btn-success\">New</a></div><div class=\"w-full overflow-x-hidden mx-auto\"><table class=\"table bg-slate-80 bg-slate-800\"><!-- head --><thead><tr><th></th><th>Title</th><th>Slug</th><th>Status</th><th>ReleasedAt</th></tr></thead> <tbody>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -64,7 +64,7 @@ func Articles(data []ArticleViewData, tkn string) templ.Component {
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(article.Title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/articles.templ`, Line: 41, Col: 77}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/articles.templ`, Line: 44, Col: 77}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -77,7 +77,7 @@ func Articles(data []ArticleViewData, tkn string) templ.Component {
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(article.Slug)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/articles.templ`, Line: 42, Col: 76}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/articles.templ`, Line: 45, Col: 76}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -115,7 +115,7 @@ func Articles(data []ArticleViewData, tkn string) templ.Component {
 					var templ_7745c5c3_Var6 string
 					templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(carbon.Parse(article.ReleasedAt).ToDateString())
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/articles.templ`, Line: 53, Col: 112}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/articles.templ`, Line: 56, Col: 112}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 					if templ_7745c5c3_Err != nil {
