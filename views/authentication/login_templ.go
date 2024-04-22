@@ -12,6 +12,7 @@ import "bytes"
 
 import (
 	"github.com/MBvisti/mortenvistisen/views"
+	"github.com/MBvisti/mortenvistisen/views/internal/components"
 	"github.com/MBvisti/mortenvistisen/views/internal/layouts"
 )
 
@@ -76,7 +77,7 @@ func LoginForm(csrfToken string, props LoginFormProps) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(props.ErrMsg)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/authentication/login.templ`, Line: 46, Col: 44}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/authentication/login.templ`, Line: 47, Col: 44}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -94,29 +95,25 @@ func LoginForm(csrfToken string, props LoginFormProps) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(csrfToken)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/authentication/login.templ`, Line: 50, Col: 68}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/authentication/login.templ`, Line: 51, Col: 68}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><div class=\"grid gap-y-4\"><div><label for=\"email\" class=\"block text-sm mb-2 text-white\">Email</label><div class=\"relative\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><div class=\"grid gap-y-4\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = inputField("email", "email", "", true, false).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = components.InputElementWithLabelBuilder().SetName("email").SetType("email").SetLabelValue("Email").MakeRequired().SetLayout(components.LabelOutside).Build().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div><div><div class=\"flex items center\"><label for=\"email\" class=\"block text-sm mb-2 text-white\">password</label></div><div class=\"relative\">")
+		templ_7745c5c3_Err = components.InputElementWithLabelBuilder().SetName("password").SetType("password").SetLabelValue("Password").MakeRequired().SetLayout(components.LabelOutside).Build().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = inputField("password", "password", "", true, false).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div><div class=\"my-2 w-full flex items-center justify-between\"><div class=\"form-control\"><label class=\"label cursor-pointer\"><span class=\"label-text mr-4\">Remember me</span> <input type=\"checkbox\" class=\"checkbox\"></label></div><a class=\"text-blue-600 decoration-2 hover:underline font-medium\" href=\"/forgot-password\">Forgotten password?</a></div><button type=\"submit\" class=\"py-3 px-4 inline-flex jstify-center items-center gap-2 rounded-md border border-transparent font-semibold bg-blue-500 text-white hover:bg-blue-600 focs:outline-none focs:ring-2 focs:ring-blue-500 focs:ring-offset-2 transition-all text-sm focs:ring-offset-gray-800\">Login</button></div></form></div></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"my-2 w-full flex items-center justify-between\"><div class=\"form-control\"><label class=\"label cursor-pointer\"><span class=\"label-text mr-4\">Remember me</span> <input type=\"checkbox\" class=\"checkbox\"></label></div><a class=\"text-blue-600 decoration-2 hover:underline font-medium\" href=\"/forgot-password\">Forgotten password?</a></div><button type=\"submit\" class=\"py-3 px-4 inline-flex jstify-center items-center gap-2 rounded-md border border-transparent font-semibold bg-blue-500 text-white hover:bg-blue-600 focs:outline-none focs:ring-2 focs:ring-blue-500 focs:ring-offset-2 transition-all text-sm focs:ring-offset-gray-800\">Login</button></div></form></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
