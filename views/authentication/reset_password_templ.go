@@ -18,8 +18,8 @@ import (
 type ResetPasswordFormProps struct {
 	CsrfToken       string
 	ResetToken      string
-	Password        views.InputElementError
-	ConfirmPassword views.InputElementError
+	Password        views.InputElement
+	ConfirmPassword views.InputElement
 }
 
 func ResetPasswordForm(props ResetPasswordFormProps) templ.Component {

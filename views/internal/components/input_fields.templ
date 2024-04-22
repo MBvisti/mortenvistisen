@@ -1,0 +1,89 @@
+package components
+
+import (
+	"fmt"
+	"github.com/MBvisti/mortenvistisen/views/validation"
+)
+
+type BorderedInputField struct {
+	labelValue       string
+	name             string
+	inputType        string
+	placeholderValue string
+	isRequired       bool
+	validation       validation.InputField
+}
+
+func BorderInputFieldBuilder() BorderedInputField {
+	return BorderedInputField{}
+}
+
+func (b BorderedInputField) SetLabelValue(val string) BorderedInputField {
+	b.labelValue = val
+	return b
+}
+
+func (b BorderedInputField) SetName(val string) BorderedInputField {
+	b.name = val
+	return b
+}
+
+func (b BorderedInputField) SetType(val string) BorderedInputField {
+	b.inputType = val
+	return b
+}
+
+func (b BorderedInputField) MakeRequired() BorderedInputField {
+	b.isRequired = true
+	return b
+}
+
+func (b BorderedInputField) SetPlaceholder(val string) BorderedInputField {
+	b.placeholderValue = val
+	return b
+}
+
+func (b BorderedInputField) WithValidation(validation validation.InputField) BorderedInputField {
+	b.validation = validation
+	return b
+}
+
+func (b BorderedInputField) Build() templ.Component {
+	return b.component()
+}
+
+func hasError(val bool) string {
+	if val {
+		return "border border-red-700"
+	}
+
+	return ""
+}
+
+templ (b BorderedInputField) component() {
+	if b.validation.Invalid {
+		<div role="alert" class="rounded flex items-center mb-2 h-4 alert alert-warning">
+			<svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+			<span>{ b.validation.InvalidMsg }</span>
+		</div>
+	}
+	<label
+		class={ fmt.Sprintf("mb-4 input input-bordered flex items-center gap-2 %v", hasError(b.validation.Invalid)) }
+	>
+		{ b.labelValue }
+		<input
+			if b.isRequired {
+				required
+			}
+			if b.validation.OldValue != "" {
+				value={ b.validation.OldValue }
+			}
+			name={ b.name }
+			type={ b.inputType }
+			class="grow"
+			if b.placeholderValue != "" {
+				placeholder={ b.placeholderValue }
+			}
+		/>
+	</label>
+}
