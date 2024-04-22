@@ -257,11 +257,11 @@ func (c *Controller) StoreResetPassword(ctx echo.Context) error {
 		for _, validationError := range e {
 			switch validationError.StructField() {
 			case "Password", "ConfirmPassword":
-				props.Password = views.InputElementError{
+				props.Password = views.InputElement{
 					Invalid:    true,
 					InvalidMsg: validationError.Param(),
 				}
-				props.ConfirmPassword = views.InputElementError{
+				props.ConfirmPassword = views.InputElement{
 					Invalid:    true,
 					InvalidMsg: validationError.Param(),
 				}

@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/MBvisti/mortenvistisen/entity"
 	"github.com/MBvisti/mortenvistisen/pkg/config"
 	"github.com/MBvisti/mortenvistisen/pkg/mail"
 	"github.com/MBvisti/mortenvistisen/pkg/tokens"
@@ -40,6 +41,8 @@ func NewController(
 ) Controller {
 	validate := validator.New(validator.WithRequiredStructEnabled())
 
+	validate.RegisterStructValidation(entity.FilenameValidation, entity.NewPost{})
+
 	return Controller{
 		db,
 		mail,
@@ -57,7 +60,7 @@ func (c *Controller) AppHealth(ctx echo.Context) error {
 }
 
 func (c *Controller) InternalError(ctx echo.Context) error {
-	var from string
+	from := "/"
 
 	return views.InternalServerErr(ctx, views.InternalServerErrData{
 		FromLocation: from,

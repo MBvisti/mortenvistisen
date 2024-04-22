@@ -75,10 +75,10 @@ func (c *Controller) StoreUser(ctx echo.Context) error {
 		}
 
 		props := authentication.RegisterFormProps{
-			NameInput: views.InputElementError{
+			NameInput: views.InputElement{
 				OldValue: payload.UserName,
 			},
-			EmailInput: views.InputElementError{
+			EmailInput: views.InputElement{
 				OldValue: payload.Mail,
 			},
 			CsrfToken: csrf.Token(ctx.Request()),
@@ -93,11 +93,11 @@ func (c *Controller) StoreUser(ctx echo.Context) error {
 				props.EmailInput.Invalid = true
 				props.EmailInput.InvalidMsg = validationError.Param()
 			case "Password", "ConfirmPassword":
-				props.PasswordInput = views.InputElementError{
+				props.PasswordInput = views.InputElement{
 					Invalid:    true,
 					InvalidMsg: validationError.Param(),
 				}
-				props.ConfirmPassword = views.InputElementError{
+				props.ConfirmPassword = views.InputElement{
 					Invalid:    true,
 					InvalidMsg: validationError.Param(),
 				}

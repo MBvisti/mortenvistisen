@@ -50,6 +50,15 @@ func NewPostManager() PostManager {
 	}
 }
 
+func CheckIfFileExist(name string) error {
+	_, err := assets.ReadFile(name)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func GetAllFiles() ([]string, error) {
 	entries, err := assets.ReadDir(".")
 	if err != nil {

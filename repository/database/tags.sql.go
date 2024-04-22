@@ -11,6 +11,21 @@ import (
 	"github.com/google/uuid"
 )
 
+const associateTagWithPost = `-- name: AssociateTagWithPost :exec
+insert into posts_tags (id, post_id, tag_id) values ($1, $2, $3)
+`
+
+type AssociateTagWithPostParams struct {
+	ID     uuid.UUID
+	PostID uuid.UUID
+	TagID  uuid.UUID
+}
+
+func (q *Queries) AssociateTagWithPost(ctx context.Context, arg AssociateTagWithPostParams) error {
+	_, err := q.db.Exec(ctx, associateTagWithPost, arg.ID, arg.PostID, arg.TagID)
+	return err
+}
+
 const getTagsForPost = `-- name: GetTagsForPost :many
 SELECT
     tags.id, tags.name

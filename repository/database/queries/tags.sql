@@ -14,3 +14,6 @@ select * from tags;
 -- name: InsertTag :exec
 insert into tags (id, name)
 values ($1, $2);
+
+-- name: AssociateTagWithPost :exec
+insert into posts_tags (id, post_id, tag_id) values ($1, $2, $3);

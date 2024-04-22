@@ -4,15 +4,20 @@ import (
 	"fmt"
 	"net/http"
 	"slices"
+	"strconv"
 	"time"
 
+	"github.com/MBvisti/mortenvistisen/entity"
 	"github.com/MBvisti/mortenvistisen/pkg/mail/templates"
 	"github.com/MBvisti/mortenvistisen/pkg/queue"
 	"github.com/MBvisti/mortenvistisen/pkg/tokens"
 	"github.com/MBvisti/mortenvistisen/posts"
 	"github.com/MBvisti/mortenvistisen/repository/database"
+	"github.com/MBvisti/mortenvistisen/services"
 	"github.com/MBvisti/mortenvistisen/views"
 	"github.com/MBvisti/mortenvistisen/views/dashboard"
+	"github.com/MBvisti/mortenvistisen/views/validation"
+	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/gorilla/csrf"
 	"github.com/labstack/echo/v4"
@@ -278,4 +283,123 @@ func (c *Controller) DashboadTagStore(ctx echo.Context) error {
 	}
 
 	return dashboard.KeywordsGrid(keywords).Render(views.ExtractRenderDeps(ctx))
+}
+
+type NewPostFormPayload struct {
+	Title             string   `form:"title"`
+	HeaderTitle       string   `form:"header-title"`
+	Excerpt           string   `form:"excerpt"`
+	EstimatedReadTime string   `form:"estimated-read-time"`
+	Filename          string   `form:"filename"`
+	SelectedKeywords  []string `form:"selected-keyword"`
+	Release           string   `form:"release"`
+}
+
+func (c *Controller) DashboadPostStore(ctx echo.Context) error {
+	var postPayload NewPostFormPayload
+	if err := ctx.Bind(&postPayload); err != nil {
+		return err
+	}
+
+	var releaseNow bool
+	if postPayload.Release == "on" {
+		releaseNow = true
+	}
+
+	estimatedReadTime, err := strconv.Atoi(postPayload.EstimatedReadTime)
+	if err != nil {
+		return err
+	}
+
+	if err := services.NewPost(ctx.Request().Context(), &c.db, c.validate, entity.NewPost{
+		Title:             postPayload.Title,
+		HeaderTitle:       postPayload.HeaderTitle,
+		Excerpt:           postPayload.Excerpt,
+		ReleaseNow:        releaseNow,
+		EstimatedReadTime: int64(estimatedReadTime),
+		Filename:          postPayload.Filename,
+	}, postPayload.SelectedKeywords); err != nil {
+		e, ok := err.(validator.ValidationErrors)
+		if !ok {
+			return c.InternalError(ctx)
+		}
+
+		tags, err := c.db.QueryAllTags(ctx.Request().Context())
+		if err != nil {
+			return err
+		}
+
+		var keywords []dashboard.Keyword
+		for _, tag := range tags {
+			keywords = append(keywords, dashboard.Keyword{
+				ID:    tag.ID.String(),
+				Value: tag.Name,
+			})
+		}
+
+		filenames, err := posts.GetAllFiles()
+		if err != nil {
+			return err
+		}
+
+		usedFilenames, err := c.db.QueryAllFilenames(ctx.Request().Context())
+		if err != nil {
+			return err
+		}
+
+		var unusedFileNames []string
+		for _, filename := range filenames {
+			if !slices.Contains(usedFilenames, filename) {
+				unusedFileNames = append(unusedFileNames, filename)
+			}
+		}
+
+		props := dashboard.CreateArticleFormProps{
+			Title: validation.InputField{
+				OldValue: postPayload.Title,
+			},
+			HeaderTitle: validation.InputField{
+				OldValue: postPayload.HeaderTitle,
+			},
+			Excerpt: validation.InputField{
+				OldValue: postPayload.Excerpt,
+			},
+			Filename: validation.InputField{
+				OldValue: postPayload.Filename,
+			},
+			EstimatedReadTime: validation.InputField{
+				OldValue: postPayload.EstimatedReadTime,
+			},
+			ReleaseNow: releaseNow,
+		}
+
+		for _, validationError := range e {
+			switch validationError.StructField() {
+			case "Title":
+				props.Title.Invalid = true
+				props.Title.InvalidMsg = "Title is not long enough"
+			case "HeaderTitle":
+				props.HeaderTitle.Invalid = true
+				props.HeaderTitle.InvalidMsg = "Header title is not long enough"
+			case "Excerpt":
+				props.Excerpt.Invalid = true
+				props.Excerpt.InvalidMsg = "Excerpt has to be between 130 and 160 chars long"
+			case "EstimatedReadTime":
+				props.EstimatedReadTime.Invalid = true
+				props.EstimatedReadTime.InvalidMsg = "Est. time cannot be 0"
+			case "Filename":
+				props.Filename.Invalid = true
+				props.Filename.InvalidMsg = "All filenames must end with .md"
+			}
+		}
+
+		return dashboard.CreateArticleFormContent(
+			props,
+			keywords,
+			unusedFileNames,
+		).Render(views.ExtractRenderDeps(ctx))
+	}
+
+	ctx.Response().Writer.Header().Add("HX-Redirect", "/dashboard/articles")
+	return nil
 }
