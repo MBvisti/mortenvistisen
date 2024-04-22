@@ -58,19 +58,19 @@ func CreateArticleFormContent(
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = components.BorderInputFieldBuilder().SetLabelValue("Title").WithValidation(props.Title).SetName("title").SetType("text").MakeRequired().SetPlaceholder("SEO Friendly title").Build().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = components.InputElementWithLabelBuilder().SetLabelValue("Title").WithValidation(props.Title).SetName("title").SetType("text").MakeRequired().SetPlaceholder("SEO Friendly title").Build().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = components.BorderInputFieldBuilder().SetLabelValue("Header Title").WithValidation(props.HeaderTitle).SetName("header-title").SetType("text").SetPlaceholder("SEO Friendly header title").MakeRequired().Build().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = components.InputElementWithLabelBuilder().SetLabelValue("Header Title").WithValidation(props.HeaderTitle).SetName("header-title").SetType("text").SetPlaceholder("SEO Friendly header title").MakeRequired().Build().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = components.BorderInputFieldBuilder().SetLabelValue("Excerpt").WithValidation(props.Excerpt).SetName("excerpt").SetType("text").SetPlaceholder("Short desc of article").MakeRequired().Build().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = components.InputElementWithLabelBuilder().SetLabelValue("Excerpt").WithValidation(props.Excerpt).SetName("excerpt").SetType("text").SetPlaceholder("Short desc of article").MakeRequired().Build().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = components.BorderInputFieldBuilder().SetLabelValue("Estimated Read Time").WithValidation(props.EstimatedReadTime).SetName("estimated-read-time").SetType("number").SetPlaceholder("5 min").MakeRequired().Build().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = components.InputElementWithLabelBuilder().SetLabelValue("Estimated Read Time").WithValidation(props.EstimatedReadTime).SetName("estimated-read-time").SetType("number").SetPlaceholder("5 min").MakeRequired().Build().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -13,6 +13,7 @@ import (
 	"github.com/MBvisti/mortenvistisen/services"
 	"github.com/MBvisti/mortenvistisen/views"
 	"github.com/MBvisti/mortenvistisen/views/authentication"
+	"github.com/MBvisti/mortenvistisen/views/validation"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/gorilla/csrf"
@@ -75,10 +76,10 @@ func (c *Controller) StoreUser(ctx echo.Context) error {
 		}
 
 		props := authentication.RegisterFormProps{
-			NameInput: views.InputElement{
+			NameInput: validation.InputField{
 				OldValue: payload.UserName,
 			},
-			EmailInput: views.InputElement{
+			EmailInput: validation.InputField{
 				OldValue: payload.Mail,
 			},
 			CsrfToken: csrf.Token(ctx.Request()),
@@ -93,11 +94,11 @@ func (c *Controller) StoreUser(ctx echo.Context) error {
 				props.EmailInput.Invalid = true
 				props.EmailInput.InvalidMsg = validationError.Param()
 			case "Password", "ConfirmPassword":
-				props.PasswordInput = views.InputElement{
+				props.PasswordInput = validation.InputField{
 					Invalid:    true,
 					InvalidMsg: validationError.Param(),
 				}
-				props.ConfirmPassword = views.InputElement{
+				props.ConfirmPassword = validation.InputField{
 					Invalid:    true,
 					InvalidMsg: validationError.Param(),
 				}

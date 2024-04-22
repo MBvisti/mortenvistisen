@@ -14,6 +14,7 @@ import (
 	"github.com/MBvisti/mortenvistisen/services"
 	"github.com/MBvisti/mortenvistisen/views"
 	"github.com/MBvisti/mortenvistisen/views/authentication"
+	"github.com/MBvisti/mortenvistisen/views/validation"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/gorilla/csrf"
@@ -257,11 +258,11 @@ func (c *Controller) StoreResetPassword(ctx echo.Context) error {
 		for _, validationError := range e {
 			switch validationError.StructField() {
 			case "Password", "ConfirmPassword":
-				props.Password = views.InputElement{
+				props.Password = validation.InputField{
 					Invalid:    true,
 					InvalidMsg: validationError.Param(),
 				}
-				props.ConfirmPassword = views.InputElement{
+				props.ConfirmPassword = validation.InputField{
 					Invalid:    true,
 					InvalidMsg: validationError.Param(),
 				}
