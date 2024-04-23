@@ -4102,16 +4102,16 @@ html {
   height: 100%;
 }
 
+.h-screen {
+  height: 100vh;
+}
+
 .max-h-80 {
   max-height: 20rem;
 }
 
 .\!min-h-\[2rem\] {
   min-height: 2rem !important;
-}
-
-.min-h-\[100vh\] {
-  min-height: 100vh;
 }
 
 .min-h-screen {
@@ -4148,6 +4148,10 @@ html {
 
 .w-screen {
   width: 100vw;
+}
+
+.w-\[50rem\] {
+  width: 50rem;
 }
 
 .max-w-\[100vw\] {
@@ -4200,6 +4204,10 @@ html {
 
 .grid-cols-2 {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.grid-cols-\[10rem_1fr\] {
+  grid-template-columns: 10rem 1fr;
 }
 
 .flex-col {
@@ -4666,11 +4674,6 @@ html {
 .text-red-600 {
   --tw-text-opacity: 1;
   color: rgb(220 38 38 / var(--tw-text-opacity));
-}
-
-.text-red-700 {
-  --tw-text-opacity: 1;
-  color: rgb(185 28 28 / var(--tw-text-opacity));
 }
 
 .text-secondary {

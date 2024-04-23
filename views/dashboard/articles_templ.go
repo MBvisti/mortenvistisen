@@ -43,7 +43,7 @@ func Articles(data []ArticleViewData, tkn string) templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"p-12 w-full flex flex-col mx-28\"><div class=\"mb-4 w-full flex items-center justify-between\"><h2 class=\"text-xl\">Articles</h2><a href=\"/dashboard/article/create\" class=\"btn btn-success\">New</a></div><div class=\"w-full overflow-x-hidden mx-auto\"><table class=\"table bg-slate-80 bg-slate-800\"><!-- head --><thead><tr><th></th><th>Title</th><th>Slug</th><th>Status</th><th>ReleasedAt</th></tr></thead> <tbody>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"container mx-auto flex flex-col justify-center\"><div class=\"mb-4 w-full flex items-center justify-between\"><h2 class=\"text-xl\">Articles</h2><a href=\"/dashboard/article/create\" class=\"btn btn-success\">New</a></div><div class=\"w-full overflow-x-hidden mx-auto\"><table class=\"table bg-slate-80 bg-slate-800\"><!-- head --><thead><tr><th></th><th>Title</th><th>Slug</th><th>Status</th><th>ReleasedAt</th></tr></thead> <tbody>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

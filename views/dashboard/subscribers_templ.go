@@ -81,7 +81,7 @@ func Subscribers(data []SubscriberViewData, tkn string) templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"p-12 w-full flex flex-col mx-28\"><div class=\"stats shadow mb-4\"><div class=\"stat place-items-center\"><div class=\"stat-title\">Total Subscribers</div><div class=\"stat-value\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"mt-6 container mx-auto flex flex-col\"><div class=\"stats shadow mb-4\"><div class=\"stat place-items-center\"><div class=\"stat-title\">Total Subscribers</div><div class=\"stat-value\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
