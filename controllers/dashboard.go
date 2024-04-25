@@ -120,7 +120,7 @@ func (c *Controller) DashboardSubscribers(ctx echo.Context) error {
 		})
 	}
 
-	return dashboard.Subscribers(viewData, csrf.Token(ctx.Request())).
+	return dashboard.Subscribers(viewData, components.PaginationPayload{}, csrf.Token(ctx.Request())).
 		Render(views.ExtractRenderDeps(ctx))
 }
 

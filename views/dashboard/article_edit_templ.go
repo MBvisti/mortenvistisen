@@ -59,139 +59,139 @@ func ArticleEdit(data ArticleEditViewData, tkn string) templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"mt-6 container mx-auto flex flex-col\"><a class=\"mb-4 hover:font-bold\" href=\"/dashboard/articles\">Back</a><h2 class=\"text-xl mb-4\">Edit Article</h2><form><div class=\"flex w-full overflow-x-hidden mx-auto mb-4\"><span class=\"flex flex-col mr-8\"><p class=\"mb-1 font-bold\">Title</p><p class=\"py-2\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"container\"><a role=\"button\" class=\"mb-4 btn btn-sm btn-secondary\" href=\"/dashboard/articles\">Back</a><h2 class=\"text-xl mb-4\">Edit Article</h2><form class=\"row g-3\"><div class=\"mb-4 col-4\"><label for=\"exampleInputEmail1\" class=\"form-label\">Title</label> <input type=\"text\" class=\"form-control\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(data.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/article_edit.templ`, Line: 42, Col: 34}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/article_edit.templ`, Line: 41, Col: 63}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></span> <span class=\"flex flex-col mr-8\"><p class=\"mb-1 font-bold\">Header title</p><p class=\"py-2\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"></div><div class=\"mb-4 col-4\"><label for=\"exampleInputEmail1\" class=\"form-label\">Header Title</label> <input type=\"text\" class=\"form-control\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(data.HeaderTitle)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/article_edit.templ`, Line: 46, Col: 40}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/article_edit.templ`, Line: 45, Col: 69}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></span> <span class=\"flex flex-col mr-8\"><p class=\"mb-1 font-bold\">Slug</p><p class=\"py-2\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"></div><div class=\"mb-4 col-4\"><label for=\"exampleInputEmail1\" class=\"form-label\">Slug</label> <input type=\"text\" class=\"form-control\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(data.Slug)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/article_edit.templ`, Line: 50, Col: 33}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/article_edit.templ`, Line: 49, Col: 62}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></span> <span class=\"flex flex-col\"><p class=\"mb-1 font-bold\">Status</p><div class=\"form-control w-52\"><label class=\"cursor-pointer label\"><span class=\"label-text\">Not live</span> ")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			if data.Draft {
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<input type=\"checkbox\" class=\"toggle toggle-accent\"> ")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			} else {
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<input type=\"checkbox\" class=\"toggle toggle-accent\" checked> ")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<span class=\"label-text\">Live</span></label></div></span></div><div class=\"flex w-full overflow-x-hidden mx-auto mb-6\"><span class=\"flex flex-col mr-8\"><p class=\"mb-1 font-bold\">Excerpt</p><p class=\"py-2\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"></div><div class=\"mb-4 col-4\"><label for=\"exampleInputEmail1\" class=\"form-label\">Excerpt</label> <input type=\"text\" class=\"form-control\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(data.Excerpt)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/article_edit.templ`, Line: 70, Col: 36}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/article_edit.templ`, Line: 53, Col: 65}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></span> <span class=\"flex flex-col mr-8\"><p class=\"mb-1 font-bold\">Est. Read Time</p><p class=\"py-2\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"></div><div class=\"mb-4 col-4\"><label for=\"exampleInputEmail1\" class=\"form-label\">Est. Read Time</label> <input type=\"number\" class=\"form-control\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(int(data.ReadTime)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/article_edit.templ`, Line: 74, Col: 56}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/article_edit.templ`, Line: 57, Col: 87}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></span> <span class=\"flex flex-col mr-8\"><p class=\"mb-1 font-bold\">File name</p><p class=\"py-2\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"></div><div class=\"mb-4 col-4\"><label for=\"exampleInputEmail1\" class=\"form-label\">Filename</label> <input disabled type=\"text\" class=\"form-control\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(data.Filename)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/article_edit.templ`, Line: 78, Col: 37}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/article_edit.templ`, Line: 61, Col: 75}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></span> <span class=\"flex flex-col mr-8\"><p class=\"mb-1 font-bold\">Created At</p><p class=\"py-2\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"></div><div class=\"mb-4 col-4\"><label for=\"exampleInputEmail1\" class=\"form-label\">Created At</label> <input type=\"text\" class=\"form-control\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(carbon.CreateFromStdTime(data.CreatedAt).ToDateString())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/article_edit.templ`, Line: 82, Col: 79}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/article_edit.templ`, Line: 65, Col: 108}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></span> <span class=\"flex flex-col mr-8\"><p class=\"mb-1 font-bold\">Updated At</p><p class=\"py-2\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"></div><div class=\"mb-4 col-4\"><label for=\"exampleInputEmail1\" class=\"form-label\">Updated At</label> <input type=\"text\" class=\"form-control\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(carbon.CreateFromStdTime(data.UpdatedAt).ToDateString())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/article_edit.templ`, Line: 86, Col: 79}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/article_edit.templ`, Line: 69, Col: 108}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></span> <span class=\"flex flex-col mr-8\"><p class=\"mb-1 font-bold\">Released At</p><p class=\"py-2\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"></div><div class=\"mb-4 col-4\"><label for=\"exampleInputEmail1\" class=\"form-label\">Released At</label> <input type=\"text\" class=\"form-control\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(carbon.CreateFromStdTime(data.ReleasedAt).ToDateString())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/article_edit.templ`, Line: 90, Col: 80}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/article_edit.templ`, Line: 73, Col: 109}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p></span></div><button class=\"btn mb-10\">Update</button></form><hr><h2 class=\"text-2xl mx-auto font-bold my-8\">Article Content</h2><article class=\"text-gray-300 mx-auto text-left leading-normal prose\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"></div><div class=\"col-12\"><div class=\"form-check\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if data.Draft {
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<input class=\"form-check-input\" type=\"checkbox\" id=\"statusCheck\"> ")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			} else {
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<input class=\"form-check-input\" type=\"checkbox\" id=\"statusCheck\" checked> ")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<label class=\"form-check-label\" for=\"statusCheck\">Is live</label></div></div><div class=\"col-12\"><button type=\"submit\" class=\"btn btn-primary\">Update</button></div></form><hr><div class=\"row text-center\"><h2 class=\"text-2xl mx-auto font-bold mb-4 mt-4\">Article Content</h2><article class=\"text-start col-6 text-gray-300 mx-auto text-left leading-normal prose\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -199,7 +199,7 @@ func ArticleEdit(data ArticleEditViewData, tkn string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</article>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</article></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
