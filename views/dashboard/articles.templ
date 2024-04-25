@@ -4,6 +4,7 @@ import (
 	"github.com/MBvisti/mortenvistisen/views/internal/layouts"
 	"fmt"
 	"github.com/golang-module/carbon/v2"
+	"github.com/MBvisti/mortenvistisen/views/components"
 )
 
 type ArticleViewData struct {
@@ -14,52 +15,66 @@ type ArticleViewData struct {
 	Slug       string
 }
 
-templ Articles(data []ArticleViewData, tkn string) {
+templ Articles(data []ArticleViewData, pagination components.PaginationPayload, tkn string) {
 	@layouts.Dashboard() {
-		<div class="container mx-auto flex flex-col justify-center">
-			<div class="mb-4 w-full flex items-center justify-between">
-				<h2 class="text-xl">Articles</h2>
-				<a href="/dashboard/article/create" class="btn btn-success">New</a>
+		<div class="container">
+			<div class="row mb-4 justify-content-between">
+				<div class="col">
+					<h2 class="text-xl">Articles</h2>
+				</div>
+				<div class="col d-flex justify-content-end align-items-center">
+					<a role="button" href="/dashboard/article/create" class="btn btn-success">New</a>
+				</div>
 			</div>
-			<div class="w-full overflow-x-hidden mx-auto">
-				<table class="table bg-slate-80 bg-slate-800">
-					<!-- head -->
-					<thead>
-						<tr>
-							<th></th>
-							<th>Title</th>
-							<th>Slug</th>
-							<th>Status</th>
-							<th>ReleasedAt</th>
-						</tr>
-					</thead>
-					<tbody>
-						for _, article := range data {
+			<div class="row">
+				<div class="col">
+					<table class="border rounded-2 table table-dark table-hover">
+						<!-- head -->
+						<thead>
 							<tr>
-								<td class="py-3 ps-4">
-									<div class="flex items-center h-5">
-										<a href={ templ.SafeURL(fmt.Sprintf("/dashboard/article/%s/edit", article.Slug)) }><button>Edit</button></a>
-									</div>
-								</td>
-								<td class="py-4 whitespace-nowrap text-sm text-white">{ article.Title }</td>
-								<td class="py-4 whitespace-nowrap text-sm text-white">{ article.Slug }</td>
-								<td class="py-4 whitespace-nowrap text-sm text-white">
-									if !article.Draft {
-										<span class="text-green-500">Released</span>
-									} else {
-										<span class="text-red-500">In draft</span>
-									}
-								</td>
-								if article.Draft {
-									<td class="py-4 whitespace-nowrap text-sm text-white">Not relased yet</td>
-								} else {
-									<td class="py-4 whitespace-nowrap text-sm text-white">{ carbon.Parse(article.ReleasedAt).ToDateString() }</td>
-								}
+								<th scope="col"></th>
+								<th scope="col">Title</th>
+								<th scope="col">Slug</th>
+								<th scope="col">Status</th>
+								<th scope="col">Released On</th>
 							</tr>
-						}
-					</tbody>
-				</table>
+						</thead>
+						<tbody>
+							for _, article := range data {
+								<tr class="align-middle">
+									<th scope="row">
+										<div>
+											<a href={ templ.SafeURL(fmt.Sprintf("/dashboard/article/%s/edit", article.Slug)) }><button class="btn btn-primary btn-sm">Edit</button></a>
+										</div>
+									</th>
+									<td>{ article.Title }</td>
+									<td>{ article.Slug }</td>
+									<td>
+										if !article.Draft {
+											<span class="text-success">Released</span>
+										} else {
+											<span class="text-danger">In draft</span>
+										}
+									</td>
+									if article.Draft {
+										<td>Not relased yet</td>
+									} else {
+										<td>{ carbon.Parse(article.ReleasedAt).ToDateString() }</td>
+									}
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
 			</div>
+			@components.Pagination(components.PaginationPayload{
+				CurrentPage:     pagination.CurrentPage,
+				PrevPage:        pagination.PrevPage,
+				NextPage:        pagination.NextPage,
+				Endpoint:        "/dashboard/articles",
+				NoNextPage:      pagination.NoNextPage,
+				HasNextNextPage: pagination.HasNextNextPage,
+			})
 			@addCSRFTkn(tkn)
 		</div>
 	}

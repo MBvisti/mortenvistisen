@@ -275,27 +275,33 @@ SELECT
     posts.excerpt,
     posts.draft,
     posts.released_at,
-    posts.read_time
+    posts.read_time,
+    (select count(id) from posts) as total_posts_count
 FROM
     posts
+LIMIT
+    7
+OFFSET
+    $1
 `
 
 type QueryAllPostsRow struct {
-	ID          uuid.UUID
-	CreatedAt   pgtype.Timestamp
-	UpdatedAt   pgtype.Timestamp
-	Title       string
-	HeaderTitle sql.NullString
-	Filename    string
-	Slug        string
-	Excerpt     string
-	Draft       bool
-	ReleasedAt  pgtype.Timestamp
-	ReadTime    sql.NullInt32
+	ID              uuid.UUID
+	CreatedAt       pgtype.Timestamp
+	UpdatedAt       pgtype.Timestamp
+	Title           string
+	HeaderTitle     sql.NullString
+	Filename        string
+	Slug            string
+	Excerpt         string
+	Draft           bool
+	ReleasedAt      pgtype.Timestamp
+	ReadTime        sql.NullInt32
+	TotalPostsCount int64
 }
 
-func (q *Queries) QueryAllPosts(ctx context.Context) ([]QueryAllPostsRow, error) {
-	rows, err := q.db.Query(ctx, queryAllPosts)
+func (q *Queries) QueryAllPosts(ctx context.Context, offset int32) ([]QueryAllPostsRow, error) {
+	rows, err := q.db.Query(ctx, queryAllPosts, offset)
 	if err != nil {
 		return nil, err
 	}
@@ -315,6 +321,7 @@ func (q *Queries) QueryAllPosts(ctx context.Context) ([]QueryAllPostsRow, error)
 			&i.Draft,
 			&i.ReleasedAt,
 			&i.ReadTime,
+			&i.TotalPostsCount,
 		); err != nil {
 			return nil, err
 		}

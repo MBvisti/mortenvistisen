@@ -15,6 +15,7 @@ import (
 	"github.com/MBvisti/mortenvistisen/repository/database"
 	"github.com/MBvisti/mortenvistisen/services"
 	"github.com/MBvisti/mortenvistisen/views"
+	"github.com/MBvisti/mortenvistisen/views/components"
 	"github.com/MBvisti/mortenvistisen/views/dashboard"
 	"github.com/MBvisti/mortenvistisen/views/validation"
 	"github.com/go-playground/validator/v10"
@@ -124,13 +125,42 @@ func (c *Controller) DashboardSubscribers(ctx echo.Context) error {
 }
 
 func (c *Controller) DashboardArticles(ctx echo.Context) error {
-	articles, err := c.db.QueryAllPosts(ctx.Request().Context())
+	page := ctx.QueryParam("page")
+
+	var currentPage int
+	if page == "" {
+		currentPage = 1
+	}
+	if page != "" {
+		cp, err := strconv.Atoi(page)
+		if err != nil {
+			return err
+		}
+
+		currentPage = cp
+	}
+
+	offset := 0
+	if currentPage == 2 {
+		offset = 7
+	}
+
+	if currentPage > 2 {
+		offset = 7 * (currentPage - 1)
+	}
+
+	articles, err := c.db.QueryAllPosts(ctx.Request().Context(), int32(offset))
 	if err != nil {
 		return err
 	}
 
+	var totalPostCount int
+
 	viewData := make([]dashboard.ArticleViewData, 0, len(articles))
-	for _, article := range articles {
+	for i, article := range articles {
+		if i == 0 {
+			totalPostCount = int(article.TotalPostsCount)
+		}
 		viewData = append(viewData, dashboard.ArticleViewData{
 			ID:         article.ID.String(),
 			Title:      article.Title,
@@ -140,7 +170,18 @@ func (c *Controller) DashboardArticles(ctx echo.Context) error {
 		})
 	}
 
-	return dashboard.Articles(viewData, csrf.Token(ctx.Request())).
+	pagination := components.PaginationPayload{
+		CurrentPage:     currentPage,
+		NextPage:        currentPage + 1,
+		PrevPage:        currentPage - 1,
+		HasNextNextPage: totalPostCount-7 >= 7,
+	}
+
+	if len(articles) < 7 {
+		pagination.NoNextPage = true
+	}
+
+	return dashboard.Articles(viewData, pagination, csrf.Token(ctx.Request())).
 		Render(views.ExtractRenderDeps(ctx))
 }
 

@@ -69,9 +69,14 @@ SELECT
     posts.excerpt,
     posts.draft,
     posts.released_at,
-    posts.read_time
+    posts.read_time,
+    (select count(id) from posts) as total_posts_count
 FROM
-    posts;
+    posts
+LIMIT
+    7
+OFFSET
+    $1;
 
 -- name: QueryAllFilenames :many
 select filename from posts;
