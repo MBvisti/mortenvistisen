@@ -1,0 +1,30 @@
+package dashboard
+
+import (
+	"github.com/MBvisti/mortenvistisen/views/internal/layouts"
+	"github.com/MBvisti/mortenvistisen/pkg/mail/templates"
+	//"strconv"
+	//"fmt"
+	"github.com/MBvisti/mortenvistisen/repository/database"
+	"github.com/google/uuid"
+)
+
+type NewsletterEditViewData struct {
+	Title       string
+	Edition     string
+	ArticleID   uuid.UUID
+	MailPreview templates.NewsletterMail
+	Articles    []database.Post
+}
+
+templ NewsletterEdit(data NewsletterEditViewData, tkn string) {
+	@layouts.Dashboard() {
+		<div class="mh-full mt-4 mb-4 container mx-auto flex flex-col">
+			<a role="button" class="btn btn-secondary mb-4 hover:font-bold" href="/dashboard/newsletter">Back</a>
+			<div class="row mt-4">
+				<h2 class="fs-4 text-white">New Newsletter</h2>
+				@NewsletterPreview(data.Articles, data.MailPreview, data.ArticleID, tkn)
+			</div>
+		</div>
+	}
+}

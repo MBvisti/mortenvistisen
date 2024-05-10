@@ -37,3 +37,7 @@ func ConvertToPGTimestamp(t time.Time) pgtype.Timestamp {
 func ConvertFromPGTimestamptzToTime(t pgtype.Timestamptz) time.Time {
 	return t.Time
 }
+
+func ConvertFromPGTimestampToTime(t pgtype.Timestamp) time.Time {
+	return t.Time
+}

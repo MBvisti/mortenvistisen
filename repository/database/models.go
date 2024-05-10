@@ -23,6 +23,18 @@ type Job struct {
 	RepeatableID   sql.NullString
 }
 
+type Newsletter struct {
+	ID                  uuid.UUID
+	CreatedAt           pgtype.Timestamptz
+	UpdatedAt           pgtype.Timestamptz
+	Title               string
+	Edition             sql.NullInt32
+	Released            pgtype.Bool
+	ReleasedAt          pgtype.Timestamptz
+	Body                []byte
+	AssociatedArticleID uuid.UUID
+}
+
 type Post struct {
 	ID          uuid.UUID
 	CreatedAt   pgtype.Timestamp

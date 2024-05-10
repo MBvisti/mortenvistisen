@@ -1,0 +1,81 @@
+package dashboard
+
+import (
+	"github.com/MBvisti/mortenvistisen/views/internal/layouts"
+	"fmt"
+	"github.com/golang-module/carbon/v2"
+	"github.com/MBvisti/mortenvistisen/views/components"
+)
+
+type NewsletterViewData struct {
+	ID         string
+	Title      string
+	Edition    string
+	Released   bool
+	ReleasedAt string
+}
+
+templ Newsletter(data []NewsletterViewData, pagination components.PaginationPayload, tkn string) {
+	@layouts.Dashboard() {
+		<div class="container">
+			<div class="row mb-4 justify-content-between">
+				<div class="col">
+					<h2 class="text-xl">Newsletter</h2>
+				</div>
+				<div class="col d-flex justify-content-end align-items-center">
+					<a role="button" href="/dashboard/newsletter/create" class="btn btn-success">New</a>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col">
+					<table class="rounded-2 table table-dark table-hover table-bordered">
+						<!-- head -->
+						<thead>
+							<tr>
+								<th scope="col"></th>
+								<th scope="col">Title</th>
+								<th scope="col">Edition</th>
+								<th scope="col">Status</th>
+								<th scope="col">Released On</th>
+							</tr>
+						</thead>
+						<tbody>
+							for _, article := range data {
+								<tr class="align-middle">
+									<th scope="row">
+										<div>
+											<a href={ templ.SafeURL(fmt.Sprintf("/dashboard/newsletter/%s/edit", article.ID)) }><button class="btn btn-primary btn-sm">Edit</button></a>
+										</div>
+									</th>
+									<td>{ article.Title }</td>
+									<td>{ article.Edition }</td>
+									<td>
+										if article.Released {
+											<span class="text-success">Released</span>
+										} else {
+											<span class="text-danger">In draft</span>
+										}
+									</td>
+									if article.Released {
+										<td>{ carbon.Parse(article.ReleasedAt).ToDateString() }</td>
+									} else {
+										<td>Not relased yet</td>
+									}
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+			</div>
+			@components.Pagination(components.PaginationPayload{
+				CurrentPage:     pagination.CurrentPage,
+				PrevPage:        pagination.PrevPage,
+				NextPage:        pagination.NextPage,
+				Endpoint:        "/dashboard/articles",
+				NoNextPage:      pagination.NoNextPage,
+				HasNextNextPage: pagination.HasNextNextPage,
+			})
+			@addCSRFTkn(tkn)
+		</div>
+	}
+}

@@ -18,6 +18,7 @@ type Post struct {
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 	Title       string
+	HeaderTitle string
 	Filename    string
 	Slug        string
 	Excerpt     string
@@ -48,4 +49,15 @@ func FilenameValidation(sl validator.StructLevel) {
 			"filename not in assets",
 		)
 	}
+}
+
+type UpdatePost struct {
+	ID                uuid.UUID `validate:"required"`
+	Title             string    `validate:"required,gte=3"`
+	HeaderTitle       string    `validate:"required"`
+	Excerpt           string    `validate:"required,lte=160,gte=130"`
+	Slug              string    `validate:"required"`
+	ReleaedAt         time.Time `validate:"required"`
+	ReleaseNow        bool
+	EstimatedReadTime int32 `validate:"required"`
 }

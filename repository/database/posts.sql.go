@@ -332,3 +332,110 @@ func (q *Queries) QueryAllPosts(ctx context.Context, offset int32) ([]QueryAllPo
 	}
 	return items, nil
 }
+
+const queryPostByID = `-- name: QueryPostByID :one
+select id, created_at, updated_at, title, filename, slug, excerpt, draft, released_at, read_time, header_title from posts where id = $1
+`
+
+func (q *Queries) QueryPostByID(ctx context.Context, id uuid.UUID) (Post, error) {
+	row := q.db.QueryRow(ctx, queryPostByID, id)
+	var i Post
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Title,
+		&i.Filename,
+		&i.Slug,
+		&i.Excerpt,
+		&i.Draft,
+		&i.ReleasedAt,
+		&i.ReadTime,
+		&i.HeaderTitle,
+	)
+	return i, err
+}
+
+const queryPosts = `-- name: QueryPosts :many
+select posts.id, posts.created_at, posts.updated_at, posts.title, posts.filename, posts.slug, posts.excerpt, posts.draft, posts.released_at, posts.read_time, posts.header_title from posts
+`
+
+func (q *Queries) QueryPosts(ctx context.Context) ([]Post, error) {
+	rows, err := q.db.Query(ctx, queryPosts)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Post
+	for rows.Next() {
+		var i Post
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Title,
+			&i.Filename,
+			&i.Slug,
+			&i.Excerpt,
+			&i.Draft,
+			&i.ReleasedAt,
+			&i.ReadTime,
+			&i.HeaderTitle,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updatePost = `-- name: UpdatePost :one
+update posts
+    set updated_at = $1, title = $2, header_title = $3, slug = $4, excerpt = $5, draft = $6, released_at = $7, read_time = $8
+where id = $9
+returning id, created_at, updated_at, title, filename, slug, excerpt, draft, released_at, read_time, header_title
+`
+
+type UpdatePostParams struct {
+	UpdatedAt   pgtype.Timestamp
+	Title       string
+	HeaderTitle sql.NullString
+	Slug        string
+	Excerpt     string
+	Draft       bool
+	ReleasedAt  pgtype.Timestamp
+	ReadTime    sql.NullInt32
+	ID          uuid.UUID
+}
+
+func (q *Queries) UpdatePost(ctx context.Context, arg UpdatePostParams) (Post, error) {
+	row := q.db.QueryRow(ctx, updatePost,
+		arg.UpdatedAt,
+		arg.Title,
+		arg.HeaderTitle,
+		arg.Slug,
+		arg.Excerpt,
+		arg.Draft,
+		arg.ReleasedAt,
+		arg.ReadTime,
+		arg.ID,
+	)
+	var i Post
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Title,
+		&i.Filename,
+		&i.Slug,
+		&i.Excerpt,
+		&i.Draft,
+		&i.ReleasedAt,
+		&i.ReadTime,
+		&i.HeaderTitle,
+	)
+	return i, err
+}

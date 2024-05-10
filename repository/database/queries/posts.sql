@@ -57,6 +57,9 @@ ORDER BY
     random()
 limit 5;
 
+-- name: QueryPosts :many
+select posts.* from posts;
+
 -- name: QueryAllPosts :many
 SELECT
     posts.id,
@@ -85,3 +88,12 @@ select filename from posts;
 insert into posts (id, created_at, updated_at, title, header_title, filename, slug, excerpt, draft, released_at, read_time)
 values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
 returning id;
+
+-- name: UpdatePost :one
+update posts
+    set updated_at = $1, title = $2, header_title = $3, slug = $4, excerpt = $5, draft = $6, released_at = $7, read_time = $8
+where id = $9
+returning *;
+
+-- name: QueryPostByID :one
+select * from posts where id = $1;

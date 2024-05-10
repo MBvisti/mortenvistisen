@@ -23,7 +23,7 @@ func sideBar() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"container mb-4\"><nav class=\"navbar justify-content-between\"><a class=\"navbar-brand\" href=\"/dashboard\">Admin</a><ul class=\"nav justify-content-end\"><li class=\"nav-item\"><a class=\"nav-link active\" aria-current=\"page\" href=\"/dashboard\">Home</a></li><li class=\"nav-item\"><a class=\"nav-link\" href=\"/dashboard/subscribers\">Subscribers</a></li><li class=\"nav-item\"><a class=\"nav-link\" href=\"/dashboard/articles\">Articles</a></li></ul></nav></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"container mb-4\"><nav class=\"navbar justify-content-between\"><a class=\"navbar-brand\" href=\"/dashboard\">Admin</a><ul class=\"nav justify-content-end\"><li class=\"nav-item\"><a class=\"nav-link active\" aria-current=\"page\" href=\"/dashboard\">Home</a></li><li class=\"nav-item\"><a class=\"nav-link\" href=\"/dashboard/subscribers\">Subscribers</a></li><li class=\"nav-item\"><a class=\"nav-link\" href=\"/dashboard/articles\">Articles</a></li><li class=\"nav-item\"><a class=\"nav-link\" href=\"/dashboard/newsletter\">Newsletter</a></li></ul></nav></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -59,7 +59,7 @@ func Dashboard() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<script src=\"/static/js/htmx.min.js\"></script><script src=\"/static/js/alpine.js\"></script><script src=\"/static/js/preline/preline.js\"></script></body></html>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<script src=\"/static/js/htmx.min.js\"></script><script src=\"/static/js/alpine.js\"></script><script src=\"/static/js/bootstrap.bundle.min.js\"></script></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

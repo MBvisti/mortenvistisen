@@ -172,8 +172,27 @@ func dashboardRoutes(router *echo.Echo, ctrl controllers.Controller, mw middlewa
 	dashboardRouter.POST("/article/store", func(c echo.Context) error {
 		return ctrl.DashboadPostStore(c)
 	})
+	dashboardRouter.PUT("/article/:id/update", func(c echo.Context) error {
+		return ctrl.DashboardArticleUpdate(c)
+	})
 	dashboardRouter.POST("/tag/store", func(c echo.Context) error {
 		return ctrl.DashboadTagStore(c)
+	})
+
+	dashboardRouter.GET("/newsletter", func(c echo.Context) error {
+		return ctrl.DashboardNewsletter(c)
+	})
+	dashboardRouter.GET("/newsletter/create", func(c echo.Context) error {
+		return ctrl.DashboardNewsletterCreate(c)
+	})
+	dashboardRouter.POST("/newsletter/store", func(c echo.Context) error {
+		return ctrl.DashboardNewsletterStore(c)
+	})
+	dashboardRouter.GET("/newsletter/:id/edit", func(c echo.Context) error {
+		return ctrl.DashboardNewsletterEdit(c)
+	})
+	dashboardRouter.PUT("/newsletter/:id/Update", func(c echo.Context) error {
+		return ctrl.DashboardNewsletterEdit(c)
 	})
 
 	dashboardRouter.DELETE("/subscriber/:ID", func(c echo.Context) error {

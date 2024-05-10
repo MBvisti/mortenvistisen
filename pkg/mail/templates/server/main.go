@@ -14,6 +14,14 @@ import (
 
 // main is only in place to develop emails locally
 func main() {
+	http.Handle("/newsletter", templ.Handler(&templates.NewsletterMail{
+		Title:           "Test",
+		Edition:         "1",
+		Paragraphs:      []string{"paragrah 1", "paragraph 2"},
+		ArticleLink:     "http://localhost:8080/posts/how-to-create-a-blog-using-golang",
+		UnsubscribeLink: "http://localhost:8080/",
+	}))
+
 	http.Handle("/password-reset-mail", templ.Handler(&templates.PasswordResetMail{
 		ResetPasswordLink: "https://mortenvistisen.com",
 	}))
