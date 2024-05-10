@@ -61,6 +61,9 @@ func appRoutes(router *echo.Echo, ctrl controllers.Controller) {
 	router.GET("/", func(c echo.Context) error {
 		return ctrl.HomeIndex(c)
 	})
+	router.GET("", func(c echo.Context) error {
+		return ctrl.HomeIndex(c)
+	})
 
 	router.GET("/about", func(c echo.Context) error {
 		return ctrl.About(c)
