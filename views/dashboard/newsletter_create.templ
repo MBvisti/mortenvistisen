@@ -1,0 +1,176 @@
+package dashboard
+
+import (
+	"github.com/MBvisti/mortenvistisen/views/internal/layouts"
+	"github.com/MBvisti/mortenvistisen/pkg/mail/templates"
+	"strconv"
+	"fmt"
+	"github.com/MBvisti/mortenvistisen/repository/database"
+	"github.com/google/uuid"
+)
+
+templ NewsletterForm(
+	paragraphs []string,
+	title,
+	edition string,
+	selectedArticleID uuid.UUID,
+	articles []database.Post,
+) {
+	<div
+		id="target"
+		class="row"
+	>
+		<div
+			class="mb-4 col-12"
+		>
+			<label
+				for="newsletter-title"
+				class="form-label text-light-emphasis"
+			>Title</label>
+			<input
+				hx-trigger="input changed delay:500ms"
+				hx-post="/dashboard/newsletter/store?preview=true"
+				hx-target="#preview-target"
+				hx-swap="outerHTML"
+				id="newsletter-title"
+				value={ title }
+				name="title"
+				type="text"
+				class="form-control mb-4 text-light"
+				required
+			/>
+			<label
+				for="newsletter-edition"
+				class="form-label text-light-emphasis"
+			>Edition</label>
+			<input
+				id="newsletter-edition"
+				value={ edition }
+				name="edition"
+				type="text"
+				class="form-control mb-4 text-light"
+			/>
+			<select name="article-id" required class="form-select" aria-label="Default select example">
+				<option value="">Article to include</option>
+				for _, article := range articles {
+					if article.ID == selectedArticleID {
+						<option selected value={ article.ID.String() }>{ article.Title }</option>
+					} else {
+						<option value={ article.ID.String() }>{ article.Title }</option>
+					}
+				}
+			</select>
+		</div>
+		<div style="height: 15rem; max-height: 25rem;" class="col-12 mb-4 overflow-y-scroll">
+			for i, para := range paragraphs {
+				<div style="max-height: 2rem;" class="mx-auto w-100 row mb-3 border rounded">
+					<span class="input-group-text col-1" id="basic-addon1">
+						#{ strconv.Itoa(i+1) }
+					</span>
+					<button class="col-10 border border-bottom btn btn-dark text-white overflow-x-hidden" type="button" data-bs-toggle="collapse" data-bs-target={ fmt.Sprintf("#collapsedParagraph-%v", i) } aria-expanded="false" aria-controls={ fmt.Sprintf("collapsedParagraph-%v", i) }>
+						{ para }
+					</button>
+					<button
+						class="border btn btn-danger col-1"
+						type="button"
+						id="button-addon2"
+						hx-target="#preview-target"
+						hx-post={ fmt.Sprintf("/dashboard/newsletter/store?preview=true&paragraph-index=%v&action=del", i) }
+					>Del</button>
+				</div>
+				<div class="collapse w-100" id={ fmt.Sprintf("collapsedParagraph-%v", i) }>
+					<div class="card card-body  d-flex flex-column">
+						<textarea
+							name="paragraph-element"
+							type="text"
+							class="form-control"
+							rows="4"
+						>
+							{ para }
+						</textarea>
+						<button
+							class="border btn btn-warning"
+							type="button"
+							id="button-addon1"
+							hx-target="#preview-target"
+							hx-post="/dashboard/newsletter/store?preview=true"
+						>
+							Edit
+						</button>
+					</div>
+				</div>
+			}
+		</div>
+		<div class="mb-4 col-12 input-group">
+			<textarea
+				name="new-paragraph-element"
+				class="form-control"
+			></textarea>
+			<button
+				hx-target="#preview-target"
+				hx-swap="outerHTML"
+				hx-post="/dashboard/newsletter/store?preview=true"
+				class="btn btn-outline-secondary"
+				type="button"
+			>
+				Add
+			</button>
+		</div>
+		<div class="col-12 my-4">
+			<div class="row">
+				<div class="col my-auto">
+					<div class="form-check form-switch">
+						<input name="release-on-create" class="form-check-input" type="checkbox" role="switch" id="releaseNewsletterOnCreateSwitch"/>
+						<label class="form-check-label text-light-emphasis" for="releaseNewsletterOnCreateSwitch">Release On Create</label>
+					</div>
+				</div>
+				<div class="col d-flex">
+					<button
+						type="submit"
+						class="btn btn-success ms-auto"
+					>Create</button>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+templ NewsletterPreview(
+	articles []database.Post,
+	newsletterMailPreview templates.NewsletterMail,
+	selectedArticleID uuid.UUID,
+	tkn string,
+) {
+	<div id="preview-target" class="row" hx-boost="true">
+		<div style="max-height: 35rem; height: 35rem;" class="bg-dark-subtle rounded py-2 col-12 overflow-y-auto mb-4">
+			@newsletterMailPreview
+		</div>
+		<form
+			class="col-12 bg-dark-subtle rounded py-2"
+			hx-target="#target"
+			hx-swap="outerHTML"
+			hx-post="/dashboard/newsletter/store"
+		>
+			@NewsletterForm(
+				newsletterMailPreview.Paragraphs,
+				newsletterMailPreview.Title,
+				newsletterMailPreview.Edition,
+				selectedArticleID,
+				articles,
+			)
+		</form>
+		@addCSRFTkn(tkn)
+	</div>
+}
+
+templ CreateNewsletter(articles []database.Post, selectedArticleID uuid.UUID, newsletterMailPreview templates.NewsletterMail, tkn string) {
+	@layouts.Dashboard() {
+		<div class="mh-full mt-4 mb-4 container mx-auto flex flex-col">
+			<a role="button" class="btn btn-secondary mb-4 hover:font-bold" href="/dashboard/newsletter">Back</a>
+			<div class="row mt-4">
+				<h2 class="fs-4 text-white">New Newsletter</h2>
+				@NewsletterPreview(articles, newsletterMailPreview, selectedArticleID, tkn)
+			</div>
+		</div>
+	}
+}

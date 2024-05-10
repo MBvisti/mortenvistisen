@@ -15,6 +15,7 @@ import (
 
 type postDatabase interface {
 	InsertPost(ctx context.Context, arg database.InsertPostParams) (uuid.UUID, error)
+	UpdatePost(ctx context.Context, arg database.UpdatePostParams) (database.Post, error)
 	AssociateTagWithPost(ctx context.Context, arg database.AssociateTagWithPostParams) error
 }
 
@@ -73,4 +74,47 @@ func NewPost(
 	}
 
 	return nil
+}
+
+func UpdatePost(
+	ctx context.Context,
+	db postDatabase,
+	v *validator.Validate,
+	updatePost entity.UpdatePost,
+) (entity.Post, error) {
+	if err := v.Struct(updatePost); err != nil {
+		telemetry.Logger.Error("provided post data did not pass the validation", "error", err)
+		return entity.Post{}, err
+	}
+
+	now := time.Now()
+	args := database.UpdatePostParams{
+		ID:          updatePost.ID,
+		UpdatedAt:   database.ConvertToPGTimestamp(now),
+		Title:       updatePost.Title,
+		HeaderTitle: sql.NullString{Valid: true, String: updatePost.HeaderTitle},
+		Slug:        slug.MakeLang(updatePost.Title, "en"),
+		Excerpt:     updatePost.Excerpt,
+		Draft:       updatePost.ReleaseNow,
+		ReleasedAt:  database.ConvertToPGTimestamp(now),
+		ReadTime:    sql.NullInt32{Int32: updatePost.EstimatedReadTime, Valid: true},
+	}
+
+	updatedPost, err := db.UpdatePost(ctx, args)
+	if err != nil {
+		return entity.Post{}, err
+	}
+
+	return entity.Post{
+		ID:          updatedPost.ID,
+		CreatedAt:   database.ConvertFromPGTimestampToTime(updatedPost.CreatedAt),
+		UpdatedAt:   database.ConvertFromPGTimestampToTime(updatedPost.UpdatedAt),
+		Title:       updatedPost.Title,
+		Filename:    updatedPost.Filename,
+		Slug:        updatedPost.Slug,
+		Excerpt:     updatedPost.Excerpt,
+		Draft:       updatedPost.Draft,
+		ReleaseDate: database.ConvertFromPGTimestampToTime(updatedPost.ReleasedAt),
+		ReadTime:    updatedPost.ReadTime.Int32,
+	}, nil
 }

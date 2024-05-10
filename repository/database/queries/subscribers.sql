@@ -16,3 +16,6 @@ update subscribers set is_verified=true, updated_at=$2 where id=$1;
 
 -- name: QuerySubscriber :one
 select * from subscribers where id = $1;
+
+-- name: QueryVerifiedSubscribers :many
+select * from subscribers where is_verified = true;

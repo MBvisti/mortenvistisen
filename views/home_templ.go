@@ -44,7 +44,7 @@ func HomePage(posts []Post) templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex flex-col md:grid md:grid-flow-col md:grid-rows-[300px_100px_1fr] md:grid-cols-12 \n			w-full px-4 md:px-16 md:w-2/3 mt-4 mx-auto hero\"><div class=\"flex flex-col hero-content text-center pb-0 col-start-3 col-end-11 row-start-1 row-end-2\"><h1 class=\"text-5xl font-bold mb-2 text-white\">Hi, I'm Morten</h1><p class=\"text-xl text-gray-300\">a software engineer from Denmark. I write about technology and indiehacking; mainly focused around Go, Rust and Machine Learning.</p></div><div class=\"h-full w-full mb-10 row-start-2 row-end-3 col-start-3 col-end-11 flex flex-col justify-center\"><div class=\"text-white divider divider-accent font-bold\">Socials</div><div class=\"flex flex-col w-full\"><div class=\"flex h-10 justify-around text-xs items-center md:px-20\"><a href=\"https://twitter.com/mbvisti\"><span class=\"text-gray-300 badge badge-neutral\">Twitter</span></a> <a href=\"https://www.linkedin.com/in/mortenvistisen\"><span class=\"text-gray-300 badge badge-neutral\">Linkedin</span></a> <a href=\"https://github.com/mbvisti\"><span class=\"text-gray-300 badge badge-neutral\">Github</span></a> <a href=\"mailto:hi@mortenvistisen.com?subject=hi\" target=\"_blank\"><span class=\"text-gray-300 badge badge-neutral\">Email</span></a></div></div></div><div class=\"h-full w-full row-start-3 row-end-4 col-start-4 col-end-10 flex flex-col justify-center\"><h2 class=\"block text-2xl font-bold text-white mb-5 xl:my-8\">Latest posts</h2><div class=\"w-full\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"container mx-auto grid grid-cols-4 md:grid-cols-12 grid-rows-[300px_100px_1fr] mt-4 hero\"><div class=\"flex flex-col hero-content text-center pb-0 col-span-4 md:col-start-3 md:col-end-11 lg:col-start-5 lg:col-end-9 md:row-start-1 md:row-end-2\"><h1 class=\"text-5xl font-bold mb-2 text-white\">Hi, I'm Morten</h1><p class=\"text-xl text-gray-300\">A software engineer from Denmark. I write about technology and indiehacking; mainly focused around Go, Rust and Machine Learning.</p></div><div class=\"w-full px-4 md:px-0 h-full col-span-4 row-start-2 row-end-3 md:col-start-3 md:col-end-11 lg:col-start-5 lg:col-end-9 flex flex-col justify-center\"><div class=\"w-full text-white divider divider-accent font-bold\">Socials</div><div class=\"flex flex-col w-full\"><div class=\"flex h-10 justify-around text-xs items-center md:px-20\"><a href=\"https://twitter.com/mbvisti\"><span class=\"text-gray-300 badge badge-neutral\">Twitter</span></a> <a href=\"https://www.linkedin.com/in/mortenvistisen\"><span class=\"text-gray-300 badge badge-neutral\">Linkedin</span></a> <a href=\"https://github.com/mbvisti\"><span class=\"text-gray-300 badge badge-neutral\">Github</span></a> <a href=\"mailto:hi@mortenvistisen.com?subject=hi\" target=\"_blank\"><span class=\"text-gray-300 badge badge-neutral\">Email</span></a></div></div></div><div class=\"mt-10 w-full px-4 md:px-0 h-full row-start-3 row-end-4 col-span-4 md:col-start-4 md:col-end-10 lg:col-start-5 lg:col-end-9 flex flex-col justify-center\"><h2 class=\"block text-2xl font-bold text-white mb-5 xl:my-8\">Latest posts</h2><div class=\"w-full\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -65,7 +65,7 @@ func HomePage(posts []Post) templ.Component {
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s %v, %v", carbon.Parse(post.ReleaseDate).ToShortMonthString(), carbon.Parse(post.ReleaseDate).DayOfMonth(), carbon.Parse(post.ReleaseDate).Year()))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/home.templ`, Line: 66, Col: 173}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/home.templ`, Line: 65, Col: 173}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -78,7 +78,7 @@ func HomePage(posts []Post) templ.Component {
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(post.Title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/home.templ`, Line: 70, Col: 97}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/home.templ`, Line: 69, Col: 97}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -91,7 +91,7 @@ func HomePage(posts []Post) templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(post.Excerpt)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/home.templ`, Line: 71, Col: 53}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/home.templ`, Line: 70, Col: 53}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -109,7 +109,7 @@ func HomePage(posts []Post) templ.Component {
 					var templ_7745c5c3_Var7 string
 					templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(tag)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/home.templ`, Line: 76, Col: 171}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/home.templ`, Line: 75, Col: 171}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 					if templ_7745c5c3_Err != nil {

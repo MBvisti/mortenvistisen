@@ -3,7 +3,6 @@ package mail
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -58,7 +57,7 @@ func (a *AwsSimpleEmailService) SendMail(ctx context.Context, payload MailPayloa
 		Source: aws.String(from),
 	}
 
-	result, err := a.client.SendEmail(input)
+	_, err := a.client.SendEmail(input)
 	if err != nil {
 		if aerr, ok := err.(awserr.Error); ok {
 			switch aerr.Code() {
@@ -79,8 +78,6 @@ func (a *AwsSimpleEmailService) SendMail(ctx context.Context, payload MailPayloa
 
 		return err
 	}
-
-	log.Print(result)
 
 	return nil
 }

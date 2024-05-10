@@ -1,7 +1,12 @@
 package controllers
 
 import (
+	"bytes"
+	"database/sql"
+	"encoding/json"
 	"fmt"
+	"log"
+	"log/slog"
 	"net/http"
 	"slices"
 	"strconv"
@@ -15,11 +20,14 @@ import (
 	"github.com/MBvisti/mortenvistisen/repository/database"
 	"github.com/MBvisti/mortenvistisen/services"
 	"github.com/MBvisti/mortenvistisen/views"
+	"github.com/MBvisti/mortenvistisen/views/components"
 	"github.com/MBvisti/mortenvistisen/views/dashboard"
 	"github.com/MBvisti/mortenvistisen/views/validation"
 	"github.com/go-playground/validator/v10"
+	"github.com/golang-module/carbon/v2"
 	"github.com/google/uuid"
 	"github.com/gorilla/csrf"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 )
 
@@ -119,18 +127,59 @@ func (c *Controller) DashboardSubscribers(ctx echo.Context) error {
 		})
 	}
 
-	return dashboard.Subscribers(viewData, csrf.Token(ctx.Request())).
+	currentPage := 1
+	pagination := components.PaginationPayload{
+		CurrentPage:     currentPage,
+		NextPage:        currentPage + 1,
+		PrevPage:        currentPage - 1,
+		HasNextNextPage: len(viewData)-7 >= 7,
+	}
+
+	if len(viewData) < 7 {
+		pagination.NoNextPage = true
+	}
+
+	return dashboard.Subscribers(viewData, pagination, csrf.Token(ctx.Request())).
 		Render(views.ExtractRenderDeps(ctx))
 }
 
 func (c *Controller) DashboardArticles(ctx echo.Context) error {
-	articles, err := c.db.QueryAllPosts(ctx.Request().Context())
+	page := ctx.QueryParam("page")
+
+	var currentPage int
+	if page == "" {
+		currentPage = 1
+	}
+	if page != "" {
+		cp, err := strconv.Atoi(page)
+		if err != nil {
+			return err
+		}
+
+		currentPage = cp
+	}
+
+	offset := 0
+	if currentPage == 2 {
+		offset = 7
+	}
+
+	if currentPage > 2 {
+		offset = 7 * (currentPage - 1)
+	}
+
+	articles, err := c.db.QueryAllPosts(ctx.Request().Context(), int32(offset))
 	if err != nil {
 		return err
 	}
 
+	var totalPostCount int
+
 	viewData := make([]dashboard.ArticleViewData, 0, len(articles))
-	for _, article := range articles {
+	for i, article := range articles {
+		if i == 0 {
+			totalPostCount = int(article.TotalPostsCount)
+		}
 		viewData = append(viewData, dashboard.ArticleViewData{
 			ID:         article.ID.String(),
 			Title:      article.Title,
@@ -140,8 +189,303 @@ func (c *Controller) DashboardArticles(ctx echo.Context) error {
 		})
 	}
 
-	return dashboard.Articles(viewData, csrf.Token(ctx.Request())).
+	pagination := components.PaginationPayload{
+		CurrentPage:     currentPage,
+		NextPage:        currentPage + 1,
+		PrevPage:        currentPage - 1,
+		HasNextNextPage: totalPostCount-7 >= 7,
+	}
+
+	if len(articles) < 7 {
+		pagination.NoNextPage = true
+	}
+
+	return dashboard.Articles(viewData, pagination, csrf.Token(ctx.Request())).
 		Render(views.ExtractRenderDeps(ctx))
+}
+
+func (c *Controller) DashboardNewsletter(ctx echo.Context) error {
+	page := ctx.QueryParam("page")
+
+	var currentPage int
+	if page == "" {
+		currentPage = 1
+	}
+	if page != "" {
+		cp, err := strconv.Atoi(page)
+		if err != nil {
+			return err
+		}
+
+		currentPage = cp
+	}
+
+	offset := 0
+	if currentPage == 2 {
+		offset = 7
+	}
+
+	if currentPage > 2 {
+		offset = 7 * (currentPage - 1)
+	}
+
+	newsletters, err := c.db.QueryNewsletterInPages(ctx.Request().Context(), int32(offset))
+	if err != nil {
+		return err
+	}
+
+	releasedNewslettersCount, err := c.db.QueryReleasedNewslettersCount(ctx.Request().Context())
+	if err != nil {
+		return err
+	}
+
+	viewData := make([]dashboard.NewsletterViewData, 0, len(newsletters))
+	for _, newsletter := range newsletters {
+		viewData = append(viewData, dashboard.NewsletterViewData{
+			ID:         newsletter.ID.String(),
+			Title:      newsletter.Title,
+			Released:   newsletter.Released.Bool,
+			ReleasedAt: newsletter.ReleasedAt.Time.String(),
+			Edition:    strconv.Itoa(int(newsletter.Edition.Int32)),
+		})
+	}
+
+	pagination := components.PaginationPayload{
+		CurrentPage:     currentPage,
+		NextPage:        currentPage + 1,
+		PrevPage:        currentPage - 1,
+		HasNextNextPage: releasedNewslettersCount-7 >= 7,
+	}
+
+	if len(newsletters) < 7 {
+		pagination.NoNextPage = true
+	}
+
+	return dashboard.Newsletter(viewData, pagination, csrf.Token(ctx.Request())).
+		Render(views.ExtractRenderDeps(ctx))
+}
+
+func (c *Controller) DashboardNewsletterCreate(ctx echo.Context) error {
+	releasedNewslettersCount, err := c.db.QueryReleasedNewslettersCount(ctx.Request().Context())
+	if err != nil {
+		return err
+	}
+
+	articles, err := c.db.QueryPosts(ctx.Request().Context())
+	if err != nil {
+		return err
+	}
+
+	edition := strconv.Itoa(int(releasedNewslettersCount) + 1)
+
+	return dashboard.CreateNewsletter(articles, uuid.UUID{}, templates.NewsletterMail{
+		Edition: edition,
+	}, csrf.Token(ctx.Request())).
+		Render(views.ExtractRenderDeps(ctx))
+}
+
+func (c *Controller) DashboardNewsletterEdit(ctx echo.Context) error {
+	newsletterIDParam := ctx.Param("id")
+	newsletterID, err := uuid.Parse(newsletterIDParam)
+	if err != nil {
+		return err
+	}
+
+	newsletter, err := c.db.QueryNewsletterByID(ctx.Request().Context(), newsletterID)
+	if err != nil {
+		return err
+	}
+
+	articles, err := c.db.QueryPosts(ctx.Request().Context())
+	if err != nil {
+		return err
+	}
+	edition := strconv.Itoa(int(newsletter.Edition.Int32))
+	return dashboard.NewsletterEdit(dashboard.NewsletterEditViewData{
+		Title:     newsletter.Title,
+		Edition:   edition,
+		ArticleID: newsletter.AssociatedArticleID,
+		MailPreview: templates.NewsletterMail{
+			Title:       newsletter.Title,
+			Edition:     edition,
+			Paragraphs:  []string{""},
+			ArticleLink: "",
+		},
+		Articles: articles,
+	}, csrf.Token(ctx.Request())).
+		Render(views.ExtractRenderDeps(ctx))
+}
+
+type NewsletterCreatePreview struct {
+	Title               string    `form:"title"`
+	ParagraphElements   []string  `form:"paragraph-element"`
+	NewParagraphElement string    `form:"new-paragraph-element"`
+	ArticleID           uuid.UUID `form:"article-id"`
+}
+
+func (c *Controller) dashboardNewsletterCreatePreview(ctx echo.Context) error {
+	paragraphIndex := ctx.QueryParam("paragraph-index")
+	action := ctx.QueryParam("action")
+
+	var previewPayload NewsletterCreatePreview
+	if err := ctx.Bind(&previewPayload); err != nil {
+		return err
+	}
+
+	paras := previewPayload.ParagraphElements
+
+	if paragraphIndex != "" && action == "del" {
+		log.Print(paras)
+		index, err := strconv.Atoi(paragraphIndex)
+		if err != nil {
+			return err
+		}
+
+		if action == "del" {
+			paras = append(
+				paras[:index],
+				paras[index+1:]...)
+		}
+		log.Print(paras)
+	}
+
+	if previewPayload.NewParagraphElement != "" && action != "del" {
+		paras = append(
+			paras,
+			previewPayload.NewParagraphElement,
+		)
+	}
+
+	articles, err := c.db.QueryPosts(ctx.Request().Context())
+	if err != nil {
+		return err
+	}
+
+	releasedNewslettersCount, err := c.db.QueryReleasedNewslettersCount(ctx.Request().Context())
+	(ctx.Request().Context())
+	if err != nil {
+		return err
+	}
+
+	edition := strconv.Itoa(int(releasedNewslettersCount) + 1)
+
+	return dashboard.NewsletterPreview(articles, templates.NewsletterMail{
+		Title:      previewPayload.Title,
+		Edition:    edition,
+		Paragraphs: paras,
+	}, previewPayload.ArticleID, csrf.Token(ctx.Request())).
+		Render(views.ExtractRenderDeps(ctx))
+}
+
+type StoreNewsletterPayload struct {
+	Title             string    `form:"title"             validate:"required,gte=4"`
+	Edition           string    `form:"edition"           validate:"required"`
+	ArticleID         uuid.UUID `form:"article-id"        validate:"required"`
+	ParagraphElements []string  `form:"paragraph-element" validate:"required,gte=1"`
+	ReleaseOnCreate   string    `form:"release-on-create"`
+}
+
+func (c *Controller) DashboardNewsletterStore(ctx echo.Context) error {
+	preview := ctx.QueryParam("preview")
+	if preview == "true" {
+		return c.dashboardNewsletterCreatePreview(ctx)
+	}
+
+	var storeNewsletterPayload StoreNewsletterPayload
+	if err := ctx.Bind(&storeNewsletterPayload); err != nil {
+		return err
+	}
+
+	if err := c.validate.Struct(storeNewsletterPayload); err != nil {
+		log.Print(err)
+		return err
+	}
+
+	edition, err := strconv.Atoi(storeNewsletterPayload.Edition)
+	if err != nil {
+		return err
+	}
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(storeNewsletterPayload.ParagraphElements); err != nil {
+		return err
+	}
+
+	now := database.ConvertToPGTimestamptz(time.Now())
+	insertArgs := database.InsertNewsletterParams{
+		ID:                  uuid.New(),
+		CreatedAt:           now,
+		UpdatedAt:           now,
+		Title:               storeNewsletterPayload.Title,
+		Edition:             sql.NullInt32{Int32: int32(edition), Valid: true},
+		Body:                buf.Bytes(),
+		AssociatedArticleID: storeNewsletterPayload.ArticleID,
+	}
+
+	if storeNewsletterPayload.ReleaseOnCreate == "on" {
+		insertArgs.Released = pgtype.Bool{Bool: true, Valid: true}
+		insertArgs.ReleasedAt = now
+	}
+
+	newsletter, err := c.db.InsertNewsletter(
+		ctx.Request().Context(), insertArgs,
+	)
+	if err != nil {
+		return err
+	}
+
+	if newsletter.Released.Bool {
+		verifiedSubs, err := c.db.QueryVerifiedSubscribers(ctx.Request().Context())
+		if err != nil {
+			return err
+		}
+
+		article, err := c.db.QueryPostByID(ctx.Request().Context(), newsletter.AssociatedArticleID)
+		if err != nil {
+			return err
+		}
+
+		newsletterMail := templates.NewsletterMail{
+			Title:       newsletter.Title,
+			Edition:     strconv.Itoa(int(newsletter.Edition.Int32)),
+			Paragraphs:  storeNewsletterPayload.ParagraphElements,
+			ArticleLink: c.buildURLFromSlug(c.formatArticleSlug(article.Slug)),
+		}
+
+		htmlMail, err := newsletterMail.GenerateHtmlVersion()
+		if err != nil {
+			return err
+		}
+
+		textMail, err := newsletterMail.GenerateTextVersion()
+		if err != nil {
+			return err
+		}
+
+		for _, verifiedSub := range verifiedSubs {
+			if err := c.mail.Send(
+				ctx.Request().Context(),
+				verifiedSub.Email.String,
+				"newsletter@mortenvistisen.com",
+				fmt.Sprintf("MBV newsletter edition: %v", newsletter.Edition.Int32),
+				textMail,
+				htmlMail,
+			); err != nil {
+				slog.Error("could not send email", "error", err)
+				return err
+			}
+		}
+
+		ctx.Response().Header().Add("HX-Refresh", "true")
+		ctx.Response().Writer.Header().Add("HX-Redirect", "/dashboard/newsletter")
+		return ctx.String(http.StatusCreated, "newsletter sent")
+	}
+
+	ctx.Response().Header().Add("HX-Refresh", "true")
+	ctx.Response().
+		Writer.Header().
+		Add("HX-Redirect", fmt.Sprintf("/dashboard/newsletter/%v/edit", newsletter.ID))
+	return ctx.String(http.StatusCreated, "newsletter sent")
 }
 
 func (c *Controller) DashboardArticleCreate(ctx echo.Context) error {
@@ -225,6 +569,67 @@ func (c *Controller) DashboardArticleEdit(ctx echo.Context) error {
 		Content:     postContent,
 		Keywords:    keywords,
 	}, csrf.Token(ctx.Request())).
+		Render(views.ExtractRenderDeps(ctx))
+}
+
+type UpdateArticlePayload struct {
+	Title       string `form:"title"`
+	HeaderTitle string `form:"header-title"`
+	Slug        string `form:"slug"`
+	Excerpt     string `form:"excerpt"`
+	EstReadTime int32  `form:"est-read-time"`
+	UpdatedAt   string `form:"updated-at"`
+	ReleasedAt  string `form:"released-at"`
+	IsLive      string `form:"is-live"`
+}
+
+func (c *Controller) DashboardArticleUpdate(ctx echo.Context) error {
+	id := ctx.Param("id")
+
+	var updateArticlePayload UpdateArticlePayload
+	if err := ctx.Bind(&updateArticlePayload); err != nil {
+		return err
+	}
+
+	parsedID, err := uuid.Parse(id)
+	if err != nil {
+		return err
+	}
+
+	parsedReleasedAt := carbon.Parse(updateArticlePayload.ReleasedAt).ToStdTime()
+
+	var release bool
+	if updateArticlePayload.IsLive == "on" {
+		release = true
+	}
+
+	post, err := services.UpdatePost(ctx.Request().Context(), &c.db, c.validate, entity.UpdatePost{
+		ID:                parsedID,
+		Title:             updateArticlePayload.Title,
+		HeaderTitle:       updateArticlePayload.HeaderTitle,
+		Excerpt:           updateArticlePayload.Excerpt,
+		Slug:              updateArticlePayload.Slug,
+		ReleaedAt:         parsedReleasedAt,
+		ReleaseNow:        release,
+		EstimatedReadTime: updateArticlePayload.EstReadTime,
+	})
+	if err != nil {
+		return err
+	}
+
+	return dashboard.ArticleEditForm(dashboard.ArticleEditViewData{
+		ID:          post.ID.String(),
+		CreatedAt:   post.CreatedAt,
+		UpdatedAt:   post.UpdatedAt,
+		Title:       post.Title,
+		HeaderTitle: post.HeaderTitle,
+		Filename:    post.Filename,
+		Slug:        post.Slug,
+		Excerpt:     post.Excerpt,
+		Draft:       post.Draft,
+		ReleasedAt:  post.ReleaseDate,
+		ReadTime:    post.ReadTime,
+	}, true).
 		Render(views.ExtractRenderDeps(ctx))
 }
 

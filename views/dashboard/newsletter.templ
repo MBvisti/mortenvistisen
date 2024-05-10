@@ -7,23 +7,23 @@ import (
 	"github.com/MBvisti/mortenvistisen/views/components"
 )
 
-type ArticleViewData struct {
+type NewsletterViewData struct {
 	ID         string
 	Title      string
-	Draft      bool
+	Edition    string
+	Released   bool
 	ReleasedAt string
-	Slug       string
 }
 
-templ Articles(data []ArticleViewData, pagination components.PaginationPayload, tkn string) {
+templ Newsletter(data []NewsletterViewData, pagination components.PaginationPayload, tkn string) {
 	@layouts.Dashboard() {
 		<div class="container">
 			<div class="row mb-4 justify-content-between">
 				<div class="col">
-					<h2 class="text-xl">Articles</h2>
+					<h2 class="text-xl">Newsletter</h2>
 				</div>
 				<div class="col d-flex justify-content-end align-items-center">
-					<a role="button" href="/dashboard/article/create" class="btn btn-success">New</a>
+					<a role="button" href="/dashboard/newsletter/create" class="btn btn-success">New</a>
 				</div>
 			</div>
 			<div class="row">
@@ -34,7 +34,7 @@ templ Articles(data []ArticleViewData, pagination components.PaginationPayload, 
 							<tr>
 								<th scope="col"></th>
 								<th scope="col">Title</th>
-								<th scope="col">Slug</th>
+								<th scope="col">Edition</th>
 								<th scope="col">Status</th>
 								<th scope="col">Released On</th>
 							</tr>
@@ -44,22 +44,22 @@ templ Articles(data []ArticleViewData, pagination components.PaginationPayload, 
 								<tr class="align-middle">
 									<th scope="row">
 										<div>
-											<a href={ templ.SafeURL(fmt.Sprintf("/dashboard/article/%s/edit", article.Slug)) }><button class="btn btn-primary btn-sm">Edit</button></a>
+											<a href={ templ.SafeURL(fmt.Sprintf("/dashboard/newsletter/%s/edit", article.ID)) }><button class="btn btn-primary btn-sm">Edit</button></a>
 										</div>
 									</th>
 									<td>{ article.Title }</td>
-									<td>{ article.Slug }</td>
+									<td>{ article.Edition }</td>
 									<td>
-										if !article.Draft {
+										if article.Released {
 											<span class="text-success">Released</span>
 										} else {
 											<span class="text-danger">In draft</span>
 										}
 									</td>
-									if article.Draft {
-										<td>Not relased yet</td>
-									} else {
+									if article.Released {
 										<td>{ carbon.Parse(article.ReleasedAt).ToDateString() }</td>
+									} else {
+										<td>Not relased yet</td>
 									}
 								</tr>
 							}

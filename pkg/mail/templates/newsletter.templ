@@ -3,43 +3,45 @@ package templates
 import (
 	"fmt"
 	"text/template"
-	"time"
-	"github.com/riverqueue/river/rivertype"
 
-	"github.com/golang-module/carbon/v2"
 	"github.com/vanng822/go-premailer/premailer"
 )
 
-const backgroundJobErrorTmplName = "background_job_error"
+const newsletterTmplName = "newsletter"
 
-type BackgroundJobErrorMail struct {
-	JobID           int64
-	AttemptedAt     time.Time
-	Kind            string
-	MetaData        string
-	Err             error
-	AttemptedErrors []rivertype.AttemptError
+type NewsletterMail struct {
+	Title           string
+	Edition         string
+	Paragraphs      []string
+	ArticleLink     string
+	UnsubscribeLink string
 }
 
-var _ MailTemplateHandler = (*BackgroundJobErrorMail)(nil)
+var _ MailTemplateHandler = (*NewsletterMail)(nil)
 
-func (b BackgroundJobErrorMail) GenerateTextVersion() (string, error) {
-	textFile, err := template.ParseFS(textTemplates, fmt.Sprintf("%s.txt", backgroundJobErrorTmplName))
+func (n NewsletterMail) GenerateTextVersion() (string, error) {
+	textFile, err := template.ParseFS(textTemplates, fmt.Sprintf("%s.txt", newsletterTmplName))
 	if err != nil {
 		return "", err
 	}
 
 	var textBody bytes.Buffer
-	if err := textFile.Execute(&textBody, BackgroundJobErrorMail{}); err != nil {
+	if err := textFile.Execute(&textBody, NewsletterMail{
+		Title:           n.Title,
+		Edition:         n.Edition,
+		Paragraphs:      n.Paragraphs,
+		ArticleLink:     n.ArticleLink,
+		UnsubscribeLink: n.UnsubscribeLink,
+	}); err != nil {
 		return "", err
 	}
 
 	return textBody.String(), nil
 }
 
-func (b BackgroundJobErrorMail) GenerateHtmlVersion() (string, error) {
+func (n NewsletterMail) GenerateHtmlVersion() (string, error) {
 	var html bytes.Buffer
-	if err := b.template().Render(context.Background(), &html); err != nil {
+	if err := n.template().Render(context.Background(), &html); err != nil {
 		return "", err
 	}
 
@@ -56,11 +58,11 @@ func (b BackgroundJobErrorMail) GenerateHtmlVersion() (string, error) {
 	return inlineHtml, nil
 }
 
-func (b BackgroundJobErrorMail) Render(ctx context.Context, w io.Writer) error {
-	return b.template().Render(ctx, w)
+func (n NewsletterMail) Render(ctx context.Context, w io.Writer) error {
+	return n.template().Render(ctx, w)
 }
 
-templ (b *BackgroundJobErrorMail) template() {
+templ (n NewsletterMail) template() {
 	<!DOCTYPE html>
 	<html xmlns="http://www.w3.org/1999/xhtml">
 		<head>
@@ -173,11 +175,11 @@ templ (b *BackgroundJobErrorMail) template() {
     /* Buttons ------------------------------ */
     
     .button {
-      background-color: #3869D4;
-      border-top: 10px solid #3869D4;
-      border-right: 18px solid #3869D4;
-      border-bottom: 10px solid #3869D4;
-      border-left: 18px solid #3869D4;
+      background-color: #16a34a;
+      border-top: 10px solid #16a34a;
+      border-right: 18px solid #16a34a;
+      border-bottom: 10px solid #16a34a;
+      border-left: 18px solid #16a34a;
       display: inline-block;
       color: #FFF;
       text-decoration: none;
@@ -500,15 +502,15 @@ templ (b *BackgroundJobErrorMail) template() {
   <![endif]-->
 		</head>
 		<body>
-			<span class="preheader">Background job failed.</span>
+			<span class="preheader">{ n.Title }</span>
 			<table class="email-wrapper" width="100%" cellpadding="0" cellspacing="0" role="presentation">
 				<tr>
 					<td align="center">
 						<table class="email-content" width="100%" cellpadding="0" cellspacing="0" role="presentation">
 							<tr>
 								<td class="email-masthead">
-									<a href="https://mbv-labs.com" class="f-fallback email-masthead_name">
-										Grafto
+									<a href="https://example.com" class="f-fallback email-masthead_name">
+										{ n.Title } | Morten Vistisen
 									</a>
 								</td>
 							</tr>
@@ -520,32 +522,30 @@ templ (b *BackgroundJobErrorMail) template() {
 										<tr>
 											<td class="content-cell">
 												<div class="f-fallback">
-													<h1>A background job failed BIG TIME.</h1>
-													<p>
-														Job with ID: <strong>{ fmt.Sprintf("%v", b.JobID) }</strong> failed at <strong>{ carbon.CreateFromStdTime(b.AttemptedAt).ToDateTimeString() }</strong>
-														<br/>
-														with the following error: <strong>{ b.Err.Error() }</strong>
-													</p>
-													if len(b.AttemptedErrors) > 0 {
-														<p>Attempted errors: </p>
-														<ul>
-															for _, attemptedErr := range b.AttemptedErrors {
-																<li>
-																	Attempt: { fmt.Sprintf("%v", attemptedErr.Attempt) }
-																	<br/>
-																	At: { carbon.CreateFromStdTime(attemptedErr.At).ToDateTimeString() }
-																	<br/>
-																	Error: { attemptedErr.Error }
-																	<br/>
-																	Trace: { attemptedErr.Trace }
-																</li>
-															}
-														</ul>
+													<p>Thanks for being a subscriber to this newsletter! <br/>You're currently reading <b>edition #{ n.Edition }</b></p>
+													for _, paragraph := range n.Paragraphs {
+														<p>{ paragraph }</p>
 													}
+													<table class="body-action" align="center" width="100%" cellpadding="0" cellspacing="0" role="presentation">
+														<tr>
+															<td align="center">
+																<!-- Border based button https://litmus.com/blog/a-guide-to-bulletproof-buttons-in-email-design -->
+																<table width="100%" border="0" cellspacing="0" cellpadding="0" role="presentation">
+																	<tr>
+																		<td align="center">
+																			<a href={ templ.SafeURL(n.ArticleLink) } class="f-fallback button" target="_blank">Read it here</a>
+																		</td>
+																	</tr>
+																</table>
+															</td>
+														</tr>
+													</table>
 													<p>
-														Kind: <strong>{ b.Kind }</strong>
-														<br/>
-														MetaData: <strong>{ b.MetaData }</strong>
+														<p>
+															Until next time,
+															<br/>
+															Morten (from https://mortenvistisen.com)
+														</p>
 													</p>
 												</div>
 											</td>
@@ -554,7 +554,7 @@ templ (b *BackgroundJobErrorMail) template() {
 								</td>
 							</tr>
 							<tr>
-								@footer(nil)
+								@footer(unsubscribeUrl(n.UnsubscribeLink))
 							</tr>
 						</table>
 					</td>

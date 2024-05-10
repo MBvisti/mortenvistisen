@@ -127,3 +127,35 @@ func (q *Queries) QuerySubscriber(ctx context.Context, id uuid.UUID) (Subscriber
 	)
 	return i, err
 }
+
+const queryVerifiedSubscribers = `-- name: QueryVerifiedSubscribers :many
+select id, created_at, updated_at, email, subscribed_at, referer, is_verified from subscribers where is_verified = true
+`
+
+func (q *Queries) QueryVerifiedSubscribers(ctx context.Context) ([]Subscriber, error) {
+	rows, err := q.db.Query(ctx, queryVerifiedSubscribers)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Subscriber
+	for rows.Next() {
+		var i Subscriber
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Email,
+			&i.SubscribedAt,
+			&i.Referer,
+			&i.IsVerified,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

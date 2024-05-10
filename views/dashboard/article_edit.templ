@@ -2,6 +2,7 @@ package dashboard
 
 import (
 	"github.com/MBvisti/mortenvistisen/views/internal/layouts"
+	"fmt"
 	"time"
 	"strconv"
 	"github.com/golang-module/carbon/v2"
@@ -32,74 +33,157 @@ type ArticleEditViewData struct {
 
 templ ArticleEdit(data ArticleEditViewData, tkn string) {
 	@layouts.Dashboard() {
-		<div class="p-12 flex flex-col mx-28">
-			<a class="mb-4 hover:font-bold" href="/dashboard/articles">Back</a>
+		<div class="container">
+			<a role="button" class="mb-4 btn btn-sm btn-secondary" href="/dashboard/articles">Back</a>
 			<h2 class="text-xl mb-4">Edit Article</h2>
-			<form>
-				<div class="flex w-full overflow-x-hidden mx-auto mb-4">
-					<span class="flex flex-col mr-8">
-						<p class="mb-1 font-bold">Title</p>
-						<p class="py-2">{ data.Title }</p>
-					</span>
-					<span class="flex flex-col mr-8">
-						<p class="mb-1 font-bold">Header title</p>
-						<p class="py-2">{ data.HeaderTitle }</p>
-					</span>
-					<span class="flex flex-col mr-8">
-						<p class="mb-1 font-bold">Slug</p>
-						<p class="py-2">{ data.Slug }</p>
-					</span>
-					<span class="flex flex-col">
-						<p class="mb-1 font-bold">Status</p>
-						<div class="form-control w-52">
-							<label class="cursor-pointer label">
-								<span class="label-text">Not live</span>
-								if data.Draft {
-									<input type="checkbox" class="toggle toggle-accent"/>
-								} else {
-									<input type="checkbox" class="toggle toggle-accent" checked/>
-								}
-								<span class="label-text">Live</span>
-							</label>
-						</div>
-					</span>
-				</div>
-				<div class="flex w-full overflow-x-hidden mx-auto mb-6">
-					<span class="flex flex-col mr-8">
-						<p class="mb-1 font-bold">Excerpt</p>
-						<p class="py-2">{ data.Excerpt }</p>
-					</span>
-					<span class="flex flex-col mr-8">
-						<p class="mb-1 font-bold">Est. Read Time</p>
-						<p class="py-2">{ strconv.Itoa(int(data.ReadTime)) }</p>
-					</span>
-					<span class="flex flex-col mr-8">
-						<p class="mb-1 font-bold">File name</p>
-						<p class="py-2">{ data.Filename }</p>
-					</span>
-					<span class="flex flex-col mr-8">
-						<p class="mb-1 font-bold">Created At</p>
-						<p class="py-2">{ carbon.CreateFromStdTime(data.CreatedAt).ToDateString() }</p>
-					</span>
-					<span class="flex flex-col mr-8">
-						<p class="mb-1 font-bold">Updated At</p>
-						<p class="py-2">{ carbon.CreateFromStdTime(data.UpdatedAt).ToDateString() }</p>
-					</span>
-					<span class="flex flex-col mr-8">
-						<p class="mb-1 font-bold">Released At</p>
-						<p class="py-2">{ carbon.CreateFromStdTime(data.ReleasedAt).ToDateString() }</p>
-					</span>
-				</div>
-				<button class="btn mb-10">Update</button>
-			</form>
+			@ArticleEditForm(data, false)
 			<hr/>
-			<h2 class="text-2xl mx-auto font-bold my-8">Article Content</h2>
-			<article
-				class="text-gray-300 mx-auto text-left leading-normal prose"
-			>
-				@unsafe(data.Content)
-			</article>
+			<div class="row text-center">
+				<h2 class="text-2xl mx-auto font-bold mb-4 mt-4">Article Content</h2>
+				<article
+					class="text-start col-6 text-gray-300 mx-auto text-left leading-normal prose"
+				>
+					@unsafe(data.Content)
+				</article>
+			</div>
 			@addCSRFTkn(tkn)
 		</div>
 	}
+}
+
+templ ArticleEditForm(data ArticleEditViewData, succesfullyUpdated bool) {
+	if succesfullyUpdated {
+		<div class="alert alert-success" role="alert">
+			Article updated succesfully
+		</div>
+	}
+	<form class="row g-3" hx-put={ fmt.Sprintf("/dashboard/article/%s/update", data.ID) }>
+		<div class="mb-4 col-4">
+			<label
+				for="article-title"
+				class="form-label"
+			>Title</label>
+			<input
+				id="article-title"
+				name="title"
+				type="text"
+				class="form-control"
+				value={ data.Title }
+			/>
+		</div>
+		<div class="mb-4 col-4">
+			<label
+				for="article-header-title"
+				class="form-label"
+			>Header Title</label>
+			<input
+				id="article-header-title"
+				name="header-title"
+				type="text"
+				class="form-control"
+				value={ data.HeaderTitle }
+			/>
+		</div>
+		<div class="mb-4 col-4">
+			<label
+				for="article-slug"
+				class="form-label"
+			>Slug</label>
+			<input
+				id="article-slug"
+				name="slug"
+				type="text"
+				class="form-control"
+				value={ data.Slug }
+			/>
+		</div>
+		<div class="mb-4 col-4">
+			<label
+				for="article-excerpt"
+				class="form-label"
+			>Excerpt</label>
+			<input
+				id="article-excerpt"
+				name="excerpt"
+				type="text"
+				class="form-control"
+				value={ data.Excerpt }
+				maxlength="160"
+			/>
+		</div>
+		<div class="mb-4 col-4">
+			<label
+				for="article-read-time"
+				class="form-label"
+			>Est. Read Time</label>
+			<input
+				id="article-read-time"
+				name="est-read-time"
+				type="number"
+				class="form-control"
+				value={ strconv.Itoa(int(data.ReadTime)) }
+			/>
+		</div>
+		<div class="mb-4 col-4">
+			<label
+				for="article-filename"
+				class="form-label"
+			>Filename</label>
+			<input name="filename" id="article-filename" disabled type="text" class="form-control" value={ data.Filename }/>
+		</div>
+		<div class="mb-4 col-4">
+			<label
+				for="article-created-at"
+				class="form-label"
+			>Created At</label>
+			<input
+				id="article-created-at"
+				name="created-at"
+				type="text"
+				class="form-control"
+				value={ carbon.CreateFromStdTime(data.CreatedAt).ToDateString() }
+			/>
+		</div>
+		<div class="mb-4 col-4">
+			<label
+				for="article-updated-at"
+				class="form-label"
+			>Updated At</label>
+			<input
+				id="article-updated-at"
+				name="updated-at"
+				type="text"
+				class="form-control"
+				value={ carbon.CreateFromStdTime(data.UpdatedAt).ToDateString() }
+			/>
+		</div>
+		<div class="mb-4 col-4">
+			<label
+				for="article-released-at"
+				class="form-label"
+			>Released At</label>
+			<input
+				id="article-released-at"
+				name="released-at"
+				type="text"
+				class="form-control"
+				value={ carbon.CreateFromStdTime(data.ReleasedAt).ToDateString() }
+			/>
+		</div>
+		<div class="col-12">
+			<div class="form-check">
+				if data.Draft {
+					<input name="is-live" class="form-check-input" type="checkbox" id="statusCheck"/>
+				} else {
+					<input name="is-live" class="form-check-input" type="checkbox" id="statusCheck" checked/>
+				}
+				<label class="form-check-label" for="statusCheck">
+					Is live
+				</label>
+			</div>
+		</div>
+		<div class="col-12">
+			<button type="submit" class="btn btn-primary">Update</button>
+		</div>
+	</form>
 }
