@@ -23,7 +23,7 @@ templ Articles(data []ArticleViewData, pagination components.PaginationPayload, 
 					<h2 class="text-xl">Articles</h2>
 				</div>
 				<div class="col d-flex justify-content-end align-items-center">
-					<a role="button" href="/dashboard/article/create" class="btn btn-success">New</a>
+					<a role="button" href="/dashboard/articles/create" class="btn btn-success">New</a>
 				</div>
 			</div>
 			<div class="row">
@@ -44,7 +44,7 @@ templ Articles(data []ArticleViewData, pagination components.PaginationPayload, 
 								<tr class="align-middle">
 									<th scope="row">
 										<div>
-											<a href={ templ.SafeURL(fmt.Sprintf("/dashboard/article/%s/edit", article.Slug)) }><button class="btn btn-primary btn-sm">Edit</button></a>
+											<a href={ templ.SafeURL(fmt.Sprintf("/dashboard/articles/%s/edit", article.Slug)) }><button class="btn btn-primary btn-sm">Edit</button></a>
 										</div>
 									</th>
 									<td>{ article.Title }</td>

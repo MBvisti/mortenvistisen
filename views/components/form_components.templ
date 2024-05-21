@@ -1,0 +1,198 @@
+package components
+
+type InputError struct {
+	HasProblem bool
+	ErrorMsg   string
+}
+
+type InputElementBuilder struct {
+	id        string
+	inputType string
+	value     string
+	name      string
+	err       InputError
+	title     string
+	required  bool
+	hxTrigger string
+	hxAction  string
+	hxMethod  string
+	hxTarget  string
+	hxSwap    string
+}
+
+func (i InputElementBuilder) WithID(id string) InputElementBuilder {
+	i.id = id
+	return i
+}
+
+func (i InputElementBuilder) WithType(t string) InputElementBuilder {
+	i.inputType = t
+	return i
+}
+
+func (i InputElementBuilder) WithValue(val string) InputElementBuilder {
+	i.value = val
+	return i
+}
+
+func (i InputElementBuilder) WithName(name string) InputElementBuilder {
+	i.name = name
+	return i
+}
+
+func (i InputElementBuilder) HasErr(msg string) InputElementBuilder {
+	i.err = InputError{
+		HasProblem: true,
+		ErrorMsg:   msg,
+	}
+	return i
+}
+
+func (i InputElementBuilder) WithTitle(title string) InputElementBuilder {
+	i.title = title
+	return i
+}
+
+func (i InputElementBuilder) MakeRequired() InputElementBuilder {
+	i.required = true
+	return i
+}
+
+func (i InputElementBuilder) WithHxTrigger(trigger string) InputElementBuilder {
+	i.hxTrigger = trigger
+	return i
+}
+
+func (i InputElementBuilder) WithHxTarget(target string) InputElementBuilder {
+	i.hxTarget = target
+	return i
+}
+
+func (i InputElementBuilder) WithHxSwap(swap string) InputElementBuilder {
+	i.hxSwap = swap
+	return i
+}
+
+func (i InputElementBuilder) WithHxPost(endpoint string) InputElementBuilder {
+	i.hxMethod = "post"
+	i.hxAction = endpoint
+
+	return i
+}
+
+func (i InputElementBuilder) WithHxPut(endpoint string) InputElementBuilder {
+	i.hxMethod = "put"
+	i.hxAction = endpoint
+
+	return i
+}
+
+func InputBuilder() InputElementBuilder {
+	return InputElementBuilder{
+		inputType: "text",
+		title:     "NO TITLE PROVIDED",
+	}
+}
+
+templ (i InputElementBuilder) Build() {
+	<label
+		if i.id != "" {
+			for={ i.id }
+		}
+		class="form-label text-light-emphasis"
+	>
+		{ i.title }
+	</label>
+	<input
+		class="form-control mb-4 text-light"
+		if i.id != "" {
+			id={ i.id }
+		}
+		if i.value != "" {
+			value={ i.value }
+		}
+		if i.name != "" {
+			name={ i.name }
+		}
+		if i.inputType != "" {
+			type={ i.inputType }
+		}
+		if i.required {
+			required
+		}
+		if i.hxTrigger != "" {
+			hx-trigger={ i.hxTrigger }
+		}
+		if i.hxTarget != "" {
+			hx-target={ i.hxTarget }
+		}
+		if i.hxSwap != "" {
+			hx-swap={ i.hxSwap }
+		}
+		if i.hxMethod == "post" {
+			hx-post={ i.hxAction }
+		}
+		if i.hxMethod == "put" {
+			hx-put={ i.hxAction }
+		}
+	/>
+}
+
+type InputElementData struct {
+	ID        string
+	InputType string
+	Value     string
+	Name      string
+	Err       InputError
+	Title     string
+	Required  bool
+	HxTrigger string
+	HxAction  string
+	HxMethod  string
+	HxTarget  string
+	HxSwap    string
+}
+
+templ InputElement(data InputElementData) {
+	<label
+		if data.ID != "" {
+			for={ data.ID }
+		}
+		class="form-label text-light-emphasis"
+	>
+		{ data.Title }
+	</label>
+	<input
+		class="form-control mb-4 text-light"
+		if data.ID != "" {
+			id={ data.ID }
+		}
+		if data.Value != "" {
+			value={ data.Value }
+		}
+		if data.Name != "" {
+			name={ data.Name }
+		}
+		if data.InputType != "" {
+			type={ data.InputType }
+		}
+		if data.Required {
+			required
+		}
+		if data.HxTrigger != "" {
+			hx-trigger={ data.HxTrigger }
+		}
+		if data.HxTarget != "" {
+			hx-target={ data.HxTarget }
+		}
+		if data.HxSwap != "" {
+			hx-swap={ data.HxSwap }
+		}
+		if data.HxMethod == "post" {
+			hx-post={ data.HxAction }
+		}
+		if data.HxMethod == "put" {
+			hx-put={ data.HxAction }
+		}
+	/>
+}

@@ -10,14 +10,13 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/MBvisti/mortenvistisen/controllers"
 	"github.com/MBvisti/mortenvistisen/pkg/config"
+	"github.com/MBvisti/mortenvistisen/server/router"
 	"github.com/gorilla/csrf"
-	"github.com/labstack/echo/v4"
 )
 
 type Server struct {
-	router *echo.Echo
+	router *router.Router
 	host   string
 	port   string
 	cfg    config.Cfg
@@ -25,8 +24,7 @@ type Server struct {
 }
 
 func NewServer(
-	router *echo.Echo,
-	controllers controllers.Controller,
+	router *router.Router,
 	logger *slog.Logger,
 	cfg config.Cfg,
 ) Server {
@@ -37,7 +35,7 @@ func NewServer(
 	srv := &http.Server{
 		Addr: fmt.Sprintf("%v:%v", host, port),
 		Handler: csrf.Protect(
-			[]byte(cfg.Auth.CsrfToken), csrf.Secure(isProduction))(router),
+			[]byte(cfg.Auth.CsrfToken), csrf.Secure(isProduction))(router.GetInstance()),
 		ReadTimeout:  30 * time.Second,
 		WriteTimeout: 30 * time.Second,
 	}

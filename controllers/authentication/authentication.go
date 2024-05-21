@@ -1,4 +1,4 @@
-package controllers
+package authentication
 
 import (
 	"errors"
@@ -6,7 +6,9 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/MBvisti/mortenvistisen/controllers/misc"
 	"github.com/MBvisti/mortenvistisen/entity"
+	"github.com/MBvisti/mortenvistisen/pkg/config"
 	"github.com/MBvisti/mortenvistisen/pkg/mail/templates"
 	"github.com/MBvisti/mortenvistisen/pkg/queue"
 	"github.com/MBvisti/mortenvistisen/pkg/tokens"
@@ -18,11 +20,13 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/gorilla/csrf"
+	"github.com/gorilla/sessions"
 	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
+	"github.com/riverqueue/river"
 )
 
-func (c *Controller) CreateAuthenticatedSession(ctx echo.Context) error {
+func CreateAuthenticatedSession(ctx echo.Context) error {
 	return authentication.LoginPage(authentication.LoginPageProps{
 		CsrfToken: csrf.Token(ctx.Request()),
 	}, views.Head{}).Render(views.ExtractRenderDeps(ctx))
@@ -34,7 +38,12 @@ type UserLoginPayload struct {
 	RememberMe string `form:"remember_me"`
 }
 
-func (c *Controller) StoreAuthenticatedSession(ctx echo.Context) error {
+func StoreAuthenticatedSession(
+	ctx echo.Context,
+	db database.Queries,
+	cfg config.Cfg,
+	authStore *sessions.CookieStore,
+) error {
 	var payload UserLoginPayload
 	if err := ctx.Bind(&payload); err != nil {
 		slog.ErrorContext(ctx.Request().Context(), "could not parse UserLoginPayload", "error", err)
@@ -46,7 +55,7 @@ func (c *Controller) StoreAuthenticatedSession(ctx echo.Context) error {
 		ctx.Request().Context(), services.AuthenticateUserPayload{
 			Email:    payload.Mail,
 			Password: payload.Password,
-		}, &c.db, c.cfg.Auth.PasswordPepper)
+		}, &db, cfg.Auth.PasswordPepper)
 	if err != nil {
 		errMsg := "An error occurred while trying to authenticate you. Please try again."
 
@@ -62,30 +71,28 @@ func (c *Controller) StoreAuthenticatedSession(ctx echo.Context) error {
 		}).Render(views.ExtractRenderDeps(ctx))
 	}
 
-	session, err := c.authSessionStore.Get(ctx.Request(), "ua")
+	session, err := authStore.Get(ctx.Request(), "ua")
 	if err != nil {
 		ctx.Response().Writer.Header().Add("HX-Redirect", "/500")
 		ctx.Response().Writer.Header().Add("PreviousLocation", "/login")
 
 		slog.ErrorContext(ctx.Request().Context(), "could not get auth session", "error", err)
-		return c.InternalError(ctx)
+		return misc.InternalError(ctx)
 	}
 
-	authSession := services.CreateAuthenticatedSession(*session, authenticatedUser.ID, c.cfg)
+	authSession := services.CreateAuthenticatedSession(*session, authenticatedUser.ID, cfg)
 	if err := authSession.Save(ctx.Request(), ctx.Response()); err != nil {
 		ctx.Response().Writer.Header().Add("HX-Redirect", "/500")
 		ctx.Response().Writer.Header().Add("PreviousLocation", "/login")
 
 		slog.ErrorContext(ctx.Request().Context(), "could not save auth session", "error", err)
-		return c.InternalError(ctx)
+		return misc.InternalError(ctx)
 	}
-
-	slog.Info("user authenticated", "auth_session", authSession.Name())
 
 	return authentication.LoginResponse(false).Render(views.ExtractRenderDeps(ctx))
 }
 
-func (c *Controller) CreatePasswordReset(ctx echo.Context) error {
+func CreatePasswordReset(ctx echo.Context) error {
 	return authentication.ForgottenPasswordPage(authentication.ForgottenPasswordPageProps{
 		CsrfToken: csrf.Token(ctx.Request()),
 	}, views.Head{}).Render(views.ExtractRenderDeps(ctx))
@@ -95,13 +102,19 @@ type StorePasswordResetPayload struct {
 	Mail string `form:"email"`
 }
 
-func (c *Controller) StorePasswordReset(ctx echo.Context) error {
+func StorePasswordReset(
+	ctx echo.Context,
+	db database.Queries,
+	tknManager tokens.Manager,
+	cfg config.Cfg,
+	queueClient *river.Client[pgx.Tx],
+) error {
 	var payload StorePasswordResetPayload
 	if err := ctx.Bind(&payload); err != nil {
 		return authentication.ForgottenPasswordSuccess(true).Render(views.ExtractRenderDeps(ctx))
 	}
 
-	user, err := c.db.QueryUserByMail(ctx.Request().Context(), payload.Mail)
+	user, err := db.QueryUserByMail(ctx.Request().Context(), payload.Mail)
 	if err != nil {
 		failureOccurred := true
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -112,7 +125,7 @@ func (c *Controller) StorePasswordReset(ctx echo.Context) error {
 			Render(views.ExtractRenderDeps(ctx))
 	}
 
-	generatedTkn, err := c.tknManager.GenerateToken()
+	generatedTkn, err := tknManager.GenerateToken()
 	if err != nil {
 		return authentication.ForgottenPasswordSuccess(true).Render(views.ExtractRenderDeps(ctx))
 	}
@@ -122,7 +135,7 @@ func (c *Controller) StorePasswordReset(ctx echo.Context) error {
 		generatedTkn.HashedToken,
 	)
 
-	if err := c.db.StoreToken(ctx.Request().Context(), database.StoreTokenParams{
+	if err := db.StoreToken(ctx.Request().Context(), database.StoreTokenParams{
 		ID:        uuid.New(),
 		CreatedAt: database.ConvertToPGTimestamptz(time.Now()),
 		Hash:      resetPWToken.Hash,
@@ -137,8 +150,8 @@ func (c *Controller) StorePasswordReset(ctx echo.Context) error {
 	pwResetMail := &templates.PasswordResetMail{
 		ResetPasswordLink: fmt.Sprintf(
 			"%s://%s/reset-password?token=%s",
-			c.cfg.App.AppScheme,
-			c.cfg.App.AppHost,
+			cfg.App.AppScheme,
+			cfg.App.AppHost,
 			resetPWToken.GetPlainText(),
 		),
 	}
@@ -152,9 +165,9 @@ func (c *Controller) StorePasswordReset(ctx echo.Context) error {
 		return authentication.ForgottenPasswordSuccess(true).Render(views.ExtractRenderDeps(ctx))
 	}
 
-	_, err = c.queueClient.Insert(ctx.Request().Context(), queue.EmailJobArgs{
+	_, err = queueClient.Insert(ctx.Request().Context(), queue.EmailJobArgs{
 		To:          user.Mail,
-		From:        c.cfg.App.DefaultSenderSignature,
+		From:        cfg.App.DefaultSenderSignature,
 		Subject:     "Password Reset Request",
 		TextVersion: textVersion,
 		HtmlVersion: htmlVersion,
@@ -170,10 +183,10 @@ type PasswordResetToken struct {
 	Token string `query:"token"`
 }
 
-func (c *Controller) CreateResetPassword(ctx echo.Context) error {
+func CreateResetPassword(ctx echo.Context) error {
 	var passwordResetToken PasswordResetToken
 	if err := ctx.Bind(&passwordResetToken); err != nil {
-		return c.InternalError(ctx)
+		return misc.InternalError(ctx)
 	}
 
 	return authentication.ResetPasswordPage(authentication.ResetPasswordPageProps{
@@ -188,7 +201,13 @@ type ResetPasswordPayload struct {
 	Token           string `form:"token"`
 }
 
-func (c *Controller) StoreResetPassword(ctx echo.Context) error {
+func StoreResetPassword(
+	ctx echo.Context,
+	db database.Queries,
+	tknManager tokens.Manager,
+	cfg config.Cfg,
+	v *validator.Validate,
+) error {
 	var payload ResetPasswordPayload
 	if err := ctx.Bind(&payload); err != nil {
 		return authentication.ResetPasswordResponse(authentication.ResetPasswordResponseProps{
@@ -197,9 +216,9 @@ func (c *Controller) StoreResetPassword(ctx echo.Context) error {
 		}).Render(views.ExtractRenderDeps(ctx))
 	}
 
-	hashedToken := c.tknManager.Hash(payload.Token)
+	hashedToken := tknManager.Hash(payload.Token)
 
-	token, err := c.db.QueryTokenByHash(ctx.Request().Context(), hashedToken)
+	token, err := db.QueryTokenByHash(ctx.Request().Context(), hashedToken)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return authentication.ResetPasswordResponse(authentication.ResetPasswordResponseProps{
@@ -222,7 +241,7 @@ func (c *Controller) StoreResetPassword(ctx echo.Context) error {
 		}).Render(views.ExtractRenderDeps(ctx))
 	}
 
-	user, err := c.db.QueryUser(ctx.Request().Context(), token.UserID)
+	user, err := db.QueryUser(ctx.Request().Context(), token.UserID)
 	if err != nil {
 		return authentication.ResetPasswordResponse(authentication.ResetPasswordResponseProps{
 			HasError: true,
@@ -236,7 +255,7 @@ func (c *Controller) StoreResetPassword(ctx echo.Context) error {
 		Password:        payload.Password,
 		ConfirmPassword: payload.ConfirmPassword,
 		ID:              user.ID,
-	}, &c.db, c.validate, c.cfg.Auth.PasswordPepper)
+	}, &db, v, cfg.Auth.PasswordPepper)
 	if err != nil {
 		e, ok := err.(validator.ValidationErrors)
 		if !ok {
@@ -272,12 +291,12 @@ func (c *Controller) StoreResetPassword(ctx echo.Context) error {
 		return authentication.ResetPasswordForm(props).Render(views.ExtractRenderDeps(ctx))
 	}
 
-	if err := c.db.DeleteToken(ctx.Request().Context(), token.ID); err != nil {
+	if err := db.DeleteToken(ctx.Request().Context(), token.ID); err != nil {
 		ctx.Response().Writer.Header().Add("HX-Redirect", "/500")
 		ctx.Response().Writer.Header().Add("PreviousLocation", "/login")
 
 		slog.ErrorContext(ctx.Request().Context(), "could not delete token", "error", err)
-		return c.InternalError(ctx)
+		return misc.InternalError(ctx)
 	}
 
 	return authentication.ResetPasswordResponse(authentication.ResetPasswordResponseProps{
@@ -289,19 +308,24 @@ type VerifyEmail struct {
 	Token string `query:"token"`
 }
 
-// VerifyEmail method    verifies the email the user provided during signup
-func (c *Controller) VerifyEmail(ctx echo.Context) error {
+func UserEmailVerification(
+	ctx echo.Context,
+	db database.Queries,
+	tknManager tokens.Manager,
+	cfg config.Cfg,
+	authStore *sessions.CookieStore,
+) error {
 	var tkn VerifyEmail
 	if err := ctx.Bind(&tkn); err != nil {
 		ctx.Response().Writer.Header().Add("HX-Redirect", "/500")
 		ctx.Response().Writer.Header().Add("PreviousLocation", "/user/create")
 
-		return c.InternalError(ctx)
+		return misc.InternalError(ctx)
 	}
 
-	hashedToken := c.tknManager.Hash(tkn.Token)
+	hashedToken := tknManager.Hash(tkn.Token)
 
-	token, err := c.db.QueryTokenByHash(ctx.Request().Context(), hashedToken)
+	token, err := db.QueryTokenByHash(ctx.Request().Context(), hashedToken)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return authentication.VerifyEmailPage(
@@ -314,7 +338,7 @@ func (c *Controller) VerifyEmail(ctx echo.Context) error {
 		ctx.Response().Writer.Header().Add("PreviousLocation", "/login")
 
 		slog.ErrorContext(ctx.Request().Context(), "could not query token by hash", "error", err)
-		return c.InternalError(ctx)
+		return misc.InternalError(ctx)
 	}
 
 	if database.ConvertFromPGTimestamptzToTime(
@@ -325,7 +349,7 @@ func (c *Controller) VerifyEmail(ctx echo.Context) error {
 	}
 
 	confirmTime := time.Now()
-	user, err := c.db.ConfirmUserEmail(ctx.Request().Context(), database.ConfirmUserEmailParams{
+	user, err := db.ConfirmUserEmail(ctx.Request().Context(), database.ConfirmUserEmailParams{
 		ID:             token.UserID,
 		UpdatedAt:      database.ConvertToPGTimestamptz(confirmTime),
 		MailVerifiedAt: database.ConvertToPGTimestamptz(confirmTime),
@@ -335,18 +359,18 @@ func (c *Controller) VerifyEmail(ctx echo.Context) error {
 		ctx.Response().Writer.Header().Add("PreviousLocation", "/login")
 
 		slog.ErrorContext(ctx.Request().Context(), "could not confirm user email", "error", err)
-		return c.InternalError(ctx)
+		return misc.InternalError(ctx)
 	}
 
-	if err := c.db.DeleteToken(ctx.Request().Context(), token.ID); err != nil {
+	if err := db.DeleteToken(ctx.Request().Context(), token.ID); err != nil {
 		ctx.Response().Writer.Header().Add("HX-Redirect", "/500")
 		ctx.Response().Writer.Header().Add("PreviousLocation", "/login")
 
 		slog.ErrorContext(ctx.Request().Context(), "could not deleted token", "error", err)
-		return c.InternalError(ctx)
+		return misc.InternalError(ctx)
 	}
 
-	session, err := c.authSessionStore.Get(ctx.Request(), "ua")
+	session, err := authStore.Get(ctx.Request(), "ua")
 	if err != nil {
 		ctx.Response().Writer.Header().Add("HX-Redirect", "/500")
 		ctx.Response().Writer.Header().Add("PreviousLocation", "/login")
@@ -357,34 +381,38 @@ func (c *Controller) VerifyEmail(ctx echo.Context) error {
 			"error",
 			err,
 		)
-		return c.InternalError(ctx)
+		return misc.InternalError(ctx)
 	}
 
-	authSession := services.CreateAuthenticatedSession(*session, user.ID, c.cfg)
+	authSession := services.CreateAuthenticatedSession(*session, user.ID, cfg)
 	if err := authSession.Save(ctx.Request(), ctx.Response()); err != nil {
 		ctx.Response().Writer.Header().Add("HX-Redirect", "/500")
 		ctx.Response().Writer.Header().Add("PreviousLocation", "/login")
 
 		slog.ErrorContext(ctx.Request().Context(), "could not save auth session", "error", err)
-		return c.InternalError(ctx)
+		return misc.InternalError(ctx)
 	}
 
 	return authentication.VerifyEmailPage(false, views.Head{}).Render(views.ExtractRenderDeps(ctx))
 }
 
 // VerifySubscriberEmail method    verifies the email the subscriber provided during signup
-func (c *Controller) VerifySubscriberEmail(ctx echo.Context) error {
+func SubscriberEmailVerification(
+	ctx echo.Context,
+	db database.Queries,
+	tknManager tokens.Manager,
+) error {
 	var tkn VerifyEmail
 	if err := ctx.Bind(&tkn); err != nil {
 		ctx.Response().Writer.Header().Add("HX-Redirect", "/500")
 		ctx.Response().Writer.Header().Add("PreviousLocation", "/user/create")
 
-		return c.InternalError(ctx)
+		return misc.InternalError(ctx)
 	}
 
-	hashedToken := c.tknManager.Hash(tkn.Token)
+	hashedToken := tknManager.Hash(tkn.Token)
 
-	token, err := c.db.QuerySubscriberTokenByHash(ctx.Request().Context(), hashedToken)
+	token, err := db.QuerySubscriberTokenByHash(ctx.Request().Context(), hashedToken)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return authentication.VerifyEmailPage(true, views.Head{}).
@@ -395,7 +423,7 @@ func (c *Controller) VerifySubscriberEmail(ctx echo.Context) error {
 		ctx.Response().Writer.Header().Add("PreviousLocation", "/login")
 
 		slog.ErrorContext(ctx.Request().Context(), "could not query subscriber token", "error", err)
-		return c.InternalError(ctx)
+		return misc.InternalError(ctx)
 	}
 
 	if database.ConvertFromPGTimestamptzToTime(token.ExpiresAt).Before(time.Now()) &&
@@ -404,7 +432,7 @@ func (c *Controller) VerifySubscriberEmail(ctx echo.Context) error {
 			Render(views.ExtractRenderDeps(ctx))
 	}
 
-	if err := c.db.ConfirmSubscriberEmail(ctx.Request().Context(), database.ConfirmSubscriberEmailParams{
+	if err := db.ConfirmSubscriberEmail(ctx.Request().Context(), database.ConfirmSubscriberEmailParams{
 		ID:        token.SubscriberID,
 		UpdatedAt: database.ConvertToPGTimestamptz(time.Now()),
 	}); err != nil {
@@ -412,7 +440,7 @@ func (c *Controller) VerifySubscriberEmail(ctx echo.Context) error {
 		ctx.Response().Writer.Header().Add("PreviousLocation", "/login")
 
 		slog.ErrorContext(ctx.Request().Context(), "could not confirm email", "error", err)
-		return c.InternalError(ctx)
+		return misc.InternalError(ctx)
 	}
 
 	return authentication.VerifySubscriberEmailPage(false, views.Head{}).

@@ -12,27 +12,21 @@ import (
 	"github.com/MBvisti/mortenvistisen/pkg/tokens"
 	"github.com/MBvisti/mortenvistisen/posts"
 	"github.com/MBvisti/mortenvistisen/repository/database"
-	"github.com/MBvisti/mortenvistisen/routes"
 	"github.com/MBvisti/mortenvistisen/server"
 	mw "github.com/MBvisti/mortenvistisen/server/middleware"
+	"github.com/MBvisti/mortenvistisen/server/router"
+	"github.com/MBvisti/mortenvistisen/services"
+	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/sessions"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-	slogecho "github.com/samber/slog-echo"
 )
 
 func main() {
 	ctx := context.Background()
-	router := echo.New()
 	logger := telemetry.SetupLogger()
 	slog.SetDefault(logger)
 
 	cfg := config.New()
-
-	// Middleware
-	router.Use(slogecho.New(logger))
-	router.Use(middleware.Recover())
 
 	conn := database.SetupDatabasePool(
 		context.Background(),
@@ -67,22 +61,31 @@ func main() {
 
 	postManager := posts.NewPostManager()
 
-	controllers := controllers.NewController(
-		*db,
-		mailClient,
-		*tokenManager,
-		cfg,
-		riverClient,
-		postManager,
-		authSessionStore,
+	validator := validator.New()
+	validator.RegisterStructValidation(
+		services.PasswordMatchValidation,
+		services.NewUserValidation{},
+	)
+	validator.RegisterStructValidation(
+		services.ResetPasswordMatchValidation,
+		services.UpdateUserValidation{},
 	)
 
-	serverMW := mw.NewMiddleware(authSessionStore)
+	controllerDeps := controllers.Dependencies{
+		DB:          *db,
+		TknManager:  *tokenManager,
+		QueueClient: riverClient,
+		Validate:    validator,
+		PostManager: postManager,
+		Mail:        mailClient,
+		AuthStore:   authSessionStore,
+	}
 
-	routes := routes.NewRoutes(controllers, serverMW, cfg)
-	router = routes.SetupRoutes()
+	middleware := mw.NewMiddleware(authSessionStore)
+	router := router.NewRouter(controllerDeps, middleware, cfg)
+	router.LoadInRoutes()
 
-	server := server.NewServer(router, controllers, logger, cfg)
+	server := server.NewServer(router, logger, cfg)
 
 	server.Start()
 }

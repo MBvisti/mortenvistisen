@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"github.com/MBvisti/mortenvistisen/pkg/mail/templates"
 	"github.com/MBvisti/mortenvistisen/repository/database"
+	"github.com/MBvisti/mortenvistisen/views/components"
 	"github.com/MBvisti/mortenvistisen/views/internal/layouts"
 	"github.com/google/uuid"
 	"strconv"
@@ -38,29 +39,40 @@ func NewsletterForm(
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"target\" class=\"row\"><div class=\"mb-4 col-12\"><label for=\"newsletter-title\" class=\"form-label text-light-emphasis\">Title</label> <input hx-trigger=\"input changed delay:500ms\" hx-post=\"/dashboard/newsletter/store?preview=true\" hx-target=\"#preview-target\" hx-swap=\"outerHTML\" id=\"newsletter-title\" value=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"target\" class=\"row\"><div class=\"mb-4 col-12\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = components.InputElement(components.InputElementData{
+			ID:        "",
+			InputType: "",
+			Value:     "",
+			Name:      "",
+			Title:     "",
+			Required:  true,
+			HxTrigger: "",
+			HxAction:  "",
+			HxMethod:  "",
+			HxTarget:  "",
+			HxSwap:    "",
+		}).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = components.InputBuilder().WithTitle("Title").WithID("newsletter-title").WithValue(title).WithName("title").MakeRequired().WithHxTrigger("input changed delay:500ms").WithHxPost("/dashboard/newsletter/store?preview=true").WithHxTarget("#preview-target").WithHxSwap("outerHTML").Build().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<label for=\"newsletter-edition\" class=\"form-label text-light-emphasis\">Edition</label> <input id=\"newsletter-edition\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(title)
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(edition)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletter_create.templ`, Line: 36, Col: 17}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletter_create.templ`, Line: 47, Col: 19}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" name=\"title\" type=\"text\" class=\"form-control mb-4 text-light\" required> <label for=\"newsletter-edition\" class=\"form-label text-light-emphasis\">Edition</label> <input id=\"newsletter-edition\" value=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var3 string
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(edition)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletter_create.templ`, Line: 48, Col: 19}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -74,12 +86,12 @@ func NewsletterForm(
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var4 string
-				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(article.ID.String())
+				var templ_7745c5c3_Var3 string
+				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(article.ID.String())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletter_create.templ`, Line: 57, Col: 50}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletter_create.templ`, Line: 56, Col: 50}
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -87,12 +99,12 @@ func NewsletterForm(
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var5 string
-				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(article.Title)
+				var templ_7745c5c3_Var4 string
+				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(article.Title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletter_create.templ`, Line: 57, Col: 68}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletter_create.templ`, Line: 56, Col: 68}
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -105,12 +117,12 @@ func NewsletterForm(
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var6 string
-				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(article.ID.String())
+				var templ_7745c5c3_Var5 string
+				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(article.ID.String())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletter_create.templ`, Line: 59, Col: 41}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletter_create.templ`, Line: 58, Col: 41}
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -118,12 +130,12 @@ func NewsletterForm(
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var7 string
-				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(article.Title)
+				var templ_7745c5c3_Var6 string
+				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(article.Title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletter_create.templ`, Line: 59, Col: 59}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletter_create.templ`, Line: 58, Col: 59}
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -142,12 +154,12 @@ func NewsletterForm(
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var8 string
-			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(i + 1))
+			var templ_7745c5c3_Var7 string
+			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(i + 1))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletter_create.templ`, Line: 68, Col: 26}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletter_create.templ`, Line: 67, Col: 26}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -155,12 +167,12 @@ func NewsletterForm(
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var9 string
-			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#collapsedParagraph-%v", i))
+			var templ_7745c5c3_Var8 string
+			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#collapsedParagraph-%v", i))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletter_create.templ`, Line: 70, Col: 188}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletter_create.templ`, Line: 69, Col: 188}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -168,12 +180,12 @@ func NewsletterForm(
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var10 string
-			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("collapsedParagraph-%v", i))
+			var templ_7745c5c3_Var9 string
+			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("collapsedParagraph-%v", i))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletter_create.templ`, Line: 70, Col: 268}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletter_create.templ`, Line: 69, Col: 268}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -181,12 +193,12 @@ func NewsletterForm(
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var11 string
-			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(para)
+			var templ_7745c5c3_Var10 string
+			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(para)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletter_create.templ`, Line: 71, Col: 12}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletter_create.templ`, Line: 70, Col: 12}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -194,12 +206,12 @@ func NewsletterForm(
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var12 string
-			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/dashboard/newsletter/store?preview=true&paragraph-index=%v&action=del", i))
+			var templ_7745c5c3_Var11 string
+			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/dashboard/newsletters/store?preview=true&paragraph-index=%v&action=del", i))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletter_create.templ`, Line: 78, Col: 104}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletter_create.templ`, Line: 77, Col: 105}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -207,12 +219,12 @@ func NewsletterForm(
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var13 string
-			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("collapsedParagraph-%v", i))
+			var templ_7745c5c3_Var12 string
+			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("collapsedParagraph-%v", i))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletter_create.templ`, Line: 81, Col: 76}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletter_create.templ`, Line: 80, Col: 76}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -220,21 +232,21 @@ func NewsletterForm(
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var14 string
-			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(para)
+			var templ_7745c5c3_Var13 string
+			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(para)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletter_create.templ`, Line: 89, Col: 13}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletter_create.templ`, Line: 88, Col: 13}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</textarea> <button class=\"border btn btn-warning\" type=\"button\" id=\"button-addon1\" hx-target=\"#preview-target\" hx-post=\"/dashboard/newsletter/store?preview=true\">Edit</button></div></div>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</textarea> <button class=\"border btn btn-warning\" type=\"button\" id=\"button-addon1\" hx-target=\"#preview-target\" hx-post=\"/dashboard/newsletters/store?preview=true\">Edit</button></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><div class=\"mb-4 col-12 input-group\"><textarea name=\"new-paragraph-element\" class=\"form-control\"></textarea> <button hx-target=\"#preview-target\" hx-swap=\"outerHTML\" hx-post=\"/dashboard/newsletter/store?preview=true\" class=\"btn btn-outline-secondary\" type=\"button\">Add</button></div><div class=\"col-12 my-4\"><div class=\"row\"><div class=\"col my-auto\"><div class=\"form-check form-switch\"><input name=\"release-on-create\" class=\"form-check-input\" type=\"checkbox\" role=\"switch\" id=\"releaseNewsletterOnCreateSwitch\"> <label class=\"form-check-label text-light-emphasis\" for=\"releaseNewsletterOnCreateSwitch\">Release On Create</label></div></div><div class=\"col d-flex\"><button type=\"submit\" class=\"btn btn-success ms-auto\">Create</button></div></div></div></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><div class=\"mb-4 col-12 input-group\"><textarea name=\"new-paragraph-element\" class=\"form-control\"></textarea> <button hx-target=\"#preview-target\" hx-swap=\"outerHTML\" hx-post=\"/dashboard/newsletters/store?preview=true\" class=\"btn btn-outline-secondary\" type=\"button\">Add</button></div><div class=\"col-12 my-4\"><div class=\"row\"><div class=\"col my-auto\"><div class=\"form-check form-switch\"><input name=\"release-on-create\" class=\"form-check-input\" type=\"checkbox\" role=\"switch\" id=\"releaseNewsletterOnCreateSwitch\"> <label class=\"form-check-label text-light-emphasis\" for=\"releaseNewsletterOnCreateSwitch\">Release On Create</label></div></div><div class=\"col d-flex\"><button type=\"submit\" class=\"btn btn-success ms-auto\">Create</button></div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -258,9 +270,9 @@ func NewsletterPreview(
 			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var15 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var15 == nil {
-			templ_7745c5c3_Var15 = templ.NopComponent
+		templ_7745c5c3_Var14 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var14 == nil {
+			templ_7745c5c3_Var14 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"preview-target\" class=\"row\" hx-boost=\"true\"><div style=\"max-height: 35rem; height: 35rem;\" class=\"bg-dark-subtle rounded py-2 col-12 overflow-y-auto mb-4\">")
@@ -271,7 +283,7 @@ func NewsletterPreview(
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><form class=\"col-12 bg-dark-subtle rounded py-2\" hx-target=\"#target\" hx-swap=\"outerHTML\" hx-post=\"/dashboard/newsletter/store\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><form class=\"col-12 bg-dark-subtle rounded py-2\" hx-target=\"#target\" hx-swap=\"outerHTML\" hx-post=\"/dashboard/newsletters/store\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -312,18 +324,18 @@ func CreateNewsletter(articles []database.Post, selectedArticleID uuid.UUID, new
 			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var16 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var16 == nil {
-			templ_7745c5c3_Var16 = templ.NopComponent
+		templ_7745c5c3_Var15 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var15 == nil {
+			templ_7745c5c3_Var15 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Var17 := templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_Var16 := templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 			if !templ_7745c5c3_IsBuffer {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"mh-full mt-4 mb-4 container mx-auto flex flex-col\"><a role=\"button\" class=\"btn btn-secondary mb-4 hover:font-bold\" href=\"/dashboard/newsletter\">Back</a><div class=\"row mt-4\"><h2 class=\"fs-4 text-white\">New Newsletter</h2>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"mh-full mt-4 mb-4 container mx-auto flex flex-col\"><a role=\"button\" class=\"btn btn-secondary mb-4 hover:font-bold\" href=\"/dashboard/newsletters\">Back</a><div class=\"row mt-4\"><h2 class=\"fs-4 text-white\">New Newsletter</h2>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -340,7 +352,7 @@ func CreateNewsletter(articles []database.Post, selectedArticleID uuid.UUID, new
 			}
 			return templ_7745c5c3_Err
 		})
-		templ_7745c5c3_Err = layouts.Dashboard().Render(templ.WithChildren(ctx, templ_7745c5c3_Var17), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = layouts.Dashboard().Render(templ.WithChildren(ctx, templ_7745c5c3_Var16), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

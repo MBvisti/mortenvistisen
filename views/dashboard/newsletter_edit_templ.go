@@ -46,7 +46,7 @@ func NewsletterEdit(data NewsletterEditViewData, tkn string) templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"mh-full mt-4 mb-4 container mx-auto flex flex-col\"><a role=\"button\" class=\"btn btn-secondary mb-4 hover:font-bold\" href=\"/dashboard/newsletter\">Back</a><div class=\"row mt-4\"><h2 class=\"fs-4 text-white\">New Newsletter</h2>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"mh-full mt-4 mb-4 container mx-auto flex flex-col\"><a role=\"button\" class=\"btn btn-secondary mb-4 hover:font-bold\" href=\"/dashboard/newsletters\">Back</a><div class=\"row mt-4\"><h2 class=\"fs-4 text-white\">New Newsletter</h2>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

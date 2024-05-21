@@ -1,10 +1,11 @@
-package controllers
+package authentication
 
 import (
 	"fmt"
 	"time"
 
 	"github.com/MBvisti/mortenvistisen/entity"
+	"github.com/MBvisti/mortenvistisen/pkg/config"
 	"github.com/MBvisti/mortenvistisen/pkg/mail/templates"
 	"github.com/MBvisti/mortenvistisen/pkg/queue"
 	"github.com/MBvisti/mortenvistisen/pkg/telemetry"
@@ -17,11 +18,13 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/gorilla/csrf"
+	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
+	"github.com/riverqueue/river"
 )
 
 // CreateUser method    shows the form to create the user
-func (c *Controller) CreateUser(ctx echo.Context) error {
+func CreateUser(ctx echo.Context) error {
 	return authentication.RegisterPage(authentication.RegisterFormProps{
 		CsrfToken: csrf.Token(ctx.Request()),
 	}, views.Head{}).Render(views.ExtractRenderDeps(ctx))
@@ -35,7 +38,14 @@ type StoreUserPayload struct {
 }
 
 // StoreUser method    stores the new user
-func (c *Controller) StoreUser(ctx echo.Context) error {
+func StoreUser(
+	ctx echo.Context,
+	db database.Queries,
+	v *validator.Validate,
+	cfg config.Cfg,
+	tknManager tokens.Manager,
+	queueClient *river.Client[pgx.Tx],
+) error {
 	var payload StoreUserPayload
 	if err := ctx.Bind(&payload); err != nil {
 		return authentication.RegisterResponse("An error occurred", "Please refresh the page an try again.", true).
@@ -47,7 +57,7 @@ func (c *Controller) StoreUser(ctx echo.Context) error {
 		Mail:            payload.Mail,
 		Password:        payload.Password,
 		ConfirmPassword: payload.ConfirmPassword,
-	}, &c.db, c.validate, c.cfg.Auth.PasswordPepper)
+	}, &db, v, cfg.Auth.PasswordPepper)
 	if err != nil {
 		telemetry.Logger.Info("error", "err", err)
 		e, ok := err.(validator.ValidationErrors)
@@ -108,7 +118,7 @@ func (c *Controller) StoreUser(ctx echo.Context) error {
 		return authentication.RegisterForm(props).Render(views.ExtractRenderDeps(ctx))
 	}
 
-	generatedTkn, err := c.tknManager.GenerateToken()
+	generatedTkn, err := tknManager.GenerateToken()
 	if err != nil {
 		telemetry.Logger.ErrorContext(ctx.Request().Context(), "could not query user", "error", err)
 
@@ -121,7 +131,7 @@ func (c *Controller) StoreUser(ctx echo.Context) error {
 		generatedTkn.HashedToken,
 	)
 
-	if err := c.db.StoreToken(ctx.Request().Context(), database.StoreTokenParams{
+	if err := db.StoreToken(ctx.Request().Context(), database.StoreTokenParams{
 		ID:        uuid.New(),
 		CreatedAt: database.ConvertToPGTimestamptz(time.Now()),
 		Hash:      activationToken.Hash,
@@ -138,8 +148,8 @@ func (c *Controller) StoreUser(ctx echo.Context) error {
 	userSignupMail := templates.UserSignupWelcomeMail{
 		ConfirmationLink: fmt.Sprintf(
 			"%s://%s/verify-email?token=%s",
-			c.cfg.App.AppScheme,
-			c.cfg.App.AppHost,
+			cfg.App.AppScheme,
+			cfg.App.AppHost,
 			activationToken.GetPlainText(),
 		),
 	}
@@ -158,9 +168,9 @@ func (c *Controller) StoreUser(ctx echo.Context) error {
 			Render(views.ExtractRenderDeps(ctx))
 	}
 
-	_, err = c.queueClient.Insert(ctx.Request().Context(), queue.EmailJobArgs{
+	_, err = queueClient.Insert(ctx.Request().Context(), queue.EmailJobArgs{
 		To:          user.Mail,
-		From:        c.cfg.App.DefaultSenderSignature,
+		From:        cfg.App.DefaultSenderSignature,
 		Subject:     "Thanks for signing up!",
 		TextVersion: textVersion,
 		HtmlVersion: htmlVersion,

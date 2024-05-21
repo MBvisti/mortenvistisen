@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -21,7 +20,7 @@ type userDatabase interface {
 	UpdateUser(ctx context.Context, arg database.UpdateUserParams) (database.User, error)
 }
 
-type newUserValidation struct {
+type NewUserValidation struct {
 	ConfirmPassword string `validate:"required,gte=8"`
 	Name            string `validate:"required,gte=2"`
 	Mail            string `validate:"required,email"`
@@ -29,8 +28,8 @@ type newUserValidation struct {
 	Password        string `validate:"required,gte=8"`
 }
 
-func passwordMatchValidation(sl validator.StructLevel) {
-	data := sl.Current().Interface().(newUserValidation)
+func PasswordMatchValidation(sl validator.StructLevel) {
+	data := sl.Current().Interface().(NewUserValidation)
 
 	if data.ConfirmPassword != data.Password {
 		sl.ReportError(
@@ -56,9 +55,7 @@ func NewUser(
 		return entity.User{}, err
 	}
 
-	v.RegisterStructValidation(passwordMatchValidation, newUserValidation{})
-
-	newUserData := newUserValidation{
+	newUserData := NewUserValidation{
 		ConfirmPassword: data.ConfirmPassword,
 		Name:            data.Name,
 		Mail:            data.Mail,
@@ -98,15 +95,15 @@ func NewUser(
 	}, nil
 }
 
-type updateUserValidation struct {
+type UpdateUserValidation struct {
 	ConfirmPassword string `validate:"required,gte=8"`
 	Password        string `validate:"required,gte=8"`
 	Name            string `validate:"required,gte=2"`
 	Mail            string `validate:"required,email"`
 }
 
-func resetPasswordMatchValidation(sl validator.StructLevel) {
-	data := sl.Current().Interface().(updateUserValidation)
+func ResetPasswordMatchValidation(sl validator.StructLevel) {
+	data := sl.Current().Interface().(UpdateUserValidation)
 
 	if data.ConfirmPassword != data.Password {
 		sl.ReportError(
@@ -126,10 +123,7 @@ func UpdateUser(
 	v *validator.Validate,
 	passwordPepper string,
 ) (entity.User, error) {
-
-	v.RegisterStructValidation(resetPasswordMatchValidation, updateUserValidation{})
-
-	validatedData := updateUserValidation{
+	validatedData := UpdateUserValidation{
 		ConfirmPassword: data.ConfirmPassword,
 		Password:        data.Password,
 		Name:            data.Name,

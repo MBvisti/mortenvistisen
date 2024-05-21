@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/MBvisti/mortenvistisen/repository/database"
 	"github.com/google/uuid"
+	"github.com/MBvisti/mortenvistisen/views/components"
 )
 
 templ NewsletterForm(
@@ -23,22 +24,20 @@ templ NewsletterForm(
 		<div
 			class="mb-4 col-12"
 		>
-			<label
-				for="newsletter-title"
-				class="form-label text-light-emphasis"
-			>Title</label>
-			<input
-				hx-trigger="input changed delay:500ms"
-				hx-post="/dashboard/newsletter/store?preview=true"
-				hx-target="#preview-target"
-				hx-swap="outerHTML"
-				id="newsletter-title"
-				value={ title }
-				name="title"
-				type="text"
-				class="form-control mb-4 text-light"
-				required
-			/>
+			@components.InputElement(components.InputElementData{
+				ID:        "",
+				InputType: "",
+				Value:     "",
+				Name:      "",
+				Title:     "",
+				Required:  true,
+				HxTrigger: "",
+				HxAction:  "",
+				HxMethod:  "",
+				HxTarget:  "",
+				HxSwap:    "",
+			})
+			@components.InputBuilder().WithTitle("Title").WithID("newsletter-title").WithValue(title).WithName("title").MakeRequired().WithHxTrigger("input changed delay:500ms").WithHxPost("/dashboard/newsletter/store?preview=true").WithHxTarget("#preview-target").WithHxSwap("outerHTML").Build()
 			<label
 				for="newsletter-edition"
 				class="form-label text-light-emphasis"
@@ -75,7 +74,7 @@ templ NewsletterForm(
 						type="button"
 						id="button-addon2"
 						hx-target="#preview-target"
-						hx-post={ fmt.Sprintf("/dashboard/newsletter/store?preview=true&paragraph-index=%v&action=del", i) }
+						hx-post={ fmt.Sprintf("/dashboard/newsletters/store?preview=true&paragraph-index=%v&action=del", i) }
 					>Del</button>
 				</div>
 				<div class="collapse w-100" id={ fmt.Sprintf("collapsedParagraph-%v", i) }>
@@ -93,7 +92,7 @@ templ NewsletterForm(
 							type="button"
 							id="button-addon1"
 							hx-target="#preview-target"
-							hx-post="/dashboard/newsletter/store?preview=true"
+							hx-post="/dashboard/newsletters/store?preview=true"
 						>
 							Edit
 						</button>
@@ -109,7 +108,7 @@ templ NewsletterForm(
 			<button
 				hx-target="#preview-target"
 				hx-swap="outerHTML"
-				hx-post="/dashboard/newsletter/store?preview=true"
+				hx-post="/dashboard/newsletters/store?preview=true"
 				class="btn btn-outline-secondary"
 				type="button"
 			>
@@ -149,7 +148,7 @@ templ NewsletterPreview(
 			class="col-12 bg-dark-subtle rounded py-2"
 			hx-target="#target"
 			hx-swap="outerHTML"
-			hx-post="/dashboard/newsletter/store"
+			hx-post="/dashboard/newsletters/store"
 		>
 			@NewsletterForm(
 				newsletterMailPreview.Paragraphs,
@@ -166,7 +165,7 @@ templ NewsletterPreview(
 templ CreateNewsletter(articles []database.Post, selectedArticleID uuid.UUID, newsletterMailPreview templates.NewsletterMail, tkn string) {
 	@layouts.Dashboard() {
 		<div class="mh-full mt-4 mb-4 container mx-auto flex flex-col">
-			<a role="button" class="btn btn-secondary mb-4 hover:font-bold" href="/dashboard/newsletter">Back</a>
+			<a role="button" class="btn btn-secondary mb-4 hover:font-bold" href="/dashboard/newsletters">Back</a>
 			<div class="row mt-4">
 				<h2 class="fs-4 text-white">New Newsletter</h2>
 				@NewsletterPreview(articles, newsletterMailPreview, selectedArticleID, tkn)

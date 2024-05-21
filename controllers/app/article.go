@@ -1,36 +1,42 @@
-package controllers
+package app
 
 import (
 	"database/sql"
 	"fmt"
 	"time"
 
+	"github.com/MBvisti/mortenvistisen/controllers/internal/utilities"
+	"github.com/MBvisti/mortenvistisen/pkg/config"
+	"github.com/MBvisti/mortenvistisen/pkg/mail"
 	"github.com/MBvisti/mortenvistisen/pkg/mail/templates"
 	"github.com/MBvisti/mortenvistisen/pkg/queue"
 	"github.com/MBvisti/mortenvistisen/pkg/telemetry"
 	"github.com/MBvisti/mortenvistisen/pkg/tokens"
+	"github.com/MBvisti/mortenvistisen/posts"
 	"github.com/MBvisti/mortenvistisen/repository/database"
 	"github.com/MBvisti/mortenvistisen/views"
 	"github.com/google/uuid"
 	"github.com/gorilla/csrf"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
+	"github.com/riverqueue/river"
 )
 
-func (c *Controller) Article(ctx echo.Context) error {
+func Article(ctx echo.Context, db database.Queries, postManager posts.PostManager) error {
 	postSlug := ctx.Param("postSlug")
 
-	post, err := c.db.GetPostBySlug(ctx.Request().Context(), postSlug)
+	post, err := db.GetPostBySlug(ctx.Request().Context(), postSlug)
 	if err != nil {
 		return err
 	}
 
-	postContent, err := c.postManager.Parse(post.Filename)
+	postContent, err := postManager.Parse(post.Filename)
 	if err != nil {
 		return err
 	}
 
-	tags, err := c.db.GetTagsForPost(ctx.Request().Context(), post.ID)
+	tags, err := db.GetTagsForPost(ctx.Request().Context(), post.ID)
 	if err != nil {
 		return err
 	}
@@ -44,7 +50,7 @@ func (c *Controller) Article(ctx echo.Context) error {
 		}
 	}
 
-	fiveRandomPosts, err := c.db.GetFiveRandomPosts(
+	fiveRandomPosts, err := db.GetFiveRandomPosts(
 		ctx.Request().Context(),
 		post.ID,
 	)
@@ -55,7 +61,7 @@ func (c *Controller) Article(ctx echo.Context) error {
 	otherArticles := make(map[string]string, 5)
 
 	for _, article := range fiveRandomPosts {
-		otherArticles[article.Title] = c.buildURLFromSlug(
+		otherArticles[article.Title] = utilities.BuildURLFromSlug(
 			"posts/" + article.Slug,
 		)
 	}
@@ -69,7 +75,7 @@ func (c *Controller) Article(ctx echo.Context) error {
 	}, views.Head{
 		Title:       post.Title,
 		Description: post.Excerpt,
-		Slug:        c.buildURLFromSlug("posts/" + post.Slug),
+		Slug:        utilities.BuildURLFromSlug("posts/" + post.Slug),
 		MetaType:    "article",
 		Image:       "https://mortenvistisen.com/static/images/mbv.png",
 		ExtraMeta: []views.MetaContent{
@@ -98,17 +104,24 @@ type SubscriptionEventForm struct {
 	Title string `form:"article-title"`
 }
 
-func (c *Controller) SubscriptionEvent(ctx echo.Context) error {
+func SubscriptionEvent(
+	ctx echo.Context,
+	mail mail.Mail,
+	queueClient *river.Client[pgx.Tx],
+	db database.Queries,
+	tknManager tokens.Manager,
+	cfg config.Cfg,
+) error {
 	var form SubscriptionEventForm
 	if err := ctx.Bind(&form); err != nil {
-		if err := c.mail.Send(ctx.Request().Context(), "hi@mortenvistisen.com", "sub-blog@mortenvistisen.com",
+		if err := mail.Send(ctx.Request().Context(), "hi@mortenvistisen.com", "sub-blog@mortenvistisen.com",
 			"Failed to subscribe", "sub_report", err.Error()); err != nil {
 			telemetry.Logger.Error("Failed to send email", "error", err)
 		}
 		return ctx.String(200, "You're now subscribed!")
 	}
 
-	sub, err := c.db.InsertSubscriber(
+	sub, err := db.InsertSubscriber(
 		ctx.Request().Context(),
 		database.InsertSubscriberParams{
 			ID:        uuid.New(),
@@ -130,7 +143,7 @@ func (c *Controller) SubscriptionEvent(ctx echo.Context) error {
 		return err
 	}
 
-	generatedTkn, err := c.tknManager.GenerateToken()
+	generatedTkn, err := tknManager.GenerateToken()
 	if err != nil {
 		return err
 	}
@@ -140,7 +153,7 @@ func (c *Controller) SubscriptionEvent(ctx echo.Context) error {
 		generatedTkn.HashedToken,
 	)
 
-	if err := c.db.InsertSubscriberToken(ctx.Request().Context(), database.InsertSubscriberTokenParams{
+	if err := db.InsertSubscriberToken(ctx.Request().Context(), database.InsertSubscriberTokenParams{
 		ID:           uuid.New(),
 		CreatedAt:    database.ConvertToPGTimestamptz(time.Now()),
 		Hash:         activationToken.Hash,
@@ -154,8 +167,8 @@ func (c *Controller) SubscriptionEvent(ctx echo.Context) error {
 	newsletterMail := templates.NewsletterWelcomeMail{
 		ConfirmationLink: fmt.Sprintf(
 			"%s://%s/verify-subscriber?token=%s",
-			c.cfg.App.AppScheme,
-			c.cfg.App.AppHost,
+			cfg.App.AppScheme,
+			cfg.App.AppHost,
 			activationToken.GetPlainText(),
 		),
 		UnsubscribeLink: "",
@@ -169,7 +182,7 @@ func (c *Controller) SubscriptionEvent(ctx echo.Context) error {
 	if err != nil {
 		return err
 	}
-	_, err = c.queueClient.Insert(ctx.Request().Context(), queue.EmailJobArgs{
+	_, err = queueClient.Insert(ctx.Request().Context(), queue.EmailJobArgs{
 		To:          form.Email,
 		From:        "noreply@mortenvistisen.com",
 		Subject:     "Thanks for signing up!",
@@ -189,7 +202,7 @@ func (c *Controller) SubscriptionEvent(ctx echo.Context) error {
 	}
 }
 
-func (c *Controller) RenderModal(ctx echo.Context) error {
+func RenderModal(ctx echo.Context) error {
 	return views.SubscribeModal(
 		csrf.Token(
 			ctx.Request(),
