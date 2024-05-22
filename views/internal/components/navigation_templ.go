@@ -35,7 +35,7 @@ func Nav() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<nav class=\"container h-10 grid grid-cols-4 md:grid-cols-12 px-4 md:px-0 mx-auto navbar bg-base-100\"><div class=\"col-start-1 md:col-start-3 md:col-end-4\"><a href=\"/\" class=\"text-white text-xl px-0\">MBV</a></div><div class=\"text-white col-start-4 md:col-start-10 md:col-end-11\"><ul class=\"menu menu-horizontal px-1\"><li><details><summary>Menu</summary><ul class=\"z-50 p-2 bg-base-200 rounded\"><li><a href=\"/\">Home</a></li><li><a href=\"/newsletter\">Newsletter</a></li><li><a href=\"/projects\">Projects</a></li><li><a href=\"/about\">About</a></li></ul></details></li></ul></div></nav>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"container bg-base-100\"><nav class=\"navbar px-0\"><div class=\"flex-1 flex items-center\"><a href=\"/\" class=\"text-white sm:text-xl px-0\">MBV</a></div><div class=\"flex-none text-white\"><ul class=\"menu menu-horizontal px-1\"><li><details><summary>Menu</summary><ul class=\"right-0.5 z-50 p-2 bg-base-200 rounded\"><li><a href=\"/\">Home</a></li><li><a href=\"/newsletter\">Newsletter</a></li><li><a href=\"/projects\">Projects</a></li><li><a href=\"/about\">About</a></li></ul></details></li></ul></div></nav></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

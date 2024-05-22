@@ -198,7 +198,7 @@ func SubscriptionEvent(
 		return views.SubscribeModalResponse().
 			Render(views.ExtractRenderDeps(ctx))
 	} else {
-		return ctx.String(200, "You're now subscribed!")
+		return ctx.String(200, "<div class='col-12 sm:col-6 mx-auto rounded py-4 px-2 text-success text-center border'><p>Thanks for subscribing!</p></div>")
 	}
 }
 
