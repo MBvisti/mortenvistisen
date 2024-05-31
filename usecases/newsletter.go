@@ -5,7 +5,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"log/slog"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -223,27 +223,27 @@ func (n *Newsletter) ReleaseNewsletter(
 		ArticleLink: BuildURLFromSlug(FormatArticleSlug(newsletter.ArticleSlug)),
 	}
 
-	_, err = newsletterMail.GenerateHtmlVersion()
+	htmlMail, err := newsletterMail.GenerateHtmlVersion()
 	if err != nil {
 		return nil, err
 	}
 
-	_, err = newsletterMail.GenerateTextVersion()
+	textMail, err := newsletterMail.GenerateTextVersion()
 	if err != nil {
 		return nil, err
 	}
 
-	for range verifiedSubs {
-		// if err := n.mail.Send(
-		// 	ctx,
-		// 	verifiedSub.Email.String,
-		// 	"newsletter@mortenvistisen.com",
-		// 	fmt.Sprintf("MBV newsletter edition: %v", newsletter.Edition),
-		// 	textMail,
-		// 	htmlMail,
-		// ); err != nil {
-		// 	return nil, err
-		// }
+	for _, verifiedSub := range verifiedSubs {
+		if err := n.mail.Send(
+			ctx,
+			verifiedSub.Email.String,
+			"newsletter@mortenvistisen.com",
+			fmt.Sprintf("MBV newsletter edition: %v", newsletter.Edition),
+			textMail,
+			htmlMail,
+		); err != nil {
+			return nil, err
+		}
 	}
 
 	return nil, nil
@@ -259,13 +259,11 @@ func (n *Newsletter) Update(
 ) (domain.Newsletter, domain.ValidationErrsMap, error) {
 	newsletterModel, err := n.db.QueryNewsletterByID(ctx, id)
 	if err != nil {
-		slog.Error("is this the error", "err", err)
 		return domain.Newsletter{}, nil, err
 	}
 
 	associatedArticle, err := n.db.QueryPostByID(ctx, newsletterModel.AssociatedArticleID)
 	if err != nil {
-		slog.Error("is this the error", "err", err)
 		return domain.Newsletter{}, nil, err
 	}
 
