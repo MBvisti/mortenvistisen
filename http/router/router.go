@@ -5,6 +5,7 @@ import (
 	"log/slog"
 
 	"github.com/MBvisti/mortenvistisen/controllers"
+	"github.com/MBvisti/mortenvistisen/controllers/api"
 	"github.com/MBvisti/mortenvistisen/controllers/app"
 	"github.com/MBvisti/mortenvistisen/controllers/authentication"
 	"github.com/MBvisti/mortenvistisen/controllers/dashboard"
@@ -72,13 +73,14 @@ func (r *Router) GetInstance() *echo.Echo {
 }
 
 func (r *Router) LoadInRoutes() {
+	r.loadApiV1Routes()
 	r.loadDashboardRoutes()
 	r.loadAppRoutes()
 	r.loadAuthRoutes()
 }
 
 func (r *Router) loadDashboardRoutes() {
-	router := r.router.Group("/dashboard")
+	router := r.router.Group("/dashboard", r.middleware.AuthOnly)
 
 	router.GET("", func(c echo.Context) error {
 		return dashboard.Index(c)
@@ -260,5 +262,13 @@ func (r *Router) loadAuthRoutes() {
 			r.cfg,
 			r.ctrlDeps.Validate,
 		)
+	})
+}
+
+func (r *Router) loadApiV1Routes() {
+	router := r.router.Group("/api/v1")
+
+	router.GET("/health", func(c echo.Context) error {
+		return api.AppHealth(c)
 	})
 }
