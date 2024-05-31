@@ -2,7 +2,6 @@ package dashboard
 
 import (
 	"fmt"
-	"log/slog"
 	"strconv"
 
 	"github.com/MBvisti/mortenvistisen/controllers"
@@ -247,7 +246,6 @@ func NewsletterUpdate(
 		newsletterID,
 	)
 	if err != nil {
-		slog.Error("could not update newsletters", "error", err)
 		return err
 	}
 	if len(validationErrs) > 0 {
