@@ -7,7 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/MBvisti/mortenvistisen/entity"
+	"github.com/MBvisti/mortenvistisen/domain"
 	"github.com/MBvisti/mortenvistisen/pkg/config"
 	"github.com/MBvisti/mortenvistisen/repository/database"
 	"github.com/google/uuid"
@@ -51,29 +51,29 @@ func AuthenticateUser(
 	data AuthenticateUserPayload,
 	db userDatabase,
 	passwordPepper string,
-) (entity.User, error) {
+) (domain.User, error) {
 	user, err := db.QueryUserByMail(ctx, data.Email)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return entity.User{}, ErrUserNotExist
+			return domain.User{}, ErrUserNotExist
 		}
 
 		slog.Error("could not query user by mail", "error", err)
-		return entity.User{}, err
+		return domain.User{}, err
 	}
 
 	if verifiedAt := user.MailVerifiedAt; !verifiedAt.Valid {
-		return entity.User{}, ErrEmailNotValidated
+		return domain.User{}, ErrEmailNotValidated
 	}
 
 	if err := validatePassword(validatePasswordPayload{
 		hashedpassword: user.Password,
 		password:       data.Password,
 	}, passwordPepper); err != nil {
-		return entity.User{}, ErrPasswordNotMatch
+		return domain.User{}, ErrPasswordNotMatch
 	}
 
-	return entity.User{
+	return domain.User{
 		ID:        user.ID,
 		CreatedAt: database.ConvertFromPGTimestamptzToTime(user.CreatedAt),
 		UpdatedAt: database.ConvertFromPGTimestamptzToTime(user.UpdatedAt),

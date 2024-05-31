@@ -5,6 +5,9 @@ import (
 	"log/slog"
 
 	"github.com/MBvisti/mortenvistisen/controllers"
+	"github.com/MBvisti/mortenvistisen/http"
+	mw "github.com/MBvisti/mortenvistisen/http/middleware"
+	"github.com/MBvisti/mortenvistisen/http/router"
 	"github.com/MBvisti/mortenvistisen/pkg/config"
 	"github.com/MBvisti/mortenvistisen/pkg/mail"
 	"github.com/MBvisti/mortenvistisen/pkg/queue"
@@ -12,27 +15,19 @@ import (
 	"github.com/MBvisti/mortenvistisen/pkg/tokens"
 	"github.com/MBvisti/mortenvistisen/posts"
 	"github.com/MBvisti/mortenvistisen/repository/database"
-	"github.com/MBvisti/mortenvistisen/routes"
-	"github.com/MBvisti/mortenvistisen/server"
-	mw "github.com/MBvisti/mortenvistisen/server/middleware"
+	"github.com/MBvisti/mortenvistisen/services"
+	"github.com/MBvisti/mortenvistisen/usecases"
+	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/sessions"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-	slogecho "github.com/samber/slog-echo"
 )
 
 func main() {
 	ctx := context.Background()
-	router := echo.New()
 	logger := telemetry.SetupLogger()
 	slog.SetDefault(logger)
 
 	cfg := config.New()
-
-	// Middleware
-	router.Use(slogecho.New(logger))
-	router.Use(middleware.Recover())
 
 	conn := database.SetupDatabasePool(
 		context.Background(),
@@ -67,22 +62,34 @@ func main() {
 
 	postManager := posts.NewPostManager()
 
-	controllers := controllers.NewController(
-		*db,
-		mailClient,
-		*tokenManager,
-		cfg,
-		riverClient,
-		postManager,
-		authSessionStore,
+	validator := validator.New()
+	validator.RegisterStructValidation(
+		services.PasswordMatchValidation,
+		services.NewUserValidation{},
+	)
+	validator.RegisterStructValidation(
+		services.ResetPasswordMatchValidation,
+		services.UpdateUserValidation{},
 	)
 
-	serverMW := mw.NewMiddleware(authSessionStore)
+	newsletterUsecase := usecases.NewNewsletter(*db, validator, mailClient)
 
-	routes := routes.NewRoutes(controllers, serverMW, cfg)
-	router = routes.SetupRoutes()
+	controllerDeps := controllers.NewDependencies(
+		*db,
+		*tokenManager,
+		riverClient,
+		validator,
+		postManager,
+		mailClient,
+		authSessionStore,
+		newsletterUsecase,
+	)
 
-	server := server.NewServer(router, controllers, logger, cfg)
+	middleware := mw.NewMiddleware(authSessionStore)
+	router := router.NewRouter(controllerDeps, middleware, cfg, logger)
+	router.LoadInRoutes()
+
+	server := http.NewServer(router, logger, cfg)
 
 	server.Start()
 }

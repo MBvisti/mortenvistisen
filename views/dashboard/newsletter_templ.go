@@ -25,7 +25,7 @@ type NewsletterViewData struct {
 	ReleasedAt string
 }
 
-func Newsletter(data []NewsletterViewData, pagination components.PaginationPayload, tkn string) templ.Component {
+func Newsletter(data []NewsletterViewData, pagination components.PaginationPayload, tkn string, showFlash bool) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -44,28 +44,63 @@ func Newsletter(data []NewsletterViewData, pagination components.PaginationPaylo
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"container\"><div class=\"row mb-4 justify-content-between\"><div class=\"col\"><h2 class=\"text-xl\">Newsletter</h2></div><div class=\"col d-flex justify-content-end align-items-center\"><a role=\"button\" href=\"/dashboard/newsletter/create\" class=\"btn btn-success\">New</a></div></div><div class=\"row\"><div class=\"col\"><table class=\"rounded-2 table table-dark table-hover table-bordered\"><!-- head --><thead><tr><th scope=\"col\"></th><th scope=\"col\">Title</th><th scope=\"col\">Edition</th><th scope=\"col\">Status</th><th scope=\"col\">Released On</th></tr></thead> <tbody>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"container\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if showFlash {
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div remove-me=\"2s\" class=\"row alert alert-success\" role=\"alert\">Succesfully sent newsletter to subscribers!</div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"row mb-4 justify-content-between\"><div class=\"col\"><h2 class=\"text-xl\">Newsletter</h2></div><div class=\"col d-flex justify-content-end align-items-center\"><a role=\"button\" href=\"/dashboard/newsletters/create\" class=\"btn btn-success\">New</a></div></div><div class=\"row\"><div class=\"col\"><table class=\"rounded-2 table table-dark table-hover table-bordered\"><!-- head --><thead><tr><th scope=\"col\"></th><th scope=\"col\">Title</th><th scope=\"col\">Edition</th><th scope=\"col\">Status</th><th scope=\"col\">Released On</th></tr></thead> <tbody>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			for _, article := range data {
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<tr class=\"align-middle\"><th scope=\"row\"><div><a href=\"")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<tr class=\"align-middle\"><th scope=\"row\"><div><a")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var3 templ.SafeURL = templ.SafeURL(fmt.Sprintf("/dashboard/newsletter/%s/edit", article.ID))
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var3)))
+				if article.Released {
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" disabled")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				} else {
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" href=\"")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					var templ_7745c5c3_Var3 templ.SafeURL = templ.SafeURL(fmt.Sprintf("/dashboard/newsletters/%s/edit", article.ID))
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var3)))
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("><button class=\"btn btn-primary btn-sm\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><button class=\"btn btn-primary btn-sm\">Edit</button></a></div></th><td>")
+				if article.Released {
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" disabled")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(">Edit</button></a></div></th><td>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(article.Title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletter.templ`, Line: 50, Col: 28}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletter.templ`, Line: 68, Col: 28}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -78,7 +113,7 @@ func Newsletter(data []NewsletterViewData, pagination components.PaginationPaylo
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(article.Edition)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletter.templ`, Line: 51, Col: 30}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletter.templ`, Line: 69, Col: 30}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -111,7 +146,7 @@ func Newsletter(data []NewsletterViewData, pagination components.PaginationPaylo
 					var templ_7745c5c3_Var6 string
 					templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(carbon.Parse(article.ReleasedAt).ToDateString())
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletter.templ`, Line: 60, Col: 63}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletter.templ`, Line: 78, Col: 63}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 					if templ_7745c5c3_Err != nil {
@@ -140,7 +175,7 @@ func Newsletter(data []NewsletterViewData, pagination components.PaginationPaylo
 				CurrentPage:     pagination.CurrentPage,
 				PrevPage:        pagination.PrevPage,
 				NextPage:        pagination.NextPage,
-				Endpoint:        "/dashboard/articles",
+				Endpoint:        "/dashboard/newsletters",
 				NoNextPage:      pagination.NoNextPage,
 				HasNextNextPage: pagination.HasNextNextPage,
 			}).Render(ctx, templ_7745c5c3_Buffer)

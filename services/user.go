@@ -2,12 +2,11 @@ package services
 
 import (
 	"context"
-
 	"time"
 
 	"github.com/go-playground/validator/v10"
 
-	"github.com/MBvisti/mortenvistisen/entity"
+	"github.com/MBvisti/mortenvistisen/domain"
 	"github.com/MBvisti/mortenvistisen/pkg/telemetry"
 	"github.com/MBvisti/mortenvistisen/repository/database"
 	"github.com/google/uuid"
@@ -21,7 +20,7 @@ type userDatabase interface {
 	UpdateUser(ctx context.Context, arg database.UpdateUserParams) (database.User, error)
 }
 
-type newUserValidation struct {
+type NewUserValidation struct {
 	ConfirmPassword string `validate:"required,gte=8"`
 	Name            string `validate:"required,gte=2"`
 	Mail            string `validate:"required,email"`
@@ -29,8 +28,8 @@ type newUserValidation struct {
 	Password        string `validate:"required,gte=8"`
 }
 
-func passwordMatchValidation(sl validator.StructLevel) {
-	data := sl.Current().Interface().(newUserValidation)
+func PasswordMatchValidation(sl validator.StructLevel) {
+	data := sl.Current().Interface().(NewUserValidation)
 
 	if data.ConfirmPassword != data.Password {
 		sl.ReportError(
@@ -45,20 +44,18 @@ func passwordMatchValidation(sl validator.StructLevel) {
 
 func NewUser(
 	ctx context.Context,
-	data entity.NewUser,
+	data domain.NewUser,
 	db userDatabase,
 	v *validator.Validate,
 	passwordPepper string,
-) (entity.User, error) {
+) (domain.User, error) {
 	mailAlreadyRegistered, err := db.DoesMailExists(ctx, data.Mail)
 	if err != nil {
 		telemetry.Logger.Error("could not check if email exists", "error", err)
-		return entity.User{}, err
+		return domain.User{}, err
 	}
 
-	v.RegisterStructValidation(passwordMatchValidation, newUserValidation{})
-
-	newUserData := newUserValidation{
+	newUserData := NewUserValidation{
 		ConfirmPassword: data.ConfirmPassword,
 		Name:            data.Name,
 		Mail:            data.Mail,
@@ -67,13 +64,13 @@ func NewUser(
 	}
 
 	if err := v.Struct(newUserData); err != nil {
-		return entity.User{}, err
+		return domain.User{}, err
 	}
 
 	hashedPassword, err := hashAndPepperPassword(newUserData.Password, passwordPepper)
 	if err != nil {
 		telemetry.Logger.Error("error hashing and peppering password", "error", err)
-		return entity.User{}, err
+		return domain.User{}, err
 	}
 
 	user, err := db.InsertUser(ctx, database.InsertUserParams{
@@ -86,10 +83,10 @@ func NewUser(
 	})
 	if err != nil {
 		telemetry.Logger.Error("could not insert user", "error", err)
-		return entity.User{}, err
+		return domain.User{}, err
 	}
 
-	return entity.User{
+	return domain.User{
 		ID:        user.ID,
 		CreatedAt: database.ConvertFromPGTimestamptzToTime(user.CreatedAt),
 		UpdatedAt: database.ConvertFromPGTimestamptzToTime(user.UpdatedAt),
@@ -98,15 +95,15 @@ func NewUser(
 	}, nil
 }
 
-type updateUserValidation struct {
+type UpdateUserValidation struct {
 	ConfirmPassword string `validate:"required,gte=8"`
 	Password        string `validate:"required,gte=8"`
 	Name            string `validate:"required,gte=2"`
 	Mail            string `validate:"required,email"`
 }
 
-func resetPasswordMatchValidation(sl validator.StructLevel) {
-	data := sl.Current().Interface().(updateUserValidation)
+func ResetPasswordMatchValidation(sl validator.StructLevel) {
+	data := sl.Current().Interface().(UpdateUserValidation)
 
 	if data.ConfirmPassword != data.Password {
 		sl.ReportError(
@@ -121,15 +118,12 @@ func resetPasswordMatchValidation(sl validator.StructLevel) {
 
 func UpdateUser(
 	ctx context.Context,
-	data entity.UpdateUser,
+	data domain.UpdateUser,
 	db userDatabase,
 	v *validator.Validate,
 	passwordPepper string,
-) (entity.User, error) {
-
-	v.RegisterStructValidation(resetPasswordMatchValidation, updateUserValidation{})
-
-	validatedData := updateUserValidation{
+) (domain.User, error) {
+	validatedData := UpdateUserValidation{
 		ConfirmPassword: data.ConfirmPassword,
 		Password:        data.Password,
 		Name:            data.Name,
@@ -137,13 +131,13 @@ func UpdateUser(
 	}
 
 	if err := v.Struct(validatedData); err != nil {
-		return entity.User{}, err
+		return domain.User{}, err
 	}
 
 	hashedPassword, err := hashAndPepperPassword(validatedData.Password, passwordPepper)
 	if err != nil {
 		telemetry.Logger.Error("error hashing and peppering password", "error", err)
-		return entity.User{}, err
+		return domain.User{}, err
 	}
 
 	updatedUser, err := db.UpdateUser(ctx, database.UpdateUserParams{
@@ -155,10 +149,10 @@ func UpdateUser(
 	})
 	if err != nil {
 		telemetry.Logger.Error("could not insert user", "error", err)
-		return entity.User{}, err
+		return domain.User{}, err
 	}
 
-	return entity.User{
+	return domain.User{
 		ID:        updatedUser.ID,
 		CreatedAt: database.ConvertFromPGTimestamptzToTime(updatedUser.CreatedAt),
 		UpdatedAt: database.ConvertFromPGTimestamptzToTime(updatedUser.UpdatedAt),

@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/MBvisti/mortenvistisen/entity"
+	"github.com/MBvisti/mortenvistisen/domain"
 	"github.com/MBvisti/mortenvistisen/pkg/telemetry"
 	"github.com/MBvisti/mortenvistisen/repository/database"
 	"github.com/go-playground/validator/v10"
@@ -23,7 +23,7 @@ func NewPost(
 	ctx context.Context,
 	db postDatabase,
 	v *validator.Validate,
-	newPost entity.NewPost,
+	newPost domain.NewPost,
 	associatedTags []string,
 ) error {
 	if err := v.Struct(newPost); err != nil {
@@ -80,11 +80,11 @@ func UpdatePost(
 	ctx context.Context,
 	db postDatabase,
 	v *validator.Validate,
-	updatePost entity.UpdatePost,
-) (entity.Post, error) {
+	updatePost domain.UpdatePost,
+) (domain.Post, error) {
 	if err := v.Struct(updatePost); err != nil {
 		telemetry.Logger.Error("provided post data did not pass the validation", "error", err)
-		return entity.Post{}, err
+		return domain.Post{}, err
 	}
 
 	now := time.Now()
@@ -102,10 +102,10 @@ func UpdatePost(
 
 	updatedPost, err := db.UpdatePost(ctx, args)
 	if err != nil {
-		return entity.Post{}, err
+		return domain.Post{}, err
 	}
 
-	return entity.Post{
+	return domain.Post{
 		ID:          updatedPost.ID,
 		CreatedAt:   database.ConvertFromPGTimestampToTime(updatedPost.CreatedAt),
 		UpdatedAt:   database.ConvertFromPGTimestampToTime(updatedPost.UpdatedAt),

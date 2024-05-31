@@ -15,7 +15,7 @@ templ sideBar() {
 					<a class="nav-link" href="/dashboard/articles">Articles</a>
 				</li>
 				<li class="nav-item">
-					<a class="nav-link" href="/dashboard/newsletter">Newsletter</a>
+					<a class="nav-link" href="/dashboard/newsletters">Newsletters</a>
 				</li>
 			</ul>
 		</nav>
@@ -34,10 +34,13 @@ templ Dashboard() {
 			<link rel="icon" type="image/png" sizes="32x32" href="/static/images/favicon-32x32.png"/>
 			<link rel="icon" type="image/png" sizes="16x16" href="/static/images/favicon-16x16.png"/>
 		</head>
-		<body class="bg-dark">
+		<body hx-ext="loading-states, remove-me" class="bg-dark">
 			@sideBar()
 			{ children... }
 			<script src="/static/js/htmx.min.js"></script>
+			//<script src="/static/js/htmx.loading-states.min.js"></script>
+			<script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/loading-states.js"></script>
+			<script src="/static/js/htmx.remove-me.min.js"></script>
 			<script src="/static/js/alpine.js"></script>
 			<script src="/static/js/bootstrap.bundle.min.js"></script>
 		</body>

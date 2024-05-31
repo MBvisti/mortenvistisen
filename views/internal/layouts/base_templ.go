@@ -47,7 +47,7 @@ func Base(head templ.Component) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<body class=\"min-w-screen h-screen\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<body class=\"flex flex-col min-w-screen h-screen\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -59,7 +59,7 @@ func Base(head templ.Component) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<footer class=\"flex items-center justify-center pb-10 container mx-auto px-20 footer bg-base-100 text-base-content\"><aside class=\"flex flex-col items-center\"><p>Copyright © <span id=\"cur-year-footer\"></span></p><p>All right reserved by MBV Labs</p></aside></footer>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<footer class=\"container footer bg-base-100 text-base-content py-4\"><aside class=\"flex flex-col items-center mx-auto\"><p>Copyright ©<span id=\"cur-year-footer\"></span></p><p>All right reserved by MBV Labs</p></aside></footer>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

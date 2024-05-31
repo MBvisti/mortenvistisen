@@ -31,20 +31,20 @@ func NewsletterPage(head Head, csrfToken string) templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"container mx-auto min-h-[83vh] flex items-center\"><div class=\"max-w-xl text-center mx-auto\"><div class=\"mb-5\"><h1 class=\"text-2xl font-bold md:text-3xl md:leading-tight text-white mb-4\">Monthly technical deep dives.</h1><p class=\"text-base\">I work with everything from backend dev, systems designs to devops and machine learning. I share my learnings twice a month in tutorial form, so you can pick up new concept faster and expand your technical tool belt. <br><br>I promise to not spam you; there is always an option to opt-out of receiving these updates, included in each mail. One click of a button and you are out.</p></div><form hx-post=\"/subscribe\" hx-target=\"this\" hx-swap=\"outerHTML\" method=\"POST\" action=\"/subscribe\"><input type=\"hidden\" name=\"gorilla.csrf.Token\" value=\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"grow container mx-auto flex flex-col justify-center\"><div class=\"row\"><div class=\"card-body sm:bg-base-300 p-6 rounded col-12 md:col-6 mx-auto mb-5\"><h1 class=\"card-title text-2xl font-bold md:text-3xl md:leading-tight text-white mb-4\">Monthly technical deep dives.</h1><p class=\"text-base\">I work with everything from backend dev, systems designs to devops and machine learning. I share my learnings twice a month in tutorial form, so you can pick up new concept faster and expand your technical tool belt. </p><p class=\"text-base\">There is always an option to opt-out of receiving these updates, included in each mail. One click of a button and you are out.</p></div></div><div class=\"row\"><form class=\"col-12 md:col-6 mx-auto my-auto sm:px-0\" hx-post=\"/subscribe\" hx-target=\"this\" hx-swap=\"outerHTML\" method=\"POST\" action=\"/subscribe\"><input type=\"hidden\" name=\"gorilla.csrf.Token\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(csrfToken)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/newsletter.templ`, Line: 19, Col: 69}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/newsletter.templ`, Line: 21, Col: 69}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><div class=\"mt-5 lg:mt-8 flex flex-col items-center gap-2 sm:flex-row sm:gap-3\"><input type=\"hidden\" name=\"article-title\" value=\"newsletter-page\"> <input required type=\"email\" id=\"hero-input\" name=\"hero-input\" class=\"py-3 px-4 block w-full border-gray-200 rounded-lg \n  				          text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none \n  				          bg-slate-900 border-gray-700 text-gray-400 focus:ring-gray-600\" placeholder=\"deep-dives@mortenvistisen.com\"> <button data-umami-event=\"newsletter--newsletter-page\" type=\"submit\" class=\"w-full sm:w-auto whitespace-nowrap py-3 px-4 inline-flex justify-center \n  				          items-center gap-x-2 text-sm font-semibold rounded-lg border bg-slate-600 \n  				          text-white hover:bg-slate-900 disabled:opacity-50 disabled:pointer-events-none focus:outline-none \n  				          focus:ring-1 focus:ring-gray-600\">Receive Updates</button></div></form></div></div>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><div class=\"flex flex-col\"><input type=\"hidden\" name=\"article-title\" value=\"newsletter-page\"> <input required type=\"email\" id=\"hero-input\" name=\"hero-input\" class=\"input input-bordered input-primary w-full mb-4\" placeholder=\"your-mail@here.com\"> <button data-umami-event=\"newsletter--newsletter-page\" type=\"submit\" class=\"btn btn-outline btn-primary\">Receive Updates</button></div></form></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

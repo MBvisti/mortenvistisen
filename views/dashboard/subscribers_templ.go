@@ -159,9 +159,9 @@ func Subscribers(
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var7 string
-					templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/dashboard/subscriber/%v/send-verification-mail", sub.ID))
+					templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/dashboard/subscribers/%v/send-verification-mail", sub.ID))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/subscribers.templ`, Line: 98, Col: 147}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/subscribers.templ`, Line: 98, Col: 148}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 					if templ_7745c5c3_Err != nil {
@@ -239,7 +239,7 @@ func Subscribers(
 				CurrentPage:     pagination.CurrentPage,
 				PrevPage:        pagination.PrevPage,
 				NextPage:        pagination.NextPage,
-				Endpoint:        "/dashboard/articles",
+				Endpoint:        "/dashboard/subscribers",
 				NoNextPage:      pagination.NoNextPage,
 				HasNextNextPage: pagination.HasNextNextPage,
 			}).Render(ctx, templ_7745c5c3_Buffer)

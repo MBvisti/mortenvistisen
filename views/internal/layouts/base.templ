@@ -14,12 +14,12 @@ templ Base(head templ.Component) {
 	<!DOCTYPE html>
 	<html lang="en" data-theme="dark" class="dark max-w-screen">
 		@head
-		<body class="min-w-screen h-screen">
+		<body class="flex flex-col min-w-screen h-screen">
 			@components.Nav()
 			{ children... }
-			<footer class="flex items-center justify-center pb-10 container mx-auto px-20 footer bg-base-100 text-base-content">
-				<aside class="flex flex-col items-center">
-					<p>Copyright © <span id="cur-year-footer"></span> </p>
+			<footer class="container footer bg-base-100 text-base-content py-4">
+				<aside class="flex flex-col items-center mx-auto">
+					<p>Copyright ©<span id="cur-year-footer"></span> </p>
 					<p>All right reserved by MBV Labs</p>
 				</aside>
 			</footer>

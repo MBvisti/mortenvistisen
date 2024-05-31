@@ -44,7 +44,7 @@ func Articles(data []ArticleViewData, pagination components.PaginationPayload, t
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"container\"><div class=\"row mb-4 justify-content-between\"><div class=\"col\"><h2 class=\"text-xl\">Articles</h2></div><div class=\"col d-flex justify-content-end align-items-center\"><a role=\"button\" href=\"/dashboard/article/create\" class=\"btn btn-success\">New</a></div></div><div class=\"row\"><div class=\"col\"><table class=\"rounded-2 table table-dark table-hover table-bordered\"><!-- head --><thead><tr><th scope=\"col\"></th><th scope=\"col\">Title</th><th scope=\"col\">Slug</th><th scope=\"col\">Status</th><th scope=\"col\">Released On</th></tr></thead> <tbody>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"container\"><div class=\"row mb-4 justify-content-between\"><div class=\"col\"><h2 class=\"text-xl\">Articles</h2></div><div class=\"col d-flex justify-content-end align-items-center\"><a role=\"button\" href=\"/dashboard/articles/create\" class=\"btn btn-success\">New</a></div></div><div class=\"row\"><div class=\"col\"><table class=\"rounded-2 table table-dark table-hover table-bordered\"><!-- head --><thead><tr><th scope=\"col\"></th><th scope=\"col\">Title</th><th scope=\"col\">Slug</th><th scope=\"col\">Status</th><th scope=\"col\">Released On</th></tr></thead> <tbody>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -53,7 +53,7 @@ func Articles(data []ArticleViewData, pagination components.PaginationPayload, t
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var3 templ.SafeURL = templ.SafeURL(fmt.Sprintf("/dashboard/article/%s/edit", article.Slug))
+				var templ_7745c5c3_Var3 templ.SafeURL = templ.SafeURL(fmt.Sprintf("/dashboard/articles/%s/edit", article.Slug))
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var3)))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err

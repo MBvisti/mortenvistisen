@@ -134,20 +134,20 @@ func ArticlePage(data ArticlePageData, head Head) templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"text-white flex flex-col md:grid md:grid-flow-col md:gap-y-8 md:grid-rows-[200px_1fr] md:grid-cols-12 \n			w-full px-4 md:px-0 md:w-2/3 mt-6 md:mt-12 mx-auto hero\"><div class=\"mb-6 md:mb-0 w-full col-start-3 col-end-11 row-start-1 row-end-2 flex flex-col\"><h1 class=\"mx-auto text-center text-4xl md:text-6xl mb-2\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"container\"><div class=\"row\"><h1 class=\"col-12 sm:col-6 mx-auto text-4xl md:text-6xl mb-2\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(data.HeaderTitle)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 103, Col: 80}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 102, Col: 84}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h1><div class=\"flex mx-auto text-xl\"><p class=\"text-gray-500 mr-2\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h1></div><div class=\"row mb-10\"><div class=\"col-12 sm:col-6 flex mx-auto text-xl\"><p class=\"text-gray-500 mr-2\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -155,13 +155,13 @@ func ArticlePage(data ArticlePageData, head Head) templ.Component {
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s %v, %v", carbon.CreateFromStdTime(data.ReleaseDate).ToShortMonthString(),
 				carbon.CreateFromStdTime(data.ReleaseDate).DayOfMonth(), carbon.CreateFromStdTime(data.ReleaseDate).Year()))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 107, Col: 109}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 108, Col: 109}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><p class=\"text-gray-500 mr-2\">|</p><p class=\"text-gray-500\">MBV</p></div></div><article class=\"text-gray-300 w-full col-start-3 col-end-11 text-left leading-normal prose lg:prose-xl row-start-2\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><p class=\"text-gray-500 mr-2\">|</p><p class=\"text-gray-500\">MBV</p></div></div><div class=\"row\"><article class=\"col-12 sm:col-6 mx-auto text-left text-neutral-content leading-normal prose lg:prose-xl row-start-2\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -190,7 +190,7 @@ func ArticlePage(data ArticlePageData, head Head) templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 123, Col: 19}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 125, Col: 20}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -201,7 +201,7 @@ func ArticlePage(data ArticlePageData, head Head) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</ul></div></article>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</ul></div></article></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

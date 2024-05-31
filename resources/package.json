@@ -4,8 +4,8 @@
 	"author": "",
 	"license": "ISC",
 	"scripts": {
-		"watch-css": "tailwind -c ./tailwind/config.js -i ./tailwind/base.css -o ../static/css/output.css --watch",
-		"build-css": "tailwindcss -c ./tailwind/config.js -i ./tailwind/base.css -o ../static/css/output.css --minify"
+		"watch-css": "tailwind --poll -c ./tailwind/config.js -i ./tailwind/base.css -o ../static/css/output.css --watch",
+		"build-css": "npx tailwindcss -c ./tailwind/config.js -i ./tailwind/base.css -o ../static/css/output.css --minify"
 	},
 	"repository": {
 		"type": "git",
@@ -16,7 +16,8 @@
 		"@tailwindcss/typography": "^0.5.10"
 	},
 	"devDependencies": {
-		"daisyui": "^4.7.3",
-		"tailwindcss": "^3.4.1"
+		"daisyui": "^4.11.1",
+		"tailwindcss": "^3.4.1",
+		"tailwind-bootstrap-grid": "^5.1.0"
 	}
 }

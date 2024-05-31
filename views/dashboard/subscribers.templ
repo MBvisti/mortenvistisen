@@ -95,7 +95,7 @@ templ Subscribers(
 											if sub.Verified {
 												<button class="btn btn-success btn-sm" disabled>Send</button>
 											} else {
-												<button hx-target="#toast-wrapper" hx-swap="innerHTML" hx-post={ fmt.Sprintf("/dashboard/subscriber/%v/send-verification-mail", sub.ID) } class="btn btn-success btn-sm">Send</button>
+												<button hx-target="#toast-wrapper" hx-swap="innerHTML" hx-post={ fmt.Sprintf("/dashboard/subscribers/%v/send-verification-mail", sub.ID) } class="btn btn-success btn-sm">Send</button>
 											}
 										</div>
 									</th>
@@ -120,7 +120,7 @@ templ Subscribers(
 				CurrentPage:     pagination.CurrentPage,
 				PrevPage:        pagination.PrevPage,
 				NextPage:        pagination.NextPage,
-				Endpoint:        "/dashboard/articles",
+				Endpoint:        "/dashboard/subscribers",
 				NoNextPage:      pagination.NoNextPage,
 				HasNextNextPage: pagination.HasNextNextPage,
 			})

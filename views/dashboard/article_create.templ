@@ -75,7 +75,7 @@ templ CreateArticle(data CreateArticleViewData, tkn string) {
 			<form
 				hx-target="#target"
 				hx-swap="outerHTML"
-				hx-post="/dashboard/article/store"
+				hx-post="/dashboard/articles/store"
 				class="h-full flex flex-col justify-center"
 			>
 				<div class="flex justify-between">
@@ -86,7 +86,7 @@ templ CreateArticle(data CreateArticleViewData, tkn string) {
 								New keyword
 								<input id="new-keyword" name="tag-name" type="text" class="grow" placeholder="Keyword"/>
 							</label>
-							<button hx-target="#keywords-grid" hx-swap="innerHTML" hx-post="/dashboard/tag/store" type="submit" class="btn mb-4">Add</button>
+							<button hx-target="#keywords-grid" hx-swap="innerHTML" hx-post="/dashboard/tags/store" type="submit" class="btn mb-4">Add</button>
 							<div id="keywords-grid" class="max-h-80 overflow-y-scroll p-4 rounded bg-neutral grid grid-cols-2 grid-flow-rows gap-4 form-control">
 								for _, kw := range data.Keywords {
 									<label class="label cursor-pointer">

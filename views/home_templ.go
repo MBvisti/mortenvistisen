@@ -44,12 +44,12 @@ func HomePage(posts []Post) templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"container mx-auto grid grid-cols-4 md:grid-cols-12 grid-rows-[300px_100px_1fr] mt-4 hero\"><div class=\"flex flex-col hero-content text-center pb-0 col-span-4 md:col-start-3 md:col-end-11 lg:col-start-5 lg:col-end-9 md:row-start-1 md:row-end-2\"><h1 class=\"text-5xl font-bold mb-2 text-white\">Hi, I'm Morten</h1><p class=\"text-xl text-gray-300\">A software engineer from Denmark. I write about technology and indiehacking; mainly focused around Go, Rust and Machine Learning.</p></div><div class=\"w-full px-4 md:px-0 h-full col-span-4 row-start-2 row-end-3 md:col-start-3 md:col-end-11 lg:col-start-5 lg:col-end-9 flex flex-col justify-center\"><div class=\"w-full text-white divider divider-accent font-bold\">Socials</div><div class=\"flex flex-col w-full\"><div class=\"flex h-10 justify-around text-xs items-center md:px-20\"><a href=\"https://twitter.com/mbvisti\"><span class=\"text-gray-300 badge badge-neutral\">Twitter</span></a> <a href=\"https://www.linkedin.com/in/mortenvistisen\"><span class=\"text-gray-300 badge badge-neutral\">Linkedin</span></a> <a href=\"https://github.com/mbvisti\"><span class=\"text-gray-300 badge badge-neutral\">Github</span></a> <a href=\"mailto:hi@mortenvistisen.com?subject=hi\" target=\"_blank\"><span class=\"text-gray-300 badge badge-neutral\">Email</span></a></div></div></div><div class=\"mt-10 w-full px-4 md:px-0 h-full row-start-3 row-end-4 col-span-4 md:col-start-4 md:col-end-10 lg:col-start-5 lg:col-end-9 flex flex-col justify-center\"><h2 class=\"block text-2xl font-bold text-white mb-5 xl:my-8\">Latest posts</h2><div class=\"w-full\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"container mt-4 md:mt-8 lg:mt-24\"><div class=\"row hero mx-auto\"><div class=\"flex flex-col hero-content text-center col md:col-8 lg:col-6 mx-auto\"><h1 class=\"text-4xl font-bold mb-2 text-white\">Hi, I'm Morten</h1><p class=\"text-xl text-gray-300\">A software engineer from Denmark. I write about technology and indiehacking; mainly focused around Go, Rust and Machine Learning.</p></div></div><div class=\"md:col-8 lg:col-6 row mx-auto my-4 md:my-8\"><div class=\"col-12 text-white divider divider-accent font-bold\">Socials</div><div class=\"flex flex-col col-12\"><div class=\"flex h-10 justify-around text-xs items-center md:px-20\"><a href=\"https://twitter.com/mbvisti\"><span class=\"text-gray-300 badge badge-neutral\">Twitter</span></a> <a href=\"https://www.linkedin.com/in/mortenvistisen\"><span class=\"text-gray-300 badge badge-neutral\">Linkedin</span></a> <a href=\"https://github.com/mbvisti\"><span class=\"text-gray-300 badge badge-neutral\">Github</span></a> <a href=\"mailto:hi@mortenvistisen.com?subject=hi\" target=\"_blank\"><span class=\"text-gray-300 badge badge-neutral\">Email</span></a></div></div></div><div class=\"md:col-8 lg:col-6 row mx-auto mt-4 md:mt-10\"><h2 class=\"col block text-2xl font-bold text-white mb-5 xl:my-8\">Latest posts</h2><div class=\"col\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			for _, post := range posts {
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<a href=\"")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<a class=\"row mx-auto shadow\" href=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -58,7 +58,7 @@ func HomePage(posts []Post) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><div class=\"mb-10 w-full px-8 py-4 rounded-lg shadow-md bg-base-300\"><div class=\"flex items-center justify-between\"><span class=\"text-sm font-light text-gray-400\">")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><div class=\"mb-10 col px-8 py-4 rounded-lg shadow-md bg-base-300  overflow-x-auto\"><div class=\"flex items-center justify-between\"><span class=\"text-sm font-light text-gray-400\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

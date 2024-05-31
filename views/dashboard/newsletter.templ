@@ -15,15 +15,20 @@ type NewsletterViewData struct {
 	ReleasedAt string
 }
 
-templ Newsletter(data []NewsletterViewData, pagination components.PaginationPayload, tkn string) {
+templ Newsletter(data []NewsletterViewData, pagination components.PaginationPayload, tkn string, showFlash bool) {
 	@layouts.Dashboard() {
 		<div class="container">
+			if showFlash {
+				<div remove-me="2s" class="row alert alert-success" role="alert">
+					Succesfully sent newsletter to subscribers!
+				</div>
+			}
 			<div class="row mb-4 justify-content-between">
 				<div class="col">
 					<h2 class="text-xl">Newsletter</h2>
 				</div>
 				<div class="col d-flex justify-content-end align-items-center">
-					<a role="button" href="/dashboard/newsletter/create" class="btn btn-success">New</a>
+					<a role="button" href="/dashboard/newsletters/create" class="btn btn-success">New</a>
 				</div>
 			</div>
 			<div class="row">
@@ -44,7 +49,20 @@ templ Newsletter(data []NewsletterViewData, pagination components.PaginationPayl
 								<tr class="align-middle">
 									<th scope="row">
 										<div>
-											<a href={ templ.SafeURL(fmt.Sprintf("/dashboard/newsletter/%s/edit", article.ID)) }><button class="btn btn-primary btn-sm">Edit</button></a>
+											<a
+												if article.Released {
+													disabled
+												} else {
+													href={ templ.SafeURL(fmt.Sprintf("/dashboard/newsletters/%s/edit", article.ID)) }
+												}
+											>
+												<button
+													class="btn btn-primary btn-sm"
+													if article.Released {
+														disabled
+													}
+												>Edit</button>
+											</a>
 										</div>
 									</th>
 									<td>{ article.Title }</td>
@@ -71,7 +89,7 @@ templ Newsletter(data []NewsletterViewData, pagination components.PaginationPayl
 				CurrentPage:     pagination.CurrentPage,
 				PrevPage:        pagination.PrevPage,
 				NextPage:        pagination.NextPage,
-				Endpoint:        "/dashboard/articles",
+				Endpoint:        "/dashboard/newsletters",
 				NoNextPage:      pagination.NoNextPage,
 				HasNextNextPage: pagination.HasNextNextPage,
 			})
