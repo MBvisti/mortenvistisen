@@ -33,7 +33,7 @@ func SubscribeModalResponse() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div @click.away=\"open = false, function() {\n			document.cookie = &#39;hideModal=true; max-age=34560000; path=/&#39;;\n		}()\" class=\"w-2/3 md:w-96 bg-base-100 rounded shadow-lg p-6 relative flex flex-col\"><button @click=\"open = false, function() {\n			document.cookie = &#39;hideModal=true; max-age=34560000; path=/&#39;;\n		}()\" class=\"!min-h-[2rem] !h-[2rem] !w-[2rem] btn btn-circle btn-outline self-end\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-6 w-6\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M6 18L18 6M6 6l12 12\"></path></svg></button> <span class=\"font-bold py-2\">Thanks for subscribing!</span> <span class=\"font-sm my-2\">You will receive an email shortly to confirm your subscription.</span></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex flex-col\"><div class=\"divider\"></div><span class=\"font-bold py-2\">Thanks for subscribing!</span> <span class=\"font-sm my-2\">You will receive an email shortly to confirm your subscription.</span><div class=\"divider\"></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -57,33 +57,33 @@ func SubscribeModal(csrfToken, title string) templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div x-data=\"{ open: true }\"><div x-show=\"open\" x-cloak=\"\" class=\"fixed inset-0 z-50 flex justify-center items-center bg-black bg-opacity-70\" x-transition:enter=\"ease-out duration-300\" x-transition:enter-start=\"opacity-0 scale-90\" x-transition:enter-end=\"opacity-100 scale-100\"><div id=\"modalTarget\" @click.away=\"open = false, function() {\n					document.cookie = &#39;hideModal=true; max-age=1209600; path=/&#39;;\n				}()\" class=\"w-2/3 md:w-96 bg-base-100 rounded shadow-lg p-6 relative flex flex-col\"><div class=\"w-full flex justify-end mb-2\"><button @click=\"open = false, function() {\n							document.cookie = &#39;hideModal=true; max-age=1209600; path=/&#39;;\n						}()\" class=\"!min-h-[2rem] !h-[2rem] !w-[2rem] btn btn-circle btn-outline\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-6 w-6\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M6 18L18 6M6 6l12 12\"></path></svg></button></div><h3 class=\"!mt-0 text-center text-2xl font-bold md:text-3xl md:leading-tight text-white\">Monthly deep dives</h3><p class=\"text-base\">I share my learnings twice a month in tutorial form,  so you can pick up new concept faster and expand your technical tool belt.</p><form hx-post=\"/subscribe?is-modal=true\" hx-target=\"#modalTarget\" hx-swap=\"outerHTML\" method=\"POST\" action=\"/subscribe\"><input type=\"hidden\" name=\"gorilla.csrf.Token\" value=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"subscribe-model-wrapper\"><div class=\"divider\"></div><div class=\"mx-auto text-left text-neutral-content\"><h1 class=\"text-2xl font-bold md:text-3xl md:leading-tight text-neutral-content mb-0\">Monthly technical deep dives.</h1><p class=\"mt-0 text-neutral-content leading-normal prose lg:prose-xl\">I work with everything from backend dev, systems designs to devops and machine learning. I share my learnings twice a month in tutorial form, so you can pick up new concept faster and expand your technical tool belt. <br><br>is always an option to opt-out of receiving these updates, included in each mail. One click of a button and you are out.</p></div><form class=\"mx-auto\" hx-post=\"/subscribe\" hx-target=\"#subscribe-model-wrapper\" hx-swap=\"outerHTML\" method=\"POST\" action=\"/subscribe\"><input type=\"hidden\" name=\"gorilla.csrf.Token\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(csrfToken)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/subscribe_modal.templ`, Line: 92, Col: 69}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/subscribe_modal.templ`, Line: 33, Col: 67}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><div class=\"flex md:flex-col items-center gap-2 sm:flex-row sm:gap-3\"><input type=\"hidden\" name=\"article-title\" value=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><div class=\"flex flex-col\"><input type=\"hidden\" name=\"article-title\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/subscribe_modal.templ`, Line: 94, Col: 61}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/subscribe_modal.templ`, Line: 35, Col: 59}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"> <input required type=\"email\" id=\"hero-input\" name=\"hero-input\" class=\"py-3 px-4 block w-full rounded-lg text-sm \n								focus:border-blue-500 disabled:opacity-50 \n								disabled:pointer-events-none bg-slate-900 \n								border-gray-700 text-gray-400 focus:ring-gray-600\" placeholder=\"deep-dives@mortenvistisen.com\"> <button type=\"submit\" class=\"md:w-full sm:w-auto whitespace-nowrap py-3 px-4 \n								inline-flex justify-center items-center gap-x-2 \n								text-sm font-semibold rounded-lg border bg-slate-600 \n								text-white hover:bg-slate-900 disabled:opacity-50 \n								disabled:pointer-events-none focus:outline-none \n								focus:ring-1 focus:ring-gray-600\">Receive Tutorials</button></div></form></div></div></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"> <input required type=\"email\" id=\"hero-input\" name=\"hero-input\" class=\"input input-bordered input-primary w-full mb-4\" placeholder=\"your-mail@here.com\"> <button data-umami-event=\"newsletter--newsletter-page\" type=\"submit\" class=\"btn btn-primary text-white\">Receive Updates</button></div></form><div class=\"divider\"></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
