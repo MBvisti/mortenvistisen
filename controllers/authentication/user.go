@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/MBvisti/mortenvistisen/entity"
+	"github.com/MBvisti/mortenvistisen/domain"
 	"github.com/MBvisti/mortenvistisen/pkg/config"
 	"github.com/MBvisti/mortenvistisen/pkg/mail/templates"
 	"github.com/MBvisti/mortenvistisen/pkg/queue"
@@ -52,7 +52,7 @@ func StoreUser(
 			Render(views.ExtractRenderDeps(ctx))
 	}
 
-	user, err := services.NewUser(ctx.Request().Context(), entity.NewUser{
+	user, err := services.NewUser(ctx.Request().Context(), domain.NewUser{
 		Name:            payload.UserName,
 		Mail:            payload.Mail,
 		Password:        payload.Password,

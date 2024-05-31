@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"github.com/MBvisti/mortenvistisen/controllers/misc"
-	"github.com/MBvisti/mortenvistisen/entity"
+	"github.com/MBvisti/mortenvistisen/domain"
 	"github.com/MBvisti/mortenvistisen/posts"
 	"github.com/MBvisti/mortenvistisen/repository/database"
 	"github.com/MBvisti/mortenvistisen/services"
@@ -204,7 +204,7 @@ func ArticleUpdate(ctx echo.Context, db database.Queries, v *validator.Validate)
 		ctx.Request().Context(),
 		&db,
 		v,
-		entity.UpdatePost{
+		domain.UpdatePost{
 			ID:                parsedID,
 			Title:             updateArticlePayload.Title,
 			HeaderTitle:       updateArticlePayload.HeaderTitle,
@@ -261,7 +261,7 @@ func ArticleStore(ctx echo.Context, db database.Queries, v *validator.Validate) 
 		return err
 	}
 
-	if err := services.NewPost(ctx.Request().Context(), &db, v, entity.NewPost{
+	if err := services.NewPost(ctx.Request().Context(), &db, v, domain.NewPost{
 		Title:             postPayload.Title,
 		HeaderTitle:       postPayload.HeaderTitle,
 		Excerpt:           postPayload.Excerpt,

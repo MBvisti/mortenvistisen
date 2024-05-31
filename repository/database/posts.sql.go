@@ -356,6 +356,29 @@ func (q *Queries) QueryPostByID(ctx context.Context, id uuid.UUID) (Post, error)
 	return i, err
 }
 
+const queryPostBySlug = `-- name: QueryPostBySlug :one
+select id, created_at, updated_at, title, filename, slug, excerpt, draft, released_at, read_time, header_title from posts where slug = $1
+`
+
+func (q *Queries) QueryPostBySlug(ctx context.Context, slug string) (Post, error) {
+	row := q.db.QueryRow(ctx, queryPostBySlug, slug)
+	var i Post
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Title,
+		&i.Filename,
+		&i.Slug,
+		&i.Excerpt,
+		&i.Draft,
+		&i.ReleasedAt,
+		&i.ReadTime,
+		&i.HeaderTitle,
+	)
+	return i, err
+}
+
 const queryPosts = `-- name: QueryPosts :many
 select posts.id, posts.created_at, posts.updated_at, posts.title, posts.filename, posts.slug, posts.excerpt, posts.draft, posts.released_at, posts.read_time, posts.header_title from posts
 `

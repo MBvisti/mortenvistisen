@@ -1,4 +1,4 @@
-package server
+package http
 
 import (
 	"context"
@@ -10,8 +10,8 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/MBvisti/mortenvistisen/http/router"
 	"github.com/MBvisti/mortenvistisen/pkg/config"
-	"github.com/MBvisti/mortenvistisen/server/router"
 	"github.com/gorilla/csrf"
 )
 

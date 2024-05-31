@@ -4,8 +4,8 @@
 	"author": "",
 	"license": "ISC",
 	"scripts": {
-		"watch-css": "tailwind -c ./tailwind/config.js -i ./tailwind/base.css -o ../static/css/output.css --watch",
-		"build-css": "tailwindcss -c ./tailwind/config.js -i ./tailwind/base.css -o ../static/css/output.css --minify"
+		"watch-css": "tailwind --poll -c ./tailwind/config.js -i ./tailwind/base.css -o ../static/css/output.css --watch",
+		"build-css": "npx tailwindcss -c ./tailwind/config.js -i ./tailwind/base.css -o ../static/css/output.css --minify"
 	},
 	"repository": {
 		"type": "git",

@@ -97,3 +97,6 @@ returning *;
 
 -- name: QueryPostByID :one
 select * from posts where id = $1;
+
+-- name: QueryPostBySlug :one
+select * from posts where slug = $1;

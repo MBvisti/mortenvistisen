@@ -15,9 +15,14 @@ type NewsletterViewData struct {
 	ReleasedAt string
 }
 
-templ Newsletter(data []NewsletterViewData, pagination components.PaginationPayload, tkn string) {
+templ Newsletter(data []NewsletterViewData, pagination components.PaginationPayload, tkn string, showFlash bool) {
 	@layouts.Dashboard() {
 		<div class="container">
+			if showFlash {
+				<div remove-me="2s" class="row alert alert-success" role="alert">
+					Succesfully sent newsletter to subscribers!
+				</div>
+			}
 			<div class="row mb-4 justify-content-between">
 				<div class="col">
 					<h2 class="text-xl">Newsletter</h2>

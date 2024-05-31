@@ -25,4 +25,14 @@ values
 returning *;
 
 -- name: QueryNewsletterByID :one
-select * from newsletters where id = $1;
+select 
+	* 
+from newsletters 
+where 
+	id = $1;
+
+-- name: UpdateNewsletter :one
+update newsletters
+	set updated_at = $1, title = $2, edition = $3, released = $4, released_at = $5, body = $6, associated_article_id = $7
+where id = $8
+returning *;

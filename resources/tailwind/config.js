@@ -1,7 +1,11 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    "../views/**/*.templ",
+    "../views/*.templ",
+    "../views/authentication/*.templ",
+    "../views/components/*.templ",
+    "../views/internal/components/*.templ",
+    "../views/internal/layouts/*.templ"
   ],
   darkMode: 'class',
   corePlugins: {

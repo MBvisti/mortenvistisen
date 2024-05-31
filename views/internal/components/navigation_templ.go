@@ -11,7 +11,7 @@ import "io"
 import "bytes"
 
 import (
-	"github.com/MBvisti/mortenvistisen/server/middleware"
+	"github.com/MBvisti/mortenvistisen/http/middleware"
 )
 
 func extractAuthStatus(ctx context.Context) bool {

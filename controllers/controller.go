@@ -1,13 +1,19 @@
 package controllers
 
 import (
+	"log/slog"
+	"net/http"
+
 	"github.com/MBvisti/mortenvistisen/pkg/mail"
 	"github.com/MBvisti/mortenvistisen/pkg/tokens"
 	"github.com/MBvisti/mortenvistisen/posts"
 	"github.com/MBvisti/mortenvistisen/repository/database"
+	"github.com/MBvisti/mortenvistisen/usecases"
+	"github.com/MBvisti/mortenvistisen/views"
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/sessions"
 	"github.com/jackc/pgx/v5"
+	"github.com/labstack/echo/v4"
 	"github.com/riverqueue/river"
 )
 
@@ -21,11 +27,56 @@ import (
 // - destroy | DELETE
 
 type Dependencies struct {
-	DB          database.Queries
-	TknManager  tokens.Manager
-	QueueClient *river.Client[pgx.Tx]
-	Validate    *validator.Validate
-	PostManager posts.PostManager
-	Mail        mail.Mail
-	AuthStore   *sessions.CookieStore
+	DB                database.Queries
+	TknManager        tokens.Manager
+	QueueClient       *river.Client[pgx.Tx]
+	Validate          *validator.Validate
+	PostManager       posts.PostManager
+	Mail              mail.Mail
+	AuthStore         *sessions.CookieStore
+	NewsletterUsecase usecases.Newsletter
+}
+
+func NewDependencies(
+	db database.Queries,
+	tknManager tokens.Manager,
+	queueClient *river.Client[pgx.Tx],
+	validate *validator.Validate,
+	postManager posts.PostManager,
+	mail mail.Mail,
+	authStore *sessions.CookieStore,
+	newsletterUsecase usecases.Newsletter,
+) Dependencies {
+	return Dependencies{
+		db,
+		tknManager,
+		queueClient,
+		validate,
+		postManager,
+		mail,
+		authStore,
+		newsletterUsecase,
+	}
+}
+
+func RedirectHx(w http.ResponseWriter, url string) error {
+	slog.Info("redirecting", "url", url)
+	w.Header().Set("HX-Redirect", url)
+	w.WriteHeader(http.StatusSeeOther)
+
+	return nil
+}
+
+func Redirect(w http.ResponseWriter, r *http.Request, url string) error {
+	http.Redirect(w, r, url, http.StatusSeeOther)
+
+	return nil
+}
+
+func InternalError(ctx echo.Context) error {
+	from := "/"
+
+	return views.InternalServerErr(ctx, views.InternalServerErrData{
+		FromLocation: from,
+	})
 }

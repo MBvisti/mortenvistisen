@@ -5,6 +5,9 @@ import (
 	"log/slog"
 
 	"github.com/MBvisti/mortenvistisen/controllers"
+	"github.com/MBvisti/mortenvistisen/http"
+	mw "github.com/MBvisti/mortenvistisen/http/middleware"
+	"github.com/MBvisti/mortenvistisen/http/router"
 	"github.com/MBvisti/mortenvistisen/pkg/config"
 	"github.com/MBvisti/mortenvistisen/pkg/mail"
 	"github.com/MBvisti/mortenvistisen/pkg/queue"
@@ -12,10 +15,8 @@ import (
 	"github.com/MBvisti/mortenvistisen/pkg/tokens"
 	"github.com/MBvisti/mortenvistisen/posts"
 	"github.com/MBvisti/mortenvistisen/repository/database"
-	"github.com/MBvisti/mortenvistisen/server"
-	mw "github.com/MBvisti/mortenvistisen/server/middleware"
-	"github.com/MBvisti/mortenvistisen/server/router"
 	"github.com/MBvisti/mortenvistisen/services"
+	"github.com/MBvisti/mortenvistisen/usecases"
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/sessions"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -71,21 +72,24 @@ func main() {
 		services.UpdateUserValidation{},
 	)
 
-	controllerDeps := controllers.Dependencies{
-		DB:          *db,
-		TknManager:  *tokenManager,
-		QueueClient: riverClient,
-		Validate:    validator,
-		PostManager: postManager,
-		Mail:        mailClient,
-		AuthStore:   authSessionStore,
-	}
+	newsletterUsecase := usecases.NewNewsletter(*db, validator, mailClient)
+
+	controllerDeps := controllers.NewDependencies(
+		*db,
+		*tokenManager,
+		riverClient,
+		validator,
+		postManager,
+		mailClient,
+		authSessionStore,
+		newsletterUsecase,
+	)
 
 	middleware := mw.NewMiddleware(authSessionStore)
-	router := router.NewRouter(controllerDeps, middleware, cfg)
+	router := router.NewRouter(controllerDeps, middleware, cfg, logger)
 	router.LoadInRoutes()
 
-	server := server.NewServer(router, logger, cfg)
+	server := http.NewServer(router, logger, cfg)
 
 	server.Start()
 }

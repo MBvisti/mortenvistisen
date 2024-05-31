@@ -95,7 +95,11 @@ func (q *Queries) QueryAllNewsletters(ctx context.Context) ([]Newsletter, error)
 }
 
 const queryNewsletterByID = `-- name: QueryNewsletterByID :one
-select id, created_at, updated_at, title, edition, released, released_at, body, associated_article_id from newsletters where id = $1
+select 
+	id, created_at, updated_at, title, edition, released, released_at, body, associated_article_id 
+from newsletters 
+where 
+	id = $1
 `
 
 func (q *Queries) QueryNewsletterByID(ctx context.Context, id uuid.UUID) (Newsletter, error) {
@@ -168,4 +172,48 @@ func (q *Queries) QueryReleasedNewslettersCount(ctx context.Context) (int64, err
 	var newsletters_count int64
 	err := row.Scan(&newsletters_count)
 	return newsletters_count, err
+}
+
+const updateNewsletter = `-- name: UpdateNewsletter :one
+update newsletters
+	set updated_at = $1, title = $2, edition = $3, released = $4, released_at = $5, body = $6, associated_article_id = $7
+where id = $8
+returning id, created_at, updated_at, title, edition, released, released_at, body, associated_article_id
+`
+
+type UpdateNewsletterParams struct {
+	UpdatedAt           pgtype.Timestamptz
+	Title               string
+	Edition             sql.NullInt32
+	Released            pgtype.Bool
+	ReleasedAt          pgtype.Timestamptz
+	Body                []byte
+	AssociatedArticleID uuid.UUID
+	ID                  uuid.UUID
+}
+
+func (q *Queries) UpdateNewsletter(ctx context.Context, arg UpdateNewsletterParams) (Newsletter, error) {
+	row := q.db.QueryRow(ctx, updateNewsletter,
+		arg.UpdatedAt,
+		arg.Title,
+		arg.Edition,
+		arg.Released,
+		arg.ReleasedAt,
+		arg.Body,
+		arg.AssociatedArticleID,
+		arg.ID,
+	)
+	var i Newsletter
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Title,
+		&i.Edition,
+		&i.Released,
+		&i.ReleasedAt,
+		&i.Body,
+		&i.AssociatedArticleID,
+	)
+	return i, err
 }

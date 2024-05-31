@@ -32,9 +32,10 @@ func (b InputElementWithLabel) SetLabelValue(val string) InputElementWithLabel {
 }
 
 func (b InputElementWithLabel) SetLayout(val string) InputElementWithLabel {
-	if val != LabelOutside || val != LabelInside {
+	if val != LabelOutside {
 		b.layout = LabelInside
 	}
+
 	b.layout = val
 	return b
 }

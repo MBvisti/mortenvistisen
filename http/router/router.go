@@ -1,12 +1,15 @@
 package router
 
 import (
+	"context"
+	"log/slog"
+
 	"github.com/MBvisti/mortenvistisen/controllers"
 	"github.com/MBvisti/mortenvistisen/controllers/app"
 	"github.com/MBvisti/mortenvistisen/controllers/authentication"
 	"github.com/MBvisti/mortenvistisen/controllers/dashboard"
+	"github.com/MBvisti/mortenvistisen/http/middleware"
 	"github.com/MBvisti/mortenvistisen/pkg/config"
-	"github.com/MBvisti/mortenvistisen/server/middleware"
 	"github.com/labstack/echo/v4"
 
 	echomw "github.com/labstack/echo/v4/middleware"
@@ -23,6 +26,7 @@ func NewRouter(
 	ctrlDeps controllers.Dependencies,
 	mw middleware.Middleware,
 	cfg config.Cfg,
+	logger *slog.Logger,
 ) *Router {
 	router := echo.New()
 
@@ -33,6 +37,27 @@ func NewRouter(
 	router.Static("/static", "static")
 	router.Use(mw.RegisterUserContext)
 	router.Use(echomw.Recover())
+	router.Use(echomw.RequestLoggerWithConfig(echomw.RequestLoggerConfig{
+		LogStatus:   true,
+		LogURI:      true,
+		LogError:    true,
+		HandleError: true, // forwards error to the global error handler, so it can decide appropriate status code
+		LogValuesFunc: func(c echo.Context, v echomw.RequestLoggerValues) error {
+			if v.Error == nil {
+				logger.LogAttrs(context.Background(), slog.LevelInfo, "REQUEST",
+					slog.String("uri", v.URI),
+					slog.Int("status", v.Status),
+				)
+			} else {
+				logger.LogAttrs(context.Background(), slog.LevelError, "REQUEST_ERROR",
+					slog.String("uri", v.URI),
+					slog.Int("status", v.Status),
+					slog.String("err", v.Error.Error()),
+				)
+			}
+			return nil
+		},
+	}))
 
 	return &Router{
 		router:     router,
@@ -53,7 +78,7 @@ func (r *Router) LoadInRoutes() {
 }
 
 func (r *Router) loadDashboardRoutes() {
-	router := r.router.Group("/dashboard", r.middleware.AuthOnly)
+	router := r.router.Group("/dashboard")
 
 	router.GET("", func(c echo.Context) error {
 		return dashboard.Index(c)
@@ -93,19 +118,34 @@ func (r *Router) loadDashboardRoutes() {
 	})
 
 	router.GET("/newsletters", func(c echo.Context) error {
-		return dashboard.NewslettersIndex(c, r.ctrlDeps.DB)
+		return dashboard.NewslettersIndex(c, r.ctrlDeps.DB, r.ctrlDeps.AuthStore)
 	})
 	router.GET("/newsletters/create", func(c echo.Context) error {
 		return dashboard.NewsletterCreate(c, r.ctrlDeps.DB)
 	})
 	router.POST("/newsletters/store", func(c echo.Context) error {
-		return dashboard.NewsletterStore(c, r.ctrlDeps.Validate, r.ctrlDeps.DB, r.ctrlDeps.Mail)
+		return dashboard.NewsletterStore(
+			c,
+			r.ctrlDeps.DB,
+			r.ctrlDeps.AuthStore,
+			r.ctrlDeps.NewsletterUsecase,
+		)
 	})
 	router.GET("/newsletters/:id/edit", func(c echo.Context) error {
-		return dashboard.NewsletterEdit(c, r.ctrlDeps.DB)
+		return dashboard.NewslettersEdit(
+			c,
+			r.ctrlDeps.DB,
+			r.ctrlDeps.NewsletterUsecase,
+			r.ctrlDeps.AuthStore,
+		)
 	})
 	router.PUT("/newsletters/:id/update", func(c echo.Context) error {
-		return dashboard.NewsletterUpdate(c, r.ctrlDeps.DB)
+		return dashboard.NewsletterUpdate(
+			c,
+			r.ctrlDeps.DB,
+			r.ctrlDeps.NewsletterUsecase,
+			r.ctrlDeps.AuthStore,
+		)
 	})
 
 	router.DELETE("/subscribers/:ID", func(c echo.Context) error {

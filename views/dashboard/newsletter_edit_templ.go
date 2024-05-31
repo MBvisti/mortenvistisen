@@ -12,22 +12,24 @@ import "bytes"
 
 import (
 	"github.com/MBvisti/mortenvistisen/pkg/mail/templates"
+	"github.com/MBvisti/mortenvistisen/views/components"
 	"github.com/MBvisti/mortenvistisen/views/internal/layouts"
 	//"strconv"
-	//"fmt"
+	"fmt"
 	"github.com/MBvisti/mortenvistisen/repository/database"
 	"github.com/google/uuid"
 )
 
 type NewsletterEditViewData struct {
-	Title       string
-	Edition     string
-	ArticleID   uuid.UUID
-	MailPreview templates.NewsletterMail
-	Articles    []database.Post
+	Title        string
+	Edition      string
+	ArticleID    uuid.UUID
+	MailPreview  templates.NewsletterMail
+	Articles     []database.Post
+	NewsletterID uuid.UUID
 }
 
-func NewsletterEdit(data NewsletterEditViewData, tkn string) templ.Component {
+func NewsletterEdit(data NewsletterEditViewData, tkn string, showFlash bool) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -46,15 +48,28 @@ func NewsletterEdit(data NewsletterEditViewData, tkn string) templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"mh-full mt-4 mb-4 container mx-auto flex flex-col\"><a role=\"button\" class=\"btn btn-secondary mb-4 hover:font-bold\" href=\"/dashboard/newsletters\">Back</a><div class=\"row mt-4\"><h2 class=\"fs-4 text-white\">New Newsletter</h2>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"mh-full mt-4 mb-4 container mx-auto flex flex-col\"><a role=\"button\" class=\"btn btn-secondary mb-4 hover:font-bold\" href=\"/dashboard/newsletters\">Back</a><div class=\"row mt-4\"><h2 class=\"fs-4 text-white\">Edit Newsletter</h2>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = NewsletterPreview(data.Articles, data.MailPreview, data.ArticleID, tkn).Render(ctx, templ_7745c5c3_Buffer)
+			if showFlash {
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div remove-me=\"2s\" class=\"alert alert-success\" role=\"alert\">Succesfully saved draft of newsletter</div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = NewsletterPreview(
+				data.Articles,
+				data.MailPreview,
+				data.ArticleID,
+				make(map[string]components.InputError),
+				tkn,
+				"put",
+				fmt.Sprintf("newsletters/%s/update", data.NewsletterID.String())).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(")</div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

@@ -1,31 +1,29 @@
 package dashboard
 
 import (
-	"bytes"
-	"database/sql"
-	"encoding/json"
 	"fmt"
-	"log"
 	"log/slog"
-	"net/http"
 	"strconv"
-	"time"
 
-	"github.com/MBvisti/mortenvistisen/controllers/internal/utilities"
-	"github.com/MBvisti/mortenvistisen/pkg/mail"
+	"github.com/MBvisti/mortenvistisen/controllers"
+	"github.com/MBvisti/mortenvistisen/domain"
 	"github.com/MBvisti/mortenvistisen/pkg/mail/templates"
 	"github.com/MBvisti/mortenvistisen/repository/database"
+	"github.com/MBvisti/mortenvistisen/usecases"
 	"github.com/MBvisti/mortenvistisen/views"
 	"github.com/MBvisti/mortenvistisen/views/components"
 	"github.com/MBvisti/mortenvistisen/views/dashboard"
-	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/gorilla/csrf"
-	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/gorilla/sessions"
 	"github.com/labstack/echo/v4"
 )
 
-func NewslettersIndex(ctx echo.Context, db database.Queries) error {
+func NewslettersIndex(
+	ctx echo.Context,
+	db database.Queries,
+	sess *sessions.CookieStore,
+) error {
 	page := ctx.QueryParam("page")
 
 	var currentPage int
@@ -84,7 +82,28 @@ func NewslettersIndex(ctx echo.Context, db database.Queries) error {
 		pagination.NoNextPage = true
 	}
 
-	return dashboard.Newsletter(viewData, pagination, csrf.Token(ctx.Request())).
+	s, err := sess.Get(ctx.Request(), "flashMsg")
+	if err != nil {
+		return err
+	}
+
+	var showFlash bool
+	for _, flash := range s.Flashes() {
+		f, ok := flash.(string)
+		if !ok {
+			return err
+		}
+
+		if f == "newsletter-released" {
+			showFlash = true
+		}
+	}
+
+	if err := s.Save(ctx.Request(), ctx.Response()); err != nil {
+		return err
+	}
+
+	return dashboard.Newsletter(viewData, pagination, csrf.Token(ctx.Request()), showFlash).
 		Render(views.ExtractRenderDeps(ctx))
 }
 
@@ -109,14 +128,19 @@ func NewsletterCreate(ctx echo.Context, db database.Queries) error {
 		Render(views.ExtractRenderDeps(ctx))
 }
 
-func NewsletterEdit(ctx echo.Context, db database.Queries) error {
+func NewslettersEdit(
+	ctx echo.Context,
+	db database.Queries,
+	newsletterUsecase usecases.Newsletter,
+	sess *sessions.CookieStore,
+) error {
 	newsletterIDParam := ctx.Param("id")
 	newsletterID, err := uuid.Parse(newsletterIDParam)
 	if err != nil {
 		return err
 	}
 
-	newsletter, err := db.QueryNewsletterByID(ctx.Request().Context(), newsletterID)
+	newsletter, err := newsletterUsecase.Get(ctx.Request().Context(), newsletterID)
 	if err != nil {
 		return err
 	}
@@ -126,236 +150,367 @@ func NewsletterEdit(ctx echo.Context, db database.Queries) error {
 		return err
 	}
 
-	edition := strconv.Itoa(int(newsletter.Edition.Int32))
-
-	return dashboard.NewsletterEdit(dashboard.NewsletterEditViewData{
-		Title:     newsletter.Title,
-		Edition:   edition,
-		ArticleID: newsletter.AssociatedArticleID,
-		MailPreview: templates.NewsletterMail{
-			Title:       newsletter.Title,
-			Edition:     edition,
-			Paragraphs:  []string{""},
-			ArticleLink: "",
-		},
-		Articles: articles,
-	}, csrf.Token(ctx.Request())).
-		Render(views.ExtractRenderDeps(ctx))
-}
-
-// TODO: implement
-func NewsletterUpdate(ctx echo.Context, db database.Queries) error {
-	newsletterIDParam := ctx.Param("id")
-	newsletterID, err := uuid.Parse(newsletterIDParam)
-	if err != nil {
-		return err
-	}
-
-	newsletter, err := db.QueryNewsletterByID(ctx.Request().Context(), newsletterID)
-	if err != nil {
-		return err
-	}
-
-	articles, err := db.QueryPosts(ctx.Request().Context())
-	if err != nil {
-		return err
-	}
-
-	edition := strconv.Itoa(int(newsletter.Edition.Int32))
-
-	return dashboard.NewsletterEdit(dashboard.NewsletterEditViewData{
-		Title:     newsletter.Title,
-		Edition:   edition,
-		ArticleID: newsletter.AssociatedArticleID,
-		MailPreview: templates.NewsletterMail{
-			Title:       newsletter.Title,
-			Edition:     edition,
-			Paragraphs:  []string{""},
-			ArticleLink: "",
-		},
-		Articles: articles,
-	}, csrf.Token(ctx.Request())).
-		Render(views.ExtractRenderDeps(ctx))
-}
-
-type newsletterCreatePreviewPayload struct {
-	Title               string    `form:"title"`
-	ParagraphElements   []string  `form:"paragraph-element"`
-	NewParagraphElement string    `form:"new-paragraph-element"`
-	ArticleID           uuid.UUID `form:"article-id"`
-}
-
-func newsletterCreatePreview(ctx echo.Context, db database.Queries) error {
-	paragraphIndex := ctx.QueryParam("paragraph-index")
-	action := ctx.QueryParam("action")
-
-	var previewPayload newsletterCreatePreviewPayload
-	if err := ctx.Bind(&previewPayload); err != nil {
-		return err
-	}
-
-	paras := previewPayload.ParagraphElements
-
-	if paragraphIndex != "" && action == "del" {
-		log.Print(paras)
-		index, err := strconv.Atoi(paragraphIndex)
-		if err != nil {
-			return err
+	var associatedArticleID uuid.UUID
+	for _, article := range articles {
+		if article.Slug == newsletter.ArticleSlug {
+			associatedArticleID = article.ID
 		}
-
-		if action == "del" {
-			paras = append(
-				paras[:index],
-				paras[index+1:]...)
-		}
-		log.Print(paras)
-	}
-
-	if previewPayload.NewParagraphElement != "" && action != "del" {
-		paras = append(
-			paras,
-			previewPayload.NewParagraphElement,
-		)
-	}
-
-	articles, err := db.QueryPosts(ctx.Request().Context())
-	if err != nil {
-		return err
 	}
 
 	releasedNewslettersCount, err := db.QueryReleasedNewslettersCount(
 		ctx.Request().Context(),
 	)
-	(ctx.Request().Context())
+	if err != nil {
+		return err
+	}
+	edition := strconv.Itoa(int(releasedNewslettersCount) + 1)
+
+	s, err := sess.Get(ctx.Request(), "flashMsg")
 	if err != nil {
 		return err
 	}
 
-	edition := strconv.Itoa(int(releasedNewslettersCount) + 1)
+	var showFlash bool
+	for _, flash := range s.Flashes() {
+		f, ok := flash.(string)
+		if !ok {
+			return err
+		}
 
-	return dashboard.NewsletterPreview(articles, templates.NewsletterMail{
-		Title:      previewPayload.Title,
-		Edition:    edition,
-		Paragraphs: paras,
-	}, previewPayload.ArticleID, csrf.Token(ctx.Request())).
+		if f == "newsletter-draft-saved" {
+			showFlash = true
+		}
+	}
+
+	if err := s.Save(ctx.Request(), ctx.Response()); err != nil {
+		return err
+	}
+
+	return dashboard.NewsletterEdit(dashboard.NewsletterEditViewData{
+		Title:        newsletter.Title,
+		Edition:      edition,
+		NewsletterID: newsletterID,
+		ArticleID:    associatedArticleID,
+		MailPreview: templates.NewsletterMail{
+			Title:      newsletter.Title,
+			Edition:    edition,
+			Paragraphs: newsletter.Paragraphs,
+			ArticleLink: usecases.BuildURLFromSlug(
+				usecases.FormatArticleSlug(newsletter.ArticleSlug),
+			),
+		},
+		Articles: articles,
+	}, csrf.Token(ctx.Request()), showFlash).
 		Render(views.ExtractRenderDeps(ctx))
 }
 
-type newsletterStorePayload struct {
-	Title             string    `form:"title"             validate:"required,gte=4"`
-	Edition           string    `form:"edition"           validate:"required"`
-	ArticleID         uuid.UUID `form:"article-id"        validate:"required"`
-	ParagraphElements []string  `form:"paragraph-element" validate:"required,gte=1"`
-	ReleaseOnCreate   string    `form:"release-on-create"`
-}
-
-func NewsletterStore(
+// TODO: implement
+func NewsletterUpdate(
 	ctx echo.Context,
-	v *validator.Validate,
 	db database.Queries,
-	mail mail.Mail,
+	newsletterUsecase usecases.Newsletter,
+	sess *sessions.CookieStore,
 ) error {
 	preview := ctx.QueryParam("preview")
-	if preview == "true" {
-		return newsletterCreatePreview(ctx, db)
-	}
-
-	var storeNewsletterPayload newsletterStorePayload
-	if err := ctx.Bind(&storeNewsletterPayload); err != nil {
+	var updateNewsletterPayload newsletterPayload
+	if err := ctx.Bind(&updateNewsletterPayload); err != nil {
 		return err
 	}
-
-	if err := v.Struct(storeNewsletterPayload); err != nil {
-		log.Print(err)
-		return err
-	}
-
-	edition, err := strconv.Atoi(storeNewsletterPayload.Edition)
+	newsletterIDParam := ctx.Param("id")
+	newsletterID, err := uuid.Parse(newsletterIDParam)
 	if err != nil {
 		return err
 	}
 
-	var buf bytes.Buffer
-	if err := json.NewEncoder(&buf).Encode(storeNewsletterPayload.ParagraphElements); err != nil {
+	articleID, err := uuid.Parse(updateNewsletterPayload.ArticleID)
+	if err != nil {
 		return err
 	}
 
-	now := database.ConvertToPGTimestamptz(time.Now())
-	insertArgs := database.InsertNewsletterParams{
-		ID:                  uuid.New(),
-		CreatedAt:           now,
-		UpdatedAt:           now,
-		Title:               storeNewsletterPayload.Title,
-		Edition:             sql.NullInt32{Int32: int32(edition), Valid: true},
-		Body:                buf.Bytes(),
-		AssociatedArticleID: storeNewsletterPayload.ArticleID,
+	if preview == "true" {
+		return previewNewsletter(
+			ctx,
+			db,
+			newsletterUsecase,
+			updateNewsletterPayload,
+			"put",
+			fmt.Sprintf("newsletters/%s/update", newsletterID),
+		)
 	}
 
-	if storeNewsletterPayload.ReleaseOnCreate == "on" {
-		insertArgs.Released = pgtype.Bool{Bool: true, Valid: true}
-		insertArgs.ReleasedAt = now
+	newsletter, validationErrs, err := newsletterUsecase.Update(
+		ctx.Request().Context(),
+		updateNewsletterPayload.Title,
+		updateNewsletterPayload.Edition,
+		updateNewsletterPayload.ParagraphElements,
+		updateNewsletterPayload.ArticleID,
+		newsletterID,
+	)
+	if err != nil {
+		slog.Error("could not update newsletters", "error", err)
+		return err
+	}
+	if len(validationErrs) > 0 {
+		articles, err := db.QueryPosts(ctx.Request().Context())
+		if err != nil {
+			return err
+		}
+
+		errors := make(map[string]components.InputError, len(validationErrs))
+
+		for field, validationErr := range validationErrs {
+			switch field {
+			case "Title":
+				errors["title"] = components.InputError{
+					Msg:      validationErr,
+					OldValue: updateNewsletterPayload.Title,
+				}
+			case "Paragraphs":
+				errors["paragraph-elements"] = components.InputError{
+					Msg: validationErr,
+				}
+			case "ArticleSlug":
+				errors["article-id"] = components.InputError{
+					Msg: validationErr,
+				}
+			case "Edition":
+				errors["edition"] = components.InputError{
+					Msg: validationErr,
+				}
+			}
+		}
+
+		return dashboard.NewsletterPreview(articles, templates.NewsletterMail{
+			Title:      updateNewsletterPayload.Title,
+			Edition:    updateNewsletterPayload.Edition,
+			Paragraphs: updateNewsletterPayload.ParagraphElements,
+		}, articleID, errors, csrf.Token(ctx.Request()), "put", fmt.Sprintf("newsletters/%s/update", articleID)).
+			Render(views.ExtractRenderDeps(ctx))
 	}
 
-	newsletter, err := db.InsertNewsletter(
-		ctx.Request().Context(), insertArgs,
+	articles, err := db.QueryPosts(ctx.Request().Context())
+	if err != nil {
+		return err
+	}
+
+	if updateNewsletterPayload.ReleaseOnCreate == "on" {
+		return releaseNewsletter(
+			ctx,
+			newsletter,
+			db,
+			newsletterUsecase,
+			updateNewsletterPayload,
+			sess,
+			"put",
+			fmt.Sprintf("newsletters/%s/update", newsletterID),
+		)
+	}
+
+	return dashboard.NewsletterEdit(dashboard.NewsletterEditViewData{
+		NewsletterID: newsletter.ID,
+		Title:        newsletter.Title,
+		Edition:      strconv.Itoa(int(newsletter.Edition)),
+		ArticleID:    articleID,
+		MailPreview: templates.NewsletterMail{
+			Title:       newsletter.Title,
+			Edition:     strconv.Itoa(int(newsletter.Edition)),
+			Paragraphs:  newsletter.Paragraphs,
+			ArticleLink: newsletter.ArticleSlug,
+		},
+		Articles: articles,
+	}, csrf.Token(ctx.Request()), false).
+		Render(views.ExtractRenderDeps(ctx))
+}
+
+func previewNewsletter(ctx echo.Context,
+	db database.Queries,
+	newsletterUsecase usecases.Newsletter,
+	storeNewsletterPayload newsletterPayload,
+	hxAction string,
+	endpoint string,
+) error {
+	paragraphIndex := ctx.QueryParam("paragraph-index")
+	action := ctx.QueryParam("action")
+
+	newsletterPreview, err := newsletterUsecase.Preview(
+		ctx.Request().Context(),
+		paragraphIndex,
+		action,
+		storeNewsletterPayload.Title,
+		storeNewsletterPayload.ParagraphElements,
+		storeNewsletterPayload.NewParagraphElement,
+		storeNewsletterPayload.ArticleID,
 	)
 	if err != nil {
 		return err
 	}
 
-	if newsletter.Released.Bool {
-		verifiedSubs, err := db.QueryVerifiedSubscribers(ctx.Request().Context())
+	articles, err := db.QueryPosts(ctx.Request().Context())
+	if err != nil {
+		return err
+	}
+
+	var parsedArticleID uuid.UUID
+	if storeNewsletterPayload.ArticleID != "" {
+		id, err := uuid.Parse(storeNewsletterPayload.ArticleID)
 		if err != nil {
 			return err
 		}
 
-		article, err := db.QueryPostByID(
-			ctx.Request().Context(),
-			newsletter.AssociatedArticleID,
-		)
+		parsedArticleID = id
+	}
+
+	return dashboard.NewsletterPreview(articles, templates.NewsletterMail{
+		Title:      newsletterPreview.Title,
+		Edition:    strconv.Itoa(int(newsletterPreview.Edition)),
+		Paragraphs: newsletterPreview.Paragraphs,
+	}, parsedArticleID, make(map[string]components.InputError), csrf.Token(ctx.Request()), hxAction, endpoint).Render(views.ExtractRenderDeps(ctx))
+}
+
+func releaseNewsletter(ctx echo.Context,
+	newsletter domain.Newsletter,
+	db database.Queries,
+	newsletterUsecase usecases.Newsletter,
+	storeNewsletterPayload newsletterPayload,
+	sess *sessions.CookieStore,
+	hxAction string,
+	endpoint string,
+) error {
+	validationErrs, err := newsletterUsecase.ReleaseNewsletter(
+		ctx.Request().Context(),
+		newsletter,
+	)
+	if err != nil {
+		return err
+	}
+
+	if len(validationErrs) > 0 {
+		articles, err := db.QueryPosts(ctx.Request().Context())
 		if err != nil {
 			return err
 		}
 
-		newsletterMail := templates.NewsletterMail{
-			Title:       newsletter.Title,
-			Edition:     strconv.Itoa(int(newsletter.Edition.Int32)),
-			Paragraphs:  storeNewsletterPayload.ParagraphElements,
-			ArticleLink: utilities.BuildURLFromSlug(utilities.FormatArticleSlug(article.Slug)),
-		}
-
-		htmlMail, err := newsletterMail.GenerateHtmlVersion()
+		articleID, err := uuid.Parse(storeNewsletterPayload.ArticleID)
 		if err != nil {
 			return err
 		}
 
-		textMail, err := newsletterMail.GenerateTextVersion()
-		if err != nil {
-			return err
-		}
+		errors := make(map[string]components.InputError, len(validationErrs))
 
-		for _, verifiedSub := range verifiedSubs {
-			if err := mail.Send(
-				ctx.Request().Context(),
-				verifiedSub.Email.String,
-				"newsletter@mortenvistisen.com",
-				fmt.Sprintf("MBV newsletter edition: %v", newsletter.Edition.Int32),
-				textMail,
-				htmlMail,
-			); err != nil {
-				slog.Error("could not send email", "error", err)
-				return err
+		for field, validationErr := range validationErrs {
+			switch field {
+			case "Title":
+				errors["title"] = components.InputError{
+					Msg:      validationErr,
+					OldValue: storeNewsletterPayload.Title,
+				}
+			case "Paragraphs":
+				errors["paragraph-elements"] = components.InputError{
+					Msg: validationErr,
+				}
+			case "ArticleSlug":
+				errors["article-id"] = components.InputError{
+					Msg: validationErr,
+				}
+			case "Edition":
+				errors["edition"] = components.InputError{
+					Msg: validationErr,
+				}
 			}
 		}
 
-		ctx.Response().Header().Add("HX-Refresh", "true")
-		ctx.Response().Writer.Header().Add("HX-Redirect", "/dashboard/newsletter")
-		return ctx.String(http.StatusCreated, "newsletter sent")
+		return dashboard.NewsletterPreview(articles, templates.NewsletterMail{
+			Title:      storeNewsletterPayload.Title,
+			Edition:    storeNewsletterPayload.Edition,
+			Paragraphs: storeNewsletterPayload.ParagraphElements,
+		}, articleID, errors, csrf.Token(ctx.Request()), hxAction, endpoint).
+			Render(views.ExtractRenderDeps(ctx))
 	}
 
-	ctx.Response().Header().Add("HX-Refresh", "true")
-	ctx.Response().
-		Writer.Header().
-		Add("HX-Redirect", fmt.Sprintf("/dashboard/newsletter/%v/edit", newsletter.ID))
-	return ctx.String(http.StatusCreated, "newsletter sent")
+	s, err := sess.Get(ctx.Request(), "flashMsg")
+	if err != nil {
+		return err
+	}
+	s.AddFlash("newsletter-released")
+	if err := s.Save(ctx.Request(), ctx.Response()); err != nil {
+		return err
+	}
+
+	return controllers.RedirectHx(
+		ctx.Response().Writer,
+		"/dashboard/newsletters",
+	)
+}
+
+type newsletterPayload struct {
+	Title               string   `form:"title"                 validate:"required,gte=4"`
+	Edition             string   `form:"edition"               validate:"required"`
+	ArticleID           string   `form:"article-id"            validate:"required"`
+	NewParagraphElement string   `form:"new-paragraph-element"`
+	ParagraphElements   []string `form:"paragraph-element"     validate:"required,gte=1"`
+	ReleaseOnCreate     string   `form:"release-on-create"`
+}
+
+func NewsletterStore(
+	ctx echo.Context,
+	db database.Queries,
+	sess *sessions.CookieStore,
+	newsletterUsecase usecases.Newsletter,
+) error {
+	preview := ctx.QueryParam("preview")
+	var storeNewsletterPayload newsletterPayload
+	if err := ctx.Bind(&storeNewsletterPayload); err != nil {
+		return err
+	}
+
+	if preview == "true" {
+		return previewNewsletter(
+			ctx,
+			db,
+			newsletterUsecase,
+			storeNewsletterPayload,
+			"post",
+			"newsletters/store",
+		)
+	}
+
+	newsletter, err := newsletterUsecase.Create(ctx.Request().Context(),
+		storeNewsletterPayload.Title,
+		storeNewsletterPayload.Edition,
+		storeNewsletterPayload.ParagraphElements,
+		storeNewsletterPayload.ArticleID,
+	)
+	if err != nil {
+		return err
+	}
+
+	if storeNewsletterPayload.ReleaseOnCreate == "" {
+		s, err := sess.Get(ctx.Request(), "flashMsg")
+		if err != nil {
+			return err
+		}
+
+		s.AddFlash("newsletter-draft-saved")
+		if err := s.Save(ctx.Request(), ctx.Response()); err != nil {
+			return err
+		}
+	}
+
+	if storeNewsletterPayload.ReleaseOnCreate == "on" {
+		return releaseNewsletter(
+			ctx,
+			newsletter,
+			db,
+			newsletterUsecase,
+			storeNewsletterPayload,
+			sess,
+			"post",
+			"newsletters/store",
+		)
+	}
+
+	return controllers.RedirectHx(
+		ctx.Response().Writer,
+		fmt.Sprintf("/dashboard/newsletters/%v/edit", newsletter.ID),
+	)
 }

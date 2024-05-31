@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/MBvisti/mortenvistisen/controllers/misc"
-	"github.com/MBvisti/mortenvistisen/entity"
+	"github.com/MBvisti/mortenvistisen/domain"
 	"github.com/MBvisti/mortenvistisen/pkg/config"
 	"github.com/MBvisti/mortenvistisen/pkg/mail/templates"
 	"github.com/MBvisti/mortenvistisen/pkg/queue"
@@ -249,7 +249,7 @@ func StoreResetPassword(
 		}).Render(views.ExtractRenderDeps(ctx))
 	}
 
-	_, err = services.UpdateUser(ctx.Request().Context(), entity.UpdateUser{
+	_, err = services.UpdateUser(ctx.Request().Context(), domain.UpdateUser{
 		Name:            user.Name,
 		Mail:            user.Mail,
 		Password:        payload.Password,
