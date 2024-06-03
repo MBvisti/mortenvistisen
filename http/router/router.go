@@ -80,14 +80,14 @@ func (r *Router) LoadInRoutes() {
 }
 
 func (r *Router) loadDashboardRoutes() {
-	router := r.router.Group("/dashboard", r.middleware.AuthOnly)
+	router := r.router.Group("/dashboard")
 
 	router.GET("", func(c echo.Context) error {
 		return dashboard.Index(c)
 	})
 
 	router.GET("/subscribers", func(c echo.Context) error {
-		return dashboard.SubscribersIndex(c, r.ctrlDeps.DB, r.ctrlDeps.SubscriberModel)
+		return dashboard.SubscribersIndex(c, r.ctrlDeps.DB, r.ctrlDeps.Models.Subscriber)
 	})
 
 	router.POST("/subscribers/:id/send-verification-mail", func(c echo.Context) error {

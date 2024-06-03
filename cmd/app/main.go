@@ -75,7 +75,7 @@ func main() {
 
 	newsletterUsecase := usecases.NewNewsletter(*db, validator, mailClient)
 
-	subModel := models.NewSubscriber(*db)
+	models := models.NewModels(conn)
 
 	controllerDeps := controllers.NewDependencies(
 		*db,
@@ -86,7 +86,7 @@ func main() {
 		mailClient,
 		authSessionStore,
 		newsletterUsecase,
-		subModel,
+		models,
 	)
 
 	middleware := mw.NewMiddleware(authSessionStore)

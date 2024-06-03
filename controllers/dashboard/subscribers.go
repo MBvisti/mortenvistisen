@@ -25,7 +25,7 @@ import (
 func SubscribersIndex(
 	ctx echo.Context,
 	db database.Queries,
-	subscriberModel models.Subscriber,
+	subscriberModel models.SubscriberModel,
 ) error {
 	page := ctx.QueryParam("page")
 	pageLimit := 7

@@ -6,7 +6,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/MBvisti/mortenvistisen/repository/database"
+	"github.com/MBvisti/mortenvistisen/models/internal/database"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
@@ -19,16 +19,19 @@ type Subscriber struct {
 	SubscribedAt time.Time
 	Referer      string
 	IsVerified   bool
-	db           database.Queries
 }
 
-func NewSubscriber(db database.Queries) Subscriber {
-	return Subscriber{
+type SubscriberModel struct {
+	db *database.Queries
+}
+
+func NewSubscriber(db *database.Queries) SubscriberModel {
+	return SubscriberModel{
 		db: db,
 	}
 }
 
-func (s *Subscriber) ByID(ctx context.Context, id uuid.UUID) (Subscriber, error) {
+func (s *SubscriberModel) ByID(ctx context.Context, id uuid.UUID) (Subscriber, error) {
 	subscriber, err := s.db.QuerySubscriberByID(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -49,7 +52,7 @@ func (s *Subscriber) ByID(ctx context.Context, id uuid.UUID) (Subscriber, error)
 	}, nil
 }
 
-func (s *Subscriber) ByEmail(ctx context.Context, email string) (Subscriber, error) {
+func (s *SubscriberModel) ByEmail(ctx context.Context, email string) (Subscriber, error) {
 	subscriber, err := s.db.QuerySubscriberByEmail(ctx, sql.NullString{String: email, Valid: true})
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -70,7 +73,10 @@ func (s *Subscriber) ByEmail(ctx context.Context, email string) (Subscriber, err
 	}, nil
 }
 
-func (s *Subscriber) List(ctx context.Context, opts ...listOpt) ([]Subscriber, error) {
+func (s *SubscriberModel) List(
+	ctx context.Context,
+	opts ...listOpt,
+) ([]Subscriber, error) {
 	options := &listOptions{}
 
 	for _, opt := range opts {
@@ -101,7 +107,7 @@ func (s *Subscriber) List(ctx context.Context, opts ...listOpt) ([]Subscriber, e
 	return subscribers, nil
 }
 
-func (s *Subscriber) Count(ctx context.Context) (int64, error) {
+func (s *SubscriberModel) Count(ctx context.Context) (int64, error) {
 	count, err := s.db.QuerySubscriberCount(ctx)
 	if err != nil {
 		return 0, err
@@ -110,7 +116,7 @@ func (s *Subscriber) Count(ctx context.Context) (int64, error) {
 	return count, nil
 }
 
-func (s *Subscriber) NewForCurrentMonth(ctx context.Context) (int64, error) {
+func (s *SubscriberModel) NewForCurrentMonth(ctx context.Context) (int64, error) {
 	count, err := s.db.QueryNewSubscribersForCurrentMonth(ctx)
 	if err != nil {
 		return 0, err
@@ -119,7 +125,7 @@ func (s *Subscriber) NewForCurrentMonth(ctx context.Context) (int64, error) {
 	return count, nil
 }
 
-func (s *Subscriber) UnverifiedCount(ctx context.Context) (int64, error) {
+func (s *SubscriberModel) UnverifiedCount(ctx context.Context) (int64, error) {
 	count, err := s.db.QueryUnverifiedSubCount(ctx)
 	if err != nil {
 		return 0, err

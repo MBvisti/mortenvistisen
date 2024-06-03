@@ -38,7 +38,7 @@ type Dependencies struct {
 	Mail              mail.Mail
 	AuthStore         *sessions.CookieStore
 	NewsletterUsecase usecases.Newsletter
-	SubscriberModel   models.Subscriber
+	Models            models.Models
 }
 
 func NewDependencies(
@@ -50,7 +50,7 @@ func NewDependencies(
 	mail mail.Mail,
 	authStore *sessions.CookieStore,
 	newsletterUsecase usecases.Newsletter,
-	subscriberModel models.Subscriber,
+	models models.Models,
 ) Dependencies {
 	return Dependencies{
 		db,
@@ -61,7 +61,7 @@ func NewDependencies(
 		mail,
 		authStore,
 		newsletterUsecase,
-		subscriberModel,
+		models,
 	}
 }
 

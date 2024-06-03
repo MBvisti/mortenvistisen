@@ -1,6 +1,14 @@
 package models
 
-import "database/sql"
+import (
+	"context"
+	"database/sql"
+	"fmt"
+	"os"
+
+	"github.com/MBvisti/mortenvistisen/models/internal/database"
+	"github.com/jackc/pgx/v5/pgxpool"
+)
 
 type listOptions struct {
 	limit  sql.NullInt32
@@ -27,4 +35,25 @@ func WithPagination(limit, offset int32) listOpt {
 		lso.offset = sql.NullInt32{Int32: offset, Valid: true}
 		lso.limit = sql.NullInt32{Int32: limit, Valid: true}
 	}
+}
+
+type Models struct {
+	Subscriber SubscriberModel
+}
+
+func NewModels(pool *pgxpool.Pool) Models {
+	db := database.New(pool)
+	return Models{
+		Subscriber: SubscriberModel{db},
+	}
+}
+
+func SetupDatabasePool(ctx context.Context, databaseURL string) *pgxpool.Pool {
+	dbpool, err := pgxpool.New(ctx, databaseURL)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to create connection pool: %v\n", err)
+		os.Exit(1)
+	}
+
+	return dbpool
 }
