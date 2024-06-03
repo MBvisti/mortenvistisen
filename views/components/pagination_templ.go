@@ -15,16 +15,48 @@ import (
 	"strconv"
 )
 
-type PaginationPayload struct {
-	CurrentPage     int
-	PrevPage        int
-	NextPage        int
-	Endpoint        string
-	NoNextPage      bool
-	HasNextNextPage bool
+type page struct {
+	value int
+	link  string
+	show  bool
 }
 
-func Pagination(page PaginationPayload) templ.Component {
+type PaginationProps struct {
+	CurrentPage int
+	TotalPages  int
+}
+
+func Pagination(props PaginationProps) templ.Component {
+	nextPage := props.CurrentPage + 1
+	prevPage := props.CurrentPage - 1
+
+	pages := make(map[string]page, 4)
+
+	var hasNextPage bool
+	if props.CurrentPage < props.TotalPages {
+		hasNextPage = true
+	}
+
+	if !hasNextPage && props.TotalPages >= 3 && prevPage != 1 {
+		pages["prevSquared"] = page{link: fmt.Sprintf("?page=%v", (prevPage - 1)), value: (prevPage - 1), show: true}
+	}
+
+	if prevPage != 0 {
+		pages["prev"] = page{link: fmt.Sprintf("?page=%v", prevPage), value: prevPage, show: true}
+	}
+
+	if props.CurrentPage == 1 && props.TotalPages >= 3 {
+		pages["nextSquared"] = page{link: fmt.Sprintf("?page=%v", 3), value: 3, show: true}
+	}
+
+	pages["next"] = page{link: fmt.Sprintf("?page=%v", nextPage), value: nextPage, show: hasNextPage}
+
+	pages["current"] = page{value: props.CurrentPage, show: true}
+
+	return paginationComponent(pages)
+}
+
+func paginationComponent(page map[string]page) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -41,13 +73,13 @@ func Pagination(page PaginationPayload) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if page.CurrentPage == 1 {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" class=\"page-item disabled\"")
+		if page["prev"].show {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" class=\"page-item\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" class=\"page-item\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" class=\"page-item disabled\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -56,7 +88,7 @@ func Pagination(page PaginationPayload) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var2 templ.SafeURL = templ.SafeURL(fmt.Sprintf("%s?page=%v", page.Endpoint, page.PrevPage))
+		var templ_7745c5c3_Var2 templ.SafeURL = templ.SafeURL(page["prev"].link)
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var2)))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -65,12 +97,12 @@ func Pagination(page PaginationPayload) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if page.NoNextPage && page.CurrentPage > 2 {
+		if page["prevSquared"].show {
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<li class=\"page-item\"><a class=\"page-link\" href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var3 templ.SafeURL = templ.SafeURL(fmt.Sprintf("%s?page=%v", page.Endpoint, page.PrevPage-1))
+			var templ_7745c5c3_Var3 templ.SafeURL = templ.SafeURL(page["prevSquared"].link)
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var3)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -80,9 +112,9 @@ func Pagination(page PaginationPayload) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var4 string
-			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(page.PrevPage - 1))
+			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(page["prevSquared"].value))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/pagination.templ`, Line: 40, Col: 38}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/pagination.templ`, Line: 74, Col: 48}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -93,186 +125,103 @@ func Pagination(page PaginationPayload) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<li")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if page.CurrentPage == 1 {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" class=\"page-item active\"")
+		if page["prev"].show {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<li class=\"page-item\"><a class=\"page-link\" href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		} else {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" class=\"page-item\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("><a")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if page.CurrentPage != 1 {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" href=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var5 templ.SafeURL = templ.SafeURL(fmt.Sprintf("%s?page=%v", page.Endpoint, page.PrevPage))
+			var templ_7745c5c3_Var5 templ.SafeURL = templ.SafeURL(page["prev"].link)
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var5)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" class=\"page-link\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if page.CurrentPage == 1 {
 			var templ_7745c5c3_Var6 string
-			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(page.CurrentPage))
+			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(page["prev"].value))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/pagination.templ`, Line: 58, Col: 39}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/pagination.templ`, Line: 84, Col: 41}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		} else {
-			var templ_7745c5c3_Var7 string
-			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(page.PrevPage))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a></li>")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/pagination.templ`, Line: 60, Col: 36}
+				return templ_7745c5c3_Err
+			}
+		}
+		if page["current"].show {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<li class=\"page-item active\"><a class=\"page-link\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var7 string
+			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(page["current"].value))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/pagination.templ`, Line: 93, Col: 44}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a></li><li")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if page.CurrentPage > 1 {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" class=\"page-item active\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		} else {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" class=\"page-item\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a></li>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("><a class=\"page-link\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if page.CurrentPage == 1 {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" href=\"")
+		if page["next"].show {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<li class=\"page-item\"><a class=\"page-link\" href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var8 templ.SafeURL = templ.SafeURL(fmt.Sprintf("%s?page=%v", page.Endpoint, page.NextPage))
+			var templ_7745c5c3_Var8 templ.SafeURL = templ.SafeURL(page["next"].link)
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var8)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if page.CurrentPage > 1 {
 			var templ_7745c5c3_Var9 string
-			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(page.CurrentPage))
+			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(page["next"].value))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/pagination.templ`, Line: 78, Col: 39}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/pagination.templ`, Line: 103, Col: 41}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-		} else {
-			var templ_7745c5c3_Var10 string
-			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(page.NextPage))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/pagination.templ`, Line: 80, Col: 36}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a></li>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a></li>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if !page.NoNextPage && page.HasNextNextPage {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<li class=\"page-item\"><a class=\"page-link\"")
+		if page["nextSquared"].show {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<li class=\"page-item\"><a class=\"page-link\" href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if page.CurrentPage == 1 {
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" href=\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var11 templ.SafeURL = templ.SafeURL(fmt.Sprintf("%s?page=%v", page.Endpoint, page.NextPage+1))
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var11)))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			} else {
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" href=\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var12 templ.SafeURL = templ.SafeURL(fmt.Sprintf("%s?page=%v", page.Endpoint, page.NextPage))
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var12)))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(">")
+			var templ_7745c5c3_Var10 templ.SafeURL = templ.SafeURL(page["nextSquared"].link)
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var10)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if page.CurrentPage == 1 {
-				var templ_7745c5c3_Var13 string
-				templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(page.NextPage + 1))
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/pagination.templ`, Line: 95, Col: 39}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			} else {
-				var templ_7745c5c3_Var14 string
-				templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(page.NextPage))
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/pagination.templ`, Line: 97, Col: 37}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var11 string
+			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(page["nextSquared"].value))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/pagination.templ`, Line: 113, Col: 48}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a></li>")
 			if templ_7745c5c3_Err != nil {
@@ -283,13 +232,13 @@ func Pagination(page PaginationPayload) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if page.NoNextPage {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" class=\"page-item disabled\"")
+		if page["next"].show {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" class=\"page-item\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" class=\"page-item\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" class=\"page-item disabled\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -298,13 +247,13 @@ func Pagination(page PaginationPayload) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if !page.NoNextPage {
+		if page["next"].show {
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var15 templ.SafeURL = templ.SafeURL(fmt.Sprintf("%s?page=%v", page.Endpoint, page.NextPage))
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var15)))
+			var templ_7745c5c3_Var12 templ.SafeURL = templ.SafeURL(page["next"].link)
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var12)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -323,3 +272,74 @@ func Pagination(page PaginationPayload) templ.Component {
 		return templ_7745c5c3_Err
 	})
 }
+
+//if !page.NoNextPage && page.HasNextNextPage {
+//	<li class="page-item">
+//		<a
+//			class="page-link"
+//			if page.CurrentPage == 1 {
+//				href={ templ.SafeURL(fmt.Sprintf("%s?page=%v", page.Endpoint, page.NextPage+1)) }
+//			} else {
+//				href={ templ.SafeURL(fmt.Sprintf("%s?page=%v", page.Endpoint, page.NextPage)) }
+//			}
+//		>
+//			if page.CurrentPage == 1 {
+//				{ strconv.Itoa(page.NextPage+1) }
+//			} else {
+//				{ strconv.Itoa(page.NextPage) }
+//			}
+//		</a>
+//	</li>
+//}
+
+//if page.NoNextPage && page.CurrentPage > 2 {
+//	<li
+//		class="page-item"
+//	>
+//		<a class="page-link" href={ templ.SafeURL(fmt.Sprintf("%s?page=%v", page.Endpoint, page.PrevPage-1)) }>
+//			{ strconv.Itoa(page.PrevPage-1) }
+//		</a>
+//	</li>
+//}
+//<li
+//	if page.CurrentPage == 1 {
+//		class="page-item active"
+//	} else {
+//		class="page-item"
+//	}
+//>
+//	<a
+//		if page.CurrentPage != 1 {
+//			href={ templ.SafeURL(fmt.Sprintf("%s?page=%v", page.Endpoint, page.PrevPage)) }
+//		}
+//		class="page-link"
+//	>
+//		if page.CurrentPage == 1 {
+//			{ strconv.Itoa(page.CurrentPage) }
+//		} else {
+//			{ strconv.Itoa(page.PrevPage) }
+//		}
+//	</a>
+//</li>
+//if !page.NoNextPage {
+//	<li
+//		if page.CurrentPage > 1 {
+//			class="page-item active"
+//		} else {
+//			class="page-item"
+//		}
+//	>
+//		<a
+//			class="page-link"
+//			if page.CurrentPage ==1 {
+//				href={ templ.SafeURL(fmt.Sprintf("%s?page=%v", page.Endpoint, page.NextPage)) }
+//			}
+//		>
+//			if page.CurrentPage > 1 {
+//				{ strconv.Itoa(page.CurrentPage) }
+//			} else {
+//				{ strconv.Itoa(page.NextPage) }
+//			}
+//		</a>
+//	</li>
+//}

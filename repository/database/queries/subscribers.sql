@@ -19,3 +19,16 @@ select * from subscribers where id = $1;
 
 -- name: QueryVerifiedSubscribers :many
 select * from subscribers where is_verified = true;
+
+-- name: QuerySubscribersInPages :many
+select
+	subscribers.*
+from 
+	subscribers
+limit 
+	$1
+offset 
+	$2;
+
+-- name: QuerySubscriberCount :one
+select count(id) from subscribers;

@@ -25,7 +25,7 @@ type NewsletterViewData struct {
 	ReleasedAt string
 }
 
-func Newsletter(data []NewsletterViewData, pagination components.PaginationPayload, tkn string, showFlash bool) templ.Component {
+func Newsletter(data []NewsletterViewData, paginationProps components.PaginationProps, tkn string, showFlash bool) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -171,14 +171,7 @@ func Newsletter(data []NewsletterViewData, pagination components.PaginationPaylo
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = components.Pagination(components.PaginationPayload{
-				CurrentPage:     pagination.CurrentPage,
-				PrevPage:        pagination.PrevPage,
-				NextPage:        pagination.NextPage,
-				Endpoint:        "/dashboard/newsletters",
-				NoNextPage:      pagination.NoNextPage,
-				HasNextNextPage: pagination.HasNextNextPage,
-			}).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = components.Pagination(paginationProps).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

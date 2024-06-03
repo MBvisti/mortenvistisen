@@ -4,6 +4,7 @@ import (
 	"slices"
 	"strconv"
 
+	"github.com/MBvisti/mortenvistisen/controllers"
 	"github.com/MBvisti/mortenvistisen/controllers/misc"
 	"github.com/MBvisti/mortenvistisen/domain"
 	"github.com/MBvisti/mortenvistisen/posts"
@@ -45,18 +46,21 @@ func ArticlesIndex(ctx echo.Context, db database.Queries) error {
 		offset = 7 * (currentPage - 1)
 	}
 
-	articles, err := db.QueryAllPosts(ctx.Request().Context(), int32(offset))
+	articles, err := db.QueryPostsInPages(ctx.Request().Context(), database.QueryPostsInPagesParams{
+		Limit:  7,
+		Offset: int32(offset),
+	})
 	if err != nil {
 		return err
 	}
 
-	var totalPostCount int
+	totalPostsCount, err := db.QueryPostsCount(ctx.Request().Context())
+	if err != nil {
+		return err
+	}
 
 	viewData := make([]dashboard.ArticleViewData, 0, len(articles))
-	for i, article := range articles {
-		if i == 0 {
-			totalPostCount = int(article.TotalPostsCount)
-		}
+	for _, article := range articles {
 		viewData = append(viewData, dashboard.ArticleViewData{
 			ID:         article.ID.String(),
 			Title:      article.Title,
@@ -66,15 +70,9 @@ func ArticlesIndex(ctx echo.Context, db database.Queries) error {
 		})
 	}
 
-	pagination := components.PaginationPayload{
-		CurrentPage:     currentPage,
-		NextPage:        currentPage + 1,
-		PrevPage:        currentPage - 1,
-		HasNextNextPage: totalPostCount-7 >= 7,
-	}
-
-	if len(articles) < 7 {
-		pagination.NoNextPage = true
+	pagination := components.PaginationProps{
+		CurrentPage: currentPage,
+		TotalPages:  controllers.CalculateNumberOfPages(int(totalPostsCount), 7),
 	}
 
 	return dashboard.Articles(viewData, pagination, csrf.Token(ctx.Request())).

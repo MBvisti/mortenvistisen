@@ -10,6 +10,12 @@ limit
 offset
 	$1;
 
+-- name: QueryNewslettersCount :one
+select 
+	count(id)
+from 
+	newsletters;
+
 -- name: QueryReleasedNewslettersCount :one
 select 
 	count(id) as newsletters_count 

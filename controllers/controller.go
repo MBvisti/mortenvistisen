@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"log/slog"
+	"math"
 	"net/http"
 
 	"github.com/MBvisti/mortenvistisen/pkg/mail"
@@ -79,4 +80,8 @@ func InternalError(ctx echo.Context) error {
 	return views.InternalServerErr(ctx, views.InternalServerErrData{
 		FromLocation: from,
 	})
+}
+
+func CalculateNumberOfPages(totalItems, pageSize int) int {
+	return int(math.Ceil(float64(totalItems) / float64(pageSize)))
 }

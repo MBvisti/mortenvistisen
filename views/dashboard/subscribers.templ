@@ -50,7 +50,7 @@ func returnSubscribersUnverifiedCount(data []SubscriberViewData) string {
 
 templ Subscribers(
 	data []SubscriberViewData,
-	pagination components.PaginationPayload,
+	paginationProps components.PaginationProps,
 	tkn string,
 ) {
 	@layouts.Dashboard() {
@@ -116,14 +116,7 @@ templ Subscribers(
 				</div>
 				<div id="toast-wrapper" class="toast toast-end toast-end"></div>
 			</div>
-			@components.Pagination(components.PaginationPayload{
-				CurrentPage:     pagination.CurrentPage,
-				PrevPage:        pagination.PrevPage,
-				NextPage:        pagination.NextPage,
-				Endpoint:        "/dashboard/subscribers",
-				NoNextPage:      pagination.NoNextPage,
-				HasNextNextPage: pagination.HasNextNextPage,
-			})
+			@components.Pagination(paginationProps)
 			@addCSRFTkn(tkn)
 		</div>
 	}

@@ -60,6 +60,16 @@ limit 5;
 -- name: QueryPosts :many
 select posts.* from posts;
 
+-- name: QueryPostsInPages :many
+SELECT
+    posts.*
+FROM
+	posts
+LIMIT
+    $1
+OFFSET
+    $2;
+
 -- name: QueryAllPosts :many
 SELECT
     posts.id,
@@ -100,3 +110,6 @@ select * from posts where id = $1;
 
 -- name: QueryPostBySlug :one
 select * from posts where slug = $1;
+
+-- name: QueryPostsCount :one
+select count(id) from posts;

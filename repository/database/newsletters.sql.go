@@ -159,6 +159,20 @@ func (q *Queries) QueryNewsletterInPages(ctx context.Context, offset int32) ([]N
 	return items, nil
 }
 
+const queryNewslettersCount = `-- name: QueryNewslettersCount :one
+select 
+	count(id)
+from 
+	newsletters
+`
+
+func (q *Queries) QueryNewslettersCount(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, queryNewslettersCount)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const queryReleasedNewslettersCount = `-- name: QueryReleasedNewslettersCount :one
 select 
 	count(id) as newsletters_count 

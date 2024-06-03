@@ -66,7 +66,7 @@ func returnSubscribersUnverifiedCount(data []SubscriberViewData) string {
 
 func Subscribers(
 	data []SubscriberViewData,
-	pagination components.PaginationPayload,
+	paginationProps components.PaginationProps,
 	tkn string,
 ) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
@@ -235,14 +235,7 @@ func Subscribers(
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = components.Pagination(components.PaginationPayload{
-				CurrentPage:     pagination.CurrentPage,
-				PrevPage:        pagination.PrevPage,
-				NextPage:        pagination.NextPage,
-				Endpoint:        "/dashboard/subscribers",
-				NoNextPage:      pagination.NoNextPage,
-				HasNextNextPage: pagination.HasNextNextPage,
-			}).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = components.Pagination(paginationProps).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -290,7 +283,7 @@ func SuccessMsg(msg string) templ.Component {
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(msg)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/subscribers.templ`, Line: 134, Col: 13}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/subscribers.templ`, Line: 127, Col: 13}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -327,7 +320,7 @@ func FailureMsg(msg string) templ.Component {
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(msg)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/subscribers.templ`, Line: 140, Col: 13}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/subscribers.templ`, Line: 133, Col: 13}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {

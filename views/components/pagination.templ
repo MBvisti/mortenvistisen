@@ -5,111 +5,125 @@ import (
 	"strconv"
 )
 
-type PaginationPayload struct {
-	CurrentPage     int
-	PrevPage        int
-	NextPage        int
-	Endpoint        string
-	NoNextPage      bool
-	HasNextNextPage bool
+type page struct {
+	value int
+	link  string
+	show  bool
 }
 
-templ Pagination(page PaginationPayload) {
+type PaginationProps struct {
+	CurrentPage int
+	TotalPages  int
+}
+
+func Pagination(props PaginationProps) templ.Component {
+	nextPage := props.CurrentPage + 1
+	prevPage := props.CurrentPage - 1
+
+	pages := make(map[string]page, 4)
+
+	var hasNextPage bool
+	if props.CurrentPage < props.TotalPages {
+		hasNextPage = true
+	}
+
+	if !hasNextPage && props.TotalPages >= 3 && prevPage != 1 {
+		pages["prevSquared"] = page{link: fmt.Sprintf("?page=%v", (prevPage - 1)), value: (prevPage - 1), show: true}
+	}
+
+	if prevPage != 0 {
+		pages["prev"] = page{link: fmt.Sprintf("?page=%v", prevPage), value: prevPage, show: true}
+	}
+
+	if props.CurrentPage == 1 && props.TotalPages >= 3 {
+		pages["nextSquared"] = page{link: fmt.Sprintf("?page=%v", 3), value: 3, show: true}
+	}
+
+	pages["next"] = page{link: fmt.Sprintf("?page=%v", nextPage), value: nextPage, show: hasNextPage}
+
+	pages["current"] = page{value: props.CurrentPage, show: true}
+
+	return paginationComponent(pages)
+}
+
+templ paginationComponent(page map[string]page) {
 	<div class="row">
 		<div class="col-4">
 			<ul class="pagination">
 				<li
-					if page.CurrentPage == 1 {
-						class="page-item disabled"
-					} else {
+					if page["prev"].show {
 						class="page-item"
+					} else {
+						class="page-item disabled"
 					}
 				>
 					<a
 						class="page-link"
-						href={ templ.SafeURL(fmt.Sprintf("%s?page=%v", page.Endpoint, page.PrevPage)) }
+						href={ templ.SafeURL(page["prev"].link) }
 					>
 						Previous
 					</a>
 				</li>
-				if page.NoNextPage && page.CurrentPage > 2 {
+				if page["prevSquared"].show {
 					<li
 						class="page-item"
 					>
-						<a class="page-link" href={ templ.SafeURL(fmt.Sprintf("%s?page=%v", page.Endpoint, page.PrevPage-1)) }>
-							{ strconv.Itoa(page.PrevPage-1) }
-						</a>
-					</li>
-				}
-				<li
-					if page.CurrentPage == 1 {
-						class="page-item active"
-					} else {
-						class="page-item"
-					}
-				>
-					<a
-						if page.CurrentPage != 1 {
-							href={ templ.SafeURL(fmt.Sprintf("%s?page=%v", page.Endpoint, page.PrevPage)) }
-						}
-						class="page-link"
-					>
-						if page.CurrentPage == 1 {
-							{ strconv.Itoa(page.CurrentPage) }
-						} else {
-							{ strconv.Itoa(page.PrevPage) }
-						}
-					</a>
-				</li>
-				<li
-					if page.CurrentPage > 1 {
-						class="page-item active"
-					} else {
-						class="page-item"
-					}
-				>
-					<a
-						class="page-link"
-						if page.CurrentPage ==1 {
-							href={ templ.SafeURL(fmt.Sprintf("%s?page=%v", page.Endpoint, page.NextPage)) }
-						}
-					>
-						if page.CurrentPage > 1 {
-							{ strconv.Itoa(page.CurrentPage) }
-						} else {
-							{ strconv.Itoa(page.NextPage) }
-						}
-					</a>
-				</li>
-				if !page.NoNextPage && page.HasNextNextPage {
-					<li class="page-item">
 						<a
 							class="page-link"
-							if page.CurrentPage == 1 {
-								href={ templ.SafeURL(fmt.Sprintf("%s?page=%v", page.Endpoint, page.NextPage+1)) }
-							} else {
-								href={ templ.SafeURL(fmt.Sprintf("%s?page=%v", page.Endpoint, page.NextPage)) }
-							}
-						>
-							if page.CurrentPage == 1 {
-								{ strconv.Itoa(page.NextPage+1) }
-							} else {
-								{ strconv.Itoa(page.NextPage) }
-							}
-						</a>
+							href={ templ.SafeURL(page["prevSquared"].link) }
+						>{ strconv.Itoa(page["prevSquared"].value) }</a>
+					</li>
+				}
+				if page["prev"].show {
+					<li
+						class="page-item"
+					>
+						<a
+							class="page-link"
+							href={ templ.SafeURL(page["prev"].link) }
+						>{ strconv.Itoa(page["prev"].value) }</a>
+					</li>
+				}
+				if page["current"].show {
+					<li
+						class="page-item active"
+					>
+						<a
+							class="page-link"
+						>{ strconv.Itoa(page["current"].value) }</a>
+					</li>
+				}
+				if page["next"].show {
+					<li
+						class="page-item"
+					>
+						<a
+							class="page-link"
+							href={ templ.SafeURL(page["next"].link) }
+						>{ strconv.Itoa(page["next"].value) }</a>
+					</li>
+				}
+				if page["nextSquared"].show {
+					<li
+						class="page-item"
+					>
+						<a
+							class="page-link"
+							href={ templ.SafeURL(page["nextSquared"].link) }
+						>{ strconv.Itoa(page["nextSquared"].value) }</a>
 					</li>
 				}
 				<li
-					if page.NoNextPage {
-						class="page-item disabled"
-					} else {
+					if page["next"].show {
 						class="page-item"
+					} else {
+						class="page-item disabled"
 					}
 				>
 					<a
 						class="page-link"
-						if !page.NoNextPage {
-							href={ templ.SafeURL(fmt.Sprintf("%s?page=%v", page.Endpoint, page.NextPage)) }
+						if page["next"].show {
+							href={ templ.SafeURL(page["next"].link) }
 						}
 					>Next</a>
 				</li>
@@ -117,3 +131,74 @@ templ Pagination(page PaginationPayload) {
 		</div>
 	</div>
 }
+
+//if !page.NoNextPage && page.HasNextNextPage {
+//	<li class="page-item">
+//		<a
+//			class="page-link"
+//			if page.CurrentPage == 1 {
+//				href={ templ.SafeURL(fmt.Sprintf("%s?page=%v", page.Endpoint, page.NextPage+1)) }
+//			} else {
+//				href={ templ.SafeURL(fmt.Sprintf("%s?page=%v", page.Endpoint, page.NextPage)) }
+//			}
+//		>
+//			if page.CurrentPage == 1 {
+//				{ strconv.Itoa(page.NextPage+1) }
+//			} else {
+//				{ strconv.Itoa(page.NextPage) }
+//			}
+//		</a>
+//	</li>
+//}
+
+//if page.NoNextPage && page.CurrentPage > 2 {
+//	<li
+//		class="page-item"
+//	>
+//		<a class="page-link" href={ templ.SafeURL(fmt.Sprintf("%s?page=%v", page.Endpoint, page.PrevPage-1)) }>
+//			{ strconv.Itoa(page.PrevPage-1) }
+//		</a>
+//	</li>
+//}
+//<li
+//	if page.CurrentPage == 1 {
+//		class="page-item active"
+//	} else {
+//		class="page-item"
+//	}
+//>
+//	<a
+//		if page.CurrentPage != 1 {
+//			href={ templ.SafeURL(fmt.Sprintf("%s?page=%v", page.Endpoint, page.PrevPage)) }
+//		}
+//		class="page-link"
+//	>
+//		if page.CurrentPage == 1 {
+//			{ strconv.Itoa(page.CurrentPage) }
+//		} else {
+//			{ strconv.Itoa(page.PrevPage) }
+//		}
+//	</a>
+//</li>
+//if !page.NoNextPage {
+//	<li
+//		if page.CurrentPage > 1 {
+//			class="page-item active"
+//		} else {
+//			class="page-item"
+//		}
+//	>
+//		<a
+//			class="page-link"
+//			if page.CurrentPage ==1 {
+//				href={ templ.SafeURL(fmt.Sprintf("%s?page=%v", page.Endpoint, page.NextPage)) }
+//			}
+//		>
+//			if page.CurrentPage > 1 {
+//				{ strconv.Itoa(page.CurrentPage) }
+//			} else {
+//				{ strconv.Itoa(page.NextPage) }
+//			}
+//		</a>
+//	</li>
+//}
