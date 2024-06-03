@@ -2,7 +2,11 @@ package router
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
+	"net/http"
+	"os"
+	"time"
 
 	"github.com/MBvisti/mortenvistisen/controllers"
 	"github.com/MBvisti/mortenvistisen/controllers/api"
@@ -59,6 +63,56 @@ func NewRouter(
 			return nil
 		},
 	}))
+
+	router.GET("/robots.txt", func(c echo.Context) error {
+		return c.File("./resources/seo/robots.txt")
+	})
+	router.GET("/sitemap.xml", func(c echo.Context) error {
+		return c.File("./resources/seo/sitemap.xml")
+	})
+	router.GET("/static/css/output.css", func(c echo.Context) error {
+		if os.Getenv("ENVIRONMENT") == "production" {
+			// Set cache headers for one year (adjust as needed)
+			cacheTime := time.Now().AddDate(0, 0, 1)
+
+			c.Response().Header().Set(echo.HeaderCacheControl, "public, max-age=31536000")
+			c.Response().
+				Header().
+				Set(echo.HeaderLastModified, cacheTime.UTC().Format(http.TimeFormat))
+		}
+
+		return c.File("./static/css/output.css")
+	})
+	router.GET("/static/js/:filename", func(c echo.Context) error {
+		fm := c.Param("filename")
+
+		if os.Getenv("ENVIRONMENT") == "production" {
+			// Set cache headers for one year (adjust as needed)
+			cacheTime := time.Now().AddDate(0, 1, 0)
+
+			c.Response().Header().Set(echo.HeaderCacheControl, "public, max-age=31536000")
+			c.Response().
+				Header().
+				Set(echo.HeaderLastModified, cacheTime.UTC().Format(http.TimeFormat))
+		}
+
+		return c.File(fmt.Sprintf("./static/js/%s", fm))
+	})
+	router.GET("/static/images/:filename", func(c echo.Context) error {
+		fm := c.Param("filename")
+
+		if os.Getenv("ENVIRONMENT") == "production" {
+			// Set cache headers for one year (adjust as needed)
+			cacheTime := time.Now().AddDate(0, 1, 0)
+
+			c.Response().Header().Set(echo.HeaderCacheControl, "public, max-age=31536000")
+			c.Response().
+				Header().
+				Set(echo.HeaderLastModified, cacheTime.UTC().Format(http.TimeFormat))
+		}
+
+		return c.File(fmt.Sprintf("./static/images/%s", fm))
+	})
 
 	return &Router{
 		router:     router,
