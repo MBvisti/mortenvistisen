@@ -25,30 +25,32 @@ script addCSRFTkn(csrfToken string) {
 	})
 }
 
-func returnNewSubsForCurrentMonth(data []SubscriberViewData) string {
-	t := carbon.Now()
-	count := 0
-	for _, d := range data {
-		if carbon.Parse(d.SubscribedAt).Month() == t.Month() {
-			count++
-		}
-	}
-
-	return strconv.Itoa(count)
-}
-
-func returnSubscribersUnverifiedCount(data []SubscriberViewData) string {
-	count := 0
-	for _, d := range data {
-		if !d.Verified {
-			count++
-		}
-	}
-
-	return strconv.Itoa(count)
-}
-
+//func returnNewSubsForCurrentMonth(data []SubscriberViewData) string {
+//	t := carbon.Now()
+//	count := 0
+//	for _, d := range data {
+//		if carbon.Parse(d.SubscribedAt).Month() == t.Month() {
+//			count++
+//		}
+//	}
+//
+//	return strconv.Itoa(count)
+//}
+//
+//func returnSubscribersUnverifiedCount(data []SubscriberViewData) string {
+//	count := 0
+//	for _, d := range data {
+//		if !d.Verified {
+//			count++
+//		}
+//	}
+//
+//	return strconv.Itoa(count)
+//}
 templ Subscribers(
+	totalSubsCount int,
+	newSubsCurrMonth int,
+	unverifiedSubs int,
 	data []SubscriberViewData,
 	paginationProps components.PaginationProps,
 	tkn string,
@@ -58,15 +60,15 @@ templ Subscribers(
 			<section class="border py-3 bg-body-secondary rounded-2">
 				<div class="row justify-content-center text-center">
 					<div class="col-md-3">
-						<h2 class="">{ strconv.Itoa(len(data)) }</h2>
+						<h2 class="">{ strconv.Itoa(totalSubsCount) }</h2>
 						<p class="fs-5 mt-3 text-secondary-emphasis">Total Subscribers</p>
 					</div>
 					<div class="col-md-3">
-						<h2 class="">{ returnNewSubsForCurrentMonth(data) }</h2>
+						<h2 class="">{ strconv.Itoa(newSubsCurrMonth) }</h2>
 						<p class="fs-5 mt-3 text-secondary-emphasis">New subscribers { time.Now().Month().String() }</p>
 					</div>
 					<div class="col-md-3">
-						<h2 class="">{ returnSubscribersUnverifiedCount(data) }</h2>
+						<h2 class="">{ strconv.Itoa(unverifiedSubs) }</h2>
 						<p class="fs-5 mt-3 text-secondary-emphasis">Unverified Subscribers</p>
 					</div>
 				</div>

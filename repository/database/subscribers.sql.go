@@ -109,6 +109,22 @@ func (q *Queries) QueryAllSubscribers(ctx context.Context) ([]Subscriber, error)
 	return items, nil
 }
 
+const queryNewSubscribersForCurrentMonth = `-- name: QueryNewSubscribersForCurrentMonth :one
+select 
+	count(id) 
+from 
+	subscribers
+where 
+	 date_trunc('month', created_at) = date_trunc('month', current_timestamp)
+`
+
+func (q *Queries) QueryNewSubscribersForCurrentMonth(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, queryNewSubscribersForCurrentMonth)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const querySubscriber = `-- name: QuerySubscriber :one
 select id, created_at, updated_at, email, subscribed_at, referer, is_verified from subscribers where id = $1
 `
@@ -181,6 +197,22 @@ func (q *Queries) QuerySubscribersInPages(ctx context.Context, arg QuerySubscrib
 		return nil, err
 	}
 	return items, nil
+}
+
+const queryUnverifiedSubCount = `-- name: QueryUnverifiedSubCount :one
+select 
+	count(id) 
+from 
+	subscribers
+where
+	is_verified = false
+`
+
+func (q *Queries) QueryUnverifiedSubCount(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, queryUnverifiedSubCount)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
 }
 
 const queryVerifiedSubscribers = `-- name: QueryVerifiedSubscribers :many

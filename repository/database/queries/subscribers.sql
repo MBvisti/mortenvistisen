@@ -32,3 +32,19 @@ offset
 
 -- name: QuerySubscriberCount :one
 select count(id) from subscribers;
+
+-- name: QueryNewSubscribersForCurrentMonth :one
+select 
+	count(id) 
+from 
+	subscribers
+where 
+	 date_trunc('month', created_at) = date_trunc('month', current_timestamp);
+
+-- name: QueryUnverifiedSubCount :one
+select 
+	count(id) 
+from 
+	subscribers
+where
+	is_verified = false;

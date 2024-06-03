@@ -22,6 +22,79 @@ import (
 	"github.com/riverqueue/river"
 )
 
+func SubscribersIndex(ctx echo.Context, db database.Queries) error {
+	page := ctx.QueryParam("page")
+
+	var currentPage int
+	if page == "" {
+		currentPage = 1
+	}
+	if page != "" {
+		cp, err := strconv.Atoi(page)
+		if err != nil {
+			return err
+		}
+
+		currentPage = cp
+	}
+
+	offset := 0
+	if currentPage == 2 {
+		offset = 7
+	}
+
+	if currentPage > 2 {
+		offset = 7 * (currentPage - 1)
+	}
+
+	subs, err := db.QuerySubscribersInPages(
+		ctx.Request().Context(),
+		database.QuerySubscribersInPagesParams{
+			Limit:  7,
+			Offset: int32(offset),
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	subsCount, err := db.QuerySubscriberCount(ctx.Request().Context())
+	if err != nil {
+		return err
+	}
+
+	monthlySubscriberCount, err := db.QueryNewSubscribersForCurrentMonth(
+		ctx.Request().Context(),
+	)
+	if err != nil {
+		return err
+	}
+
+	unverifiedSubCount, err := db.QueryUnverifiedSubCount(ctx.Request().Context())
+	if err != nil {
+		return err
+	}
+
+	viewData := make([]dashboard.SubscriberViewData, 0, len(subs))
+	for _, sub := range subs {
+		viewData = append(viewData, dashboard.SubscriberViewData{
+			Email:        sub.Email.String,
+			ID:           sub.ID.String(),
+			Verified:     sub.IsVerified.Bool,
+			SubscribedAt: sub.SubscribedAt.Time.String(),
+			Refererer:    sub.Referer.String,
+		})
+	}
+
+	pagination := components.PaginationProps{
+		CurrentPage: currentPage,
+		TotalPages:  controllers.CalculateNumberOfPages(int(subsCount), 7),
+	}
+
+	return dashboard.Subscribers(int(subsCount), int(monthlySubscriberCount), int(unverifiedSubCount), viewData, pagination, csrf.Token(ctx.Request())).
+		Render(views.ExtractRenderDeps(ctx))
+}
+
 func ResendVerificationMail(
 	ctx echo.Context,
 	db database.Queries,
@@ -101,67 +174,6 @@ func ResendVerificationMail(
 	}
 
 	return dashboard.SuccessMsg("Verification mail send").Render(views.ExtractRenderDeps(ctx))
-}
-
-func SubscribersIndex(ctx echo.Context, db database.Queries) error {
-	page := ctx.QueryParam("page")
-
-	var currentPage int
-	if page == "" {
-		currentPage = 1
-	}
-	if page != "" {
-		cp, err := strconv.Atoi(page)
-		if err != nil {
-			return err
-		}
-
-		currentPage = cp
-	}
-
-	offset := 0
-	if currentPage == 2 {
-		offset = 7
-	}
-
-	if currentPage > 2 {
-		offset = 7 * (currentPage - 1)
-	}
-
-	subs, err := db.QuerySubscribersInPages(
-		ctx.Request().Context(),
-		database.QuerySubscribersInPagesParams{
-			Limit:  7,
-			Offset: int32(offset),
-		},
-	)
-	if err != nil {
-		return err
-	}
-
-	subsCount, err := db.QuerySubscriberCount(ctx.Request().Context())
-	if err != nil {
-		return err
-	}
-
-	viewData := make([]dashboard.SubscriberViewData, 0, len(subs))
-	for _, sub := range subs {
-		viewData = append(viewData, dashboard.SubscriberViewData{
-			Email:        sub.Email.String,
-			ID:           sub.ID.String(),
-			Verified:     sub.IsVerified.Bool,
-			SubscribedAt: sub.SubscribedAt.Time.String(),
-			Refererer:    sub.Referer.String,
-		})
-	}
-
-	pagination := components.PaginationProps{
-		CurrentPage: currentPage,
-		TotalPages:  controllers.CalculateNumberOfPages(int(subsCount), 7),
-	}
-
-	return dashboard.Subscribers(viewData, pagination, csrf.Token(ctx.Request())).
-		Render(views.ExtractRenderDeps(ctx))
 }
 
 func DeleteSubscriber(ctx echo.Context, db database.Queries) error {
