@@ -15,7 +15,7 @@ type ArticleViewData struct {
 	Slug       string
 }
 
-templ Articles(data []ArticleViewData, pagination components.PaginationPayload, tkn string) {
+templ Articles(data []ArticleViewData, paginationProps components.PaginationProps, tkn string) {
 	@layouts.Dashboard() {
 		<div class="container">
 			<div class="row mb-4 justify-content-between">
@@ -67,14 +67,7 @@ templ Articles(data []ArticleViewData, pagination components.PaginationPayload, 
 					</table>
 				</div>
 			</div>
-			@components.Pagination(components.PaginationPayload{
-				CurrentPage:     pagination.CurrentPage,
-				PrevPage:        pagination.PrevPage,
-				NextPage:        pagination.NextPage,
-				Endpoint:        "/dashboard/articles",
-				NoNextPage:      pagination.NoNextPage,
-				HasNextNextPage: pagination.HasNextNextPage,
-			})
+			@components.Pagination(paginationProps)
 			@addCSRFTkn(tkn)
 		</div>
 	}

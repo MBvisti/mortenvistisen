@@ -3,8 +3,10 @@ package dashboard
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
+	"github.com/MBvisti/mortenvistisen/controllers"
 	"github.com/MBvisti/mortenvistisen/pkg/config"
 	"github.com/MBvisti/mortenvistisen/pkg/mail/templates"
 	"github.com/MBvisti/mortenvistisen/pkg/queue"
@@ -102,7 +104,42 @@ func ResendVerificationMail(
 }
 
 func SubscribersIndex(ctx echo.Context, db database.Queries) error {
-	subs, err := db.QueryAllSubscribers(ctx.Request().Context())
+	page := ctx.QueryParam("page")
+
+	var currentPage int
+	if page == "" {
+		currentPage = 1
+	}
+	if page != "" {
+		cp, err := strconv.Atoi(page)
+		if err != nil {
+			return err
+		}
+
+		currentPage = cp
+	}
+
+	offset := 0
+	if currentPage == 2 {
+		offset = 7
+	}
+
+	if currentPage > 2 {
+		offset = 7 * (currentPage - 1)
+	}
+
+	subs, err := db.QuerySubscribersInPages(
+		ctx.Request().Context(),
+		database.QuerySubscribersInPagesParams{
+			Limit:  7,
+			Offset: int32(offset),
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	subsCount, err := db.QuerySubscriberCount(ctx.Request().Context())
 	if err != nil {
 		return err
 	}
@@ -118,16 +155,9 @@ func SubscribersIndex(ctx echo.Context, db database.Queries) error {
 		})
 	}
 
-	currentPage := 1
-	pagination := components.PaginationPayload{
-		CurrentPage:     currentPage,
-		NextPage:        currentPage + 1,
-		PrevPage:        currentPage - 1,
-		HasNextNextPage: len(viewData)-7 >= 7,
-	}
-
-	if len(viewData) < 7 {
-		pagination.NoNextPage = true
+	pagination := components.PaginationProps{
+		CurrentPage: currentPage,
+		TotalPages:  controllers.CalculateNumberOfPages(int(subsCount), 7),
 	}
 
 	return dashboard.Subscribers(viewData, pagination, csrf.Token(ctx.Request())).

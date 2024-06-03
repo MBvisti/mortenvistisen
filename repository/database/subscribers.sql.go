@@ -128,6 +128,61 @@ func (q *Queries) QuerySubscriber(ctx context.Context, id uuid.UUID) (Subscriber
 	return i, err
 }
 
+const querySubscriberCount = `-- name: QuerySubscriberCount :one
+select count(id) from subscribers
+`
+
+func (q *Queries) QuerySubscriberCount(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, querySubscriberCount)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const querySubscribersInPages = `-- name: QuerySubscribersInPages :many
+select
+	subscribers.id, subscribers.created_at, subscribers.updated_at, subscribers.email, subscribers.subscribed_at, subscribers.referer, subscribers.is_verified
+from 
+	subscribers
+limit 
+	$1
+offset 
+	$2
+`
+
+type QuerySubscribersInPagesParams struct {
+	Limit  int32
+	Offset int32
+}
+
+func (q *Queries) QuerySubscribersInPages(ctx context.Context, arg QuerySubscribersInPagesParams) ([]Subscriber, error) {
+	rows, err := q.db.Query(ctx, querySubscribersInPages, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Subscriber
+	for rows.Next() {
+		var i Subscriber
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Email,
+			&i.SubscribedAt,
+			&i.Referer,
+			&i.IsVerified,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const queryVerifiedSubscribers = `-- name: QueryVerifiedSubscribers :many
 select id, created_at, updated_at, email, subscribed_at, referer, is_verified from subscribers where is_verified = true
 `

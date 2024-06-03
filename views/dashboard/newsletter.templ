@@ -15,7 +15,7 @@ type NewsletterViewData struct {
 	ReleasedAt string
 }
 
-templ Newsletter(data []NewsletterViewData, pagination components.PaginationPayload, tkn string, showFlash bool) {
+templ Newsletter(data []NewsletterViewData, paginationProps components.PaginationProps, tkn string, showFlash bool) {
 	@layouts.Dashboard() {
 		<div class="container">
 			if showFlash {
@@ -85,14 +85,7 @@ templ Newsletter(data []NewsletterViewData, pagination components.PaginationPayl
 					</table>
 				</div>
 			</div>
-			@components.Pagination(components.PaginationPayload{
-				CurrentPage:     pagination.CurrentPage,
-				PrevPage:        pagination.PrevPage,
-				NextPage:        pagination.NextPage,
-				Endpoint:        "/dashboard/newsletters",
-				NoNextPage:      pagination.NoNextPage,
-				HasNextNextPage: pagination.HasNextNextPage,
-			})
+			@components.Pagination(paginationProps)
 			@addCSRFTkn(tkn)
 		</div>
 	}

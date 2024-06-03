@@ -52,7 +52,12 @@ func NewslettersIndex(
 		return err
 	}
 
-	releasedNewslettersCount, err := db.QueryReleasedNewslettersCount(
+	totalNewslettersCount, err := db.QueryNewslettersCount(ctx.Request().Context())
+	if err != nil {
+		return err
+	}
+
+	_, err = db.QueryReleasedNewslettersCount(
 		ctx.Request().Context(),
 	)
 	if err != nil {
@@ -70,15 +75,9 @@ func NewslettersIndex(
 		})
 	}
 
-	pagination := components.PaginationPayload{
-		CurrentPage:     currentPage,
-		NextPage:        currentPage + 1,
-		PrevPage:        currentPage - 1,
-		HasNextNextPage: releasedNewslettersCount-7 >= 7,
-	}
-
-	if len(newsletters) < 7 {
-		pagination.NoNextPage = true
+	pagination := components.PaginationProps{
+		CurrentPage: currentPage,
+		TotalPages:  controllers.CalculateNumberOfPages(int(totalNewslettersCount), 7),
 	}
 
 	s, err := sess.Get(ctx.Request(), "flashMsg")

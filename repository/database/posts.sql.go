@@ -415,6 +415,65 @@ func (q *Queries) QueryPosts(ctx context.Context) ([]Post, error) {
 	return items, nil
 }
 
+const queryPostsCount = `-- name: QueryPostsCount :one
+select count(id) from posts
+`
+
+func (q *Queries) QueryPostsCount(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, queryPostsCount)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const queryPostsInPages = `-- name: QueryPostsInPages :many
+SELECT
+    posts.id, posts.created_at, posts.updated_at, posts.title, posts.filename, posts.slug, posts.excerpt, posts.draft, posts.released_at, posts.read_time, posts.header_title
+FROM
+	posts
+LIMIT
+    $1
+OFFSET
+    $2
+`
+
+type QueryPostsInPagesParams struct {
+	Limit  int32
+	Offset int32
+}
+
+func (q *Queries) QueryPostsInPages(ctx context.Context, arg QueryPostsInPagesParams) ([]Post, error) {
+	rows, err := q.db.Query(ctx, queryPostsInPages, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Post
+	for rows.Next() {
+		var i Post
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Title,
+			&i.Filename,
+			&i.Slug,
+			&i.Excerpt,
+			&i.Draft,
+			&i.ReleasedAt,
+			&i.ReadTime,
+			&i.HeaderTitle,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updatePost = `-- name: UpdatePost :one
 update posts
     set updated_at = $1, title = $2, header_title = $3, slug = $4, excerpt = $5, draft = $6, released_at = $7, read_time = $8
