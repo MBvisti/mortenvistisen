@@ -3,10 +3,10 @@ package dashboard
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/MBvisti/mortenvistisen/controllers"
+	"github.com/MBvisti/mortenvistisen/models"
 	"github.com/MBvisti/mortenvistisen/pkg/config"
 	"github.com/MBvisti/mortenvistisen/pkg/mail/templates"
 	"github.com/MBvisti/mortenvistisen/pkg/queue"
@@ -22,76 +22,59 @@ import (
 	"github.com/riverqueue/river"
 )
 
-func SubscribersIndex(ctx echo.Context, db database.Queries) error {
+func SubscribersIndex(
+	ctx echo.Context,
+	db database.Queries,
+	subscriberModel models.Subscriber,
+) error {
 	page := ctx.QueryParam("page")
+	pageLimit := 7
 
-	var currentPage int
-	if page == "" {
-		currentPage = 1
-	}
-	if page != "" {
-		cp, err := strconv.Atoi(page)
-		if err != nil {
-			return err
-		}
-
-		currentPage = cp
+	offset, currentPage, err := controllers.GetOffsetAndCurrPage(page, pageLimit)
+	if err != nil {
+		return err
 	}
 
-	offset := 0
-	if currentPage == 2 {
-		offset = 7
-	}
-
-	if currentPage > 2 {
-		offset = 7 * (currentPage - 1)
-	}
-
-	subs, err := db.QuerySubscribersInPages(
+	subscribers, err := subscriberModel.List(
 		ctx.Request().Context(),
-		database.QuerySubscribersInPagesParams{
-			Limit:  7,
-			Offset: int32(offset),
-		},
+		models.WithPagination(int32(pageLimit), int32(offset)),
 	)
 	if err != nil {
 		return err
 	}
 
-	subsCount, err := db.QuerySubscriberCount(ctx.Request().Context())
+	count, err := subscriberModel.Count(ctx.Request().Context())
 	if err != nil {
 		return err
 	}
 
-	monthlySubscriberCount, err := db.QueryNewSubscribersForCurrentMonth(
-		ctx.Request().Context(),
-	)
+	monthlySubscriberCount, err := subscriberModel.NewForCurrentMonth(ctx.Request().Context())
 	if err != nil {
 		return err
 	}
 
-	unverifiedSubCount, err := db.QueryUnverifiedSubCount(ctx.Request().Context())
+	unverifiedSubCount, err := subscriberModel.UnverifiedCount(ctx.Request().Context())
 	if err != nil {
 		return err
 	}
 
-	viewData := make([]dashboard.SubscriberViewData, 0, len(subs))
-	for _, sub := range subs {
+	viewData := make([]dashboard.SubscriberViewData, 0, len(subscribers))
+	for _, sub := range subscribers {
 		viewData = append(viewData, dashboard.SubscriberViewData{
-			Email:        sub.Email.String,
+			Email:        sub.Email,
 			ID:           sub.ID.String(),
-			Verified:     sub.IsVerified.Bool,
-			SubscribedAt: sub.SubscribedAt.Time.String(),
-			Refererer:    sub.Referer.String,
+			Verified:     sub.IsVerified,
+			SubscribedAt: sub.SubscribedAt.String(),
+			Refererer:    sub.Referer,
 		})
 	}
 
 	pagination := components.PaginationProps{
 		CurrentPage: currentPage,
-		TotalPages:  controllers.CalculateNumberOfPages(int(subsCount), 7),
+		TotalPages:  controllers.CalculateNumberOfPages(int(count), 7),
 	}
 
-	return dashboard.Subscribers(int(subsCount), int(monthlySubscriberCount), int(unverifiedSubCount), viewData, pagination, csrf.Token(ctx.Request())).
+	return dashboard.Subscribers(int(count), int(monthlySubscriberCount), int(unverifiedSubCount), viewData, pagination, csrf.Token(ctx.Request())).
 		Render(views.ExtractRenderDeps(ctx))
 }
 

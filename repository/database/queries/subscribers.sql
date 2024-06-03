@@ -1,6 +1,22 @@
 -- name: QueryAllSubscribers :many
 select * from subscribers;
 
+-- name: QuerySubscribers :many
+select
+	*
+from
+	subscribers
+limit 
+	coalesce(sqlc.narg('limit')::int, null)
+offset 
+	coalesce(sqlc.narg('offset')::int, 0);
+
+-- name: QuerySubscriberByID :one
+select * from subscribers where id=$1;
+
+-- name: QuerySubscriberByEmail :one
+select * from subscribers where email=$1;
+
 -- name: DeleteSubscriber :exec
 delete from subscribers where id=$1;
 

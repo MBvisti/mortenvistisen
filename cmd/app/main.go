@@ -8,6 +8,7 @@ import (
 	"github.com/MBvisti/mortenvistisen/http"
 	mw "github.com/MBvisti/mortenvistisen/http/middleware"
 	"github.com/MBvisti/mortenvistisen/http/router"
+	"github.com/MBvisti/mortenvistisen/models"
 	"github.com/MBvisti/mortenvistisen/pkg/config"
 	"github.com/MBvisti/mortenvistisen/pkg/mail"
 	"github.com/MBvisti/mortenvistisen/pkg/queue"
@@ -74,6 +75,8 @@ func main() {
 
 	newsletterUsecase := usecases.NewNewsletter(*db, validator, mailClient)
 
+	subModel := models.NewSubscriber(*db)
+
 	controllerDeps := controllers.NewDependencies(
 		*db,
 		*tokenManager,
@@ -83,6 +86,7 @@ func main() {
 		mailClient,
 		authSessionStore,
 		newsletterUsecase,
+		subModel,
 	)
 
 	middleware := mw.NewMiddleware(authSessionStore)

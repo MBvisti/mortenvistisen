@@ -144,6 +144,44 @@ func (q *Queries) QuerySubscriber(ctx context.Context, id uuid.UUID) (Subscriber
 	return i, err
 }
 
+const querySubscriberByEmail = `-- name: QuerySubscriberByEmail :one
+select id, created_at, updated_at, email, subscribed_at, referer, is_verified from subscribers where email=$1
+`
+
+func (q *Queries) QuerySubscriberByEmail(ctx context.Context, email sql.NullString) (Subscriber, error) {
+	row := q.db.QueryRow(ctx, querySubscriberByEmail, email)
+	var i Subscriber
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Email,
+		&i.SubscribedAt,
+		&i.Referer,
+		&i.IsVerified,
+	)
+	return i, err
+}
+
+const querySubscriberByID = `-- name: QuerySubscriberByID :one
+select id, created_at, updated_at, email, subscribed_at, referer, is_verified from subscribers where id=$1
+`
+
+func (q *Queries) QuerySubscriberByID(ctx context.Context, id uuid.UUID) (Subscriber, error) {
+	row := q.db.QueryRow(ctx, querySubscriberByID, id)
+	var i Subscriber
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Email,
+		&i.SubscribedAt,
+		&i.Referer,
+		&i.IsVerified,
+	)
+	return i, err
+}
+
 const querySubscriberCount = `-- name: QuerySubscriberCount :one
 select count(id) from subscribers
 `
@@ -153,6 +191,50 @@ func (q *Queries) QuerySubscriberCount(ctx context.Context) (int64, error) {
 	var count int64
 	err := row.Scan(&count)
 	return count, err
+}
+
+const querySubscribers = `-- name: QuerySubscribers :many
+select
+	id, created_at, updated_at, email, subscribed_at, referer, is_verified
+from
+	subscribers
+limit 
+	coalesce($2::int, null)
+offset 
+	coalesce($1::int, 0)
+`
+
+type QuerySubscribersParams struct {
+	Offset sql.NullInt32
+	Limit  sql.NullInt32
+}
+
+func (q *Queries) QuerySubscribers(ctx context.Context, arg QuerySubscribersParams) ([]Subscriber, error) {
+	rows, err := q.db.Query(ctx, querySubscribers, arg.Offset, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Subscriber
+	for rows.Next() {
+		var i Subscriber
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Email,
+			&i.SubscribedAt,
+			&i.Referer,
+			&i.IsVerified,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const querySubscribersInPages = `-- name: QuerySubscribersInPages :many

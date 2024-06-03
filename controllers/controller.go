@@ -4,7 +4,9 @@ import (
 	"log/slog"
 	"math"
 	"net/http"
+	"strconv"
 
+	"github.com/MBvisti/mortenvistisen/models"
 	"github.com/MBvisti/mortenvistisen/pkg/mail"
 	"github.com/MBvisti/mortenvistisen/pkg/tokens"
 	"github.com/MBvisti/mortenvistisen/posts"
@@ -36,6 +38,7 @@ type Dependencies struct {
 	Mail              mail.Mail
 	AuthStore         *sessions.CookieStore
 	NewsletterUsecase usecases.Newsletter
+	SubscriberModel   models.Subscriber
 }
 
 func NewDependencies(
@@ -47,6 +50,7 @@ func NewDependencies(
 	mail mail.Mail,
 	authStore *sessions.CookieStore,
 	newsletterUsecase usecases.Newsletter,
+	subscriberModel models.Subscriber,
 ) Dependencies {
 	return Dependencies{
 		db,
@@ -57,6 +61,7 @@ func NewDependencies(
 		mail,
 		authStore,
 		newsletterUsecase,
+		subscriberModel,
 	}
 }
 
@@ -84,4 +89,30 @@ func InternalError(ctx echo.Context) error {
 
 func CalculateNumberOfPages(totalItems, pageSize int) int {
 	return int(math.Ceil(float64(totalItems) / float64(pageSize)))
+}
+
+func GetOffsetAndCurrPage(page string, limit int) (int, int, error) {
+	var currentPage int
+	if page == "" {
+		currentPage = 1
+	}
+	if page != "" {
+		cp, err := strconv.Atoi(page)
+		if err != nil {
+			return 0, 0, err
+		}
+
+		currentPage = cp
+	}
+
+	offset := 0
+	if currentPage == 2 {
+		offset = limit
+	}
+
+	if currentPage > 2 {
+		offset = limit * (currentPage - 1)
+	}
+
+	return offset, currentPage, nil
 }
