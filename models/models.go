@@ -5,8 +5,11 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/MBvisti/mortenvistisen/models/internal/database"
+	"github.com/go-playground/validator/v10"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -39,12 +42,16 @@ func WithPagination(limit, offset int32) listOpt {
 
 type Models struct {
 	Subscriber SubscriberModel
+	Newsletter NewsletterModel
+	Article    ArticleModel
 }
 
-func NewModels(pool *pgxpool.Pool) Models {
+func NewModels(pool *pgxpool.Pool, v *validator.Validate) Models {
 	db := database.New(pool)
 	return Models{
-		Subscriber: SubscriberModel{db},
+		SubscriberModel{db},
+		NewsletterModel{db, v},
+		ArticleModel{db},
 	}
 }
 
@@ -56,4 +63,11 @@ func SetupDatabasePool(ctx context.Context, databaseURL string) *pgxpool.Pool {
 	}
 
 	return dbpool
+}
+
+func ConvertToPGTimestamptz(t time.Time) pgtype.Timestamptz {
+	return pgtype.Timestamptz{
+		Time:  t,
+		Valid: true,
+	}
 }

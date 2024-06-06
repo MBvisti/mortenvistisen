@@ -75,7 +75,7 @@ func main() {
 
 	newsletterUsecase := usecases.NewNewsletter(*db, validator, mailClient)
 
-	models := models.NewModels(conn)
+	models := models.NewModels(conn, validator)
 
 	controllerDeps := controllers.NewDependencies(
 		*db,

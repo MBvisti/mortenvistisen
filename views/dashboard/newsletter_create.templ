@@ -5,7 +5,7 @@ import (
 	"github.com/MBvisti/mortenvistisen/pkg/mail/templates"
 	"strconv"
 	"fmt"
-	"github.com/MBvisti/mortenvistisen/repository/database"
+	"github.com/MBvisti/mortenvistisen/models"
 	"github.com/google/uuid"
 	"github.com/MBvisti/mortenvistisen/views/components"
 )
@@ -14,7 +14,7 @@ templ NewsletterForm(
 	title,
 	edition string,
 	selectedArticleID uuid.UUID,
-	articles []database.Post,
+	articles []models.Article,
 	errors map[string]components.InputError,
 	action string,
 	endpoint string,
@@ -72,7 +72,7 @@ templ NewsletterForm(
 }
 
 templ NewsletterPreview(
-	articles []database.Post,
+	articles []models.Article,
 	newsletterMailPreview templates.NewsletterMail,
 	selectedArticleID uuid.UUID,
 	errors map[string]components.InputError,
@@ -226,7 +226,7 @@ templ NewsletterPreview(
 	</div>
 }
 
-templ CreateNewsletter(articles []database.Post, selectedArticleID uuid.UUID, newsletterMailPreview templates.NewsletterMail, tkn string) {
+templ CreateNewsletter(articles []models.Article, selectedArticleID uuid.UUID, newsletterMailPreview templates.NewsletterMail, tkn string) {
 	@layouts.Dashboard() {
 		<div class="mh-full mt-4 mb-2 container mx-auto flex flex-col">
 			<a role="button" class="btn btn-secondary mb-4 hover:font-bold" href="/dashboard/newsletters">Back</a>

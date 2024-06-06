@@ -91,8 +91,8 @@ func CalculateNumberOfPages(totalItems, pageSize int) int {
 	return int(math.Ceil(float64(totalItems) / float64(pageSize)))
 }
 
-func GetOffsetAndCurrPage(page string, limit int) (int, int, error) {
-	var currentPage int
+func GetOffsetAndCurrPage(page string, limit int32) (int32, int32, error) {
+	var currentPage int32
 	if page == "" {
 		currentPage = 1
 	}
@@ -102,10 +102,10 @@ func GetOffsetAndCurrPage(page string, limit int) (int, int, error) {
 			return 0, 0, err
 		}
 
-		currentPage = cp
+		currentPage = int32(cp)
 	}
 
-	offset := 0
+	var offset int32
 	if currentPage == 2 {
 		offset = limit
 	}

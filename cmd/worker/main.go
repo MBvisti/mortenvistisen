@@ -30,6 +30,7 @@ func main() {
 	awsSes := mail.NewAwsSimpleEmailService()
 	mailClient := mail.NewMail(&awsSes)
 
+	// can be switched out now
 	queueDbPool, err := pgxpool.New(context.Background(), cfg.Db.GetQueueUrlString())
 	if err != nil {
 		panic(err)

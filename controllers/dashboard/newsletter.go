@@ -6,6 +6,7 @@ import (
 
 	"github.com/MBvisti/mortenvistisen/controllers"
 	"github.com/MBvisti/mortenvistisen/domain"
+	"github.com/MBvisti/mortenvistisen/models"
 	"github.com/MBvisti/mortenvistisen/pkg/mail/templates"
 	"github.com/MBvisti/mortenvistisen/repository/database"
 	"github.com/MBvisti/mortenvistisen/usecases"
@@ -22,44 +23,25 @@ func NewslettersIndex(
 	ctx echo.Context,
 	db database.Queries,
 	sess *sessions.CookieStore,
+	newsletterModel models.NewsletterModel,
 ) error {
 	page := ctx.QueryParam("page")
+	limit := 7
 
-	var currentPage int
-	if page == "" {
-		currentPage = 1
-	}
-	if page != "" {
-		cp, err := strconv.Atoi(page)
-		if err != nil {
-			return err
-		}
-
-		currentPage = cp
-	}
-
-	offset := 0
-	if currentPage == 2 {
-		offset = 7
-	}
-
-	if currentPage > 2 {
-		offset = 7 * (currentPage - 1)
-	}
-
-	newsletters, err := db.QueryNewsletterInPages(ctx.Request().Context(), int32(offset))
+	offset, currentPage, err := controllers.GetOffsetAndCurrPage(page, int32(limit))
 	if err != nil {
 		return err
 	}
 
-	totalNewslettersCount, err := db.QueryNewslettersCount(ctx.Request().Context())
-	if err != nil {
-		return err
-	}
-
-	_, err = db.QueryReleasedNewslettersCount(
+	newsletters, err := newsletterModel.List(
 		ctx.Request().Context(),
+		models.WithPagination(int32(limit), offset),
 	)
+	if err != nil {
+		return err
+	}
+
+	totalNewslettersCount, err := newsletterModel.GetCount(ctx.Request().Context())
 	if err != nil {
 		return err
 	}
@@ -69,14 +51,14 @@ func NewslettersIndex(
 		viewData = append(viewData, dashboard.NewsletterViewData{
 			ID:         newsletter.ID.String(),
 			Title:      newsletter.Title,
-			Released:   newsletter.Released.Bool,
-			ReleasedAt: newsletter.ReleasedAt.Time.String(),
-			Edition:    strconv.Itoa(int(newsletter.Edition.Int32)),
+			Released:   newsletter.Released,
+			ReleasedAt: newsletter.ReleasedAt.String(),
+			Edition:    strconv.Itoa(int(newsletter.Edition)),
 		})
 	}
 
 	pagination := components.PaginationProps{
-		CurrentPage: currentPage,
+		CurrentPage: int(currentPage),
 		TotalPages:  controllers.CalculateNumberOfPages(int(totalNewslettersCount), 7),
 	}
 
@@ -105,15 +87,18 @@ func NewslettersIndex(
 		Render(views.ExtractRenderDeps(ctx))
 }
 
-func NewsletterCreate(ctx echo.Context, db database.Queries) error {
-	releasedNewslettersCount, err := db.QueryReleasedNewslettersCount(
-		ctx.Request().Context(),
-	)
+func NewsletterCreate(
+	ctx echo.Context,
+	db database.Queries,
+	newsletterModel models.NewsletterModel,
+	articleModel models.ArticleModel,
+) error {
+	releasedNewslettersCount, err := newsletterModel.GetReleasedCount(ctx.Request().Context())
 	if err != nil {
 		return err
 	}
 
-	articles, err := db.QueryPosts(ctx.Request().Context())
+	articles, err := articleModel.List(ctx.Request().Context())
 	if err != nil {
 		return err
 	}
@@ -130,6 +115,7 @@ func NewslettersEdit(
 	ctx echo.Context,
 	db database.Queries,
 	newsletterUsecase usecases.Newsletter,
+	articleModel models.ArticleModel,
 	sess *sessions.CookieStore,
 ) error {
 	newsletterIDParam := ctx.Param("id")
@@ -143,7 +129,7 @@ func NewslettersEdit(
 		return err
 	}
 
-	articles, err := db.QueryPosts(ctx.Request().Context())
+	articles, err := articleModel.List(ctx.Request().Context())
 	if err != nil {
 		return err
 	}
@@ -207,6 +193,7 @@ func NewsletterUpdate(
 	ctx echo.Context,
 	db database.Queries,
 	newsletterUsecase usecases.Newsletter,
+	articleModel models.ArticleModel,
 	sess *sessions.CookieStore,
 ) error {
 	preview := ctx.QueryParam("preview")
@@ -228,8 +215,8 @@ func NewsletterUpdate(
 	if preview == "true" {
 		return previewNewsletter(
 			ctx,
-			db,
 			newsletterUsecase,
+			articleModel,
 			updateNewsletterPayload,
 			"put",
 			fmt.Sprintf("newsletters/%s/update", newsletterID),
@@ -248,7 +235,7 @@ func NewsletterUpdate(
 		return err
 	}
 	if len(validationErrs) > 0 {
-		articles, err := db.QueryPosts(ctx.Request().Context())
+		articles, err := articleModel.List(ctx.Request().Context())
 		if err != nil {
 			return err
 		}
@@ -285,22 +272,22 @@ func NewsletterUpdate(
 			Render(views.ExtractRenderDeps(ctx))
 	}
 
-	articles, err := db.QueryPosts(ctx.Request().Context())
-	if err != nil {
-		return err
-	}
-
 	if updateNewsletterPayload.ReleaseOnCreate == "on" {
 		return releaseNewsletter(
 			ctx,
 			newsletter,
-			db,
+			articleModel,
 			newsletterUsecase,
 			updateNewsletterPayload,
 			sess,
 			"put",
 			fmt.Sprintf("newsletters/%s/update", newsletterID),
 		)
+	}
+
+	articles, err := articleModel.List(ctx.Request().Context())
+	if err != nil {
+		return err
 	}
 
 	return dashboard.NewsletterEdit(dashboard.NewsletterEditViewData{
@@ -320,8 +307,8 @@ func NewsletterUpdate(
 }
 
 func previewNewsletter(ctx echo.Context,
-	db database.Queries,
 	newsletterUsecase usecases.Newsletter,
+	articleModel models.ArticleModel,
 	storeNewsletterPayload newsletterPayload,
 	hxAction string,
 	endpoint string,
@@ -342,7 +329,7 @@ func previewNewsletter(ctx echo.Context,
 		return err
 	}
 
-	articles, err := db.QueryPosts(ctx.Request().Context())
+	articles, err := articleModel.List(ctx.Request().Context())
 	if err != nil {
 		return err
 	}
@@ -366,7 +353,7 @@ func previewNewsletter(ctx echo.Context,
 
 func releaseNewsletter(ctx echo.Context,
 	newsletter domain.Newsletter,
-	db database.Queries,
+	articleModel models.ArticleModel,
 	newsletterUsecase usecases.Newsletter,
 	storeNewsletterPayload newsletterPayload,
 	sess *sessions.CookieStore,
@@ -382,7 +369,7 @@ func releaseNewsletter(ctx echo.Context,
 	}
 
 	if len(validationErrs) > 0 {
-		articles, err := db.QueryPosts(ctx.Request().Context())
+		articles, err := articleModel.List(ctx.Request().Context())
 		if err != nil {
 			return err
 		}
@@ -453,6 +440,8 @@ func NewsletterStore(
 	db database.Queries,
 	sess *sessions.CookieStore,
 	newsletterUsecase usecases.Newsletter,
+	articleModel models.ArticleModel,
+	newsletterModel models.NewsletterModel,
 ) error {
 	preview := ctx.QueryParam("preview")
 	var storeNewsletterPayload newsletterPayload
@@ -463,13 +452,15 @@ func NewsletterStore(
 	if preview == "true" {
 		return previewNewsletter(
 			ctx,
-			db,
 			newsletterUsecase,
+			articleModel,
 			storeNewsletterPayload,
 			"post",
 			"newsletters/store",
 		)
 	}
+
+	newsletterModel.Create(ctx.Request().Context(), uuid.New())
 
 	newsletter, err := newsletterUsecase.Create(ctx.Request().Context(),
 		storeNewsletterPayload.Title,
@@ -497,7 +488,7 @@ func NewsletterStore(
 		return releaseNewsletter(
 			ctx,
 			newsletter,
-			db,
+			articleModel,
 			newsletterUsecase,
 			storeNewsletterPayload,
 			sess,

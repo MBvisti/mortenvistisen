@@ -25,12 +25,16 @@ update jobs
 WHERE id = $4;
 
 -- name: DeleteJob :exec
-delete from jobs where id = $1;
+delete from jobs
+where id = $1
+;
 
 -- name: RepeatableJobExists :one
-select exists(select 1 from jobs where repeatable_id = $1);
+select exists (select 1 from jobs where repeatable_id = $1)
+;
 
 -- name: RescheduleJob :exec
 update jobs
     set state = $1, updated_at = $2, scheduled_for  = $3, failed_attempts = 0
-    where id = $4;
+	where id = $4;
+

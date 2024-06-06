@@ -1,6 +1,16 @@
 -- name: QueryAllNewsletters :many
 select * from newsletters;
 
+-- name: QueryNewsletters :many
+select
+	*
+from
+	newsletters
+limit 
+	coalesce(sqlc.narg('limit')::int, null)
+offset 
+	coalesce(sqlc.narg('offset')::int, 0);
+
 -- name: QueryNewsletterInPages :many
 select 
 	newsletters.*

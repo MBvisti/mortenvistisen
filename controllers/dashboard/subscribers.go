@@ -30,7 +30,7 @@ func SubscribersIndex(
 	page := ctx.QueryParam("page")
 	pageLimit := 7
 
-	offset, currentPage, err := controllers.GetOffsetAndCurrPage(page, pageLimit)
+	offset, currentPage, err := controllers.GetOffsetAndCurrPage(page, int32(pageLimit))
 	if err != nil {
 		return err
 	}
@@ -70,7 +70,7 @@ func SubscribersIndex(
 	}
 
 	pagination := components.PaginationProps{
-		CurrentPage: currentPage,
+		CurrentPage: int(currentPage),
 		TotalPages:  controllers.CalculateNumberOfPages(int(count), 7),
 	}
 

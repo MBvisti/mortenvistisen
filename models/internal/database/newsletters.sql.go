@@ -159,6 +159,52 @@ func (q *Queries) QueryNewsletterInPages(ctx context.Context, offset int32) ([]N
 	return items, nil
 }
 
+const queryNewsletters = `-- name: QueryNewsletters :many
+select
+	id, created_at, updated_at, title, edition, released, released_at, body, associated_article_id
+from
+	newsletters
+limit 
+	coalesce($2::int, null)
+offset 
+	coalesce($1::int, 0)
+`
+
+type QueryNewslettersParams struct {
+	Offset sql.NullInt32
+	Limit  sql.NullInt32
+}
+
+func (q *Queries) QueryNewsletters(ctx context.Context, arg QueryNewslettersParams) ([]Newsletter, error) {
+	rows, err := q.db.Query(ctx, queryNewsletters, arg.Offset, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Newsletter
+	for rows.Next() {
+		var i Newsletter
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Title,
+			&i.Edition,
+			&i.Released,
+			&i.ReleasedAt,
+			&i.Body,
+			&i.AssociatedArticleID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const queryNewslettersCount = `-- name: QueryNewslettersCount :one
 select 
 	count(id)

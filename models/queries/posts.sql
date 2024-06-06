@@ -58,7 +58,14 @@ ORDER BY
 limit 5;
 
 -- name: QueryPosts :many
-select posts.* from posts;
+select
+	*
+from
+	posts
+limit 
+	coalesce(sqlc.narg('limit')::int, null)
+offset 
+	coalesce(sqlc.narg('offset')::int, 0);
 
 -- name: QueryPostsInPages :many
 SELECT

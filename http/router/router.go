@@ -120,10 +120,20 @@ func (r *Router) loadDashboardRoutes() {
 	})
 
 	router.GET("/newsletters", func(c echo.Context) error {
-		return dashboard.NewslettersIndex(c, r.ctrlDeps.DB, r.ctrlDeps.AuthStore)
+		return dashboard.NewslettersIndex(
+			c,
+			r.ctrlDeps.DB,
+			r.ctrlDeps.AuthStore,
+			r.ctrlDeps.Models.Newsletter,
+		)
 	})
 	router.GET("/newsletters/create", func(c echo.Context) error {
-		return dashboard.NewsletterCreate(c, r.ctrlDeps.DB)
+		return dashboard.NewsletterCreate(
+			c,
+			r.ctrlDeps.DB,
+			r.ctrlDeps.Models.Newsletter,
+			r.ctrlDeps.Models.Article,
+		)
 	})
 	router.POST("/newsletters/store", func(c echo.Context) error {
 		return dashboard.NewsletterStore(
@@ -131,6 +141,7 @@ func (r *Router) loadDashboardRoutes() {
 			r.ctrlDeps.DB,
 			r.ctrlDeps.AuthStore,
 			r.ctrlDeps.NewsletterUsecase,
+			r.ctrlDeps.Models.Article,
 		)
 	})
 	router.GET("/newsletters/:id/edit", func(c echo.Context) error {
@@ -138,6 +149,7 @@ func (r *Router) loadDashboardRoutes() {
 			c,
 			r.ctrlDeps.DB,
 			r.ctrlDeps.NewsletterUsecase,
+			r.ctrlDeps.Models.Article,
 			r.ctrlDeps.AuthStore,
 		)
 	})
@@ -146,6 +158,7 @@ func (r *Router) loadDashboardRoutes() {
 			c,
 			r.ctrlDeps.DB,
 			r.ctrlDeps.NewsletterUsecase,
+			r.ctrlDeps.Models.Article,
 			r.ctrlDeps.AuthStore,
 		)
 	})
