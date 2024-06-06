@@ -20,11 +20,9 @@ import (
 	"github.com/MBvisti/mortenvistisen/usecases"
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/sessions"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 func main() {
-	ctx := context.Background()
 	logger := telemetry.SetupLogger()
 	slog.SetDefault(logger)
 
@@ -47,19 +45,7 @@ func main() {
 		[]byte(cfg.Auth.SessionEncryptionKey),
 	)
 
-	queueDbPool, err := pgxpool.New(
-		context.Background(),
-		cfg.Db.GetQueueUrlString(),
-	)
-	if err != nil {
-		panic(err)
-	}
-
-	if err := queueDbPool.Ping(ctx); err != nil {
-		panic(err)
-	}
-
-	riverClient := queue.NewClient(queueDbPool, queue.WithLogger(logger))
+	riverClient := queue.NewClient(conn, queue.WithLogger(logger))
 
 	postManager := posts.NewPostManager()
 
