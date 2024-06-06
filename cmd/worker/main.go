@@ -16,7 +16,6 @@ import (
 	"github.com/MBvisti/mortenvistisen/pkg/queue"
 	"github.com/MBvisti/mortenvistisen/pkg/telemetry"
 	"github.com/MBvisti/mortenvistisen/repository/database"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/riverqueue/river"
 )
 
@@ -29,15 +28,6 @@ func main() {
 	// postmark := mail.NewPostmark(cfg.ExternalProviders.PostmarkApiToken)
 	awsSes := mail.NewAwsSimpleEmailService()
 	mailClient := mail.NewMail(&awsSes)
-
-	queueDbPool, err := pgxpool.New(context.Background(), cfg.Db.GetQueueUrlString())
-	if err != nil {
-		panic(err)
-	}
-
-	if err := queueDbPool.Ping(ctx); err != nil {
-		panic(err)
-	}
 
 	conn := database.SetupDatabasePool(context.Background(), cfg.Db.GetUrlString())
 	db := database.New(conn)
@@ -56,7 +46,7 @@ func main() {
 
 	q := map[string]river.QueueConfig{river.QueueDefault: {MaxWorkers: 100}}
 	riverClient := queue.NewClient(
-		queueDbPool,
+		conn,
 		queue.WithQueues(q),
 		queue.WithWorkers(workers),
 		queue.WithLogger(logger),
