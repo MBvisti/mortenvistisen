@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/MBvisti/mortenvistisen/services"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -25,7 +26,7 @@ type AwsSimpleEmailService struct {
 }
 
 // SendMail implements mailClient.
-func (a *AwsSimpleEmailService) SendMail(ctx context.Context, payload MailPayload) error {
+func (a *AwsSimpleEmailService) SendMail(ctx context.Context, payload services.MailPayload) error {
 	from := payload.From
 	if payload.From == "" {
 		from = sender
@@ -99,5 +100,3 @@ func NewAwsSimpleEmailService() AwsSimpleEmailService {
 		svc,
 	}
 }
-
-var _ mailClient = (*AwsSimpleEmailService)(nil)

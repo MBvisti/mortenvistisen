@@ -239,14 +239,18 @@ func (r *Router) loadAppRoutes() {
 		return app.RenderModal(c)
 	})
 
+	router.GET("/verify-subscriber", func(c echo.Context) error {
+		return app.SubscriberEmailVerification(c, r.ctrlDeps.DB, r.ctrlDeps.TknManager)
+	})
+
 	router.POST("/subscribe", func(c echo.Context) error {
 		return app.SubscriptionEvent(
 			c,
-			r.ctrlDeps.Mail,
 			r.ctrlDeps.QueueClient,
 			r.ctrlDeps.DB,
 			r.ctrlDeps.TknManager,
 			r.cfg,
+			r.ctrlDeps.SubscriberModel,
 		)
 	})
 }
@@ -277,10 +281,6 @@ func (r *Router) loadAuthRoutes() {
 			r.cfg,
 			r.ctrlDeps.AuthStore,
 		)
-	})
-
-	router.GET("/verify-subscriber", func(c echo.Context) error {
-		return authentication.SubscriberEmailVerification(c, r.ctrlDeps.DB, r.ctrlDeps.TknManager)
 	})
 
 	router.GET("/verify-email", func(c echo.Context) error {

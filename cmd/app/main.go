@@ -16,6 +16,7 @@ import (
 	"github.com/MBvisti/mortenvistisen/pkg/tokens"
 	"github.com/MBvisti/mortenvistisen/posts"
 	"github.com/MBvisti/mortenvistisen/repository/database"
+	"github.com/MBvisti/mortenvistisen/repository/psql"
 	"github.com/MBvisti/mortenvistisen/services"
 	"github.com/MBvisti/mortenvistisen/usecases"
 	"github.com/go-playground/validator/v10"
@@ -33,10 +34,10 @@ func main() {
 		cfg.Db.GetUrlString(),
 	)
 	db := database.New(conn)
+	psql := psql.NewPostgres(conn)
 
 	// postmark := mail.NewPostmark(cfg.ExternalProviders.PostmarkApiToken)
 	awsSes := mail.NewAwsSimpleEmailService()
-	mailClient := mail.NewMail(&awsSes)
 
 	tokenManager := tokens.NewManager(cfg.Auth.TokenSigningKey)
 
@@ -59,9 +60,11 @@ func main() {
 		services.UpdateUserValidation{},
 	)
 
-	newsletterUsecase := usecases.NewNewsletter(*db, validator, mailClient)
+	mailService := services.NewEmailSvc(cfg, &awsSes)
+	newsletterUsecase := usecases.NewNewsletter(*db, validator, mailService)
 
-	subModel := models.NewSubscriber(*db)
+	tknService := services.NewTokenSvc(psql, cfg.Auth.TokenSigningKey)
+	subModel := models.NewSubscriberSvc(&mailService, tknService, validator, psql)
 
 	controllerDeps := controllers.NewDependencies(
 		*db,
@@ -69,10 +72,11 @@ func main() {
 		riverClient,
 		validator,
 		postManager,
-		mailClient,
+		mailService,
 		authSessionStore,
 		newsletterUsecase,
 		subModel,
+		psql,
 	)
 
 	middleware := mw.NewMiddleware(authSessionStore)

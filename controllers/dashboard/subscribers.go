@@ -25,7 +25,7 @@ import (
 func SubscribersIndex(
 	ctx echo.Context,
 	db database.Queries,
-	subscriberModel models.Subscriber,
+	subscriberSvc models.SubscriberService,
 ) error {
 	page := ctx.QueryParam("page")
 	pageLimit := 7
@@ -35,25 +35,22 @@ func SubscribersIndex(
 		return err
 	}
 
-	subscribers, err := subscriberModel.List(
-		ctx.Request().Context(),
-		models.WithPagination(int32(pageLimit), int32(offset)),
-	)
+	subscribers, err := subscriberSvc.List(ctx.Request().Context(), int32(offset), int32(pageLimit))
 	if err != nil {
 		return err
 	}
 
-	count, err := subscriberModel.Count(ctx.Request().Context())
+	count, err := subscriberSvc.Count(ctx.Request().Context())
 	if err != nil {
 		return err
 	}
 
-	monthlySubscriberCount, err := subscriberModel.NewForCurrentMonth(ctx.Request().Context())
+	monthlySubscriberCount, err := subscriberSvc.NewForCurrentMonth(ctx.Request().Context())
 	if err != nil {
 		return err
 	}
 
-	unverifiedSubCount, err := subscriberModel.UnverifiedCount(ctx.Request().Context())
+	unverifiedSubCount, err := subscriberSvc.UnverifiedCount(ctx.Request().Context())
 	if err != nil {
 		return err
 	}
@@ -74,7 +71,7 @@ func SubscribersIndex(
 		TotalPages:  controllers.CalculateNumberOfPages(int(count), 7),
 	}
 
-	return dashboard.Subscribers(int(count), int(monthlySubscriberCount), int(unverifiedSubCount), viewData, pagination, csrf.Token(ctx.Request())).
+	return dashboard.Subscribers(int(count), int(len(monthlySubscriberCount)), int(unverifiedSubCount), viewData, pagination, csrf.Token(ctx.Request())).
 		Render(views.ExtractRenderDeps(ctx))
 }
 

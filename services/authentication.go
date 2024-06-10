@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/MBvisti/mortenvistisen/domain"
+	"github.com/MBvisti/mortenvistisen/models"
 	"github.com/MBvisti/mortenvistisen/pkg/config"
 	"github.com/MBvisti/mortenvistisen/repository/database"
 	"github.com/google/uuid"
@@ -15,6 +16,10 @@ import (
 	"github.com/jackc/pgx/v5"
 	"golang.org/x/crypto/bcrypt"
 )
+
+type AuthSvc struct {
+	userModel models.UserSvc
+}
 
 func hashAndPepperPassword(password, passwordPepper string) (string, error) {
 	passwordBytes := []byte(password + passwordPepper)
@@ -46,10 +51,9 @@ type AuthenticateUserPayload struct {
 	Password string
 }
 
-func AuthenticateUser(
+func (a AuthSvc) AuthenticateUser(
 	ctx context.Context,
 	data AuthenticateUserPayload,
-	db userDatabase,
 	passwordPepper string,
 ) (domain.User, error) {
 	user, err := db.QueryUserByMail(ctx, data.Email)

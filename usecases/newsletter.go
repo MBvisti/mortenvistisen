@@ -10,9 +10,9 @@ import (
 	"time"
 
 	"github.com/MBvisti/mortenvistisen/domain"
-	"github.com/MBvisti/mortenvistisen/pkg/mail"
 	"github.com/MBvisti/mortenvistisen/pkg/mail/templates"
 	"github.com/MBvisti/mortenvistisen/repository/database"
+	"github.com/MBvisti/mortenvistisen/services"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -21,13 +21,13 @@ import (
 type Newsletter struct {
 	db   database.Queries
 	v    *validator.Validate
-	mail mail.Mail
+	mail services.EmailSvc
 }
 
 func NewNewsletter(
 	db database.Queries,
 	v *validator.Validate,
-	mail mail.Mail,
+	mail services.EmailSvc,
 ) Newsletter {
 	return Newsletter{
 		db:   db,

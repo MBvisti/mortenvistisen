@@ -7,10 +7,11 @@ import (
 	"strconv"
 
 	"github.com/MBvisti/mortenvistisen/models"
-	"github.com/MBvisti/mortenvistisen/pkg/mail"
 	"github.com/MBvisti/mortenvistisen/pkg/tokens"
 	"github.com/MBvisti/mortenvistisen/posts"
 	"github.com/MBvisti/mortenvistisen/repository/database"
+	"github.com/MBvisti/mortenvistisen/repository/psql"
+	"github.com/MBvisti/mortenvistisen/services"
 	"github.com/MBvisti/mortenvistisen/usecases"
 	"github.com/MBvisti/mortenvistisen/views"
 	"github.com/go-playground/validator/v10"
@@ -35,10 +36,11 @@ type Dependencies struct {
 	QueueClient       *river.Client[pgx.Tx]
 	Validate          *validator.Validate
 	PostManager       posts.PostManager
-	Mail              mail.Mail
+	EmailSvc          services.EmailSvc
 	AuthStore         *sessions.CookieStore
 	NewsletterUsecase usecases.Newsletter
-	SubscriberModel   models.Subscriber
+	SubscriberModel   models.SubscriberService
+	Psql              psql.Postgres
 }
 
 func NewDependencies(
@@ -47,10 +49,11 @@ func NewDependencies(
 	queueClient *river.Client[pgx.Tx],
 	validate *validator.Validate,
 	postManager posts.PostManager,
-	mail mail.Mail,
+	emailSvc services.EmailSvc,
 	authStore *sessions.CookieStore,
 	newsletterUsecase usecases.Newsletter,
-	subscriberModel models.Subscriber,
+	subscriberModel models.SubscriberService,
+	psql psql.Postgres,
 ) Dependencies {
 	return Dependencies{
 		db,
@@ -58,10 +61,11 @@ func NewDependencies(
 		queueClient,
 		validate,
 		postManager,
-		mail,
+		emailSvc,
 		authStore,
 		newsletterUsecase,
 		subscriberModel,
+		psql,
 	}
 }
 

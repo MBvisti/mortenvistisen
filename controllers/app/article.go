@@ -1,26 +1,12 @@
 package app
 
 import (
-	"database/sql"
-	"fmt"
-	"time"
-
 	"github.com/MBvisti/mortenvistisen/controllers/internal/utilities"
-	"github.com/MBvisti/mortenvistisen/pkg/config"
-	"github.com/MBvisti/mortenvistisen/pkg/mail"
-	"github.com/MBvisti/mortenvistisen/pkg/mail/templates"
-	"github.com/MBvisti/mortenvistisen/pkg/queue"
-	"github.com/MBvisti/mortenvistisen/pkg/telemetry"
-	"github.com/MBvisti/mortenvistisen/pkg/tokens"
 	"github.com/MBvisti/mortenvistisen/posts"
 	"github.com/MBvisti/mortenvistisen/repository/database"
 	"github.com/MBvisti/mortenvistisen/views"
-	"github.com/google/uuid"
 	"github.com/gorilla/csrf"
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
-	"github.com/riverqueue/river"
 )
 
 func Article(ctx echo.Context, db database.Queries, postManager posts.PostManager) error {
@@ -97,111 +83,4 @@ func Article(ctx echo.Context, db database.Queries, postManager posts.PostManage
 			},
 		},
 	}).Render(views.ExtractRenderDeps(ctx))
-}
-
-type SubscriptionEventForm struct {
-	Email string `form:"hero-input"`
-	Title string `form:"article-title"`
-}
-
-func SubscriptionEvent(
-	ctx echo.Context,
-	mail mail.Mail,
-	queueClient *river.Client[pgx.Tx],
-	db database.Queries,
-	tknManager tokens.Manager,
-	cfg config.Cfg,
-) error {
-	var form SubscriptionEventForm
-	if err := ctx.Bind(&form); err != nil {
-		if err := mail.Send(ctx.Request().Context(), "hi@mortenvistisen.com", "sub-blog@mortenvistisen.com",
-			"Failed to subscribe", "sub_report", err.Error()); err != nil {
-			telemetry.Logger.Error("Failed to send email", "error", err)
-		}
-		return ctx.String(200, "You're now subscribed!")
-	}
-
-	sub, err := db.InsertSubscriber(
-		ctx.Request().Context(),
-		database.InsertSubscriberParams{
-			ID:        uuid.New(),
-			CreatedAt: database.ConvertToPGTimestamptz(time.Now()),
-			UpdatedAt: database.ConvertToPGTimestamptz(time.Now()),
-			Email: sql.NullString{
-				String: form.Email,
-				Valid:  true,
-			},
-			SubscribedAt: database.ConvertToPGTimestamptz(time.Now()),
-			Referer: sql.NullString{
-				String: form.Title,
-				Valid:  true,
-			},
-			IsVerified: pgtype.Bool{Bool: false, Valid: true},
-		},
-	)
-	if err != nil {
-		return err
-	}
-
-	generatedTkn, err := tknManager.GenerateToken()
-	if err != nil {
-		return err
-	}
-
-	activationToken := tokens.CreateActivationToken(
-		generatedTkn.PlainTextToken,
-		generatedTkn.HashedToken,
-	)
-
-	if err := db.InsertSubscriberToken(ctx.Request().Context(), database.InsertSubscriberTokenParams{
-		ID:           uuid.New(),
-		CreatedAt:    database.ConvertToPGTimestamptz(time.Now()),
-		Hash:         activationToken.Hash,
-		ExpiresAt:    database.ConvertToPGTimestamptz(activationToken.GetExpirationTime()),
-		Scope:        activationToken.GetScope(),
-		SubscriberID: sub.ID,
-	}); err != nil {
-		return err
-	}
-
-	newsletterMail := templates.NewsletterWelcomeMail{
-		ConfirmationLink: fmt.Sprintf(
-			"%s://%s/verify-subscriber?token=%s",
-			cfg.App.AppScheme,
-			cfg.App.AppHost,
-			activationToken.GetPlainText(),
-		),
-		UnsubscribeLink: "",
-	}
-	textVersion, err := newsletterMail.GenerateTextVersion()
-	if err != nil {
-		return err
-	}
-
-	htmlVersion, err := newsletterMail.GenerateHtmlVersion()
-	if err != nil {
-		return err
-	}
-	_, err = queueClient.Insert(ctx.Request().Context(), queue.EmailJobArgs{
-		To:          form.Email,
-		From:        "noreply@mortenvistisen.com",
-		Subject:     "Thanks for signing up!",
-		TextVersion: textVersion,
-		HtmlVersion: htmlVersion,
-	}, nil)
-	if err != nil {
-		return err
-	}
-
-	return views.SubscribeModalResponse().
-		Render(views.ExtractRenderDeps(ctx))
-}
-
-func RenderModal(ctx echo.Context) error {
-	return views.SubscribeModal(
-		csrf.Token(
-			ctx.Request(),
-		),
-		ctx.QueryParam("article-name"),
-	).Render(views.ExtractRenderDeps(ctx))
 }
