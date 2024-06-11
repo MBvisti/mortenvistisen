@@ -66,7 +66,7 @@ func (p Postgres) InsertUser(
 		UpdatedAt: updatedAt,
 		Name:      data.Name,
 		Mail:      data.Mail,
-		Password:  data.GetPassword(),
+		Password:  data.Password,
 	})
 	if err != nil {
 		return domain.User{}, err
@@ -89,7 +89,7 @@ func (p Postgres) UpdateUser(
 		UpdatedAt: updatedAt,
 		Name:      data.Name,
 		Mail:      data.Mail,
-		Password:  data.GetPassword(),
+		Password:  data.Password,
 	})
 	if err != nil {
 		return domain.User{}, err

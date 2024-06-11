@@ -1,56 +1,174 @@
 package domain
 
 import (
-	"errors"
 	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 )
 
-type ValidationErrsMap map[string]string
-
 type Newsletter struct {
-	ID          uuid.UUID `validate:"required"`
-	Title       string    `validate:"required,gte=3"`
-	Edition     int32     `validate:"required,gte=1"`
+	ID          uuid.UUID
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	Title       string
+	Edition     int32
 	ReleasedAt  time.Time
 	Released    bool
-	Paragraphs  []string `validate:"required,gte=1"`
-	ArticleSlug string   `validate:"required"`
+	Paragraphs  []string
+	ArticleSlug string
 }
 
-// CanBeReleased checks if a newsletter is ready to be released and updates the 'Released' and 'ReleasedAt' properties
-func (n Newsletter) CanBeReleased(v *validator.Validate) (Newsletter, ValidationErrsMap, error) {
-	if err := v.Struct(n); err != nil {
-		validationErrors, ok := err.(validator.ValidationErrors)
-		if !ok {
-			return Newsletter{}, nil, errors.New("could not convert errors to ValidationErrors")
-		}
+var NewsletterValidations = map[string][]Rule{
+	"ID":          {RequiredRule},
+	"Title":       {RequiredRule, MinLenRule(3)},
+	"Edition":     {RequiredRule},
+	"Paragraphs":  {RequiredRule, MinLenRule(1)},
+	"ArticleSlug": {RequiredRule},
+	"ReleasedAt":  {RequiredRule},
+	"Released  ":  {RequiredRule},
+}
 
-		errors := make(ValidationErrsMap, len(validationErrors))
-		for _, valiErr := range validationErrors {
-			switch valiErr.Field() {
-			case "ID":
-				errors[valiErr.Field()] = "a valid uuid v4 must be provided"
-			case "Title":
-				errors[valiErr.Field()] = "title cannot be empty"
-			case "Paragraphs":
-				errors[valiErr.Field()] = "atleast one paragraph is needed"
-			case "ArticleSlug":
-				errors[valiErr.Field()] = "an article slug must be provided"
-			case "Edition":
-				errors[valiErr.Field()] = "edition is required and must be > 0"
+func (n Newsletter) Validate() error {
+	var errors []ValidationErr
+	for field, rules := range NewsletterValidations {
+		switch field {
+		case "ID":
+			idValidationErr := ErrValidation{
+				FieldName:  "ID",
+				FieldValue: n.ID,
 			}
+			for _, rule := range rules {
+				if err := checkRule(n.ID, rule); err != nil {
+					idValidationErr.Violations = append(
+						idValidationErr.Violations,
+						err,
+					)
+				}
+			}
+			errors = append(errors, idValidationErr)
+		case "Title":
+			titleValidationErr := ErrValidation{
+				FieldName:  "Title",
+				FieldValue: n.Title,
+			}
+			for _, rule := range rules {
+				if err := checkRule(n.Title, rule); err != nil {
+					titleValidationErr.Violations = append(
+						titleValidationErr.Violations,
+						err,
+					)
+				}
+			}
+			errors = append(errors, titleValidationErr)
+		case "Edition":
+			editionValidationErr := ErrValidation{
+				FieldName:  "Edition",
+				FieldValue: n.Edition,
+			}
+			for _, rule := range rules {
+				if err := checkRule(n.Edition, rule); err != nil {
+					editionValidationErr.Violations = append(
+						editionValidationErr.Violations,
+						err,
+					)
+				}
+			}
+			errors = append(errors, editionValidationErr)
+		case "Paragraphs":
+			paragraphsValidationErr := ErrValidation{
+				FieldName:  "Paragraphs",
+				FieldValue: n.Paragraphs,
+			}
+			for _, rule := range rules {
+				if err := checkRule(n.Paragraphs, rule); err != nil {
+					paragraphsValidationErr.Violations = append(
+						paragraphsValidationErr.Violations,
+						err,
+					)
+				}
+			}
+			errors = append(errors, paragraphsValidationErr)
+		case "ArticleSlug":
+			articleValidationErr := ErrValidation{
+				FieldName:  "ArticleSlug",
+				FieldValue: n.ArticleSlug,
+			}
+			for _, rule := range rules {
+				if err := checkRule(n.ArticleSlug, rule); err != nil {
+					articleValidationErr.Violations = append(
+						articleValidationErr.Violations,
+						err,
+					)
+				}
+			}
+			errors = append(errors, articleValidationErr)
+		case "ReleasedAt":
+			releasedAtValidationErr := ErrValidation{
+				FieldName:  "ReleasedAt",
+				FieldValue: n.ReleasedAt,
+			}
+			for _, rule := range rules {
+				if err := checkRule(n.ReleasedAt, rule); err != nil {
+					releasedAtValidationErr.Violations = append(
+						releasedAtValidationErr.Violations,
+						err,
+					)
+				}
+			}
+			errors = append(errors, releasedAtValidationErr)
+		case "Released":
+			releasedValidationErr := ErrValidation{
+				FieldName:  "Released",
+				FieldValue: n.Released,
+			}
+			for _, rule := range rules {
+				if err := checkRule(n.Released, rule); err != nil {
+					releasedValidationErr.Violations = append(
+						releasedValidationErr.Violations,
+						err,
+					)
+				}
+			}
+			errors = append(errors, releasedValidationErr)
 		}
-
-		return Newsletter{}, errors, nil
 	}
 
-	n.Released = true
-	n.ReleasedAt = time.Now()
+	e := constructValidationErrors(errors...)
+	if len(e) > 0 {
+		return e
+	}
 
-	return n, nil, nil
+	return nil
+}
+
+func NewNewsletter(
+	title string,
+	edition int32,
+	releasedAt time.Time,
+	released bool,
+	paragraphs []string,
+	articleSlug string,
+) (Newsletter, error) {
+	now := time.Now()
+
+	newsletter := Newsletter{
+		uuid.New(),
+		now,
+		now,
+		title,
+		edition,
+		releasedAt,
+		released,
+		paragraphs,
+		articleSlug,
+	}
+
+	if err := newsletter.Validate(); err != nil {
+		return Newsletter{}, err
+	}
+
+	return newsletter, nil
 }
 
 type UpdateNewsletterPayload struct {

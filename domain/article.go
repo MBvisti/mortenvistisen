@@ -27,7 +27,7 @@ func NewArticle(
 	filename string,
 	slug string,
 	excerpt string,
-	estimatedReadTime int32,
+	readtime int32,
 	tags []Tag,
 ) (Article, error) {
 	now := time.Now()
@@ -41,7 +41,7 @@ func NewArticle(
 		Slug:        slug,
 		Excerpt:     excerpt,
 		Draft:       true,
-		ReadTime:    estimatedReadTime,
+		ReadTime:    readtime,
 		Tags:        tags,
 	}
 
@@ -52,86 +52,94 @@ func NewArticle(
 	return article, nil
 }
 
+var ArticleValidations = map[string][]Rule{
+	"ID":          {RequiredRule},
+	"Title":       {RequiredRule, MinLenRule(2)},
+	"HeaderTitle": {RequiredRule, MinLenRule(2)},
+	"Excerpt":     {RequiredRule, MinLenRule(130), MaxLenRule(160)},
+	"ReadTime":    {RequiredRule},
+	"Filename":    {RequiredRule},
+}
+
 func (a Article) Validate() error {
-	titleValidationErr := ErrValidation{
-		FieldName:  "Title",
-		FieldValue: a.Title,
-	}
-	if a.Title == "" {
-		titleValidationErr.Violations = append(titleValidationErr.Violations, ErrIsRequired)
-	}
-	if len(a.Title) < 2 {
-		titleValidationErr.Violations = append(titleValidationErr.Violations, ErrTooShort)
-	}
-
-	headerTitleValidationErr := ErrValidation{
-		FieldName:  "HeaderTitle",
-		FieldValue: a.HeaderTitle,
-	}
-	if a.HeaderTitle == "" {
-		headerTitleValidationErr.Violations = append(
-			headerTitleValidationErr.Violations,
-			ErrIsRequired,
-		)
-	}
-	if len(a.HeaderTitle) < 2 {
-		headerTitleValidationErr.Violations = append(
-			headerTitleValidationErr.Violations,
-			ErrTooShort,
-		)
-	}
-
-	excerptValidationErr := ErrValidation{
-		FieldName:  "Excerpt",
-		FieldValue: a.Excerpt,
-	}
-	if a.Excerpt == "" {
-		excerptValidationErr.Violations = append(
-			excerptValidationErr.Violations,
-			ErrIsRequired,
-		)
-	}
-	if len(a.Excerpt) < 130 {
-		excerptValidationErr.Violations = append(
-			excerptValidationErr.Violations,
-			ErrTooShort,
-		)
-	}
-	if len(a.Excerpt) > 160 {
-		excerptValidationErr.Violations = append(
-			excerptValidationErr.Violations,
-			ErrTooLong,
-		)
-	}
-
-	estimatedReadingTimeValidationErr := ErrValidation{
-		FieldName:  "ReadTime",
-		FieldValue: a.ReadTime,
-	}
-	if a.ReadTime == 0 {
-		estimatedReadingTimeValidationErr.Violations = append(
-			estimatedReadingTimeValidationErr.Violations,
-			ErrIsRequired,
-		)
-	}
-
-	filenameValidationErr := ErrValidation{
-		FieldName:  "Filename",
-		FieldValue: a.Filename,
-	}
-	if a.Filename == "" {
-		filenameValidationErr.Violations = append(
-			filenameValidationErr.Violations,
-			ErrIsRequired,
-		)
+	var errors []ValidationErr
+	for field, rules := range ArticleValidations {
+		switch field {
+		case "ID":
+			idValidationErr := ErrValidation{
+				FieldName:  "ID",
+				FieldValue: a.ID,
+			}
+			for _, rule := range rules {
+				if err := checkRule(a.ID, rule); err != nil {
+					idValidationErr.Violations = append(
+						idValidationErr.Violations,
+						err,
+					)
+				}
+			}
+			errors = append(errors, idValidationErr)
+		case "Title":
+			titleValidationErr := ErrValidation{
+				FieldName:  "Title",
+				FieldValue: a.Title,
+			}
+			for _, rule := range rules {
+				if err := checkRule(a.Title, rule); err != nil {
+					titleValidationErr.Violations = append(
+						titleValidationErr.Violations,
+						err,
+					)
+				}
+			}
+			errors = append(errors, titleValidationErr)
+		case "HeaderTitle":
+			headerTitleValidationErr := ErrValidation{
+				FieldName:  "HeaderTitle",
+				FieldValue: a.HeaderTitle,
+			}
+			for _, rule := range rules {
+				if err := checkRule(a.HeaderTitle, rule); err != nil {
+					headerTitleValidationErr.Violations = append(
+						headerTitleValidationErr.Violations,
+						err,
+					)
+				}
+			}
+			errors = append(errors, headerTitleValidationErr)
+		case "Excerpt":
+			excerptValidationErr := ErrValidation{
+				FieldName:  "Excerpt",
+				FieldValue: a.Excerpt,
+			}
+			for _, rule := range rules {
+				if err := checkRule(a.Excerpt, rule); err != nil {
+					excerptValidationErr.Violations = append(
+						excerptValidationErr.Violations,
+						err,
+					)
+				}
+			}
+			errors = append(errors, excerptValidationErr)
+		case "ReadTime":
+			readTimeValidationErr := ErrValidation{
+				FieldName:  "ReadTime",
+				FieldValue: a.ReadTime,
+			}
+			for _, rule := range rules {
+				if err := checkRule(a.ReadTime, rule); err != nil {
+					readTimeValidationErr.Violations = append(
+						readTimeValidationErr.Violations,
+						err,
+					)
+				}
+			}
+			errors = append(errors, readTimeValidationErr)
+		}
 	}
 
 	e := constructValidationErrors(
-		titleValidationErr,
-		headerTitleValidationErr,
-		excerptValidationErr,
-		estimatedReadingTimeValidationErr,
-		filenameValidationErr,
+		errors...,
 	)
 	if len(e) > 0 {
 		return e
@@ -139,14 +147,3 @@ func (a Article) Validate() error {
 
 	return nil
 }
-
-// type UpdateArticle struct {
-// 	ID                uuid.UUID `validate:"required"`
-// 	Title             string    `validate:"required,gte=3"`
-// 	HeaderTitle       string    `validate:"required"`
-// 	Excerpt           string    `validate:"required,lte=160,gte=130"`
-// 	Slug              string    `validate:"required"`
-// 	ReleaedAt         time.Time `validate:"required"`
-// 	ReleaseNow        bool
-// 	EstimatedReadTime int32 `validate:"required"`
-// }

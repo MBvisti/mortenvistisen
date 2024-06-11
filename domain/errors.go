@@ -40,6 +40,10 @@ func (ve ValidationErrs) Error() string {
 	return errMsg
 }
 
+func (ve ValidationErrs) Unwrap() error {
+	return ErrInvalidEmail
+}
+
 type ErrValidation struct {
 	FieldValue any
 	FieldName  string

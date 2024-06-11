@@ -33,59 +33,87 @@ func NewUser(name, mail, password, confirmPassword string) (User, error) {
 	return usr, nil
 }
 
-// type Validations string
-
-// var UserValidations = map[string][]string{
-// 	"Name": {"required", "gte=2"},
-// }
+var UserValidations = map[string][]Rule{
+	"ID":       {RequiredRule},
+	"Name":     {RequiredRule, MinLenRule(2), MaxLenRule(50)},
+	"Password": {RequiredRule, MinLenRule(6), PasswordMatchConfirmRule},
+	"Mail":     {RequiredRule, EmailRule},
+}
 
 func (u User) Validate(confirmPassword string) error {
-	nameValidationErr := ErrValidation{
-		FieldName:  "Name",
-		FieldValue: u.Name,
-	}
-	if u.Name == "" {
-		nameValidationErr.Violations = append(nameValidationErr.Violations, ErrIsRequired)
-	}
-	if len(u.Name) < 2 {
-		nameValidationErr.Violations = append(nameValidationErr.Violations, ErrTooShort)
+	var errors []ValidationErr
+	for field, rules := range UserValidations {
+		switch field {
+		case "ID":
+			idValidationErr := ErrValidation{
+				FieldName:  "ID",
+				FieldValue: u.ID,
+			}
+			for _, rule := range rules {
+				if err := checkRule(u.ID, rule); err != nil {
+					idValidationErr.Violations = append(
+						idValidationErr.Violations,
+						err,
+					)
+				}
+			}
+			errors = append(errors, idValidationErr)
+		case "Name":
+			nameValidationErr := ErrValidation{
+				FieldName:  "Name",
+				FieldValue: u.Name,
+			}
+			for _, rule := range rules {
+				if err := checkRule(u.Name, rule); err != nil {
+					nameValidationErr.Violations = append(
+						nameValidationErr.Violations,
+						err,
+					)
+				}
+			}
+			errors = append(errors, nameValidationErr)
+		case "Password":
+			passwordValidationErrs := ErrValidation{
+				FieldName:  "Password",
+				FieldValue: u.Password,
+			}
+			for _, rule := range rules {
+				compareable, ok := rule.(Compareable)
+				if !ok {
+					if err := checkRule(u.Password, rule); err != nil {
+						passwordValidationErrs.Violations = append(
+							passwordValidationErrs.Violations,
+							err,
+						)
+					}
+				}
+				if ok {
+					err := checkComparableRule(u.Password, confirmPassword, rule, compareable)
+					passwordValidationErrs.Violations = append(
+						passwordValidationErrs.Violations,
+						err,
+					)
+				}
+			}
+			errors = append(errors, passwordValidationErrs)
+		case "Mail":
+			emailValidationErr := ErrValidation{
+				FieldName:  "Mail",
+				FieldValue: u.Mail,
+			}
+			for _, rule := range rules {
+				if err := checkRule(u.Mail, rule); err != nil {
+					emailValidationErr.Violations = append(
+						emailValidationErr.Violations,
+						err,
+					)
+				}
+			}
+			errors = append(errors, emailValidationErr)
+		}
 	}
 
-	passwordValidationErrs := ErrValidation{
-		FieldName: "Password",
-	}
-	if u.Password == "" {
-		passwordValidationErrs.Violations = append(passwordValidationErrs.Violations, ErrIsRequired)
-	}
-	if u.Password != confirmPassword {
-		passwordValidationErrs.Violations = append(
-			passwordValidationErrs.Violations,
-			ErrPasswordDontMatch,
-		)
-	}
-
-	emailValidationErrs := ErrValidation{
-		FieldName:  "Mail",
-		FieldValue: u.Mail,
-	}
-	if u.Mail == "" {
-		emailValidationErrs.Violations = append(
-			emailValidationErrs.Violations,
-			ErrIsRequired,
-		)
-	}
-	if !isEmailValid(u.Mail) {
-		emailValidationErrs.Violations = append(
-			emailValidationErrs.Violations,
-			ErrInvalidEmail,
-		)
-	}
-
-	e := constructValidationErrors(
-		emailValidationErrs,
-		nameValidationErr,
-		passwordValidationErrs,
-	)
+	e := constructValidationErrors(errors...)
 	if len(e) > 0 {
 		return e
 	}

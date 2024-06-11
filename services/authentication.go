@@ -1,19 +1,14 @@
 package services
 
 import (
-	"context"
 	"encoding/gob"
-	"errors"
 	"log/slog"
 	"net/http"
 
-	"github.com/MBvisti/mortenvistisen/domain"
 	"github.com/MBvisti/mortenvistisen/models"
 	"github.com/MBvisti/mortenvistisen/pkg/config"
-	"github.com/MBvisti/mortenvistisen/repository/database"
 	"github.com/google/uuid"
 	"github.com/gorilla/sessions"
-	"github.com/jackc/pgx/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -51,40 +46,40 @@ type AuthenticateUserPayload struct {
 	Password string
 }
 
-func (a AuthSvc) AuthenticateUser(
-	ctx context.Context,
-	data AuthenticateUserPayload,
-	passwordPepper string,
-) (domain.User, error) {
-	user, err := db.QueryUserByMail(ctx, data.Email)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return domain.User{}, ErrUserNotExist
-		}
-
-		slog.Error("could not query user by mail", "error", err)
-		return domain.User{}, err
-	}
-
-	if verifiedAt := user.MailVerifiedAt; !verifiedAt.Valid {
-		return domain.User{}, ErrEmailNotValidated
-	}
-
-	if err := validatePassword(validatePasswordPayload{
-		hashedpassword: user.Password,
-		password:       data.Password,
-	}, passwordPepper); err != nil {
-		return domain.User{}, ErrPasswordNotMatch
-	}
-
-	return domain.User{
-		ID:        user.ID,
-		CreatedAt: database.ConvertFromPGTimestamptzToTime(user.CreatedAt),
-		UpdatedAt: database.ConvertFromPGTimestamptzToTime(user.UpdatedAt),
-		Name:      user.Name,
-		Mail:      user.Mail,
-	}, nil
-}
+// func (a AuthSvc) AuthenticateUser(
+// 	ctx context.Context,
+// 	data AuthenticateUserPayload,
+// 	passwordPepper string,
+// ) (domain.User, error) {
+// 	user, err := db.QueryUserByMail(ctx, data.Email)
+// 	if err != nil {
+// 		if errors.Is(err, pgx.ErrNoRows) {
+// 			return domain.User{}, ErrUserNotExist
+// 		}
+//
+// 		slog.Error("could not query user by mail", "error", err)
+// 		return domain.User{}, err
+// 	}
+//
+// 	if verifiedAt := user.MailVerifiedAt; !verifiedAt.Valid {
+// 		return domain.User{}, ErrEmailNotValidated
+// 	}
+//
+// 	if err := validatePassword(validatePasswordPayload{
+// 		hashedpassword: user.Password,
+// 		password:       data.Password,
+// 	}, passwordPepper); err != nil {
+// 		return domain.User{}, ErrPasswordNotMatch
+// 	}
+//
+// 	return domain.User{
+// 		ID:        user.ID,
+// 		CreatedAt: database.ConvertFromPGTimestamptzToTime(user.CreatedAt),
+// 		UpdatedAt: database.ConvertFromPGTimestamptzToTime(user.UpdatedAt),
+// 		Name:      user.Name,
+// 		Mail:      user.Mail,
+// 	}, nil
+// }
 
 func CreateAuthenticatedSession(
 	session sessions.Session,
