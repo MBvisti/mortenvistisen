@@ -26,7 +26,7 @@ func TestNewUser(t *testing.T) {
 			confirmPassword: "dkslajdklsajkdlsajkldsjkl",
 			expected:        nil,
 		},
-		"should return errors ErrIsRequired ErrInvalidEmail": {
+		"should return errors ErrIsRequired": {
 			name:            "Test user",
 			mail:            "validemail@gmail.com",
 			mailVerifiedAt:  time.Now(),

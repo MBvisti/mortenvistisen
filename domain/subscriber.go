@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"reflect"
 	"time"
 
 	"github.com/google/uuid"
@@ -16,73 +17,39 @@ type Subscriber struct {
 	IsVerified   bool
 }
 
-var SubscriberValidations = map[string][]Rule{
-	"ID":           {RequiredRule},
-	"Email":        {RequiredRule, EmailRule},
-	"SubscribedAt": {RequiredRule},
-	"Referer":      {RequiredRule},
+var BuildSubscriberValidations = func() map[string][]Rule {
+	return map[string][]Rule{
+		"ID":           {RequiredRule},
+		"Email":        {RequiredRule, EmailRule},
+		"SubscribedAt": {RequiredRule},
+		"Referer":      {RequiredRule},
+	}
 }
 
-func (s Subscriber) Validate() error {
+func (s Subscriber) Validate(validations map[string][]Rule) error {
+	val := reflect.ValueOf(s)
+	typ := reflect.TypeOf(s)
 	var errors []ValidationErr
-	for field, rules := range SubscriberValidations {
-		switch field {
-		case "ID":
-			idValidationErr := ErrValidation{
-				FieldName:  "ID",
-				FieldValue: s.ID,
+	for i := 0; i < val.NumField(); i++ {
+		value := val.Field(i)
+		name := typ.Field(i).Name
+
+		errVal := ErrValidation{
+			FieldValue: value,
+			FieldName:  name,
+		}
+
+		for _, rule := range validations[name] {
+			if rule.IsViolated(GetFieldValue(value)) {
+				errVal.Violations = append(
+					errVal.Violations,
+					rule.Violation(),
+				)
 			}
-			for _, rule := range rules {
-				if err := checkRule(s.ID, rule); err != nil {
-					idValidationErr.Violations = append(
-						idValidationErr.Violations,
-						err,
-					)
-				}
-			}
-			errors = append(errors, idValidationErr)
-		case "Email":
-			emailValidationErr := ErrValidation{
-				FieldName:  "Email",
-				FieldValue: s.Email,
-			}
-			for _, rule := range rules {
-				if err := checkRule(s.Email, rule); err != nil {
-					emailValidationErr.Violations = append(
-						emailValidationErr.Violations,
-						err,
-					)
-				}
-			}
-			errors = append(errors, emailValidationErr)
-		case "SubscribedAt":
-			subscribedAtValidationErr := ErrValidation{
-				FieldName:  "SubscribedAt",
-				FieldValue: s.SubscribedAt,
-			}
-			for _, rule := range rules {
-				if err := checkRule(s.SubscribedAt, rule); err != nil {
-					subscribedAtValidationErr.Violations = append(
-						subscribedAtValidationErr.Violations,
-						err,
-					)
-				}
-			}
-			errors = append(errors, subscribedAtValidationErr)
-		case "Referer":
-			refererValidationErr := ErrValidation{
-				FieldName:  "Referer",
-				FieldValue: s.Referer,
-			}
-			for _, rule := range rules {
-				if err := checkRule(s.Referer, rule); err != nil {
-					refererValidationErr.Violations = append(
-						refererValidationErr.Violations,
-						err,
-					)
-				}
-			}
-			errors = append(errors, refererValidationErr)
+		}
+
+		if len(errVal.Violations) > 0 {
+			errors = append(errors, errVal)
 		}
 	}
 
@@ -112,7 +79,7 @@ func NewSubscriber(
 		isVerified,
 	}
 
-	if err := sub.Validate(); err != nil {
+	if err := sub.Validate(BuildSubscriberValidations()); err != nil {
 		return Subscriber{}, err
 	}
 

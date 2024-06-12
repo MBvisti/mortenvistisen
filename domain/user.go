@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"reflect"
 	"time"
 
 	"github.com/google/uuid"
@@ -26,90 +27,47 @@ func NewUser(name, mail, password, confirmPassword string) (User, error) {
 		Mail:      mail,
 		Password:  password,
 	}
-	if err := usr.Validate(confirmPassword); err != nil {
+	if err := usr.Validate(BuildUserValidations(confirmPassword)); err != nil {
 		return User{}, err
 	}
 
 	return usr, nil
 }
 
-var UserValidations = map[string][]Rule{
-	"ID":       {RequiredRule},
-	"Name":     {RequiredRule, MinLenRule(2), MaxLenRule(50)},
-	"Password": {RequiredRule, MinLenRule(6), PasswordMatchConfirmRule},
-	"Mail":     {RequiredRule, EmailRule},
+var BuildUserValidations = func(confirm string) map[string][]Rule {
+	return map[string][]Rule{
+		"ID":        {RequiredRule},
+		"Name":      {RequiredRule, MinLenRule(2), MaxLenRule(25)},
+		"Password":  {RequiredRule, MinLenRule(6), PasswordMatchConfirmRule(confirm)},
+		"Mail":      {RequiredRule, EmailRule},
+		"CreatedAt": {RequiredRule},
+	}
 }
 
-func (u User) Validate(confirmPassword string) error {
+func (u User) Validate(validations map[string][]Rule) error {
+	val := reflect.ValueOf(u)
+	typ := reflect.TypeOf(u)
 	var errors []ValidationErr
-	for field, rules := range UserValidations {
-		switch field {
-		case "ID":
-			idValidationErr := ErrValidation{
-				FieldName:  "ID",
-				FieldValue: u.ID,
+	for i := 0; i < val.NumField(); i++ {
+		value := val.Field(i)
+		name := typ.Field(i).Name
+
+		errVal := ErrValidation{
+			FieldValue: value,
+			FieldName:  name,
+		}
+
+		for _, rule := range validations[name] {
+			if rule.IsViolated(GetFieldValue(value)) {
+				errVal.Violations = append(
+					errVal.Violations,
+					rule.Violation(),
+				)
 			}
-			for _, rule := range rules {
-				if err := checkRule(u.ID, rule); err != nil {
-					idValidationErr.Violations = append(
-						idValidationErr.Violations,
-						err,
-					)
-				}
-			}
-			errors = append(errors, idValidationErr)
-		case "Name":
-			nameValidationErr := ErrValidation{
-				FieldName:  "Name",
-				FieldValue: u.Name,
-			}
-			for _, rule := range rules {
-				if err := checkRule(u.Name, rule); err != nil {
-					nameValidationErr.Violations = append(
-						nameValidationErr.Violations,
-						err,
-					)
-				}
-			}
-			errors = append(errors, nameValidationErr)
-		case "Password":
-			passwordValidationErrs := ErrValidation{
-				FieldName:  "Password",
-				FieldValue: u.Password,
-			}
-			for _, rule := range rules {
-				compareable, ok := rule.(Compareable)
-				if !ok {
-					if err := checkRule(u.Password, rule); err != nil {
-						passwordValidationErrs.Violations = append(
-							passwordValidationErrs.Violations,
-							err,
-						)
-					}
-				}
-				if ok {
-					err := checkComparableRule(u.Password, confirmPassword, rule, compareable)
-					passwordValidationErrs.Violations = append(
-						passwordValidationErrs.Violations,
-						err,
-					)
-				}
-			}
-			errors = append(errors, passwordValidationErrs)
-		case "Mail":
-			emailValidationErr := ErrValidation{
-				FieldName:  "Mail",
-				FieldValue: u.Mail,
-			}
-			for _, rule := range rules {
-				if err := checkRule(u.Mail, rule); err != nil {
-					emailValidationErr.Violations = append(
-						emailValidationErr.Violations,
-						err,
-					)
-				}
-			}
-			errors = append(errors, emailValidationErr)
+		}
+
+		if len(errVal.Violations) > 0 {
+			errors = append(errors, errVal)
 		}
 	}
 
@@ -119,4 +77,28 @@ func (u User) Validate(confirmPassword string) error {
 	}
 
 	return nil
+}
+
+func (u User) Update(
+	name string,
+	mail string,
+	mailVerifiedAt time.Time,
+	password string,
+	confirmPassword string,
+) (User, error) {
+	updatedUser := User{
+		ID:             u.ID,
+		CreatedAt:      u.CreatedAt,
+		UpdatedAt:      time.Now(),
+		Name:           name,
+		Mail:           mail,
+		MailVerifiedAt: mailVerifiedAt,
+		Password:       password,
+	}
+
+	if err := updatedUser.Validate(BuildUserValidations(confirmPassword)); err != nil {
+		return User{}, err
+	}
+
+	return updatedUser, nil
 }

@@ -2,21 +2,24 @@ package main
 
 import (
 	"log"
+	"time"
 
+	"github.com/MBvisti/mortenvistisen/domain"
 	"github.com/google/uuid"
 )
 
-type MinLength int
-
-// Validate implements validators.
-func (m MinLength) Violated(val any) bool {
-	id, ok := val.(uuid.UUID)
-	log.Print(id, ok)
-	return val != int(m)
-}
-
 func main() {
-	// id := uuid.New()
-	id := uuid.UUID{}
-	MinLength(2).Violated(id)
+	usr := domain.User{
+		ID:             uuid.New(),
+		CreatedAt:      time.Now(),
+		UpdatedAt:      time.Now(),
+		Name:           "mm",
+		Mail:           "sdjkasldjklads@gmail.com",
+		MailVerifiedAt: time.Now(),
+		Password:       "dksjlkdjaljd",
+	}
+
+	vali := domain.BuildUserValidations("dksjalkdjaljd")
+
+	log.Print(usr.Validate(vali))
 }

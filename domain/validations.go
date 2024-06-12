@@ -4,23 +4,62 @@ import (
 	"fmt"
 	"reflect"
 	"time"
+
+	"github.com/google/uuid"
 )
 
-const UUID = "uuid.UUID"
+const (
+	UUIDType   = "uuid.UUID"
+	StringType = "string"
+	StructType = "struct"
+	TimeType   = "time.Time"
+	NilType    = "nil"
+)
 
-func LengthOfValue(value interface{}) (int, error) {
-	v := reflect.ValueOf(value)
+func LengthOfValue(v *reflect.Value) (int, error) {
 	switch v.Kind() {
 	case reflect.String, reflect.Slice, reflect.Map, reflect.Array:
 		return v.Len(), nil
+	case reflect.Invalid:
+		return 0, fmt.Errorf("cannot get the length of invalid kind")
+	default:
+		return 0, fmt.Errorf("provided value: '%v' did not match any kind", v.Kind())
 	}
-	return 0, fmt.Errorf("cannot get the length of %v", v.Kind())
+}
+
+func GetTypeOfValue(rfVal reflect.Value) any {
+	var conv any
+	switch rfVal.Type().String() {
+	case StringType:
+		convVal, _ := rfVal.Interface().(string)
+		conv = convVal
+	case UUIDType:
+		convVal, _ := rfVal.Interface().(uuid.UUID)
+		conv = convVal
+	case StructType:
+		convVal, _ := rfVal.Interface().(time.Time)
+		conv = convVal
+	case TimeType:
+		convVal, _ := rfVal.Interface().(time.Time)
+		conv = convVal
+	case NilType:
+	}
+
+	return conv
 }
 
 func IsEmpty(value interface{}) bool {
 	v := reflect.ValueOf(value)
 	switch v.Kind() {
 	case reflect.String, reflect.Array, reflect.Map, reflect.Slice:
+		if v.Type().String() == "uuid.UUID" {
+			uid, ok := v.Interface().(uuid.UUID)
+			if !ok {
+				return true
+			}
+
+			return uid == uuid.UUID{}
+		}
 		return v.Len() == 0
 	case reflect.Bool:
 		return !v.Bool()
@@ -88,7 +127,7 @@ func ToString(value interface{}) (string, error) {
 	return "", fmt.Errorf("cannot convert %v to string", v.Kind())
 }
 
-func checkRule(val any, rule Rule) error {
+func checkRule(val *reflect.Value, rule Rule) error {
 	if isViolated := rule.IsViolated(val); isViolated {
 		return rule.Violation()
 	}
@@ -96,14 +135,9 @@ func checkRule(val any, rule Rule) error {
 	return nil
 }
 
-func checkComparableRule(
-	val, compareVal any,
-	rule Rule,
-	eomparableRule Compareable,
-) error {
-	if isViolated := eomparableRule.NotEqual(val, compareVal); isViolated {
-		return rule.Violation()
+func GetFieldValue(fieldValue reflect.Value) any {
+	if !fieldValue.CanInterface() {
+		return nil
 	}
-
-	return nil
+	return fieldValue.Interface()
 }

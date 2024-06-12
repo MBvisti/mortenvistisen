@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"reflect"
 	"time"
 
 	"github.com/google/uuid"
@@ -45,102 +46,52 @@ func NewArticle(
 		Tags:        tags,
 	}
 
-	if err := article.Validate(); err != nil {
+	if err := article.Validate(BuildArticleValidations()); err != nil {
 		return Article{}, err
 	}
 
 	return article, nil
 }
 
-var ArticleValidations = map[string][]Rule{
-	"ID":          {RequiredRule},
-	"Title":       {RequiredRule, MinLenRule(2)},
-	"HeaderTitle": {RequiredRule, MinLenRule(2)},
-	"Excerpt":     {RequiredRule, MinLenRule(130), MaxLenRule(160)},
-	"ReadTime":    {RequiredRule},
-	"Filename":    {RequiredRule},
+var BuildArticleValidations = func() map[string][]Rule {
+	return map[string][]Rule{
+		"ID":          {RequiredRule},
+		"Title":       {RequiredRule, MinLenRule(2)},
+		"HeaderTitle": {RequiredRule, MinLenRule(2)},
+		"Excerpt":     {RequiredRule, MinLenRule(130), MaxLenRule(160)},
+		"ReadTime":    {RequiredRule},
+		"Filename":    {RequiredRule},
+	}
 }
 
-func (a Article) Validate() error {
+func (a Article) Validate(validations map[string][]Rule) error {
+	val := reflect.ValueOf(a)
+	typ := reflect.TypeOf(a)
 	var errors []ValidationErr
-	for field, rules := range ArticleValidations {
-		switch field {
-		case "ID":
-			idValidationErr := ErrValidation{
-				FieldName:  "ID",
-				FieldValue: a.ID,
+	for i := 0; i < val.NumField(); i++ {
+		value := val.Field(i)
+		name := typ.Field(i).Name
+
+		errVal := ErrValidation{
+			FieldValue: value,
+			FieldName:  name,
+		}
+
+		for _, rule := range validations[name] {
+			if rule.IsViolated(GetFieldValue(value)) {
+				errVal.Violations = append(
+					errVal.Violations,
+					rule.Violation(),
+				)
 			}
-			for _, rule := range rules {
-				if err := checkRule(a.ID, rule); err != nil {
-					idValidationErr.Violations = append(
-						idValidationErr.Violations,
-						err,
-					)
-				}
-			}
-			errors = append(errors, idValidationErr)
-		case "Title":
-			titleValidationErr := ErrValidation{
-				FieldName:  "Title",
-				FieldValue: a.Title,
-			}
-			for _, rule := range rules {
-				if err := checkRule(a.Title, rule); err != nil {
-					titleValidationErr.Violations = append(
-						titleValidationErr.Violations,
-						err,
-					)
-				}
-			}
-			errors = append(errors, titleValidationErr)
-		case "HeaderTitle":
-			headerTitleValidationErr := ErrValidation{
-				FieldName:  "HeaderTitle",
-				FieldValue: a.HeaderTitle,
-			}
-			for _, rule := range rules {
-				if err := checkRule(a.HeaderTitle, rule); err != nil {
-					headerTitleValidationErr.Violations = append(
-						headerTitleValidationErr.Violations,
-						err,
-					)
-				}
-			}
-			errors = append(errors, headerTitleValidationErr)
-		case "Excerpt":
-			excerptValidationErr := ErrValidation{
-				FieldName:  "Excerpt",
-				FieldValue: a.Excerpt,
-			}
-			for _, rule := range rules {
-				if err := checkRule(a.Excerpt, rule); err != nil {
-					excerptValidationErr.Violations = append(
-						excerptValidationErr.Violations,
-						err,
-					)
-				}
-			}
-			errors = append(errors, excerptValidationErr)
-		case "ReadTime":
-			readTimeValidationErr := ErrValidation{
-				FieldName:  "ReadTime",
-				FieldValue: a.ReadTime,
-			}
-			for _, rule := range rules {
-				if err := checkRule(a.ReadTime, rule); err != nil {
-					readTimeValidationErr.Violations = append(
-						readTimeValidationErr.Violations,
-						err,
-					)
-				}
-			}
-			errors = append(errors, readTimeValidationErr)
+		}
+
+		if len(errVal.Violations) > 0 {
+			errors = append(errors, errVal)
 		}
 	}
 
-	e := constructValidationErrors(
-		errors...,
-	)
+	e := constructValidationErrors(errors...)
 	if len(e) > 0 {
 		return e
 	}

@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"reflect"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -19,118 +20,42 @@ type Newsletter struct {
 	ArticleSlug string
 }
 
-var NewsletterValidations = map[string][]Rule{
-	"ID":          {RequiredRule},
-	"Title":       {RequiredRule, MinLenRule(3)},
-	"Edition":     {RequiredRule},
-	"Paragraphs":  {RequiredRule, MinLenRule(1)},
-	"ArticleSlug": {RequiredRule},
-	"ReleasedAt":  {RequiredRule},
-	"Released  ":  {RequiredRule},
+var BuildNewsletterValidations = func() map[string][]Rule {
+	return map[string][]Rule{
+		"ID":          {RequiredRule},
+		"Title":       {RequiredRule, MinLenRule(3)},
+		"Edition":     {RequiredRule},
+		"Paragraphs":  {RequiredRule, MinLenRule(1)},
+		"ArticleSlug": {RequiredRule},
+		"ReleasedAt":  {RequiredRule},
+		"Released  ":  {RequiredRule},
+	}
 }
 
-func (n Newsletter) Validate() error {
+func (n Newsletter) Validate(validations map[string][]Rule) error {
+	val := reflect.ValueOf(n)
+	typ := reflect.TypeOf(n)
 	var errors []ValidationErr
-	for field, rules := range NewsletterValidations {
-		switch field {
-		case "ID":
-			idValidationErr := ErrValidation{
-				FieldName:  "ID",
-				FieldValue: n.ID,
+	for i := 0; i < val.NumField(); i++ {
+		value := val.Field(i)
+		name := typ.Field(i).Name
+
+		errVal := ErrValidation{
+			FieldValue: value,
+			FieldName:  name,
+		}
+
+		for _, rule := range validations[name] {
+			if rule.IsViolated(GetFieldValue(value)) {
+				errVal.Violations = append(
+					errVal.Violations,
+					rule.Violation(),
+				)
 			}
-			for _, rule := range rules {
-				if err := checkRule(n.ID, rule); err != nil {
-					idValidationErr.Violations = append(
-						idValidationErr.Violations,
-						err,
-					)
-				}
-			}
-			errors = append(errors, idValidationErr)
-		case "Title":
-			titleValidationErr := ErrValidation{
-				FieldName:  "Title",
-				FieldValue: n.Title,
-			}
-			for _, rule := range rules {
-				if err := checkRule(n.Title, rule); err != nil {
-					titleValidationErr.Violations = append(
-						titleValidationErr.Violations,
-						err,
-					)
-				}
-			}
-			errors = append(errors, titleValidationErr)
-		case "Edition":
-			editionValidationErr := ErrValidation{
-				FieldName:  "Edition",
-				FieldValue: n.Edition,
-			}
-			for _, rule := range rules {
-				if err := checkRule(n.Edition, rule); err != nil {
-					editionValidationErr.Violations = append(
-						editionValidationErr.Violations,
-						err,
-					)
-				}
-			}
-			errors = append(errors, editionValidationErr)
-		case "Paragraphs":
-			paragraphsValidationErr := ErrValidation{
-				FieldName:  "Paragraphs",
-				FieldValue: n.Paragraphs,
-			}
-			for _, rule := range rules {
-				if err := checkRule(n.Paragraphs, rule); err != nil {
-					paragraphsValidationErr.Violations = append(
-						paragraphsValidationErr.Violations,
-						err,
-					)
-				}
-			}
-			errors = append(errors, paragraphsValidationErr)
-		case "ArticleSlug":
-			articleValidationErr := ErrValidation{
-				FieldName:  "ArticleSlug",
-				FieldValue: n.ArticleSlug,
-			}
-			for _, rule := range rules {
-				if err := checkRule(n.ArticleSlug, rule); err != nil {
-					articleValidationErr.Violations = append(
-						articleValidationErr.Violations,
-						err,
-					)
-				}
-			}
-			errors = append(errors, articleValidationErr)
-		case "ReleasedAt":
-			releasedAtValidationErr := ErrValidation{
-				FieldName:  "ReleasedAt",
-				FieldValue: n.ReleasedAt,
-			}
-			for _, rule := range rules {
-				if err := checkRule(n.ReleasedAt, rule); err != nil {
-					releasedAtValidationErr.Violations = append(
-						releasedAtValidationErr.Violations,
-						err,
-					)
-				}
-			}
-			errors = append(errors, releasedAtValidationErr)
-		case "Released":
-			releasedValidationErr := ErrValidation{
-				FieldName:  "Released",
-				FieldValue: n.Released,
-			}
-			for _, rule := range rules {
-				if err := checkRule(n.Released, rule); err != nil {
-					releasedValidationErr.Violations = append(
-						releasedValidationErr.Violations,
-						err,
-					)
-				}
-			}
-			errors = append(errors, releasedValidationErr)
+		}
+
+		if len(errVal.Violations) > 0 {
+			errors = append(errors, errVal)
 		}
 	}
 
@@ -164,7 +89,7 @@ func NewNewsletter(
 		articleSlug,
 	}
 
-	if err := newsletter.Validate(); err != nil {
+	if err := newsletter.Validate(BuildNewsletterValidations()); err != nil {
 		return Newsletter{}, err
 	}
 
