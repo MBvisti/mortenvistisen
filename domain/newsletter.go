@@ -4,7 +4,6 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 )
 
@@ -51,6 +50,10 @@ func (n Newsletter) Validate(validations map[string][]Rule) error {
 					errVal.Violations,
 					rule.Violation(),
 				)
+				errVal.ViolationsForHuman = append(
+					errVal.ViolationsForHuman,
+					rule.ViolationForHumans(name),
+				)
 			}
 		}
 
@@ -70,8 +73,6 @@ func (n Newsletter) Validate(validations map[string][]Rule) error {
 func NewNewsletter(
 	title string,
 	edition int32,
-	releasedAt time.Time,
-	released bool,
 	paragraphs []string,
 	articleSlug string,
 ) (Newsletter, error) {
@@ -83,8 +84,8 @@ func NewNewsletter(
 		now,
 		title,
 		edition,
-		releasedAt,
-		released,
+		time.Time{},
+		false,
 		paragraphs,
 		articleSlug,
 	}
@@ -96,29 +97,23 @@ func NewNewsletter(
 	return newsletter, nil
 }
 
-type UpdateNewsletterPayload struct {
-	ID          uuid.UUID
-	Title       string   `validate:"required,gte=3"`
-	Edition     int32    `validate:"required,gte=1"`
-	Paragraphs  []string `validate:"required,gte=1"`
-	ArticleSlug string   `validate:"required"`
-}
-
 func (n Newsletter) Update(
-	payload UpdateNewsletterPayload,
-	v *validator.Validate,
+	title string,
+	edition int32,
+	paragraphs []string,
+	articleSlug string,
 ) (Newsletter, error) {
-	if err := v.Struct(payload); err != nil {
+	n.Title = title
+	n.Edition = edition
+	n.Paragraphs = paragraphs
+	n.ArticleSlug = articleSlug
+	n.UpdatedAt = time.Now()
+
+	if err := n.Validate(BuildNewsletterValidations()); err != nil {
 		return Newsletter{}, err
 	}
 
-	return Newsletter{
-		ID:          payload.ID,
-		Title:       payload.Title,
-		Edition:     payload.Edition,
-		Paragraphs:  payload.Paragraphs,
-		ArticleSlug: payload.ArticleSlug,
-	}, nil
+	return n, nil
 }
 
 func InitilizeNewsletter(

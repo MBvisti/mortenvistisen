@@ -83,6 +83,10 @@ func (a Article) Validate(validations map[string][]Rule) error {
 					errVal.Violations,
 					rule.Violation(),
 				)
+				errVal.ViolationsForHuman = append(
+					errVal.ViolationsForHuman,
+					rule.ViolationForHumans(name),
+				)
 			}
 		}
 

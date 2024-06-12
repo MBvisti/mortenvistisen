@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"log"
 	"time"
 
@@ -13,13 +14,19 @@ func main() {
 		ID:             uuid.New(),
 		CreatedAt:      time.Now(),
 		UpdatedAt:      time.Now(),
-		Name:           "mm",
+		Name:           "m",
 		Mail:           "sdjkasldjklads@gmail.com",
 		MailVerifiedAt: time.Now(),
 		Password:       "dksjlkdjaljd",
 	}
 
-	vali := domain.BuildUserValidations("dksjalkdjaljd")
+	vali := domain.BuildUserValidations("dksjlkdjaljd")
 
-	log.Print(usr.Validate(vali))
+	var e domain.ValidationErrs
+	if errors.As(usr.Validate(vali), &e) {
+		for _, err := range e {
+			log.Print(err.ErrorForHumans())
+			log.Print(err.Error())
+		}
+	}
 }

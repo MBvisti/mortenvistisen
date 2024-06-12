@@ -60,46 +60,10 @@ func (q *Queries) InsertNewsletter(ctx context.Context, arg InsertNewsletterPara
 	return i, err
 }
 
-const queryAllNewsletters = `-- name: QueryAllNewsletters :many
-select id, created_at, updated_at, title, edition, released, released_at, body, associated_article_id from newsletters
-`
-
-func (q *Queries) QueryAllNewsletters(ctx context.Context) ([]Newsletter, error) {
-	rows, err := q.db.Query(ctx, queryAllNewsletters)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Newsletter
-	for rows.Next() {
-		var i Newsletter
-		if err := rows.Scan(
-			&i.ID,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-			&i.Title,
-			&i.Edition,
-			&i.Released,
-			&i.ReleasedAt,
-			&i.Body,
-			&i.AssociatedArticleID,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const queryNewsletterByID = `-- name: QueryNewsletterByID :one
-select 
-	id, created_at, updated_at, title, edition, released, released_at, body, associated_article_id 
-from newsletters 
-where 
-	id = $1
+select id, created_at, updated_at, title, edition, released, released_at, body, associated_article_id
+from newsletters
+where id = $1
 `
 
 func (q *Queries) QueryNewsletterByID(ctx context.Context, id uuid.UUID) (Newsletter, error) {
@@ -120,13 +84,10 @@ func (q *Queries) QueryNewsletterByID(ctx context.Context, id uuid.UUID) (Newsle
 }
 
 const queryNewsletterInPages = `-- name: QueryNewsletterInPages :many
-select 
-	newsletters.id, newsletters.created_at, newsletters.updated_at, newsletters.title, newsletters.edition, newsletters.released, newsletters.released_at, newsletters.body, newsletters.associated_article_id
-from newsletters 
-limit
-	7
-offset
-	$1
+select newsletters.id, newsletters.created_at, newsletters.updated_at, newsletters.title, newsletters.edition, newsletters.released, newsletters.released_at, newsletters.body, newsletters.associated_article_id
+from newsletters
+limit 7
+offset $1
 `
 
 func (q *Queries) QueryNewsletterInPages(ctx context.Context, offset int32) ([]Newsletter, error) {
@@ -159,11 +120,108 @@ func (q *Queries) QueryNewsletterInPages(ctx context.Context, offset int32) ([]N
 	return items, nil
 }
 
+const queryNewsletters = `-- name: QueryNewsletters :many
+select
+    newsletters.id as newsletter_id,
+    newsletters.created_at as newsletter_created_at,
+    newsletters.updated_at as newsletter_updated_at,
+    newsletters.title as newsletter_title,
+    newsletters.edition as newsletter_edition,
+    newsletters.released as newsletter_released,
+    newsletters.released_at as newsletter_released_at,
+    newsletters.body as newsletter_body,
+    newsletters.associated_article_id as newsletter_associated_article_id,
+    posts.id as post_id,
+    posts.created_at as post_created_at,
+    posts.updated_at as post_updated_at,
+    posts.title as post_title,
+    posts.header_title as post_header_title,
+    posts.filename as post_filename,
+    posts.slug as post_slug,
+    posts.excerpt as post_excerpt,
+    posts.draft as post_draft,
+    posts.released_at as post_released_at,
+    posts.read_time as post_read_time
+from newsletters
+join posts on posts.id = newsletter.associated_article_id
+where released = coalesce($1::bool, null)
+limit coalesce($3::int, null)
+offset coalesce($2::int, 0)
+`
+
+type QueryNewslettersParams struct {
+	IsReleased pgtype.Bool
+	Offset     sql.NullInt32
+	Limit      sql.NullInt32
+}
+
+type QueryNewslettersRow struct {
+	NewsletterID                  uuid.UUID
+	NewsletterCreatedAt           pgtype.Timestamptz
+	NewsletterUpdatedAt           pgtype.Timestamptz
+	NewsletterTitle               string
+	NewsletterEdition             sql.NullInt32
+	NewsletterReleased            pgtype.Bool
+	NewsletterReleasedAt          pgtype.Timestamptz
+	NewsletterBody                []byte
+	NewsletterAssociatedArticleID uuid.UUID
+	PostID                        uuid.UUID
+	PostCreatedAt                 pgtype.Timestamp
+	PostUpdatedAt                 pgtype.Timestamp
+	PostTitle                     string
+	PostHeaderTitle               sql.NullString
+	PostFilename                  string
+	PostSlug                      string
+	PostExcerpt                   string
+	PostDraft                     bool
+	PostReleasedAt                pgtype.Timestamp
+	PostReadTime                  sql.NullInt32
+}
+
+func (q *Queries) QueryNewsletters(ctx context.Context, arg QueryNewslettersParams) ([]QueryNewslettersRow, error) {
+	rows, err := q.db.Query(ctx, queryNewsletters, arg.IsReleased, arg.Offset, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []QueryNewslettersRow
+	for rows.Next() {
+		var i QueryNewslettersRow
+		if err := rows.Scan(
+			&i.NewsletterID,
+			&i.NewsletterCreatedAt,
+			&i.NewsletterUpdatedAt,
+			&i.NewsletterTitle,
+			&i.NewsletterEdition,
+			&i.NewsletterReleased,
+			&i.NewsletterReleasedAt,
+			&i.NewsletterBody,
+			&i.NewsletterAssociatedArticleID,
+			&i.PostID,
+			&i.PostCreatedAt,
+			&i.PostUpdatedAt,
+			&i.PostTitle,
+			&i.PostHeaderTitle,
+			&i.PostFilename,
+			&i.PostSlug,
+			&i.PostExcerpt,
+			&i.PostDraft,
+			&i.PostReleasedAt,
+			&i.PostReadTime,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const queryNewslettersCount = `-- name: QueryNewslettersCount :one
-select 
-	count(id)
-from 
-	newsletters
+select count(id)
+from newsletters
 `
 
 func (q *Queries) QueryNewslettersCount(ctx context.Context) (int64, error) {
@@ -174,10 +232,8 @@ func (q *Queries) QueryNewslettersCount(ctx context.Context) (int64, error) {
 }
 
 const queryReleasedNewslettersCount = `-- name: QueryReleasedNewslettersCount :one
-select 
-	count(id) as newsletters_count 
-from 
-	newsletters
+select count(id) as newsletters_count
+from newsletters
 where released = true
 `
 

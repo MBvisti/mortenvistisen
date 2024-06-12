@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/MBvisti/mortenvistisen/domain"
-	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
@@ -29,7 +28,6 @@ type subscriberStorage interface {
 	QueryNewSubscribersByMonth(ctx context.Context) ([]domain.Subscriber, error)
 	UpdateSubscriber(
 		ctx context.Context,
-		id uuid.UUID,
 		data domain.Subscriber,
 	) (domain.Subscriber, error)
 	InsertSubscriber(
@@ -42,7 +40,7 @@ type subscriberEmailService interface {
 	SendNewSubscriberEmail(
 		ctx context.Context,
 		subscriberEmail string,
-		activationToken, unsubscribeToken domain.Token,
+		activationToken, unsubscribeToken string,
 	) error
 }
 
@@ -50,30 +48,27 @@ type subscriberTokenService interface {
 	CreateSubscriptionToken(
 		ctx context.Context,
 		subscriberID uuid.UUID,
-	) (domain.Token, error)
+	) (string, error)
 	CreateUnsubscribeToken(
 		ctx context.Context,
 		subscriberID uuid.UUID,
-	) (domain.Token, error)
+	) (string, error)
 }
 
 type SubscriberService struct {
 	emailService subscriberEmailService
 	tknService   subscriberTokenService
-	validator    *validator.Validate
 	storage      subscriberStorage
 }
 
 func NewSubscriberSvc(
 	emailService subscriberEmailService,
 	tknService subscriberTokenService,
-	validator *validator.Validate,
 	storage subscriberStorage,
 ) SubscriberService {
 	return SubscriberService{
 		emailService,
 		tknService,
-		validator,
 		storage,
 	}
 }
@@ -212,7 +207,7 @@ func (svc *SubscriberService) New(ctx context.Context, email, articleTitle strin
 	}
 
 	// 1. create type
-	subscriber, err := domain.NewSubscriber(email, articleTitle, time.Now(), false, svc.validator)
+	subscriber, err := domain.NewSubscriber(email, articleTitle, time.Now(), false)
 	if err != nil {
 		return err
 	}

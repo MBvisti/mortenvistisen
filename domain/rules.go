@@ -9,6 +9,7 @@ import (
 type Rule interface {
 	IsViolated(val any) bool
 	Violation() error
+	ViolationForHumans(val string) error
 }
 
 // type Compareable interface {
@@ -23,6 +24,13 @@ func PasswordMatchConfirmRule(confirm string) PasswordMatchConfirm {
 
 type PasswordMatchConfirm struct {
 	confirm string
+}
+
+// ViolationForHumans implements Rule.
+func (p PasswordMatchConfirm) ViolationForHumans(val string) error {
+	return fmt.Errorf(
+		"password and confirm password must match",
+	)
 }
 
 // Violation implements Rule.
@@ -40,6 +48,11 @@ func (p PasswordMatchConfirm) IsViolated(val any) bool {
 var RequiredRule Required
 
 type Required struct{}
+
+// ViolationForHumans implements Rule.
+func (r Required) ViolationForHumans(val string) error {
+	return fmt.Errorf("%v needs to provided", val)
+}
 
 // IsViolated implements Rule.
 func (r Required) IsViolated(v any) bool {
@@ -62,7 +75,7 @@ func (r Required) Violation() error {
 
 var MinLenRule = func(required int) MinLen {
 	return MinLen{
-		requiredLen: required,
+		required,
 	}
 }
 
@@ -87,10 +100,33 @@ func (m MinLen) Violation() error {
 	return ErrTooShort
 }
 
-type MaxLenRule int
+func (m MinLen) ViolationForHumans(val string) error {
+	return fmt.Errorf(
+		"%s needs to be longer than: '%v' characters",
+		val,
+		m.requiredLen,
+	)
+}
+
+var MaxLenRule = func(required int) MaxLen {
+	return MaxLen{required}
+}
+
+type MaxLen struct {
+	requiredLen int
+}
+
+// ViolationForHumans implements Rule.
+func (m MaxLen) ViolationForHumans(val string) error {
+	return fmt.Errorf(
+		"%s needs to be shorter than: '%v' characters",
+		val,
+		m.requiredLen,
+	)
+}
 
 // IsViolated implements Rule.
-func (m MaxLenRule) IsViolated(val any) bool {
+func (m MaxLen) IsViolated(val any) bool {
 	v := reflect.ValueOf(val)
 	valLen, err := LengthOfValue(&v)
 	if err != nil {
@@ -98,17 +134,26 @@ func (m MaxLenRule) IsViolated(val any) bool {
 		return true
 	}
 
-	return valLen > int(m)
+	return valLen > m.requiredLen
 }
 
 // Violation implements Rule.
-func (m MaxLenRule) Violation() error {
-	return ErrTooLong
+func (m MaxLen) Violation() error {
+	return fmt.Errorf(
+		"failed error: '%v', because val was longer than: '%v' characters",
+		ErrTooLong,
+		m,
+	)
 }
 
 var EmailRule Email
 
 type Email struct{}
+
+// ViolationForHumans implements Rule.
+func (e Email) ViolationForHumans(val string) error {
+	return fmt.Errorf("the provided email was not valid")
+}
 
 // IsViolated implements Rule.
 func (e Email) IsViolated(val any) bool {
@@ -125,10 +170,10 @@ func (e Email) Violation() error {
 	return ErrInvalidEmail
 }
 
-// _ Rule = new(PasswordMatchConfirm)
-// _ Compareable = new(PasswordMatchConfirm)
-// _ Rule = new(Required)
-// var _ Rule = new(MinLenRule)
-
-// _ Rule = new(MaxLenRule)
-// _ Rule = new(Email)
+var (
+	_ Rule = new(PasswordMatchConfirm)
+	_ Rule = new(Required)
+	_ Rule = new(MinLen)
+	_ Rule = new(MaxLen)
+	_ Rule = new(Email)
+)

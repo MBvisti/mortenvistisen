@@ -9,6 +9,7 @@ import (
 
 var (
 	ErrNoRowWithIdentifier = errors.New("could not find requested row in database")
+	ErrNewsletterNotFound  = errors.New("could not find a newsletter for the provided identifier")
 	ErrUnrecoverableEvent  = errors.New("an error occurred that could not be recovered from")
 	ErrSubscriberExists    = errors.New(
 		"there is already a subscriber registered with the provided data",

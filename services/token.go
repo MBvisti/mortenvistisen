@@ -9,7 +9,6 @@ import (
 	"hash"
 	"time"
 
-	"github.com/MBvisti/mortenvistisen/domain"
 	"github.com/google/uuid"
 )
 
@@ -77,13 +76,13 @@ func (svc *TokenSvc) hash(token string) string {
 func (svc *TokenSvc) CreateSubscriptionToken(
 	ctx context.Context,
 	subscriberID uuid.UUID,
-) (domain.Token, error) {
+) (string, error) {
 	tokenPair, err := svc.create()
 	if err != nil {
-		return domain.Token{}, err
+		return "", err
 	}
 
-	tkn := domain.NewToken(
+	tkn := NewToken(
 		ScopeSubscriberEmailVerification,
 		time.Now().Add(72*time.Hour),
 		tokenPair.hashed,
@@ -91,36 +90,31 @@ func (svc *TokenSvc) CreateSubscriptionToken(
 	)
 
 	if err := svc.storage.InsertSubscriberToken(ctx, tkn.Hash, tkn.GetScope(), tkn.GetExpirationTime(), subscriberID); err != nil {
-		return domain.Token{}, err
+		return "", err
 	}
 
-	return tkn, nil
+	return tkn.GetPlainText(), nil
 }
 
-func (svc *TokenSvc) CreateResetPasswordToken() (domain.Token, error) {
+func (svc *TokenSvc) CreateResetPasswordToken() (string, error) {
 	tokenPair, err := svc.create()
 	if err != nil {
-		return domain.Token{}, err
+		return "", err
 	}
 
-	return domain.NewToken(
-		ScopeResetPassword,
-		time.Now().Add(24*time.Hour),
-		tokenPair.hashed,
-		tokenPair.plain,
-	), nil
+	return tokenPair.plain, nil
 }
 
 func (svc *TokenSvc) CreateUnsubscribeToken(
 	ctx context.Context,
 	subscriberID uuid.UUID,
-) (domain.Token, error) {
+) (string, error) {
 	tokenPair, err := svc.create()
 	if err != nil {
-		return domain.Token{}, err
+		return "", err
 	}
 
-	tkn := domain.NewToken(
+	tkn := NewToken(
 		ScopeUnsubscribe,
 		time.Now().Add(168*time.Hour), // allow 7 days for an unsubscribe link to be valid
 		tokenPair.hashed,
@@ -128,8 +122,41 @@ func (svc *TokenSvc) CreateUnsubscribeToken(
 	)
 
 	if err := svc.storage.InsertSubscriberToken(ctx, tkn.Hash, tkn.GetScope(), tkn.GetExpirationTime(), subscriberID); err != nil {
-		return domain.Token{}, err
+		return "", err
 	}
 
-	return tkn, nil
+	return tkn.GetPlainText(), nil
+}
+
+type Token struct {
+	scope     string
+	expiresAt time.Time
+	Hash      string
+	plain     string
+}
+
+func NewToken(
+	scope string,
+	expiresAt time.Time,
+	Hash string,
+	plain string,
+) Token {
+	return Token{
+		scope,
+		expiresAt,
+		Hash,
+		plain,
+	}
+}
+
+func (t *Token) GetPlainText() string {
+	return t.plain
+}
+
+func (t *Token) GetExpirationTime() time.Time {
+	return t.expiresAt
+}
+
+func (t *Token) GetScope() string {
+	return t.scope
 }

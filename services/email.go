@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/MBvisti/mortenvistisen/domain"
 	"github.com/MBvisti/mortenvistisen/pkg/config"
 	"github.com/MBvisti/mortenvistisen/views/emails"
 )
@@ -39,20 +38,20 @@ func NewEmailSvc(
 func (e *EmailSvc) SendNewSubscriberEmail(
 	ctx context.Context,
 	subscriberEmail string,
-	activationToken, unsubscribeToken domain.Token,
+	activationToken, unsubscribeToken string,
 ) error {
 	newsletterMail := emails.NewsletterWelcomeMail{
 		ConfirmationLink: fmt.Sprintf(
 			"%s://%s/verify-subscriber?token=%s",
 			e.cfg.App.AppScheme,
 			e.cfg.App.AppHost,
-			activationToken.GetPlainText(),
+			activationToken,
 		),
 		UnsubscribeLink: fmt.Sprintf(
 			"%s://%s/unsubscriber?token=%s",
 			e.cfg.App.AppScheme,
 			e.cfg.App.AppHost,
-			unsubscribeToken.GetPlainText(),
+			unsubscribeToken,
 		),
 	}
 

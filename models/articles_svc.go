@@ -1,5 +1,7 @@
 package models
 
+type ArticleStorage interface{}
+
 // type postDatabase interface {
 // 	InsertPost(ctx context.Context, arg database.InsertPostParams) (uuid.UUID, error)
 // 	UpdatePost(ctx context.Context, arg database.UpdatePostParams) (database.Post, error)

@@ -1,9 +1,11 @@
 package controllers
 
 import (
+	"fmt"
 	"log/slog"
 	"math"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/MBvisti/mortenvistisen/models"
@@ -12,9 +14,7 @@ import (
 	"github.com/MBvisti/mortenvistisen/repository/database"
 	"github.com/MBvisti/mortenvistisen/repository/psql"
 	"github.com/MBvisti/mortenvistisen/services"
-	"github.com/MBvisti/mortenvistisen/usecases"
 	"github.com/MBvisti/mortenvistisen/views"
-	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/sessions"
 	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
@@ -31,27 +31,25 @@ import (
 // - destroy | DELETE
 
 type Dependencies struct {
-	DB                database.Queries
-	TknManager        tokens.Manager
-	QueueClient       *river.Client[pgx.Tx]
-	Validate          *validator.Validate
-	PostManager       posts.PostManager
-	EmailSvc          services.EmailSvc
-	AuthStore         *sessions.CookieStore
-	NewsletterUsecase usecases.Newsletter
-	SubscriberModel   models.SubscriberService
-	Psql              psql.Postgres
+	DB              database.Queries
+	TknManager      tokens.Manager
+	QueueClient     *river.Client[pgx.Tx]
+	PostManager     posts.PostManager
+	EmailSvc        services.EmailSvc
+	AuthStore       *sessions.CookieStore
+	NewsletterModel models.NewsletterService
+	SubscriberModel models.SubscriberService
+	Database        psql.Postgres
 }
 
 func NewDependencies(
 	db database.Queries,
 	tknManager tokens.Manager,
 	queueClient *river.Client[pgx.Tx],
-	validate *validator.Validate,
 	postManager posts.PostManager,
 	emailSvc services.EmailSvc,
 	authStore *sessions.CookieStore,
-	newsletterUsecase usecases.Newsletter,
+	newsletterModel models.NewsletterService,
 	subscriberModel models.SubscriberService,
 	psql psql.Postgres,
 ) Dependencies {
@@ -59,11 +57,10 @@ func NewDependencies(
 		db,
 		tknManager,
 		queueClient,
-		validate,
 		postManager,
 		emailSvc,
 		authStore,
-		newsletterUsecase,
+		newsletterModel,
 		subscriberModel,
 		psql,
 	}
@@ -119,4 +116,12 @@ func GetOffsetAndCurrPage(page string, limit int) (int, int, error) {
 	}
 
 	return offset, currentPage, nil
+}
+
+func FormatArticleSlug(slug string) string {
+	return fmt.Sprintf("posts/%s", slug)
+}
+
+func BuildURLFromSlug(slug string) string {
+	return fmt.Sprintf("%s://%s/%s", os.Getenv("APP_SCHEME"), os.Getenv("APP_HOST"), slug)
 }

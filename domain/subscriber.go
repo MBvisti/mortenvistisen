@@ -19,10 +19,10 @@ type Subscriber struct {
 
 var BuildSubscriberValidations = func() map[string][]Rule {
 	return map[string][]Rule{
-		"ID":           {RequiredRule},
-		"Email":        {RequiredRule, EmailRule},
-		"SubscribedAt": {RequiredRule},
-		"Referer":      {RequiredRule},
+		"ID":    {RequiredRule},
+		"Email": {RequiredRule, EmailRule},
+		// "SubscribedAt": {RequiredRule},
+		"Referer": {RequiredRule},
 	}
 }
 
@@ -44,6 +44,10 @@ func (s Subscriber) Validate(validations map[string][]Rule) error {
 				errVal.Violations = append(
 					errVal.Violations,
 					rule.Violation(),
+				)
+				errVal.ViolationsForHuman = append(
+					errVal.ViolationsForHuman,
+					rule.ViolationForHumans(name),
 				)
 			}
 		}

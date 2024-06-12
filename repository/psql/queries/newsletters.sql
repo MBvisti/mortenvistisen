@@ -1,27 +1,49 @@
--- name: QueryAllNewsletters :many
-select * from newsletters;
+-- name: QueryNewsletters :many
+select
+    newsletters.id as newsletter_id,
+    newsletters.created_at as newsletter_created_at,
+    newsletters.updated_at as newsletter_updated_at,
+    newsletters.title as newsletter_title,
+    newsletters.edition as newsletter_edition,
+    newsletters.released as newsletter_released,
+    newsletters.released_at as newsletter_released_at,
+    newsletters.body as newsletter_body,
+    newsletters.associated_article_id as newsletter_associated_article_id,
+    posts.id as post_id,
+    posts.created_at as post_created_at,
+    posts.updated_at as post_updated_at,
+    posts.title as post_title,
+    posts.header_title as post_header_title,
+    posts.filename as post_filename,
+    posts.slug as post_slug,
+    posts.excerpt as post_excerpt,
+    posts.draft as post_draft,
+    posts.released_at as post_released_at,
+    posts.read_time as post_read_time
+from newsletters
+join posts on posts.id = newsletter.associated_article_id
+where released = coalesce(sqlc.narg('is_released')::bool, null)
+limit coalesce(sqlc.narg('limit')::int, null)
+offset coalesce(sqlc.narg('offset')::int, 0)
+;
 
 -- name: QueryNewsletterInPages :many
-select 
-	newsletters.*
-from newsletters 
-limit
-	7
-offset
-	$1;
+select newsletters.*
+from newsletters
+limit 7
+offset $1
+;
 
 -- name: QueryNewslettersCount :one
-select 
-	count(id)
-from 
-	newsletters;
+select count(id)
+from newsletters
+;
 
 -- name: QueryReleasedNewslettersCount :one
-select 
-	count(id) as newsletters_count 
-from 
-	newsletters
-where released = true;
+select count(id) as newsletters_count
+from newsletters
+where released = true
+;
 
 -- name: InsertNewsletter :one
 insert into newsletters
@@ -31,14 +53,14 @@ values
 returning *;
 
 -- name: QueryNewsletterByID :one
-select 
-	* 
-from newsletters 
-where 
-	id = $1;
+select *
+from newsletters
+where id = $1
+;
 
 -- name: UpdateNewsletter :one
 update newsletters
 	set updated_at = $1, title = $2, edition = $3, released = $4, released_at = $5, body = $6, associated_article_id = $7
 where id = $8
 returning *;
+

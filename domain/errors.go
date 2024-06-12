@@ -23,6 +23,7 @@ func isEmailValid(e string) bool {
 
 type ValidationErr interface {
 	Error() string
+	ErrorForHumans() string
 	Field() string
 	Value() any
 	Causes() []error
@@ -45,9 +46,10 @@ func (ve ValidationErrs) Unwrap() error {
 }
 
 type ErrValidation struct {
-	FieldValue any
-	FieldName  string
-	Violations []error
+	FieldValue         any
+	FieldName          string
+	Violations         []error
+	ViolationsForHuman []error
 }
 
 func (e ErrValidation) Field() string {
@@ -60,6 +62,30 @@ func (e ErrValidation) Value() any {
 
 func (e ErrValidation) Causes() []error {
 	return e.Violations
+}
+
+func (e ErrValidation) ErrorForHumans() string {
+	var causes string
+	for i, violation := range e.ViolationsForHuman {
+		var validationErr ValidationErr
+		if errors.As(violation, &validationErr) {
+			if i == 0 {
+				causes = validationErr.ErrorForHumans()
+			}
+
+			if i != 0 {
+				causes = causes + ", " + validationErr.ErrorForHumans()
+			}
+		}
+
+	}
+
+	return fmt.Sprintf(
+		baseErrMsg,
+		e.FieldName,
+		e.FieldValue,
+		causes,
+	)
 }
 
 func (e ErrValidation) Error() string {

@@ -18,8 +18,6 @@ import (
 	"github.com/MBvisti/mortenvistisen/repository/database"
 	"github.com/MBvisti/mortenvistisen/repository/psql"
 	"github.com/MBvisti/mortenvistisen/services"
-	"github.com/MBvisti/mortenvistisen/usecases"
-	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/sessions"
 )
 
@@ -50,31 +48,30 @@ func main() {
 
 	postManager := posts.NewPostManager()
 
-	validator := validator.New()
-	validator.RegisterStructValidation(
-		services.PasswordMatchValidation,
-		services.NewUserValidation{},
-	)
-	validator.RegisterStructValidation(
-		services.ResetPasswordMatchValidation,
-		services.UpdateUserValidation{},
-	)
+	// validator := validator.New()
+	// validator.RegisterStructValidation(
+	// 	services.PasswordMatchValidation,
+	// 	services.NewUserValidation{},
+	// )
+	// validator.RegisterStructValidation(
+	// 	services.ResetPasswordMatchValidation,
+	// 	services.UpdateUserValidation{},
+	// )
 
 	mailService := services.NewEmailSvc(cfg, &awsSes)
-	newsletterUsecase := usecases.NewNewsletter(*db, validator, mailService)
+	// newsletterUsecase := usecases.NewNewsletter(*db, validator, mailService)
 
 	tknService := services.NewTokenSvc(psql, cfg.Auth.TokenSigningKey)
-	subModel := models.NewSubscriberSvc(&mailService, tknService, validator, psql)
+	subModel := models.NewSubscriberSvc(&mailService, tknService, psql)
 
 	controllerDeps := controllers.NewDependencies(
 		*db,
 		*tokenManager,
 		riverClient,
-		validator,
+		// validator,
 		postManager,
 		mailService,
 		authSessionStore,
-		newsletterUsecase,
 		subModel,
 		psql,
 	)
