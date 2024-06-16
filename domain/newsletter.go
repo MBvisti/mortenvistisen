@@ -19,15 +19,47 @@ type Newsletter struct {
 	ArticleSlug string
 }
 
-var BuildNewsletterValidations = func() map[string][]Rule {
+var NewsletterValidations = func() map[string][]Rule {
+	return map[string][]Rule{
+		"ID":          {RequiredRule},
+		"ArticleSlug": {RequiredRule},
+	}
+}
+
+func CreateNewsletter(
+	title string,
+	edition int32,
+	paragraphs []string,
+	articleSlug string,
+) (Newsletter, error) {
+	now := time.Now()
+
+	newsletter := Newsletter{
+		uuid.New(),
+		now,
+		now,
+		title,
+		edition,
+		time.Time{},
+		false,
+		paragraphs,
+		articleSlug,
+	}
+
+	if err := newsletter.Validate(NewsletterValidations()); err != nil {
+		return Newsletter{}, err
+	}
+
+	return newsletter, nil
+}
+
+var ReleaseNewsletterValidations = func() map[string][]Rule {
 	return map[string][]Rule{
 		"ID":          {RequiredRule},
 		"Title":       {RequiredRule, MinLenRule(3)},
 		"Edition":     {RequiredRule},
 		"Paragraphs":  {RequiredRule, MinLenRule(1)},
 		"ArticleSlug": {RequiredRule},
-		"ReleasedAt":  {RequiredRule},
-		"Released  ":  {RequiredRule},
 	}
 }
 
@@ -70,31 +102,15 @@ func (n Newsletter) Validate(validations map[string][]Rule) error {
 	return nil
 }
 
-func NewNewsletter(
-	title string,
-	edition int32,
-	paragraphs []string,
-	articleSlug string,
-) (Newsletter, error) {
-	now := time.Now()
-
-	newsletter := Newsletter{
-		uuid.New(),
-		now,
-		now,
-		title,
-		edition,
-		time.Time{},
-		false,
-		paragraphs,
-		articleSlug,
-	}
-
-	if err := newsletter.Validate(BuildNewsletterValidations()); err != nil {
+func (n Newsletter) Release() (Newsletter, error) {
+	if err := n.Validate(ReleaseNewsletterValidations()); err != nil {
 		return Newsletter{}, err
 	}
 
-	return newsletter, nil
+	n.Released = true
+	n.ReleasedAt = time.Now()
+
+	return n, nil
 }
 
 func (n Newsletter) Update(
@@ -109,24 +125,9 @@ func (n Newsletter) Update(
 	n.ArticleSlug = articleSlug
 	n.UpdatedAt = time.Now()
 
-	if err := n.Validate(BuildNewsletterValidations()); err != nil {
+	if err := n.Validate(NewsletterValidations()); err != nil {
 		return Newsletter{}, err
 	}
 
 	return n, nil
-}
-
-func InitilizeNewsletter(
-	title string,
-	edition int32,
-	paragraphs []string,
-	articleSlug string,
-) Newsletter {
-	return Newsletter{
-		ID:          uuid.New(),
-		Title:       title,
-		Edition:     edition,
-		Paragraphs:  paragraphs,
-		ArticleSlug: articleSlug,
-	}
 }

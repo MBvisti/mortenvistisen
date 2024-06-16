@@ -16,6 +16,7 @@ type subscriberStorage interface {
 	QuerySubscriberByEmail(ctx context.Context, email string) (domain.Subscriber, error)
 	ListSubscribers(
 		ctx context.Context,
+		filters QueryFilters,
 		opts ...PaginationOption,
 	) ([]domain.Subscriber, error)
 	CountSubscribers(
@@ -123,7 +124,7 @@ func (svc *SubscriberService) List(
 	offset int32,
 	limit int32,
 ) ([]domain.Subscriber, error) {
-	subs, err := svc.storage.ListSubscribers(ctx, WithPagination(limit, offset))
+	subs, err := svc.storage.ListSubscribers(ctx, nil, WithPagination(limit, offset))
 	if err != nil {
 		return nil, err
 	}

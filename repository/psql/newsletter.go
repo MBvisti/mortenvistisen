@@ -46,7 +46,7 @@ func (p Postgres) QueryNewsletterByID(
 
 func (p Postgres) ListNewsletters(
 	ctx context.Context,
-	filters models.NewsletterFilters,
+	filters models.QueryFilters,
 	opts ...models.PaginationOption,
 ) ([]domain.Newsletter, error) {
 	options := &models.PaginationOptions{}

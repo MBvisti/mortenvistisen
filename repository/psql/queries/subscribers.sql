@@ -8,6 +8,7 @@ returning *;
 -- name: QuerySubscribers :many
 select *
 from subscribers
+where is_verified = coalesce(sqlc.narg('is_verified')::bool, null)
 limit coalesce(sqlc.narg('limit')::int, null)
 offset coalesce(sqlc.narg('offset')::int, 0)
 ;

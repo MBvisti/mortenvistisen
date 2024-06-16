@@ -180,6 +180,7 @@ func (p Postgres) QueryNewSubscribersByMonth(ctx context.Context) ([]domain.Subs
 
 func (p Postgres) ListSubscribers(
 	ctx context.Context,
+	filters models.QueryFilters,
 	opts ...models.PaginationOption,
 ) ([]domain.Subscriber, error) {
 	options := &models.PaginationOptions{}
@@ -188,12 +189,23 @@ func (p Postgres) ListSubscribers(
 		opt(options)
 	}
 
-	subs, err := p.db.QuerySubscribers(ctx, database.QuerySubscribersParams{
+	params := database.QuerySubscribersParams{
 		Offset: sql.NullInt32{Int32: options.Offset, Valid: true},
 		Limit:  sql.NullInt32{Int32: options.Limit, Valid: true},
-	})
+	}
+
+	subs, err := p.db.QuerySubscribers(ctx, params)
 	if err != nil {
 		return nil, err
+	}
+
+	for k, v := range filters {
+		if k == "IsVerified" {
+			val, ok := v.(bool)
+			if ok {
+				params.IsVerified = pgtype.Bool{Bool: val, Valid: true}
+			}
+		}
 	}
 
 	subscribers := make([]domain.Subscriber, len(subs))

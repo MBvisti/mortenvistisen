@@ -368,17 +368,13 @@ func releaseNewsletter(ctx echo.Context,
 	newsletter domain.Newsletter,
 	db database.Queries,
 	newsletterModel models.NewsletterService,
-	storeNewsletterPayload newsletterPayload,
 	sess *sessions.CookieStore,
 	hxAction string,
 	endpoint string,
 ) error {
 	_, err := newsletterModel.Release(
 		ctx.Request().Context(),
-		storeNewsletterPayload.Title,
-		storeNewsletterPayload.Edition,
-		storeNewsletterPayload.ParagraphElements,
-		storeNewsletterPayload.ArticleID,
+		newsletter,
 	)
 	if err != nil {
 		return err
@@ -503,7 +499,6 @@ func NewsletterStore(
 			newsletter,
 			db,
 			newsletterModel,
-			storeNewsletterPayload,
 			sess,
 			"post",
 			"newsletters/store",

@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"strconv"
 
 	"github.com/MBvisti/mortenvistisen/domain"
@@ -29,9 +30,14 @@ type newsletterStorage interface {
 	) (domain.Article, error)
 	ListNewsletters(
 		ctx context.Context,
-		filters NewsletterFilters,
+		filters QueryFilters,
 		opts ...PaginationOption,
 	) ([]domain.Newsletter, error)
+	// ListSubscribers(
+	// 	ctx context.Context,
+	// 	filters QueryFilters,
+	// 	opts ...PaginationOption,
+	// ) ([]domain.Subscriber, error)
 	InsertNewsletter(
 		ctx context.Context,
 		newsletter domain.Newsletter,
@@ -46,25 +52,31 @@ type newsletterEmailService interface {
 	) error
 }
 
-type NewsletterFilters map[string]any
+type QueryFilters map[string]any
 
 type NewsletterService struct {
-	storage      newsletterStorage
-	emailService newsletterEmailService
+	newsletterStorage newsletterStorage
+	subscriberStorage subscriberStorage
+	tknService        subscriberTokenService
+	emailService      newsletterEmailService
 }
 
 func NewNewsletterSvc(
-	storage newsletterStorage,
+	newsletterStorage newsletterStorage,
+	subscriberStorage subscriberStorage,
+	tknService subscriberTokenService,
 	emailService newsletterEmailService,
 ) NewsletterService {
 	return NewsletterService{
-		storage,
+		newsletterStorage,
+		subscriberStorage,
+		tknService,
 		emailService,
 	}
 }
 
 func (svc NewsletterService) ByID(ctx context.Context, id uuid.UUID) (domain.Newsletter, error) {
-	newsletter, err := svc.storage.QueryNewsletterByID(ctx, id)
+	newsletter, err := svc.newsletterStorage.QueryNewsletterByID(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return domain.Newsletter{}, ErrNewsletterNotFound
@@ -113,7 +125,7 @@ func (svc NewsletterService) Preview(
 			return domain.Newsletter{}, err
 		}
 
-		article, err := svc.storage.QueryArticleByID(ctx, id)
+		article, err := svc.newsletterStorage.QueryArticleByID(ctx, id)
 		if err != nil {
 			return domain.Newsletter{}, err
 		}
@@ -121,21 +133,21 @@ func (svc NewsletterService) Preview(
 		articleSlug = article.Slug
 	}
 
-	filters := NewsletterFilters{
+	filters := QueryFilters{
 		"IsReleased": true,
 	}
 
-	releasedArticles, err := svc.storage.ListNewsletters(ctx, filters)
+	releasedArticles, err := svc.newsletterStorage.ListNewsletters(ctx, filters)
 	if err != nil {
 		return domain.Newsletter{}, err
 	}
 
-	return domain.InitilizeNewsletter(
+	return domain.CreateNewsletter(
 		title,
 		int32(len(releasedArticles))+1,
 		newParagraphsElements,
 		articleSlug,
-	), nil
+	)
 }
 
 func (svc NewsletterService) CreateDraft(
@@ -152,7 +164,7 @@ func (svc NewsletterService) CreateDraft(
 			return domain.Newsletter{}, err
 		}
 
-		article, err := svc.storage.QueryArticleByID(ctx, id)
+		article, err := svc.newsletterStorage.QueryArticleByID(ctx, id)
 		if err != nil {
 			return domain.Newsletter{}, err
 		}
@@ -160,12 +172,12 @@ func (svc NewsletterService) CreateDraft(
 		articleSlug = article.Slug
 	}
 
-	newsletter, err := domain.NewNewsletter(title, edition, paragraphs, articleSlug)
+	newsletter, err := domain.CreateNewsletter(title, edition, paragraphs, articleSlug)
 	if err != nil {
 		return domain.Newsletter{}, err
 	}
 
-	if _, err := svc.storage.InsertNewsletter(ctx, newsletter); err != nil {
+	if _, err := svc.newsletterStorage.InsertNewsletter(ctx, newsletter); err != nil {
 		return domain.Newsletter{}, err
 	}
 
@@ -174,139 +186,54 @@ func (svc NewsletterService) CreateDraft(
 
 func (svc NewsletterService) Release(
 	ctx context.Context,
-	title string,
-	edition string,
-	paragraphs []string,
-	articleID string,
+	instance domain.Newsletter,
 ) (domain.Newsletter, error) {
-	// var associatedArticleSlug string
-	// var associatedArticleID uuid.UUID
-	//
-	// if articleID != "" {
-	// 	id, err := uuid.Parse(articleID)
-	// 	if err != nil {
-	// 		return domain.Newsletter{}, err
-	// 	}
-	// 	associatedArticle, err := n.db.QueryPostByID(ctx, id)
-	// 	if err != nil {
-	// 		return domain.Newsletter{}, err
-	// 	}
-	//
-	// 	associatedArticleSlug = associatedArticle.Slug
-	// 	associatedArticleID = id
-	// }
-	//
-	// parsedEdition, err := strconv.Atoi(edition)
-	// if err != nil {
-	// 	return domain.Newsletter{}, err
-	// }
-	//
-	// newsletter := domain.InitilizeNewsletter(
-	// 	title,
-	// 	int32(parsedEdition),
-	// 	paragraphs,
-	// 	associatedArticleSlug,
-	// )
-	//
-	// now := time.Now()
-	//
-	// var buf bytes.Buffer
-	// if err := json.NewEncoder(&buf).Encode(newsletter.Paragraphs); err != nil {
-	// 	return domain.Newsletter{}, err
-	// }
-	//
-	// _, err = n.db.InsertNewsletter(ctx, database.InsertNewsletterParams{
-	// 	ID:                  newsletter.ID,
-	// 	CreatedAt:           database.ConvertToPGTimestamptz(now),
-	// 	UpdatedAt:           database.ConvertToPGTimestamptz(now),
-	// 	Title:               newsletter.Title,
-	// 	Edition:             sql.NullInt32{Int32: newsletter.Edition, Valid: true},
-	// 	Body:                buf.Bytes(),
-	// 	AssociatedArticleID: associatedArticleID,
-	// })
-	// if err != nil {
-	return domain.Newsletter{}, nil
-	// }
-	//
-	// return newsletter, nil
-}
+	newsletter, err := instance.Release()
+	if err != nil {
+		return domain.Newsletter{}, err
+	}
 
-// func (n *Newsletter) ReleaseNewsletter(
-// 	ctx context.Context,
-// 	newsletter domain.Newsletter,
-// ) (domain.ValidationErrsMap, error) {
-// 	now := time.Now()
-//
-// 	updatedNewsletter, validationErrs, err := newsletter.CanBeReleased(n.v)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-//
-// 	if len(validationErrs) > 0 {
-// 		return validationErrs, nil
-// 	}
-//
-// 	var buf bytes.Buffer
-// 	if err := json.NewEncoder(&buf).Encode(updatedNewsletter.Paragraphs); err != nil {
-// 		return nil, err
-// 	}
-//
-// 	associatedArticle, err := n.db.QueryPostBySlug(ctx, updatedNewsletter.ArticleSlug)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-//
-// 	_, err = n.db.UpdateNewsletter(ctx, database.UpdateNewsletterParams{
-// 		UpdatedAt:           database.ConvertToPGTimestamptz(now),
-// 		Title:               updatedNewsletter.Title,
-// 		Edition:             sql.NullInt32{Int32: updatedNewsletter.Edition, Valid: true},
-// 		Released:            pgtype.Bool{Bool: updatedNewsletter.Released, Valid: true},
-// 		ReleasedAt:          database.ConvertToPGTimestamptz(updatedNewsletter.ReleasedAt),
-// 		Body:                buf.Bytes(),
-// 		AssociatedArticleID: associatedArticle.ID,
-// 		ID:                  updatedNewsletter.ID,
-// 	})
-// 	if err != nil {
-// 		return nil, err
-// 	}
-//
-// 	verifiedSubs, err := n.db.QueryVerifiedSubscribers(ctx)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-//
-// 	newsletterMail := templates.NewsletterMail{
-// 		Title:       newsletter.Title,
-// 		Edition:     strconv.Itoa(int(newsletter.Edition)),
-// 		Paragraphs:  newsletter.Paragraphs,
-// 		ArticleLink: BuildURLFromSlug(FormatArticleSlug(newsletter.ArticleSlug)),
-// 	}
-//
-// 	htmlMail, err := newsletterMail.GenerateHtmlVersion()
-// 	if err != nil {
-// 		return nil, err
-// 	}
-//
-// 	textMail, err := newsletterMail.GenerateTextVersion()
-// 	if err != nil {
-// 		return nil, err
-// 	}
-//
-// 	for _, verifiedSub := range verifiedSubs {
-// 		if err := n.mail.Send(
-// 			ctx,
-// 			verifiedSub.Email.String,
-// 			"newsletter@mortenvistisen.com",
-// 			fmt.Sprintf("MBV newsletter edition: %v", newsletter.Edition),
-// 			textMail,
-// 			htmlMail,
-// 		); err != nil {
-// 			return nil, err
-// 		}
-// 	}
-//
-// 	return nil, nil
-// }
+	updatedNewsletter, err := svc.newsletterStorage.UpdateNewsletter(ctx, newsletter)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return domain.Newsletter{}, errors.Join(ErrNewsletterNotFound, err)
+		}
+
+		slog.Error("could not update newsletter", "error", err)
+		return domain.Newsletter{}, err
+	}
+
+	verifiedSubscribers, err := svc.subscriberStorage.ListSubscribers(
+		ctx,
+		QueryFilters{"IsVerified": true},
+	)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			slog.Error("could not find any verified subscribers")
+			return domain.Newsletter{}, nil
+		}
+
+		return domain.Newsletter{}, errors.Join(ErrUnrecoverableEvent, err)
+	}
+
+	for _, verifiedSubscriber := range verifiedSubscribers {
+		subTkn, err := svc.tknService.CreateSubscriptionToken(ctx, verifiedSubscriber.ID)
+		if err != nil {
+			return domain.Newsletter{}, errors.Join(ErrUnrecoverableEvent, err)
+		}
+
+		unsubTkn, err := svc.tknService.CreateUnsubscribeToken(ctx, verifiedSubscriber.ID)
+		if err != nil {
+			return domain.Newsletter{}, errors.Join(ErrUnrecoverableEvent, err)
+		}
+
+		if err := svc.emailService.SendNewSubscriberEmail(ctx, verifiedSubscriber.Email, subTkn, unsubTkn); err != nil {
+			return domain.Newsletter{}, errors.Join(ErrUnrecoverableEvent, err)
+		}
+	}
+
+	return updatedNewsletter, nil
+}
 
 func (svc *NewsletterService) Update(
 	ctx context.Context,
@@ -316,7 +243,7 @@ func (svc *NewsletterService) Update(
 	articleID string,
 	id uuid.UUID,
 ) (domain.Newsletter, error) {
-	newsletter, err := svc.storage.QueryNewsletterByID(ctx, id)
+	newsletter, err := svc.newsletterStorage.QueryNewsletterByID(ctx, id)
 	if err != nil {
 		return domain.Newsletter{}, err
 	}
@@ -326,7 +253,7 @@ func (svc *NewsletterService) Update(
 		return domain.Newsletter{}, err
 	}
 
-	article, err := svc.storage.QueryArticleByID(ctx, parsedArticleID)
+	article, err := svc.newsletterStorage.QueryArticleByID(ctx, parsedArticleID)
 	if err != nil {
 		return domain.Newsletter{}, err
 	}
@@ -346,7 +273,7 @@ func (svc *NewsletterService) Update(
 		return domain.Newsletter{}, err
 	}
 
-	if _, err := svc.storage.UpdateNewsletter(ctx, updatedNewsletter); err != nil {
+	if _, err := svc.newsletterStorage.UpdateNewsletter(ctx, updatedNewsletter); err != nil {
 		return domain.Newsletter{}, err
 	}
 

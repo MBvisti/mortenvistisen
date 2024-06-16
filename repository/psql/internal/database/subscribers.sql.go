@@ -168,17 +168,19 @@ func (q *Queries) QuerySubscriberCountByStatus(ctx context.Context, isVerified p
 const querySubscribers = `-- name: QuerySubscribers :many
 select id, created_at, updated_at, email, subscribed_at, referer, is_verified
 from subscribers
-limit coalesce($2::int, null)
-offset coalesce($1::int, 0)
+where is_verified = coalesce($1::bool, null)
+limit coalesce($3::int, null)
+offset coalesce($2::int, 0)
 `
 
 type QuerySubscribersParams struct {
-	Offset sql.NullInt32
-	Limit  sql.NullInt32
+	IsVerified pgtype.Bool
+	Offset     sql.NullInt32
+	Limit      sql.NullInt32
 }
 
 func (q *Queries) QuerySubscribers(ctx context.Context, arg QuerySubscribersParams) ([]Subscriber, error) {
-	rows, err := q.db.Query(ctx, querySubscribers, arg.Offset, arg.Limit)
+	rows, err := q.db.Query(ctx, querySubscribers, arg.IsVerified, arg.Offset, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
