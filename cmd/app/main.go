@@ -23,6 +23,41 @@ import (
 )
 
 func main() {
+	// logger := telemetry.SetupLogger()
+	// setup loki client
+
+	// tp := trace.NewTracerProvider(
+	// 	trace.WithSampler(trace.AlwaysSample()),
+	// )
+	// tracer := tp.Tracer("hello/world")
+	//
+	// ctx, span := tracer.Start(context.Background(), "foo")
+	// defer span.End()
+
+	// lokiCfg, _ := loki.NewDefaultConfig("https://monitoring.mbv-labs.com/loki/api/v1/push")
+	// lokiCfg.TenantID = "local-test"
+	// client, err := loki.New(lokiCfg)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// defer client.Stop()
+	//
+	// logger := slog.New(slogloki.Option{
+	// 	Level:  slog.LevelInfo,
+	// 	Client: client,
+	// 	AttrFromContext: []func(ctx context.Context) []slog.Attr{
+	// 		slogotel.ExtractOtelAttrFromContext([]string{"tracing"}, "trace_id", "span_id"),
+	// 	},
+	// }.NewLokiHandler())
+	// logger = logger.
+	// 	// With("environment", "dev").
+	// 	// With("release", "v1.0.0").
+	// 	// With("container", "mbv").
+	// 	With("service_name", "mortenvistisen_blog")
+	//
+	// log.Print("yo cunt")
+	// logger.Info("yoyoyo this shit whack")
+
 	logger := telemetry.SetupLogger()
 	slog.SetDefault(logger)
 

@@ -50,7 +50,7 @@ func NewServer(
 }
 
 func (s *Server) Start() {
-	slog.Info("starting server on", "host", s.host, "port", s.port)
+	slog.Error("starting server on", "host", s.host, "port", s.port)
 
 	// Start server
 	go func() {
