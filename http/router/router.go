@@ -8,6 +8,8 @@ import (
 	"os"
 	"time"
 
+	slogecho "github.com/samber/slog-echo"
+
 	"github.com/MBvisti/mortenvistisen/controllers"
 	"github.com/MBvisti/mortenvistisen/controllers/api"
 	"github.com/MBvisti/mortenvistisen/controllers/app"
@@ -43,6 +45,7 @@ func NewRouter(
 	router.Static("/static", "static")
 	router.Use(mw.RegisterUserContext)
 	router.Use(echomw.Recover())
+	router.Use(slogecho.New(logger))
 	router.Use(echomw.RequestLoggerWithConfig(echomw.RequestLoggerConfig{
 		LogStatus:   true,
 		LogURI:      true,
@@ -64,6 +67,9 @@ func NewRouter(
 			return nil
 		},
 	}))
+
+	logger.Info("starting the routing logger")
+
 	router.Use(
 		echoprometheus.NewMiddleware("mortenvistisen_blog"),
 	) // adds middleware to gather metrics
