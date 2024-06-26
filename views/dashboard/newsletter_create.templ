@@ -5,7 +5,7 @@ import (
 	"github.com/MBvisti/mortenvistisen/pkg/mail/templates"
 	"strconv"
 	"fmt"
-	"github.com/MBvisti/mortenvistisen/repository/database"
+	"github.com/MBvisti/mortenvistisen/domain"
 	"github.com/google/uuid"
 	"github.com/MBvisti/mortenvistisen/views/components"
 )
@@ -14,7 +14,7 @@ templ NewsletterForm(
 	title,
 	edition string,
 	selectedArticleID uuid.UUID,
-	articles []database.Post,
+	articles []domain.Post,
 	errors map[string]components.InputError,
 	action string,
 	endpoint string,

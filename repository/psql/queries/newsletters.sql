@@ -64,3 +64,10 @@ update newsletters
 where id = $8
 returning *;
 
+
+-- name: CountNewsletters :one
+select count(id)
+from newsletters
+where released = coalence(sqlc.narg('released')::bool, null)
+;
+

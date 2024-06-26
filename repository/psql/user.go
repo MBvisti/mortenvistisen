@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/MBvisti/mortenvistisen/domain"
-	"github.com/MBvisti/mortenvistisen/repository/psql/internal/database"
+	"github.com/MBvisti/mortenvistisen/repository/psql/database"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -13,7 +13,7 @@ func (p Postgres) QueryUserByID(
 	ctx context.Context,
 	id uuid.UUID,
 ) (domain.User, error) {
-	user, err := p.db.QueryUserByID(ctx, id)
+	user, err := p.Queries.QueryUserByID(ctx, id)
 	if err != nil {
 		return domain.User{}, err
 	}
@@ -32,7 +32,7 @@ func (p Postgres) QueryUserByEmail(
 	ctx context.Context,
 	email string,
 ) (domain.User, error) {
-	user, err := p.db.QueryUserByEmail(ctx, email)
+	user, err := p.Queries.QueryUserByEmail(ctx, email)
 	if err != nil {
 		return domain.User{}, err
 	}
@@ -60,7 +60,7 @@ func (p Postgres) InsertUser(
 		Valid: true,
 	}
 
-	_, err := p.db.InsertUser(ctx, database.InsertUserParams{
+	_, err := p.Queries.InsertUser(ctx, database.InsertUserParams{
 		ID:        data.ID,
 		CreatedAt: createdAt,
 		UpdatedAt: updatedAt,
@@ -84,7 +84,7 @@ func (p Postgres) UpdateUser(
 		Valid: true,
 	}
 
-	_, err := p.db.UpdateUser(ctx, database.UpdateUserParams{
+	_, err := p.Queries.UpdateUser(ctx, database.UpdateUserParams{
 		ID:        data.ID,
 		UpdatedAt: updatedAt,
 		Name:      data.Name,

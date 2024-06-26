@@ -12,8 +12,8 @@ import "bytes"
 
 import (
 	"fmt"
+	"github.com/MBvisti/mortenvistisen/domain"
 	"github.com/MBvisti/mortenvistisen/pkg/mail/templates"
-	"github.com/MBvisti/mortenvistisen/repository/database"
 	"github.com/MBvisti/mortenvistisen/views/components"
 	"github.com/MBvisti/mortenvistisen/views/internal/layouts"
 	"github.com/google/uuid"
@@ -24,7 +24,7 @@ func NewsletterForm(
 	title,
 	edition string,
 	selectedArticleID uuid.UUID,
-	articles []database.Post,
+	articles []domain.Post,
 	errors map[string]components.InputError,
 	action string,
 	endpoint string,

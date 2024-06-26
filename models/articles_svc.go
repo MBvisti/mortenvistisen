@@ -1,109 +1,171 @@
 package models
 
-type ArticleStorage interface{}
+import (
+	"context"
 
-// type postDatabase interface {
-// 	InsertPost(ctx context.Context, arg database.InsertPostParams) (uuid.UUID, error)
-// 	UpdatePost(ctx context.Context, arg database.UpdatePostParams) (database.Post, error)
-// 	AssociateTagWithPost(ctx context.Context, arg database.AssociateTagWithPostParams) error
-// }
-//
-// func NewArticle(
-// 	ctx context.Context,
-// 	db postDatabase,
-// 	v *validator.Validate,
-// 	newArticle domain.NewArticle,
-// 	associatedTags []string,
-// ) error {
-// 	if err := v.Struct(newArticle); err != nil {
-// 		telemetry.Logger.Error("provided post data did not pass the validation", "error", err)
-// 		return err
-// 	}
-//
-// 	now := time.Now()
-//
-// 	args := database.InsertPostParams{
-// 		ID:          uuid.New(),
-// 		CreatedAt:   database.ConvertToPGTimestamp(now),
-// 		UpdatedAt:   database.ConvertToPGTimestamp(now),
-// 		Title:       newArticle.Title,
-// 		HeaderTitle: sql.NullString{Valid: true, String: newArticle.HeaderTitle},
-// 		Filename:    newArticle.Filename,
-// 		Slug:        slug.MakeLang(newArticle.Title, "en"),
-// 		Excerpt:     newArticle.Excerpt,
-// 		Draft:       true,
-// 	}
-//
-// 	if newArticle.ReleaseNow {
-// 		args.ReleasedAt = database.ConvertToPGTimestamp(now)
-// 		args.Draft = false
-// 	}
-//
-// 	id, err := db.InsertPost(ctx, args)
-// 	if err != nil {
-// 		return err
-// 	}
-//
-// 	// TODO: run in transaction
-// 	for _, associatedTag := range associatedTags {
-// 		tagID, err := uuid.Parse(associatedTag)
-// 		if err != nil {
-// 			return err
-// 		}
-//
-// 		if err := db.AssociateTagWithPost(
-// 			ctx,
-// 			database.AssociateTagWithPostParams{
-// 				ID:     uuid.New(),
-// 				PostID: id,
-// 				TagID:  tagID,
-// 			}); err != nil {
-// 			return err
-// 		}
-// 	}
-//
-// 	return nil
-// }
-//
-// func UpdateArticle(
-// 	ctx context.Context,
-// 	db postDatabase,
-// 	v *validator.Validate,
-// 	updateArticle domain.UpdateArticle,
-// ) (domain.Article, error) {
-// 	if err := v.Struct(updateArticle); err != nil {
-// 		telemetry.Logger.Error("provided post data did not pass the validation", "error", err)
-// 		return domain.Article{}, err
-// 	}
-//
-// 	now := time.Now()
-// 	args := database.UpdatePostParams{
-// 		ID:          updateArticle.ID,
-// 		UpdatedAt:   database.ConvertToPGTimestamp(now),
-// 		Title:       updateArticle.Title,
-// 		HeaderTitle: sql.NullString{Valid: true, String: updateArticle.HeaderTitle},
-// 		Slug:        slug.MakeLang(updateArticle.Title, "en"),
-// 		Excerpt:     updateArticle.Excerpt,
-// 		Draft:       updateArticle.ReleaseNow,
-// 		ReleasedAt:  database.ConvertToPGTimestamp(now),
-// 		ReadTime:    sql.NullInt32{Int32: updateArticle.EstimatedReadTime, Valid: true},
-// 	}
-//
-// 	updatedArticle, err := db.UpdatePost(ctx, args)
-// 	if err != nil {
-// 		return domain.Article{}, err
-// 	}
-//
-// 	return domain.Article{
-// 		ID:          updatedArticle.ID,
-// 		CreatedAt:   database.ConvertFromPGTimestampToTime(updatedArticle.CreatedAt),
-// 		UpdatedAt:   database.ConvertFromPGTimestampToTime(updatedArticle.UpdatedAt),
-// 		Title:       updatedArticle.Title,
-// 		Filename:    updatedArticle.Filename,
-// 		Slug:        updatedArticle.Slug,
-// 		Excerpt:     updatedArticle.Excerpt,
-// 		Draft:       updatedArticle.Draft,
-// 		ReleaseDate: database.ConvertFromPGTimestampToTime(updatedArticle.ReleasedAt),
-// 		ReadTime:    updatedArticle.ReadTime.Int32,
-// 	}, nil
-// }
+	"github.com/MBvisti/mortenvistisen/domain"
+	"github.com/google/uuid"
+)
+
+type articleStorage interface {
+	InsertArticle(
+		ctx context.Context,
+		data domain.Article,
+	) error
+	QueryArticleByID(
+		ctx context.Context,
+		id uuid.UUID,
+	) (domain.Article, error)
+	QueryArticleBySlug(
+		ctx context.Context,
+		slug string,
+	) (domain.Article, error)
+	UpdateArticle(ctx context.Context, data domain.Article) error
+	QueryTagsByIDs(ctx context.Context, ids []uuid.UUID) ([]domain.Tag, error)
+	AssociateTagsWithPost(
+		ctx context.Context,
+		postID uuid.UUID,
+		tagIDs []uuid.UUID,
+	) error
+	ListArticles(
+		ctx context.Context,
+		filters QueryFilters,
+		opts ...PaginationOption,
+	) ([]domain.Article, error)
+	UpdateTagsPostAssociations(
+		ctx context.Context,
+		postID uuid.UUID,
+		tagIDs []uuid.UUID,
+	) error
+	CountArticles(ctx context.Context) (int64, error)
+	QueryAllArticles(ctx context.Context) ([]domain.Article, error)
+}
+
+type ArticleService struct {
+	articleStorage articleStorage
+}
+
+func NewArticleSvc(articleStorage articleStorage) ArticleService {
+	return ArticleService{articleStorage}
+}
+
+type NewArticlePayload struct {
+	Title       string
+	HeaderTitle string
+	Filename    string
+	Slug        string
+	Excerpt     string
+	Readtime    int32
+	TagIDs      []uuid.UUID
+}
+
+func (a ArticleService) New(
+	ctx context.Context,
+	payload NewArticlePayload,
+) (domain.Article, error) {
+	tags, err := a.articleStorage.QueryTagsByIDs(ctx, payload.TagIDs)
+	if err != nil {
+		return domain.Article{}, err
+	}
+
+	article, err := domain.NewArticle(
+		payload.Title,
+		payload.HeaderTitle,
+		payload.Filename,
+		payload.Slug,
+		payload.Excerpt,
+		payload.Readtime,
+		tags,
+	)
+	if err != nil {
+		return domain.Article{}, err
+	}
+
+	if err := a.articleStorage.InsertArticle(ctx, article); err != nil {
+		return domain.Article{}, err
+	}
+
+	if err := a.articleStorage.AssociateTagsWithPost(ctx, article.ID, payload.TagIDs); err != nil {
+		return domain.Article{}, err
+	}
+
+	return article, nil
+}
+
+type UpdateArticlePayload struct {
+	ID          uuid.UUID
+	Title       string
+	HeaderTitle string
+	Filename    string
+	Slug        string
+	Excerpt     string
+	Readtime    int32
+	TagIDs      []uuid.UUID
+}
+
+func (a ArticleService) Update(
+	ctx context.Context,
+	payload UpdateArticlePayload,
+) (domain.Article, error) {
+	tags, err := a.articleStorage.QueryTagsByIDs(ctx, payload.TagIDs)
+	if err != nil {
+		return domain.Article{}, err
+	}
+
+	article, err := a.articleStorage.QueryArticleByID(ctx, payload.ID)
+	if err != nil {
+		return domain.Article{}, err
+	}
+
+	if err := article.Update(
+		payload.Title,
+		payload.HeaderTitle,
+		payload.Filename,
+		payload.Slug,
+		payload.Excerpt,
+		payload.Readtime,
+		tags,
+	); err != nil {
+		return domain.Article{}, err
+	}
+
+	if err := a.articleStorage.UpdateArticle(ctx, article); err != nil {
+		return domain.Article{}, err
+	}
+
+	if err := a.articleStorage.UpdateTagsPostAssociations(ctx, article.ID, payload.TagIDs); err != nil {
+		return domain.Article{}, err
+	}
+
+	return article, nil
+}
+
+func (a ArticleService) List(
+	ctx context.Context,
+	offset int32,
+	limit int32,
+) ([]domain.Article, error) {
+	articles, err := a.articleStorage.ListArticles(ctx, nil, WithPagination(limit, offset))
+	if err != nil {
+		return nil, err
+	}
+
+	return articles, nil
+}
+
+func (a ArticleService) BySlug(ctx context.Context, slug string) (domain.Article, error) {
+	return a.articleStorage.QueryArticleBySlug(ctx, slug)
+}
+
+func (a ArticleService) Count(ctx context.Context) (int64, error) {
+	count, err := a.articleStorage.CountArticles(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
+}
+
+func (a ArticleService) All(ctx context.Context) ([]domain.Article, error) {
+	return a.articleStorage.QueryAllArticles(ctx)
+}

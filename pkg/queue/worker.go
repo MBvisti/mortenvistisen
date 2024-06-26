@@ -2,7 +2,7 @@ package queue
 
 import (
 	"github.com/MBvisti/mortenvistisen/pkg/mail"
-	"github.com/MBvisti/mortenvistisen/repository/database"
+	"github.com/MBvisti/mortenvistisen/repository/psql/database"
 	"github.com/riverqueue/river"
 )
 

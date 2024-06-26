@@ -1,5 +1,15 @@
+-- name: QueryPosts :many
+select posts.*, array_agg(tags.*) as tags
+from posts
+join posts_tags on posts_tags.post_id = posts.id
+join tags on tags.id = posts_tags.tag_id
+order by posts.created_at
+limit coalesce(sqlc.narg('limit')::int, null)
+offset coalesce(sqlc.narg('offset')::int, 0)
+;
+
 -- name: GetLatestPosts :many
-SELECT
+select
     posts.id,
     posts.created_at,
     posts.updated_at,
@@ -11,15 +21,13 @@ SELECT
     posts.draft,
     posts.released_at,
     posts.read_time
-FROM
-    posts
-WHERE
-    released_at IS NOT NULL AND draft = false
-ORDER BY
-    released_at DESC;
+from posts
+where released_at is not null and draft = false
+order by released_at desc
+;
 
 -- name: GetPostBySlug :one
-SELECT
+select
     posts.id,
     posts.created_at,
     posts.updated_at,
@@ -31,13 +39,12 @@ SELECT
     posts.draft,
     posts.released_at,
     posts.read_time
-FROM
-    posts
-WHERE
-    slug = $1;
+from posts
+where slug = $1
+;
 
 -- name: GetFiveRandomPosts :many
-SELECT
+select
     posts.id,
     posts.created_at,
     posts.updated_at,
@@ -49,29 +56,21 @@ SELECT
     posts.draft,
     posts.released_at,
     posts.read_time
-FROM
-    posts
-WHERE
-    released_at IS NOT NULL AND draft = false AND posts.id != $1
-ORDER BY
-    random()
-limit 5;
-
--- name: QueryPosts :many
-select posts.* from posts;
+from posts
+where released_at is not null and draft = false and posts.id != $1
+order by random()
+limit 5
+;
 
 -- name: QueryPostsInPages :many
-SELECT
-    posts.*
-FROM
-	posts
-LIMIT
-    $1
-OFFSET
-    $2;
+select posts.*
+from posts
+limit $1
+offset $2
+;
 
 -- name: QueryAllPosts :many
-SELECT
+select
     posts.id,
     posts.created_at,
     posts.updated_at,
@@ -84,15 +83,15 @@ SELECT
     posts.released_at,
     posts.read_time,
     (select count(id) from posts) as total_posts_count
-FROM
-    posts
-LIMIT
-    7
-OFFSET
-    $1;
+from posts
+limit 7
+offset $1
+;
 
 -- name: QueryAllFilenames :many
-select filename from posts;
+select filename
+from posts
+;
 
 -- name: InsertPost :one
 insert into posts (id, created_at, updated_at, title, header_title, filename, slug, excerpt, draft, released_at, read_time)
@@ -106,10 +105,19 @@ where id = $9
 returning *;
 
 -- name: QueryPostByID :one
-select * from posts where id = $1;
+select *
+from posts
+where id = $1
+;
 
 -- name: QueryPostBySlug :one
-select * from posts where slug = $1;
+select *
+from posts
+where slug = $1
+;
 
 -- name: QueryPostsCount :one
-select count(id) from posts;
+select count(id)
+from posts
+;
+

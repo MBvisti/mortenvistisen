@@ -83,6 +83,13 @@ func (u User) Validate(validations map[string][]Rule) error {
 	return nil
 }
 
+func (u *User) ConfirmEmail() {
+	now := time.Now()
+
+	u.MailVerifiedAt = now
+	u.UpdatedAt = now
+}
+
 func (u User) Update(
 	name string,
 	mail string,

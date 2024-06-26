@@ -35,6 +35,7 @@ type subscriberStorage interface {
 		ctx context.Context,
 		data domain.Subscriber,
 	) (domain.Subscriber, error)
+	DeleteSubscriber(ctx context.Context, subscriberID uuid.UUID) error
 }
 
 type subscriberEmailService interface {
@@ -129,20 +130,7 @@ func (svc *SubscriberService) List(
 		return nil, err
 	}
 
-	subscribers := make([]domain.Subscriber, len(subs))
-	for i, sub := range subs {
-		subscribers[i] = domain.Subscriber{
-			ID:           sub.ID,
-			CreatedAt:    sub.CreatedAt,
-			UpdatedAt:    sub.UpdatedAt,
-			Email:        sub.Email,
-			SubscribedAt: sub.SubscribedAt,
-			Referer:      sub.Referer,
-			IsVerified:   sub.IsVerified,
-		}
-	}
-
-	return subscribers, nil
+	return subs, nil
 }
 
 func (svc *SubscriberService) Count(ctx context.Context) (int64, error) {
@@ -240,4 +228,8 @@ func (svc *SubscriberService) New(ctx context.Context, email, articleTitle strin
 	}
 
 	return nil
+}
+
+func (svc *SubscriberService) Delete(ctx context.Context, id uuid.UUID) error {
+	return svc.storage.DeleteSubscriber(ctx, id)
 }

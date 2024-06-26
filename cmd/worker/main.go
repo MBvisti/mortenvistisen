@@ -12,10 +12,12 @@ import (
 	"time"
 
 	"github.com/MBvisti/mortenvistisen/pkg/config"
-	"github.com/MBvisti/mortenvistisen/pkg/mail"
+	"github.com/MBvisti/mortenvistisen/pkg/mail_client"
 	"github.com/MBvisti/mortenvistisen/pkg/queue"
 	"github.com/MBvisti/mortenvistisen/pkg/telemetry"
-	"github.com/MBvisti/mortenvistisen/repository/database"
+	"github.com/MBvisti/mortenvistisen/repository/psql"
+	"github.com/MBvisti/mortenvistisen/repository/psql/database"
+	"github.com/MBvisti/mortenvistisen/services"
 	"github.com/riverqueue/river"
 )
 
@@ -25,11 +27,14 @@ func main() {
 
 	logger := telemetry.SetupLogger()
 
-	// postmark := mail.NewPostmark(cfg.ExternalProviders.PostmarkApiToken)
-	awsSes := mail.NewAwsSimpleEmailService()
-	mailClient := mail.NewMail(&awsSes)
+	awsSes := mail_client.NewAwsSimpleEmailService()
+	mailClient := services.NewEmailSvc(cfg, &awsSes)
 
-	conn := database.SetupDatabasePool(context.Background(), cfg.Db.GetUrlString())
+	conn, err := psql.CreatePooledConnection(context.Background(), cfg.Db.GetUrlString())
+	if err != nil {
+		panic(err)
+	}
+
 	db := database.New(conn)
 
 	jobStarted := make(chan struct{})

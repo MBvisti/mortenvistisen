@@ -13,6 +13,19 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const countNewsletters = `-- name: CountNewsletters :one
+select count(id)
+from newsletters
+where released = coalence($1::bool, null)
+`
+
+func (q *Queries) CountNewsletters(ctx context.Context, released pgtype.Bool) (int64, error) {
+	row := q.db.QueryRow(ctx, countNewsletters, released)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const insertNewsletter = `-- name: InsertNewsletter :one
 insert into newsletters
 	(id, created_at, updated_at, title, edition, released, released_at, body, associated_article_id)

@@ -11,12 +11,12 @@ import "io"
 import "bytes"
 
 import (
+	"github.com/MBvisti/mortenvistisen/domain"
 	"github.com/MBvisti/mortenvistisen/pkg/mail/templates"
 	"github.com/MBvisti/mortenvistisen/views/components"
 	"github.com/MBvisti/mortenvistisen/views/internal/layouts"
 	//"strconv"
 	"fmt"
-	"github.com/MBvisti/mortenvistisen/repository/database"
 	"github.com/google/uuid"
 )
 
@@ -25,7 +25,7 @@ type NewsletterEditViewData struct {
 	Edition      string
 	ArticleID    uuid.UUID
 	MailPreview  templates.NewsletterMail
-	Articles     []database.Post
+	Articles     []domain.Article
 	NewsletterID uuid.UUID
 }
 

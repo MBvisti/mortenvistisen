@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/MBvisti/mortenvistisen/domain"
 	"github.com/google/uuid"
@@ -19,7 +20,6 @@ type userStorage interface {
 	InsertUser(
 		ctx context.Context,
 		data domain.User,
-		hashedPassword string,
 	) (domain.User, error)
 	UpdateUser(
 		ctx context.Context,
@@ -31,13 +31,81 @@ type authService interface {
 	HashAndPepperPassword(password string) (string, error)
 }
 
-type UserSvc struct {
+type UserService struct {
 	auth        authService
 	userStorage userStorage
 }
 
-func NewUserSvc(auth authService, usrStorage userStorage) UserSvc {
-	return UserSvc{auth, usrStorage}
+func NewUserSvc(auth authService, usrStorage userStorage) UserService {
+	return UserService{auth, usrStorage}
+}
+
+func (us UserService) ByEmail(ctx context.Context, email string) (domain.User, error) {
+	user, err := us.userStorage.QueryUserByEmail(ctx, email)
+	if err != nil {
+		return domain.User{}, err
+	}
+
+	return user, nil
+}
+
+func (us UserService) UpdatePassword(
+	ctx context.Context,
+	userID uuid.UUID,
+	password, confirmPassword string,
+) (domain.User, error) {
+	user, err := us.userStorage.QueryUserByID(ctx, userID)
+	if err != nil {
+		return domain.User{}, err
+	}
+
+	return user, nil
+}
+
+func (us UserService) ConfirmEmail(
+	ctx context.Context,
+	userID uuid.UUID,
+) (domain.User, error) {
+	user, err := us.userStorage.QueryUserByID(ctx, userID)
+	if err != nil {
+		return domain.User{}, err
+	}
+
+	user.ConfirmEmail()
+
+	updatedUser, err := us.userStorage.UpdateUser(ctx, user)
+	if err != nil {
+		return domain.User{}, err
+	}
+
+	return updatedUser, nil
+}
+
+func (us UserService) New(
+	ctx context.Context,
+	name, mail, password, confirmPassword string,
+) (domain.User, error) {
+	hashedPassword, err := us.auth.HashAndPepperPassword(password)
+	if err != nil {
+		return domain.User{}, nil
+	}
+
+	hashedConfirmPassword, err := us.auth.HashAndPepperPassword(confirmPassword)
+	if err != nil {
+		return domain.User{}, nil
+	}
+
+	user, err := domain.NewUser(name, mail, hashedPassword, hashedConfirmPassword)
+	if err != nil {
+		return domain.User{}, nil
+	}
+
+	if _, err := us.userStorage.InsertUser(ctx, user); err != nil {
+		slog.ErrorContext(ctx, "could not insert user to database", "error", err)
+		return domain.User{}, nil
+	}
+
+	return domain.User{}, nil
 }
 
 // func (u UserSvc) New(
@@ -156,5 +224,40 @@ func NewUserSvc(auth authService, usrStorage userStorage) UserSvc {
 // 		UpdatedAt: database.ConvertFromPGTimestamptzToTime(updatedUser.UpdatedAt),
 // 		Name:      updatedUser.Name,
 // 		Mail:      updatedUser.Mail,
+// 	}, nil
+// }
+
+// func (a AuthSvc) AuthenticateUser(
+// 	ctx context.Context,
+// 	data AuthenticateUserPayload,
+// 	passwordPepper string,
+// ) (domain.User, error) {
+// 	user, err := db.QueryUserByMail(ctx, data.Email)
+// 	if err != nil {
+// 		if errors.Is(err, pgx.ErrNoRows) {
+// 			return domain.User{}, ErrUserNotExist
+// 		}
+//
+// 		slog.Error("could not query user by mail", "error", err)
+// 		return domain.User{}, err
+// 	}
+//
+// 	if verifiedAt := user.MailVerifiedAt; !verifiedAt.Valid {
+// 		return domain.User{}, ErrEmailNotValidated
+// 	}
+//
+// 	if err := validatePassword(validatePasswordPayload{
+// 		hashedpassword: user.Password,
+// 		password:       data.Password,
+// 	}, passwordPepper); err != nil {
+// 		return domain.User{}, ErrPasswordNotMatch
+// 	}
+//
+// 	return domain.User{
+// 		ID:        user.ID,
+// 		CreatedAt: database.ConvertFromPGTimestamptzToTime(user.CreatedAt),
+// 		UpdatedAt: database.ConvertFromPGTimestamptzToTime(user.UpdatedAt),
+// 		Name:      user.Name,
+// 		Mail:      user.Mail,
 // 	}, nil
 // }

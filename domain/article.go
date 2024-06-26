@@ -46,14 +46,14 @@ func NewArticle(
 		Tags:        tags,
 	}
 
-	if err := article.Validate(BuildArticleValidations()); err != nil {
+	if err := article.Validate(ArticleValidations()); err != nil {
 		return Article{}, err
 	}
 
 	return article, nil
 }
 
-var BuildArticleValidations = func() map[string][]Rule {
+var ArticleValidations = func() map[string][]Rule {
 	return map[string][]Rule{
 		"ID":          {RequiredRule},
 		"Title":       {RequiredRule, MinLenRule(2)},
@@ -98,6 +98,30 @@ func (a Article) Validate(validations map[string][]Rule) error {
 	e := constructValidationErrors(errors...)
 	if len(e) > 0 {
 		return e
+	}
+
+	return nil
+}
+
+func (a *Article) Update(
+	title string,
+	headerTitle string,
+	filename string,
+	slug string,
+	excerpt string,
+	readtime int32,
+	tags []Tag,
+) error {
+	a.Title = title
+	a.HeaderTitle = headerTitle
+	a.Filename = filename
+	a.Slug = slug
+	a.Excerpt = excerpt
+	a.ReadTime = readtime
+	a.Tags = tags
+
+	if err := a.Validate(ArticleValidations()); err != nil {
+		return err
 	}
 
 	return nil

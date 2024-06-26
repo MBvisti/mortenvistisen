@@ -5,7 +5,8 @@ import (
 	"errors"
 	"log/slog"
 
-	"github.com/MBvisti/mortenvistisen/repository/psql/internal/database"
+	"github.com/MBvisti/mortenvistisen/repository/psql/database"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -15,13 +16,19 @@ var (
 )
 
 type Postgres struct {
-	db *database.Queries
+	Queries *database.Queries
+	tx      *pgxpool.Pool
 }
 
 func NewPostgres(dbPool *pgxpool.Pool) Postgres {
 	return Postgres{
-		db: database.New(dbPool),
+		Queries: database.New(dbPool),
+		tx:      dbPool,
 	}
+}
+
+func (p Postgres) BeginTx(ctx context.Context) (pgx.Tx, error) {
+	return p.tx.Begin(ctx)
 }
 
 func CreatePooledConnection(ctx context.Context, uri string) (*pgxpool.Pool, error) {

@@ -2,11 +2,9 @@ package psql
 
 import (
 	"context"
-	"errors"
-	"log/slog"
 	"time"
 
-	"github.com/MBvisti/mortenvistisen/repository/psql/internal/database"
+	"github.com/MBvisti/mortenvistisen/repository/psql/database"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -34,7 +32,7 @@ func (p Postgres) InsertSubscriberToken(
 	hash, scope string, expiresAt time.Time,
 	subscriberID uuid.UUID,
 ) error {
-	err := p.db.InsertSubscriberToken(ctx, database.InsertSubscriberTokenParams{
+	err := p.Queries.InsertSubscriberToken(ctx, database.InsertSubscriberTokenParams{
 		ID: uuid.New(),
 		CreatedAt: pgtype.Timestamptz{
 			Time:  time.Now(),
@@ -49,9 +47,42 @@ func (p Postgres) InsertSubscriberToken(
 		SubscriberID: subscriberID,
 	})
 	if err != nil {
-		slog.Error("could not insert subscriber token", "error", err)
-		return errors.Join(ErrInternalDBErr, err)
+		return err
 	}
 
 	return nil
+}
+
+func (p Postgres) InsertToken(
+	ctx context.Context,
+	hash, scope string, expiresAt time.Time,
+	userID uuid.UUID,
+) error {
+	err := p.Queries.InsertToken(ctx, database.InsertTokenParams{
+		ID: uuid.New(),
+		CreatedAt: pgtype.Timestamptz{
+			Time:  time.Now(),
+			Valid: true,
+		},
+		Hash: hash,
+		ExpiresAt: pgtype.Timestamptz{
+			Time:  expiresAt,
+			Valid: true,
+		},
+		Scope:  scope,
+		UserID: userID,
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (p Postgres) DeleteTokenByHash(ctx context.Context, hash string) error {
+	return nil
+}
+
+func (p Postgres) QueryTokenByHash(ctx context.Context, hash string) (database.Token, error) {
+	return database.Token{}, nil
 }

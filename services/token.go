@@ -6,10 +6,13 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
+	"errors"
 	"hash"
 	"time"
 
+	"github.com/MBvisti/mortenvistisen/repository/psql/database"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 )
 
 const (
@@ -19,21 +22,29 @@ const (
 	ScopeResetPassword               = "password_reset"
 )
 
-type TokenServiceStorage interface {
+type tokenServiceStorage interface {
 	InsertSubscriberToken(
 		ctx context.Context,
 		hash, scope string, expiresAt time.Time,
 		subscriberID uuid.UUID,
 	) error
+	InsertToken(
+		ctx context.Context,
+		hash, scope string, expiresAt time.Time,
+		userID uuid.UUID,
+	) error
+	QueryTokenByHash(ctx context.Context, hash string) (database.Token, error)
+	DeleteTokenByHash(ctx context.Context, hash string) error
+	DeleteTokenBySubID(ctx context.Context, id uuid.UUID) error
 }
 
 type TokenSvc struct {
-	storage TokenServiceStorage
+	storage tokenServiceStorage
 	hasher  hash.Hash
 }
 
 func NewTokenSvc(
-	storage TokenServiceStorage,
+	storage tokenServiceStorage,
 	tokenSigningKey string,
 ) *TokenSvc {
 	h := hmac.New(sha256.New, []byte(tokenSigningKey))
@@ -96,13 +107,50 @@ func (svc *TokenSvc) CreateSubscriptionToken(
 	return tkn.GetPlainText(), nil
 }
 
-func (svc *TokenSvc) CreateResetPasswordToken() (string, error) {
+func (svc *TokenSvc) CreateEmailVerificationToken(
+	ctx context.Context,
+	userID uuid.UUID,
+) (string, error) {
 	tokenPair, err := svc.create()
 	if err != nil {
 		return "", err
 	}
 
-	return tokenPair.plain, nil
+	tkn := NewToken(
+		ScopeEmailVerification,
+		time.Now().Add(48*time.Hour),
+		tokenPair.hashed,
+		tokenPair.plain,
+	)
+
+	if err := svc.storage.InsertToken(ctx, tkn.Hash, tkn.GetScope(), tkn.GetExpirationTime(), userID); err != nil {
+		return "", err
+	}
+
+	return tkn.GetPlainText(), nil
+}
+
+func (svc *TokenSvc) CreateResetPasswordToken(
+	ctx context.Context,
+	userID uuid.UUID,
+) (string, error) {
+	tokenPair, err := svc.create()
+	if err != nil {
+		return "", err
+	}
+
+	tkn := NewToken(
+		ScopeResetPassword,
+		time.Now().Add(24*time.Hour),
+		tokenPair.hashed,
+		tokenPair.plain,
+	)
+
+	if err := svc.storage.InsertToken(ctx, tkn.Hash, tkn.GetScope(), tkn.GetExpirationTime(), userID); err != nil {
+		return "", err
+	}
+
+	return tkn.GetPlainText(), nil
 }
 
 func (svc *TokenSvc) CreateUnsubscribeToken(
@@ -126,6 +174,49 @@ func (svc *TokenSvc) CreateUnsubscribeToken(
 	}
 
 	return tkn.GetPlainText(), nil
+}
+
+func (svc *TokenSvc) Validate(ctx context.Context, token string) error {
+	tkn, err := svc.storage.QueryTokenByHash(ctx, svc.hash(token))
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return errors.Join(ErrTokenNotExist, err)
+		}
+		return err
+	}
+
+	if !time.Now().Before(tkn.ExpiresAt.Time) {
+		return ErrTokenExpired
+	}
+
+	return nil
+}
+
+func (svc *TokenSvc) GetAssociatedUserID(ctx context.Context, token string) (uuid.UUID, error) {
+	tkn, err := svc.storage.QueryTokenByHash(ctx, svc.hash(token))
+	if err != nil {
+		return uuid.UUID{}, err
+	}
+
+	return tkn.UserID, nil
+}
+
+func (svc *TokenSvc) Delete(ctx context.Context, token string) error {
+	err := svc.storage.DeleteTokenByHash(ctx, svc.hash(token))
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (svc *TokenSvc) DeleteSubscriberToken(ctx context.Context, subscriberID uuid.UUID) error {
+	err := svc.storage.DeleteTokenBySubID(ctx, subscriberID)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 type Token struct {
@@ -159,4 +250,8 @@ func (t *Token) GetExpirationTime() time.Time {
 
 func (t *Token) GetScope() string {
 	return t.scope
+}
+
+func (t *Token) IsValid() bool {
+	return time.Now().Before(t.expiresAt)
 }

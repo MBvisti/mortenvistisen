@@ -2,52 +2,39 @@ package app
 
 import (
 	"errors"
-	"log/slog"
 	"net/http"
-	"time"
 
-	"github.com/MBvisti/mortenvistisen/controllers/internal/utilities"
+	"github.com/MBvisti/mortenvistisen/controllers"
 	"github.com/MBvisti/mortenvistisen/controllers/misc"
 	"github.com/MBvisti/mortenvistisen/models"
-	"github.com/MBvisti/mortenvistisen/pkg/config"
 	"github.com/MBvisti/mortenvistisen/pkg/telemetry"
-	"github.com/MBvisti/mortenvistisen/pkg/tokens"
-	"github.com/MBvisti/mortenvistisen/repository/database"
+	"github.com/MBvisti/mortenvistisen/services"
 	"github.com/MBvisti/mortenvistisen/views"
 	"github.com/MBvisti/mortenvistisen/views/authentication"
 	"github.com/gorilla/csrf"
-	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
-	"github.com/riverqueue/river"
 )
 
-func Index(ctx echo.Context, db database.Queries) error {
-	data, err := db.GetLatestPosts(ctx.Request().Context())
+func Index(ctx echo.Context, articleModel models.ArticleService) error {
+	data, err := articleModel.List(ctx.Request().Context(), 0, 5)
 	if err != nil {
 		telemetry.Logger.Error("failed to get posts", "error", err)
 		return err
 	}
 
 	posts := make([]views.Post, 0, len(data))
-
 	for _, d := range data {
-		tagsData, err := db.GetTagsForPost(ctx.Request().Context(), d.ID)
-		if err != nil {
-			telemetry.Logger.Error("failed to get tags", "error", err)
-			return err
-		}
-
-		tags := make([]string, 0, len(tagsData))
-		for _, t := range tagsData {
-			tags = append(tags, t.Name)
+		var tags []string
+		for _, tag := range d.Tags {
+			tags = append(tags, tag.Name)
 		}
 
 		posts = append(posts, views.Post{
-			Title:       d.HeaderTitle.String,
-			ReleaseDate: d.ReleasedAt.Time.String(),
+			Title:       d.Title,
+			ReleaseDate: d.ReleaseDate.String(),
 			Excerpt:     d.Excerpt,
 			Tags:        tags,
-			Slug:        utilities.FormatArticleSlug(d.Slug),
+			Slug:        controllers.FormatArticleSlug(d.Slug),
 		})
 	}
 
@@ -58,7 +45,7 @@ func About(ctx echo.Context) error {
 	return views.AboutPage(views.Head{
 		Title:       "About",
 		Description: "Contains information about the site owner, Morten Vistisen, the purpose of the site and the technologies used to build it.",
-		Slug:        utilities.BuildURLFromSlug("about"),
+		Slug:        controllers.BuildURLFromSlug("about"),
 		Image:       "https://mortenvistisen.com/static/images/mbv.png",
 		MetaType:    "website",
 	}).Render(views.ExtractRenderDeps(ctx))
@@ -68,7 +55,7 @@ func Newsletter(ctx echo.Context) error {
 	return views.NewsletterPage(views.Head{
 		Title:       "Newsletter",
 		Description: "Signup page for joining Morten's newsletter where he shares his thoughts on software development, business and life.",
-		Slug:        utilities.BuildURLFromSlug("newsletter"),
+		Slug:        controllers.BuildURLFromSlug("newsletter"),
 		MetaType:    "website",
 		Image:       "https://mortenvistisen.com/static/images/mbv.png",
 	}, csrf.Token(ctx.Request())).Render(views.ExtractRenderDeps(ctx))
@@ -78,7 +65,7 @@ func Projects(ctx echo.Context) error {
 	return views.ProjectsPage(views.Head{
 		Title:       "Projects",
 		Description: "A collection of on-going and retired projects I've build over the years. This includes business projects, open source projects and personal projects.",
-		Slug:        utilities.BuildURLFromSlug("projects"),
+		Slug:        controllers.BuildURLFromSlug("projects"),
 		MetaType:    "website",
 		Image:       "https://mortenvistisen.com/static/images/mbv.png",
 	}).Render(views.ExtractRenderDeps(ctx))
@@ -91,10 +78,6 @@ type SubscriptionEventForm struct {
 
 func SubscriptionEvent(
 	ctx echo.Context,
-	queueClient *river.Client[pgx.Tx],
-	db database.Queries,
-	tknManager tokens.Manager,
-	cfg config.Cfg,
 	subscriberSvc models.SubscriberService,
 ) error {
 	var form SubscriptionEventForm
@@ -206,8 +189,8 @@ type VerificationToken struct {
 
 func SubscriberEmailVerification(
 	ctx echo.Context,
-	db database.Queries,
-	tknManager tokens.Manager,
+	subscriberModel models.SubscriberService,
+	tokenService services.TokenSvc,
 ) error {
 	var tkn VerificationToken
 	if err := ctx.Bind(&tkn); err != nil {
@@ -217,38 +200,38 @@ func SubscriberEmailVerification(
 		return misc.InternalError(ctx)
 	}
 
-	hashedToken := tknManager.Hash(tkn.Token)
-
-	token, err := db.QuerySubscriberTokenByHash(ctx.Request().Context(), hashedToken)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return authentication.VerifyEmailPage(true, views.Head{}).
-				Render(views.ExtractRenderDeps(ctx))
-		}
-
-		ctx.Response().Writer.Header().Add("HX-Redirect", "/500")
-		ctx.Response().Writer.Header().Add("PreviousLocation", "/login")
-
-		slog.ErrorContext(ctx.Request().Context(), "could not query subscriber token", "error", err)
-		return misc.InternalError(ctx)
-	}
-
-	if database.ConvertFromPGTimestamptzToTime(token.ExpiresAt).Before(time.Now()) &&
-		token.Scope != tokens.ScopeEmailVerification {
-		return authentication.VerifyEmailPage(true, views.Head{}).
-			Render(views.ExtractRenderDeps(ctx))
-	}
-
-	if err := db.ConfirmSubscriberEmail(ctx.Request().Context(), database.ConfirmSubscriberEmailParams{
-		ID:        token.SubscriberID,
-		UpdatedAt: database.ConvertToPGTimestamptz(time.Now()),
-	}); err != nil {
-		ctx.Response().Writer.Header().Add("HX-Redirect", "/500")
-		ctx.Response().Writer.Header().Add("PreviousLocation", "/login")
-
-		slog.ErrorContext(ctx.Request().Context(), "could not confirm email", "error", err)
-		return misc.InternalError(ctx)
-	}
+	// hashedToken := tknManager.Hash(tkn.Token)
+	//
+	// token, err := db.QuerySubscriberTokenByHash(ctx.Request().Context(), hashedToken)
+	// if err != nil {
+	// 	if errors.Is(err, pgx.ErrNoRows) {
+	// 		return authentication.VerifyEmailPage(true, views.Head{}).
+	// 			Render(views.ExtractRenderDeps(ctx))
+	// 	}
+	//
+	// 	ctx.Response().Writer.Header().Add("HX-Redirect", "/500")
+	// 	ctx.Response().Writer.Header().Add("PreviousLocation", "/login")
+	//
+	// 	slog.ErrorContext(ctx.Request().Context(), "could not query subscriber token", "error", err)
+	// 	return misc.InternalError(ctx)
+	// }
+	//
+	// if database.ConvertFromPGTimestamptzToTime(token.ExpiresAt).Before(time.Now()) &&
+	// 	token.Scope != tokens.ScopeEmailVerification {
+	// 	return authentication.VerifyEmailPage(true, views.Head{}).
+	// 		Render(views.ExtractRenderDeps(ctx))
+	// }
+	//
+	// if err := db.ConfirmSubscriberEmail(ctx.Request().Context(), database.ConfirmSubscriberEmailParams{
+	// 	ID:        token.SubscriberID,
+	// 	UpdatedAt: database.ConvertToPGTimestamptz(time.Now()),
+	// }); err != nil {
+	// 	ctx.Response().Writer.Header().Add("HX-Redirect", "/500")
+	// 	ctx.Response().Writer.Header().Add("PreviousLocation", "/login")
+	//
+	// 	slog.ErrorContext(ctx.Request().Context(), "could not confirm email", "error", err)
+	// 	return misc.InternalError(ctx)
+	// }
 
 	return authentication.VerifySubscriberEmailPage(false, views.Head{}).
 		Render(views.ExtractRenderDeps(ctx))

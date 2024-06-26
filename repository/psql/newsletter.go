@@ -7,7 +7,7 @@ import (
 
 	"github.com/MBvisti/mortenvistisen/domain"
 	"github.com/MBvisti/mortenvistisen/models"
-	"github.com/MBvisti/mortenvistisen/repository/psql/internal/database"
+	"github.com/MBvisti/mortenvistisen/repository/psql/database"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -16,7 +16,7 @@ func (p Postgres) QueryNewsletterByID(
 	ctx context.Context,
 	id uuid.UUID,
 ) (domain.Newsletter, error) {
-	newsletter, err := p.db.QueryNewsletterByID(ctx, id)
+	newsletter, err := p.Queries.QueryNewsletterByID(ctx, id)
 	if err != nil {
 		return domain.Newsletter{}, err
 	}
@@ -26,7 +26,7 @@ func (p Postgres) QueryNewsletterByID(
 		return domain.Newsletter{}, err
 	}
 
-	article, err := p.db.QueryPostByID(ctx, newsletter.AssociatedArticleID)
+	article, err := p.Queries.QueryPostByID(ctx, newsletter.AssociatedArticleID)
 	if err != nil {
 		return domain.Newsletter{}, err
 	}
@@ -69,7 +69,7 @@ func (p Postgres) ListNewsletters(
 		}
 	}
 
-	newsL, err := p.db.QueryNewsletters(ctx, params)
+	newsL, err := p.Queries.QueryNewsletters(ctx, params)
 	if err != nil {
 		return nil, err
 	}
@@ -110,12 +110,12 @@ func (p Postgres) InsertNewsletter(
 		Valid: true,
 	}
 
-	article, err := p.db.QueryPostBySlug(ctx, data.ArticleSlug)
+	article, err := p.Queries.QueryPostBySlug(ctx, data.ArticleSlug)
 	if err != nil {
 		return domain.Newsletter{}, err
 	}
 
-	newNewsletter, err := p.db.InsertNewsletter(ctx, database.InsertNewsletterParams{
+	newNewsletter, err := p.Queries.InsertNewsletter(ctx, database.InsertNewsletterParams{
 		ID:                  data.ID,
 		CreatedAt:           createdAt,
 		UpdatedAt:           updatedAt,
@@ -142,4 +142,26 @@ func (p Postgres) InsertNewsletter(
 		Paragraphs:  paragraphs,
 		ArticleSlug: article.Slug,
 	}, nil
+}
+
+// TODO
+func (p Postgres) UpdateNewsletter(
+	ctx context.Context,
+	newsletter domain.Newsletter,
+) (domain.Newsletter, error) {
+	return domain.Newsletter{}, nil
+}
+
+func (p Postgres) Count(ctx context.Context) (int64, error) {
+	return p.Queries.CountNewsletters(ctx, pgtype.Bool{
+		Bool:  false,
+		Valid: false,
+	})
+}
+
+func (p Postgres) CountReleased(ctx context.Context) (int64, error) {
+	return p.Queries.CountNewsletters(ctx, pgtype.Bool{
+		Bool:  true,
+		Valid: true,
+	})
 }

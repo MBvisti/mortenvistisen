@@ -14,7 +14,7 @@ import (
 )
 
 const getFiveRandomPosts = `-- name: GetFiveRandomPosts :many
-SELECT
+select
     posts.id,
     posts.created_at,
     posts.updated_at,
@@ -26,12 +26,9 @@ SELECT
     posts.draft,
     posts.released_at,
     posts.read_time
-FROM
-    posts
-WHERE
-    released_at IS NOT NULL AND draft = false AND posts.id != $1
-ORDER BY
-    random()
+from posts
+where released_at is not null and draft = false and posts.id != $1
+order by random()
 limit 5
 `
 
@@ -82,7 +79,7 @@ func (q *Queries) GetFiveRandomPosts(ctx context.Context, id uuid.UUID) ([]GetFi
 }
 
 const getLatestPosts = `-- name: GetLatestPosts :many
-SELECT
+select
     posts.id,
     posts.created_at,
     posts.updated_at,
@@ -94,12 +91,9 @@ SELECT
     posts.draft,
     posts.released_at,
     posts.read_time
-FROM
-    posts
-WHERE
-    released_at IS NOT NULL AND draft = false
-ORDER BY
-    released_at DESC
+from posts
+where released_at is not null and draft = false
+order by released_at desc
 `
 
 type GetLatestPostsRow struct {
@@ -149,7 +143,7 @@ func (q *Queries) GetLatestPosts(ctx context.Context) ([]GetLatestPostsRow, erro
 }
 
 const getPostBySlug = `-- name: GetPostBySlug :one
-SELECT
+select
     posts.id,
     posts.created_at,
     posts.updated_at,
@@ -161,10 +155,8 @@ SELECT
     posts.draft,
     posts.released_at,
     posts.read_time
-FROM
-    posts
-WHERE
-    slug = $1
+from posts
+where slug = $1
 `
 
 type GetPostBySlugRow struct {
@@ -240,7 +232,8 @@ func (q *Queries) InsertPost(ctx context.Context, arg InsertPostParams) (uuid.UU
 }
 
 const queryAllFilenames = `-- name: QueryAllFilenames :many
-select filename from posts
+select filename
+from posts
 `
 
 func (q *Queries) QueryAllFilenames(ctx context.Context) ([]string, error) {
@@ -264,7 +257,7 @@ func (q *Queries) QueryAllFilenames(ctx context.Context) ([]string, error) {
 }
 
 const queryAllPosts = `-- name: QueryAllPosts :many
-SELECT
+select
     posts.id,
     posts.created_at,
     posts.updated_at,
@@ -277,12 +270,9 @@ SELECT
     posts.released_at,
     posts.read_time,
     (select count(id) from posts) as total_posts_count
-FROM
-    posts
-LIMIT
-    7
-OFFSET
-    $1
+from posts
+limit 7
+offset $1
 `
 
 type QueryAllPostsRow struct {
@@ -334,7 +324,9 @@ func (q *Queries) QueryAllPosts(ctx context.Context, offset int32) ([]QueryAllPo
 }
 
 const queryPostByID = `-- name: QueryPostByID :one
-select id, created_at, updated_at, title, filename, slug, excerpt, draft, released_at, read_time, header_title from posts where id = $1
+select id, created_at, updated_at, title, filename, slug, excerpt, draft, released_at, read_time, header_title
+from posts
+where id = $1
 `
 
 func (q *Queries) QueryPostByID(ctx context.Context, id uuid.UUID) (Post, error) {
@@ -357,7 +349,9 @@ func (q *Queries) QueryPostByID(ctx context.Context, id uuid.UUID) (Post, error)
 }
 
 const queryPostBySlug = `-- name: QueryPostBySlug :one
-select id, created_at, updated_at, title, filename, slug, excerpt, draft, released_at, read_time, header_title from posts where slug = $1
+select id, created_at, updated_at, title, filename, slug, excerpt, draft, released_at, read_time, header_title
+from posts
+where slug = $1
 `
 
 func (q *Queries) QueryPostBySlug(ctx context.Context, slug string) (Post, error) {
@@ -380,18 +374,44 @@ func (q *Queries) QueryPostBySlug(ctx context.Context, slug string) (Post, error
 }
 
 const queryPosts = `-- name: QueryPosts :many
-select posts.id, posts.created_at, posts.updated_at, posts.title, posts.filename, posts.slug, posts.excerpt, posts.draft, posts.released_at, posts.read_time, posts.header_title from posts
+select posts.id, posts.created_at, posts.updated_at, posts.title, posts.filename, posts.slug, posts.excerpt, posts.draft, posts.released_at, posts.read_time, posts.header_title, array_agg(tags.*) as tags
+from posts
+join posts_tags on posts_tags.post_id = posts.id
+join tags on tags.id = posts_tags.tag_id
+order by posts.created_at
+limit coalesce($2::int, null)
+offset coalesce($1::int, 0)
 `
 
-func (q *Queries) QueryPosts(ctx context.Context) ([]Post, error) {
-	rows, err := q.db.Query(ctx, queryPosts)
+type QueryPostsParams struct {
+	Offset sql.NullInt32
+	Limit  sql.NullInt32
+}
+
+type QueryPostsRow struct {
+	ID          uuid.UUID
+	CreatedAt   pgtype.Timestamp
+	UpdatedAt   pgtype.Timestamp
+	Title       string
+	Filename    string
+	Slug        string
+	Excerpt     string
+	Draft       bool
+	ReleasedAt  pgtype.Timestamp
+	ReadTime    sql.NullInt32
+	HeaderTitle sql.NullString
+	Tags        interface{}
+}
+
+func (q *Queries) QueryPosts(ctx context.Context, arg QueryPostsParams) ([]QueryPostsRow, error) {
+	rows, err := q.db.Query(ctx, queryPosts, arg.Offset, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Post
+	var items []QueryPostsRow
 	for rows.Next() {
-		var i Post
+		var i QueryPostsRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.CreatedAt,
@@ -404,6 +424,7 @@ func (q *Queries) QueryPosts(ctx context.Context) ([]Post, error) {
 			&i.ReleasedAt,
 			&i.ReadTime,
 			&i.HeaderTitle,
+			&i.Tags,
 		); err != nil {
 			return nil, err
 		}
@@ -416,7 +437,8 @@ func (q *Queries) QueryPosts(ctx context.Context) ([]Post, error) {
 }
 
 const queryPostsCount = `-- name: QueryPostsCount :one
-select count(id) from posts
+select count(id)
+from posts
 `
 
 func (q *Queries) QueryPostsCount(ctx context.Context) (int64, error) {
@@ -427,14 +449,10 @@ func (q *Queries) QueryPostsCount(ctx context.Context) (int64, error) {
 }
 
 const queryPostsInPages = `-- name: QueryPostsInPages :many
-SELECT
-    posts.id, posts.created_at, posts.updated_at, posts.title, posts.filename, posts.slug, posts.excerpt, posts.draft, posts.released_at, posts.read_time, posts.header_title
-FROM
-	posts
-LIMIT
-    $1
-OFFSET
-    $2
+select posts.id, posts.created_at, posts.updated_at, posts.title, posts.filename, posts.slug, posts.excerpt, posts.draft, posts.released_at, posts.read_time, posts.header_title
+from posts
+limit $1
+offset $2
 `
 
 type QueryPostsInPagesParams struct {

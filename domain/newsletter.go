@@ -21,7 +21,6 @@ type Newsletter struct {
 
 var NewsletterValidations = func() map[string][]Rule {
 	return map[string][]Rule{
-		"ID":          {RequiredRule},
 		"ArticleSlug": {RequiredRule},
 	}
 }

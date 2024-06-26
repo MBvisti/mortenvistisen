@@ -33,15 +33,12 @@ type newsletterStorage interface {
 		filters QueryFilters,
 		opts ...PaginationOption,
 	) ([]domain.Newsletter, error)
-	// ListSubscribers(
-	// 	ctx context.Context,
-	// 	filters QueryFilters,
-	// 	opts ...PaginationOption,
-	// ) ([]domain.Subscriber, error)
 	InsertNewsletter(
 		ctx context.Context,
 		newsletter domain.Newsletter,
-	) ([]domain.Newsletter, error)
+	) (domain.Newsletter, error)
+	Count(ctx context.Context) (int64, error)
+	CountReleased(ctx context.Context) (int64, error)
 }
 
 type newsletterEmailService interface {
@@ -86,6 +83,24 @@ func (svc NewsletterService) ByID(ctx context.Context, id uuid.UUID) (domain.New
 	}
 
 	return newsletter, nil
+}
+
+func (svc NewsletterService) List(
+	ctx context.Context,
+	limit, offset int32,
+) ([]domain.Newsletter, error) {
+	return svc.newsletterStorage.ListNewsletters(ctx, nil, WithPagination(limit, offset))
+}
+
+func (svc NewsletterService) Count(
+	ctx context.Context,
+	releasedOnly bool,
+) (int64, error) {
+	if releasedOnly {
+		return svc.newsletterStorage.CountReleased(ctx)
+	}
+
+	return svc.newsletterStorage.Count(ctx)
 }
 
 func (svc NewsletterService) Preview(

@@ -1,4 +1,4 @@
-package mail
+package mail_client
 
 import (
 	"bytes"
@@ -40,7 +40,7 @@ type mailBody struct {
 }
 
 // SendMail implements emailClient.
-func (p *Postmark) SendMail(ctx context.Context, payload MailPayload) error {
+func (p *Postmark) SendMail(ctx context.Context, payload Payload) error {
 	byt, err := json.Marshal(mailBody{
 		From:     payload.From,
 		To:       payload.To,

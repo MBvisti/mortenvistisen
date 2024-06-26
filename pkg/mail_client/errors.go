@@ -1,4 +1,4 @@
-package mail
+package mail_client
 
 import "errors"
 

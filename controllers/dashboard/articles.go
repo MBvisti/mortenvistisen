@@ -5,23 +5,17 @@ import (
 	"strconv"
 
 	"github.com/MBvisti/mortenvistisen/controllers"
-	"github.com/MBvisti/mortenvistisen/controllers/misc"
-	"github.com/MBvisti/mortenvistisen/domain"
+	"github.com/MBvisti/mortenvistisen/models"
 	"github.com/MBvisti/mortenvistisen/posts"
-	"github.com/MBvisti/mortenvistisen/repository/database"
-	"github.com/MBvisti/mortenvistisen/services"
 	"github.com/MBvisti/mortenvistisen/views"
 	"github.com/MBvisti/mortenvistisen/views/components"
 	"github.com/MBvisti/mortenvistisen/views/dashboard"
-	"github.com/MBvisti/mortenvistisen/views/validation"
-	"github.com/go-playground/validator/v10"
-	"github.com/golang-module/carbon/v2"
 	"github.com/google/uuid"
 	"github.com/gorilla/csrf"
 	"github.com/labstack/echo/v4"
 )
 
-func ArticlesIndex(ctx echo.Context, db database.Queries) error {
+func ArticlesIndex(ctx echo.Context, articleModel models.ArticleService) error {
 	page := ctx.QueryParam("page")
 
 	var currentPage int
@@ -46,15 +40,12 @@ func ArticlesIndex(ctx echo.Context, db database.Queries) error {
 		offset = 7 * (currentPage - 1)
 	}
 
-	articles, err := db.QueryPostsInPages(ctx.Request().Context(), database.QueryPostsInPagesParams{
-		Limit:  7,
-		Offset: int32(offset),
-	})
+	articles, err := articleModel.List(ctx.Request().Context(), 7, int32(offset))
 	if err != nil {
 		return err
 	}
 
-	totalPostsCount, err := db.QueryPostsCount(ctx.Request().Context())
+	totalPostsCount, err := articleModel.Count(ctx.Request().Context())
 	if err != nil {
 		return err
 	}
@@ -65,7 +56,7 @@ func ArticlesIndex(ctx echo.Context, db database.Queries) error {
 			ID:         article.ID.String(),
 			Title:      article.Title,
 			Draft:      article.Draft,
-			ReleasedAt: article.ReleasedAt.Time.String(),
+			ReleasedAt: article.ReleaseDate.String(),
 			Slug:       article.Slug,
 		})
 	}
@@ -79,8 +70,12 @@ func ArticlesIndex(ctx echo.Context, db database.Queries) error {
 		Render(views.ExtractRenderDeps(ctx))
 }
 
-func ArticleCreate(ctx echo.Context, db database.Queries) error {
-	tags, err := db.QueryAllTags(ctx.Request().Context())
+func ArticleCreate(
+	ctx echo.Context,
+	articleModel models.ArticleService,
+	tagModel models.TagService,
+) error {
+	tags, err := tagModel.All(ctx.Request().Context())
 	if err != nil {
 		return err
 	}
@@ -98,9 +93,14 @@ func ArticleCreate(ctx echo.Context, db database.Queries) error {
 		return err
 	}
 
-	usedFilenames, err := db.QueryAllFilenames(ctx.Request().Context())
+	articles, err := articleModel.All(ctx.Request().Context())
 	if err != nil {
 		return err
+	}
+
+	var usedFilenames []string
+	for _, article := range articles {
+		usedFilenames = append(usedFilenames, article.Filename)
 	}
 
 	var unusedFileNames []string
@@ -120,12 +120,12 @@ func ArticleCreate(ctx echo.Context, db database.Queries) error {
 
 func ArticleEdit(
 	ctx echo.Context,
-	db database.Queries,
+	articleModel models.ArticleService,
 	postManager posts.PostManager,
 ) error {
 	slug := ctx.Param("slug")
 
-	post, err := db.GetPostBySlug(ctx.Request().Context(), slug)
+	post, err := articleModel.BySlug(ctx.Request().Context(), slug)
 	if err != nil {
 		return err
 	}
@@ -135,32 +135,27 @@ func ArticleEdit(
 		return err
 	}
 
-	tags, err := db.GetTagsForPost(ctx.Request().Context(), post.ID)
-	if err != nil {
-		return err
-	}
-
 	var keywords string
-	for i, kw := range tags {
-		if i == len(tags)-1 {
-			keywords = keywords + kw.Name
+	for i, tag := range post.Tags {
+		if i == len(post.Tags)-1 {
+			keywords = keywords + tag.Name
 		} else {
-			keywords = keywords + kw.Name + ", "
+			keywords = keywords + tag.Name + ", "
 		}
 	}
 
 	return dashboard.ArticleEdit(dashboard.ArticleEditViewData{
 		ID:          post.ID.String(),
-		CreatedAt:   post.CreatedAt.Time,
-		UpdatedAt:   post.UpdatedAt.Time,
+		CreatedAt:   post.CreatedAt,
+		UpdatedAt:   post.UpdatedAt,
 		Title:       post.Title,
-		HeaderTitle: post.HeaderTitle.String,
+		HeaderTitle: post.HeaderTitle,
 		Filename:    post.Filename,
 		Slug:        post.Slug,
 		Excerpt:     post.Excerpt,
 		Draft:       post.Draft,
-		ReleasedAt:  post.ReleasedAt.Time,
-		ReadTime:    post.ReadTime.Int32,
+		ReleasedAt:  post.ReleaseDate,
+		ReadTime:    post.ReadTime,
 		Content:     postContent,
 		Keywords:    keywords,
 	}, csrf.Token(ctx.Request())).
@@ -176,9 +171,13 @@ type articleUpdatePayload struct {
 	UpdatedAt   string `form:"updated-at"`
 	ReleasedAt  string `form:"released-at"`
 	IsLive      string `form:"is-live"`
+	Filename    string `form:"filename"`
 }
 
-func ArticleUpdate(ctx echo.Context, db database.Queries, v *validator.Validate) error {
+func ArticleUpdate(
+	ctx echo.Context,
+	articleModel models.ArticleService,
+) error {
 	id := ctx.Param("id")
 
 	var updateArticlePayload articleUpdatePayload
@@ -191,44 +190,39 @@ func ArticleUpdate(ctx echo.Context, db database.Queries, v *validator.Validate)
 		return err
 	}
 
-	parsedReleasedAt := carbon.Parse(updateArticlePayload.ReleasedAt).ToStdTime()
-
-	var release bool
-	if updateArticlePayload.IsLive == "on" {
-		release = true
-	}
-
-	post, err := services.UpdatePost(
-		ctx.Request().Context(),
-		&db,
-		v,
-		domain.UpdatePost{
-			ID:                parsedID,
-			Title:             updateArticlePayload.Title,
-			HeaderTitle:       updateArticlePayload.HeaderTitle,
-			Excerpt:           updateArticlePayload.Excerpt,
-			Slug:              updateArticlePayload.Slug,
-			ReleaedAt:         parsedReleasedAt,
-			ReleaseNow:        release,
-			EstimatedReadTime: updateArticlePayload.EstReadTime,
-		},
-	)
+	article, err := articleModel.Update(ctx.Request().Context(), models.UpdateArticlePayload{
+		ID:          parsedID,
+		Title:       updateArticlePayload.Title,
+		HeaderTitle: updateArticlePayload.HeaderTitle,
+		Filename:    updateArticlePayload.Filename,
+		Slug:        updateArticlePayload.Slug,
+		Excerpt:     updateArticlePayload.Excerpt,
+		Readtime:    updateArticlePayload.EstReadTime,
+		TagIDs:      []uuid.UUID{},
+	})
 	if err != nil {
 		return err
 	}
 
+	// parsedReleasedAt := carbon.Parse(updateArticlePayload.ReleasedAt).ToStdTime()
+	//
+	// var release bool
+	// if updateArticlePayload.IsLive == "on" {
+	// 	release = true
+	// }
+
 	return dashboard.ArticleEditForm(dashboard.ArticleEditViewData{
-		ID:          post.ID.String(),
-		CreatedAt:   post.CreatedAt,
-		UpdatedAt:   post.UpdatedAt,
-		Title:       post.Title,
-		HeaderTitle: post.HeaderTitle,
-		Filename:    post.Filename,
-		Slug:        post.Slug,
-		Excerpt:     post.Excerpt,
-		Draft:       post.Draft,
-		ReleasedAt:  post.ReleaseDate,
-		ReadTime:    post.ReadTime,
+		ID:          article.ID.String(),
+		CreatedAt:   article.CreatedAt,
+		UpdatedAt:   article.UpdatedAt,
+		Title:       article.Title,
+		HeaderTitle: article.HeaderTitle,
+		Filename:    article.Filename,
+		Slug:        article.Slug,
+		Excerpt:     article.Excerpt,
+		Draft:       article.Draft,
+		ReleasedAt:  article.ReleaseDate,
+		ReadTime:    article.ReadTime,
 	}, true).
 		Render(views.ExtractRenderDeps(ctx))
 }
@@ -241,111 +235,46 @@ type newArticleFormPayload struct {
 	Filename          string   `form:"filename"`
 	SelectedKeywords  []string `form:"selected-keyword"`
 	Release           string   `form:"release"`
+	Slug              string   `form:"slug"`
 }
 
-func ArticleStore(ctx echo.Context, db database.Queries, v *validator.Validate) error {
+func ArticleStore(ctx echo.Context, articleModel models.ArticleService) error {
 	var postPayload newArticleFormPayload
 	if err := ctx.Bind(&postPayload); err != nil {
 		return err
 	}
 
-	var releaseNow bool
-	if postPayload.Release == "on" {
-		releaseNow = true
-	}
-
+	// var releaseNow bool
+	// if postPayload.Release == "on" {
+	// 	releaseNow = true
+	// }
+	//
 	estimatedReadTime, err := strconv.Atoi(postPayload.EstimatedReadTime)
 	if err != nil {
 		return err
 	}
 
-	if err := services.NewPost(ctx.Request().Context(), &db, v, domain.NewPost{
-		Title:             postPayload.Title,
-		HeaderTitle:       postPayload.HeaderTitle,
-		Excerpt:           postPayload.Excerpt,
-		ReleaseNow:        releaseNow,
-		EstimatedReadTime: int64(estimatedReadTime),
-		Filename:          postPayload.Filename,
-	}, postPayload.SelectedKeywords); err != nil {
-		e, ok := err.(validator.ValidationErrors)
-		if !ok {
-			return misc.InternalError(ctx)
-		}
-
-		tags, err := db.QueryAllTags(ctx.Request().Context())
+	var tagIDs []uuid.UUID
+	for _, seletedKeyword := range postPayload.SelectedKeywords {
+		id, err := uuid.Parse(seletedKeyword)
 		if err != nil {
 			return err
 		}
 
-		var keywords []dashboard.Keyword
-		for _, tag := range tags {
-			keywords = append(keywords, dashboard.Keyword{
-				ID:    tag.ID.String(),
-				Value: tag.Name,
-			})
-		}
+		tagIDs = append(tagIDs, id)
+	}
 
-		filenames, err := posts.GetAllFiles()
-		if err != nil {
-			return err
-		}
-
-		usedFilenames, err := db.QueryAllFilenames(ctx.Request().Context())
-		if err != nil {
-			return err
-		}
-
-		var unusedFileNames []string
-		for _, filename := range filenames {
-			if !slices.Contains(usedFilenames, filename) {
-				unusedFileNames = append(unusedFileNames, filename)
-			}
-		}
-
-		props := dashboard.CreateArticleFormProps{
-			Title: validation.InputField{
-				OldValue: postPayload.Title,
-			},
-			HeaderTitle: validation.InputField{
-				OldValue: postPayload.HeaderTitle,
-			},
-			Excerpt: validation.InputField{
-				OldValue: postPayload.Excerpt,
-			},
-			Filename: validation.InputField{
-				OldValue: postPayload.Filename,
-			},
-			EstimatedReadTime: validation.InputField{
-				OldValue: postPayload.EstimatedReadTime,
-			},
-			ReleaseNow: releaseNow,
-		}
-
-		for _, validationError := range e {
-			switch validationError.StructField() {
-			case "Title":
-				props.Title.Invalid = true
-				props.Title.InvalidMsg = "Title is not long enough"
-			case "HeaderTitle":
-				props.HeaderTitle.Invalid = true
-				props.HeaderTitle.InvalidMsg = "Header title is not long enough"
-			case "Excerpt":
-				props.Excerpt.Invalid = true
-				props.Excerpt.InvalidMsg = "Excerpt has to be between 130 and 160 chars long"
-			case "EstimatedReadTime":
-				props.EstimatedReadTime.Invalid = true
-				props.EstimatedReadTime.InvalidMsg = "Est. time cannot be 0"
-			case "Filename":
-				props.Filename.Invalid = true
-				props.Filename.InvalidMsg = "All filenames must end with .md"
-			}
-		}
-
-		return dashboard.CreateArticleFormContent(
-			props,
-			keywords,
-			unusedFileNames,
-		).Render(views.ExtractRenderDeps(ctx))
+	_, err = articleModel.New(ctx.Request().Context(), models.NewArticlePayload{
+		Title:       postPayload.Title,
+		HeaderTitle: postPayload.HeaderTitle,
+		Filename:    postPayload.Filename,
+		Slug:        postPayload.Slug,
+		Excerpt:     postPayload.EstimatedReadTime,
+		Readtime:    int32(estimatedReadTime),
+		TagIDs:      tagIDs,
+	})
+	if err != nil {
+		return err
 	}
 
 	ctx.Response().Writer.Header().Add("HX-Redirect", "/dashboard/articles")
@@ -357,20 +286,19 @@ type newTagFormPayload struct {
 	SelectedKeywords []string `form:"selected-keyword"`
 }
 
-func TagStore(ctx echo.Context, db database.Queries) error {
+func TagStore(ctx echo.Context,
+	tagModel models.TagService,
+) error {
 	var tagPayload newTagFormPayload
 	if err := ctx.Bind(&tagPayload); err != nil {
 		return err
 	}
 
-	if err := db.InsertTag(ctx.Request().Context(), database.InsertTagParams{
-		ID:   uuid.New(),
-		Name: tagPayload.Name,
-	}); err != nil {
+	if _, err := tagModel.New(ctx.Request().Context(), tagPayload.Name); err != nil {
 		return err
 	}
 
-	tags, err := db.QueryAllTags(ctx.Request().Context())
+	tags, err := tagModel.All(ctx.Request().Context())
 	if err != nil {
 		return err
 	}

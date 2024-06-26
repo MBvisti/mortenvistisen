@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"fmt"
+	"log/slog"
 
 	"github.com/MBvisti/mortenvistisen/pkg/config"
 	"github.com/MBvisti/mortenvistisen/views/emails"
@@ -20,7 +21,7 @@ type mailClient interface {
 	SendMail(ctx context.Context, payload MailPayload) error
 }
 
-type EmailSvc struct {
+type Email struct {
 	cfg    config.Cfg
 	client mailClient
 }
@@ -28,14 +29,14 @@ type EmailSvc struct {
 func NewEmailSvc(
 	cfg config.Cfg,
 	client mailClient,
-) EmailSvc {
-	return EmailSvc{
+) Email {
+	return Email{
 		cfg,
 		client,
 	}
 }
 
-func (e *EmailSvc) SendNewSubscriberEmail(
+func (e *Email) SendNewSubscriberEmail(
 	ctx context.Context,
 	subscriberEmail string,
 	activationToken, unsubscribeToken string,
@@ -74,7 +75,92 @@ func (e *EmailSvc) SendNewSubscriberEmail(
 	})
 }
 
-func (e *EmailSvc) Send(
+func (e *Email) SendUserSignup(
+	ctx context.Context,
+	email string,
+	activationTkn string,
+) error {
+	newsletterMail := emails.UserSignupWelcomeMail{
+		ConfirmationLink: fmt.Sprintf(
+			"%s://%s/verify-email?token=%s",
+			e.cfg.App.AppScheme,
+			e.cfg.App.AppHost,
+			activationTkn,
+		),
+	}
+
+	textVersion, err := newsletterMail.GenerateTextVersion()
+	if err != nil {
+		slog.ErrorContext(
+			ctx,
+			"could not generate text version of UserSignupWelcomeMail",
+			"error",
+			err,
+		)
+		return err
+	}
+
+	htmlVersion, err := newsletterMail.GenerateHtmlVersion()
+	if err != nil {
+		slog.ErrorContext(
+			ctx,
+			"could not generate html version of UserSignupWelcomeMail",
+			"error",
+			err,
+		)
+		return err
+	}
+
+	return e.client.SendMail(ctx, MailPayload{
+		To:       email,
+		From:     "newsletter@mortenvistisen.com",
+		Subject:  "MBV Blog - action required",
+		HtmlBody: htmlVersion,
+		TextBody: textVersion,
+	})
+}
+
+func (e *Email) SendPasswordReset(
+	ctx context.Context,
+	email string,
+	resetLink string,
+) error {
+	newsletterMail := emails.PasswordReset{
+		ResetPasswordLink: resetLink,
+	}
+
+	textVersion, err := newsletterMail.GenerateTextVersion()
+	if err != nil {
+		slog.ErrorContext(
+			ctx,
+			"could not generate text version of PasswordReset",
+			"error",
+			err,
+		)
+		return err
+	}
+
+	htmlVersion, err := newsletterMail.GenerateHtmlVersion()
+	if err != nil {
+		slog.ErrorContext(
+			ctx,
+			"could not generate html version of PasswordReset",
+			"error",
+			err,
+		)
+		return err
+	}
+
+	return e.client.SendMail(ctx, MailPayload{
+		To:       email,
+		From:     "newsletter@mortenvistisen.com",
+		Subject:  "MBV Blog - action required",
+		HtmlBody: htmlVersion,
+		TextBody: textVersion,
+	})
+}
+
+func (e *Email) Send(
 	ctx context.Context,
 	to,
 	from,

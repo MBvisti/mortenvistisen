@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -76,6 +77,45 @@ func TestNewUser(t *testing.T) {
 					test.expected,
 					gotErr,
 				),
+			)
+		})
+	}
+}
+
+func TestConfirmUserEmail(t *testing.T) {
+	tests := map[string]struct {
+		user     User
+		expected bool
+	}{
+		"should validate an user's email": {
+			user: User{
+				ID:        uuid.New(),
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
+				Name:      "Test",
+				Mail:      "test@gmail.com",
+				Password:  "sdasdsadsa",
+			},
+			expected: true,
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			assert.True(
+				t,
+				test.user.MailVerifiedAt.IsZero(),
+				test.expected,
+				"expected MailVerifiedAt to be zero",
+			)
+
+			test.user.ConfirmEmail()
+
+			assert.True(
+				t,
+				!test.user.MailVerifiedAt.IsZero(),
+				test.expected,
+				"expected MailVerifiedAt to nott be zero",
 			)
 		})
 	}

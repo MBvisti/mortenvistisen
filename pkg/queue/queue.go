@@ -6,9 +6,9 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/MBvisti/mortenvistisen/pkg/mail"
-	"github.com/MBvisti/mortenvistisen/pkg/mail/templates"
 	"github.com/MBvisti/mortenvistisen/pkg/telemetry"
+	"github.com/MBvisti/mortenvistisen/services"
+	"github.com/MBvisti/mortenvistisen/views/emails"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/riverqueue/river"
@@ -120,14 +120,14 @@ func NewClient(pool *pgxpool.Pool, opts ...ClientCfgOpts) *river.Client[pgx.Tx] 
 // MailErrorHandler is an implementation of river.ErrorHandler that sends an email when an error occurs.
 type MailErrorHandler struct {
 	logger     *slog.Logger
-	mailClient *mail.Mail
+	mailClient services.Email
 	to         string
 	from       string
 }
 
 func NewMailErrorHandler(
 	logger *slog.Logger,
-	mailClient *mail.Mail,
+	mailClient services.Email,
 	baseSenderSignature, receiverMail string,
 ) *MailErrorHandler {
 	return &MailErrorHandler{
@@ -146,7 +146,7 @@ func (m *MailErrorHandler) HandleError(
 ) *river.ErrorHandlerResult {
 	m.logger.Error("error handling job", "error", err, "job_kind", job.Kind)
 
-	backgroundJobErrorMail := &templates.BackgroundJobErrorMail{
+	backgroundJobErrorMail := &emails.BackgroundJobErrorMail{
 		JobID:           job.ID,
 		AttemptedAt:     *job.AttemptedAt,
 		Kind:            job.Kind,
@@ -182,7 +182,7 @@ func (m *MailErrorHandler) HandlePanic(
 ) *river.ErrorHandlerResult {
 	m.logger.Error("panic handling job", "panic", panicVal, "job_kind", job.Kind)
 
-	backgroundJobErrorMail := &templates.BackgroundJobErrorMail{
+	backgroundJobErrorMail := &emails.BackgroundJobErrorMail{
 		JobID:           job.ID,
 		AttemptedAt:     *job.AttemptedAt,
 		Kind:            job.Kind,
