@@ -17,6 +17,7 @@ import (
 	"github.com/MBvisti/mortenvistisen/pkg/config"
 	"github.com/labstack/echo/v4"
 
+	"github.com/labstack/echo-contrib/echoprometheus"
 	echomw "github.com/labstack/echo/v4/middleware"
 )
 
@@ -63,6 +64,10 @@ func NewRouter(
 			return nil
 		},
 	}))
+	router.Use(
+		echoprometheus.NewMiddleware("mortenvistisen_blog"),
+	) // adds middleware to gather metrics
+	router.GET("/metrics", echoprometheus.NewHandler())
 
 	router.GET("/robots.txt", func(c echo.Context) error {
 		return c.File("./resources/seo/robots.txt")
