@@ -7,7 +7,6 @@ import (
 	"github.com/MBvisti/mortenvistisen/controllers"
 	"github.com/MBvisti/mortenvistisen/controllers/misc"
 	"github.com/MBvisti/mortenvistisen/models"
-	"github.com/MBvisti/mortenvistisen/pkg/telemetry"
 	"github.com/MBvisti/mortenvistisen/services"
 	"github.com/MBvisti/mortenvistisen/views"
 	"github.com/MBvisti/mortenvistisen/views/authentication"
@@ -18,7 +17,6 @@ import (
 func Index(ctx echo.Context, articleModel models.ArticleService) error {
 	data, err := articleModel.List(ctx.Request().Context(), 0, 5)
 	if err != nil {
-		telemetry.Logger.Error("failed to get posts", "error", err)
 		return err
 	}
 
@@ -198,6 +196,23 @@ func SubscriberEmailVerification(
 		ctx.Response().Writer.Header().Add("PreviousLocation", "/user/create")
 
 		return misc.InternalError(ctx)
+	}
+
+	if err := tokenService.ValidateSubscriber(ctx.Request().Context(), tkn.Token); err != nil {
+		return err
+	}
+
+	subscriberID, err := tokenService.GetAssociatedSubscriberID(ctx.Request().Context(), tkn.Token)
+	if err != nil {
+		return err
+	}
+
+	if err := subscriberModel.Verify(ctx.Request().Context(), subscriberID); err != nil {
+		return err
+	}
+
+	if err := tokenService.DeleteSubscriberToken(ctx.Request().Context(), subscriberID); err != nil {
+		return err
 	}
 
 	// hashedToken := tknManager.Hash(tkn.Token)

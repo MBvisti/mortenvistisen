@@ -218,9 +218,9 @@ func (p Postgres) ListArticles(
 
 	articles := make([]domain.Article, len(posts))
 	for i, post := range posts {
-		tags, ok := post.Tags.([]database.Tag)
-		if !ok {
-			panic("could not convert tag") // TODO handle when verified works
+		tags, err := p.Queries.QueryTagsByPost(ctx, post.ID)
+		if err != nil {
+			return nil, err
 		}
 
 		var convertedTags []domain.Tag

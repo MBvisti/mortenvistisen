@@ -65,7 +65,7 @@ func (a Auth) HashAndPepperPassword(password string) (string, error) {
 
 func (a Auth) ValidatePassword(password, hashedPassword string) error {
 	if err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password+a.passwordPepper)); err != nil {
-		slog.Error("could not validate password", "error", err)
+		slog.Error("could not validate password", "error", err, "pass", password)
 		return errors.Join(ErrCouldNotValidatePassword, err)
 	}
 
@@ -75,38 +75,40 @@ func (a Auth) ValidatePassword(password, hashedPassword string) error {
 func (a Auth) AuthenticateUser(
 	ctx context.Context,
 	req *http.Request,
+	res http.ResponseWriter,
 	remember bool,
 	mail string,
 	password string,
-) (*sessions.Session, error) {
+) error {
 	user, err := a.storage.QueryUserByEmail(ctx, mail)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, errors.Join(ErrUserNotExist, err)
+			return errors.Join(ErrUserNotExist, err)
 		}
 
-		return nil, err
+		return err
 	}
 
 	if user.MailVerifiedAt.IsZero() {
-		return nil, ErrEmailNotValidated
+		return ErrEmailNotValidated
 	}
 
 	if err := a.ValidatePassword(password, user.Password); err != nil {
-		return nil, err
+		return err
 	}
 
-	return a.CreateAuthenticatedSession(req, user.ID, remember)
+	return a.CreateAuthenticatedSession(req, res, user.ID, remember)
 }
 
 func (a Auth) CreateAuthenticatedSession(
-	r *http.Request,
+	req *http.Request,
+	res http.ResponseWriter,
 	userID uuid.UUID,
 	remember bool,
-) (*sessions.Session, error) {
-	session, err := a.cookieStore.Get(r, "ua")
+) error {
+	session, err := a.cookieStore.Get(req, "ua")
 	if err != nil {
-		return nil, errors.Join(ErrCouldNotGetAuthenticatedSession, err)
+		return errors.Join(ErrCouldNotGetAuthenticatedSession, err)
 	}
 
 	session.Options.HttpOnly = true
@@ -126,7 +128,7 @@ func (a Auth) CreateAuthenticatedSession(
 		session.Values["is_admin"] = false
 	}
 
-	return session, nil
+	return session.Save(req, res)
 }
 
 func (a Auth) IsAuthenticated(r *http.Request) (bool, uuid.UUID, error) {

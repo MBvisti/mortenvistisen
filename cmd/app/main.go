@@ -65,7 +65,7 @@ func main() {
 	newsletterModel := models.NewNewsletterSvc(psql, psql, tknService, &mailService)
 	subModel := models.NewSubscriberSvc(&mailService, tknService, psql)
 	userModel := models.NewUserSvc(authService, psql)
-	tagModel := models.NewTagSvc()
+	tagModel := models.NewTagSvc(psql)
 	articleModel := models.NewArticleSvc(psql)
 
 	cookieStore := controllers.NewCookieStore(cfg.Auth.SessionKey)

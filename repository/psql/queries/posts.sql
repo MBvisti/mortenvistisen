@@ -1,8 +1,6 @@
 -- name: QueryPosts :many
-select posts.*, array_agg(tags.*) as tags
+select posts.*
 from posts
-join posts_tags on posts_tags.post_id = posts.id
-join tags on tags.id = posts_tags.tag_id
 order by posts.created_at
 limit coalesce(sqlc.narg('limit')::int, null)
 offset coalesce(sqlc.narg('offset')::int, 0)

@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/MBvisti/mortenvistisen/domain"
 	"github.com/google/uuid"
@@ -147,6 +148,7 @@ func (a ArticleService) List(
 ) ([]domain.Article, error) {
 	articles, err := a.articleStorage.ListArticles(ctx, nil, WithPagination(limit, offset))
 	if err != nil {
+		slog.ErrorContext(ctx, "could not get list of articles", "error", err)
 		return nil, err
 	}
 

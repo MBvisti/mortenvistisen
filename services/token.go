@@ -8,6 +8,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"hash"
+	"log/slog"
 	"time"
 
 	"github.com/MBvisti/mortenvistisen/repository/psql/database"
@@ -34,6 +35,7 @@ type tokenServiceStorage interface {
 		userID uuid.UUID,
 	) error
 	QueryTokenByHash(ctx context.Context, hash string) (database.Token, error)
+	QuerySubscriberTokenByHash(ctx context.Context, hash string) (database.SubscriberToken, error)
 	DeleteTokenByHash(ctx context.Context, hash string) error
 	DeleteTokenBySubID(ctx context.Context, id uuid.UUID) error
 }
@@ -101,6 +103,14 @@ func (svc *TokenSvc) CreateSubscriptionToken(
 	)
 
 	if err := svc.storage.InsertSubscriberToken(ctx, tkn.Hash, tkn.GetScope(), tkn.GetExpirationTime(), subscriberID); err != nil {
+		slog.ErrorContext(
+			ctx,
+			"could not insert a subscriber token",
+			"error",
+			err,
+			"subscriber_id",
+			subscriberID,
+		)
 		return "", err
 	}
 
@@ -124,6 +134,14 @@ func (svc *TokenSvc) CreateEmailVerificationToken(
 	)
 
 	if err := svc.storage.InsertToken(ctx, tkn.Hash, tkn.GetScope(), tkn.GetExpirationTime(), userID); err != nil {
+		slog.ErrorContext(
+			ctx,
+			"could not insert a token",
+			"error",
+			err,
+			"user_id",
+			userID,
+		)
 		return "", err
 	}
 
@@ -180,12 +198,36 @@ func (svc *TokenSvc) Validate(ctx context.Context, token string) error {
 	tkn, err := svc.storage.QueryTokenByHash(ctx, svc.hash(token))
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
+			slog.InfoContext(ctx, "a token was requested that could not be found", "token", tkn)
+
+			slog.ErrorContext(ctx, "could not query token by hash", "error", err)
 			return errors.Join(ErrTokenNotExist, err)
 		}
+
 		return err
 	}
 
-	if !time.Now().Before(tkn.ExpiresAt.Time) {
+	if time.Now().After(tkn.ExpiresAt.Time) {
+		return ErrTokenExpired
+	}
+
+	return nil
+}
+
+func (svc *TokenSvc) ValidateSubscriber(ctx context.Context, token string) error {
+	tkn, err := svc.storage.QuerySubscriberTokenByHash(ctx, svc.hash(token))
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			slog.InfoContext(ctx, "a token was requested that could not be found", "token", tkn)
+
+			slog.ErrorContext(ctx, "could not query token by hash", "error", err)
+			return errors.Join(ErrTokenNotExist, err)
+		}
+
+		return err
+	}
+
+	if time.Now().After(tkn.ExpiresAt.Time) {
 		return ErrTokenExpired
 	}
 
@@ -199,6 +241,18 @@ func (svc *TokenSvc) GetAssociatedUserID(ctx context.Context, token string) (uui
 	}
 
 	return tkn.UserID, nil
+}
+
+func (svc *TokenSvc) GetAssociatedSubscriberID(
+	ctx context.Context,
+	token string,
+) (uuid.UUID, error) {
+	tkn, err := svc.storage.QuerySubscriberTokenByHash(ctx, svc.hash(token))
+	if err != nil {
+		return uuid.UUID{}, err
+	}
+
+	return tkn.SubscriberID, nil
 }
 
 func (svc *TokenSvc) Delete(ctx context.Context, token string) error {

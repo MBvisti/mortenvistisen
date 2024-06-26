@@ -44,6 +44,7 @@ func (p Postgres) QueryUserByEmail(
 		Name:           user.Name,
 		Mail:           user.Mail,
 		MailVerifiedAt: user.MailVerifiedAt.Time,
+		Password:       user.Password,
 	}, nil
 }
 

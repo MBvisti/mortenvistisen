@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"time"
 
 	"github.com/MBvisti/mortenvistisen/domain"
 	"github.com/MBvisti/mortenvistisen/models"
@@ -111,32 +110,16 @@ func (p Postgres) UpdateSubscriber(
 	ctx context.Context,
 	data domain.Subscriber,
 ) (domain.Subscriber, error) {
-	subscriberToUpdate, err := p.Queries.QuerySubscriberByID(ctx, data.ID)
-	if err != nil {
-		return domain.Subscriber{}, err
-	}
-
 	updateParams := database.UpdateSubscriberParams{
+		ID: data.ID,
 		UpdatedAt: pgtype.Timestamptz{
-			Time:  time.Now(),
+			Time:  data.UpdatedAt,
 			Valid: true,
 		},
-		Email:        subscriberToUpdate.Email,
-		SubscribedAt: subscriberToUpdate.SubscribedAt,
-		Referer:      subscriberToUpdate.Referer,
-		IsVerified:   subscriberToUpdate.IsVerified,
-	}
-
-	switch {
-	case data.Email != "":
-		updateParams.Email = sql.NullString{String: data.Email, Valid: true}
-	case data.SubscribedAt != time.Time{}:
-		updateParams.SubscribedAt = pgtype.Timestamptz{
-			Time:  data.SubscribedAt,
-			Valid: true,
-		}
-	case data.Referer != "":
-		updateParams.Referer = sql.NullString{String: data.Referer, Valid: true}
+		Email:        sql.NullString{String: data.Email, Valid: true},
+		SubscribedAt: pgtype.Timestamptz{Time: data.SubscribedAt, Valid: true},
+		Referer:      sql.NullString{String: data.Referer, Valid: true},
+		IsVerified:   pgtype.Bool{Bool: data.IsVerified, Valid: true},
 	}
 
 	updatedSubscriber, err := p.Queries.UpdateSubscriber(ctx, updateParams)

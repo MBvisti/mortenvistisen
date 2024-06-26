@@ -80,9 +80,20 @@ func (p Postgres) InsertToken(
 }
 
 func (p Postgres) DeleteTokenByHash(ctx context.Context, hash string) error {
-	return nil
+	return p.Queries.DeleteTokenByHash(ctx, hash)
+}
+
+func (p Postgres) DeleteTokenBySubID(ctx context.Context, id uuid.UUID) error {
+	return p.Queries.DeleteSubscriberTokenBySubscriberID(ctx, id)
 }
 
 func (p Postgres) QueryTokenByHash(ctx context.Context, hash string) (database.Token, error) {
-	return database.Token{}, nil
+	return p.Queries.QueryTokenByHash(ctx, hash)
+}
+
+func (p Postgres) QuerySubscriberTokenByHash(
+	ctx context.Context,
+	hash string,
+) (database.SubscriberToken, error) {
+	return p.Queries.QuerySubscriberTokenByHash(ctx, hash)
 }

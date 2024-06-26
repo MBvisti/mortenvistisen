@@ -17,18 +17,18 @@ type MailPayload struct {
 	TextBody string
 }
 
-type mailClient interface {
+type MailClient interface {
 	SendMail(ctx context.Context, payload MailPayload) error
 }
 
 type Email struct {
 	cfg    config.Cfg
-	client mailClient
+	client MailClient
 }
 
 func NewEmailSvc(
 	cfg config.Cfg,
-	client mailClient,
+	client MailClient,
 ) Email {
 	return Email{
 		cfg,

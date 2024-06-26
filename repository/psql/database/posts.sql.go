@@ -374,10 +374,8 @@ func (q *Queries) QueryPostBySlug(ctx context.Context, slug string) (Post, error
 }
 
 const queryPosts = `-- name: QueryPosts :many
-select posts.id, posts.created_at, posts.updated_at, posts.title, posts.filename, posts.slug, posts.excerpt, posts.draft, posts.released_at, posts.read_time, posts.header_title, array_agg(tags.*) as tags
+select posts.id, posts.created_at, posts.updated_at, posts.title, posts.filename, posts.slug, posts.excerpt, posts.draft, posts.released_at, posts.read_time, posts.header_title
 from posts
-join posts_tags on posts_tags.post_id = posts.id
-join tags on tags.id = posts_tags.tag_id
 order by posts.created_at
 limit coalesce($2::int, null)
 offset coalesce($1::int, 0)
@@ -388,30 +386,15 @@ type QueryPostsParams struct {
 	Limit  sql.NullInt32
 }
 
-type QueryPostsRow struct {
-	ID          uuid.UUID
-	CreatedAt   pgtype.Timestamp
-	UpdatedAt   pgtype.Timestamp
-	Title       string
-	Filename    string
-	Slug        string
-	Excerpt     string
-	Draft       bool
-	ReleasedAt  pgtype.Timestamp
-	ReadTime    sql.NullInt32
-	HeaderTitle sql.NullString
-	Tags        interface{}
-}
-
-func (q *Queries) QueryPosts(ctx context.Context, arg QueryPostsParams) ([]QueryPostsRow, error) {
+func (q *Queries) QueryPosts(ctx context.Context, arg QueryPostsParams) ([]Post, error) {
 	rows, err := q.db.Query(ctx, queryPosts, arg.Offset, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []QueryPostsRow
+	var items []Post
 	for rows.Next() {
-		var i QueryPostsRow
+		var i Post
 		if err := rows.Scan(
 			&i.ID,
 			&i.CreatedAt,
@@ -424,7 +407,6 @@ func (q *Queries) QueryPosts(ctx context.Context, arg QueryPostsParams) ([]Query
 			&i.ReleasedAt,
 			&i.ReadTime,
 			&i.HeaderTitle,
-			&i.Tags,
 		); err != nil {
 			return nil, err
 		}

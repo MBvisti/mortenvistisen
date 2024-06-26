@@ -147,21 +147,20 @@ func (r *Router) loadDashboardRoutes() {
 	router.POST("/subscribers/:id/send-verification-mail", func(c echo.Context) error {
 		return dashboard.ResendVerificationMail(
 			c,
-			r.ctrlDeps.DB,
-			r.ctrlDeps.TknManager,
-			r.ctrlDeps.QueueClient,
-			r.cfg,
+			r.ctrlDeps.SubscriberModel,
+			r.ctrlDeps.TokenService,
+			r.ctrlDeps.EmailService,
 		)
 	})
 
 	router.GET("/articles", func(c echo.Context) error {
-		return dashboard.ArticlesIndex(c, r.ctrlDeps.DB)
+		return dashboard.ArticlesIndex(c, r.ctrlDeps.ArticleModel)
 	})
 	router.GET("/articles/:slug/edit", func(c echo.Context) error {
 		return dashboard.ArticleEdit(c, r.ctrlDeps.ArticleModel, r.ctrlDeps.PostManager)
 	})
 	router.GET("/articles/create", func(c echo.Context) error {
-		return dashboard.ArticleCreate(c, r.ctrlDeps.ArticleModel)
+		return dashboard.ArticleCreate(c, r.ctrlDeps.ArticleModel, r.ctrlDeps.TagModel)
 	})
 	router.POST("/articles/store", func(c echo.Context) error {
 		return dashboard.ArticleStore(c, r.ctrlDeps.ArticleModel)
@@ -174,22 +173,24 @@ func (r *Router) loadDashboardRoutes() {
 	})
 
 	router.GET("/newsletters", func(c echo.Context) error {
-		return dashboard.NewslettersIndex(c, r.ctrlDeps.NewsletterModel)
+		return dashboard.NewslettersIndex(c, r.ctrlDeps.NewsletterModel, r.ctrlDeps.CookieStore)
 	})
 	router.GET("/newsletters/create", func(c echo.Context) error {
-		return dashboard.NewsletterCreate(c, r.ctrlDeps.NewsletterModel)
+		return dashboard.NewsletterCreate(c, r.ctrlDeps.NewsletterModel, r.ctrlDeps.ArticleModel)
 	})
 	router.POST("/newsletters/store", func(c echo.Context) error {
 		return dashboard.NewsletterStore(
 			c,
 			r.ctrlDeps.CookieStore,
 			r.ctrlDeps.NewsletterModel,
+			r.ctrlDeps.ArticleModel,
 		)
 	})
 	router.GET("/newsletters/:id/edit", func(c echo.Context) error {
 		return dashboard.NewslettersEdit(
 			c,
 			r.ctrlDeps.NewsletterModel,
+			r.ctrlDeps.ArticleModel,
 			r.ctrlDeps.CookieStore,
 		)
 	})
@@ -197,6 +198,7 @@ func (r *Router) loadDashboardRoutes() {
 		return dashboard.NewsletterUpdate(
 			c,
 			r.ctrlDeps.NewsletterModel,
+			r.ctrlDeps.ArticleModel,
 			r.ctrlDeps.CookieStore,
 		)
 	})
@@ -247,12 +249,13 @@ func (r *Router) loadAppRoutes() {
 	router.POST("/subscribe", func(c echo.Context) error {
 		return app.SubscriptionEvent(
 			c,
-			// r.ctrlDeps.QueueClient,
-			// r.ctrlDeps.DB,
-			// r.ctrlDeps.TknManager,
-			// r.cfg,
 			r.ctrlDeps.SubscriberModel,
 		)
+	})
+
+	router.GET("/redirect", func(c echo.Context) error {
+		to := c.QueryParam("to")
+		return controllers.RedirectHx(c.Response(), fmt.Sprintf("/%s", to))
 	})
 }
 
@@ -285,6 +288,7 @@ func (r *Router) loadAuthRoutes() {
 			c,
 			r.ctrlDeps.UserModel,
 			r.ctrlDeps.TokenService,
+			r.ctrlDeps.AuthService,
 		)
 	})
 

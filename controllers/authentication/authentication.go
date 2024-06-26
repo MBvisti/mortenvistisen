@@ -39,14 +39,14 @@ func StoreAuthenticatedSession(
 		return authentication.LoginResponse(true).Render(views.ExtractRenderDeps(ctx))
 	}
 
-	_, err := authService.AuthenticateUser(
+	if err := authService.AuthenticateUser(
 		ctx.Request().Context(),
 		ctx.Request(),
+		ctx.Response(),
 		false,
 		payload.Mail,
 		payload.Password,
-	)
-	if err != nil {
+	); err != nil {
 		var errMsg string
 
 		switch err {
@@ -155,6 +155,9 @@ func StoreResetPassword(
 	}
 
 	userID, err := tknService.GetAssociatedUserID(ctx.Request().Context(), payload.Token)
+	if err != nil {
+		return err
+	}
 
 	user, err := userModel.UpdatePassword(
 		ctx.Request().Context(),
@@ -166,8 +169,7 @@ func StoreResetPassword(
 		return err
 	}
 
-	_, err = authService.CreateAuthenticatedSession(ctx.Request(), user.ID, false)
-	if err != nil {
+	if err = authService.CreateAuthenticatedSession(ctx.Request(), ctx.Response(), user.ID, false); err != nil {
 		return err
 	}
 
@@ -284,7 +286,7 @@ func UserEmailVerification(
 		return err
 	}
 
-	if _, err := authService.CreateAuthenticatedSession(ctx.Request(), user.ID, false); err != nil {
+	if err := authService.CreateAuthenticatedSession(ctx.Request(), ctx.Response(), user.ID, false); err != nil {
 		return err
 	}
 

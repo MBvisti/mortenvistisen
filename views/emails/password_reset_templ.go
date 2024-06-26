@@ -58,11 +58,11 @@ func (p PasswordReset) GenerateHtmlVersion() (string, error) {
 	return inlineHtml, nil
 }
 
-func (p PasswordResetMail) Render(ctx context.Context, w io.Writer) error {
+func (p PasswordReset) Render(ctx context.Context, w io.Writer) error {
 	return p.template().Render(ctx, w)
 }
 
-func (n PasswordResetMail) template() templ.Component {
+func (n PasswordReset) template() templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {

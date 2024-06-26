@@ -29,6 +29,7 @@ type userStorage interface {
 
 type authService interface {
 	HashAndPepperPassword(password string) (string, error)
+	ValidatePassword(password, hashedPassword string) error
 }
 
 type UserService struct {
@@ -85,27 +86,24 @@ func (us UserService) New(
 	ctx context.Context,
 	name, mail, password, confirmPassword string,
 ) (domain.User, error) {
+	user, err := domain.NewUser(name, mail, password, confirmPassword)
+	if err != nil {
+		return domain.User{}, err
+	}
+
 	hashedPassword, err := us.auth.HashAndPepperPassword(password)
 	if err != nil {
-		return domain.User{}, nil
+		return domain.User{}, err
 	}
 
-	hashedConfirmPassword, err := us.auth.HashAndPepperPassword(confirmPassword)
-	if err != nil {
-		return domain.User{}, nil
-	}
-
-	user, err := domain.NewUser(name, mail, hashedPassword, hashedConfirmPassword)
-	if err != nil {
-		return domain.User{}, nil
-	}
+	user.Password = hashedPassword
 
 	if _, err := us.userStorage.InsertUser(ctx, user); err != nil {
 		slog.ErrorContext(ctx, "could not insert user to database", "error", err)
-		return domain.User{}, nil
+		return domain.User{}, err
 	}
 
-	return domain.User{}, nil
+	return user, nil
 }
 
 // func (u UserSvc) New(

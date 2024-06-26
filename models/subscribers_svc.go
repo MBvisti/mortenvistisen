@@ -173,7 +173,19 @@ func (svc *SubscriberService) UnverifiedCount(ctx context.Context) (int64, error
 	return count, nil
 }
 
-func (svc *SubscriberService) Verify(ctx context.Context) error {
+func (svc *SubscriberService) Verify(ctx context.Context, subscriberID uuid.UUID) error {
+	subscriber, err := svc.storage.QuerySubscriberByID(ctx, subscriberID)
+	if err != nil {
+		return err
+	}
+
+	subscriber.Verify()
+
+	_, err = svc.storage.UpdateSubscriber(ctx, subscriber)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -185,9 +197,8 @@ func (svc *SubscriberService) New(ctx context.Context, email, articleTitle strin
 	// 3. create token
 	// 4. create email & send email
 
-	// _, err := svc.ByEmail(ctx, email)
-	err := errors.New("something happened")
-	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
+	_, err := svc.ByEmail(ctx, email)
+	if err != nil && !errors.Is(err, ErrNoRowWithIdentifier) {
 		slog.Error("could not query subscriber by email", "error", err, "email", email)
 		return errors.Join(ErrUnrecoverableEvent, err)
 	}

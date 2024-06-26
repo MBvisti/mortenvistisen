@@ -242,7 +242,7 @@ func (q *Queries) QueryVerifiedSubscribers(ctx context.Context) ([]Subscriber, e
 }
 
 const updateSubscriber = `-- name: UpdateSubscriber :one
-update subscribers set updated_at = $1, email = $2, subscribed_at = $3, referer = $4, is_verified = $5 where id = $1
+update subscribers set updated_at = $1, email = $2, subscribed_at = $3, referer = $4, is_verified = $5 where id = $6
 returning id, created_at, updated_at, email, subscribed_at, referer, is_verified
 `
 
@@ -252,6 +252,7 @@ type UpdateSubscriberParams struct {
 	SubscribedAt pgtype.Timestamptz
 	Referer      sql.NullString
 	IsVerified   pgtype.Bool
+	ID           uuid.UUID
 }
 
 func (q *Queries) UpdateSubscriber(ctx context.Context, arg UpdateSubscriberParams) (Subscriber, error) {
@@ -261,6 +262,7 @@ func (q *Queries) UpdateSubscriber(ctx context.Context, arg UpdateSubscriberPara
 		arg.SubscribedAt,
 		arg.Referer,
 		arg.IsVerified,
+		arg.ID,
 	)
 	var i Subscriber
 	err := row.Scan(

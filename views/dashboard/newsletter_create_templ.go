@@ -13,8 +13,8 @@ import "bytes"
 import (
 	"fmt"
 	"github.com/MBvisti/mortenvistisen/domain"
-	"github.com/MBvisti/mortenvistisen/pkg/mail/templates"
 	"github.com/MBvisti/mortenvistisen/views/components"
+	"github.com/MBvisti/mortenvistisen/views/emails"
 	"github.com/MBvisti/mortenvistisen/views/internal/layouts"
 	"github.com/google/uuid"
 	"strconv"
@@ -24,7 +24,7 @@ func NewsletterForm(
 	title,
 	edition string,
 	selectedArticleID uuid.UUID,
-	articles []domain.Post,
+	articles []domain.Article,
 	errors map[string]components.InputError,
 	action string,
 	endpoint string,
@@ -154,8 +154,8 @@ func NewsletterForm(
 }
 
 func NewsletterPreview(
-	articles []database.Post,
-	newsletterMailPreview templates.NewsletterMail,
+	articles []domain.Article,
+	newsletterMailPreview emails.NewsletterMail,
 	selectedArticleID uuid.UUID,
 	errors map[string]components.InputError,
 	tkn string,
@@ -484,7 +484,7 @@ func NewsletterPreview(
 	})
 }
 
-func CreateNewsletter(articles []database.Post, selectedArticleID uuid.UUID, newsletterMailPreview templates.NewsletterMail, tkn string) templ.Component {
+func CreateNewsletter(articles []domain.Article, selectedArticleID uuid.UUID, newsletterMailPreview emails.NewsletterMail, tkn string) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {

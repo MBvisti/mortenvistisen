@@ -9,6 +9,8 @@ import (
 	"log/slog"
 	"net/http"
 	"time"
+
+	"github.com/MBvisti/mortenvistisen/services"
 )
 
 type Postmark struct {
@@ -29,7 +31,7 @@ func NewPostmark(token string) Postmark {
 	}
 }
 
-var _ mailClient = (*Postmark)(nil)
+var _ services.MailClient = (*Postmark)(nil)
 
 type mailBody struct {
 	From     string `json:"From"`
@@ -40,7 +42,7 @@ type mailBody struct {
 }
 
 // SendMail implements emailClient.
-func (p *Postmark) SendMail(ctx context.Context, payload Payload) error {
+func (p *Postmark) SendMail(ctx context.Context, payload services.MailPayload) error {
 	byt, err := json.Marshal(mailBody{
 		From:     payload.From,
 		To:       payload.To,

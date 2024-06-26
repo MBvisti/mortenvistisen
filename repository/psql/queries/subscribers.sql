@@ -49,7 +49,7 @@ where date_trunc('month', created_at) = date_trunc('month', current_timestamp)
 ;
 
 -- name: UpdateSubscriber :one
-update subscribers set updated_at = $1, email = $2, subscribed_at = $3, referer = $4, is_verified = $5 where id = $1
+update subscribers set updated_at = $1, email = $2, subscribed_at = $3, referer = $4, is_verified = $5 where id = $6
 returning *
 ;
 

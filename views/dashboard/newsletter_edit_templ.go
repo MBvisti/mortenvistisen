@@ -12,8 +12,8 @@ import "bytes"
 
 import (
 	"github.com/MBvisti/mortenvistisen/domain"
-	"github.com/MBvisti/mortenvistisen/pkg/mail/templates"
 	"github.com/MBvisti/mortenvistisen/views/components"
+	"github.com/MBvisti/mortenvistisen/views/emails"
 	"github.com/MBvisti/mortenvistisen/views/internal/layouts"
 	//"strconv"
 	"fmt"
@@ -24,7 +24,7 @@ type NewsletterEditViewData struct {
 	Title        string
 	Edition      string
 	ArticleID    uuid.UUID
-	MailPreview  templates.NewsletterMail
+	MailPreview  emails.NewsletterMail
 	Articles     []domain.Article
 	NewsletterID uuid.UUID
 }

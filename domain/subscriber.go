@@ -65,6 +65,11 @@ func (s Subscriber) Validate(validations map[string][]Rule) error {
 	return nil
 }
 
+func (s *Subscriber) Verify() {
+	s.IsVerified = true
+	s.UpdatedAt = time.Now()
+}
+
 func NewSubscriber(
 	email string,
 	referer string,
