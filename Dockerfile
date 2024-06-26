@@ -8,7 +8,7 @@ WORKDIR /
 
 COPY resources/ resources
 COPY views/ views
-COPY pkg/mail pkg/mail
+COPY pkg/mail_client pkg/mail_client
 COPY static static
 
 RUN cd resources && npm ci
@@ -26,7 +26,7 @@ COPY . .
 RUN templ generate
 
 COPY --from=build-resources static static
-COPY --from=build-resources pkg/mail pkg/mail
+COPY --from=build-resources pkg/mail_client pkg/mail_client
 
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -mod=readonly -v -o app cmd/app/main.go
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -mod=readonly -v -o worker cmd/worker/main.go
