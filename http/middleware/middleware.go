@@ -6,16 +6,15 @@ import (
 	"github.com/MBvisti/mortenvistisen/pkg/telemetry"
 	"github.com/MBvisti/mortenvistisen/services"
 	"github.com/google/uuid"
-	"github.com/gorilla/sessions"
 	"github.com/labstack/echo/v4"
 )
 
 type Middleware struct {
-	authSessionStore *sessions.CookieStore
+	authSvc services.Auth
 }
 
-func NewMiddleware(aSS *sessions.CookieStore) Middleware {
-	return Middleware{aSS}
+func NewMiddleware(authSvc services.Auth) Middleware {
+	return Middleware{authSvc}
 }
 
 type UserContext struct {
@@ -27,6 +26,7 @@ type UserContext struct {
 func (u *UserContext) GetID() uuid.UUID {
 	return u.UserID
 }
+
 func (u *UserContext) GetAuthStatus() bool {
 	return u.IsAuthenticated
 }
@@ -42,7 +42,7 @@ func (a *AdminContext) GetAdminStatus() bool {
 
 func (m *Middleware) AuthOnly(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		authenticated, userID, err := services.IsAuthenticated(c.Request(), m.authSessionStore)
+		authenticated, userID, err := m.authSvc.IsAuthenticated(c.Request())
 		if err != nil {
 			telemetry.Logger.Error("could not get authenticated status", "error", err)
 			return c.Redirect(http.StatusPermanentRedirect, "/500")
@@ -59,7 +59,7 @@ func (m *Middleware) AuthOnly(next echo.HandlerFunc) echo.HandlerFunc {
 
 func (m *Middleware) RegisterUserContext(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		authenticated, userID, err := services.IsAuthenticated(c.Request(), m.authSessionStore)
+		authenticated, userID, err := m.authSvc.IsAuthenticated(c.Request())
 		if err != nil {
 			telemetry.Logger.Error("could not get authenticated status", "error", err)
 			return c.Redirect(http.StatusPermanentRedirect, "/500")
@@ -77,7 +77,7 @@ func (m *Middleware) RegisterUserContext(next echo.HandlerFunc) echo.HandlerFunc
 
 func (m *Middleware) AdminOnly(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		isAdmin, err := services.IsAdmin(c.Request(), m.authSessionStore)
+		isAdmin, err := m.authSvc.IsAdmin(c.Request())
 		if err != nil {
 			return c.Redirect(http.StatusPermanentRedirect, "/500")
 		}

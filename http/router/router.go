@@ -152,65 +152,64 @@ func (r *Router) loadDashboardRoutes() {
 	router.POST("/subscribers/:id/send-verification-mail", func(c echo.Context) error {
 		return dashboard.ResendVerificationMail(
 			c,
-			r.ctrlDeps.DB,
-			r.ctrlDeps.TknManager,
-			r.ctrlDeps.QueueClient,
-			r.cfg,
+			r.ctrlDeps.SubscriberModel,
+			r.ctrlDeps.TokenService,
+			r.ctrlDeps.EmailService,
 		)
 	})
 
 	router.GET("/articles", func(c echo.Context) error {
-		return dashboard.ArticlesIndex(c, r.ctrlDeps.DB)
+		return dashboard.ArticlesIndex(c, r.ctrlDeps.ArticleModel)
 	})
 	router.GET("/articles/:slug/edit", func(c echo.Context) error {
-		return dashboard.ArticleEdit(c, r.ctrlDeps.DB, r.ctrlDeps.PostManager)
+		return dashboard.ArticleEdit(c, r.ctrlDeps.ArticleModel, r.ctrlDeps.PostManager)
 	})
 	router.GET("/articles/create", func(c echo.Context) error {
-		return dashboard.ArticleCreate(c, r.ctrlDeps.DB)
+		return dashboard.ArticleCreate(c, r.ctrlDeps.ArticleModel, r.ctrlDeps.TagModel)
 	})
 	router.POST("/articles/store", func(c echo.Context) error {
-		return dashboard.ArticleStore(c, r.ctrlDeps.DB, r.ctrlDeps.Validate)
+		return dashboard.ArticleStore(c, r.ctrlDeps.ArticleModel)
 	})
 	router.PUT("/articles/:id/update", func(c echo.Context) error {
-		return dashboard.ArticleUpdate(c, r.ctrlDeps.DB, r.ctrlDeps.Validate)
+		return dashboard.ArticleUpdate(c, r.ctrlDeps.ArticleModel)
 	})
 	router.POST("/tags/store", func(c echo.Context) error {
-		return dashboard.TagStore(c, r.ctrlDeps.DB)
+		return dashboard.TagStore(c, r.ctrlDeps.TagModel)
 	})
 
 	router.GET("/newsletters", func(c echo.Context) error {
-		return dashboard.NewslettersIndex(c, r.ctrlDeps.DB, r.ctrlDeps.AuthStore)
+		return dashboard.NewslettersIndex(c, r.ctrlDeps.NewsletterModel, r.ctrlDeps.CookieStore)
 	})
 	router.GET("/newsletters/create", func(c echo.Context) error {
-		return dashboard.NewsletterCreate(c, r.ctrlDeps.DB)
+		return dashboard.NewsletterCreate(c, r.ctrlDeps.NewsletterModel, r.ctrlDeps.ArticleModel)
 	})
 	router.POST("/newsletters/store", func(c echo.Context) error {
 		return dashboard.NewsletterStore(
 			c,
-			r.ctrlDeps.DB,
-			r.ctrlDeps.AuthStore,
-			r.ctrlDeps.NewsletterUsecase,
+			r.ctrlDeps.CookieStore,
+			r.ctrlDeps.NewsletterModel,
+			r.ctrlDeps.ArticleModel,
 		)
 	})
 	router.GET("/newsletters/:id/edit", func(c echo.Context) error {
 		return dashboard.NewslettersEdit(
 			c,
-			r.ctrlDeps.DB,
-			r.ctrlDeps.NewsletterUsecase,
-			r.ctrlDeps.AuthStore,
+			r.ctrlDeps.NewsletterModel,
+			r.ctrlDeps.ArticleModel,
+			r.ctrlDeps.CookieStore,
 		)
 	})
 	router.PUT("/newsletters/:id/update", func(c echo.Context) error {
 		return dashboard.NewsletterUpdate(
 			c,
-			r.ctrlDeps.DB,
-			r.ctrlDeps.NewsletterUsecase,
-			r.ctrlDeps.AuthStore,
+			r.ctrlDeps.NewsletterModel,
+			r.ctrlDeps.ArticleModel,
+			r.ctrlDeps.CookieStore,
 		)
 	})
 
 	router.DELETE("/subscribers/:ID", func(c echo.Context) error {
-		return dashboard.DeleteSubscriber(c, r.ctrlDeps.DB)
+		return dashboard.DeleteSubscriber(c, r.ctrlDeps.SubscriberModel)
 	})
 }
 
@@ -218,10 +217,10 @@ func (r *Router) loadAppRoutes() {
 	router := r.router.Group("")
 
 	router.GET("/", func(c echo.Context) error {
-		return app.Index(c, r.ctrlDeps.DB)
+		return app.Index(c, r.ctrlDeps.ArticleModel)
 	})
 	router.GET("", func(c echo.Context) error {
-		return app.Index(c, r.ctrlDeps.DB)
+		return app.Index(c, r.ctrlDeps.ArticleModel)
 	})
 
 	router.GET("/about", func(c echo.Context) error {
@@ -237,22 +236,31 @@ func (r *Router) loadAppRoutes() {
 	})
 
 	router.GET("/posts/:postSlug", func(c echo.Context) error {
-		return app.Article(c, r.ctrlDeps.DB, r.ctrlDeps.PostManager)
+		return app.Article(c, r.ctrlDeps.ArticleModel, r.ctrlDeps.PostManager)
 	})
 
 	router.GET("/modal", func(c echo.Context) error {
 		return app.RenderModal(c)
 	})
 
+	router.GET("/verify-subscriber", func(c echo.Context) error {
+		return app.SubscriberEmailVerification(
+			c,
+			r.ctrlDeps.SubscriberModel,
+			r.ctrlDeps.TokenService,
+		)
+	})
+
 	router.POST("/subscribe", func(c echo.Context) error {
 		return app.SubscriptionEvent(
 			c,
-			r.ctrlDeps.Mail,
-			r.ctrlDeps.QueueClient,
-			r.ctrlDeps.DB,
-			r.ctrlDeps.TknManager,
-			r.cfg,
+			r.ctrlDeps.SubscriberModel,
 		)
+	})
+
+	router.GET("/redirect", func(c echo.Context) error {
+		to := c.QueryParam("to")
+		return controllers.RedirectHx(c.Response(), fmt.Sprintf("/%s", to))
 	})
 }
 
@@ -264,11 +272,9 @@ func (r *Router) loadAuthRoutes() {
 	router.POST("/register", func(c echo.Context) error {
 		return authentication.StoreUser(
 			c,
-			r.ctrlDeps.DB,
-			r.ctrlDeps.Validate,
-			r.cfg,
-			r.ctrlDeps.TknManager,
-			r.ctrlDeps.QueueClient,
+			r.ctrlDeps.UserModel,
+			r.ctrlDeps.TokenService,
+			r.ctrlDeps.EmailService,
 		)
 	})
 
@@ -278,23 +284,16 @@ func (r *Router) loadAuthRoutes() {
 	router.POST("/login", func(c echo.Context) error {
 		return authentication.StoreAuthenticatedSession(
 			c,
-			r.ctrlDeps.DB,
-			r.cfg,
-			r.ctrlDeps.AuthStore,
+			r.ctrlDeps.AuthService,
 		)
-	})
-
-	router.GET("/verify-subscriber", func(c echo.Context) error {
-		return authentication.SubscriberEmailVerification(c, r.ctrlDeps.DB, r.ctrlDeps.TknManager)
 	})
 
 	router.GET("/verify-email", func(c echo.Context) error {
 		return authentication.UserEmailVerification(
 			c,
-			r.ctrlDeps.DB,
-			r.ctrlDeps.TknManager,
-			r.cfg,
-			r.ctrlDeps.AuthStore,
+			r.ctrlDeps.UserModel,
+			r.ctrlDeps.TokenService,
+			r.ctrlDeps.AuthService,
 		)
 	})
 
@@ -304,10 +303,10 @@ func (r *Router) loadAuthRoutes() {
 	router.POST("/forgot-password", func(c echo.Context) error {
 		return authentication.StorePasswordReset(
 			c,
-			r.ctrlDeps.DB,
-			r.ctrlDeps.TknManager,
+			r.ctrlDeps.UserModel,
+			r.ctrlDeps.EmailService,
+			r.ctrlDeps.TokenService,
 			r.cfg,
-			r.ctrlDeps.QueueClient,
 		)
 	})
 	router.GET("/reset-password", func(c echo.Context) error {
@@ -316,10 +315,9 @@ func (r *Router) loadAuthRoutes() {
 	router.POST("/reset-password", func(c echo.Context) error {
 		return authentication.StoreResetPassword(
 			c,
-			r.ctrlDeps.DB,
-			r.ctrlDeps.TknManager,
-			r.cfg,
-			r.ctrlDeps.Validate,
+			r.ctrlDeps.UserModel,
+			r.ctrlDeps.AuthService,
+			r.ctrlDeps.TokenService,
 		)
 	})
 }

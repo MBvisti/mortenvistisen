@@ -1,6 +1,7 @@
 -- +goose Up
 -- +goose StatementBegin
-SELECT 'up SQL query';
+select 'up SQL query'
+;
 
 -- River migration 004 [up]
 -- The args column never had a NOT NULL constraint or default value at the
@@ -26,7 +27,8 @@ ALTER TABLE river_job ADD CONSTRAINT finalized_or_finalized_at_null CHECK (
 );
 
 DROP TRIGGER river_notify ON river_job;
-DROP FUNCTION river_job_notify;
+drop function river_job_notify
+;
 
 CREATE TABLE river_queue(
   name text PRIMARY KEY NOT NULL,
@@ -41,10 +43,10 @@ ALTER TABLE river_leader
     DROP CONSTRAINT name_length,
     ADD CONSTRAINT name_length CHECK (name = 'default');
 -- +goose StatementEnd
-
 -- +goose Down
 -- +goose StatementBegin
-SELECT 'down SQL query';
+select 'down SQL query'
+;
 
 -- River migration 004 [down]
 ALTER TABLE river_job ALTER COLUMN args DROP NOT NULL;
@@ -54,15 +56,14 @@ ALTER TABLE river_job ALTER COLUMN metadata DROP DEFAULT;
 
 -- It is not possible to safely remove 'pending' from the river_job_state enum,
 -- so leave it in place.
-
 ALTER TABLE river_job DROP CONSTRAINT finalized_or_finalized_at_null;
 ALTER TABLE river_job ADD CONSTRAINT finalized_or_finalized_at_null CHECK (
   (state IN ('cancelled', 'completed', 'discarded') AND finalized_at IS NOT NULL) OR finalized_at IS NULL
 );
 
-CREATE OR REPLACE FUNCTION river_job_notify()
-  RETURNS TRIGGER
-  AS $$
+create or replace function river_job_notify()
+returns trigger
+as $$
 DECLARE
   payload json;
 BEGIN
@@ -76,7 +77,8 @@ BEGIN
   RETURN NULL;
 END;
 $$
-LANGUAGE plpgsql;
+language plpgsql
+;
 
 CREATE TRIGGER river_notify
   AFTER INSERT ON river_job
@@ -90,3 +92,5 @@ ALTER TABLE river_leader
     DROP CONSTRAINT name_length,
     ADD CONSTRAINT name_length CHECK (char_length(name) > 0 AND char_length(name) < 128);
 -- +goose StatementEnd
+
+

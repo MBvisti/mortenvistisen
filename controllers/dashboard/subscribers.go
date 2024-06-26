@@ -1,31 +1,24 @@
 package dashboard
 
 import (
-	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/MBvisti/mortenvistisen/controllers"
 	"github.com/MBvisti/mortenvistisen/models"
-	"github.com/MBvisti/mortenvistisen/pkg/config"
-	"github.com/MBvisti/mortenvistisen/pkg/mail/templates"
-	"github.com/MBvisti/mortenvistisen/pkg/queue"
-	"github.com/MBvisti/mortenvistisen/pkg/tokens"
-	"github.com/MBvisti/mortenvistisen/repository/database"
+	"github.com/MBvisti/mortenvistisen/repository/psql/database"
+	"github.com/MBvisti/mortenvistisen/services"
 	"github.com/MBvisti/mortenvistisen/views"
 	"github.com/MBvisti/mortenvistisen/views/components"
 	"github.com/MBvisti/mortenvistisen/views/dashboard"
 	"github.com/google/uuid"
 	"github.com/gorilla/csrf"
-	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
-	"github.com/riverqueue/river"
 )
 
 func SubscribersIndex(
 	ctx echo.Context,
 	db database.Queries,
-	subscriberModel models.Subscriber,
+	subscriberSvc models.SubscriberService,
 ) error {
 	page := ctx.QueryParam("page")
 	pageLimit := 7
@@ -35,25 +28,22 @@ func SubscribersIndex(
 		return err
 	}
 
-	subscribers, err := subscriberModel.List(
-		ctx.Request().Context(),
-		models.WithPagination(int32(pageLimit), int32(offset)),
-	)
+	subscribers, err := subscriberSvc.List(ctx.Request().Context(), int32(offset), int32(pageLimit))
 	if err != nil {
 		return err
 	}
 
-	count, err := subscriberModel.Count(ctx.Request().Context())
+	count, err := subscriberSvc.Count(ctx.Request().Context())
 	if err != nil {
 		return err
 	}
 
-	monthlySubscriberCount, err := subscriberModel.NewForCurrentMonth(ctx.Request().Context())
+	monthlySubscriberCount, err := subscriberSvc.NewForCurrentMonth(ctx.Request().Context())
 	if err != nil {
 		return err
 	}
 
-	unverifiedSubCount, err := subscriberModel.UnverifiedCount(ctx.Request().Context())
+	unverifiedSubCount, err := subscriberSvc.UnverifiedCount(ctx.Request().Context())
 	if err != nil {
 		return err
 	}
@@ -74,16 +64,15 @@ func SubscribersIndex(
 		TotalPages:  controllers.CalculateNumberOfPages(int(count), 7),
 	}
 
-	return dashboard.Subscribers(int(count), int(monthlySubscriberCount), int(unverifiedSubCount), viewData, pagination, csrf.Token(ctx.Request())).
+	return dashboard.Subscribers(int(count), int(len(monthlySubscriberCount)), int(unverifiedSubCount), viewData, pagination, csrf.Token(ctx.Request())).
 		Render(views.ExtractRenderDeps(ctx))
 }
 
 func ResendVerificationMail(
 	ctx echo.Context,
-	db database.Queries,
-	tknManager tokens.Manager,
-	queueClient *river.Client[pgx.Tx],
-	cfg config.Cfg,
+	subscriberModel models.SubscriberService,
+	tokenService services.TokenSvc,
+	emailService services.Email,
 ) error {
 	subscriberID := ctx.Param("id")
 
@@ -92,79 +81,53 @@ func ResendVerificationMail(
 		return dashboard.FailureMsg("Could not mail send").Render(views.ExtractRenderDeps(ctx))
 	}
 
-	subscriber, err := db.QuerySubscriber(ctx.Request().Context(), subscriberUUID)
+	subscriber, err := subscriberModel.ByID(ctx.Request().Context(), subscriberUUID)
 	if err != nil {
 		return dashboard.FailureMsg("Could not mail send").Render(views.ExtractRenderDeps(ctx))
 	}
 
-	if subscriber.IsVerified.Bool {
+	if subscriber.IsVerified {
 		return dashboard.FailureMsg("Could not mail send").Render(views.ExtractRenderDeps(ctx))
 	}
 
-	if err := db.DeleteSubscriberTokenBySubscriberID(ctx.Request().Context(), subscriberUUID); err != nil {
+	if err := tokenService.DeleteSubscriberToken(ctx.Request().Context(), subscriberUUID); err != nil {
 		return dashboard.FailureMsg("Could not mail send").Render(views.ExtractRenderDeps(ctx))
 	}
 
-	generatedTkn, err := tknManager.GenerateToken()
-	if err != nil {
-		return dashboard.FailureMsg("Could not mail send").Render(views.ExtractRenderDeps(ctx))
-	}
-
-	activationToken := tokens.CreateActivationToken(
-		generatedTkn.PlainTextToken,
-		generatedTkn.HashedToken,
+	activationToken, err := tokenService.CreateSubscriptionToken(
+		ctx.Request().Context(),
+		subscriber.ID,
 	)
-
-	if err := db.InsertSubscriberToken(ctx.Request().Context(), database.InsertSubscriberTokenParams{
-		ID:           uuid.New(),
-		CreatedAt:    database.ConvertToPGTimestamptz(time.Now()),
-		Hash:         activationToken.Hash,
-		ExpiresAt:    database.ConvertToPGTimestamptz(activationToken.GetExpirationTime()),
-		Scope:        activationToken.GetScope(),
-		SubscriberID: subscriberUUID,
-	}); err != nil {
-		return dashboard.FailureMsg("Could not mail send").Render(views.ExtractRenderDeps(ctx))
-	}
-
-	newsletterMail := templates.NewsletterWelcomeMail{
-		ConfirmationLink: fmt.Sprintf(
-			"%s://%s/verify-subscriber?token=%s",
-			cfg.App.AppScheme,
-			cfg.App.AppHost,
-			activationToken.GetPlainText(),
-		),
-		UnsubscribeLink: "",
-	}
-	textVersion, err := newsletterMail.GenerateTextVersion()
 	if err != nil {
-		return dashboard.FailureMsg("Could not mail send").Render(views.ExtractRenderDeps(ctx))
+		return err
 	}
 
-	htmlVersion, err := newsletterMail.GenerateHtmlVersion()
+	unsubToken, err := tokenService.CreateUnsubscribeToken(
+		ctx.Request().Context(),
+		subscriber.ID,
+	)
 	if err != nil {
-		return dashboard.FailureMsg("Could not mail send").Render(views.ExtractRenderDeps(ctx))
+		return err
 	}
 
-	_, err = queueClient.Insert(ctx.Request().Context(), queue.EmailJobArgs{
-		To:          subscriber.Email.String,
-		From:        "noreply@mortenvistisen.com",
-		Subject:     "Thanks for signing up!",
-		TextVersion: textVersion,
-		HtmlVersion: htmlVersion,
-	}, nil)
-	if err != nil {
+	if err := emailService.SendNewSubscriberEmail(
+		ctx.Request().Context(),
+		subscriber.Email,
+		activationToken,
+		unsubToken,
+	); err != nil {
 		return err
 	}
 
 	return dashboard.SuccessMsg("Verification mail send").Render(views.ExtractRenderDeps(ctx))
 }
 
-func DeleteSubscriber(ctx echo.Context, db database.Queries) error {
+func DeleteSubscriber(ctx echo.Context, subscriberModel models.SubscriberService) error {
 	id := ctx.Param("ID")
 
 	parsedID := uuid.MustParse(id)
 
-	if err := db.DeleteSubscriber(ctx.Request().Context(), parsedID); err != nil {
+	if err := subscriberModel.Delete(ctx.Request().Context(), parsedID); err != nil {
 		return err
 	}
 
