@@ -7,106 +7,135 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/MBvisti/mortenvistisen/entity"
+	"github.com/MBvisti/mortenvistisen/domain"
 	"github.com/MBvisti/mortenvistisen/pkg/config"
-	"github.com/MBvisti/mortenvistisen/repository/database"
 	"github.com/google/uuid"
 	"github.com/gorilla/sessions"
 	"github.com/jackc/pgx/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func hashAndPepperPassword(password, passwordPepper string) (string, error) {
-	passwordBytes := []byte(password + passwordPepper)
+var (
+	ErrCouldNotHashPepperPW            = errors.New("could not hash password")
+	ErrCouldNotValidatePassword        = errors.New("could not validate password")
+	ErrCouldNotGetAuthenticatedSession = errors.New("could not get session")
+)
+
+type authStorage interface {
+	QueryUserByEmail(
+		ctx context.Context,
+		email string,
+	) (domain.User, error)
+}
+
+type Auth struct {
+	cfg            config.Cfg
+	passwordPepper string
+	cookieStore    *sessions.CookieStore
+	storage        authStorage
+}
+
+func NewAuth(cfg config.Cfg, storage authStorage) Auth {
+	pwPepper := cfg.Auth.PasswordPepper
+
+	authSessionStore := sessions.NewCookieStore(
+		[]byte(cfg.Auth.SessionKey),
+		[]byte(cfg.Auth.SessionEncryptionKey),
+	)
+	gob.Register(uuid.UUID{})
+
+	return Auth{
+		cfg,
+		pwPepper,
+		authSessionStore,
+		storage,
+	}
+}
+
+func (a Auth) HashAndPepperPassword(password string) (string, error) {
+	passwordBytes := []byte(password + a.passwordPepper)
 	hashedBytes, err := bcrypt.GenerateFromPassword(passwordBytes, bcrypt.DefaultCost)
 	if err != nil {
 		slog.Error("could not hash password", "error", err)
-		return "", err
+		return "", errors.Join(ErrCouldNotHashPepperPW, err)
 	}
 
 	return string(hashedBytes), nil
 }
 
-type validatePasswordPayload struct {
-	hashedpassword string
-	password       string
-}
-
-func validatePassword(data validatePasswordPayload, passwordPepper string) error {
-	if err := bcrypt.CompareHashAndPassword([]byte(data.hashedpassword), []byte(data.password+passwordPepper)); err != nil {
-		slog.Error("could not validate password", "error", err)
-		return err
+func (a Auth) ValidatePassword(password, hashedPassword string) error {
+	if err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password+a.passwordPepper)); err != nil {
+		slog.Error("could not validate password", "error", err, "pass", password)
+		return errors.Join(ErrCouldNotValidatePassword, err)
 	}
 
 	return nil
 }
 
-type AuthenticateUserPayload struct {
-	Email    string
-	Password string
-}
-
-func AuthenticateUser(
+func (a Auth) AuthenticateUser(
 	ctx context.Context,
-	data AuthenticateUserPayload,
-	db userDatabase,
-	passwordPepper string,
-) (entity.User, error) {
-	user, err := db.QueryUserByMail(ctx, data.Email)
+	req *http.Request,
+	res http.ResponseWriter,
+	remember bool,
+	mail string,
+	password string,
+) error {
+	user, err := a.storage.QueryUserByEmail(ctx, mail)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return entity.User{}, ErrUserNotExist
+			return errors.Join(ErrUserNotExist, err)
 		}
 
-		slog.Error("could not query user by mail", "error", err)
-		return entity.User{}, err
+		return err
 	}
 
-	if verifiedAt := user.MailVerifiedAt; !verifiedAt.Valid {
-		return entity.User{}, ErrEmailNotValidated
+	if user.MailVerifiedAt.IsZero() {
+		return ErrEmailNotValidated
 	}
 
-	if err := validatePassword(validatePasswordPayload{
-		hashedpassword: user.Password,
-		password:       data.Password,
-	}, passwordPepper); err != nil {
-		return entity.User{}, ErrPasswordNotMatch
+	if err := a.ValidatePassword(password, user.Password); err != nil {
+		return err
 	}
 
-	return entity.User{
-		ID:        user.ID,
-		CreatedAt: database.ConvertFromPGTimestamptzToTime(user.CreatedAt),
-		UpdatedAt: database.ConvertFromPGTimestamptzToTime(user.UpdatedAt),
-		Name:      user.Name,
-		Mail:      user.Mail,
-	}, nil
+	return a.CreateAuthenticatedSession(req, res, user.ID, remember)
 }
 
-func CreateAuthenticatedSession(
-	session sessions.Session,
+func (a Auth) CreateAuthenticatedSession(
+	req *http.Request,
+	res http.ResponseWriter,
 	userID uuid.UUID,
-	cfg config.Cfg,
-) *sessions.Session {
-	gob.Register(uuid.UUID{})
+	remember bool,
+) error {
+	session, err := a.cookieStore.Get(req, "ua")
+	if err != nil {
+		return errors.Join(ErrCouldNotGetAuthenticatedSession, err)
+	}
 
 	session.Options.HttpOnly = true
-	session.Options.Domain = cfg.App.AppHost
+	session.Options.Domain = a.cfg.App.AppHost
 	session.Options.Secure = true
-	session.Options.MaxAge = 86400
+	if remember {
+		session.Options.MaxAge = 604800 // auth sess valid 1 week
+	} else {
+		session.Options.MaxAge = 86400 // auth sess valid 1 day
+	}
 
 	session.Values["user_id"] = userID
 	session.Values["authenticated"] = true
-	session.Values["is_admin"] = false
+	if userID.String() == "d7b5e3eb-a799-4f7e-8139-905c20e8c8e9" {
+		session.Values["is_admin"] = true
+	} else {
+		session.Values["is_admin"] = false
+	}
 
-	return &session
+	return session.Save(req, res)
 }
 
-func IsAuthenticated(r *http.Request, authStore *sessions.CookieStore) (bool, uuid.UUID, error) {
-	gob.Register(uuid.UUID{})
-	session, err := authStore.Get(r, "ua")
+func (a Auth) IsAuthenticated(r *http.Request) (bool, uuid.UUID, error) {
+	session, err := a.cookieStore.Get(r, "ua")
 	if err != nil {
 		slog.Error("could not get session", "error", err)
-		return false, uuid.UUID{}, err
+		return false, uuid.UUID{}, errors.Join(ErrCouldNotGetAuthenticatedSession, err)
 	}
 
 	if session.Values["authenticated"] == nil {
@@ -116,12 +145,11 @@ func IsAuthenticated(r *http.Request, authStore *sessions.CookieStore) (bool, uu
 	return session.Values["authenticated"].(bool), session.Values["user_id"].(uuid.UUID), nil
 }
 
-func IsAdmin(r *http.Request, authStore *sessions.CookieStore) (bool, error) {
-	gob.Register(uuid.UUID{})
-	session, err := authStore.Get(r, "ua")
+func (a Auth) IsAdmin(r *http.Request) (bool, error) {
+	session, err := a.cookieStore.Get(r, "ua")
 	if err != nil {
 		slog.Error("could not get session", "error", err)
-		return false, err
+		return false, errors.Join(ErrCouldNotGetAuthenticatedSession, err)
 	}
 
 	return session.Values["is_admin"].(bool), nil

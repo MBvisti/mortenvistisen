@@ -1,7 +1,7 @@
 package components
 
 import (
-	"github.com/MBvisti/mortenvistisen/server/middleware"
+	"github.com/MBvisti/mortenvistisen/http/middleware"
 )
 
 func extractAuthStatus(ctx context.Context) bool {
@@ -13,24 +13,28 @@ func extractAuthStatus(ctx context.Context) bool {
 }
 
 templ Nav() {
-	<nav class="w-full px-4 flex justify-between md:px-0 md:w-2/3 mt-4 mx-auto navbar md:grid md:grid-cols-12 bg-base-100">
-		<a href="/" class="text-white col-start-3 col-end-4 text-xl px-0">MBV</a>
-		<div class="text-white col-start-10 col-end-11">
-			<ul class="menu menu-horizontal px-1">
-				<li>
-					<details>
-						<summary>
-							Menu
-						</summary>
-						<ul class="z-50 p-2 bg-base-200 rounded">
-							<li><a href="/">Home</a></li>
-							<li><a href="/newsletter">Newsletter</a></li>
-							<li><a href="/projects">Projects</a></li>
-							<li><a href="/about">About</a></li>
-						</ul>
-					</details>
-				</li>
-			</ul>
-		</div>
-	</nav>
+	<div class="container bg-base-100">
+		<nav class="navbar px-0">
+			<div class="flex-1 flex items-center">
+				<a href="/" class="text-white sm:text-xl px-0">MBV</a>
+			</div>
+			<div class="flex-none text-white">
+				<ul class="menu menu-horizontal px-1">
+					<li>
+						<details>
+							<summary>
+								Menu
+							</summary>
+							<ul class="right-0.5 z-50 p-2 bg-base-200 rounded">
+								<li><a href="/">Home</a></li>
+								<li><a href="/newsletter">Newsletter</a></li>
+								<li><a href="/projects">Projects</a></li>
+								<li><a href="/about">About</a></li>
+							</ul>
+						</details>
+					</li>
+				</ul>
+			</div>
+		</nav>
+	</div>
 }

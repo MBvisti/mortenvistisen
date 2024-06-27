@@ -1,0 +1,247 @@
+package dashboard
+
+import (
+	"github.com/MBvisti/mortenvistisen/views/internal/layouts"
+	"github.com/MBvisti/mortenvistisen/views/emails"
+	"strconv"
+	"fmt"
+	"github.com/MBvisti/mortenvistisen/domain"
+	"github.com/google/uuid"
+	"github.com/MBvisti/mortenvistisen/views/components"
+)
+
+templ NewsletterForm(
+	title,
+	edition string,
+	selectedArticleID uuid.UUID,
+	articles []domain.Article,
+	errors map[string]components.InputError,
+	action string,
+	endpoint string,
+) {
+	<div
+		id="target"
+		class="row mb-2 bg-dark-subtle rounded py-2"
+	>
+		<div
+			class="col-5"
+		>
+			@components.InputElement(components.InputElementData{
+				Value:     title,
+				Err:       errors["title"],
+				Name:      "title",
+				ID:        "newsletter-title",
+				Title:     "Title",
+				HxTrigger: "input change delay:500ms",
+				HxAction:  fmt.Sprintf("/dashboard/%s?preview=true", endpoint),
+				HxMethod:  action,
+				HxTarget:  "#preview-target",
+				HxSwap:    "outerHTML",
+			})
+		</div>
+		<div
+			class="col-5"
+		>
+			<label
+				class="form-label text-light-emphasis"
+			>
+				Article Link
+			</label>
+			<select name="article-id" required class="form-select" aria-label="Default select example">
+				<option value=""></option>
+				for _, article := range articles {
+					if article.ID == selectedArticleID {
+						<option selected value={ article.ID.String() }>{ article.Title }</option>
+					} else {
+						<option value={ article.ID.String() }>{ article.Title }</option>
+					}
+				}
+			</select>
+		</div>
+		<div
+			class="col-2"
+		>
+			@components.InputElement(components.InputElementData{
+				Value: edition,
+				Name:  "edition",
+				ID:    "newsletter-edition",
+				Title: "Edition",
+			})
+		</div>
+	</div>
+}
+
+templ NewsletterPreview(
+	articles []domain.Article,
+	newsletterMailPreview emails.NewsletterMail,
+	selectedArticleID uuid.UUID,
+	errors map[string]components.InputError,
+	tkn string,
+	action string,
+	endpoint string,
+) {
+	<div
+		id="preview-target"
+		class="row"
+		hx-boost="true"
+		x-data="{
+				isLoading: false,
+				shouldRelease: false, 
+				changeLoading () {
+						this.isLoading = !this.isLoading
+				},
+				changeStatus() {
+						this.shouldRelease = !this.shouldRelease
+				  },
+				}"
+	>
+		<form
+			x-on:submit="changeLoading"
+			class="col-12"
+			hx-target="#preview-target"
+			hx-swap="outerHTML"
+			if action == "post" {
+				hx-post={ fmt.Sprintf("/dashboard/%s", endpoint) }
+			}
+			if action == "put" {
+				hx-put={ fmt.Sprintf("/dashboard/%s", endpoint) }
+			}
+		>
+			@NewsletterForm(
+				newsletterMailPreview.Title,
+				newsletterMailPreview.Edition,
+				selectedArticleID,
+				articles,
+				errors,
+				action,
+				endpoint,
+			)
+			<div class="row bg-dark-subtle rounded p-2 py-4">
+				<div style="height: 34rem" class="col-8 mh-100 overflow-y-auto">
+					@newsletterMailPreview
+				</div>
+				<div class="col-4 d-flex flex-column border-start">
+					<div style="height: 24rem" class="flex-grow-1 mb-4 mh-100 overflow-y-auto">
+						for i, para := range newsletterMailPreview.Paragraphs {
+							<div style="height: 3rem;" class="mx-auto w-100 row mb-3 border rounded">
+								<span class="input-group-text col-2" id="basic-addon1">
+									#{ strconv.Itoa(i+1) }
+								</span>
+								<button style="height: 3rem;" class="col-8 border border-bottom btn btn-dark text-white overflow-y-hidden" type="button" data-bs-toggle="collapse" data-bs-target={ fmt.Sprintf("#collapsedParagraph-%v", i) } aria-expanded="false" aria-controls={ fmt.Sprintf("collapsedParagraph-%v", i) }>
+									{ para }
+								</button>
+								<button
+									class="border btn btn-danger col-2"
+									type="button"
+									id="button-addon2"
+									hx-target="#preview-target"
+									if action == "post" {
+										hx-post={ fmt.Sprintf("/dashboard/newsletters/store?preview=true&paragraph-index=%v&action=del", i) }
+									}
+									if action == "pus" {
+										hx-put={ fmt.Sprintf("/dashboard/%s?preview=true&paragraph-index=%v&action=del", endpoint, i) }
+									}
+								>Del</button>
+							</div>
+							<div class="collapse w-100" id={ fmt.Sprintf("collapsedParagraph-%v", i) }>
+								<div class="card card-body  d-flex flex-column">
+									<textarea
+										name="paragraph-element"
+										type="text"
+										class="form-control"
+										rows="4"
+									>
+										{ para }
+									</textarea>
+									<button
+										class="border btn btn-warning"
+										type="button"
+										id="button-addon1"
+										hx-target="#preview-target"
+										if action == "post" {
+											hx-post="/dashboard/newsletters/store?preview=true"
+										}
+										if action == "put" {
+											hx-put={ fmt.Sprintf("/dashboard/%s?preview=true", endpoint) }
+										}
+									>
+										Edit
+									</button>
+								</div>
+							</div>
+						}
+					</div>
+					@components.TextareaElement(components.TextareaData{
+						Name: "new-paragraph-element",
+						Err:  errors["paragraph-elements"],
+					})
+					<button
+						data-loading-aria-busy
+						hx-target="#preview-target"
+						hx-swap="outerHTML"
+						if action == "post" {
+							hx-post={ fmt.Sprintf("/dashboard/%s?preview=true", endpoint) }
+						}
+						if action == "put" {
+							hx-put={ fmt.Sprintf("/dashboard/%s?preview=true", endpoint) }
+						}
+						class="btn btn-outline-secondary"
+						type="button"
+					>
+						Add { endpoint }
+					</button>
+				</div>
+			</div>
+			<div
+				class="row my-4 d-flex justify-content-end py-2"
+			>
+				<div class="col-2 d-flex flex-column">
+					<div class="form-check form-switch">
+						<input name="release-on-create" @change="changeStatus" class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault"/>
+						<label class="form-check-label" :class="{'text-white': shouldRelease}" for="flexSwitchCheckDefault">Ready For Release</label>
+					</div>
+					<button
+						x-show="shouldRelease == false && isLoading == false"
+						type="submit"
+						class="btn btn-primary mt-2"
+					>Save Draft</button>
+					<button
+						x-show="shouldRelease == true && isLoading == false"
+						type="submit"
+						class="btn btn-success mt-2"
+					>Save & Release</button>
+					<button
+						class="btn btn-primary"
+						type="button"
+						x-show="isLoading"
+						disabled
+					>
+						<span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+						<span role="status">Loading...</span>
+					</button>
+				</div>
+			</div>
+		</form>
+		@addCSRFTkn(tkn)
+	</div>
+}
+
+templ CreateNewsletter(articles []domain.Article, selectedArticleID uuid.UUID, newsletterMailPreview emails.NewsletterMail, tkn string) {
+	@layouts.Dashboard() {
+		<div class="mh-full mt-4 mb-2 container mx-auto flex flex-col">
+			<a role="button" class="btn btn-secondary mb-4 hover:font-bold" href="/dashboard/newsletters">Back</a>
+			<div class="row mt-2">
+				<h2 class="fs-4 text-white">New Newsletter</h2>
+				@NewsletterPreview(
+					articles,
+					newsletterMailPreview,
+					selectedArticleID,
+					make(map[string]components.InputError),
+					tkn,
+					"post",
+					"newsletters/store",
+				)
+			</div>
+		</div>
+	}
+}

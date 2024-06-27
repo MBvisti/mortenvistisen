@@ -1,49 +1,48 @@
 package layouts
 
 templ sideBar() {
-	<ul class="pt-12 menu lg:min-w-max bg-slate-800">
-		<li>
-			<a href="/dashboard">Home</a>
-		</li>
-		<li>
-			<a href="/dashboard/subscribers">Subscribers</a>
-			<ul>
-				<li><a href="/dashboard/subscribers/new">New</a></li>
+	<div class="container mb-4">
+		<nav class="navbar justify-content-between">
+			<a class="navbar-brand" href="/dashboard">Admin</a>
+			<ul class="nav justify-content-end">
+				<li class="nav-item">
+					<a class="nav-link active" aria-current="page" href="/dashboard">Home</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="/dashboard/subscribers">Subscribers</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="/dashboard/articles">Articles</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="/dashboard/newsletters">Newsletters</a>
+				</li>
 			</ul>
-		</li>
-		<li>
-			<a href="/dashboard/articles">Articles</a>
-			<ul>
-				<li><a href="/dashboard/articles/new">New</a></li>
-			</ul>
-		</li>
-		<li>
-			<a>Newsletter</a>
-			<ul>
-				<li><a>New</a></li>
-			</ul>
-		</li>
-	</ul>
+		</nav>
+	</div>
 }
 
 templ Dashboard() {
 	<!DOCTYPE html>
-	<html lang="en">
+	<html lang="en" data-bs-theme="dark">
 		<head>
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 			<title>Grafto</title>
-			<link href="/static/css/output.css" rel="stylesheet"/>
+			<link href="/static/css/bootstrap.min.css" rel="stylesheet"/>
 			<link rel="apple-touch-icon" sizes="180x180" href="/static/images/apple-touch-icon.png"/>
 			<link rel="icon" type="image/png" sizes="32x32" href="/static/images/favicon-32x32.png"/>
 			<link rel="icon" type="image/png" sizes="16x16" href="/static/images/favicon-16x16.png"/>
 		</head>
-		<body class="bg-slate-700 w-screen min-h-[100vh] max-w-[100vw] flex">
+		<body hx-ext="loading-states, remove-me" class="bg-dark">
 			@sideBar()
 			{ children... }
 			<script src="/static/js/htmx.min.js"></script>
+			//<script src="/static/js/htmx.loading-states.min.js"></script>
+			<script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/loading-states.js"></script>
+			<script src="/static/js/htmx.remove-me.min.js"></script>
 			<script src="/static/js/alpine.js"></script>
-			<script src="/static/js/preline/preline.js"></script>
+			<script src="/static/js/bootstrap.bundle.min.js"></script>
 		</body>
 	</html>
 }

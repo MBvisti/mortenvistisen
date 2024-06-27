@@ -12,11 +12,12 @@ import (
 	"time"
 
 	"github.com/MBvisti/mortenvistisen/pkg/config"
-	"github.com/MBvisti/mortenvistisen/pkg/mail"
+	"github.com/MBvisti/mortenvistisen/pkg/mail_client"
 	"github.com/MBvisti/mortenvistisen/pkg/queue"
 	"github.com/MBvisti/mortenvistisen/pkg/telemetry"
-	"github.com/MBvisti/mortenvistisen/repository/database"
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/MBvisti/mortenvistisen/repository/psql"
+	"github.com/MBvisti/mortenvistisen/repository/psql/database"
+	"github.com/MBvisti/mortenvistisen/services"
 	"github.com/riverqueue/river"
 )
 
@@ -26,19 +27,14 @@ func main() {
 
 	logger := telemetry.SetupLogger()
 
-	postmark := mail.NewPostmark(cfg.ExternalProviders.PostmarkApiToken)
-	mailClient := mail.NewMail(&postmark)
+	awsSes := mail_client.NewAwsSimpleEmailService()
+	mailClient := services.NewEmailSvc(cfg, &awsSes)
 
-	queueDbPool, err := pgxpool.New(context.Background(), cfg.Db.GetQueueUrlString())
+	conn, err := psql.CreatePooledConnection(context.Background(), cfg.Db.GetUrlString())
 	if err != nil {
 		panic(err)
 	}
 
-	if err := queueDbPool.Ping(ctx); err != nil {
-		panic(err)
-	}
-
-	conn := database.SetupDatabasePool(context.Background(), cfg.Db.GetUrlString())
 	db := database.New(conn)
 
 	jobStarted := make(chan struct{})
@@ -55,7 +51,7 @@ func main() {
 
 	q := map[string]river.QueueConfig{river.QueueDefault: {MaxWorkers: 100}}
 	riverClient := queue.NewClient(
-		queueDbPool,
+		conn,
 		queue.WithQueues(q),
 		queue.WithWorkers(workers),
 		queue.WithLogger(logger),

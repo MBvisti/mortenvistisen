@@ -1,0 +1,26 @@
+Thanks for joining my newsletter!
+
+mortenvistisen ( https://mortenvistisen.com )
+
+******************
+Welcome!
+******************
+
+Thanks for joining my newsletter. I'm super excited to have you here. To receive the monthly deep dives, I first need you to confirm your mail:
+
+Confirm your mail: ( {{ .ConfirmationLink }} )
+
+Thanks,
+Morten (https://mortenvistisen.com)
+
+If you’re having trouble with the button above, copy and paste the URL below into your web browser.
+
+{{ .ConfirmationLink }}
+
+If you didn't signup, or want to stop receiving these emails, click here:
+
+{{ .UnsubscribeLink }}
+
+mbv labs
+
+CPH Denmark

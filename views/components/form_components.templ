@@ -1,0 +1,127 @@
+package components
+
+import (
+	"strings"
+)
+
+type InputError struct {
+	Msg      string
+	OldValue string
+}
+
+type InputElementData struct {
+	ID string
+	// InputType defaults to "text"
+	InputType string
+	Value     string
+	Name      string
+	Err       InputError
+	Title     string
+	Required  bool
+	HxTrigger string
+	// HxAction is the endpoint to send the request to
+	HxAction string
+	// HxMethod accepts: GET, POST, PUT, DELETE
+	HxMethod string
+	HxTarget string
+	HxSwap   string
+}
+
+templ InputElement(data InputElementData) {
+	<label
+		if data.ID != "" {
+			for={ data.ID }
+		}
+		class="form-label text-light-emphasis"
+	>
+		{ data.Title }
+	</label>
+	<div class="input-group">
+		<input
+			if data.Err.Msg != "" {
+				class="form-control text-light is-invalid"
+			} else {
+				class="form-control mb-4 text-light"
+			}
+			if data.ID != "" {
+				id={ data.ID }
+			}
+			if data.Name != "" {
+				name={ data.Name }
+			}
+			if data.Err.Msg != "" && data.Err.OldValue != "" {
+				value={ data.Err.OldValue }
+			} else {
+				value={ data.Value }
+			}
+			if data.InputType != "" {
+				type={ data.InputType }
+			} else {
+				type="text"
+			}
+			if data.Required {
+				required
+			}
+			if data.HxTrigger != "" {
+				hx-trigger={ data.HxTrigger }
+			}
+			if data.HxTarget != "" {
+				hx-target={ data.HxTarget }
+			}
+			if data.HxSwap != "" {
+				hx-swap={ data.HxSwap }
+			}
+			if strings.ToLower(data.HxMethod) == "get" && data.HxAction != "" {
+				hx-get={ data.HxAction }
+			}
+			if strings.ToLower(data.HxMethod) == "post" && data.HxAction != "" {
+				hx-post={ data.HxAction }
+			}
+			if strings.ToLower(data.HxMethod) == "put" && data.HxAction != "" {
+				hx-put={ data.HxAction }
+			}
+			if strings.ToLower(data.HxMethod) == "delete" && data.HxAction != "" {
+				hx-delete={ data.HxAction }
+			}
+		/>
+		if data.Err.Msg != "" {
+			<div class="invalid-feedback">
+				{ data.Err.Msg }
+			</div>
+		}
+	</div>
+}
+
+type TextareaData struct {
+	// ID string
+	// InputType defaults to "text"
+	// InputType string
+	// Value     string
+	Name string
+	Err  InputError
+	// Title     string
+	// Required  bool
+	// HxTrigger string
+	// HxAction is the endpoint to send the request to
+	// HxAction string
+	// HxMethod accepts: GET, POST, PUT, DELETE
+	// HxMethod string
+	// HxTarget string
+	// HxSwap   string
+}
+
+templ TextareaElement(data TextareaData) {
+	<textarea
+		name={ data.Name }
+		if data.Err.Msg != "" {
+			class="form-control is-invalid"
+		} else {
+			class="form-control mb-4"
+		}
+	></textarea>
+	if data.Err.Msg != "" {
+		<div class="invalid-feedback mb-4">
+			{ data.Err.Msg }
+		</div>
+	}
+}

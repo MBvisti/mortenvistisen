@@ -1,0 +1,120 @@
+package dashboard
+
+import (
+	"github.com/MBvisti/mortenvistisen/views/internal/layouts"
+	"github.com/MBvisti/mortenvistisen/views/internal/components"
+	"github.com/MBvisti/mortenvistisen/views/validation"
+)
+
+type Keyword struct {
+	ID       string
+	Value    string
+	Selected bool
+}
+
+type CreateArticleViewData struct {
+	Keywords  []Keyword
+	Filenames []string
+	Props     CreateArticleFormProps
+}
+
+type CreateArticleFormProps struct {
+	Title             validation.InputField
+	HeaderTitle       validation.InputField
+	Excerpt           validation.InputField
+	EstimatedReadTime validation.InputField
+	Filename          validation.InputField
+	ReleaseNow        bool
+}
+
+templ CreateArticleFormContent(
+	props CreateArticleFormProps,
+	keywords []Keyword,
+	filenames []string,
+) {
+	<div
+		id="target"
+		class="flex flex-col justify-between w-full pl-4"
+	>
+		<p class="mb-4 text-xl">New article</p>
+		@components.InputElementWithLabelBuilder().SetLabelValue("Title").WithValidation(props.Title).SetName("title").SetType("text").MakeRequired().SetPlaceholder("SEO Friendly title").Build()
+		@components.InputElementWithLabelBuilder().SetLabelValue("Header Title").WithValidation(props.HeaderTitle).SetName("header-title").SetType("text").SetPlaceholder("SEO Friendly header title").MakeRequired().Build()
+		@components.InputElementWithLabelBuilder().SetLabelValue("Excerpt").WithValidation(props.Excerpt).SetName("excerpt").SetType("text").SetPlaceholder("Short desc of article").MakeRequired().Build()
+		@components.InputElementWithLabelBuilder().SetLabelValue("Estimated Read Time").WithValidation(props.EstimatedReadTime).SetName("estimated-read-time").SetType("number").SetPlaceholder("5 min").MakeRequired().Build()
+		if props.Filename.Invalid {
+			<div role="alert" class="rounded flex items-center mb-2 h-4 alert alert-warning">
+				<svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+				<span>{ props.Filename.InvalidMsg }</span>
+			</div>
+		}
+		<select required name="filename" class="mb-4 select select-bordered w-full max-w-xs">
+			<option disabled selected>Choose file</option>
+			for _, filename := range filenames {
+				<option value={ filename }>{ filename }</option>
+			}
+		</select>
+		<div class="form-control w-52">
+			<label class="cursor-pointer label">
+				<span class="label-text text-lg font-bold">Release now</span>
+				<input name="release" type="checkbox" class="toggle toggle-success toggle-lg"/>
+			</label>
+		</div>
+		<button
+			type="submit"
+			class="btn"
+		>
+			Create Article
+		</button>
+	</div>
+}
+
+templ CreateArticle(data CreateArticleViewData, tkn string) {
+	@layouts.Dashboard() {
+		<div class="mt-6 container mx-auto flex flex-col">
+			<a class="mb-4 hover:font-bold" href="/dashboard/articles">Back</a>
+			<form
+				hx-target="#target"
+				hx-swap="outerHTML"
+				hx-post="/dashboard/articles/store"
+				class="h-full flex flex-col justify-center"
+			>
+				<div class="flex justify-between">
+					<div class="flex flex-col justify-between w-full pr-4">
+						<p class="mb-4 text-xl">Keywords</p>
+						<form class="flex">
+							<label class="mb-4 input input-bordered flex items-center gap-2">
+								New keyword
+								<input id="new-keyword" name="tag-name" type="text" class="grow" placeholder="Keyword"/>
+							</label>
+							<button hx-target="#keywords-grid" hx-swap="innerHTML" hx-post="/dashboard/tags/store" type="submit" class="btn mb-4">Add</button>
+							<div id="keywords-grid" class="max-h-80 overflow-y-scroll p-4 rounded bg-neutral grid grid-cols-2 grid-flow-rows gap-4 form-control">
+								for _, kw := range data.Keywords {
+									<label class="label cursor-pointer">
+										<span class="label-text font-bold">{ kw.Value }</span>
+										<input name="selected-keyword" value={ kw.ID } type="checkbox" class="checkbox"/>
+									</label>
+								}
+							</div>
+						</form>
+					</div>
+					@CreateArticleFormContent(data.Props, data.Keywords, data.Filenames)
+				</div>
+			</form>
+			@addCSRFTkn(tkn)
+		</div>
+	}
+}
+
+templ KeywordsGrid(keywords []Keyword) {
+	for _, kw := range keywords {
+		<label class="label cursor-pointer">
+			<span class="label-text font-bold">{ kw.Value }</span>
+			if kw.Selected {
+				<input value={ kw.ID } type="checkbox" class="checkbox" checked="checked"/>
+			} else {
+				<input value={ kw.ID } type="checkbox" class="checkbox"/>
+			}
+		</label>
+	}
+	<input id="new-keyword" hx-swap-oob="true" name="tag-name" type="text" class="grow" placeholder="Keyword"/>
+}

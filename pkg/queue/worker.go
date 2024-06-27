@@ -1,14 +1,14 @@
 package queue
 
 import (
-	"github.com/MBvisti/mortenvistisen/pkg/mail"
-	"github.com/MBvisti/mortenvistisen/repository/database"
+	"github.com/MBvisti/mortenvistisen/repository/psql/database"
+	"github.com/MBvisti/mortenvistisen/services"
 	"github.com/riverqueue/river"
 )
 
 type WorkerDependencies struct {
 	Db         *database.Queries
-	MailClient mail.Mail
+	MailClient services.Email
 }
 
 func SetupWorkers(deps WorkerDependencies) (*river.Workers, error) {

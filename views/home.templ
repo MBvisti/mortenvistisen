@@ -17,17 +17,16 @@ type Post struct {
 // HomePage renders the page at '/'
 templ HomePage(posts []Post) {
 	@layouts.Base(Head{}.Default().Build()) {
-		<div
-			class="flex flex-col md:grid md:grid-flow-col md:grid-rows-[300px_100px_1fr] md:grid-cols-12 
-			w-full px-4 md:px-16 md:w-2/3 mt-4 mx-auto hero"
-		>
-			<div class="flex flex-col hero-content text-center pb-0 col-start-3 col-end-11 row-start-1 row-end-2">
-				<h1 class="text-5xl font-bold mb-2 text-white">Hi, I'm Morten</h1>
-				<p class="text-xl text-gray-300">I write about technology and indiehacking; mainly focused around Go and full-stack development.</p>
+		<div class="container mt-4 md:mt-8 lg:mt-24">
+			<div class="row hero mx-auto">
+				<div class="flex flex-col hero-content text-center col md:col-8 lg:col-6 mx-auto">
+					<h1 class="text-4xl font-bold mb-2 text-white">Hi, I'm Morten</h1>
+					<p class="text-xl text-gray-300">A software engineer from Denmark. I write about technology and indiehacking; mainly focused around Go, Rust and Machine Learning.</p>
+				</div>
 			</div>
-			<div class="h-full w-full mb-10 row-start-2 row-end-3 col-start-3 col-end-11 flex flex-col justify-center">
-				<div class="text-white divider divider-accent font-bold">Socials</div>
-				<div class="flex flex-col w-full">
+			<div class="md:col-8 lg:col-6 row mx-auto my-4 md:my-8">
+				<div class="col-12 text-white divider divider-accent font-bold">Socials</div>
+				<div class="flex flex-col col-12">
 					<div class="flex h-10 justify-around text-xs items-center md:px-20">
 						<a href="https://twitter.com/mbvisti">
 							<span
@@ -55,12 +54,12 @@ templ HomePage(posts []Post) {
 					</div>
 				</div>
 			</div>
-			<div class="h-full w-full row-start-3 row-end-4 col-start-4 col-end-10 flex flex-col justify-center">
-				<h2 class="block text-2xl font-bold text-white mb-5 xl:my-8">Latest posts</h2>
-				<div class="w-full">
+			<div class="md:col-8 lg:col-6 row mx-auto mt-4 md:mt-10">
+				<h2 class="col block text-2xl font-bold text-white mb-5 xl:my-8">Latest posts</h2>
+				<div class="col">
 					for _, post := range posts {
-						<a href={ templ.URL(post.Slug) }>
-							<div class="mb-10 w-full px-8 py-4 rounded-lg shadow-md bg-base-300">
+						<a class="row mx-auto shadow" href={ templ.URL(post.Slug) }>
+							<div class="mb-10 col px-8 py-4 rounded-lg shadow-md bg-base-300  overflow-x-auto">
 								<div class="flex items-center justify-between">
 									<span class="text-sm font-light text-gray-400">
 										{ fmt.Sprintf("%s %v, %v", carbon.Parse(post.ReleaseDate).ToShortMonthString(), carbon.Parse(post.ReleaseDate).DayOfMonth(), carbon.Parse(post.ReleaseDate).Year()) }

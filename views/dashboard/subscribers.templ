@@ -1,12 +1,22 @@
 package dashboard
 
-import "github.com/MBvisti/mortenvistisen/views/internal/layouts"
+import (
+	"github.com/MBvisti/mortenvistisen/views/internal/layouts"
+
+	"github.com/MBvisti/mortenvistisen/views/components"
+	"fmt"
+	"strconv"
+
+	"time"
+	"github.com/golang-module/carbon/v2"
+)
 
 type SubscriberViewData struct {
 	Email        string
 	ID           string
 	Verified     bool
 	SubscribedAt string
+	Refererer    string
 }
 
 script addCSRFTkn(csrfToken string) {
@@ -15,45 +25,113 @@ script addCSRFTkn(csrfToken string) {
 	})
 }
 
-templ Subscribers(data []SubscriberViewData, tkn string) {
+//func returnNewSubsForCurrentMonth(data []SubscriberViewData) string {
+//	t := carbon.Now()
+//	count := 0
+//	for _, d := range data {
+//		if carbon.Parse(d.SubscribedAt).Month() == t.Month() {
+//			count++
+//		}
+//	}
+//
+//	return strconv.Itoa(count)
+//}
+//
+//func returnSubscribersUnverifiedCount(data []SubscriberViewData) string {
+//	count := 0
+//	for _, d := range data {
+//		if !d.Verified {
+//			count++
+//		}
+//	}
+//
+//	return strconv.Itoa(count)
+//}
+templ Subscribers(
+	totalSubsCount int,
+	newSubsCurrMonth int,
+	unverifiedSubs int,
+	data []SubscriberViewData,
+	paginationProps components.PaginationProps,
+	tkn string,
+) {
 	@layouts.Dashboard() {
-		<div class="p-12 w-full flex flex-col">
-			<div class="w-1/2 overflow-x-hidden mx-auto">
-				<h2 class="mb-4">Subscribers</h2>
-				<table class="table bg-slate-80 bg-slate-800">
-					<!-- head -->
-					<thead>
-						<tr>
-							<th></th>
-							<th>Email</th>
-							<th>Status</th>
-							<th>Subscribed</th>
-						</tr>
-					</thead>
-					<tbody>
-						for _, sub := range data {
-							<tr>
-								<td class="py-3 ps-4">
-									<div class="flex items-center h-5">
-										<input id="hs-table-checkbox-1" type="checkbox" class="border-gray-200 rounded text-blue-600 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:checked:bg-blue-500 dark:checked:border-blue-500 dark:focus:ring-offset-gray-800" value={ sub.ID }/>
-										<label for="hs-table-checkbox-1" class="sr-only">Checkbox</label>
-									</div>
-								</td>
-								<td class="py-4 whitespace-nowrap text-sm text-white">{ sub.Email }</td>
-								<td class="py-4 whitespace-nowrap text-sm text-white">
-									if sub.Verified {
-										<span class="text-green-500">Verified</span>
-									} else {
-										<span class="text-red-500">Not Verified</span>
-									}
-								</td>
-								<td class="py-4 whitespace-nowrap text-sm text-white">{ sub.SubscribedAt }</td>
-							</tr>
-						}
-					</tbody>
-				</table>
+		<div class="container">
+			<section class="border py-3 bg-body-secondary rounded-2">
+				<div class="row justify-content-center text-center">
+					<div class="col-md-3">
+						<h2 class="">{ strconv.Itoa(totalSubsCount) }</h2>
+						<p class="fs-5 mt-3 text-secondary-emphasis">Total Subscribers</p>
+					</div>
+					<div class="col-md-3">
+						<h2 class="">{ strconv.Itoa(newSubsCurrMonth) }</h2>
+						<p class="fs-5 mt-3 text-secondary-emphasis">New subscribers { time.Now().Month().String() }</p>
+					</div>
+					<div class="col-md-3">
+						<h2 class="">{ strconv.Itoa(unverifiedSubs) }</h2>
+						<p class="fs-5 mt-3 text-secondary-emphasis">Unverified Subscribers</p>
+					</div>
+				</div>
+			</section>
+			<div class="mt-4 w-full flex justify-between">
+				<h2 class="mb-4 mt-8">Subscribers</h2>
 			</div>
+			<div class="row">
+				<div class="col">
+					<table class="rounded-2 table table-dark table-hover table-bordered">
+						<!-- head -->
+						<thead>
+							<tr>
+								<th>Send Verification mail</th>
+								<th>Email</th>
+								<th>Subscribed on</th>
+								<th>Status</th>
+								<th>Subscribed</th>
+							</tr>
+						</thead>
+						<tbody>
+							for _, sub := range data {
+								<tr class="align-middle">
+									<th scope="row">
+										<div>
+											if sub.Verified {
+												<button class="btn btn-success btn-sm" disabled>Send</button>
+											} else {
+												<button hx-target="#toast-wrapper" hx-swap="innerHTML" hx-post={ fmt.Sprintf("/dashboard/subscribers/%v/send-verification-mail", sub.ID) } class="btn btn-success btn-sm">Send</button>
+											}
+										</div>
+									</th>
+									<td>{ sub.Email }</td>
+									<td>{ sub.Refererer }</td>
+									<td>
+										if sub.Verified {
+											<span class="text-success">Verified</span>
+										} else {
+											<span class="text-danger">Not Verified</span>
+										}
+									</td>
+									<td>{ carbon.Parse(sub.SubscribedAt).ToDateString() }</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+				<div id="toast-wrapper" class="toast toast-end toast-end"></div>
+			</div>
+			@components.Pagination(paginationProps)
 			@addCSRFTkn(tkn)
 		</div>
 	}
+}
+
+templ SuccessMsg(msg string) {
+	<div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)" class="alert alert-success">
+		<span>{ msg }</span>
+	</div>
+}
+
+templ FailureMsg(msg string) {
+	<div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 3000)" class="alert alert-error">
+		<span>{ msg }</span>
+	</div>
 }
