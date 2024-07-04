@@ -3,7 +3,7 @@ Prompted by client work where I had to consolidate their infrastructure on AWS I
 
 This is a rather naive approach that doesn't utilize a lot of Pulumi's strengths, like allowing us to use design patterns, when building out infrastructure. But should, hopefully, illustrate the benefits of having your infrastructure as code in code you actually read and write everyday.
 
-## Code
+## Wall Of Code
 
 ```go
 package main
@@ -631,9 +631,11 @@ func main() {
 
 An obvious improvement to the above would be to enable HTTPS; if you check the load balancer's security group you can see that we allow ingress traffic on port 80. This is the only entrypoint since our Fargate tasks are all in private networks, so adding a certicate would limiting it to port 443 could go a long way.
 
-You'll probably also have noticed multiple opportunities for re-using code, through setup functions or, my personal favorite in this case, builders. Builders can simply the code a lot, especially if the amount of tasks you've in your ecs service increase. In a future article we'll improve upon this so we can easily expand upon our intrastructure.
+Take a look at the calculations of the cidr ranges. If we add too many availability zones this will fail which is something to handle as well. Could be a simple check on how many AZs is requsted and limited it to a certain level, but should still be fixed.
 
 It would also be beneficial to store the environmental variables somewhere like AWS's parameter store, and not directly in the code.
+
+You'll probably also have noticed multiple opportunities for re-using code, through setup functions or, my personal favorite in this case, builders. Builders can simply the code a lot, especially if the amount of tasks you've in your ecs service increase. In a future article we'll improve upon this so we can easily expand upon our intrastructure.
 
 An interesting comparison would be to do the same for Terraform and see how much they differ, and if the effort in making the infrastructure code resuable with different design patterns make sense in the end.
 
