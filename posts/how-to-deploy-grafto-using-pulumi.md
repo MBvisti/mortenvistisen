@@ -1,63 +1,89 @@
-Last year I finally overcame my (unfounded) disstate of PHP and tried out Laravel; the productivity of Laravel was an eye opener especially after being used to having to write or setup most things from scratch, when developing with Go. But, I love writing Go so I wanted to create something similar with purely in Go which resulted in [Grafto](https://github.com/mbv-labs/grafto). It's still, at the time of writing this, a work in progress but has much of what you need. Authentication, emails, background jobs etc.
+My first interaction with infrastructure as code tools came when I was working for a german start-up, which were heavily invested in Terraform. To this day, I'm pretty the vast majority of the team didn't know the ins and outs of the infrastructure setup. Would this have been different if .
 
-For one of my clients, I was tasked with consolidating their infrastructure under AWS as they currently use a multiple of cloud providers. IaC tools have long been a thing in the industry with Terraform (in my experience, at least) being the default choice. I often felt that I had to relearn HCL everytime I had to touch infrastructure, which created friction. I wrote a bit about it here [Pulumi vs Terraform](/posts/pulumi-vs-terraform). Since Grafto is focused around Go, and Pulumi has a great SDK for provisioning infrastructure in Go, I wanted to show how you could go about hosting Grafto using Pulumi and AWS.
+<!--Last year I overcame my (unfounded) disstate of PHP and tried out Laravel; the productivity of Laravel was an eye opener especially after being used to having to write or setup most things from scratch, when developing with Go. But, I love writing Go so I wanted to create something similar with purely in Go which resulted in [Grafto](https://github.com/mbv-labs/grafto). It's still, at the time of writing this, a work in progress but has much of what you need. Authentication, emails, background jobs etc.-->
 
-Since Grafto is containerzed, utilizing services such as ECS and Fargate becomes a breeze. Let's go over how you can setup a production ready infrastructure for Grafto using Pulumi.
+<!--For one of my clients, I was tasked with consolidating their infrastructure under AWS as they currently use a multiple of cloud providers. IaC tools have long been a thing in the industry with Terraform (in my experience, at least) being the default choice. I often felt that I had to relearn HCL everytime I had to touch infrastructure, which created friction. I wrote a bit about it here [Pulumi vs Terraform](/posts/pulumi-vs-terraform). Since Grafto is focused around Go, and Pulumi has a great SDK for provisioning infrastructure in Go, I wanted to show how you could go about hosting Grafto using Pulumi and AWS.-->
+
+We're going to be using my starter template project, [Grafto](https://github.com/mbv-labs/grafto), as a the basis for this tutorial; since it is containerzed, utilizing services such as ECS and Fargate becomes a breeze. Please note, this will be quite code heavy and will not utilize any design patterns (which, imo, is where pulumi really shines. Will be saved for a future article), so I will only show snippets relevant to the concept being explained. You can find the complete code at the end of the article.
+
+Let's go over how you can setup a production ready infrastructure for Grafto using Pulumi.
 
 ## Networking
 
-We'll be creating a somewhat simple network; it should suffice for a long time and follow some best practics. Our application(s) will be running in a private network, running in 2 > availability zones for high availability. We'll not be digging deep into the details of networks, other people have already created great [material](https://www.youtube.com/watch?v=2doSoMN2xvI) on the subject.
+We'll be creating a somewhat simple network; it should suffice for a long time and follow some best practics. Our application will be running in multiple private networks located in 2 > availability zones for high availability. 
 
-We need a few things: a VPC, some subnets to place our resources in, a load balancer to distribute traffic and some gateways. To allow our applications to reach out to the internet, and for the internet to reach our applcations we need an internet gateway and a nat gateway. The nat gateway is what allows our private subnets to communicate through the public ones. It's also the pricier component, so when though it's recommended to have one for each availability zone, we will only be using one.
+An important note here on the choice of network setup, aws's recommends to keep as much as possible in private networks (i.e. not accessible from the public internet), it increases security. This means that the only entry point will be through an internet gateway which we will create later, but, it also means our application cannot reach out to the internet. This is not always feasible since most app use other apps and need to be able to call their APIs. To allow for this, and still only have one-way communication, we need a nat gateway. This will our applications reach out to the internet but not the other way around. It is also, of course, relatively expensive. Do note that it's possible to place your applications in public subnet, allowing them to reach out to the public internet thus removing the need for the nat gateway. With this approach, you'll need to be very strict with your security group settings and only allowing ingress on ports you trust. At the time of writing, an exploit was just found in OpenSSH so having port 22 public accessible is a security issue.
+
+Alright, let's continue.
+
+We need a few things: a VPC, some subnets to place our resources in, a load balancer to distribute traffic and some gateways. Let's start with creating the VPC and corresponding subnets.
+
+A VPC, virtual private cloud, works like a private network where you can fence in resources. AWS automatically create a default one for you but we will create our own so we can control things like CIDR ranges and how many available ip addresses that are in the network. We'll be using "10.0.0.0/16" which gives us a total of 65.536 addresses.
+
+As for subnets, these can be seen as a postal address, which can be used to increase both security and effiency of communications. As with the VPC, subnets also need a CIDR range. Going back to our earlier discussion on security, public and private networks, we can now limit our potential attack surface by limiting the number of addresses in the public subnet and increase the ones in our private.
+
+Notice how we havea `startingSubnetCidrRange` that ends with `/20`. This gives us a potential of 4.096 number of addresses. And, to ensure high availability, we create 2 private and public subnets in each availability zone. We will also be ignoring the above advice about having more addresses in the private subnets than the public.
+
+Utilizing a rather naive function, we loop over the availability zones we want (in this case only two) and create a private and public subnet in each. Notice how we change the starting cidr range, so that we don't have overlapping addresses.
 
 ```go
-var availabilityZones = []string{"us-west-2a", "us-west-2b"}
-```
-
-```go
-vpc, err := ec2.NewVpc(ctx, "grafto-vpc", &ec2.VpcArgs{
-	CidrBlock:          pulumi.String("10.0.0.0/16"),
-	EnableDnsHostnames: pulumi.Bool(true),
-	EnableDnsSupport:   pulumi.Bool(true),
-})
-```
-
-```go
-networkAccessibility := "private"
-if isPublic {
-	networkAccessibility = "public"
-}
-
-name := fmt.Sprintf("backend-%s-subnet-%v", networkAccessibility, number)
-
-subnets := make(map[string][]*ec2.Subnet, len(availabilityZones))
-for i, az := range availabilityZones {
-	var cidrRangePublic string
-	var cidrRangePrivate string
-	if i == 0 {
-		cidrRangePublic = startingSubnetCidrRange
-		cidrRangePrivate = fmt.Sprintf("10.0.%v.0/20", 16)
-	} else {
-		cidrRangePublic = fmt.Sprintf("10.0.%v.0/20", 16*(i+1))
-		cidrRangePrivate = fmt.Sprintf("10.0.%v.0/20", 16*(i+2))
+    // VPC
+	vpc, err := ec2.NewVpc(ctx, "grafto-vpc", &ec2.VpcArgs{
+		CidrBlock:          pulumi.String("10.0.0.0/16"),
+		EnableDnsHostnames: pulumi.Bool(true),
+		EnableDnsSupport:   pulumi.Bool(true),
+	})
+	if err != nil {
+		return err
 	}
 
-	publicSubnet, err := ec2.NewSubnet(ctx, name, &ec2.SubnetArgs{
-		VpcId:            vpc.ID(),
-		CidrBlock:        pulumi.String(cidrRangePublic),
-		AvailabilityZone: pulumi.String(az),
-	})
+	startingSubnetCidrRange := "10.0.0.0/20"
 
-	subnets["public"] = append(subnets["public"], publicSubnet)
-	
-	publicSubnet, err := ec2.NewSubnet(ctx, name, &ec2.SubnetArgs{
-		VpcId:            vpc.ID(),
-		CidrBlock:        pulumi.String(cidrRangePublic),
-		AvailabilityZone: pulumi.String(az),
-	})
+	availabilityZones := []string{"us-east-1a", "us-east-1b"}
 
-	subnets["public"] = append(subnets["public"], publicSubnet)
-}
+	// SUBNETS
+	subnets := make(map[string][]*ec2.Subnet, len(availabilityZones))
+	for i, az := range availabilityZones {
+		var cidrRangePublic string
+		var cidrRangePrivate string
+		if i == 0 {
+			cidrRangePublic = startingSubnetCidrRange
+			cidrRangePrivate = fmt.Sprintf("10.0.%v.0/20", 16)
+		} else {
+			cidrRangePublic = fmt.Sprintf("10.0.%v.0/20", 16*(i+1))
+			cidrRangePrivate = fmt.Sprintf("10.0.%v.0/20", 16*(i+2))
+		}
+
+		publicSubnet, err := ec2.NewSubnet(
+			ctx,
+			fmt.Sprintf("grafto-%s-subnet-%v", "public", i+1),
+			&ec2.SubnetArgs{
+				VpcId:            vpc.ID(),
+				CidrBlock:        pulumi.String(cidrRangePublic),
+				AvailabilityZone: pulumi.String(az),
+			},
+		)
+		if err != nil {
+			return err
+		}
+
+		subnets["public"] = append(subnets["public"], publicSubnet)
+
+		privateSubnet, err := ec2.NewSubnet(
+			ctx,
+			fmt.Sprintf("grafto-%s-subnet-%v", "private", i+1),
+			&ec2.SubnetArgs{
+				VpcId:            vpc.ID(),
+				CidrBlock:        pulumi.String(cidrRangePrivate),
+				AvailabilityZone: pulumi.String(az),
+			},
+		)
+		if err != nil {
+			return err
+		}
+
+		subnets["private"] = append(subnets["private"], privateSubnet)
+	}
 ```
 
 ```go
