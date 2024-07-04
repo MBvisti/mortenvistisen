@@ -2,7 +2,6 @@ package dashboard
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 
 	"github.com/MBvisti/mortenvistisen/controllers"
@@ -41,7 +40,6 @@ func NewslettersIndex(
 
 	totalNewslettersCount, err := newsletterModel.Count(ctx.Request().Context(), false)
 	if err != nil {
-		log.Print("dsadsad")
 		return err
 	}
 
