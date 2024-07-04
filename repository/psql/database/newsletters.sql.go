@@ -16,7 +16,7 @@ import (
 const countNewsletters = `-- name: CountNewsletters :one
 select count(id)
 from newsletters
-where released = coalence($1::bool, null)
+where released = coalesce($1::bool, null)
 `
 
 func (q *Queries) CountNewsletters(ctx context.Context, released pgtype.Bool) (int64, error) {
@@ -156,8 +156,12 @@ select
     posts.released_at as post_released_at,
     posts.read_time as post_read_time
 from newsletters
-join posts on posts.id = newsletter.associated_article_id
-where released = coalesce($1::bool, null)
+join posts on posts.id = newsletters.associated_article_id
+where
+    (
+        newsletters.released = $1::bool
+        or $1::bool is null
+    )
 limit coalesce($3::int, null)
 offset coalesce($2::int, 0)
 `

@@ -22,30 +22,18 @@ func NewslettersIndex(
 	cookieStore controllers.CookieStore,
 ) error {
 	page := ctx.QueryParam("page")
+	pageLimit := 7
 
-	var currentPage int
-	if page == "" {
-		currentPage = 1
-	}
-	if page != "" {
-		cp, err := strconv.Atoi(page)
-		if err != nil {
-			return err
-		}
-
-		currentPage = cp
+	offset, currentPage, err := controllers.GetOffsetAndCurrPage(page, pageLimit)
+	if err != nil {
+		return err
 	}
 
-	offset := 0
-	if currentPage == 2 {
-		offset = 7
-	}
-
-	if currentPage > 2 {
-		offset = 7 * (currentPage - 1)
-	}
-
-	newsletters, err := newsletterModel.List(ctx.Request().Context(), 7, int32(offset))
+	newsletters, err := newsletterModel.List(
+		ctx.Request().Context(),
+		int32(pageLimit),
+		int32(offset),
+	)
 	if err != nil {
 		return err
 	}

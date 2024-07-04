@@ -21,8 +21,12 @@ select
     posts.released_at as post_released_at,
     posts.read_time as post_read_time
 from newsletters
-join posts on posts.id = newsletter.associated_article_id
-where released = coalesce(sqlc.narg('is_released')::bool, null)
+join posts on posts.id = newsletters.associated_article_id
+where
+    (
+        newsletters.released = sqlc.narg('is_released')::bool
+        or sqlc.narg('is_released')::bool is null
+    )
 limit coalesce(sqlc.narg('limit')::int, null)
 offset coalesce(sqlc.narg('offset')::int, 0)
 ;
@@ -68,6 +72,6 @@ returning *;
 -- name: CountNewsletters :one
 select count(id)
 from newsletters
-where released = coalence(sqlc.narg('released')::bool, null)
+where released = coalesce(sqlc.narg('released')::bool, null)
 ;
 
