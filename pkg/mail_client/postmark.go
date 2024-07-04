@@ -31,6 +31,10 @@ func NewPostmark(token string) Postmark {
 	}
 }
 
+func (p *Postmark) GetStatistics(ctx context.Context) error {
+	return nil
+}
+
 var _ services.MailClient = (*Postmark)(nil)
 
 type mailBody struct {

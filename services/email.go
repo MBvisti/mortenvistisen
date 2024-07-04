@@ -19,6 +19,7 @@ type MailPayload struct {
 
 type MailClient interface {
 	SendMail(ctx context.Context, payload MailPayload) error
+	GetStatistics(ctx context.Context) error
 }
 
 type Email struct {
@@ -34,6 +35,10 @@ func NewEmailSvc(
 		cfg,
 		client,
 	}
+}
+
+func (e *Email) SendStats(ctx context.Context) error {
+	return e.client.GetStatistics(ctx)
 }
 
 func (e *Email) SendNewSubscriberEmail(

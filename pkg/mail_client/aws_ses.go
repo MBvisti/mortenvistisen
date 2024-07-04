@@ -2,14 +2,15 @@ package mail_client
 
 import (
 	"context"
-	"fmt"
+	"log"
+	"os"
 
 	"github.com/MBvisti/mortenvistisen/services"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/credentials"
+	"github.com/aws/aws-sdk-go-v2/service/ses"
+	"github.com/aws/aws-sdk-go-v2/service/ses/types"
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/ses"
 )
 
 const (
@@ -22,7 +23,21 @@ const (
 )
 
 type AwsSimpleEmailService struct {
-	client *ses.SES
+	client *ses.Client
+}
+
+func (a *AwsSimpleEmailService) GetStatistics(ctx context.Context) error {
+	input := &ses.GetSendStatisticsInput{}
+	stats, err := a.client.GetSendStatistics(ctx, input)
+	if err != nil {
+		return err
+	}
+
+	for _, dp := range stats.SendDataPoints {
+		log.Println(dp)
+	}
+
+	return nil
 }
 
 // SendMail implements mailClient.
@@ -33,24 +48,23 @@ func (a *AwsSimpleEmailService) SendMail(ctx context.Context, payload services.M
 	}
 	// Assemble the email.
 	input := &ses.SendEmailInput{
-		Destination: &ses.Destination{
-			CcAddresses: []*string{},
-			ToAddresses: []*string{
-				aws.String(payload.To),
+		Destination: &types.Destination{
+			ToAddresses: []string{
+				payload.To,
 			},
 		},
-		Message: &ses.Message{
-			Body: &ses.Body{
-				Html: &ses.Content{
+		Message: &types.Message{
+			Body: &types.Body{
+				Html: &types.Content{
 					Charset: aws.String(charSet),
 					Data:    aws.String(payload.HtmlBody),
 				},
-				Text: &ses.Content{
+				Text: &types.Content{
 					Charset: aws.String(charSet),
 					Data:    aws.String(payload.TextBody),
 				},
 			},
-			Subject: &ses.Content{
+			Subject: &types.Content{
 				Charset: aws.String(charSet),
 				Data:    aws.String(payload.Subject),
 			},
@@ -58,24 +72,24 @@ func (a *AwsSimpleEmailService) SendMail(ctx context.Context, payload services.M
 		Source: aws.String(from),
 	}
 
-	_, err := a.client.SendEmail(input)
+	_, err := a.client.SendEmail(ctx, input)
 	if err != nil {
-		if aerr, ok := err.(awserr.Error); ok {
-			switch aerr.Code() {
-			case ses.ErrCodeMessageRejected:
-				fmt.Println(ses.ErrCodeMessageRejected, aerr.Error())
-			case ses.ErrCodeMailFromDomainNotVerifiedException:
-				fmt.Println(ses.ErrCodeMailFromDomainNotVerifiedException, aerr.Error())
-			case ses.ErrCodeConfigurationSetDoesNotExistException:
-				fmt.Println(ses.ErrCodeConfigurationSetDoesNotExistException, aerr.Error())
-			default:
-				fmt.Println(aerr.Error())
-			}
-		} else {
-			// Print the error, cast err to awserr.Error to get the Code and
-			// Message from an error.
-			fmt.Println(err.Error())
-		}
+		// if aerr, ok := err.(awserr.Error); ok {
+		// 	switch aerr.Code() {
+		// 	case ses.ErrCodeMessageRejected:
+		// 		fmt.Println(ses.ErrCodeMessageRejected, aerr.Error())
+		// 	case ses.ErrCodeMailFromDomainNotVerifiedException:
+		// 		fmt.Println(ses.ErrCodeMailFromDomainNotVerifiedException, aerr.Error())
+		// 	case ses.ErrCodeConfigurationSetDoesNotExistException:
+		// 		fmt.Println(ses.ErrCodeConfigurationSetDoesNotExistException, aerr.Error())
+		// 	default:
+		// 		fmt.Println(aerr.Error())
+		// 	}
+		// } else {
+		// 	// Print the error, cast err to awserr.Error to get the Code and
+		// 	// Message from an error.
+		// 	fmt.Println(err.Error())
+		// }
 
 		return err
 	}
@@ -84,19 +98,38 @@ func (a *AwsSimpleEmailService) SendMail(ctx context.Context, payload services.M
 }
 
 func NewAwsSimpleEmailService() AwsSimpleEmailService {
-	creds := credentials.NewEnvCredentials()
-	conf := &aws.Config{
-		Region:      aws.String("eu-central-1"),
-		Credentials: creds,
-	}
-	sess, err := session.NewSession(conf)
-	if err != nil {
-		panic(err)
+	accessKey := os.Getenv("AWS_ACCESS_KEY_ID")
+	secretKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
+
+	amazonConfiguration, createAmazonConfigurationError := config.LoadDefaultConfig(
+		context.Background(),
+		config.WithRegion("eu-central-1"),
+		config.WithCredentialsProvider(
+			credentials.NewStaticCredentialsProvider(
+				accessKey, secretKey, "",
+			),
+		),
+	)
+
+	if createAmazonConfigurationError != nil {
+		panic(createAmazonConfigurationError)
 	}
 
+	sesClient := ses.NewFromConfig(amazonConfiguration)
+
+	// creds := credentials.NewEnvCredentials()
+	// conf := &aws.Config{
+	// 	Region:      aws.String("eu-central-1"),
+	// 	Credentials: creds,
+	// }
+	// sess, err := session.NewSession(conf)
+	// if err != nil {
+	// 	panic(err)
+	// }
+
 	// Create an SES session.
-	svc := ses.New(sess)
+	// svc := ses.New(sess)
 	return AwsSimpleEmailService{
-		svc,
+		sesClient,
 	}
 }
