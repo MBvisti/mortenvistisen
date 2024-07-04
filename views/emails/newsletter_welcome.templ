@@ -1,10 +1,12 @@
 package emails
 
 import (
+	"bytes"
+	"context"
 	"fmt"
-	"text/template"
-
 	"github.com/vanng822/go-premailer/premailer"
+	"io"
+	"text/template"
 )
 
 const newsletterWelcomeTmplName = "newsletter_welcome"
