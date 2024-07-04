@@ -11,10 +11,12 @@ import "io"
 import "bytes"
 
 import (
+	"bytes"
+	"context"
 	"fmt"
-	"text/template"
-
 	"github.com/vanng822/go-premailer/premailer"
+	"io"
+	"text/template"
 )
 
 const newsletterWelcomeTmplName = "newsletter_welcome"
@@ -95,7 +97,7 @@ func (n NewsletterWelcomeMail) template() templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(n.ConfirmationLink)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/emails/newsletter_welcome.templ`, Line: 550, Col: 38}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/emails/newsletter_welcome.templ`, Line: 552, Col: 38}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {

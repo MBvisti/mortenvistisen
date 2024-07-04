@@ -11,10 +11,12 @@ import "io"
 import "bytes"
 
 import (
+	"bytes"
+	"context"
 	"fmt"
-	"text/template"
-
 	"github.com/vanng822/go-premailer/premailer"
+	"io"
+	"text/template"
 )
 
 const passwordResetTmplName = "password_reset"
@@ -91,7 +93,7 @@ func (n PasswordReset) template() templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(n.ResetPasswordLink)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/emails/password_reset.templ`, Line: 545, Col: 63}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/emails/password_reset.templ`, Line: 547, Col: 63}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {

@@ -11,10 +11,12 @@ import "io"
 import "bytes"
 
 import (
+	"bytes"
+	"context"
 	"fmt"
-	"text/template"
-
 	"github.com/vanng822/go-premailer/premailer"
+	"io"
+	"text/template"
 )
 
 const newsletterTmplName = "newsletter"
@@ -92,7 +94,7 @@ func (n NewsletterMail) template() templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(n.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/emails/newsletter.templ`, Line: 505, Col: 36}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/emails/newsletter.templ`, Line: 507, Col: 36}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -105,7 +107,7 @@ func (n NewsletterMail) template() templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(n.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/emails/newsletter.templ`, Line: 513, Col: 19}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/emails/newsletter.templ`, Line: 515, Col: 19}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -118,7 +120,7 @@ func (n NewsletterMail) template() templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(n.Edition)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/emails/newsletter.templ`, Line: 525, Col: 119}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/emails/newsletter.templ`, Line: 527, Col: 119}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -136,7 +138,7 @@ func (n NewsletterMail) template() templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(paragraph)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/emails/newsletter.templ`, Line: 527, Col: 28}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/emails/newsletter.templ`, Line: 529, Col: 28}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
