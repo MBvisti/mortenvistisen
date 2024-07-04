@@ -168,7 +168,11 @@ func (q *Queries) QuerySubscriberCountByStatus(ctx context.Context, isVerified p
 const querySubscribers = `-- name: QuerySubscribers :many
 select id, created_at, updated_at, email, subscribed_at, referer, is_verified
 from subscribers
-where is_verified = coalesce($1::bool, null)
+where
+    (
+        is_verified = $1::bool
+        or $1::bool is null
+    )
 limit coalesce($3::int, null)
 offset coalesce($2::int, 0)
 `

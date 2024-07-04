@@ -1,7 +1,7 @@
 -- name: QueryPosts :many
-select posts.*
+select *
 from posts
-order by posts.created_at
+order by posts.released_at desc
 limit coalesce(sqlc.narg('limit')::int, null)
 offset coalesce(sqlc.narg('offset')::int, 0)
 ;

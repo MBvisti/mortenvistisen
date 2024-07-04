@@ -15,7 +15,7 @@ import (
 )
 
 func Index(ctx echo.Context, articleModel models.ArticleService) error {
-	data, err := articleModel.List(ctx.Request().Context(), 0, 5)
+	data, err := articleModel.List(ctx.Request().Context(), 0, 50)
 	if err != nil {
 		return err
 	}
