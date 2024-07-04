@@ -17,30 +17,14 @@ import (
 
 func ArticlesIndex(ctx echo.Context, articleModel models.ArticleService) error {
 	page := ctx.QueryParam("page")
+	pageLimit := 7
 
-	var currentPage int
-	if page == "" {
-		currentPage = 1
-	}
-	if page != "" {
-		cp, err := strconv.Atoi(page)
-		if err != nil {
-			return err
-		}
-
-		currentPage = cp
+	offset, currentPage, err := controllers.GetOffsetAndCurrPage(page, pageLimit)
+	if err != nil {
+		return err
 	}
 
-	offset := 0
-	if currentPage == 2 {
-		offset = 7
-	}
-
-	if currentPage > 2 {
-		offset = 7 * (currentPage - 1)
-	}
-
-	articles, err := articleModel.List(ctx.Request().Context(), 7, int32(offset))
+	articles, err := articleModel.List(ctx.Request().Context(), int32(offset), int32(pageLimit))
 	if err != nil {
 		return err
 	}
