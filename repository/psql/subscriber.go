@@ -180,13 +180,13 @@ func (p Postgres) ListSubscribers(
 		Limit:  sql.NullInt32{Int32: options.Limit, Valid: true},
 	}
 
-	for k, v := range filters {
-		if k == "IsVerified" {
-			val, ok := v.(bool)
-			if ok {
-				params.IsVerified = pgtype.Bool{Bool: val, Valid: true}
-			}
-		}
+	for range filters {
+		// if k == "IsVerified" {
+		// 	val, ok := v.(bool)
+		// 	if ok {
+		// 		params.IsVerified = pgtype.Bool{Bool: val, Valid: true}
+		// 	}
+		// }
 	}
 
 	subs, err := p.Queries.QuerySubscribers(ctx, params)

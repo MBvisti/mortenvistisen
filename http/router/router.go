@@ -139,7 +139,7 @@ func (r *Router) LoadInRoutes() {
 }
 
 func (r *Router) loadDashboardRoutes() {
-	router := r.router.Group("/dashboard", r.middleware.AuthOnly)
+	router := r.router.Group("/dashboard")
 
 	router.GET("", func(c echo.Context) error {
 		return dashboard.Index(c)
