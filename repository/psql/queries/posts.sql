@@ -1,5 +1,5 @@
 -- name: QueryPosts :many
-select posts.*
+select *
 from posts
 order by posts.released_at desc
 limit coalesce(sqlc.narg('limit')::int, null)

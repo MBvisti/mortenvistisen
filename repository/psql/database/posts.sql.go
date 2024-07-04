@@ -374,9 +374,8 @@ func (q *Queries) QueryPostBySlug(ctx context.Context, slug string) (Post, error
 }
 
 const queryPosts = `-- name: QueryPosts :many
-select posts.id, posts.created_at, posts.updated_at, posts.title, posts.filename, posts.slug, posts.excerpt, posts.draft, posts.released_at, posts.read_time, posts.header_title
+select id, created_at, updated_at, title, filename, slug, excerpt, draft, released_at, read_time, header_title
 from posts
-order by posts.released_at desc
 limit coalesce($2::int, null)
 offset coalesce($1::int, 0)
 `
@@ -386,6 +385,7 @@ type QueryPostsParams struct {
 	Limit  sql.NullInt32
 }
 
+// order by posts.released_at desc
 func (q *Queries) QueryPosts(ctx context.Context, arg QueryPostsParams) ([]Post, error) {
 	rows, err := q.db.Query(ctx, queryPosts, arg.Offset, arg.Limit)
 	if err != nil {
