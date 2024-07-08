@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/MBvisti/mortenvistisen/controllers"
@@ -62,6 +63,13 @@ func NewRouter(
 				)
 			}
 			return nil
+		},
+	}))
+
+	router.Use(echomw.GzipWithConfig(echomw.GzipConfig{
+		Level: 5,
+		Skipper: func(c echo.Context) bool {
+			return strings.Contains(c.Path(), "metrics")
 		},
 	}))
 	router.Use(

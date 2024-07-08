@@ -37,17 +37,9 @@ FROM scratch as worker
 WORKDIR /
 
 COPY --from=build-go /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-# COPY --from=build-go app app
 COPY --from=build-go worker worker
-# COPY --from=build-go static static 
-# COPY --from=build-go resources/seo resources/seo
 
-# import curl from current repository image
-COPY --from=ghcr.io/tarampampam/curl:8.6.0 /bin/curl /bin/curl
-
-HEALTHCHECK --interval=30s --timeout=3s CMD curl -f http://0.0.0.0:8080/api/v1/health || exit 1
-
-CMD ["app"]
+CMD ["./worker"]
 
 FROM scratch as app
 
