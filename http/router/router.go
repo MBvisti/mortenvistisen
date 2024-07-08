@@ -80,6 +80,9 @@ func NewRouter(
 	router.GET("/robots.txt", func(c echo.Context) error {
 		return c.File("./resources/seo/robots.txt")
 	})
+	router.GET("/4zd8j69sf3ju2hnfxmebr3czub8uu63m.txt", func(c echo.Context) error {
+		return c.File("./resources/seo/index_now.txt")
+	})
 	router.GET("/sitemap.xml", func(c echo.Context) error {
 		return c.File("./resources/seo/sitemap.xml")
 	})
