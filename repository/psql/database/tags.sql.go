@@ -79,7 +79,7 @@ func (q *Queries) QueryAllTags(ctx context.Context) ([]Tag, error) {
 const queryTagsByIDs = `-- name: QueryTagsByIDs :many
 select id, name
 from tags
-where id in ($1::uuid[])
+where id = any($1::uuid[])
 `
 
 func (q *Queries) QueryTagsByIDs(ctx context.Context, tagIds []uuid.UUID) ([]Tag, error) {

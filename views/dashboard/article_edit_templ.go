@@ -211,14 +211,14 @@ func ArticleEditForm(data ArticleEditViewData, succesfullyUpdated bool) templ.Co
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"></div><div class=\"mb-4 col-4\"><label for=\"article-filename\" class=\"form-label\">Filename</label> <input name=\"filename\" id=\"article-filename\" disabled type=\"text\" class=\"form-control\" value=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"></div><div class=\"mb-4 col-4\"><label for=\"article-filename\" class=\"form-label\">Filename</label> <input name=\"filename\" id=\"article-filename\" type=\"text\" class=\"form-control\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(data.Filename)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/article_edit.templ`, Line: 134, Col: 111}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/article_edit.templ`, Line: 134, Col: 102}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {

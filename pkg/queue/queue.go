@@ -179,6 +179,7 @@ func (m *MailErrorHandler) HandlePanic(
 	ctx context.Context,
 	job *rivertype.JobRow,
 	panicVal any,
+	trace string,
 ) *river.ErrorHandlerResult {
 	m.logger.Error("panic handling job", "panic", panicVal, "job_kind", job.Kind)
 

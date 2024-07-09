@@ -20,9 +20,9 @@ require (
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/lmittmann/tint v1.0.4
 	github.com/pkg/errors v0.9.1
-	github.com/riverqueue/river v0.8.0
-	github.com/riverqueue/river/riverdriver/riverpgxv5 v0.8.0
-	github.com/riverqueue/river/rivertype v0.8.0
+	github.com/riverqueue/river v0.9.0
+	github.com/riverqueue/river/riverdriver/riverpgxv5 v0.9.0
+	github.com/riverqueue/river/rivertype v0.9.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/stretchr/testify v1.9.0
 	github.com/vanng822/go-premailer v1.21.0
@@ -30,6 +30,8 @@ require (
 	github.com/yuin/goldmark-highlighting/v2 v2.0.0-20230729083705-37449abec8cc
 	golang.org/x/crypto v0.24.0
 )
+
+require github.com/gosimple/unidecode v1.0.1 // indirect
 
 require (
 	github.com/PuerkitoBio/goquery v1.9.1 // indirect
@@ -44,6 +46,7 @@ require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/gorilla/css v1.0.1 // indirect
 	github.com/gorilla/securecookie v1.1.2 // indirect
+	github.com/gosimple/slug v1.14.0
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
 	github.com/jackc/puddle/v2 v2.2.1 // indirect
@@ -57,7 +60,7 @@ require (
 	github.com/prometheus/client_model v0.6.1 // indirect
 	github.com/prometheus/common v0.53.0 // indirect
 	github.com/prometheus/procfs v0.13.0 // indirect
-	github.com/riverqueue/river/riverdriver v0.8.0 // indirect
+	github.com/riverqueue/river/riverdriver v0.9.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/vanng822/css v1.0.1 // indirect

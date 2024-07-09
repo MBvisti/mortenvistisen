@@ -57,7 +57,7 @@ func CreateArticleFormContent(
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"target\" class=\"flex flex-col justify-between w-full pl-4\"><p class=\"mb-4 text-xl\">New article</p>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"target\" class=\"row mb-4\"><p class=\"mb-4 text-xl\">Article Data</p><div class=\"col-6\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -69,11 +69,19 @@ func CreateArticleFormContent(
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
+		templ_7745c5c3_Err = components.InputElementWithLabelBuilder().SetLabelValue("Estimated Read Time").WithValidation(props.EstimatedReadTime).SetName("estimated-read-time").SetType("number").SetPlaceholder("5 min").MakeRequired().Build().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><div class=\"col-6\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
 		templ_7745c5c3_Err = components.InputElementWithLabelBuilder().SetLabelValue("Excerpt").WithValidation(props.Excerpt).SetName("excerpt").SetType("text").SetPlaceholder("Short desc of article").MakeRequired().Build().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = components.InputElementWithLabelBuilder().SetLabelValue("Estimated Read Time").WithValidation(props.EstimatedReadTime).SetName("estimated-read-time").SetType("number").SetPlaceholder("5 min").MakeRequired().Build().Render(ctx, templ_7745c5c3_Buffer)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -85,7 +93,7 @@ func CreateArticleFormContent(
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(props.Filename.InvalidMsg)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/article_create.templ`, Line: 47, Col: 37}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/article_create.templ`, Line: 51, Col: 37}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
@@ -96,7 +104,7 @@ func CreateArticleFormContent(
 				return templ_7745c5c3_Err
 			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<select required name=\"filename\" class=\"mb-4 select select-bordered w-full max-w-xs\"><option disabled selected>Choose file</option> ")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"col-12\"><select required name=\"filename\" class=\"mb-4 select select-bordered w-100\"><option disabled selected>Choose file</option> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -108,7 +116,7 @@ func CreateArticleFormContent(
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(filename)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/article_create.templ`, Line: 53, Col: 28}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/article_create.templ`, Line: 58, Col: 29}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -121,7 +129,7 @@ func CreateArticleFormContent(
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(filename)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/article_create.templ`, Line: 53, Col: 41}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/article_create.templ`, Line: 58, Col: 42}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -132,7 +140,7 @@ func CreateArticleFormContent(
 				return templ_7745c5c3_Err
 			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</select><div class=\"form-control w-52\"><label class=\"cursor-pointer label\"><span class=\"label-text text-lg font-bold\">Release now</span> <input name=\"release\" type=\"checkbox\" class=\"toggle toggle-success toggle-lg\"></label></div><button type=\"submit\" class=\"btn\">Create Article</button></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</select></div><div class=\"col-12 mb-4 my-auto\"><label class=\"cursor-pointer label\"><span class=\"label-text text-lg font-bold\">Release now</span> <input name=\"release\" type=\"checkbox\" class=\"toggle toggle-success toggle-lg\"></label></div><button type=\"submit\" class=\"btn btn-primary w-100\">Create Article</button></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -170,19 +178,27 @@ func CreateArticle(data CreateArticleViewData, tkn string) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"mt-6 container mx-auto flex flex-col\"><a class=\"mb-4 hover:font-bold\" href=\"/dashboard/articles\">Back</a><form hx-target=\"#target\" hx-swap=\"outerHTML\" hx-post=\"/dashboard/articles/store\" class=\"h-full flex flex-col justify-center\"><div class=\"flex justify-between\"><div class=\"flex flex-col justify-between w-full pr-4\"><p class=\"mb-4 text-xl\">Keywords</p><form class=\"flex\"><label class=\"mb-4 input input-bordered flex items-center gap-2\">New keyword <input id=\"new-keyword\" name=\"tag-name\" type=\"text\" class=\"grow\" placeholder=\"Keyword\"></label> <button hx-target=\"#keywords-grid\" hx-swap=\"innerHTML\" hx-post=\"/dashboard/tags/store\" type=\"submit\" class=\"btn mb-4\">Add</button><div id=\"keywords-grid\" class=\"max-h-80 overflow-y-scroll p-4 rounded bg-neutral grid grid-cols-2 grid-flow-rows gap-4 form-control\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"container\"><div class=\"row mb-4\"><a class=\"hover:font-bold\" href=\"/dashboard/articles\">Back</a></div><form hx-target=\"#target\" hx-swap=\"outerHTML\" hx-post=\"/dashboard/articles/store\" class=\"row\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = CreateArticleFormContent(data.Props, data.Keywords, data.Filenames).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"row mb-4\"><div class=\"flex flex-col justify-between w-full pr-4\"><p class=\"mb-4 text-xl\">Keywords</p><form class=\"flex\"><label class=\"mb-4 input input-bordered flex items-center gap-2\">New keyword <input id=\"new-keyword\" name=\"tag-name\" type=\"text\" class=\"grow\" placeholder=\"Keyword\"></label> <button hx-target=\"#keywords-grid\" hx-swap=\"innerHTML\" hx-post=\"/dashboard/tags/store\" type=\"submit\" class=\"btn mb-4\">Add</button><div id=\"keywords-grid\" class=\"row max-h-80 overflow-y-scroll p-4 rounded bg-neutral\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			for _, kw := range data.Keywords {
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<label class=\"label cursor-pointer\"><span class=\"label-text font-bold\">")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<label class=\"col-3 d-flex flex-column label cursor-pointer\"><span class=\"label-text font-bold\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(kw.Value)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/article_create.templ`, Line: 93, Col: 55}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/article_create.templ`, Line: 102, Col: 55}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -195,7 +211,7 @@ func CreateArticle(data CreateArticleViewData, tkn string) templ.Component {
 				var templ_7745c5c3_Var8 string
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(kw.ID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/article_create.templ`, Line: 94, Col: 54}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/article_create.templ`, Line: 103, Col: 54}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -206,15 +222,7 @@ func CreateArticle(data CreateArticleViewData, tkn string) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></form></div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = CreateArticleFormContent(data.Props, data.Keywords, data.Filenames).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></form>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></form></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -222,7 +230,7 @@ func CreateArticle(data CreateArticleViewData, tkn string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</form></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -255,14 +263,14 @@ func KeywordsGrid(keywords []Keyword) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		for _, kw := range keywords {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<label class=\"label cursor-pointer\"><span class=\"label-text font-bold\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<label class=\"col-3 d-flex flex-column label cursor-pointer\"><span class=\"label-text font-bold\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(kw.Value)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/article_create.templ`, Line: 111, Col: 48}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/article_create.templ`, Line: 119, Col: 48}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
@@ -280,7 +288,7 @@ func KeywordsGrid(keywords []Keyword) templ.Component {
 				var templ_7745c5c3_Var11 string
 				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(kw.ID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/article_create.templ`, Line: 113, Col: 24}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/article_create.templ`, Line: 121, Col: 24}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 				if templ_7745c5c3_Err != nil {
@@ -298,7 +306,7 @@ func KeywordsGrid(keywords []Keyword) templ.Component {
 				var templ_7745c5c3_Var12 string
 				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(kw.ID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/article_create.templ`, Line: 115, Col: 24}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/article_create.templ`, Line: 123, Col: 24}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 				if templ_7745c5c3_Err != nil {
