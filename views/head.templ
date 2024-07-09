@@ -1,8 +1,6 @@
 package views
 
-import (
-	"os"
-)
+import "os"
 
 type MetaContent struct {
 	Content  string
@@ -75,7 +73,7 @@ templ (h Head) Build() {
 			href={ h.Slug }
 		/>
 		if os.Getenv("ENVIRONMENT") == "production" {
-			<script async src="https://mbv-analytics.fly.dev/script.js" data-website-id="234f6bd6-823d-41e5-b84f-f351301f0e33"></script>
+			<script defer src="https://analytics.mbv-labs.com/script.js" data-website-id="5b82fac0-8e18-485f-81f9-76bd3449257e"></script>
 		}
 	</head>
 }

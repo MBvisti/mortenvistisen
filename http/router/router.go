@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/MBvisti/mortenvistisen/controllers"
@@ -64,6 +65,13 @@ func NewRouter(
 			return nil
 		},
 	}))
+
+	router.Use(echomw.GzipWithConfig(echomw.GzipConfig{
+		Level: 5,
+		Skipper: func(c echo.Context) bool {
+			return strings.Contains(c.Path(), "metrics")
+		},
+	}))
 	router.Use(
 		echoprometheus.NewMiddleware("mortenvistisen_blog"),
 	) // adds middleware to gather metrics
@@ -71,6 +79,9 @@ func NewRouter(
 
 	router.GET("/robots.txt", func(c echo.Context) error {
 		return c.File("./resources/seo/robots.txt")
+	})
+	router.GET("/4zd8j69sf3ju2hnfxmebr3czub8uu63m.txt", func(c echo.Context) error {
+		return c.File("./resources/seo/index_now.txt")
 	})
 	router.GET("/sitemap.xml", func(c echo.Context) error {
 		return c.File("./resources/seo/sitemap.xml")
@@ -139,7 +150,7 @@ func (r *Router) LoadInRoutes() {
 }
 
 func (r *Router) loadDashboardRoutes() {
-	router := r.router.Group("/dashboard", r.middleware.AuthOnly)
+	router := r.router.Group("/dashboard")
 
 	router.GET("", func(c echo.Context) error {
 		return dashboard.Index(c)

@@ -8,9 +8,7 @@ package layouts
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import (
-	"github.com/MBvisti/mortenvistisen/views/internal/components"
-)
+import "github.com/MBvisti/mortenvistisen/views/internal/components"
 
 func currentYear() templ.ComponentScript {
 	return templ.ComponentScript{
