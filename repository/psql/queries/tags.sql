@@ -13,7 +13,7 @@ from tags
 -- name: QueryTagsByIDs :many
 select *
 from tags
-where id in (sqlc.arg(tag_ids)::uuid[])
+where id = any(sqlc.arg(tag_ids)::uuid[]);
 ;
 
 -- name: InsertTag :exec

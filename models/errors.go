@@ -14,6 +14,7 @@ var (
 	ErrSubscriberExists    = errors.New(
 		"there is already a subscriber registered with the provided data",
 	)
+	ErrFailValidation = errors.New("the object failed validations")
 )
 
 type ErrValidation struct {
