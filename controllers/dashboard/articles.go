@@ -1,6 +1,7 @@
 package dashboard
 
 import (
+	"log/slog"
 	"slices"
 	"strconv"
 
@@ -228,11 +229,11 @@ func ArticleStore(ctx echo.Context, articleModel models.ArticleService) error {
 		return err
 	}
 
-	// var releaseNow bool
-	// if postPayload.Release == "on" {
-	// 	releaseNow = true
-	// }
-	//
+	var releaseNow bool
+	if postPayload.Release == "on" {
+		releaseNow = true
+	}
+
 	estimatedReadTime, err := strconv.Atoi(postPayload.EstimatedReadTime)
 	if err != nil {
 		return err
@@ -249,15 +250,17 @@ func ArticleStore(ctx echo.Context, articleModel models.ArticleService) error {
 	}
 
 	_, err = articleModel.New(ctx.Request().Context(), models.NewArticlePayload{
+		ReleaseNow:  releaseNow,
 		Title:       postPayload.Title,
 		HeaderTitle: postPayload.HeaderTitle,
 		Filename:    postPayload.Filename,
 		Slug:        postPayload.Slug,
-		Excerpt:     postPayload.EstimatedReadTime,
+		Excerpt:     postPayload.Excerpt,
 		Readtime:    int32(estimatedReadTime),
 		TagIDs:      tagIDs,
 	})
 	if err != nil {
+		slog.Error("could not create new article", "error", err)
 		return err
 	}
 

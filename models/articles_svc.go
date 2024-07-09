@@ -2,10 +2,14 @@ package models
 
 import (
 	"context"
+	"errors"
 	"log/slog"
+	"time"
 
 	"github.com/MBvisti/mortenvistisen/domain"
 	"github.com/google/uuid"
+	"github.com/gosimple/slug"
+	"github.com/jackc/pgx/v5"
 )
 
 type articleStorage interface {
@@ -51,6 +55,7 @@ func NewArticleSvc(articleStorage articleStorage) ArticleService {
 }
 
 type NewArticlePayload struct {
+	ReleaseNow  bool
 	Title       string
 	HeaderTitle string
 	Filename    string
@@ -66,6 +71,10 @@ func (a ArticleService) New(
 ) (domain.Article, error) {
 	tags, err := a.articleStorage.QueryTagsByIDs(ctx, payload.TagIDs)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return domain.Article{}, errors.Join(ErrNoRowWithIdentifier, err)
+		}
+
 		return domain.Article{}, err
 	}
 
@@ -73,21 +82,26 @@ func (a ArticleService) New(
 		payload.Title,
 		payload.HeaderTitle,
 		payload.Filename,
-		payload.Slug,
+		slug.MakeLang(payload.Title, "en"),
 		payload.Excerpt,
 		payload.Readtime,
 		tags,
 	)
 	if err != nil {
-		return domain.Article{}, err
+		return domain.Article{}, errors.Join(ErrFailValidation, err)
+	}
+
+	if payload.ReleaseNow {
+		article.Draft = false
+		article.ReleaseDate = time.Now()
 	}
 
 	if err := a.articleStorage.InsertArticle(ctx, article); err != nil {
-		return domain.Article{}, err
+		return domain.Article{}, errors.Join(ErrUnrecoverableEvent, err)
 	}
 
 	if err := a.articleStorage.AssociateTagsWithPost(ctx, article.ID, payload.TagIDs); err != nil {
-		return domain.Article{}, err
+		return domain.Article{}, errors.Join(ErrUnrecoverableEvent, err)
 	}
 
 	return article, nil
