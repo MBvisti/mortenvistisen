@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"log/slog"
+	"time"
 
 	"github.com/MBvisti/mortenvistisen/domain"
 	"github.com/google/uuid"
@@ -72,7 +73,10 @@ func (us UserService) ConfirmEmail(
 		return domain.User{}, err
 	}
 
-	user.ConfirmEmail()
+	now := time.Now()
+
+	user.MailVerifiedAt = now
+	user.UpdatedAt = now
 
 	updatedUser, err := us.userStorage.UpdateUser(ctx, user)
 	if err != nil {

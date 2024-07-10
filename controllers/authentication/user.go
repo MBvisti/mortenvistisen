@@ -59,12 +59,6 @@ func StoreUser(
 		return err
 	}
 
-	// user, err := services.NewUser(ctx.Request().Context(), domain.NewUser{
-	// 	Name:            payload.UserName,
-	// 	Mail:            payload.Mail,
-	// 	Password:        payload.Password,
-	// 	ConfirmPassword: payload.ConfirmPassword,
-	// }, &db, v, cfg.Auth.PasswordPepper)
 	// if err != nil {
 	// 	telemetry.Logger.Info("error", "err", err)
 	// 	e, ok := err.(validator.ValidationErrors)

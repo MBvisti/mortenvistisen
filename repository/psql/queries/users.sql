@@ -24,7 +24,7 @@ returning *;
 
 -- name: UpdateUser :one
 update users
-    set updated_at=$2, name=$3, mail=$4, password=$5
+    set updated_at=$2, name=$3, mail=$4, password=$5, mail_verified_at=$6
 where id = $1
 returning *;
 

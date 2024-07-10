@@ -25,6 +25,7 @@ func (p Postgres) QueryUserByID(
 		Name:           user.Name,
 		Mail:           user.Mail,
 		MailVerifiedAt: user.MailVerifiedAt.Time,
+		Password:       user.Password,
 	}, nil
 }
 
@@ -84,13 +85,18 @@ func (p Postgres) UpdateUser(
 		Time:  data.UpdatedAt,
 		Valid: true,
 	}
+	mailVerifiedAt := pgtype.Timestamptz{
+		Time:  data.MailVerifiedAt,
+		Valid: true,
+	}
 
 	_, err := p.Queries.UpdateUser(ctx, database.UpdateUserParams{
-		ID:        data.ID,
-		UpdatedAt: updatedAt,
-		Name:      data.Name,
-		Mail:      data.Mail,
-		Password:  data.Password,
+		ID:             data.ID,
+		UpdatedAt:      updatedAt,
+		Name:           data.Name,
+		Mail:           data.Mail,
+		Password:       data.Password,
+		MailVerifiedAt: mailVerifiedAt,
 	})
 	if err != nil {
 		return domain.User{}, err

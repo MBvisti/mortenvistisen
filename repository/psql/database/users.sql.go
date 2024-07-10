@@ -187,17 +187,18 @@ func (q *Queries) RemoveInactiveUsers(ctx context.Context, twoWeeksAgo pgtype.Ti
 
 const updateUser = `-- name: UpdateUser :one
 update users
-    set updated_at=$2, name=$3, mail=$4, password=$5
+    set updated_at=$2, name=$3, mail=$4, password=$5, mail_verified_at=$6
 where id = $1
 returning id, created_at, updated_at, name, mail, mail_verified_at, password
 `
 
 type UpdateUserParams struct {
-	ID        uuid.UUID
-	UpdatedAt pgtype.Timestamptz
-	Name      string
-	Mail      string
-	Password  string
+	ID             uuid.UUID
+	UpdatedAt      pgtype.Timestamptz
+	Name           string
+	Mail           string
+	Password       string
+	MailVerifiedAt pgtype.Timestamptz
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
@@ -207,6 +208,7 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 		arg.Name,
 		arg.Mail,
 		arg.Password,
+		arg.MailVerifiedAt,
 	)
 	var i User
 	err := row.Scan(
