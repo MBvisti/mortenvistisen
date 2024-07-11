@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"github.com/MBvisti/mortenvistisen/controllers"
-	"github.com/MBvisti/mortenvistisen/domain"
 	"github.com/MBvisti/mortenvistisen/models"
 	"github.com/MBvisti/mortenvistisen/views"
 	"github.com/MBvisti/mortenvistisen/views/components"
@@ -317,7 +316,7 @@ func previewNewsletter(ctx echo.Context,
 }
 
 func releaseNewsletter(ctx echo.Context,
-	newsletter domain.Newsletter,
+	newsletter models.Newsletter,
 	newsletterModel models.NewsletterService,
 	cookieStore controllers.CookieStore,
 	hxAction string,

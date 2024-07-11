@@ -1,4 +1,4 @@
-package domain
+package validation
 
 import (
 	"fmt"
@@ -127,17 +127,56 @@ func ToString(value interface{}) (string, error) {
 	return "", fmt.Errorf("cannot convert %v to string", v.Kind())
 }
 
-func checkRule(val *reflect.Value, rule Rule) error {
-	if isViolated := rule.IsViolated(val); isViolated {
-		return rule.Violation()
-	}
-
-	return nil
-}
+// func checkRule(val *reflect.Value, rule Rule) error {
+// 	if isViolated := rule.IsViolated(val); isViolated {
+// 		return rule.Violation()
+// 	}
+//
+// 	return nil
+// }
 
 func GetFieldValue(fieldValue reflect.Value) any {
 	if !fieldValue.CanInterface() {
 		return nil
 	}
 	return fieldValue.Interface()
+}
+
+func Validate(structToValidate any, validationMap map[string][]Rule) error {
+	val := reflect.ValueOf(structToValidate)
+	typ := reflect.TypeOf(structToValidate)
+	var errors ValidationErrs
+	for i := 0; i < val.NumField(); i++ {
+		value := val.Field(i)
+		name := typ.Field(i).Name
+
+		errVal := ErrValidation{
+			FieldValue: value,
+			FieldName:  name,
+		}
+
+		for _, rule := range validationMap[name] {
+			if rule.IsViolated(GetFieldValue(value)) {
+				errVal.Violations = append(
+					errVal.Violations,
+					rule.Violation(),
+				)
+				errVal.ViolationsForHuman = append(
+					errVal.ViolationsForHuman,
+					rule.ViolationForHumans(name),
+				)
+			}
+		}
+
+		if len(errVal.Violations) > 0 {
+			errors = append(errors, errVal)
+		}
+	}
+
+	// e := constructValidationErrors(errors...)
+	// if len(e) > 0 {
+	// 	return e
+	// }
+
+	return errors
 }

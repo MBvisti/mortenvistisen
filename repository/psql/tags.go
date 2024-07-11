@@ -3,12 +3,12 @@ package psql
 import (
 	"context"
 
-	"github.com/MBvisti/mortenvistisen/domain"
+	"github.com/MBvisti/mortenvistisen/models"
 	"github.com/MBvisti/mortenvistisen/repository/psql/database"
 	"github.com/google/uuid"
 )
 
-func (p Postgres) InsertTag(ctx context.Context, data domain.Tag) error {
+func (p Postgres) InsertTag(ctx context.Context, data models.Tag) error {
 	if err := p.Queries.InsertTag(ctx, database.InsertTagParams{
 		ID:   data.ID,
 		Name: data.Name,
@@ -19,15 +19,15 @@ func (p Postgres) InsertTag(ctx context.Context, data domain.Tag) error {
 	return nil
 }
 
-func (p Postgres) QueryAllTags(ctx context.Context) ([]domain.Tag, error) {
+func (p Postgres) QueryAllTags(ctx context.Context) ([]models.Tag, error) {
 	tags, err := p.Queries.QueryAllTags(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	var t []domain.Tag
+	var t []models.Tag
 	for _, tag := range tags {
-		t = append(t, domain.Tag{
+		t = append(t, models.Tag{
 			ID:   tag.ID,
 			Name: tag.Name,
 		})
@@ -36,21 +36,21 @@ func (p Postgres) QueryAllTags(ctx context.Context) ([]domain.Tag, error) {
 	return t, nil
 }
 
-func (p Postgres) QueryTagsByIDs(ctx context.Context, ids []uuid.UUID) ([]domain.Tag, error) {
+func (p Postgres) QueryTagsByIDs(ctx context.Context, ids []uuid.UUID) ([]models.Tag, error) {
 	tags, err := p.Queries.QueryTagsByIDs(ctx, ids)
 	if err != nil {
 		return nil, err
 	}
 
-	var domainTags []domain.Tag
+	var modelsTags []models.Tag
 	for _, t := range tags {
-		domainTags = append(domainTags, domain.Tag{
+		modelsTags = append(modelsTags, models.Tag{
 			ID:   t.ID,
 			Name: t.Name,
 		})
 	}
 
-	return domainTags, nil
+	return modelsTags, nil
 }
 
 func (p Postgres) DeleteTagsFromPost(ctx context.Context, id uuid.UUID) error {

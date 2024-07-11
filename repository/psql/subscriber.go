@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/MBvisti/mortenvistisen/domain"
 	"github.com/MBvisti/mortenvistisen/models"
 	"github.com/MBvisti/mortenvistisen/repository/psql/database"
 	"github.com/google/uuid"
@@ -16,13 +15,13 @@ import (
 func (p Postgres) QuerySubscriberByID(
 	ctx context.Context,
 	id uuid.UUID,
-) (domain.Subscriber, error) {
+) (models.Subscriber, error) {
 	subscriber, err := p.Queries.QuerySubscriberByID(ctx, id)
 	if err != nil {
-		return domain.Subscriber{}, err
+		return models.Subscriber{}, err
 	}
 
-	return domain.Subscriber{
+	return models.Subscriber{
 		ID:           subscriber.ID,
 		CreatedAt:    subscriber.CreatedAt.Time,
 		UpdatedAt:    subscriber.UpdatedAt.Time,
@@ -36,16 +35,16 @@ func (p Postgres) QuerySubscriberByID(
 func (p Postgres) QuerySubscriberByEmail(
 	ctx context.Context,
 	email string,
-) (domain.Subscriber, error) {
+) (models.Subscriber, error) {
 	subscriber, err := p.Queries.QuerySubscriberByEmail(
 		ctx,
 		sql.NullString{String: email, Valid: true},
 	)
 	if err != nil {
-		return domain.Subscriber{}, err
+		return models.Subscriber{}, err
 	}
 
-	return domain.Subscriber{
+	return models.Subscriber{
 		ID:           subscriber.ID,
 		CreatedAt:    subscriber.CreatedAt.Time,
 		UpdatedAt:    subscriber.UpdatedAt.Time,
@@ -58,8 +57,8 @@ func (p Postgres) QuerySubscriberByEmail(
 
 func (p Postgres) InsertSubscriber(
 	ctx context.Context,
-	data domain.Subscriber,
-) (domain.Subscriber, error) {
+	data models.Subscriber,
+) (models.Subscriber, error) {
 	createdAt := pgtype.Timestamptz{
 		Time:  data.CreatedAt,
 		Valid: true,
@@ -92,10 +91,10 @@ func (p Postgres) InsertSubscriber(
 		},
 	})
 	if err != nil {
-		return domain.Subscriber{}, errors.Join(ErrInternalDBErr, err)
+		return models.Subscriber{}, errors.Join(ErrInternalDBErr, err)
 	}
 
-	return domain.Subscriber{
+	return models.Subscriber{
 		ID:           newSubscriber.ID,
 		CreatedAt:    newSubscriber.CreatedAt.Time,
 		UpdatedAt:    newSubscriber.UpdatedAt.Time,
@@ -108,8 +107,8 @@ func (p Postgres) InsertSubscriber(
 
 func (p Postgres) UpdateSubscriber(
 	ctx context.Context,
-	data domain.Subscriber,
-) (domain.Subscriber, error) {
+	data models.Subscriber,
+) (models.Subscriber, error) {
 	updateParams := database.UpdateSubscriberParams{
 		ID: data.ID,
 		UpdatedAt: pgtype.Timestamptz{
@@ -124,10 +123,10 @@ func (p Postgres) UpdateSubscriber(
 
 	updatedSubscriber, err := p.Queries.UpdateSubscriber(ctx, updateParams)
 	if err != nil {
-		return domain.Subscriber{}, errors.Join(ErrInternalDBErr, err)
+		return models.Subscriber{}, errors.Join(ErrInternalDBErr, err)
 	}
 
-	return domain.Subscriber{
+	return models.Subscriber{
 		ID:           updatedSubscriber.ID,
 		CreatedAt:    updatedSubscriber.CreatedAt.Time,
 		UpdatedAt:    updatedSubscriber.UpdatedAt.Time,
@@ -138,7 +137,7 @@ func (p Postgres) UpdateSubscriber(
 	}, nil
 }
 
-func (p Postgres) QueryNewSubscribersByMonth(ctx context.Context) ([]domain.Subscriber, error) {
+func (p Postgres) QueryNewSubscribersByMonth(ctx context.Context) ([]models.Subscriber, error) {
 	subs, err := p.Queries.QueryNewSubscribersInCurrentMonth(ctx)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -148,9 +147,9 @@ func (p Postgres) QueryNewSubscribersByMonth(ctx context.Context) ([]domain.Subs
 		return nil, errors.Join(ErrInternalDBErr, err)
 	}
 
-	subscribers := make([]domain.Subscriber, len(subs))
+	subscribers := make([]models.Subscriber, len(subs))
 	for i, sub := range subs {
-		subscribers[i] = domain.Subscriber{
+		subscribers[i] = models.Subscriber{
 			ID:           sub.ID,
 			CreatedAt:    sub.CreatedAt.Time,
 			UpdatedAt:    sub.UpdatedAt.Time,
@@ -168,7 +167,7 @@ func (p Postgres) ListSubscribers(
 	ctx context.Context,
 	filters models.QueryFilters,
 	opts ...models.PaginationOption,
-) ([]domain.Subscriber, error) {
+) ([]models.Subscriber, error) {
 	options := &models.PaginationOptions{}
 
 	for _, opt := range opts {
@@ -194,9 +193,9 @@ func (p Postgres) ListSubscribers(
 		return nil, err
 	}
 
-	subscribers := make([]domain.Subscriber, len(subs))
+	subscribers := make([]models.Subscriber, len(subs))
 	for i, sub := range subs {
-		subscribers[i] = domain.Subscriber{
+		subscribers[i] = models.Subscriber{
 			ID:           sub.ID,
 			CreatedAt:    sub.CreatedAt.Time,
 			UpdatedAt:    sub.UpdatedAt.Time,
