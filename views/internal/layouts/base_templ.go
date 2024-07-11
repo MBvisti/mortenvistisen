@@ -60,7 +60,7 @@ func Base(head templ.Component) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<footer class=\"container footer bg-base-100 text-base-content py-4\"><aside class=\"flex flex-col items-center mx-auto\"><p>Copyright ©<span id=\"cur-year-footer\"></span></p><p>All right reserved by MBV Labs</p></aside></footer>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<footer class=\"container mx-auto footer bg-base-100 text-base-content p-4 md:px-32\"><aside class=\"flex flex-col items-center mx-auto\"><p>Copyright ©<span id=\"cur-year-footer\"></span></p><p>All right reserved by MBV Labs</p></aside></footer>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
