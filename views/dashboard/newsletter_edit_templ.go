@@ -9,12 +9,11 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"github.com/MBvisti/mortenvistisen/domain"
+	"fmt"
+	"github.com/MBvisti/mortenvistisen/models"
 	"github.com/MBvisti/mortenvistisen/views/components"
 	"github.com/MBvisti/mortenvistisen/views/emails"
 	"github.com/MBvisti/mortenvistisen/views/internal/layouts"
-	//"strconv"
-	"fmt"
 	"github.com/google/uuid"
 )
 
@@ -23,7 +22,7 @@ type NewsletterEditViewData struct {
 	Edition      string
 	ArticleID    uuid.UUID
 	MailPreview  emails.NewsletterMail
-	Articles     []domain.Article
+	Articles     []models.Article
 	NewsletterID uuid.UUID
 }
 

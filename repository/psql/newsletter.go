@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"encoding/json"
 
-	"github.com/MBvisti/mortenvistisen/domain"
 	"github.com/MBvisti/mortenvistisen/models"
 	"github.com/MBvisti/mortenvistisen/repository/psql/database"
 	"github.com/google/uuid"
@@ -15,23 +14,23 @@ import (
 func (p Postgres) QueryNewsletterByID(
 	ctx context.Context,
 	id uuid.UUID,
-) (domain.Newsletter, error) {
+) (models.Newsletter, error) {
 	newsletter, err := p.Queries.QueryNewsletterByID(ctx, id)
 	if err != nil {
-		return domain.Newsletter{}, err
+		return models.Newsletter{}, err
 	}
 
 	var paragraphs []string
 	if err := json.Unmarshal(newsletter.Body, &paragraphs); err != nil {
-		return domain.Newsletter{}, err
+		return models.Newsletter{}, err
 	}
 
 	article, err := p.Queries.QueryPostByID(ctx, newsletter.AssociatedArticleID)
 	if err != nil {
-		return domain.Newsletter{}, err
+		return models.Newsletter{}, err
 	}
 
-	return domain.Newsletter{
+	return models.Newsletter{
 		ID:          newsletter.ID,
 		CreatedAt:   newsletter.CreatedAt.Time,
 		UpdatedAt:   newsletter.UpdatedAt.Time,
@@ -48,7 +47,7 @@ func (p Postgres) ListNewsletters(
 	ctx context.Context,
 	filters models.QueryFilters,
 	opts ...models.PaginationOption,
-) ([]domain.Newsletter, error) {
+) ([]models.Newsletter, error) {
 	options := &models.PaginationOptions{}
 
 	for _, opt := range opts {
@@ -74,14 +73,14 @@ func (p Postgres) ListNewsletters(
 		return nil, err
 	}
 
-	newsletters := make([]domain.Newsletter, len(newsL))
+	newsletters := make([]models.Newsletter, len(newsL))
 	for i, row := range newsL {
 		var paragraphs []string
 		if err := json.Unmarshal(row.NewsletterBody, &paragraphs); err != nil {
 			return nil, err
 		}
 
-		newsletters[i] = domain.Newsletter{
+		newsletters[i] = models.Newsletter{
 			ID:          row.NewsletterID,
 			CreatedAt:   row.NewsletterCreatedAt.Time,
 			UpdatedAt:   row.NewsletterUpdatedAt.Time,
@@ -99,8 +98,8 @@ func (p Postgres) ListNewsletters(
 
 func (p Postgres) InsertNewsletter(
 	ctx context.Context,
-	data domain.Newsletter,
-) (domain.Newsletter, error) {
+	data models.Newsletter,
+) (models.Newsletter, error) {
 	createdAt := pgtype.Timestamptz{
 		Time:  data.CreatedAt,
 		Valid: true,
@@ -112,7 +111,7 @@ func (p Postgres) InsertNewsletter(
 
 	article, err := p.Queries.QueryPostBySlug(ctx, data.ArticleSlug)
 	if err != nil {
-		return domain.Newsletter{}, err
+		return models.Newsletter{}, err
 	}
 
 	newNewsletter, err := p.Queries.InsertNewsletter(ctx, database.InsertNewsletterParams{
@@ -125,15 +124,15 @@ func (p Postgres) InsertNewsletter(
 		AssociatedArticleID: article.ID,
 	})
 	if err != nil {
-		return domain.Newsletter{}, err
+		return models.Newsletter{}, err
 	}
 
 	var paragraphs []string
 	if err := json.Unmarshal(newNewsletter.Body, &paragraphs); err != nil {
-		return domain.Newsletter{}, err
+		return models.Newsletter{}, err
 	}
 
-	return domain.Newsletter{
+	return models.Newsletter{
 		ID:          newNewsletter.ID,
 		CreatedAt:   newNewsletter.CreatedAt.Time,
 		UpdatedAt:   newNewsletter.UpdatedAt.Time,
@@ -147,9 +146,9 @@ func (p Postgres) InsertNewsletter(
 // TODO
 func (p Postgres) UpdateNewsletter(
 	ctx context.Context,
-	newsletter domain.Newsletter,
-) (domain.Newsletter, error) {
-	return domain.Newsletter{}, nil
+	newsletter models.Newsletter,
+) (models.Newsletter, error) {
+	return models.Newsletter{}, nil
 }
 
 func (p Postgres) Count(ctx context.Context) (int64, error) {

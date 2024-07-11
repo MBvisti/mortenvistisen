@@ -1,4 +1,4 @@
-package domain
+package validation
 
 import (
 	"errors"
@@ -13,6 +13,7 @@ var (
 	ErrTooShort          = errors.New("value is too short")
 	ErrTooLong           = errors.New("value is too long")
 	ErrPasswordDontMatch = errors.New("the two passwords must match")
+	ErrMustBeTrue        = errors.New("value must be true")
 )
 
 var emailRegex = regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
@@ -41,8 +42,13 @@ func (ve ValidationErrs) Error() string {
 	return errMsg
 }
 
-func (ve ValidationErrs) Unwrap() error {
-	return ErrInvalidEmail
+func (ve ValidationErrs) UnwrapViolations() []error {
+	var errs []error
+	for _, errValidation := range ve {
+		errs = append(errs, errValidation.Causes()...)
+	}
+
+	return errs
 }
 
 type ErrValidation struct {
@@ -108,13 +114,13 @@ func (e ErrValidation) Error() string {
 	)
 }
 
-func constructValidationErrors(valiErrs ...ValidationErr) ValidationErrs {
-	var validationErrors ValidationErrs
-	for _, valiErr := range valiErrs {
-		if len(valiErr.Causes()) > 0 {
-			validationErrors = append(validationErrors, valiErr)
-		}
-	}
-
-	return validationErrors
-}
+// func constructValidationErrors(valiErrs ...ValidationErr) ValidationErrs {
+// 	var validationErrors ValidationErrs
+// 	for _, valiErr := range valiErrs {
+// 		if len(valiErr.Causes()) > 0 {
+// 			validationErrors = append(validationErrors, valiErr)
+// 		}
+// 	}
+//
+// 	return validationErrors
+// }

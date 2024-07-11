@@ -6,19 +6,19 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/MBvisti/mortenvistisen/domain"
+	"github.com/MBvisti/mortenvistisen/pkg/validation"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
 
 type subscriberStorage interface {
-	QuerySubscriberByID(ctx context.Context, id uuid.UUID) (domain.Subscriber, error)
-	QuerySubscriberByEmail(ctx context.Context, email string) (domain.Subscriber, error)
+	QuerySubscriberByID(ctx context.Context, id uuid.UUID) (Subscriber, error)
+	QuerySubscriberByEmail(ctx context.Context, email string) (Subscriber, error)
 	ListSubscribers(
 		ctx context.Context,
 		filters QueryFilters,
 		opts ...PaginationOption,
-	) ([]domain.Subscriber, error)
+	) ([]Subscriber, error)
 	CountSubscribers(
 		ctx context.Context,
 	) (int64, error)
@@ -26,15 +26,15 @@ type subscriberStorage interface {
 		ctx context.Context,
 		verified bool,
 	) (int64, error)
-	QueryNewSubscribersByMonth(ctx context.Context) ([]domain.Subscriber, error)
+	QueryNewSubscribersByMonth(ctx context.Context) ([]Subscriber, error)
 	UpdateSubscriber(
 		ctx context.Context,
-		data domain.Subscriber,
-	) (domain.Subscriber, error)
+		data Subscriber,
+	) (Subscriber, error)
 	InsertSubscriber(
 		ctx context.Context,
-		data domain.Subscriber,
-	) (domain.Subscriber, error)
+		data Subscriber,
+	) (Subscriber, error)
 	DeleteSubscriber(ctx context.Context, subscriberID uuid.UUID) error
 }
 
@@ -75,17 +75,17 @@ func NewSubscriberSvc(
 	}
 }
 
-func (svc *SubscriberService) ByID(ctx context.Context, id uuid.UUID) (domain.Subscriber, error) {
+func (svc *SubscriberService) ByID(ctx context.Context, id uuid.UUID) (Subscriber, error) {
 	subscriber, err := svc.storage.QuerySubscriberByID(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return domain.Subscriber{}, ErrNoRowWithIdentifier
+			return Subscriber{}, ErrNoRowWithIdentifier
 		}
 
-		return domain.Subscriber{}, err
+		return Subscriber{}, err
 	}
 
-	return domain.Subscriber{
+	return Subscriber{
 		ID:           subscriber.ID,
 		CreatedAt:    subscriber.CreatedAt,
 		UpdatedAt:    subscriber.UpdatedAt,
@@ -99,17 +99,17 @@ func (svc *SubscriberService) ByID(ctx context.Context, id uuid.UUID) (domain.Su
 func (svc *SubscriberService) ByEmail(
 	ctx context.Context,
 	email string,
-) (domain.Subscriber, error) {
+) (Subscriber, error) {
 	subscriber, err := svc.storage.QuerySubscriberByEmail(ctx, email)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return domain.Subscriber{}, ErrNoRowWithIdentifier
+			return Subscriber{}, ErrNoRowWithIdentifier
 		}
 
-		return domain.Subscriber{}, err
+		return Subscriber{}, err
 	}
 
-	return domain.Subscriber{
+	return Subscriber{
 		ID:           subscriber.ID,
 		CreatedAt:    subscriber.CreatedAt,
 		UpdatedAt:    subscriber.UpdatedAt,
@@ -124,7 +124,7 @@ func (svc *SubscriberService) List(
 	ctx context.Context,
 	offset int32,
 	limit int32,
-) ([]domain.Subscriber, error) {
+) ([]Subscriber, error) {
 	subs, err := svc.storage.ListSubscribers(ctx, nil, WithPagination(limit, offset))
 	if err != nil {
 		return nil, err
@@ -142,15 +142,15 @@ func (svc *SubscriberService) Count(ctx context.Context) (int64, error) {
 	return count, nil
 }
 
-func (svc *SubscriberService) NewForCurrentMonth(ctx context.Context) ([]domain.Subscriber, error) {
+func (svc *SubscriberService) NewForCurrentMonth(ctx context.Context) ([]Subscriber, error) {
 	subs, err := svc.storage.QueryNewSubscribersByMonth(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	subscribers := make([]domain.Subscriber, len(subs))
+	subscribers := make([]Subscriber, len(subs))
 	for i, sub := range subs {
-		subscribers[i] = domain.Subscriber{
+		subscribers[i] = Subscriber{
 			ID:           sub.ID,
 			CreatedAt:    sub.CreatedAt,
 			UpdatedAt:    sub.UpdatedAt,
@@ -179,7 +179,8 @@ func (svc *SubscriberService) Verify(ctx context.Context, subscriberID uuid.UUID
 		return err
 	}
 
-	subscriber.Verify()
+	subscriber.UpdatedAt = time.Now()
+	subscriber.IsVerified = true
 
 	_, err = svc.storage.UpdateSubscriber(ctx, subscriber)
 	if err != nil {
@@ -206,10 +207,12 @@ func (svc *SubscriberService) New(ctx context.Context, email, articleTitle strin
 		return ErrSubscriberExists
 	}
 
+	t := time.Now()
+
 	// 1. create type
-	subscriber, err := domain.NewSubscriber(email, articleTitle, time.Now(), false)
-	if err != nil {
-		return err
+	subscriber := Subscriber{uuid.New(), t, t, email, time.Now(), articleTitle, false}
+	if err := validation.Validate(subscriber, CreateSubscriberValidations()); err != nil {
+		return errors.Join(ErrFailValidation, err)
 	}
 
 	// 2. store subscriber

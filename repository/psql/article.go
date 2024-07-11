@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/MBvisti/mortenvistisen/domain"
 	"github.com/MBvisti/mortenvistisen/models"
 	"github.com/MBvisti/mortenvistisen/repository/psql/database"
 	"github.com/google/uuid"
@@ -13,7 +12,7 @@ import (
 
 func (p Postgres) InsertArticle(
 	ctx context.Context,
-	data domain.Article,
+	data models.Article,
 ) error {
 	createdAt := pgtype.Timestamp{
 		Time:  data.CreatedAt,
@@ -48,27 +47,27 @@ func (p Postgres) InsertArticle(
 	return nil
 }
 
-func (p Postgres) QueryAllArticles(ctx context.Context) ([]domain.Article, error) {
+func (p Postgres) QueryAllArticles(ctx context.Context) ([]models.Article, error) {
 	articles, err := p.Queries.QueryAllPosts(ctx, 0)
 	if err != nil {
 		return nil, err
 	}
 
-	var a []domain.Article
+	var a []models.Article
 	for _, article := range articles {
-		var convertedTags []domain.Tag
+		var convertedTags []models.Tag
 		tags, err := p.Queries.QueryTagsByPost(ctx, article.ID)
 		if err != nil {
 			return nil, err
 		}
 
 		for _, t := range tags {
-			convertedTags = append(convertedTags, domain.Tag{
+			convertedTags = append(convertedTags, models.Tag{
 				ID:   t.ID,
 				Name: t.Name,
 			})
 		}
-		a = append(a, domain.Article{
+		a = append(a, models.Article{
 			ID:          article.ID,
 			CreatedAt:   article.CreatedAt.Time,
 			UpdatedAt:   article.UpdatedAt.Time,
@@ -90,26 +89,26 @@ func (p Postgres) QueryAllArticles(ctx context.Context) ([]domain.Article, error
 func (p Postgres) QueryArticleByID(
 	ctx context.Context,
 	id uuid.UUID,
-) (domain.Article, error) {
+) (models.Article, error) {
 	article, err := p.Queries.QueryPostByID(ctx, id)
 	if err != nil {
-		return domain.Article{}, err
+		return models.Article{}, err
 	}
 
-	var convertedTags []domain.Tag
+	var convertedTags []models.Tag
 	tags, err := p.Queries.QueryTagsByPost(ctx, id)
 	if err != nil {
-		return domain.Article{}, err
+		return models.Article{}, err
 	}
 
 	for _, t := range tags {
-		convertedTags = append(convertedTags, domain.Tag{
+		convertedTags = append(convertedTags, models.Tag{
 			ID:   t.ID,
 			Name: t.Name,
 		})
 	}
 
-	return domain.Article{
+	return models.Article{
 		ID:          article.ID,
 		CreatedAt:   article.CreatedAt.Time,
 		UpdatedAt:   article.UpdatedAt.Time,
@@ -128,26 +127,26 @@ func (p Postgres) QueryArticleByID(
 func (p Postgres) QueryArticleBySlug(
 	ctx context.Context,
 	slug string,
-) (domain.Article, error) {
+) (models.Article, error) {
 	article, err := p.Queries.QueryPostBySlug(ctx, slug)
 	if err != nil {
-		return domain.Article{}, err
+		return models.Article{}, err
 	}
 
-	var convertedTags []domain.Tag
+	var convertedTags []models.Tag
 	tags, err := p.Queries.QueryTagsByPost(ctx, article.ID)
 	if err != nil {
-		return domain.Article{}, err
+		return models.Article{}, err
 	}
 
 	for _, t := range tags {
-		convertedTags = append(convertedTags, domain.Tag{
+		convertedTags = append(convertedTags, models.Tag{
 			ID:   t.ID,
 			Name: t.Name,
 		})
 	}
 
-	return domain.Article{
+	return models.Article{
 		ID:          article.ID,
 		CreatedAt:   article.CreatedAt.Time,
 		UpdatedAt:   article.UpdatedAt.Time,
@@ -163,7 +162,7 @@ func (p Postgres) QueryArticleBySlug(
 	}, nil
 }
 
-func (p Postgres) UpdateArticle(ctx context.Context, data domain.Article) error {
+func (p Postgres) UpdateArticle(ctx context.Context, data models.Article) error {
 	updatedAt := pgtype.Timestamp{
 		Time:  data.UpdatedAt,
 		Valid: true,
@@ -199,7 +198,7 @@ func (p Postgres) ListArticles(
 	ctx context.Context,
 	filters models.QueryFilters,
 	opts ...models.PaginationOption,
-) ([]domain.Article, error) {
+) ([]models.Article, error) {
 	options := &models.PaginationOptions{}
 
 	for _, opt := range opts {
@@ -216,22 +215,22 @@ func (p Postgres) ListArticles(
 		return nil, err
 	}
 
-	articles := make([]domain.Article, len(posts))
+	articles := make([]models.Article, len(posts))
 	for i, post := range posts {
 		tags, err := p.Queries.QueryTagsByPost(ctx, post.ID)
 		if err != nil {
 			return nil, err
 		}
 
-		var convertedTags []domain.Tag
+		var convertedTags []models.Tag
 		for _, t := range tags {
-			convertedTags = append(convertedTags, domain.Tag{
+			convertedTags = append(convertedTags, models.Tag{
 				ID:   t.ID,
 				Name: t.Name,
 			})
 		}
 
-		articles[i] = domain.Article{
+		articles[i] = models.Article{
 			ID:          post.ID,
 			CreatedAt:   post.CreatedAt.Time,
 			UpdatedAt:   post.UpdatedAt.Time,

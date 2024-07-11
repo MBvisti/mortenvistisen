@@ -1,4 +1,4 @@
-package domain
+package validation
 
 import (
 	"fmt"
@@ -11,10 +11,6 @@ type Rule interface {
 	Violation() error
 	ViolationForHumans(val string) error
 }
-
-// type Compareable interface {
-// 	NotEqual(val, candidate any) bool
-// }
 
 func PasswordMatchConfirmRule(confirm string) PasswordMatchConfirm {
 	return PasswordMatchConfirm{
@@ -56,15 +52,6 @@ func (r Required) ViolationForHumans(val string) error {
 
 // IsViolated implements Rule.
 func (r Required) IsViolated(v any) bool {
-	// if v.Type().String() == "uuid.UUID" {
-	// 	id, ok := v.(uuid.UUID)
-	// 	if !ok {
-	// 		slog.Error("could not convert val to uuid in Required")
-	// 		return true
-	// 	}
-	//
-	// 	return id == uuid.Nil
-	// }
 	return IsEmpty(v)
 }
 
@@ -77,6 +64,34 @@ var MinLenRule = func(required int) MinLen {
 	return MinLen{
 		required,
 	}
+}
+
+var MustBeTrueRule MustBeTrue
+
+type MustBeTrue bool
+
+// IsViolated implements Rule.
+func (m MustBeTrue) IsViolated(val any) bool {
+	v, ok := val.(bool)
+	if !ok {
+		slog.Error("MustBeTruerule recevied a non boolean value")
+		return true
+	}
+
+	return !v
+}
+
+// Violation implements Rule.
+func (m MustBeTrue) Violation() error {
+	return ErrMustBeTrue
+}
+
+// ViolationForHumans implements Rule.
+func (m MustBeTrue) ViolationForHumans(val string) error {
+	return fmt.Errorf(
+		"%s needs to be 'true'",
+		val,
+	)
 }
 
 type MinLen struct {
@@ -176,4 +191,5 @@ var (
 	_ Rule = new(MinLen)
 	_ Rule = new(MaxLen)
 	_ Rule = new(Email)
+	_ Rule = new(MustBeTrue)
 )

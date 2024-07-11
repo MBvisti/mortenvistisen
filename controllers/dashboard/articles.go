@@ -180,7 +180,6 @@ func ArticleUpdate(
 		Title:       updateArticlePayload.Title,
 		HeaderTitle: updateArticlePayload.HeaderTitle,
 		Filename:    updateArticlePayload.Filename,
-		Slug:        updateArticlePayload.Slug,
 		Excerpt:     updateArticlePayload.Excerpt,
 		Readtime:    updateArticlePayload.EstReadTime,
 		TagIDs:      []uuid.UUID{},

@@ -7,7 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/MBvisti/mortenvistisen/domain"
+	"github.com/MBvisti/mortenvistisen/models"
 	"github.com/MBvisti/mortenvistisen/pkg/config"
 	"github.com/google/uuid"
 	"github.com/gorilla/sessions"
@@ -25,7 +25,7 @@ type authStorage interface {
 	QueryUserByEmail(
 		ctx context.Context,
 		email string,
-	) (domain.User, error)
+	) (models.User, error)
 }
 
 type Auth struct {

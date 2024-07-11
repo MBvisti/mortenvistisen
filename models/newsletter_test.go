@@ -1,4 +1,4 @@
-package domain
+package models_test
 
 import (
 	"errors"
@@ -6,42 +6,40 @@ import (
 	"testing"
 	"time"
 
+	"github.com/MBvisti/mortenvistisen/models"
+	"github.com/MBvisti/mortenvistisen/pkg/validation"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCreateNewsletter(t *testing.T) {
 	tests := map[string]struct {
-		title       string
-		edition     int32
-		paragraphs  []string
-		articleSlug string
-		expected    error
+		newsletter models.Newsletter
+		expected   []error
 	}{
 		"should create a new newsletter without errors": {
-			title:       "Test Newsletter",
-			edition:     1,
-			paragraphs:  []string{"a paragrah"},
-			articleSlug: "/test-newsletter",
-			expected:    nil,
+			newsletter: models.Newsletter{
+				Title:       "Test Newsletter",
+				Edition:     1,
+				Paragraphs:  []string{"a paragrah"},
+				ArticleSlug: "/test-newsletter",
+			},
+			expected: nil,
 		},
 		"should return errors ErrIsRequired, ErrTooShort, ErrIsRequired": {
-			title:       "empty",
-			edition:     0,
-			paragraphs:  []string{"a paragrah"},
-			articleSlug: "",
-			expected:    errors.Join(ErrIsRequired),
+			newsletter: models.Newsletter{
+				Title:       "empty",
+				Edition:     0,
+				Paragraphs:  []string{"a paragrah"},
+				ArticleSlug: "",
+			},
+			expected: []error{validation.ErrIsRequired},
 		},
 	}
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			_, actualErr := CreateNewsletter(
-				test.title,
-				test.edition,
-				test.paragraphs,
-				test.articleSlug,
-			)
+			actualErr := validation.Validate(test.newsletter, models.CreateNewsletterValidations())
 
 			if actualErr == nil {
 				assert.Equal(
@@ -56,23 +54,16 @@ func TestCreateNewsletter(t *testing.T) {
 				)
 			}
 
-			var gotErr error
-
-			var valiErrs ValidationErrs
-			if errors.As(actualErr, &valiErrs) {
-				var innerErr []error
-				for _, valiErr := range valiErrs {
-					innerErr = append(innerErr, valiErr.Causes()...)
-				}
-
-				gotErr = errors.Join(innerErr...)
+			var valiErrs validation.ValidationErrs
+			if ok := errors.As(actualErr, &valiErrs); !ok {
+				t.Fail()
 			}
 
-			assert.Equal(t, test.expected, gotErr,
+			assert.Equal(t, test.expected, valiErrs.UnwrapViolations(),
 				fmt.Sprintf(
-					"errors don't match: expected '%v', got '%v'",
+					"errors don't match: expected %v, got %v",
 					test.expected,
-					gotErr,
+					valiErrs.UnwrapViolations(),
 				),
 			)
 		})
@@ -81,24 +72,25 @@ func TestCreateNewsletter(t *testing.T) {
 
 func TestReleaseNewsletter(t *testing.T) {
 	tests := map[string]struct {
-		newsleter Newsletter
-		expected  error
+		newsleter models.Newsletter
+		expected  []error
 	}{
 		"should release without errors": {
-			newsleter: Newsletter{
+			newsleter: models.Newsletter{
 				ID:          uuid.New(),
 				CreatedAt:   time.Now(),
 				UpdatedAt:   time.Now(),
 				Title:       "All about unit testing",
 				Edition:     32,
 				ReleasedAt:  time.Now(),
+				Released:    true,
 				Paragraphs:  []string{"Welcome to this edition about unit testing"},
 				ArticleSlug: "/posts/unit-testing-in-golang",
 			},
 			expected: nil,
 		},
 		"should return errors ErrTooShort for title and paragrapsh ": {
-			newsleter: Newsletter{
+			newsleter: models.Newsletter{
 				ID:          uuid.New(),
 				CreatedAt:   time.Now(),
 				UpdatedAt:   time.Now(),
@@ -108,13 +100,17 @@ func TestReleaseNewsletter(t *testing.T) {
 				Paragraphs:  []string{""},
 				ArticleSlug: "/posts/unit-testing-in-golang",
 			},
-			expected: errors.Join(ErrTooShort),
+			expected: []error{
+				validation.ErrTooShort,
+				validation.ErrIsRequired,
+				validation.ErrMustBeTrue,
+			},
 		},
 	}
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			_, actualErr := test.newsleter.Release()
+			actualErr := test.newsleter.CanBeReleased()
 
 			if actualErr == nil {
 				assert.Equal(
@@ -129,23 +125,16 @@ func TestReleaseNewsletter(t *testing.T) {
 				)
 			}
 
-			var gotErr error
-
-			var valiErrs ValidationErrs
-			if errors.As(actualErr, &valiErrs) {
-				var innerErr []error
-				for _, valiErr := range valiErrs {
-					innerErr = append(innerErr, valiErr.Causes()...)
-				}
-
-				gotErr = errors.Join(innerErr...)
+			var valiErrs validation.ValidationErrs
+			if ok := errors.As(actualErr, &valiErrs); !ok {
+				t.Fail()
 			}
 
-			assert.Equal(t, test.expected, gotErr,
+			assert.Equal(t, test.expected, valiErrs.UnwrapViolations(),
 				fmt.Sprintf(
-					"errors don't match: expected '%v', got '%v'",
+					"errors don't match: expected %v, got %v",
 					test.expected,
-					gotErr,
+					valiErrs.UnwrapViolations(),
 				),
 			)
 		})

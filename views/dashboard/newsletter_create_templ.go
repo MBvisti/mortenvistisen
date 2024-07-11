@@ -10,7 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
-	"github.com/MBvisti/mortenvistisen/domain"
+	"github.com/MBvisti/mortenvistisen/models"
 	"github.com/MBvisti/mortenvistisen/views/components"
 	"github.com/MBvisti/mortenvistisen/views/emails"
 	"github.com/MBvisti/mortenvistisen/views/internal/layouts"
@@ -22,7 +22,7 @@ func NewsletterForm(
 	title,
 	edition string,
 	selectedArticleID uuid.UUID,
-	articles []domain.Article,
+	articles []models.Article,
 	errors map[string]components.InputError,
 	action string,
 	endpoint string,
@@ -154,7 +154,7 @@ func NewsletterForm(
 }
 
 func NewsletterPreview(
-	articles []domain.Article,
+	articles []models.Article,
 	newsletterMailPreview emails.NewsletterMail,
 	selectedArticleID uuid.UUID,
 	errors map[string]components.InputError,
@@ -486,7 +486,7 @@ func NewsletterPreview(
 	})
 }
 
-func CreateNewsletter(articles []domain.Article, selectedArticleID uuid.UUID, newsletterMailPreview emails.NewsletterMail, tkn string) templ.Component {
+func CreateNewsletter(articles []models.Article, selectedArticleID uuid.UUID, newsletterMailPreview emails.NewsletterMail, tkn string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)

@@ -3,13 +3,12 @@ package models
 import (
 	"context"
 
-	"github.com/MBvisti/mortenvistisen/domain"
 	"github.com/google/uuid"
 )
 
 type tagStorage interface {
-	InsertTag(ctx context.Context, data domain.Tag) error
-	QueryAllTags(ctx context.Context) ([]domain.Tag, error)
+	InsertTag(ctx context.Context, data Tag) error
+	QueryAllTags(ctx context.Context) ([]Tag, error)
 }
 
 type TagService struct {
@@ -22,18 +21,18 @@ func NewTagSvc(storage tagStorage) TagService {
 	}
 }
 
-func (t TagService) New(ctx context.Context, name string) (domain.Tag, error) {
-	tag := domain.Tag{
+func (t TagService) New(ctx context.Context, name string) (Tag, error) {
+	tag := Tag{
 		ID:   uuid.New(),
 		Name: name,
 	}
 	if err := t.storage.InsertTag(ctx, tag); err != nil {
-		return domain.Tag{}, err
+		return Tag{}, err
 	}
 
 	return tag, nil
 }
 
-func (t TagService) All(ctx context.Context) ([]domain.Tag, error) {
+func (t TagService) All(ctx context.Context) ([]Tag, error) {
 	return t.storage.QueryAllTags(ctx)
 }
