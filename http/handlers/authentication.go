@@ -1,11 +1,10 @@
-package authentication
+package handlers
 
 import (
 	"errors"
 	"fmt"
 	"log/slog"
 
-	"github.com/MBvisti/mortenvistisen/controllers/misc"
 	"github.com/MBvisti/mortenvistisen/models"
 	"github.com/MBvisti/mortenvistisen/pkg/config"
 	"github.com/MBvisti/mortenvistisen/services"
@@ -16,30 +15,47 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func CreateAuthenticatedSession(ctx echo.Context) error {
+type Authentication struct {
+	base         Base
+	authService  services.Auth
+	userModel    models.UserService
+	emailService services.Email
+	tknService   services.TokenSvc
+	cfg          config.Cfg
+}
+
+func NewAuthentication(
+	base Base,
+	authService services.Auth,
+	userModel models.UserService,
+	emailService services.Email,
+	tknService services.TokenSvc,
+	cfg config.Cfg,
+) Authentication {
+	return Authentication{base, authService, userModel, emailService, tknService, cfg}
+}
+
+func (a Authentication) CreateSession(ctx echo.Context) error {
 	return authentication.LoginPage(authentication.LoginPageProps{
 		CsrfToken: csrf.Token(ctx.Request()),
 	}, views.Head{}).Render(views.ExtractRenderDeps(ctx))
 }
 
-type UserLoginPayload struct {
-	Mail       string `form:"email"`
-	Password   string `form:"password"`
-	RememberMe string `form:"remember_me"` // TODO impl
-}
+func (a Authentication) StoreAuthenticatedSession(ctx echo.Context) error {
+	type userLoginPayload struct {
+		Mail       string `form:"email"`
+		Password   string `form:"password"`
+		RememberMe string `form:"remember_me"` // TODO impl
+	}
 
-func StoreAuthenticatedSession(
-	ctx echo.Context,
-	authService services.Auth,
-) error {
-	var payload UserLoginPayload
+	var payload userLoginPayload
 	if err := ctx.Bind(&payload); err != nil {
 		slog.ErrorContext(ctx.Request().Context(), "could not parse UserLoginPayload", "error", err)
 
 		return authentication.LoginResponse(true).Render(views.ExtractRenderDeps(ctx))
 	}
 
-	if err := authService.AuthenticateUser(
+	if err := a.authService.AuthenticateUser(
 		ctx.Request().Context(),
 		ctx.Request(),
 		ctx.Response(),
@@ -65,29 +81,23 @@ func StoreAuthenticatedSession(
 	return authentication.LoginResponse(false).Render(views.ExtractRenderDeps(ctx))
 }
 
-func CreatePasswordReset(ctx echo.Context) error {
+func (a Authentication) CreatePasswordReset(ctx echo.Context) error {
 	return authentication.ForgottenPasswordPage(authentication.ForgottenPasswordPageProps{
 		CsrfToken: csrf.Token(ctx.Request()),
 	}, views.Head{}).Render(views.ExtractRenderDeps(ctx))
 }
 
-type StorePasswordResetPayload struct {
-	Mail string `form:"email"`
-}
+func (a Authentication) StorePasswordReset(ctx echo.Context) error {
+	type storePasswordResetPayload struct {
+		Mail string `form:"email"`
+	}
 
-func StorePasswordReset(
-	ctx echo.Context,
-	userModel models.UserService,
-	emailService services.Email,
-	tknService services.TokenSvc,
-	cfg config.Cfg,
-) error {
-	var payload StorePasswordResetPayload
+	var payload storePasswordResetPayload
 	if err := ctx.Bind(&payload); err != nil {
 		return authentication.ForgottenPasswordSuccess(true).Render(views.ExtractRenderDeps(ctx))
 	}
 
-	user, err := userModel.ByEmail(ctx.Request().Context(), payload.Mail)
+	user, err := a.userModel.ByEmail(ctx.Request().Context(), payload.Mail)
 	if err != nil {
 		failureOccurred := true
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -98,15 +108,15 @@ func StorePasswordReset(
 			Render(views.ExtractRenderDeps(ctx))
 	}
 
-	resetPWToken, err := tknService.CreateResetPasswordToken(ctx.Request().Context(), user.ID)
+	resetPWToken, err := a.tknService.CreateResetPasswordToken(ctx.Request().Context(), user.ID)
 	if err != nil {
 		return err
 	}
 
-	if err := emailService.SendPasswordReset(ctx.Request().Context(), user.Mail, fmt.Sprintf(
+	if err := a.emailService.SendPasswordReset(ctx.Request().Context(), user.Mail, fmt.Sprintf(
 		"%s://%s/reset-password?token=%s",
-		cfg.App.AppScheme,
-		cfg.App.AppHost,
+		a.cfg.App.AppScheme,
+		a.cfg.App.AppHost,
 		resetPWToken)); err != nil {
 		return err
 	}
@@ -114,35 +124,30 @@ func StorePasswordReset(
 	return authentication.ForgottenPasswordSuccess(false).Render(views.ExtractRenderDeps(ctx))
 }
 
-type PasswordResetToken struct {
-	Token string `query:"token"`
-}
+func (a Authentication) CreateResetPassword(ctx echo.Context) error {
+	type passwordResetToken struct {
+		Token string `query:"token"`
+	}
 
-func CreateResetPassword(ctx echo.Context) error {
-	var passwordResetToken PasswordResetToken
-	if err := ctx.Bind(&passwordResetToken); err != nil {
-		return misc.InternalError(ctx)
+	var payload passwordResetToken
+	if err := ctx.Bind(&payload); err != nil {
+		return a.base.InternalError(ctx)
 	}
 
 	return authentication.ResetPasswordPage(authentication.ResetPasswordPageProps{
-		ResetToken: passwordResetToken.Token,
+		ResetToken: payload.Token,
 		CsrfToken:  csrf.Token(ctx.Request()),
 	}, views.Head{}).Render(views.ExtractRenderDeps(ctx))
 }
 
-type ResetPasswordPayload struct {
-	Password        string `form:"password"`
-	ConfirmPassword string `form:"confirm_password"`
-	Token           string `form:"token"`
-}
+func (a Authentication) StoreResetPassword(ctx echo.Context) error {
+	type resetPasswordPayload struct {
+		Password        string `form:"password"`
+		ConfirmPassword string `form:"confirm_password"`
+		Token           string `form:"token"`
+	}
 
-func StoreResetPassword(
-	ctx echo.Context,
-	userModel models.UserService,
-	authService services.Auth,
-	tknService services.TokenSvc,
-) error {
-	var payload ResetPasswordPayload
+	var payload resetPasswordPayload
 	if err := ctx.Bind(&payload); err != nil {
 		return authentication.ResetPasswordResponse(authentication.ResetPasswordResponseProps{
 			HasError: true,
@@ -150,16 +155,16 @@ func StoreResetPassword(
 		}).Render(views.ExtractRenderDeps(ctx))
 	}
 
-	if err := tknService.Validate(ctx.Request().Context(), payload.Token); err != nil {
+	if err := a.tknService.Validate(ctx.Request().Context(), payload.Token); err != nil {
 		return err
 	}
 
-	userID, err := tknService.GetAssociatedUserID(ctx.Request().Context(), payload.Token)
+	userID, err := a.tknService.GetAssociatedUserID(ctx.Request().Context(), payload.Token)
 	if err != nil {
 		return err
 	}
 
-	user, err := userModel.UpdatePassword(
+	user, err := a.userModel.UpdatePassword(
 		ctx.Request().Context(),
 		userID,
 		payload.Password,
@@ -169,7 +174,7 @@ func StoreResetPassword(
 		return err
 	}
 
-	if err = authService.CreateAuthenticatedSession(ctx.Request(), ctx.Response(), user.ID, false); err != nil {
+	if err = a.authService.CreateAuthenticatedSession(ctx.Request(), ctx.Response(), user.ID, false); err != nil {
 		return err
 	}
 
@@ -245,54 +250,11 @@ func StoreResetPassword(
 	// 	return misc.InternalError(ctx)
 	// }
 
-	if err := tknService.Delete(ctx.Request().Context(), payload.Token); err != nil {
+	if err := a.tknService.Delete(ctx.Request().Context(), payload.Token); err != nil {
 		return err
 	}
 
 	return authentication.ResetPasswordResponse(authentication.ResetPasswordResponseProps{
 		HasError: false,
 	}).Render(views.ExtractRenderDeps(ctx))
-}
-
-type VerifyEmail struct {
-	Token string `query:"token"`
-}
-
-func UserEmailVerification(
-	ctx echo.Context,
-	userModel models.UserService,
-	tknService services.TokenSvc,
-	authService services.Auth,
-) error {
-	var tkn VerifyEmail
-	if err := ctx.Bind(&tkn); err != nil {
-		ctx.Response().Writer.Header().Add("HX-Redirect", "/500")
-		ctx.Response().Writer.Header().Add("PreviousLocation", "/user/create")
-
-		return misc.InternalError(ctx)
-	}
-
-	if err := tknService.Validate(ctx.Request().Context(), tkn.Token); err != nil {
-		return err
-	}
-
-	userID, err := tknService.GetAssociatedUserID(ctx.Request().Context(), tkn.Token)
-	if err != nil {
-		return err
-	}
-
-	user, err := userModel.ConfirmEmail(ctx.Request().Context(), userID)
-	if err != nil {
-		return err
-	}
-
-	if err := authService.CreateAuthenticatedSession(ctx.Request(), ctx.Response(), user.ID, false); err != nil {
-		return err
-	}
-
-	if err := tknService.Delete(ctx.Request().Context(), tkn.Token); err != nil {
-		return err
-	}
-
-	return authentication.VerifyEmailPage(false, views.Head{}).Render(views.ExtractRenderDeps(ctx))
 }

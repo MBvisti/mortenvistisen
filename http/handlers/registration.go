@@ -1,4 +1,4 @@
-package authentication
+package handlers
 
 import (
 	"github.com/MBvisti/mortenvistisen/models"
@@ -9,34 +9,45 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// CreateUser method    shows the form to create the user
-func CreateUser(ctx echo.Context) error {
+type Registration struct {
+	base         Base
+	authService  services.Auth
+	userModel    models.UserService
+	tokenService services.TokenSvc
+	emailService services.Email
+}
+
+func NewRegistration(
+	base Base,
+	authService services.Auth,
+	userModel models.UserService,
+	tokenService services.TokenSvc,
+	emailService services.Email,
+) Registration {
+	return Registration{base, authService, userModel, tokenService, emailService}
+}
+
+func (r Registration) CreateUser(ctx echo.Context) error {
 	return authentication.RegisterPage(authentication.RegisterFormProps{
 		CsrfToken: csrf.Token(ctx.Request()),
 	}, views.Head{}).Render(views.ExtractRenderDeps(ctx))
 }
 
-type StoreUserPayload struct {
-	UserName        string `form:"user_name"`
-	Mail            string `form:"email"`
-	Password        string `form:"password"`
-	ConfirmPassword string `form:"confirm_password"`
-}
+func (r Registration) StoreUser(ctx echo.Context) error {
+	type storeUserPayload struct {
+		UserName        string `form:"user_name"`
+		Mail            string `form:"email"`
+		Password        string `form:"password"`
+		ConfirmPassword string `form:"confirm_password"`
+	}
 
-// StoreUser method    stores the new user
-func StoreUser(
-	ctx echo.Context,
-	userModel models.UserService,
-	tokenService services.TokenSvc,
-	emailService services.Email,
-) error {
-	var payload StoreUserPayload
+	var payload storeUserPayload
 	if err := ctx.Bind(&payload); err != nil {
 		return authentication.RegisterResponse("An error occurred", "Please refresh the page an try again.", true).
 			Render(views.ExtractRenderDeps(ctx))
 	}
 
-	user, err := userModel.New(
+	user, err := r.userModel.New(
 		ctx.Request().Context(),
 		payload.UserName,
 		payload.Mail,
@@ -47,7 +58,7 @@ func StoreUser(
 		return err
 	}
 
-	activationToken, err := tokenService.CreateEmailVerificationToken(
+	activationToken, err := r.tokenService.CreateEmailVerificationToken(
 		ctx.Request().Context(),
 		user.ID,
 	)
@@ -55,7 +66,7 @@ func StoreUser(
 		return err
 	}
 
-	if err := emailService.SendUserSignup(ctx.Request().Context(), user.Mail, activationToken); err != nil {
+	if err := r.emailService.SendUserSignup(ctx.Request().Context(), user.Mail, activationToken); err != nil {
 		return err
 	}
 
@@ -185,4 +196,42 @@ func StoreUser(
 
 	return authentication.RegisterResponse("You're now registered", "You should receive an email soon to validate your account.", false).
 		Render(views.ExtractRenderDeps(ctx))
+}
+
+func (r Registration) UserEmailVerification(ctx echo.Context) error {
+	type verifyEmail struct {
+		Token string `query:"token"`
+	}
+
+	var payload verifyEmail
+	if err := ctx.Bind(&payload); err != nil {
+		ctx.Response().Writer.Header().Add("HX-Redirect", "/500")
+		ctx.Response().Writer.Header().Add("PreviousLocation", "/user/create")
+
+		return r.base.InternalError(ctx)
+	}
+
+	if err := r.tokenService.Validate(ctx.Request().Context(), payload.Token); err != nil {
+		return err
+	}
+
+	userID, err := r.tokenService.GetAssociatedUserID(ctx.Request().Context(), payload.Token)
+	if err != nil {
+		return err
+	}
+
+	user, err := r.userModel.ConfirmEmail(ctx.Request().Context(), userID)
+	if err != nil {
+		return err
+	}
+
+	if err := r.authService.CreateAuthenticatedSession(ctx.Request(), ctx.Response(), user.ID, false); err != nil {
+		return err
+	}
+
+	if err := r.tokenService.Delete(ctx.Request().Context(), payload.Token); err != nil {
+		return err
+	}
+
+	return authentication.VerifyEmailPage(false, views.Head{}).Render(views.ExtractRenderDeps(ctx))
 }

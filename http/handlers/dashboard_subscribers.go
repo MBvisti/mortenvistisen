@@ -1,12 +1,8 @@
-package dashboard
+package handlers
 
 import (
 	"net/http"
 
-	"github.com/MBvisti/mortenvistisen/controllers"
-	"github.com/MBvisti/mortenvistisen/models"
-	"github.com/MBvisti/mortenvistisen/repository/psql/database"
-	"github.com/MBvisti/mortenvistisen/services"
 	"github.com/MBvisti/mortenvistisen/views"
 	"github.com/MBvisti/mortenvistisen/views/components"
 	"github.com/MBvisti/mortenvistisen/views/dashboard"
@@ -15,35 +11,35 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func SubscribersIndex(
-	ctx echo.Context,
-	db database.Queries,
-	subscriberSvc models.SubscriberService,
-) error {
+func (d Dashboard) SubscribersIndex(ctx echo.Context) error {
 	page := ctx.QueryParam("page")
 	pageLimit := 7
 
-	offset, currentPage, err := controllers.GetOffsetAndCurrPage(page, pageLimit)
+	offset, currentPage, err := d.base.GetOffsetAndCurrPage(page, pageLimit)
 	if err != nil {
 		return err
 	}
 
-	subscribers, err := subscriberSvc.List(ctx.Request().Context(), int32(offset), int32(pageLimit))
+	subscribers, err := d.subscriberSvc.List(
+		ctx.Request().Context(),
+		int32(offset),
+		int32(pageLimit),
+	)
 	if err != nil {
 		return err
 	}
 
-	count, err := subscriberSvc.Count(ctx.Request().Context())
+	count, err := d.subscriberSvc.Count(ctx.Request().Context())
 	if err != nil {
 		return err
 	}
 
-	monthlySubscriberCount, err := subscriberSvc.NewForCurrentMonth(ctx.Request().Context())
+	monthlySubscriberCount, err := d.subscriberSvc.NewForCurrentMonth(ctx.Request().Context())
 	if err != nil {
 		return err
 	}
 
-	unverifiedSubCount, err := subscriberSvc.UnverifiedCount(ctx.Request().Context())
+	unverifiedSubCount, err := d.subscriberSvc.UnverifiedCount(ctx.Request().Context())
 	if err != nil {
 		return err
 	}
@@ -61,19 +57,14 @@ func SubscribersIndex(
 
 	pagination := components.PaginationProps{
 		CurrentPage: currentPage,
-		TotalPages:  controllers.CalculateNumberOfPages(int(count), 7),
+		TotalPages:  d.base.CalculateNumberOfPages(int(count), 7),
 	}
 
 	return dashboard.Subscribers(int(count), int(len(monthlySubscriberCount)), int(unverifiedSubCount), viewData, pagination, csrf.Token(ctx.Request())).
 		Render(views.ExtractRenderDeps(ctx))
 }
 
-func ResendVerificationMail(
-	ctx echo.Context,
-	subscriberModel models.SubscriberService,
-	tokenService services.TokenSvc,
-	emailService services.Email,
-) error {
+func (d Dashboard) ResendVerificationMail(ctx echo.Context) error {
 	subscriberID := ctx.Param("id")
 
 	subscriberUUID, err := uuid.Parse(subscriberID)
@@ -81,7 +72,7 @@ func ResendVerificationMail(
 		return dashboard.FailureMsg("Could not mail send").Render(views.ExtractRenderDeps(ctx))
 	}
 
-	subscriber, err := subscriberModel.ByID(ctx.Request().Context(), subscriberUUID)
+	subscriber, err := d.subscriberSvc.ByID(ctx.Request().Context(), subscriberUUID)
 	if err != nil {
 		return dashboard.FailureMsg("Could not mail send").Render(views.ExtractRenderDeps(ctx))
 	}
@@ -90,11 +81,11 @@ func ResendVerificationMail(
 		return dashboard.FailureMsg("Could not mail send").Render(views.ExtractRenderDeps(ctx))
 	}
 
-	if err := tokenService.DeleteSubscriberToken(ctx.Request().Context(), subscriberUUID); err != nil {
+	if err := d.tokenService.DeleteSubscriberToken(ctx.Request().Context(), subscriberUUID); err != nil {
 		return dashboard.FailureMsg("Could not mail send").Render(views.ExtractRenderDeps(ctx))
 	}
 
-	activationToken, err := tokenService.CreateSubscriptionToken(
+	activationToken, err := d.tokenService.CreateSubscriptionToken(
 		ctx.Request().Context(),
 		subscriber.ID,
 	)
@@ -102,7 +93,7 @@ func ResendVerificationMail(
 		return err
 	}
 
-	unsubToken, err := tokenService.CreateUnsubscribeToken(
+	unsubToken, err := d.tokenService.CreateUnsubscribeToken(
 		ctx.Request().Context(),
 		subscriber.ID,
 	)
@@ -110,7 +101,7 @@ func ResendVerificationMail(
 		return err
 	}
 
-	if err := emailService.SendNewSubscriberEmail(
+	if err := d.emailService.SendNewSubscriberEmail(
 		ctx.Request().Context(),
 		subscriber.Email,
 		activationToken,
@@ -122,12 +113,12 @@ func ResendVerificationMail(
 	return dashboard.SuccessMsg("Verification mail send").Render(views.ExtractRenderDeps(ctx))
 }
 
-func DeleteSubscriber(ctx echo.Context, subscriberModel models.SubscriberService) error {
+func (d Dashboard) DeleteSubscriber(ctx echo.Context) error {
 	id := ctx.Param("ID")
 
 	parsedID := uuid.MustParse(id)
 
-	if err := subscriberModel.Delete(ctx.Request().Context(), parsedID); err != nil {
+	if err := d.subscriberSvc.Delete(ctx.Request().Context(), parsedID); err != nil {
 		return err
 	}
 

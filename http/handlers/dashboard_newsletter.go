@@ -1,10 +1,10 @@
-package dashboard
+package handlers
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 
-	"github.com/MBvisti/mortenvistisen/controllers"
 	"github.com/MBvisti/mortenvistisen/models"
 	"github.com/MBvisti/mortenvistisen/views"
 	"github.com/MBvisti/mortenvistisen/views/components"
@@ -15,20 +15,16 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func NewslettersIndex(
-	ctx echo.Context,
-	newsletterModel models.NewsletterService,
-	cookieStore controllers.CookieStore,
-) error {
+func (d Dashboard) NewslettersIndex(ctx echo.Context) error {
 	page := ctx.QueryParam("page")
 	pageLimit := 7
 
-	offset, currentPage, err := controllers.GetOffsetAndCurrPage(page, pageLimit)
+	offset, currentPage, err := d.base.GetOffsetAndCurrPage(page, pageLimit)
 	if err != nil {
 		return err
 	}
 
-	newsletters, err := newsletterModel.List(
+	newsletters, err := d.newsletterSvc.List(
 		ctx.Request().Context(),
 		int32(pageLimit),
 		int32(offset),
@@ -37,7 +33,7 @@ func NewslettersIndex(
 		return err
 	}
 
-	totalNewslettersCount, err := newsletterModel.Count(ctx.Request().Context(), false)
+	totalNewslettersCount, err := d.newsletterSvc.Count(ctx.Request().Context(), false)
 	if err != nil {
 		return err
 	}
@@ -55,10 +51,14 @@ func NewslettersIndex(
 
 	pagination := components.PaginationProps{
 		CurrentPage: currentPage,
-		TotalPages:  controllers.CalculateNumberOfPages(int(totalNewslettersCount), 7),
+		TotalPages:  d.base.CalculateNumberOfPages(int(totalNewslettersCount), 7),
 	}
 
-	msg, err := cookieStore.GetFlashMessages(ctx.Request(), ctx.Response(), "newsletter-released")
+	msg, err := d.base.CookieStore.GetFlashMessages(
+		ctx.Request(),
+		ctx.Response(),
+		"newsletter-released",
+	)
 	if err != nil {
 		return err
 	}
@@ -67,17 +67,13 @@ func NewslettersIndex(
 		Render(views.ExtractRenderDeps(ctx))
 }
 
-func NewsletterCreate(
-	ctx echo.Context,
-	newsletterModel models.NewsletterService,
-	articleModel models.ArticleService,
-) error {
-	releasedNewslettersCount, err := newsletterModel.Count(ctx.Request().Context(), true)
+func (d Dashboard) NewsletterCreate(ctx echo.Context) error {
+	releasedNewslettersCount, err := d.newsletterSvc.Count(ctx.Request().Context(), true)
 	if err != nil {
 		return err
 	}
 
-	articles, err := articleModel.All(ctx.Request().Context())
+	articles, err := d.articleSvc.All(ctx.Request().Context())
 	if err != nil {
 		return err
 	}
@@ -90,24 +86,19 @@ func NewsletterCreate(
 		Render(views.ExtractRenderDeps(ctx))
 }
 
-func NewslettersEdit(
-	ctx echo.Context,
-	newsletterModel models.NewsletterService,
-	articleModel models.ArticleService,
-	cookieStore controllers.CookieStore,
-) error {
+func (d Dashboard) NewslettersEdit(ctx echo.Context) error {
 	newsletterIDParam := ctx.Param("id")
 	newsletterID, err := uuid.Parse(newsletterIDParam)
 	if err != nil {
 		return err
 	}
 
-	newsletter, err := newsletterModel.ByID(ctx.Request().Context(), newsletterID)
+	newsletter, err := d.newsletterSvc.ByID(ctx.Request().Context(), newsletterID)
 	if err != nil {
 		return err
 	}
 
-	articles, err := articleModel.All(ctx.Request().Context())
+	articles, err := d.articleSvc.All(ctx.Request().Context())
 	if err != nil {
 		return err
 	}
@@ -119,14 +110,14 @@ func NewslettersEdit(
 		}
 	}
 
-	releasedNewslettersCount, err := newsletterModel.Count(ctx.Request().Context(), true)
+	releasedNewslettersCount, err := d.newsletterSvc.Count(ctx.Request().Context(), true)
 	if err != nil {
 		return err
 	}
 
 	edition := strconv.Itoa(int(releasedNewslettersCount) + 1)
 
-	msg, err := cookieStore.GetFlashMessages(
+	msg, err := d.base.CookieStore.GetFlashMessages(
 		ctx.Request(),
 		ctx.Response(),
 		"newsletter-draft-saved",
@@ -144,8 +135,8 @@ func NewslettersEdit(
 			Title:      newsletter.Title,
 			Edition:    edition,
 			Paragraphs: newsletter.Paragraphs,
-			ArticleLink: controllers.BuildURLFromSlug(
-				controllers.FormatArticleSlug(newsletter.ArticleSlug),
+			ArticleLink: d.base.BuildURLFromSlug(
+				d.base.FormatArticleSlug(newsletter.ArticleSlug),
 			),
 		},
 		Articles: articles,
@@ -154,12 +145,7 @@ func NewslettersEdit(
 }
 
 // TODO: implement
-func NewsletterUpdate(
-	ctx echo.Context,
-	newsletterModel models.NewsletterService,
-	articleModel models.ArticleService,
-	cookieStore controllers.CookieStore,
-) error {
+func (d Dashboard) NewsletterUpdate(ctx echo.Context) error {
 	preview := ctx.QueryParam("preview")
 	var updateNewsletterPayload newsletterPayload
 	if err := ctx.Bind(&updateNewsletterPayload); err != nil {
@@ -177,18 +163,15 @@ func NewsletterUpdate(
 	}
 
 	if preview == "true" {
-		return previewNewsletter(
+		return d.previewNewsletter(
 			ctx,
 			updateNewsletterPayload,
-			newsletterModel,
-			articleModel,
-			cookieStore,
 			"put",
 			fmt.Sprintf("newsletters/%s/update", newsletterID),
 		)
 	}
 
-	newsletter, err := newsletterModel.Update(
+	newsletter, err := d.newsletterSvc.Update(
 		ctx.Request().Context(),
 		updateNewsletterPayload.Title,
 		updateNewsletterPayload.Edition,
@@ -237,17 +220,15 @@ func NewsletterUpdate(
 	// 		Render(views.ExtractRenderDeps(ctx))
 	// }
 
-	articles, err := articleModel.All(ctx.Request().Context())
+	articles, err := d.articleSvc.All(ctx.Request().Context())
 	if err != nil {
 		return err
 	}
 
 	if updateNewsletterPayload.ReleaseOnCreate == "on" {
-		return releaseNewsletter(
+		return d.releaseNewsletter(
 			ctx,
 			newsletter,
-			newsletterModel,
-			cookieStore,
 			"put",
 			fmt.Sprintf("newsletters/%s/update", newsletterID),
 		)
@@ -269,18 +250,15 @@ func NewsletterUpdate(
 		Render(views.ExtractRenderDeps(ctx))
 }
 
-func previewNewsletter(ctx echo.Context,
+func (d Dashboard) previewNewsletter(ctx echo.Context,
 	storeNewsletterPayload newsletterPayload,
-	newsletterModel models.NewsletterService,
-	articleModel models.ArticleService,
-	cookieStore controllers.CookieStore,
 	hxAction string,
 	endpoint string,
 ) error {
 	paragraphIndex := ctx.QueryParam("paragraph-index")
 	action := ctx.QueryParam("action")
 
-	newsletterPreview, err := newsletterModel.Preview(
+	newsletterPreview, err := d.newsletterSvc.Preview(
 		ctx.Request().Context(),
 		paragraphIndex,
 		action,
@@ -293,7 +271,7 @@ func previewNewsletter(ctx echo.Context,
 		return err
 	}
 
-	articles, err := articleModel.All(ctx.Request().Context())
+	articles, err := d.articleSvc.All(ctx.Request().Context())
 	if err != nil {
 		return err
 	}
@@ -315,14 +293,13 @@ func previewNewsletter(ctx echo.Context,
 	}, parsedArticleID, make(map[string]components.InputError), csrf.Token(ctx.Request()), hxAction, endpoint).Render(views.ExtractRenderDeps(ctx))
 }
 
-func releaseNewsletter(ctx echo.Context,
+func (d Dashboard) releaseNewsletter(ctx echo.Context,
 	newsletter models.Newsletter,
-	newsletterModel models.NewsletterService,
-	cookieStore controllers.CookieStore,
 	hxAction string,
 	endpoint string,
 ) error {
-	_, err := newsletterModel.Release(
+	log.Print(hxAction, endpoint)
+	_, err := d.newsletterSvc.Release(
 		ctx.Request().Context(),
 		newsletter,
 	)
@@ -374,11 +351,11 @@ func releaseNewsletter(ctx echo.Context,
 	// }
 	//
 
-	if err := cookieStore.CreateFlashMsg(ctx.Request(), ctx.Response(), "newsletter-released"); err != nil {
+	if err := d.base.CookieStore.CreateFlashMsg(ctx.Request(), ctx.Response(), "newsletter-released"); err != nil {
 		return err
 	}
 
-	return controllers.RedirectHx(
+	return d.base.RedirectHx(
 		ctx.Response().Writer,
 		"/dashboard/newsletters",
 	)
@@ -393,31 +370,24 @@ type newsletterPayload struct {
 	ReleaseOnCreate     string   `form:"release-on-create"`
 }
 
-func NewsletterStore(
-	ctx echo.Context,
-	cookieStorage controllers.CookieStore,
-	newsletterModel models.NewsletterService,
-	articleModel models.ArticleService,
-) error {
+func (d Dashboard) NewsletterStore(ctx echo.Context) error {
 	preview := ctx.QueryParam("preview")
+
 	var storeNewsletterPayload newsletterPayload
 	if err := ctx.Bind(&storeNewsletterPayload); err != nil {
 		return err
 	}
 
 	if preview == "true" {
-		return previewNewsletter(
+		return d.previewNewsletter(
 			ctx,
 			storeNewsletterPayload,
-			newsletterModel,
-			articleModel,
-			cookieStorage,
 			"post",
 			"newsletters/store",
 		)
 	}
 
-	newsletter, err := newsletterModel.CreateDraft(ctx.Request().Context(),
+	newsletter, err := d.newsletterSvc.CreateDraft(ctx.Request().Context(),
 		storeNewsletterPayload.Title,
 		// storeNewsletterPayload.Edition, //TODO:
 		9,
@@ -429,23 +399,21 @@ func NewsletterStore(
 	}
 
 	if storeNewsletterPayload.ReleaseOnCreate == "" {
-		if err := cookieStorage.CreateFlashMsg(ctx.Request(), ctx.Response(), "newsletter-draft-saved"); err != nil {
+		if err := d.base.CookieStore.CreateFlashMsg(ctx.Request(), ctx.Response(), "newsletter-draft-saved"); err != nil {
 			return err
 		}
 	}
 
 	if storeNewsletterPayload.ReleaseOnCreate == "on" {
-		return releaseNewsletter(
+		return d.releaseNewsletter(
 			ctx,
 			newsletter,
-			newsletterModel,
-			cookieStorage,
 			"post",
 			"newsletters/store",
 		)
 	}
 
-	return controllers.RedirectHx(
+	return d.base.RedirectHx(
 		ctx.Response().Writer,
 		fmt.Sprintf("/dashboard/newsletters/%v/edit", newsletter.ID),
 	)

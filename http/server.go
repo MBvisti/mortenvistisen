@@ -10,13 +10,13 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/MBvisti/mortenvistisen/http/router"
 	"github.com/MBvisti/mortenvistisen/pkg/config"
+	"github.com/MBvisti/mortenvistisen/routes"
 	"github.com/gorilla/csrf"
 )
 
 type Server struct {
-	router *router.Router
+	router *routes.Router
 	host   string
 	port   string
 	cfg    config.Cfg
@@ -24,7 +24,7 @@ type Server struct {
 }
 
 func NewServer(
-	router *router.Router,
+	router *routes.Router,
 	logger *slog.Logger,
 	cfg config.Cfg,
 ) Server {

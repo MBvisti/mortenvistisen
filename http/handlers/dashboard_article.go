@@ -1,11 +1,10 @@
-package dashboard
+package handlers
 
 import (
 	"log/slog"
 	"slices"
 	"strconv"
 
-	"github.com/MBvisti/mortenvistisen/controllers"
 	"github.com/MBvisti/mortenvistisen/models"
 	"github.com/MBvisti/mortenvistisen/posts"
 	"github.com/MBvisti/mortenvistisen/views"
@@ -16,21 +15,21 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func ArticlesIndex(ctx echo.Context, articleModel models.ArticleService) error {
+func (d Dashboard) ArticlesIndex(ctx echo.Context) error {
 	page := ctx.QueryParam("page")
 	pageLimit := 7
 
-	offset, currentPage, err := controllers.GetOffsetAndCurrPage(page, pageLimit)
+	offset, currentPage, err := d.base.GetOffsetAndCurrPage(page, pageLimit)
 	if err != nil {
 		return err
 	}
 
-	articles, err := articleModel.List(ctx.Request().Context(), int32(offset), int32(pageLimit))
+	articles, err := d.articleSvc.List(ctx.Request().Context(), int32(offset), int32(pageLimit))
 	if err != nil {
 		return err
 	}
 
-	totalPostsCount, err := articleModel.Count(ctx.Request().Context())
+	totalPostsCount, err := d.articleSvc.Count(ctx.Request().Context())
 	if err != nil {
 		return err
 	}
@@ -48,19 +47,15 @@ func ArticlesIndex(ctx echo.Context, articleModel models.ArticleService) error {
 
 	pagination := components.PaginationProps{
 		CurrentPage: currentPage,
-		TotalPages:  controllers.CalculateNumberOfPages(int(totalPostsCount), 7),
+		TotalPages:  d.base.CalculateNumberOfPages(int(totalPostsCount), 7),
 	}
 
 	return dashboard.Articles(viewData, pagination, csrf.Token(ctx.Request())).
 		Render(views.ExtractRenderDeps(ctx))
 }
 
-func ArticleCreate(
-	ctx echo.Context,
-	articleModel models.ArticleService,
-	tagModel models.TagService,
-) error {
-	tags, err := tagModel.All(ctx.Request().Context())
+func (d Dashboard) ArticleCreate(ctx echo.Context) error {
+	tags, err := d.tagSvc.All(ctx.Request().Context())
 	if err != nil {
 		return err
 	}
@@ -78,7 +73,7 @@ func ArticleCreate(
 		return err
 	}
 
-	articles, err := articleModel.All(ctx.Request().Context())
+	articles, err := d.articleSvc.All(ctx.Request().Context())
 	if err != nil {
 		return err
 	}
@@ -103,19 +98,15 @@ func ArticleCreate(
 		csrf.Token(ctx.Request())).Render(views.ExtractRenderDeps(ctx))
 }
 
-func ArticleEdit(
-	ctx echo.Context,
-	articleModel models.ArticleService,
-	postManager posts.PostManager,
-) error {
+func (d Dashboard) ArticleEdit(ctx echo.Context) error {
 	slug := ctx.Param("slug")
 
-	post, err := articleModel.BySlug(ctx.Request().Context(), slug)
+	post, err := d.articleSvc.BySlug(ctx.Request().Context(), slug)
 	if err != nil {
 		return err
 	}
 
-	postContent, err := postManager.Parse(post.Filename)
+	postContent, err := d.postManager.Parse(post.Filename)
 	if err != nil {
 		return err
 	}
@@ -159,10 +150,7 @@ type articleUpdatePayload struct {
 	Filename    string `form:"filename"`
 }
 
-func ArticleUpdate(
-	ctx echo.Context,
-	articleModel models.ArticleService,
-) error {
+func (d Dashboard) ArticleUpdate(ctx echo.Context) error {
 	id := ctx.Param("id")
 
 	var updateArticlePayload articleUpdatePayload
@@ -175,7 +163,7 @@ func ArticleUpdate(
 		return err
 	}
 
-	article, err := articleModel.Update(ctx.Request().Context(), models.UpdateArticlePayload{
+	article, err := d.articleSvc.Update(ctx.Request().Context(), models.UpdateArticlePayload{
 		ID:          parsedID,
 		Title:       updateArticlePayload.Title,
 		HeaderTitle: updateArticlePayload.HeaderTitle,
@@ -211,18 +199,17 @@ func ArticleUpdate(
 		Render(views.ExtractRenderDeps(ctx))
 }
 
-type newArticleFormPayload struct {
-	Title             string   `form:"title"`
-	HeaderTitle       string   `form:"header-title"`
-	Excerpt           string   `form:"excerpt"`
-	EstimatedReadTime string   `form:"estimated-read-time"`
-	Filename          string   `form:"filename"`
-	SelectedKeywords  []string `form:"selected-keyword"`
-	Release           string   `form:"release"`
-	Slug              string   `form:"slug"`
-}
-
-func ArticleStore(ctx echo.Context, articleModel models.ArticleService) error {
+func (d Dashboard) ArticleStore(ctx echo.Context) error {
+	type newArticleFormPayload struct {
+		Title             string   `form:"title"`
+		HeaderTitle       string   `form:"header-title"`
+		Excerpt           string   `form:"excerpt"`
+		EstimatedReadTime string   `form:"estimated-read-time"`
+		Filename          string   `form:"filename"`
+		SelectedKeywords  []string `form:"selected-keyword"`
+		Release           string   `form:"release"`
+		Slug              string   `form:"slug"`
+	}
 	var postPayload newArticleFormPayload
 	if err := ctx.Bind(&postPayload); err != nil {
 		return err
@@ -248,7 +235,7 @@ func ArticleStore(ctx echo.Context, articleModel models.ArticleService) error {
 		tagIDs = append(tagIDs, id)
 	}
 
-	_, err = articleModel.New(ctx.Request().Context(), models.NewArticlePayload{
+	_, err = d.articleSvc.New(ctx.Request().Context(), models.NewArticlePayload{
 		ReleaseNow:  releaseNow,
 		Title:       postPayload.Title,
 		HeaderTitle: postPayload.HeaderTitle,
@@ -267,24 +254,21 @@ func ArticleStore(ctx echo.Context, articleModel models.ArticleService) error {
 	return nil
 }
 
-type newTagFormPayload struct {
-	Name             string   `form:"tag-name"`
-	SelectedKeywords []string `form:"selected-keyword"`
-}
-
-func TagStore(ctx echo.Context,
-	tagModel models.TagService,
-) error {
+func (d Dashboard) TagStore(ctx echo.Context) error {
+	type newTagFormPayload struct {
+		Name             string   `form:"tag-name"`
+		SelectedKeywords []string `form:"selected-keyword"`
+	}
 	var tagPayload newTagFormPayload
 	if err := ctx.Bind(&tagPayload); err != nil {
 		return err
 	}
 
-	if _, err := tagModel.New(ctx.Request().Context(), tagPayload.Name); err != nil {
+	if _, err := d.tagSvc.New(ctx.Request().Context(), tagPayload.Name); err != nil {
 		return err
 	}
 
-	tags, err := tagModel.All(ctx.Request().Context())
+	tags, err := d.tagSvc.All(ctx.Request().Context())
 	if err != nil {
 		return err
 	}
