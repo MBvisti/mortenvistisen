@@ -271,9 +271,14 @@ select
     posts.read_time,
     (select count(id) from posts) as total_posts_count
 from posts
-limit 7
+limit $2
 offset $1
 `
+
+type QueryAllPostsParams struct {
+	Offset int32
+	Limit  int32
+}
 
 type QueryAllPostsRow struct {
 	ID              uuid.UUID
@@ -290,8 +295,8 @@ type QueryAllPostsRow struct {
 	TotalPostsCount int64
 }
 
-func (q *Queries) QueryAllPosts(ctx context.Context, offset int32) ([]QueryAllPostsRow, error) {
-	rows, err := q.db.Query(ctx, queryAllPosts, offset)
+func (q *Queries) QueryAllPosts(ctx context.Context, arg QueryAllPostsParams) ([]QueryAllPostsRow, error) {
+	rows, err := q.db.Query(ctx, queryAllPosts, arg.Offset, arg.Limit)
 	if err != nil {
 		return nil, err
 	}

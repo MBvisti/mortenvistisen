@@ -43,7 +43,7 @@ type articleStorage interface {
 		tagIDs []uuid.UUID,
 	) error
 	CountArticles(ctx context.Context) (int64, error)
-	QueryAllArticles(ctx context.Context) ([]Article, error)
+	QueryAllArticles(ctx context.Context, limit, offset int32) ([]Article, error)
 }
 
 type ArticleService struct {
@@ -182,5 +182,6 @@ func (a ArticleService) Count(ctx context.Context) (int64, error) {
 }
 
 func (a ArticleService) All(ctx context.Context) ([]Article, error) {
-	return a.articleStorage.QueryAllArticles(ctx)
+	// TODO: fix this
+	return a.articleStorage.QueryAllArticles(ctx, 1000000, 0)
 }

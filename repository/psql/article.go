@@ -47,8 +47,14 @@ func (p Postgres) InsertArticle(
 	return nil
 }
 
-func (p Postgres) QueryAllArticles(ctx context.Context) ([]models.Article, error) {
-	articles, err := p.Queries.QueryAllPosts(ctx, 0)
+func (p Postgres) QueryAllArticles(
+	ctx context.Context,
+	limit, offset int32,
+) ([]models.Article, error) {
+	articles, err := p.Queries.QueryAllPosts(ctx, database.QueryAllPostsParams{
+		Offset: offset,
+		Limit:  limit,
+	})
 	if err != nil {
 		return nil, err
 	}

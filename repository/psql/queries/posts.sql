@@ -82,7 +82,7 @@ select
     posts.read_time,
     (select count(id) from posts) as total_posts_count
 from posts
-limit 7
+limit $2
 offset $1
 ;
 
