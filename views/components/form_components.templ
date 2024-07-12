@@ -1,8 +1,6 @@
 package components
 
-import (
-	"strings"
-)
+import "strings"
 
 type InputError struct {
 	Msg      string
@@ -12,13 +10,14 @@ type InputError struct {
 type InputElementData struct {
 	ID string
 	// InputType defaults to "text"
-	InputType string
-	Value     string
-	Name      string
-	Err       InputError
-	Title     string
-	Required  bool
-	HxTrigger string
+	InputType   string
+	Value       string
+	Name        string
+	Err         InputError
+	Title       string
+	Required    bool
+	Placeholder string
+	HxTrigger   string
 	// HxAction is the endpoint to send the request to
 	HxAction string
 	// HxMethod accepts: GET, POST, PUT, DELETE
@@ -32,16 +31,17 @@ templ InputElement(data InputElementData) {
 		if data.ID != "" {
 			for={ data.ID }
 		}
-		class="form-label text-light-emphasis"
+		if data.Err.Msg != "" {
+			class="input input-bordered input-error flex items-center gap-2 my-2"
+		} else {
+			class="input input-bordered flex items-center gap-2 my-2"
+		}
 	>
 		{ data.Title }
-	</label>
-	<div class="input-group">
 		<input
-			if data.Err.Msg != "" {
-				class="form-control text-light is-invalid"
-			} else {
-				class="form-control mb-4 text-light"
+			class="grow border-none input-error"
+			if data.Placeholder != "" {
+				placeholder={ data.Placeholder }
 			}
 			if data.ID != "" {
 				id={ data.ID }
@@ -89,7 +89,7 @@ templ InputElement(data InputElementData) {
 				{ data.Err.Msg }
 			</div>
 		}
-	</div>
+	</label>
 }
 
 type TextareaData struct {
@@ -97,8 +97,9 @@ type TextareaData struct {
 	// InputType defaults to "text"
 	// InputType string
 	// Value     string
-	Name string
-	Err  InputError
+	Name        string
+	Err         InputError
+	Placeholder string
 	// Title     string
 	// Required  bool
 	// HxTrigger string
@@ -114,10 +115,17 @@ templ TextareaElement(data TextareaData) {
 	<textarea
 		name={ data.Name }
 		if data.Err.Msg != "" {
-			class="form-control is-invalid"
+			class="w-full textarea textarea-bordered"
 		} else {
-			class="form-control mb-4"
+			class="w-full textarea textarea-bordered"
 		}
+		if data.Placeholder != "" {
+			placeholder={ data.Placeholder }
+		}
+		maxLength="160"
+		minLength="130"
+		x-ref="countme"
+		x-on:keyup="count = $refs.countme.value.length"
 	></textarea>
 	if data.Err.Msg != "" {
 		<div class="invalid-feedback mb-4">

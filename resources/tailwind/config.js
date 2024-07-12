@@ -5,6 +5,7 @@ module.exports = {
     "../views/authentication/*.templ",
     "../views/components/*.templ",
     "../views/internal/components/*.templ",
+    "../views/dashboard/*.templ",
     "../views/internal/layouts/*.templ"
   ],
   darkMode: 'class',

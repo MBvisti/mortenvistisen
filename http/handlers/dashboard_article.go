@@ -1,11 +1,13 @@
 package handlers
 
 import (
-	"log/slog"
+	"errors"
+	"fmt"
 	"slices"
 	"strconv"
 
 	"github.com/MBvisti/mortenvistisen/models"
+	"github.com/MBvisti/mortenvistisen/pkg/validation"
 	"github.com/MBvisti/mortenvistisen/posts"
 	"github.com/MBvisti/mortenvistisen/views"
 	"github.com/MBvisti/mortenvistisen/views/components"
@@ -208,7 +210,6 @@ func (d Dashboard) ArticleStore(ctx echo.Context) error {
 		Filename          string   `form:"filename"`
 		SelectedKeywords  []string `form:"selected-keyword"`
 		Release           string   `form:"release"`
-		Slug              string   `form:"slug"`
 	}
 	var postPayload newArticleFormPayload
 	if err := ctx.Bind(&postPayload); err != nil {
@@ -240,13 +241,73 @@ func (d Dashboard) ArticleStore(ctx echo.Context) error {
 		Title:       postPayload.Title,
 		HeaderTitle: postPayload.HeaderTitle,
 		Filename:    postPayload.Filename,
-		Slug:        postPayload.Slug,
 		Excerpt:     postPayload.Excerpt,
 		Readtime:    int32(estimatedReadTime),
 		TagIDs:      tagIDs,
 	})
 	if err != nil {
-		slog.Error("could not create new article", "error", err)
+		if errors.Is(err, models.ErrFailValidation) {
+			var validationErrors validation.ValidationErrs
+			if ok := errors.As(err, &validationErrors); !ok {
+				return err
+			}
+
+			mappedErrors := make(map[string]components.InputError, len(validationErrors))
+			for _, ve := range validationErrors {
+				var msg string
+				for i, cause := range ve.Causes() {
+					if i == 0 {
+						msg = cause.Error()
+					} else {
+						msg = fmt.Sprintf("%v, %v", msg, cause)
+					}
+				}
+
+				mappedErrors[ve.Field()] = components.InputError{
+					Msg:      msg,
+					OldValue: ve.Value(),
+				}
+			}
+
+			tags, err := d.tagSvc.All(ctx.Request().Context())
+			if err != nil {
+				return err
+			}
+
+			var keywords []dashboard.Keyword
+			for _, tag := range tags {
+				keywords = append(keywords, dashboard.Keyword{
+					ID:    tag.ID.String(),
+					Value: tag.Name,
+				})
+			}
+
+			filenames, err := posts.GetAllFiles()
+			if err != nil {
+				return err
+			}
+
+			articles, err := d.articleSvc.All(ctx.Request().Context())
+			if err != nil {
+				return err
+			}
+
+			var usedFilenames []string
+			for _, article := range articles {
+				usedFilenames = append(usedFilenames, article.Filename)
+			}
+
+			var unusedFileNames []string
+			for _, filename := range filenames {
+				if !slices.Contains(usedFilenames, filename) {
+					unusedFileNames = append(unusedFileNames, filename)
+				}
+			}
+
+			return dashboard.CreateArticleFormContent(mappedErrors, keywords, unusedFileNames).
+				Render(views.ExtractRenderDeps(ctx))
+		}
+
 		return err
 	}
 

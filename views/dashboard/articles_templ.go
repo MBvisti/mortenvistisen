@@ -53,12 +53,12 @@ func Articles(data []ArticleViewData, paginationProps components.PaginationProps
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"container\"><div class=\"row mb-4 justify-content-between\"><div class=\"col\"><h2 class=\"text-xl\">Articles</h2></div><div class=\"col d-flex justify-content-end align-items-center\"><a role=\"button\" href=\"/dashboard/articles/create\" class=\"btn btn-success\">New</a></div></div><div class=\"row\"><div class=\"col\"><table class=\"rounded-2 table table-dark table-hover table-bordered\"><!-- head --><thead><tr><th scope=\"col\"></th><th scope=\"col\">Title</th><th scope=\"col\">Slug</th><th scope=\"col\">Status</th><th scope=\"col\">Released On</th></tr></thead> <tbody>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"container mx-auto grid grid-cols-12 gap-4\"><div class=\"col-start-2 col-span-10\"><h2 class=\"text-xl\">Articles</h2></div><div class=\"col-start-11 col-end-12\"><a role=\"button\" href=\"/dashboard/articles/create\" class=\"btn btn-success w-full text-white\">New</a></div><div class=\"flex flex-col col-span-10 col-start-2\"><div class=\"w-full overflow-x-auto flex flex-col\"><table class=\"bg-base-200 w-full table mb-4\"><!-- head --><thead><tr><th></th><th class=\"text-lg\">Title</th><th class=\"text-lg\">Slug</th><th class=\"text-lg\">Status</th><th class=\"text-lg\">Released On</th></tr></thead> <tbody>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			for _, article := range data {
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<tr class=\"align-middle\"><th scope=\"row\"><div><a href=\"")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<tr class=\"hover\"><th><div><a href=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -74,7 +74,7 @@ func Articles(data []ArticleViewData, paginationProps components.PaginationProps
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(article.Title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/articles.templ`, Line: 50, Col: 28}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/articles.templ`, Line: 48, Col: 28}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -87,7 +87,7 @@ func Articles(data []ArticleViewData, paginationProps components.PaginationProps
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(article.Slug)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/articles.templ`, Line: 51, Col: 27}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/articles.templ`, Line: 49, Col: 27}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -125,7 +125,7 @@ func Articles(data []ArticleViewData, paginationProps components.PaginationProps
 					var templ_7745c5c3_Var6 string
 					templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(carbon.Parse(article.ReleasedAt).ToDateString())
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/articles.templ`, Line: 62, Col: 63}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/articles.templ`, Line: 60, Col: 63}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 					if templ_7745c5c3_Err != nil {
@@ -141,11 +141,15 @@ func Articles(data []ArticleViewData, paginationProps components.PaginationProps
 					return templ_7745c5c3_Err
 				}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</tbody></table></div></div>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</tbody></table>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			templ_7745c5c3_Err = components.Pagination(paginationProps).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

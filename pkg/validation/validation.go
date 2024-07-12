@@ -151,7 +151,7 @@ func Validate(structToValidate any, validationMap map[string][]Rule) error {
 		name := typ.Field(i).Name
 
 		errVal := ErrValidation{
-			FieldValue: value,
+			FieldValue: value.String(),
 			FieldName:  name,
 		}
 
@@ -173,10 +173,9 @@ func Validate(structToValidate any, validationMap map[string][]Rule) error {
 		}
 	}
 
-	// e := constructValidationErrors(errors...)
-	// if len(e) > 0 {
-	// 	return e
-	// }
+	if len(errors) > 0 {
+		return errors
+	}
 
-	return errors
+	return nil
 }

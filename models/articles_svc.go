@@ -59,7 +59,6 @@ type NewArticlePayload struct {
 	Title       string
 	HeaderTitle string
 	Filename    string
-	Slug        string
 	Excerpt     string
 	Readtime    int32
 	TagIDs      []uuid.UUID
@@ -88,6 +87,7 @@ func (a ArticleService) New(
 		Filename:    payload.Filename,
 		Slug:        slug.MakeLang(payload.Title, "en"),
 		Excerpt:     payload.Excerpt,
+		Draft:       true,
 		ReadTime:    payload.Readtime,
 		Tags:        tags,
 	}

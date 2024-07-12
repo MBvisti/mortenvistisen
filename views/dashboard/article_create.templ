@@ -1,7 +1,7 @@
 package dashboard
 
 import (
-	"github.com/MBvisti/mortenvistisen/views/internal/components"
+	"github.com/MBvisti/mortenvistisen/views/components"
 	"github.com/MBvisti/mortenvistisen/views/internal/layouts"
 	"github.com/MBvisti/mortenvistisen/views/validation"
 )
@@ -15,7 +15,6 @@ type Keyword struct {
 type CreateArticleViewData struct {
 	Keywords  []Keyword
 	Filenames []string
-	Props     CreateArticleFormProps
 }
 
 type CreateArticleFormProps struct {
@@ -28,7 +27,7 @@ type CreateArticleFormProps struct {
 }
 
 templ CreateArticleFormContent(
-	props CreateArticleFormProps,
+	errors map[string]components.InputError,
 	keywords []Keyword,
 	filenames []string,
 ) {
@@ -38,17 +37,41 @@ templ CreateArticleFormContent(
 	>
 		<p class="mb-4 text-xl">Article Data</p>
 		<div class="col-6">
-			@components.InputElementWithLabelBuilder().SetLabelValue("Title").WithValidation(props.Title).SetName("title").SetType("text").MakeRequired().SetPlaceholder("SEO Friendly title").Build()
-			@components.InputElementWithLabelBuilder().SetLabelValue("Header Title").WithValidation(props.HeaderTitle).SetName("header-title").SetType("text").SetPlaceholder("SEO Friendly header title").MakeRequired().Build()
-			@components.InputElementWithLabelBuilder().SetLabelValue("Estimated Read Time").WithValidation(props.EstimatedReadTime).SetName("estimated-read-time").SetType("number").SetPlaceholder("5 min").MakeRequired().Build()
+			@components.InputElement(components.InputElementData{
+				InputType: "text",
+				Name:      "title",
+				Required:  true,
+				Title:     "Title",
+				Err:       errors["Title"],
+			})
+			@components.InputElement(components.InputElementData{
+				InputType: "text",
+				Name:      "header-title",
+				Required:  true,
+				Title:     "Header Title",
+				Err:       errors["HeaderTitle"],
+			})
+			@components.InputElement(components.InputElementData{
+				InputType: "number",
+				Name:      "estimated-read-time",
+				Required:  true,
+				Title:     "Estimated Read Time",
+				Err:       errors["EstimatedReadTime"],
+			})
 		</div>
-		<div class="col-6">
-			@components.InputElementWithLabelBuilder().SetLabelValue("Excerpt").WithValidation(props.Excerpt).SetName("excerpt").SetType("text").SetPlaceholder("Short desc of article").MakeRequired().Build()
+		<div class="my-4" x-data="{ count: 0 }" x-init="count = $refs.countme.value.length">
+			@components.TextareaElement(components.TextareaData{
+				Name:        "excerpt",
+				Placeholder: "Excerpt of the article",
+			})
+			<div class="">
+				<span x-html="count"></span> / <span x-html="$refs.countme.maxLength"></span>
+			</div>
 		</div>
-		if props.Filename.Invalid {
+		if false {
 			<div role="alert" class="rounded flex items-center mb-2 h-4 alert alert-warning">
 				<svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-				<span>{ props.Filename.InvalidMsg }</span>
+				<span>kdaslkamdamld</span>
 			</div>
 		}
 		<div class="col-12">
@@ -76,17 +99,17 @@ templ CreateArticleFormContent(
 
 templ CreateArticle(data CreateArticleViewData, tkn string) {
 	@layouts.Dashboard() {
-		<div class="container">
-			<div class="row mb-4">
+		<div class="container mx-auto grid grid-cols-12 gap-4">
+			<div class="col-start-2 col-span-10">
 				<a class="hover:font-bold" href="/dashboard/articles">Back</a>
 			</div>
 			<form
 				hx-target="#target"
 				hx-swap="outerHTML"
 				hx-post="/dashboard/articles/store"
-				class="row"
+				class="col-start-2 col-span-10"
 			>
-				@CreateArticleFormContent(data.Props, data.Keywords, data.Filenames)
+				@CreateArticleFormContent(nil, data.Keywords, data.Filenames)
 				<div class="row mb-4">
 					<div class="flex flex-col justify-between w-full pr-4">
 						<p class="mb-4 text-xl">Keywords</p>

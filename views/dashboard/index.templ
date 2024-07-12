@@ -4,6 +4,10 @@ import "github.com/MBvisti/mortenvistisen/views/internal/layouts"
 
 templ Index() {
 	@layouts.Dashboard() {
-		<div class="mt-6 container mx-auto flex flex-col">Dash Home</div>
+		<div class="container mx-auto grid grid-cols-12">
+			<div class="col-span-12 col-start-2">
+				<h1>Dash home</h1>
+			</div>
+		</div>
 	}
 }
