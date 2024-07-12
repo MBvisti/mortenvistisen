@@ -16,11 +16,23 @@ import (
 const countNewsletters = `-- name: CountNewsletters :one
 select count(id)
 from newsletters
-where released = coalesce($1::bool, null)
 `
 
-func (q *Queries) CountNewsletters(ctx context.Context, released pgtype.Bool) (int64, error) {
-	row := q.db.QueryRow(ctx, countNewsletters, released)
+func (q *Queries) CountNewsletters(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, countNewsletters)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const countReleasedNewsletters = `-- name: CountReleasedNewsletters :one
+select count(id)
+from newsletters
+where released=true
+`
+
+func (q *Queries) CountReleasedNewsletters(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, countReleasedNewsletters)
 	var count int64
 	err := row.Scan(&count)
 	return count, err

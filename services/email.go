@@ -160,6 +160,64 @@ func (e *Email) SendPasswordReset(
 	})
 }
 
+func (e *Email) SendNewsletter(
+	ctx context.Context,
+	title string,
+	edition string,
+	paragraphs []string,
+	email string,
+	articleSlug string,
+	UnsubscribeTkn string,
+) error {
+	newsletterMail := emails.NewsletterMail{
+		Title:      title,
+		Edition:    edition,
+		Paragraphs: paragraphs,
+		ArticleLink: fmt.Sprintf(
+			"%s://%s/%s",
+			e.cfg.App.AppScheme,
+			e.cfg.App.AppHost,
+			articleSlug,
+		),
+		UnsubscribeLink: fmt.Sprintf(
+			"%s://%s/unsubscriber?token=%s",
+			e.cfg.App.AppScheme,
+			e.cfg.App.AppHost,
+			UnsubscribeTkn,
+		),
+	}
+
+	textVersion, err := newsletterMail.GenerateTextVersion()
+	if err != nil {
+		slog.ErrorContext(
+			ctx,
+			"could not generate text version of UserSignupWelcomeMail",
+			"error",
+			err,
+		)
+		return err
+	}
+
+	htmlVersion, err := newsletterMail.GenerateHtmlVersion()
+	if err != nil {
+		slog.ErrorContext(
+			ctx,
+			"could not generate html version of UserSignupWelcomeMail",
+			"error",
+			err,
+		)
+		return err
+	}
+
+	return e.client.SendMail(ctx, MailPayload{
+		To:       email,
+		From:     "newsletter@mortenvistisen.com",
+		Subject:  "MBV Blog - Newsletter",
+		HtmlBody: htmlVersion,
+		TextBody: textVersion,
+	})
+}
+
 func (e *Email) Send(
 	ctx context.Context,
 	to,

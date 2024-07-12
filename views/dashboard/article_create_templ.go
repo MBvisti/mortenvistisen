@@ -56,7 +56,7 @@ func CreateArticleFormContent(
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"target\" class=\"row mb-4\"><p class=\"mb-4 text-xl\">Article Data</p><div class=\"col-6\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"target\" class=\"mb-4\"><p class=\"mb-4 text-xl\">Article Data</p><div class=\"col-6\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
