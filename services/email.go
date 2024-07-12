@@ -174,7 +174,7 @@ func (e *Email) SendNewsletter(
 		Edition:    edition,
 		Paragraphs: paragraphs,
 		ArticleLink: fmt.Sprintf(
-			"%s://%s/%s",
+			"%s://%s/posts/%s",
 			e.cfg.App.AppScheme,
 			e.cfg.App.AppHost,
 			articleSlug,
