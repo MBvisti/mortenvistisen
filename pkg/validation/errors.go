@@ -26,7 +26,7 @@ type ValidationErr interface {
 	Error() string
 	ErrorForHumans() string
 	Field() string
-	Value() any
+	Value() string
 	Causes() []error
 }
 
@@ -52,7 +52,7 @@ func (ve ValidationErrs) UnwrapViolations() []error {
 }
 
 type ErrValidation struct {
-	FieldValue         any
+	FieldValue         string
 	FieldName          string
 	Violations         []error
 	ViolationsForHuman []error
@@ -62,7 +62,7 @@ func (e ErrValidation) Field() string {
 	return e.FieldName
 }
 
-func (e ErrValidation) Value() any {
+func (e ErrValidation) Value() string {
 	return e.FieldValue
 }
 

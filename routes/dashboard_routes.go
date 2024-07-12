@@ -5,8 +5,7 @@ import (
 )
 
 func (r *Router) loadDashboardRoutes() {
-	// router := r.router.Group("/dashboard", r.middleware.AuthOnly)
-	router := r.router.Group("/dashboard")
+	router := r.router.Group("/dashboard", r.middleware.AuthOnly)
 
 	router.GET("", func(c echo.Context) error {
 		return r.dashboardHandlers.Index(c)
