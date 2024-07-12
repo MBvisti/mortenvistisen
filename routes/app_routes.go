@@ -40,6 +40,10 @@ func (r *Router) loadAppRoutes() {
 		return r.appHandlers.SubscriberEmailVerification(c)
 	})
 
+	router.GET("/unsubscriber", func(c echo.Context) error {
+		return r.appHandlers.SubscriberUnsub(c)
+	})
+
 	router.POST("/subscribe", func(c echo.Context) error {
 		return r.appHandlers.SubscriptionEvent(c)
 	})

@@ -265,6 +265,71 @@ func (a App) SubscriberEmailVerification(ctx echo.Context) error {
 		Render(views.ExtractRenderDeps(ctx))
 }
 
+func (a App) SubscriberUnsub(ctx echo.Context) error {
+	var tkn VerificationToken
+	if err := ctx.Bind(&tkn); err != nil {
+		ctx.Response().Writer.Header().Add("HX-Redirect", "/500")
+		ctx.Response().Writer.Header().Add("PreviousLocation", "/user/create")
+
+		return a.base.InternalError(ctx)
+	}
+
+	if err := a.tokenService.ValidateSubscriber(ctx.Request().Context(), tkn.Token); err != nil {
+		return err
+	}
+
+	subscriberID, err := a.tokenService.GetAssociatedSubscriberID(
+		ctx.Request().Context(),
+		tkn.Token,
+	)
+	if err != nil {
+		return err
+	}
+
+	if err := a.subscriberSvc.Delete(ctx.Request().Context(), subscriberID); err != nil {
+		return err
+	}
+
+	if err := a.tokenService.DeleteSubscriberToken(ctx.Request().Context(), subscriberID); err != nil {
+		return err
+	}
+
+	// hashedToken := tknManager.Hash(tkn.Token)
+	//
+	// token, err := db.QuerySubscriberTokenByHash(ctx.Request().Context(), hashedToken)
+	// if err != nil {
+	// 	if errors.Is(err, pgx.ErrNoRows) {
+	// 		return authentication.VerifyEmailPage(true, views.Head{}).
+	// 			Render(views.ExtractRenderDeps(ctx))
+	// 	}
+	//
+	// 	ctx.Response().Writer.Header().Add("HX-Redirect", "/500")
+	// 	ctx.Response().Writer.Header().Add("PreviousLocation", "/login")
+	//
+	// 	slog.ErrorContext(ctx.Request().Context(), "could not query subscriber token", "error", err)
+	// 	return misc.InternalError(ctx)
+	// }
+	//
+	// if database.ConvertFromPGTimestamptzToTime(token.ExpiresAt).Before(time.Now()) &&
+	// 	token.Scope != tokens.ScopeEmailVerification {
+	// 	return authentication.VerifyEmailPage(true, views.Head{}).
+	// 		Render(views.ExtractRenderDeps(ctx))
+	// }
+	//
+	// if err := db.ConfirmSubscriberEmail(ctx.Request().Context(), database.ConfirmSubscriberEmailParams{
+	// 	ID:        token.SubscriberID,
+	// 	UpdatedAt: database.ConvertToPGTimestamptz(time.Now()),
+	// }); err != nil {
+	// 	ctx.Response().Writer.Header().Add("HX-Redirect", "/500")
+	// 	ctx.Response().Writer.Header().Add("PreviousLocation", "/login")
+	//
+	// 	slog.ErrorContext(ctx.Request().Context(), "could not confirm email", "error", err)
+	// 	return misc.InternalError(ctx)
+	// }
+
+	return ctx.String(http.StatusOK, "You've been unsubscribed")
+}
+
 func (a App) Article(ctx echo.Context) error {
 	postSlug := ctx.Param("postSlug")
 
