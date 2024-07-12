@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"strconv"
@@ -80,9 +81,13 @@ func (d Dashboard) NewsletterCreate(ctx echo.Context) error {
 
 	edition := strconv.Itoa(int(releasedNewslettersCount) + 1)
 
-	return dashboard.CreateNewsletter(articles, uuid.UUID{}, emails.NewsletterMail{
-		Edition: edition,
-	}, csrf.Token(ctx.Request())).
+	newsletter := emails.NewsletterMail{Edition: edition}
+	var newsletterPreview bytes.Buffer
+	if err := newsletter.Render(ctx.Request().Context(), &newsletterPreview); err != nil {
+		return err
+	}
+
+	return dashboard.CreateNewsletter(articles, uuid.UUID{}, newsletter, newsletterPreview.String(), csrf.Token(ctx.Request())).
 		Render(views.ExtractRenderDeps(ctx))
 }
 
@@ -162,12 +167,18 @@ func (d Dashboard) NewsletterUpdate(ctx echo.Context) error {
 		return err
 	}
 
+	edition, err := strconv.Atoi(updateNewsletterPayload.Edition)
+	if err != nil {
+		return err
+	}
+
 	if preview == "true" {
 		return d.previewNewsletter(
 			ctx,
 			updateNewsletterPayload,
 			"put",
 			fmt.Sprintf("newsletters/%s/update", newsletterID),
+			int32(edition),
 		)
 	}
 
@@ -254,6 +265,7 @@ func (d Dashboard) previewNewsletter(ctx echo.Context,
 	storeNewsletterPayload newsletterPayload,
 	hxAction string,
 	endpoint string,
+	edition int32,
 ) error {
 	paragraphIndex := ctx.QueryParam("paragraph-index")
 	action := ctx.QueryParam("action")
@@ -266,6 +278,7 @@ func (d Dashboard) previewNewsletter(ctx echo.Context,
 		storeNewsletterPayload.ParagraphElements,
 		storeNewsletterPayload.NewParagraphElement,
 		storeNewsletterPayload.ArticleID,
+		edition,
 	)
 	if err != nil {
 		return err
@@ -286,11 +299,18 @@ func (d Dashboard) previewNewsletter(ctx echo.Context,
 		parsedArticleID = id
 	}
 
-	return dashboard.NewsletterPreview(articles, emails.NewsletterMail{
+	newsletter := emails.NewsletterMail{
 		Title:      newsletterPreview.Title,
 		Edition:    strconv.Itoa(int(newsletterPreview.Edition)),
 		Paragraphs: newsletterPreview.Paragraphs,
-	}, parsedArticleID, make(map[string]components.InputError), csrf.Token(ctx.Request()), hxAction, endpoint).Render(views.ExtractRenderDeps(ctx))
+	}
+	var preview bytes.Buffer
+	if err := newsletter.Render(ctx.Request().Context(), &preview); err != nil {
+		return err
+	}
+
+	return dashboard.NewsletterPreview(articles, newsletter, preview.String(), parsedArticleID, make(map[string]components.InputError), csrf.Token(ctx.Request()), hxAction, endpoint).
+		Render(views.ExtractRenderDeps(ctx))
 }
 
 func (d Dashboard) releaseNewsletter(ctx echo.Context,
@@ -378,19 +398,29 @@ func (d Dashboard) NewsletterStore(ctx echo.Context) error {
 		return err
 	}
 
+	edition, err := strconv.Atoi(storeNewsletterPayload.Edition)
+	if err != nil {
+		return err
+	}
+
 	if preview == "true" {
 		return d.previewNewsletter(
 			ctx,
 			storeNewsletterPayload,
 			"post",
 			"newsletters/store",
+			int32(edition),
 		)
+	}
+
+	edtion, err := strconv.Atoi(storeNewsletterPayload.Edition)
+	if err != nil {
+		return err
 	}
 
 	newsletter, err := d.newsletterSvc.CreateDraft(ctx.Request().Context(),
 		storeNewsletterPayload.Title,
-		// storeNewsletterPayload.Edition, //TODO:
-		9,
+		int32(edtion),
 		storeNewsletterPayload.ParagraphElements,
 		storeNewsletterPayload.ArticleID,
 	)

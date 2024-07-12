@@ -32,9 +32,9 @@ templ InputElement(data InputElementData) {
 			for={ data.ID }
 		}
 		if data.Err.Msg != "" {
-			class="input input-bordered input-error flex items-center gap-2 my-2"
+			class="input input-bordered input-error flex items-center gap-2 my-4"
 		} else {
-			class="input input-bordered flex items-center gap-2 my-2"
+			class="input input-bordered flex items-center gap-2 my-4"
 		}
 	>
 		{ data.Title }
@@ -115,9 +115,9 @@ templ TextareaElement(data TextareaData) {
 	<textarea
 		name={ data.Name }
 		if data.Err.Msg != "" {
-			class="w-full textarea textarea-bordered"
+			class="w-full h-auto textarea textarea-bordered"
 		} else {
-			class="w-full textarea textarea-bordered"
+			class="w-full h-full textarea textarea-bordered"
 		}
 		if data.Placeholder != "" {
 			placeholder={ data.Placeholder }

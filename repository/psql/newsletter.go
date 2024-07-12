@@ -114,13 +114,18 @@ func (p Postgres) InsertNewsletter(
 		return models.Newsletter{}, err
 	}
 
+	body, err := json.Marshal(data.Paragraphs)
+	if err != nil {
+		return models.Newsletter{}, err
+	}
+
 	newNewsletter, err := p.Queries.InsertNewsletter(ctx, database.InsertNewsletterParams{
 		ID:                  data.ID,
 		CreatedAt:           createdAt,
 		UpdatedAt:           updatedAt,
 		Title:               data.Title,
 		Edition:             sql.NullInt32{Int32: data.Edition, Valid: true},
-		Body:                []byte{},
+		Body:                body,
 		AssociatedArticleID: article.ID,
 	})
 	if err != nil {
@@ -148,19 +153,61 @@ func (p Postgres) UpdateNewsletter(
 	ctx context.Context,
 	newsletter models.Newsletter,
 ) (models.Newsletter, error) {
-	return models.Newsletter{}, nil
+	updatedAt := pgtype.Timestamptz{
+		Time:  newsletter.UpdatedAt,
+		Valid: true,
+	}
+	releasedAt := pgtype.Timestamptz{
+		Time:  newsletter.ReleasedAt,
+		Valid: true,
+	}
+
+	body, err := json.Marshal(newsletter.Paragraphs)
+	if err != nil {
+		return models.Newsletter{}, err
+	}
+
+	article, err := p.QueryArticleBySlug(ctx, newsletter.ArticleSlug)
+	if err != nil {
+		return models.Newsletter{}, err
+	}
+
+	updatedNewsletter, err := p.Queries.UpdateNewsletter(ctx, database.UpdateNewsletterParams{
+		UpdatedAt:           updatedAt,
+		Title:               newsletter.Title,
+		Edition:             sql.NullInt32{Int32: newsletter.Edition, Valid: true},
+		Released:            pgtype.Bool{Bool: newsletter.Released, Valid: true},
+		ReleasedAt:          releasedAt,
+		Body:                body,
+		AssociatedArticleID: article.ID,
+		ID:                  newsletter.ID,
+	})
+	if err != nil {
+		return models.Newsletter{}, nil
+	}
+
+	var paragraphs []string
+	if err := json.Unmarshal(updatedNewsletter.Body, &paragraphs); err != nil {
+		return models.Newsletter{}, nil
+	}
+
+	return models.Newsletter{
+		ID:          updatedNewsletter.ID,
+		CreatedAt:   updatedNewsletter.CreatedAt.Time,
+		UpdatedAt:   updatedNewsletter.UpdatedAt.Time,
+		Title:       updatedNewsletter.Title,
+		Edition:     updatedNewsletter.Edition.Int32,
+		ReleasedAt:  updatedNewsletter.ReleasedAt.Time,
+		Released:    updatedNewsletter.Released.Bool,
+		Paragraphs:  paragraphs,
+		ArticleSlug: article.Slug,
+	}, nil
 }
 
 func (p Postgres) Count(ctx context.Context) (int64, error) {
-	return p.Queries.CountNewsletters(ctx, pgtype.Bool{
-		Bool:  false,
-		Valid: false,
-	})
+	return p.Queries.CountNewsletters(ctx)
 }
 
 func (p Postgres) CountReleased(ctx context.Context) (int64, error) {
-	return p.Queries.CountNewsletters(ctx, pgtype.Bool{
-		Bool:  true,
-		Valid: true,
-	})
+	return p.Queries.CountReleasedNewsletters(ctx)
 }

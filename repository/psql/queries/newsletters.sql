@@ -72,6 +72,11 @@ returning *;
 -- name: CountNewsletters :one
 select count(id)
 from newsletters
-where released = coalesce(sqlc.narg('released')::bool, null)
+;
+
+-- name: CountReleasedNewsletters :one
+select count(id)
+from newsletters
+where released=true
 ;
 

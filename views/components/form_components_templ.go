@@ -76,12 +76,12 @@ func InputElement(data InputElementData) templ.Component {
 			}
 		}
 		if data.Err.Msg != "" {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" class=\"input input-bordered input-error flex items-center gap-2 my-2\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" class=\"input input-bordered input-error flex items-center gap-2 my-4\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" class=\"input input-bordered flex items-center gap-2 my-2\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" class=\"input input-bordered flex items-center gap-2 my-4\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -446,12 +446,12 @@ func TextareaElement(data TextareaData) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if data.Err.Msg != "" {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" class=\"w-full textarea textarea-bordered\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" class=\"w-full h-auto textarea textarea-bordered\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" class=\"w-full textarea textarea-bordered\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" class=\"w-full h-full textarea textarea-bordered\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

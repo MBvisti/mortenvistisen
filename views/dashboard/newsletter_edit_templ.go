@@ -69,6 +69,7 @@ func NewsletterEdit(data NewsletterEditViewData, tkn string, showFlash bool) tem
 			templ_7745c5c3_Err = NewsletterPreview(
 				data.Articles,
 				data.MailPreview,
+				"",
 				data.ArticleID,
 				make(map[string]components.InputError),
 				tkn,

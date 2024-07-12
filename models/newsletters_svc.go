@@ -48,6 +48,15 @@ type newsletterEmailService interface {
 		subscriberEmail string,
 		activationToken, unsubscribeToken string,
 	) error
+	SendNewsletter(
+		ctx context.Context,
+		title string,
+		edition string,
+		paragraphs []string,
+		email string,
+		articleSlug string,
+		UnsubscribeTkn string,
+	) error
 }
 
 type QueryFilters map[string]any
@@ -112,6 +121,7 @@ func (svc NewsletterService) Preview(
 	paragraphElements []string,
 	newParagraphElement string,
 	articleID string,
+	edition int32,
 ) (Newsletter, error) {
 	newParagraphsElements := paragraphElements
 	if paragraphIndex != "" && action == "del" {
@@ -149,22 +159,13 @@ func (svc NewsletterService) Preview(
 		articleSlug = article.Slug
 	}
 
-	filters := QueryFilters{
-		"IsReleased": true,
-	}
-
-	releasedArticles, err := svc.newsletterStorage.ListNewsletters(ctx, filters)
-	if err != nil {
-		return Newsletter{}, err
-	}
-
 	t := time.Now()
 	return Newsletter{
 		ID:          uuid.New(),
 		CreatedAt:   t,
 		UpdatedAt:   t,
 		Title:       title,
-		Edition:     int32(len(releasedArticles)) + 1,
+		Edition:     edition,
 		Paragraphs:  newParagraphsElements,
 		ArticleSlug: articleSlug,
 	}, nil
@@ -239,6 +240,7 @@ func (svc NewsletterService) Release(
 	verifiedSubscribers, err := svc.subscriberStorage.ListSubscribers(
 		ctx,
 		QueryFilters{"IsVerified": true},
+		WithLimit(999),
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -250,17 +252,12 @@ func (svc NewsletterService) Release(
 	}
 
 	for _, verifiedSubscriber := range verifiedSubscribers {
-		subTkn, err := svc.tknService.CreateSubscriptionToken(ctx, verifiedSubscriber.ID)
-		if err != nil {
-			return Newsletter{}, errors.Join(ErrUnrecoverableEvent, err)
-		}
-
 		unsubTkn, err := svc.tknService.CreateUnsubscribeToken(ctx, verifiedSubscriber.ID)
 		if err != nil {
 			return Newsletter{}, errors.Join(ErrUnrecoverableEvent, err)
 		}
 
-		if err := svc.emailService.SendNewSubscriberEmail(ctx, verifiedSubscriber.Email, subTkn, unsubTkn); err != nil {
+		if err := svc.emailService.SendNewsletter(ctx, instance.Title, strconv.Itoa(int(instance.Edition)), instance.Paragraphs, verifiedSubscriber.Email, instance.ArticleSlug, unsubTkn); err != nil {
 			return Newsletter{}, errors.Join(ErrUnrecoverableEvent, err)
 		}
 	}
