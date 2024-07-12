@@ -56,28 +56,30 @@ func TestCreateArticle(t *testing.T) {
 			if actualErr == nil {
 				assert.Equal(
 					t,
-					test.expected,
-					nil,
+					len(test.expected),
+					0,
 					fmt.Sprintf(
 						"errors don't match: expected %v, got %v",
-						test.expected,
-						actualErr,
+						len(test.expected),
+						0,
 					),
 				)
 			}
 
-			var valiErrs validation.ValidationErrs
-			if ok := errors.As(actualErr, &valiErrs); !ok {
-				t.Fail()
-			}
+			if actualErr != nil {
+				var valiErrs validation.ValidationErrs
+				if ok := errors.As(actualErr, &valiErrs); !ok {
+					t.Fail()
+				}
 
-			assert.Equal(t, test.expected, valiErrs.UnwrapViolations(),
-				fmt.Sprintf(
-					"errors don't match: expected %v, got %v",
-					test.expected,
-					valiErrs.UnwrapViolations(),
-				),
-			)
+				assert.Equal(t, test.expected, valiErrs.UnwrapViolations(),
+					fmt.Sprintf(
+						"errors don't match: expected %v, got %v",
+						test.expected,
+						valiErrs.UnwrapViolations(),
+					),
+				)
+			}
 		})
 	}
 }
