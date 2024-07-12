@@ -3,7 +3,6 @@ package handlers
 import (
 	"errors"
 	"fmt"
-	"log/slog"
 	"slices"
 	"strconv"
 
@@ -255,8 +254,6 @@ func (d Dashboard) ArticleStore(ctx echo.Context) error {
 
 			mappedErrors := make(map[string]components.InputError, len(validationErrors))
 			for _, ve := range validationErrors {
-				slog.Error("validation errors", "field", ve.Field(), "error(s)", ve.Causes())
-
 				var msg string
 				for i, cause := range ve.Causes() {
 					if i == 0 {
