@@ -12,26 +12,6 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const deleteSubscriberTokenBySubscriberID = `-- name: DeleteSubscriberTokenBySubscriberID :exec
-delete from subscriber_tokens
-where subscriber_id = $1
-`
-
-func (q *Queries) DeleteSubscriberTokenBySubscriberID(ctx context.Context, subscriberID uuid.UUID) error {
-	_, err := q.db.Exec(ctx, deleteSubscriberTokenBySubscriberID, subscriberID)
-	return err
-}
-
-const deleteToken = `-- name: DeleteToken :exec
-delete from tokens
-where id = $1
-`
-
-func (q *Queries) DeleteToken(ctx context.Context, id uuid.UUID) error {
-	_, err := q.db.Exec(ctx, deleteToken, id)
-	return err
-}
-
 const deleteTokenByHash = `-- name: DeleteTokenByHash :exec
 delete from tokens
 where hash = $1
@@ -42,45 +22,18 @@ func (q *Queries) DeleteTokenByHash(ctx context.Context, hash string) error {
 	return err
 }
 
-const insertSubscriberToken = `-- name: InsertSubscriberToken :exec
-insert into subscriber_tokens
-    (id, created_at, hash, expires_at, scope, subscriber_id) values ($1, $2, $3, $4, $5, $6)
-`
-
-type InsertSubscriberTokenParams struct {
-	ID           uuid.UUID
-	CreatedAt    pgtype.Timestamptz
-	Hash         string
-	ExpiresAt    pgtype.Timestamptz
-	Scope        string
-	SubscriberID uuid.UUID
-}
-
-func (q *Queries) InsertSubscriberToken(ctx context.Context, arg InsertSubscriberTokenParams) error {
-	_, err := q.db.Exec(ctx, insertSubscriberToken,
-		arg.ID,
-		arg.CreatedAt,
-		arg.Hash,
-		arg.ExpiresAt,
-		arg.Scope,
-		arg.SubscriberID,
-	)
-	return err
-}
-
 const insertToken = `-- name: InsertToken :exec
 insert into tokens
-    (id, created_at, hash, expires_at, scope, user_id) values ($1, $2, $3, $4, $5, $6) 
-returning id, created_at, hash, expires_at, scope, user_id
+    (id, created_at, hash, expires_at, meta_information) values ($1, $2, $3, $4, $5) 
+returning id, created_at, hash, expires_at, meta_information
 `
 
 type InsertTokenParams struct {
-	ID        uuid.UUID
-	CreatedAt pgtype.Timestamptz
-	Hash      string
-	ExpiresAt pgtype.Timestamptz
-	Scope     string
-	UserID    uuid.UUID
+	ID              uuid.UUID
+	CreatedAt       pgtype.Timestamptz
+	Hash            string
+	ExpiresAt       pgtype.Timestamptz
+	MetaInformation []byte
 }
 
 func (q *Queries) InsertToken(ctx context.Context, arg InsertTokenParams) error {
@@ -89,36 +42,13 @@ func (q *Queries) InsertToken(ctx context.Context, arg InsertTokenParams) error 
 		arg.CreatedAt,
 		arg.Hash,
 		arg.ExpiresAt,
-		arg.Scope,
-		arg.UserID,
+		arg.MetaInformation,
 	)
 	return err
 }
 
-const querySubscriberTokenByHash = `-- name: QuerySubscriberTokenByHash :one
-select id, created_at, hash, expires_at, scope, subscriber_id
-from subscriber_tokens
-where hash = $1
-`
-
-func (q *Queries) QuerySubscriberTokenByHash(ctx context.Context, hash string) (SubscriberToken, error) {
-	row := q.db.QueryRow(ctx, querySubscriberTokenByHash, hash)
-	var i SubscriberToken
-	err := row.Scan(
-		&i.ID,
-		&i.CreatedAt,
-		&i.Hash,
-		&i.ExpiresAt,
-		&i.Scope,
-		&i.SubscriberID,
-	)
-	return i, err
-}
-
 const queryTokenByHash = `-- name: QueryTokenByHash :one
-select id, created_at, hash, expires_at, scope, user_id
-from tokens
-where hash = $1
+select id, created_at, hash, expires_at, meta_information from tokens where hash=$1
 `
 
 func (q *Queries) QueryTokenByHash(ctx context.Context, hash string) (Token, error) {
@@ -129,8 +59,7 @@ func (q *Queries) QueryTokenByHash(ctx context.Context, hash string) (Token, err
 		&i.CreatedAt,
 		&i.Hash,
 		&i.ExpiresAt,
-		&i.Scope,
-		&i.UserID,
+		&i.MetaInformation,
 	)
 	return i, err
 }

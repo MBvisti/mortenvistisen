@@ -149,27 +149,17 @@ type Subscriber struct {
 	IsVerified   pgtype.Bool
 }
 
-type SubscriberToken struct {
-	ID           uuid.UUID
-	CreatedAt    pgtype.Timestamptz
-	Hash         string
-	ExpiresAt    pgtype.Timestamptz
-	Scope        string
-	SubscriberID uuid.UUID
-}
-
 type Tag struct {
 	ID   uuid.UUID
 	Name string
 }
 
 type Token struct {
-	ID        uuid.UUID
-	CreatedAt pgtype.Timestamptz
-	Hash      string
-	ExpiresAt pgtype.Timestamptz
-	Scope     string
-	UserID    uuid.UUID
+	ID              uuid.UUID
+	CreatedAt       pgtype.Timestamptz
+	Hash            string
+	ExpiresAt       pgtype.Timestamptz
+	MetaInformation []byte
 }
 
 type User struct {

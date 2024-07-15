@@ -236,10 +236,6 @@ func (p Postgres) CountSubscribersByStatus(
 }
 
 func (p Postgres) DeleteSubscriber(ctx context.Context, subscriberID uuid.UUID) error {
-	if err := p.Queries.DeleteSubscriberTokenBySubscriberID(ctx, subscriberID); err != nil {
-		return err
-	}
-
 	if err := p.Queries.DeleteSubscriber(ctx, subscriberID); err != nil {
 		return err
 	}

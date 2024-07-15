@@ -16,7 +16,7 @@ type Dashboard struct {
 	postManager   posts.PostManager
 	newsletterSvc models.NewsletterService
 	subscriberSvc models.SubscriberService
-	tokenService  services.TokenSvc
+	tokenService  services.Token
 	emailService  services.Email
 }
 
@@ -27,7 +27,7 @@ func NewDashboard(
 	postManager posts.PostManager,
 	newsletterSvc models.NewsletterService,
 	subscriberSvc models.SubscriberService,
-	tokenService services.TokenSvc,
+	tokenService services.Token,
 	emailService services.Email,
 ) Dashboard {
 	return Dashboard{

@@ -81,11 +81,11 @@ func (d Dashboard) ResendVerificationMail(ctx echo.Context) error {
 		return dashboard.FailureMsg("Could not mail send").Render(views.ExtractRenderDeps(ctx))
 	}
 
-	if err := d.tokenService.DeleteSubscriberToken(ctx.Request().Context(), subscriberUUID); err != nil {
-		return dashboard.FailureMsg("Could not mail send").Render(views.ExtractRenderDeps(ctx))
-	}
+	// if err := d.tokenService.DeleteSubscriberToken(ctx.Request().Context(), subscriberUUID); err != nil {
+	// 	return dashboard.FailureMsg("Could not mail send").Render(views.ExtractRenderDeps(ctx))
+	// }
 
-	activationToken, err := d.tokenService.CreateSubscriptionToken(
+	activationToken, err := d.tokenService.CreateSubscriberEmailValidation(
 		ctx.Request().Context(),
 		subscriber.ID,
 	)

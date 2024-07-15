@@ -20,7 +20,7 @@ type Authentication struct {
 	authService  services.Auth
 	userModel    models.UserService
 	emailService services.Email
-	tknService   services.TokenSvc
+	tknService   services.Token
 	cfg          config.Cfg
 }
 
@@ -29,7 +29,7 @@ func NewAuthentication(
 	authService services.Auth,
 	userModel models.UserService,
 	emailService services.Email,
-	tknService services.TokenSvc,
+	tknService services.Token,
 	cfg config.Cfg,
 ) Authentication {
 	return Authentication{base, authService, userModel, emailService, tknService, cfg}
@@ -155,7 +155,7 @@ func (a Authentication) StoreResetPassword(ctx echo.Context) error {
 		}).Render(views.ExtractRenderDeps(ctx))
 	}
 
-	if err := a.tknService.Validate(ctx.Request().Context(), payload.Token); err != nil {
+	if err := a.tknService.Validate(ctx.Request().Context(), payload.Token, services.ScopeResetPassword); err != nil {
 		return err
 	}
 

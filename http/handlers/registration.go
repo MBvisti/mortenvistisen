@@ -13,7 +13,7 @@ type Registration struct {
 	base         Base
 	authService  services.Auth
 	userModel    models.UserService
-	tokenService services.TokenSvc
+	tokenService services.Token
 	emailService services.Email
 }
 
@@ -21,7 +21,7 @@ func NewRegistration(
 	base Base,
 	authService services.Auth,
 	userModel models.UserService,
-	tokenService services.TokenSvc,
+	tokenService services.Token,
 	emailService services.Email,
 ) Registration {
 	return Registration{base, authService, userModel, tokenService, emailService}
@@ -58,7 +58,7 @@ func (r Registration) StoreUser(ctx echo.Context) error {
 		return err
 	}
 
-	activationToken, err := r.tokenService.CreateEmailVerificationToken(
+	activationToken, err := r.tokenService.CreateUserEmailVerification(
 		ctx.Request().Context(),
 		user.ID,
 	)
@@ -211,7 +211,7 @@ func (r Registration) UserEmailVerification(ctx echo.Context) error {
 		return r.base.InternalError(ctx)
 	}
 
-	if err := r.tokenService.Validate(ctx.Request().Context(), payload.Token); err != nil {
+	if err := r.tokenService.Validate(ctx.Request().Context(), payload.Token, services.ScopeEmailVerification); err != nil {
 		return err
 	}
 

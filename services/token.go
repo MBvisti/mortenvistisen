@@ -6,6 +6,7 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"hash"
 	"log/slog"
@@ -17,30 +18,34 @@ import (
 )
 
 const (
-	ScopeEmailVerification           = "email_verification"
-	ScopeSubscriberEmailVerification = "subscriber_email_verification"
-	ScopeUnsubscribe                 = "unsubscribe"
-	ScopeResetPassword               = "password_reset"
+	ScopeEmailVerification = "email_verification"
+	ScopeUnsubscribe       = "unsubscribe"
+	ScopeResetPassword     = "password_reset"
 )
 
-type tokenServiceStorage interface {
-	InsertSubscriberToken(
-		ctx context.Context,
-		hash, scope string, expiresAt time.Time,
-		subscriberID uuid.UUID,
-	) error
-	InsertToken(
-		ctx context.Context,
-		hash, scope string, expiresAt time.Time,
-		userID uuid.UUID,
-	) error
-	QueryTokenByHash(ctx context.Context, hash string) (database.Token, error)
-	QuerySubscriberTokenByHash(ctx context.Context, hash string) (database.SubscriberToken, error)
-	DeleteTokenByHash(ctx context.Context, hash string) error
-	DeleteTokenBySubID(ctx context.Context, id uuid.UUID) error
+const (
+	resourceUser       = "users"
+	resourceSubscriber = "subscribers"
+)
+
+type TokenMetaInformation struct {
+	Resource   string    `json:"resource"`
+	ResourceID uuid.UUID `json:"resource_id"`
+	Scope      string    `json:"scope"`
 }
 
-type TokenSvc struct {
+type tokenServiceStorage interface {
+	InsertToken(
+		ctx context.Context,
+		hash string,
+		expiresAt time.Time,
+		metaData []byte,
+	) error
+	QueryTokenByHash(ctx context.Context, hash string) (database.Token, error)
+	DeleteTokenByHash(ctx context.Context, hash string) error
+}
+
+type Token struct {
 	storage tokenServiceStorage
 	hasher  hash.Hash
 }
@@ -48,10 +53,10 @@ type TokenSvc struct {
 func NewTokenSvc(
 	storage tokenServiceStorage,
 	tokenSigningKey string,
-) *TokenSvc {
+) *Token {
 	h := hmac.New(sha256.New, []byte(tokenSigningKey))
 
-	return &TokenSvc{
+	return &Token{
 		storage,
 		h,
 	}
@@ -62,7 +67,7 @@ type tokenPair struct {
 	hashed string
 }
 
-func (svc *TokenSvc) create() (tokenPair, error) {
+func (svc *Token) create() (tokenPair, error) {
 	b := make([]byte, 32)
 	_, err := rand.Read(b)
 	if err != nil {
@@ -78,7 +83,7 @@ func (svc *TokenSvc) create() (tokenPair, error) {
 	}, nil
 }
 
-func (svc *TokenSvc) hash(token string) string {
+func (svc *Token) hash(token string) string {
 	svc.hasher.Reset()
 	svc.hasher.Write([]byte(token))
 	b := svc.hasher.Sum(nil)
@@ -86,7 +91,7 @@ func (svc *TokenSvc) hash(token string) string {
 	return base64.URLEncoding.EncodeToString(b)
 }
 
-func (svc *TokenSvc) CreateSubscriptionToken(
+func (svc *Token) CreateSubscriberEmailValidation(
 	ctx context.Context,
 	subscriberID uuid.UUID,
 ) (string, error) {
@@ -95,14 +100,18 @@ func (svc *TokenSvc) CreateSubscriptionToken(
 		return "", err
 	}
 
-	tkn := NewToken(
-		ScopeSubscriberEmailVerification,
-		time.Now().Add(72*time.Hour),
-		tokenPair.hashed,
-		tokenPair.plain,
-	)
+	metaData, err := json.Marshal(TokenMetaInformation{
+		Resource:   resourceSubscriber,
+		ResourceID: subscriberID,
+		Scope:      ScopeEmailVerification,
+	})
+	if err != nil {
+		return "", err
+	}
 
-	if err := svc.storage.InsertSubscriberToken(ctx, tkn.Hash, tkn.GetScope(), tkn.GetExpirationTime(), subscriberID); err != nil {
+	expirationDate := time.Now().Add(72 * time.Hour)
+
+	if err := svc.storage.InsertToken(ctx, tokenPair.hashed, expirationDate, metaData); err != nil {
 		slog.ErrorContext(
 			ctx,
 			"could not insert a subscriber token",
@@ -114,10 +123,10 @@ func (svc *TokenSvc) CreateSubscriptionToken(
 		return "", err
 	}
 
-	return tkn.GetPlainText(), nil
+	return tokenPair.plain, nil
 }
 
-func (svc *TokenSvc) CreateEmailVerificationToken(
+func (svc *Token) CreateUserEmailVerification(
 	ctx context.Context,
 	userID uuid.UUID,
 ) (string, error) {
@@ -126,17 +135,21 @@ func (svc *TokenSvc) CreateEmailVerificationToken(
 		return "", err
 	}
 
-	tkn := NewToken(
-		ScopeEmailVerification,
-		time.Now().Add(48*time.Hour),
-		tokenPair.hashed,
-		tokenPair.plain,
-	)
+	metaData, err := json.Marshal(TokenMetaInformation{
+		Resource:   resourceUser,
+		ResourceID: userID,
+		Scope:      ScopeEmailVerification,
+	})
+	if err != nil {
+		return "", err
+	}
 
-	if err := svc.storage.InsertToken(ctx, tkn.Hash, tkn.GetScope(), tkn.GetExpirationTime(), userID); err != nil {
+	expirationDate := time.Now().Add(48 * time.Hour)
+
+	if err := svc.storage.InsertToken(ctx, tokenPair.hashed, expirationDate, metaData); err != nil {
 		slog.ErrorContext(
 			ctx,
-			"could not insert a token",
+			"could not insert a user email verification token",
 			"error",
 			err,
 			"user_id",
@@ -145,10 +158,10 @@ func (svc *TokenSvc) CreateEmailVerificationToken(
 		return "", err
 	}
 
-	return tkn.GetPlainText(), nil
+	return tokenPair.plain, nil
 }
 
-func (svc *TokenSvc) CreateResetPasswordToken(
+func (svc *Token) CreateResetPasswordToken(
 	ctx context.Context,
 	userID uuid.UUID,
 ) (string, error) {
@@ -157,21 +170,32 @@ func (svc *TokenSvc) CreateResetPasswordToken(
 		return "", err
 	}
 
-	tkn := NewToken(
-		ScopeResetPassword,
-		time.Now().Add(24*time.Hour),
-		tokenPair.hashed,
-		tokenPair.plain,
-	)
-
-	if err := svc.storage.InsertToken(ctx, tkn.Hash, tkn.GetScope(), tkn.GetExpirationTime(), userID); err != nil {
+	metaData, err := json.Marshal(TokenMetaInformation{
+		ResourceID: userID,
+		Scope:      ScopeResetPassword,
+	})
+	if err != nil {
 		return "", err
 	}
 
-	return tkn.GetPlainText(), nil
+	expirationDate := time.Now().Add(24 * time.Hour)
+
+	if err := svc.storage.InsertToken(ctx, tokenPair.hashed, expirationDate, metaData); err != nil {
+		slog.ErrorContext(
+			ctx,
+			"could not insert a reset password token",
+			"error",
+			err,
+			"user_id",
+			userID,
+		)
+		return "", err
+	}
+
+	return tokenPair.plain, nil
 }
 
-func (svc *TokenSvc) CreateUnsubscribeToken(
+func (svc *Token) CreateUnsubscribeToken(
 	ctx context.Context,
 	subscriberID uuid.UUID,
 ) (string, error) {
@@ -180,21 +204,62 @@ func (svc *TokenSvc) CreateUnsubscribeToken(
 		return "", err
 	}
 
-	tkn := NewToken(
-		ScopeUnsubscribe,
-		time.Now().Add(168*time.Hour), // allow 7 days for an unsubscribe link to be valid
-		tokenPair.hashed,
-		tokenPair.plain,
-	)
-
-	if err := svc.storage.InsertSubscriberToken(ctx, tkn.Hash, tkn.GetScope(), tkn.GetExpirationTime(), subscriberID); err != nil {
+	metaData, err := json.Marshal(TokenMetaInformation{
+		Resource:   resourceSubscriber,
+		ResourceID: subscriberID,
+		Scope:      ScopeUnsubscribe,
+	})
+	if err != nil {
 		return "", err
 	}
 
-	return tkn.GetPlainText(), nil
+	expirationDate := time.Now().Add(168 * time.Hour)
+
+	if err := svc.storage.InsertToken(ctx, tokenPair.hashed, expirationDate, metaData); err != nil {
+		slog.ErrorContext(
+			ctx,
+			"could not insert a unsubscribe token",
+			"error",
+			err,
+			"subscriber_id",
+			subscriberID,
+		)
+		return "", err
+	}
+
+	return tokenPair.plain, nil
 }
 
-func (svc *TokenSvc) Validate(ctx context.Context, token string) error {
+func (svc *Token) Validate(ctx context.Context, token, scope string) error {
+	tkn, err := svc.storage.QueryTokenByHash(ctx, svc.hash(token))
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			slog.InfoContext(ctx, "a token was requested that could not be found", "token", tkn)
+
+			slog.ErrorContext(ctx, "could not query token by hash", "error", err)
+			return errors.Join(ErrTokenNotExist, err)
+		}
+
+		return err
+	}
+
+	if time.Now().After(tkn.ExpiresAt.Time) {
+		return ErrTokenExpired
+	}
+
+	var metaInfo TokenMetaInformation
+	if err := json.Unmarshal(tkn.MetaInformation, &metaInfo); err != nil {
+		return err
+	}
+
+	if metaInfo.Scope != scope {
+		return ErrTokenScopeInvalid
+	}
+
+	return nil
+}
+
+func (svc *Token) IsExpired(ctx context.Context, token string) error {
 	tkn, err := svc.storage.QueryTokenByHash(ctx, svc.hash(token))
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -214,98 +279,52 @@ func (svc *TokenSvc) Validate(ctx context.Context, token string) error {
 	return nil
 }
 
-func (svc *TokenSvc) ValidateSubscriber(ctx context.Context, token string) error {
-	tkn, err := svc.storage.QuerySubscriberTokenByHash(ctx, svc.hash(token))
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			slog.InfoContext(ctx, "a token was requested that could not be found", "token", tkn)
-
-			slog.ErrorContext(ctx, "could not query token by hash", "error", err)
-			return errors.Join(ErrTokenNotExist, err)
-		}
-
-		return err
-	}
-
-	if time.Now().After(tkn.ExpiresAt.Time) {
-		return ErrTokenExpired
-	}
-
-	return nil
-}
-
-func (svc *TokenSvc) GetAssociatedUserID(ctx context.Context, token string) (uuid.UUID, error) {
+func (svc *Token) GetAssociatedUserID(ctx context.Context, token string) (uuid.UUID, error) {
 	tkn, err := svc.storage.QueryTokenByHash(ctx, svc.hash(token))
 	if err != nil {
 		return uuid.UUID{}, err
 	}
 
-	return tkn.UserID, nil
+	var metaData TokenMetaInformation
+	if err := json.Unmarshal(tkn.MetaInformation, &metaData); err != nil {
+		return uuid.UUID{}, err
+	}
+
+	// TODO add err here
+	if metaData.Resource != resourceUser {
+		return uuid.UUID{}, err
+	}
+
+	return metaData.ResourceID, nil
 }
 
-func (svc *TokenSvc) GetAssociatedSubscriberID(
+func (svc *Token) GetAssociatedSubscriberID(
 	ctx context.Context,
 	token string,
 ) (uuid.UUID, error) {
-	tkn, err := svc.storage.QuerySubscriberTokenByHash(ctx, svc.hash(token))
+	tkn, err := svc.storage.QueryTokenByHash(ctx, svc.hash(token))
 	if err != nil {
 		return uuid.UUID{}, err
 	}
 
-	return tkn.SubscriberID, nil
+	var metaData TokenMetaInformation
+	if err := json.Unmarshal(tkn.MetaInformation, &metaData); err != nil {
+		return uuid.UUID{}, err
+	}
+
+	// TODO add err here
+	if metaData.Resource != resourceSubscriber {
+		return uuid.UUID{}, err
+	}
+
+	return metaData.ResourceID, nil
 }
 
-func (svc *TokenSvc) Delete(ctx context.Context, token string) error {
+func (svc *Token) Delete(ctx context.Context, token string) error {
 	err := svc.storage.DeleteTokenByHash(ctx, svc.hash(token))
 	if err != nil {
 		return err
 	}
 
 	return nil
-}
-
-func (svc *TokenSvc) DeleteSubscriberToken(ctx context.Context, subscriberID uuid.UUID) error {
-	err := svc.storage.DeleteTokenBySubID(ctx, subscriberID)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-type Token struct {
-	scope     string
-	expiresAt time.Time
-	Hash      string
-	plain     string
-}
-
-func NewToken(
-	scope string,
-	expiresAt time.Time,
-	Hash string,
-	plain string,
-) Token {
-	return Token{
-		scope,
-		expiresAt,
-		Hash,
-		plain,
-	}
-}
-
-func (t *Token) GetPlainText() string {
-	return t.plain
-}
-
-func (t *Token) GetExpirationTime() time.Time {
-	return t.expiresAt
-}
-
-func (t *Token) GetScope() string {
-	return t.scope
-}
-
-func (t *Token) IsValid() bool {
-	return time.Now().Before(t.expiresAt)
 }

@@ -47,7 +47,7 @@ type subscriberEmailService interface {
 }
 
 type subscriberTokenService interface {
-	CreateSubscriptionToken(
+	CreateSubscriberEmailValidation(
 		ctx context.Context,
 		subscriberID uuid.UUID,
 	) (string, error)
@@ -222,7 +222,7 @@ func (svc *SubscriberService) New(ctx context.Context, email, articleTitle strin
 	}
 
 	// 3. create token
-	activationTkn, err := svc.tknService.CreateSubscriptionToken(ctx, subscriber.ID)
+	activationTkn, err := svc.tknService.CreateSubscriberEmailValidation(ctx, subscriber.ID)
 	if err != nil {
 		return errors.Join(ErrUnrecoverableEvent, err)
 	}
