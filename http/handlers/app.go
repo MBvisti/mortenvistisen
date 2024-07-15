@@ -94,84 +94,8 @@ func (a App) SubscriptionEvent(ctx echo.Context) error {
 
 	var form subscriptionEventForm
 	if err := ctx.Bind(&form); err != nil {
-		// if err := mail.Send(ctx.Request().Context(), "hi@mortenvistisen.com", "sub-blog@mortenvistisen.com",
-		// 	"Failed to subscribe", "sub_report", err.Error()); err != nil {
-		// 	telemetry.Logger.Error("Failed to send email", "error", err)
-		// }
 		return ctx.String(200, "You're now subscribed!")
 	}
-
-	// sub, err := db.InsertSubscriber(
-	// 	ctx.Request().Context(),
-	// 	database.InsertSubscriberParams{
-	// 		ID:        uuid.New(),
-	// 		CreatedAt: database.ConvertToPGTimestamptz(time.Now()),
-	// 		UpdatedAt: database.ConvertToPGTimestamptz(time.Now()),
-	// 		Email: sql.NullString{
-	// 			String: form.Email,
-	// 			Valid:  true,
-	// 		},
-	// 		SubscribedAt: database.ConvertToPGTimestamptz(time.Now()),
-	// 		Referer: sql.NullString{
-	// 			String: form.Title,
-	// 			Valid:  true,
-	// 		},
-	// 		IsVerified: pgtype.Bool{Bool: false, Valid: true},
-	// 	},
-	// )
-	// if err != nil {
-	// 	return err
-	// }
-	//
-	// generatedTkn, err := tknManager.GenerateToken()
-	// if err != nil {
-	// 	return err
-	// }
-	//
-	// activationToken := tokens.CreateActivationToken(
-	// 	generatedTkn.PlainTextToken,
-	// 	generatedTkn.HashedToken,
-	// )
-	//
-	// if err := db.InsertSubscriberToken(ctx.Request().Context(), database.InsertSubscriberTokenParams{
-	// 	ID:           uuid.New(),
-	// 	CreatedAt:    database.ConvertToPGTimestamptz(time.Now()),
-	// 	Hash:         activationToken.Hash,
-	// 	ExpiresAt:    database.ConvertToPGTimestamptz(activationToken.GetExpirationTime()),
-	// 	Scope:        activationToken.GetScope(),
-	// 	SubscriberID: sub.ID,
-	// }); err != nil {
-	// 	return err
-	// }
-	//
-	// newsletterMail := templates.NewsletterWelcomeMail{
-	// 	ConfirmationLink: fmt.Sprintf(
-	// 		"%s://%s/verify-subscriber?token=%s",
-	// 		cfg.App.AppScheme,
-	// 		cfg.App.AppHost,
-	// 		activationToken.GetPlainText(),
-	// 	),
-	// 	UnsubscribeLink: "",
-	// }
-	// textVersion, err := newsletterMail.GenerateTextVersion()
-	// if err != nil {
-	// 	return err
-	// }
-	//
-	// htmlVersion, err := newsletterMail.GenerateHtmlVersion()
-	// if err != nil {
-	// 	return err
-	// }
-	// _, err = queueClient.Insert(ctx.Request().Context(), queue.EmailJobArgs{
-	// 	To:          form.Email,
-	// 	From:        "noreply@mortenvistisen.com",
-	// 	Subject:     "Thanks for signing up!",
-	// 	TextVersion: textVersion,
-	// 	HtmlVersion: htmlVersion,
-	// }, nil)
-	// if err != nil {
-	// 	return err
-	// }
 
 	if err := a.subscriberSvc.New(ctx.Request().Context(), form.Email, form.Title); err != nil {
 		if errors.Is(err, models.ErrValidation{}) {
