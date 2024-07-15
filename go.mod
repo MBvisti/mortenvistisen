@@ -18,6 +18,7 @@ require (
 	github.com/jackc/pgx/v5 v5.6.0
 	github.com/labstack/echo-contrib v0.17.1
 	github.com/labstack/echo/v4 v4.12.0
+	github.com/lib/pq v1.10.9
 	github.com/lmittmann/tint v1.0.4
 	github.com/pkg/errors v0.9.1
 	github.com/riverqueue/river v0.9.0
@@ -41,6 +42,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dlclark/regexp2 v1.11.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
+	github.com/gdey/goose/v3 v3.6.5
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
