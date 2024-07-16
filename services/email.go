@@ -75,6 +75,45 @@ func (e *Email) SendNewSubscriberEmail(
 	})
 }
 
+func (e *Email) SendNewBookSubscriberEmail(
+	ctx context.Context,
+	subscriberEmail string,
+	activationToken, unsubscribeToken string,
+) error {
+	bookWelcomeMail := emails.BookWelcomeMail{
+		ConfirmationLink: fmt.Sprintf(
+			"%s://%s/verify-subscriber?token=%s",
+			e.cfg.App.AppScheme,
+			e.cfg.App.AppHost,
+			activationToken,
+		),
+		UnsubscribeLink: fmt.Sprintf(
+			"%s://%s/unsubscriber?token=%s",
+			e.cfg.App.AppScheme,
+			e.cfg.App.AppHost,
+			unsubscribeToken,
+		),
+	}
+
+	textVersion, err := bookWelcomeMail.GenerateTextVersion()
+	if err != nil {
+		return err
+	}
+
+	htmlVersion, err := bookWelcomeMail.GenerateHtmlVersion()
+	if err != nil {
+		return err
+	}
+
+	return e.client.SendMail(ctx, MailPayload{
+		To:       subscriberEmail,
+		From:     "start-freelancing@mortenvistisen.com",
+		Subject:  "Start Freelancing Book - action required",
+		HtmlBody: htmlVersion,
+		TextBody: textVersion,
+	})
+}
+
 func (e *Email) SendUserSignup(
 	ctx context.Context,
 	email string,

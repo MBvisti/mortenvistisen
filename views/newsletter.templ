@@ -4,7 +4,7 @@ import "github.com/MBvisti/mortenvistisen/views/internal/layouts"
 
 templ NewsletterPage(head Head, csrfToken string) {
 	@layouts.Base(head.Build()) {
-		<div class="my-auto container mx-auto grid grid-cols-4 px-4 md:grid-cols-6 lg:grid-cols-12">
+		<div class="container mx-auto grid grid-cols-4 px-4 md:grid-cols-6 lg:grid-cols-12">
 			<div class="col-span-4 hero md:col-start-2 md:col-end-6 lg:col-start-4 lg:col-end-10">
 				<div class="card-body rounded mb-5 p-0">
 					<h1 class="card-title text-2xl font-bold md:text-3xl md:leading-tight text-white mb-4">Monthly technical deep dives.</h1>

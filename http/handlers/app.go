@@ -97,7 +97,13 @@ func (a App) SubscriptionEvent(ctx echo.Context) error {
 		return ctx.String(200, "You're now subscribed!")
 	}
 
-	if err := a.subscriberSvc.New(ctx.Request().Context(), form.Email, form.Title); err != nil {
+	param := ctx.Param("book")
+	var bookSub bool
+	if param == "true" {
+		bookSub = true
+	}
+
+	if err := a.subscriberSvc.New(ctx.Request().Context(), form.Email, form.Title, bookSub); err != nil {
 		if errors.Is(err, models.ErrValidation{}) {
 			return nil
 		}
@@ -107,6 +113,35 @@ func (a App) SubscriptionEvent(ctx echo.Context) error {
 	}
 
 	return views.SubscribeModalResponse().
+		Render(views.ExtractRenderDeps(ctx))
+}
+
+func (a App) HowToStartFreelancing(ctx echo.Context) error {
+	return views.HowToStartFreelancing(views.Head{
+		Title:       "How To Start Freelancing Book",
+		Description: "Want to start freelancing? Kickstart your journey to working on your own terms in the best possible way by signing up for the How To Start Freelancing Book.",
+		Slug:        a.base.BuildURLFromSlug("books/" + "how-to-start-freelancing"),
+		MetaType:    "website",
+		Image:       "https://mortenvistisen.com/static/images/mbv.png",
+		ExtraMeta: []views.MetaContent{
+			{
+				Content: "Morten Vistisen",
+				Name:    "author",
+			},
+			{
+				Content: "How to start freelancing book",
+				Name:    "twitter:title",
+			},
+			{
+				Content: "Want to start freelancing? Kickstart your journey to working on your own terms in the best possible way by signing up for the How To Start Freelancing Book.",
+				Name:    "twitter:description",
+			},
+			{
+				Content: "freelancing, contracting, developer, software engineer, book, tutorial",
+				Name:    "keywords",
+			},
+		},
+	}).
 		Render(views.ExtractRenderDeps(ctx))
 }
 

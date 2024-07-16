@@ -44,6 +44,11 @@ type subscriberEmailService interface {
 		subscriberEmail string,
 		activationToken, unsubscribeToken string,
 	) error
+	SendNewBookSubscriberEmail(
+		ctx context.Context,
+		subscriberEmail string,
+		activationToken, unsubscribeToken string,
+	) error
 }
 
 type subscriberTokenService interface {
@@ -192,7 +197,11 @@ func (svc *SubscriberService) Verify(ctx context.Context, subscriberID uuid.UUID
 
 // New creates a new subscriber and sends them an verification email
 // TODO: create job to create and send email on queue
-func (svc *SubscriberService) New(ctx context.Context, email, articleTitle string) error {
+func (svc *SubscriberService) New(
+	ctx context.Context,
+	email, articleTitle string,
+	waitListBook bool,
+) error {
 	// 1. create type
 	// 2. store subscriber
 	// 3. create token
@@ -234,11 +243,21 @@ func (svc *SubscriberService) New(ctx context.Context, email, articleTitle strin
 	}
 
 	// 4. create email & send email
-	if err := svc.emailService.SendNewSubscriberEmail(ctx, subscriber.Email, activationTkn, unsubscribeTkn); err != nil {
-		return errors.Join(
-			ErrUnrecoverableEvent,
-			err,
-		) // could be retried if something goes wrong, a little TODO
+	if !waitListBook {
+		if err := svc.emailService.SendNewSubscriberEmail(ctx, subscriber.Email, activationTkn, unsubscribeTkn); err != nil {
+			return errors.Join(
+				ErrUnrecoverableEvent,
+				err,
+			) // could be retried if something goes wrong, a little TODO
+		}
+	}
+	if waitListBook {
+		if err := svc.emailService.SendNewBookSubscriberEmail(ctx, subscriber.Email, activationTkn, unsubscribeTkn); err != nil {
+			return errors.Join(
+				ErrUnrecoverableEvent,
+				err,
+			) // could be retried if something goes wrong, a little TODO
+		}
 	}
 
 	return nil
