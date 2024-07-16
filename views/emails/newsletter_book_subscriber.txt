@@ -1,0 +1,27 @@
+Thanks for joining early access!
+
+Start Freelancing | mortenvistisen ( https://mortenvistisen.com )
+
+***********************
+Start Freelancing Book!
+**********************
+
+Hi,
+I'm stoked that you're interested in the early access of Start Freelancing. It's still too early to start sharing anything yet, but, if you confirm your email I will send out updates as soon as I've them!
+
+Confirm your mail: ( {{ .ConfirmationLink }} )
+
+Thanks,
+Morten (https://mortenvistisen.com)
+
+If you’re having trouble with the button above, copy and paste the URL below into your web browser.
+
+{{ .ConfirmationLink }}
+
+If you didn't signup, or want to stop receiving these emails, click here:
+
+{{ .UnsubscribeLink }}
+
+mbv labs
+
+CPH Denmark

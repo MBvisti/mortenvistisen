@@ -10,7 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import "github.com/MBvisti/mortenvistisen/views/internal/layouts"
 
-func NewsletterPage(head Head, csrfToken string) templ.Component {
+func HowToStartFreelancing(head Head, csrfToken string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -40,20 +40,20 @@ func NewsletterPage(head Head, csrfToken string) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"container mx-auto grid grid-cols-4 px-4 md:grid-cols-6 lg:grid-cols-12\"><div class=\"col-span-4 hero md:col-start-2 md:col-end-6 lg:col-start-4 lg:col-end-10\"><div class=\"card-body rounded mb-5 p-0\"><h1 class=\"card-title text-2xl font-bold md:text-3xl md:leading-tight text-white mb-4\">Monthly technical deep dives.</h1><p class=\"text-base\">I work with everything from backend dev, systems designs to devops and machine learning. I share my learnings twice a month in tutorial form, so you can pick up new concept faster and expand your technical tool belt. </p><p class=\"text-base\">There is always an option to opt-out of receiving these updates, included in each mail. One click of a button and you are out.</p></div></div><div class=\"col-span-4 hero md:col-start-2 md:col-end-6 lg:col-start-4 lg:col-end-10\"><form class=\"w-full\" hx-post=\"/subscribe\" hx-target=\"this\" hx-swap=\"outerHTML\" method=\"POST\" action=\"/subscribe\"><input type=\"hidden\" name=\"gorilla.csrf.Token\" value=\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"container mx-auto grid grid-cols-4 px-4 md:grid-cols-6 lg:grid-cols-12 lg:mt-10 h-full\"><div class=\"lg:mx-20 xl:mx-44 col-span-4 md:col-span-6 lg:col-span-12\"><div class=\"flex flex-col md:flex-row\"><div class=\"w-full md:pr-20 lg:pr-0 lg:w-2/3 flex flex-col justify-center\"><div class=\"w-full lg:w-2/3\"><h1 class=\"text-neutral-content text-5xl font-bold leading-none\">Freedom to work how <span class=\"underline decoration-dashed decoration-warning underline-offset-[18px]\">you want</span></h1><p class=\"max-w-[450px] my-12 text-neutral-content/75 text-lg leading-relaxed\">All you need to go from developer to business owner; finding clients, negotiating rates and setting terms.</p></div><form class=\"max-w-[450px]\" hx-post=\"/subscribe?book=true\" hx-target=\"this\" hx-swap=\"outerHTML\" method=\"POST\" action=\"/subscribe?book=true\"><input type=\"hidden\" name=\"gorilla.csrf.Token\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(csrfToken)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/newsletter.templ`, Line: 21, Col: 69}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/how_to_start_freelancing.templ`, Line: 18, Col: 71}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><div class=\"flex flex-col\"><input type=\"hidden\" name=\"article-title\" value=\"newsletter-page\"> <input required type=\"email\" id=\"hero-input\" name=\"hero-input\" class=\"input input-bordered input-primary w-full mb-4\" placeholder=\"your-mail@here.com\"> <button data-umami-event=\"newsletter--newsletter-page\" type=\"submit\" class=\"btn btn-outline btn-primary\">Receive Updates</button></div></form></div></div>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><div class=\"flex flex-col\"><input type=\"hidden\" name=\"article-title\" value=\"how-to-freelance\"> <input required type=\"email\" id=\"hero-input\" name=\"hero-input\" class=\"input input-bordered input-primary w-full mb-4\" placeholder=\"your-mail@here.com\"> <button data-umami-event=\"books--freelance-early-access\" type=\"submit\" class=\"btn btn-primary text-white\">Get Early Access</button></div></form></div><img class=\"my-20 md:my-0 h-[30rem] shadow-lg\" src=\"/static/images/book-cover-ebook-wip.svg\" alt=\"book cover\"></div></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

@@ -1,0 +1,44 @@
+package views
+
+import "github.com/MBvisti/mortenvistisen/views/internal/layouts"
+
+templ HowToStartFreelancing(head Head, csrfToken string) {
+	@layouts.Base(head.Build()) {
+		<div class="container mx-auto grid grid-cols-4 px-4 md:grid-cols-6 lg:grid-cols-12 lg:mt-10 h-full">
+			<div class="lg:mx-20 xl:mx-44 col-span-4 md:col-span-6 lg:col-span-12">
+				<div class="flex flex-col md:flex-row">
+					<div class="w-full md:pr-20 lg:pr-0 lg:w-2/3 flex flex-col justify-center">
+						<div class="w-full lg:w-2/3">
+							<h1 class="text-neutral-content text-5xl font-bold leading-none">Freedom to work how <span class="underline decoration-dashed decoration-warning underline-offset-[18px]">you want</span></h1>
+							<p class="max-w-[450px] my-12 text-neutral-content/75 text-lg leading-relaxed">
+								All you need to go from developer to business owner; finding clients, negotiating rates and setting terms.
+							</p>
+						</div>
+						<form class="max-w-[450px]" hx-post="/subscribe?book=true" hx-target="this" hx-swap="outerHTML" method="POST" action="/subscribe?book=true">
+							<input type="hidden" name="gorilla.csrf.Token" value={ csrfToken }/>
+							<div class="flex flex-col">
+								<input type="hidden" name="article-title" value="how-to-freelance"/>
+								<input
+									required
+									type="email"
+									id="hero-input"
+									name="hero-input"
+									class="input input-bordered input-primary w-full mb-4"
+									placeholder="your-mail@here.com"
+								/>
+								<button
+									data-umami-event="books--freelance-early-access"
+									type="submit"
+									class="btn btn-primary text-white"
+								>
+									Get Early Access
+								</button>
+							</div>
+						</form>
+					</div>
+					<img class="my-20 md:my-0 h-[30rem] shadow-lg" src="/static/images/book-cover-ebook-wip.svg" alt="book cover"/>
+				</div>
+			</div>
+		</div>
+	}
+}

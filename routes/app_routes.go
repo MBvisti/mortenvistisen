@@ -48,6 +48,10 @@ func (r *Router) loadAppRoutes() {
 		return r.appHandlers.SubscriptionEvent(c)
 	})
 
+	router.GET("/books/how-to-start-freelancing", func(c echo.Context) error {
+		return r.appHandlers.HowToStartFreelancing(c)
+	})
+
 	router.GET("/redirect", func(c echo.Context) error {
 		to := c.QueryParam("to")
 		return r.baseHandlers.RedirectHx(c.Response(), fmt.Sprintf("/%s", to))

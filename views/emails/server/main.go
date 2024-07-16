@@ -26,6 +26,11 @@ func main() {
 		ResetPasswordLink: "https://mortenvistisen.com",
 	}))
 
+	http.Handle("/books/how-start-freelancing", templ.Handler(&emails.BookWelcomeMail{
+		ConfirmationLink: "https://mortenvistisen.com",
+		UnsubscribeLink:  "https://mortenvistisen.com",
+	}))
+
 	http.Handle("/background-job-mail", templ.Handler(&emails.BackgroundJobErrorMail{
 		JobID:       0,
 		AttemptedAt: time.Now(),
@@ -40,7 +45,7 @@ func main() {
 				Trace:   "trace trace",
 			},
 			{
-				At:      carbon.Now().SubDay().ToStdTime(),
+				At:      carbon.Now().SubDay().StdTime(),
 				Attempt: 1,
 				Error:   "bad token",
 				Trace:   "trace",
