@@ -4,17 +4,31 @@ script setModalHideCookie() {
 	document.cookie = "hideModal=true; max-age=31536000; path=/";
 }
 
-templ SubscribeModalResponse() {
-	<div class="w-full flex flex-col">
-		<div class="divider"></div>
-		<span class="font-bold py-2">
-			Thanks for subscribing!
-		</span>
-		<span class="font-sm my-2">
-			You will receive an email shortly to confirm your subscription.
-		</span>
-		<div class="divider"></div>
-	</div>
+templ SubscribeModalResponse(isBookSub bool) {
+	if isBookSub {
+		<div class="max-w-[450px] flex flex-col">
+			<div class="divider"></div>
+			<span class="font-bold py-2">
+				Awesome!
+			</span>
+			<span class="font-sm my-2">
+				Your on the list; please remember to confirm your email.
+			</span>
+			<div class="divider"></div>
+		</div>
+	}
+	if !isBookSub {
+		<div class="w-full flex flex-col">
+			<div class="divider"></div>
+			<span class="font-bold py-2">
+				Thanks for subscribing!
+			</span>
+			<span class="font-sm my-2">
+				You will receive an email shortly to confirm your subscription.
+			</span>
+			<div class="divider"></div>
+		</div>
+	}
 }
 
 templ SubscribeModal(csrfToken, title string) {

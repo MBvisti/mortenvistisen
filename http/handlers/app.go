@@ -97,7 +97,7 @@ func (a App) SubscriptionEvent(ctx echo.Context) error {
 		return ctx.String(200, "You're now subscribed!")
 	}
 
-	param := ctx.Param("book")
+	param := ctx.QueryParam("book")
 	var bookSub bool
 	if param == "true" {
 		bookSub = true
@@ -112,7 +112,7 @@ func (a App) SubscriptionEvent(ctx echo.Context) error {
 		}
 	}
 
-	return views.SubscribeModalResponse().
+	return views.SubscribeModalResponse(bookSub).
 		Render(views.ExtractRenderDeps(ctx))
 }
 
@@ -141,7 +141,9 @@ func (a App) HowToStartFreelancing(ctx echo.Context) error {
 				Name:    "keywords",
 			},
 		},
-	}).
+	},
+		csrf.Token(ctx.Request()),
+	).
 		Render(views.ExtractRenderDeps(ctx))
 }
 
