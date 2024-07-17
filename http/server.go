@@ -35,7 +35,14 @@ func NewServer(
 	srv := &http.Server{
 		Addr: fmt.Sprintf("%v:%v", host, port),
 		Handler: csrf.Protect(
-			[]byte(cfg.Auth.CsrfToken), csrf.Secure(isProduction))(router.GetInstance()),
+			[]byte(
+				cfg.Auth.CsrfToken,
+			),
+			csrf.Secure(isProduction),
+			csrf.Path("/"),
+		)(
+			router.GetInstance(),
+		),
 		ReadTimeout:  30 * time.Second,
 		WriteTimeout: 30 * time.Second,
 	}
