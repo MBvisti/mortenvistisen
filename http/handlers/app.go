@@ -104,6 +104,10 @@ func (a App) SubscriptionEvent(ctx echo.Context) error {
 	}
 
 	if err := a.subscriberSvc.New(ctx.Request().Context(), form.Email, form.Title, bookSub); err != nil {
+		if errors.Is(err, models.ErrSubscriberExists) {
+			return views.SubscribeModalResponse(bookSub, true).
+				Render(views.ExtractRenderDeps(ctx))
+		}
 		if errors.Is(err, models.ErrValidation{}) {
 			return nil
 		}
@@ -112,7 +116,7 @@ func (a App) SubscriptionEvent(ctx echo.Context) error {
 		}
 	}
 
-	return views.SubscribeModalResponse(bookSub).
+	return views.SubscribeModalResponse(bookSub, false).
 		Render(views.ExtractRenderDeps(ctx))
 }
 

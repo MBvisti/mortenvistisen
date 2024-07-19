@@ -4,20 +4,32 @@ script setModalHideCookie() {
 	document.cookie = "hideModal=true; max-age=31536000; path=/";
 }
 
-templ SubscribeModalResponse(isBookSub bool) {
-	if isBookSub {
+templ SubscribeModalResponse(isBookSub, subExists bool) {
+	if subExists {
 		<div class="max-w-[450px] flex flex-col">
 			<div class="divider"></div>
 			<span class="font-bold py-2">
-				Awesome!
+				Welcome back!
 			</span>
 			<span class="font-sm my-2">
-				Your on the list; please remember to confirm your email.
+				You're already on the list and will receive updates if you've confirmed your email.
 			</span>
 			<div class="divider"></div>
 		</div>
 	}
-	if !isBookSub {
+	if isBookSub && !subExists {
+		<div class="max-w-[450px] flex flex-col">
+			<div class="divider"></div>
+			<span class="font-bold py-2">
+				Great to have you!
+			</span>
+			<span class="font-sm my-2">
+				You're on the list; please remember to confirm your email.
+			</span>
+			<div class="divider"></div>
+		</div>
+	}
+	if !isBookSub && !subExists {
 		<div class="w-full flex flex-col">
 			<div class="divider"></div>
 			<span class="font-bold py-2">

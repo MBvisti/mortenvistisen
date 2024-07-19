@@ -17,10 +17,64 @@ type Post struct {
 templ HomePage(posts []Post) {
 	@layouts.Base(Head{}.Default().Build()) {
 		<div class="mx-auto grid grid-cols-4 px-4 md:grid-cols-6 lg:grid-cols-12">
-			<div class="col-span-4 hero md:col-start-2 md:col-end-6 lg:col-start-4 lg:col-end-10">
+			<div class="col-span-4 hero mb-14 md:col-start-2 md:col-end-6 lg:col-start-4 lg:col-end-10">
 				<div class="flex flex-col hero-content text-center">
-					<h1 class="text-4xl font-bold mb-2 text-white">Hi, I'm Morten</h1>
-					<p class="text-xl text-gray-300">A software engineer from Denmark. I write about technology and indiehacking; mainly focused around Go, Rust and Machine Learning.</p>
+					<div class="flex flex-col items-center md:flex-row w-full">
+						<div class="flex flex-col text-start">
+							<h1 class="text-4xl font-bold mb-2 text-base-content">Hi, I'm Morten</h1>
+							<p class="text-xl text-base-content/80 self-end">A software engineer from Denmark. I write about technology and indiehacking; mainly focused around Go, Rust and Machine Learning.</p>
+						</div>
+						<figure>
+							<img
+								src="/static/images/mbv.png"
+								alt="How to start freelancing book cover"
+							/>
+						</figure>
+					</div>
+				</div>
+			</div>
+			<div class="col-span-4 mb-14 md:col-start-2 md:col-d-6 lg:col-start-4 lg:col-end-10">
+				<div class="col-12 text-xl text-base-content divider divider-primary font-bold"><h2>Book Projects</h2></div>
+				<div class="flex flex-col card bg-base-100 w-96 mx-auto">
+					<figure>
+						<img
+							class="w-56 h-96 shadow-xl"
+							src="/static/images/book-cover-ebook-wip.svg"
+							alt="How to start freelancing book cover"
+						/>
+					</figure>
+					<a
+						data-umami-event="books--freelance-early-access-home"
+						class="text-center font-bold text-white hover:text-base-content"
+						href="/books/how-to-start-freelancing"
+					>Start Freelancing</a>
+				</div>
+			</div>
+			<div class="col-span-4 md:col-start-2 md:col-end-6 lg:col-start-4 lg:col-end-10">
+				<h2 class="col block text-2xl font-bold text-base-content mb-5 xl:my-8">Latest posts</h2>
+				<div class="col">
+					for _, post := range posts {
+						<a class="row mx-auto shadow" href={ templ.URL(post.Slug) }>
+							<div class="mb-10 col px-8 py-4 rounded-lg shadow-md bg-base-300  overflow-x-auto">
+								<div class="flex items-center justify-between">
+									<span class="text-sm font-light text-neutral-content">
+										{ fmt.Sprintf("%s %v, %v", carbon.Parse(post.ReleaseDate).ToShortMonthString(), carbon.Parse(post.ReleaseDate).DayOfMonth(), carbon.Parse(post.ReleaseDate).Year()) }
+									</span>
+								</div>
+								<div class="mt-2">
+									<p class="text-xl font-bold text-base-content hover:text-base-content/70 hover:underline">{ post.Title }</p>
+									<p class="mt-2 text-base-content/80">{ post.Excerpt }</p>
+								</div>
+								<div class="flex items-center justify-between mt-4">
+									<div class="flex items-center overflow-x-auto overflow-y-hidden py-2">
+										for _, tag := range post.Tags {
+											<span class="px-3 py-1 text-sm font-bold text-gray-100 transition-colors duration-300 transform bg-gray-600 rounded cursor-pointer hover:bg-gray-500 mr-2">{ tag }</span>
+										}
+									</div>
+								</div>
+							</div>
+						</a>
+					}
 				</div>
 			</div>
 			<div class="col-span-4 my-10 md:col-start-2 md:col-end-6 lg:col-start-4 lg:col-end-10">
@@ -51,33 +105,6 @@ templ HomePage(posts []Post) {
 							>Email</span>
 						</a>
 					</div>
-				</div>
-			</div>
-			<div class="col-span-4 md:col-start-2 md:col-end-6 lg:col-start-4 lg:col-end-10">
-				<h2 class="col block text-2xl font-bold text-white mb-5 xl:my-8">Latest posts</h2>
-				<div class="col">
-					for _, post := range posts {
-						<a class="row mx-auto shadow" href={ templ.URL(post.Slug) }>
-							<div class="mb-10 col px-8 py-4 rounded-lg shadow-md bg-base-300  overflow-x-auto">
-								<div class="flex items-center justify-between">
-									<span class="text-sm font-light text-gray-400">
-										{ fmt.Sprintf("%s %v, %v", carbon.Parse(post.ReleaseDate).ToShortMonthString(), carbon.Parse(post.ReleaseDate).DayOfMonth(), carbon.Parse(post.ReleaseDate).Year()) }
-									</span>
-								</div>
-								<div class="mt-2">
-									<p class="text-xl font-bold text-white hover:text-gray-200 hover:underline">{ post.Title }</p>
-									<p class="mt-2 text-gray-300">{ post.Excerpt }</p>
-								</div>
-								<div class="flex items-center justify-between mt-4">
-									<div class="flex items-center overflow-x-auto overflow-y-hidden py-2">
-										for _, tag := range post.Tags {
-											<span class="px-3 py-1 text-sm font-bold text-gray-100 transition-colors duration-300 transform bg-gray-600 rounded cursor-pointer hover:bg-gray-500 mr-2">{ tag }</span>
-										}
-									</div>
-								</div>
-							</div>
-						</a>
-					}
 				</div>
 			</div>
 		</div>
