@@ -52,7 +52,7 @@ func HomePage(posts []Post) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"mx-auto grid grid-cols-4 px-4 md:grid-cols-6 lg:grid-cols-12\"><div class=\"col-span-4 hero md:col-start-2 md:col-end-6 lg:col-start-4 lg:col-end-10\"><div class=\"flex flex-col hero-content text-center\"><h1 class=\"text-4xl font-bold mb-2 text-white\">Hi, I'm Morten</h1><p class=\"text-xl text-gray-300\">A software engineer from Denmark. I write about technology and indiehacking; mainly focused around Go, Rust and Machine Learning.</p></div></div><div class=\"col-span-4 my-10 md:col-start-2 md:col-end-6 lg:col-start-4 lg:col-end-10\"><div class=\"col-12 text-white divider divider-accent font-bold\">Socials</div><div class=\"flex flex-col col-12\"><div class=\"flex h-10 justify-around text-xs items-center md:px-20\"><a href=\"https://twitter.com/mbvisti\"><span class=\"text-gray-300 badge badge-neutral\">Twitter</span></a> <a href=\"https://www.linkedin.com/in/mortenvistisen\"><span class=\"text-gray-300 badge badge-neutral\">Linkedin</span></a> <a href=\"https://github.com/mbvisti\"><span class=\"text-gray-300 badge badge-neutral\">Github</span></a> <a href=\"mailto:hi@mortenvistisen.com?subject=hi\" target=\"_blank\"><span class=\"text-gray-300 badge badge-neutral\">Email</span></a></div></div></div><div class=\"col-span-4 md:col-start-2 md:col-end-6 lg:col-start-4 lg:col-end-10\"><h2 class=\"col block text-2xl font-bold text-white mb-5 xl:my-8\">Latest posts</h2><div class=\"col\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"mx-auto grid grid-cols-4 px-4 md:grid-cols-6 lg:grid-cols-12\"><div class=\"col-span-4 hero mb-14 md:col-start-2 md:col-end-6 lg:col-start-4 lg:col-end-10\"><div class=\"flex flex-col hero-content text-center\"><div class=\"flex flex-col items-center md:flex-row w-full\"><div class=\"flex flex-col text-start\"><h1 class=\"text-4xl font-bold mb-2 text-base-content\">Hi, I'm Morten</h1><p class=\"text-xl text-base-content/80 self-end\">A software engineer from Denmark. I write about technology and indiehacking; mainly focused around Go, Rust and Machine Learning.</p></div><figure><img src=\"/static/images/mbv.png\" alt=\"How to start freelancing book cover\"></figure></div></div></div><div class=\"col-span-4 mb-14 md:col-start-2 md:col-d-6 lg:col-start-4 lg:col-end-10\"><div class=\"col-12 text-xl text-base-content divider divider-primary font-bold\"><h2>Book Projects</h2></div><div class=\"flex flex-col card bg-base-100 w-96 mx-auto\"><figure><img class=\"w-56 h-96 shadow-xl\" src=\"/static/images/book-cover-ebook-wip.svg\" alt=\"How to start freelancing book cover\"></figure><a data-umami-event=\"books--freelance-early-access-home\" class=\"text-center font-bold text-white hover:text-base-content\" href=\"/books/how-to-start-freelancing\">Start Freelancing</a></div></div><div class=\"col-span-4 md:col-start-2 md:col-end-6 lg:col-start-4 lg:col-end-10\"><h2 class=\"col block text-2xl font-bold text-base-content mb-5 xl:my-8\">Latest posts</h2><div class=\"col\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -66,40 +66,40 @@ func HomePage(posts []Post) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><div class=\"mb-10 col px-8 py-4 rounded-lg shadow-md bg-base-300  overflow-x-auto\"><div class=\"flex items-center justify-between\"><span class=\"text-sm font-light text-gray-400\">")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><div class=\"mb-10 col px-8 py-4 rounded-lg shadow-md bg-base-300  overflow-x-auto\"><div class=\"flex items-center justify-between\"><span class=\"text-sm font-light text-neutral-content\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s %v, %v", carbon.Parse(post.ReleaseDate).ToShortMonthString(), carbon.Parse(post.ReleaseDate).DayOfMonth(), carbon.Parse(post.ReleaseDate).Year()))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/home.templ`, Line: 64, Col: 173}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/home.templ`, Line: 61, Col: 173}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</span></div><div class=\"mt-2\"><p class=\"text-xl font-bold text-white hover:text-gray-200 hover:underline\">")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</span></div><div class=\"mt-2\"><p class=\"text-xl font-bold text-base-content hover:text-base-content/70 hover:underline\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(post.Title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/home.templ`, Line: 68, Col: 97}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/home.templ`, Line: 65, Col: 111}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><p class=\"mt-2 text-gray-300\">")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><p class=\"mt-2 text-base-content/80\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(post.Excerpt)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/home.templ`, Line: 69, Col: 53}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/home.templ`, Line: 66, Col: 60}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -117,7 +117,7 @@ func HomePage(posts []Post) templ.Component {
 					var templ_7745c5c3_Var7 string
 					templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(tag)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/home.templ`, Line: 74, Col: 171}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/home.templ`, Line: 71, Col: 171}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 					if templ_7745c5c3_Err != nil {
@@ -133,7 +133,7 @@ func HomePage(posts []Post) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div></div>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div><div class=\"col-span-4 my-10 md:col-start-2 md:col-end-6 lg:col-start-4 lg:col-end-10\"><div class=\"col-12 text-white divider divider-accent font-bold\">Socials</div><div class=\"flex flex-col col-12\"><div class=\"flex h-10 justify-around text-xs items-center md:px-20\"><a href=\"https://twitter.com/mbvisti\"><span class=\"text-gray-300 badge badge-neutral\">Twitter</span></a> <a href=\"https://www.linkedin.com/in/mortenvistisen\"><span class=\"text-gray-300 badge badge-neutral\">Linkedin</span></a> <a href=\"https://github.com/mbvisti\"><span class=\"text-gray-300 badge badge-neutral\">Github</span></a> <a href=\"mailto:hi@mortenvistisen.com?subject=hi\" target=\"_blank\"><span class=\"text-gray-300 badge badge-neutral\">Email</span></a></div></div></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

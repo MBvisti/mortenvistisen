@@ -10,7 +10,7 @@ module.exports = {
   ],
   darkMode: 'class',
   daisyui: {
-    themes: ["dark"],
+    themes: ["dark", "dim"],
   },
   plugins: [
     require('@tailwindcss/forms'),
