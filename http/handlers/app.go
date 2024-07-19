@@ -126,7 +126,7 @@ func (a App) HowToStartFreelancing(ctx echo.Context) error {
 		Description: "Want to start freelancing? Kickstart your journey to working on your own terms in the best possible way by signing up for the How To Start Freelancing Book.",
 		Slug:        a.base.BuildURLFromSlug("books/" + "how-to-start-freelancing"),
 		MetaType:    "website",
-		Image:       "https://mortenvistisen.com/static/images/mbv.png",
+		Image:       "https://mortenvistisen.com/static/images/book-cover-ebook-wip.png",
 		ExtraMeta: []views.MetaContent{
 			{
 				Content: "Morten Vistisen",
