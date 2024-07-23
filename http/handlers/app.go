@@ -280,27 +280,27 @@ func (a App) Article(ctx echo.Context) error {
 		}
 	}
 
-	// fiveRandomPosts, err := db.GetFiveRandomPosts(
-	// 	ctx.Request().Context(),
-	// 	post.ID,
-	// )
-	// if err != nil {
-	// 	return err
-	// }
-	//
-	// otherArticles := make(map[string]string, 5)
-	//
-	// for _, article := range fiveRandomPosts {
-	// 	otherArticles[article.Title] = controllers.BuildURLFromSlug(
-	// 		"posts/" + article.Slug,
-	// 	)
-	// }
-	//
+	fiveRandomPosts, err := a.base.DB.GetFiveRandomPosts(
+		ctx.Request().Context(),
+		post.ID,
+	)
+	if err != nil {
+		return err
+	}
+
+	otherArticles := make(map[string]string, 5)
+
+	for _, article := range fiveRandomPosts {
+		otherArticles[article.Title] = a.base.BuildURLFromSlug(
+			"posts/" + article.Slug,
+		)
+	}
+
 	return views.ArticlePage(views.ArticlePageData{
 		Content:           postContent,
 		HeaderTitle:       post.HeaderTitle,
 		ReleaseDate:       post.ReleaseDate,
-		OtherArticleLinks: nil,
+		OtherArticleLinks: otherArticles,
 		CsrfToken:         csrf.Token(ctx.Request()),
 	}, views.Head{
 		Title:       post.Title,
