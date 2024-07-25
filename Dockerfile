@@ -33,7 +33,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -mod=readonly -v -o worke
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -mod=readonly -v -o healthcheck cmd/healthcheck/main.go
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -mod=readonly -v -o migrate cmd/migrate/main.go
 
-FROM scratch as worker
+FROM scratch AS worker
 
 WORKDIR /
 
@@ -42,7 +42,7 @@ COPY --from=build-go worker worker
 
 CMD ["./worker"]
 
-FROM scratch as app
+FROM scratch AS app
 
 WORKDIR /
 
