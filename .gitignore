@@ -30,3 +30,6 @@ tmp
 ./resources/node_modules
 
 ca*
+
+cmd/explore/sentence-transformers_all-MiniLM-L6-v2
+cmd/explore/onnxruntime-linux-x64.so
