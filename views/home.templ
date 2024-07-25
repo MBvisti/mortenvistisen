@@ -82,16 +82,18 @@ templ HomePage(posts []Post) {
 					>Start Freelancing</a>
 				</div>
 			</div>
-			<div class="col-span-4 h-96 mb-28 md:col-start-2 md:col-end-6 lg:col-start-4 lg:col-end-10">
+			<div class="col-span-4 h-[30rem] mb-28 md:col-start-2 md:col-end-6 lg:col-start-4 lg:col-end-10">
 				<h2 class="col block text-2xl font-bold text-base-content mb-5 xl:my-8">Latest video</h2>
-				<iframe width="100%" height="100%" src="https://www.youtube.com/embed/yTTdllkIcls?si=XaGpFe4hYcxOggyO" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+				<div class="bg-base-300 w-full h-full p-4 rounded-lg">
+					<iframe width="100%" height="100%" src="https://www.youtube.com/embed/KJoCSxo4rbM?si=bH9x-nuBI7PxRbB0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+				</div>
 			</div>
 			<div class="col-span-4 md:col-start-2 md:col-end-6 lg:col-start-4 lg:col-end-10">
 				<h2 class="col block text-2xl font-bold text-base-content mb-5 xl:my-8">Latest articles</h2>
 				<div class="col">
 					for _, post := range posts {
 						<a class="row mx-auto shadow" href={ templ.URL(post.Slug) }>
-							<div class="mb-10 col px-8 py-4 rounded-lg shadow-md bg-base-300  overflow-x-auto">
+							<div class="mb-10 col px-8 py-4 rounded-lg shadow-md bg-base-300 overflow-x-auto">
 								<div class="flex items-center justify-between">
 									<span class="text-sm font-light text-neutral-content">
 										{ fmt.Sprintf("%s %v, %v", carbon.Parse(post.ReleaseDate).ToShortMonthString(), carbon.Parse(post.ReleaseDate).DayOfMonth(), carbon.Parse(post.ReleaseDate).Year()) }
@@ -116,18 +118,3 @@ templ HomePage(posts []Post) {
 		</div>
 	}
 }
-
-//<div class="flex flex-col hero-content text-center">
-//	<div class="flex flex-col items-center md:flex-row w-full">
-//		<div class="flex flex-col text-start">
-//			<h1 class="text-4xl font-bold mb-2 text-base-content">Hi, I'm Morten</h1>
-//			<p class="text-xl text-base-content/80 self-end">A software engineer from Denmark. I write about technology and indiehacking; mainly focused around Go, Rust and Machine Learning.</p>
-//		</div>
-//		<figure>
-//			<img
-//				src="/static/images/mbv.png"
-//				alt="How to start freelancing book cover"
-//			/>
-//		</figure>
-//	</div>
-//</div>
