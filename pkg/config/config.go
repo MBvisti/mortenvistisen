@@ -9,26 +9,35 @@ type Cfg struct {
 	Auth              Authentication
 	App               App
 	ExternalProviders ExternalProviders
+	Telemetry         Telemetry
 }
 
 func New() Cfg {
 	databaseCfg := Database{}
-	if err := env.Parse(&databaseCfg); err != nil {
+	if err := env.ParseWithOptions(&databaseCfg, env.Options{
+		RequiredIfNoDef: true,
+	}); err != nil {
 		panic(err)
 	}
 
 	authCfg := Authentication{}
-	if err := env.Parse(&authCfg); err != nil {
+	if err := env.ParseWithOptions(&authCfg, env.Options{
+		RequiredIfNoDef: true,
+	}); err != nil {
 		panic(err)
 	}
 
 	appCfg := App{}
-	if err := env.Parse(&appCfg); err != nil {
+	if err := env.ParseWithOptions(&appCfg, env.Options{
+		RequiredIfNoDef: true,
+	}); err != nil {
 		panic(err)
 	}
 
 	externalProviders := ExternalProviders{}
-	if err := env.Parse(&externalProviders); err != nil {
+	if err := env.ParseWithOptions(&externalProviders, env.Options{
+		RequiredIfNoDef: true,
+	}); err != nil {
 		panic(err)
 	}
 
@@ -37,5 +46,6 @@ func New() Cfg {
 		authCfg,
 		appCfg,
 		externalProviders,
+		newTelemetry(),
 	}
 }

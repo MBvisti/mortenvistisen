@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"context"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -13,6 +12,7 @@ import (
 	"github.com/MBvisti/mortenvistisen/http/middleware"
 	"github.com/MBvisti/mortenvistisen/pkg/config"
 	"github.com/labstack/echo/v4"
+	slogecho "github.com/samber/slog-echo"
 
 	"github.com/labstack/echo-contrib/echoprometheus"
 	echomw "github.com/labstack/echo/v4/middleware"
@@ -42,45 +42,25 @@ func NewRouter(
 ) *Router {
 	router := echo.New()
 
-	if cfg.App.Environment == "development" {
-		router.Debug = true
+	router.Debug = true
+	if cfg.App.Environment == config.PROD_ENVIRONMENT {
+		router.Debug = false
+		router.Use(echomw.GzipWithConfig(echomw.GzipConfig{
+			Level: 5,
+			Skipper: func(c echo.Context) bool {
+				return strings.Contains(c.Path(), "metrics")
+			},
+		}))
+		router.Use(
+			echoprometheus.NewMiddleware("mortenvistisen_blog"),
+		)
+		router.GET("/metrics", echoprometheus.NewHandler())
 	}
 
 	router.Static("/static", "static")
 	router.Use(mw.RegisterUserContext)
+	router.Use(slogecho.New(slog.Default()))
 	router.Use(echomw.Recover())
-	router.Use(echomw.RequestLoggerWithConfig(echomw.RequestLoggerConfig{
-		LogStatus:   true,
-		LogURI:      true,
-		LogError:    true,
-		HandleError: true, // forwards error to the global error handler, so it can decide appropriate status code
-		LogValuesFunc: func(c echo.Context, v echomw.RequestLoggerValues) error {
-			if v.Error == nil {
-				slog.LogAttrs(context.Background(), slog.LevelInfo, "REQUEST",
-					slog.String("uri", v.URI),
-					slog.Int("status", v.Status),
-				)
-			} else {
-				slog.LogAttrs(context.Background(), slog.LevelError, "REQUEST_ERROR",
-					slog.String("uri", v.URI),
-					slog.Int("status", v.Status),
-					slog.String("err", v.Error.Error()),
-				)
-			}
-			return nil
-		},
-	}))
-
-	router.Use(echomw.GzipWithConfig(echomw.GzipConfig{
-		Level: 5,
-		Skipper: func(c echo.Context) bool {
-			return strings.Contains(c.Path(), "metrics")
-		},
-	}))
-	router.Use(
-		echoprometheus.NewMiddleware("mortenvistisen_blog"),
-	) // adds middleware to gather metrics
-	router.GET("/metrics", echoprometheus.NewHandler())
 
 	router.GET("/robots.txt", func(c echo.Context) error {
 		return c.File("./resources/seo/robots.txt")
@@ -92,7 +72,7 @@ func NewRouter(
 		return c.File("./resources/seo/sitemap.xml")
 	})
 	router.GET("/static/css/output.css", func(c echo.Context) error {
-		if os.Getenv("ENVIRONMENT") == "production" {
+		if os.Getenv("ENVIRONMENT") == config.PROD_ENVIRONMENT {
 			// Set cache headers for one year (adjust as needed)
 			cacheTime := time.Now().AddDate(0, 0, 1)
 

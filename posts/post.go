@@ -3,8 +3,8 @@ package posts
 import (
 	"bytes"
 	"embed"
+	"log/slog"
 
-	"github.com/MBvisti/mortenvistisen/pkg/telemetry"
 	chromahtml "github.com/alecthomas/chroma/v2/formatters/html"
 	"github.com/yuin/goldmark"
 	highlighting "github.com/yuin/goldmark-highlighting/v2"
@@ -78,7 +78,7 @@ func GetAllFiles() ([]string, error) {
 func (pm *PostManager) GetPost(name string) (string, error) {
 	source, err := pm.posts.ReadFile(name)
 	if err != nil {
-		telemetry.Logger.Info("failed to read markdown file", "error", err)
+		slog.Error("failed to read markdown file", "error", err)
 		return "", err
 	}
 
@@ -88,14 +88,14 @@ func (pm *PostManager) GetPost(name string) (string, error) {
 func (pm *PostManager) Parse(name string) (string, error) {
 	source, err := pm.posts.ReadFile(name)
 	if err != nil {
-		telemetry.Logger.Info("failed to read markdown file", "error", err)
+		slog.Error("failed to read markdown file", "error", err)
 		return "", err
 	}
 
 	// Parse Markdown content
 	var htmlOutput bytes.Buffer
 	if err := pm.markdownHandler.Convert(source, &htmlOutput); err != nil {
-		telemetry.Logger.Info("failed to parse markdown file", "error", err)
+		slog.Error("failed to parse markdown file", "error", err)
 		return "", err
 	}
 

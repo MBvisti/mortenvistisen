@@ -25,7 +25,6 @@ type Server struct {
 
 func NewServer(
 	router *routes.Router,
-	logger *slog.Logger,
 	cfg config.Cfg,
 ) Server {
 	host := cfg.App.ServerHost

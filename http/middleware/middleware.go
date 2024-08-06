@@ -1,9 +1,9 @@
 package middleware
 
 import (
+	"log/slog"
 	"net/http"
 
-	"github.com/MBvisti/mortenvistisen/pkg/telemetry"
 	"github.com/MBvisti/mortenvistisen/services"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -44,7 +44,12 @@ func (m *Middleware) AuthOnly(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		authenticated, userID, err := m.authSvc.IsAuthenticated(c.Request())
 		if err != nil {
-			telemetry.Logger.Error("could not get authenticated status", "error", err)
+			slog.ErrorContext(
+				c.Request().Context(),
+				"could not get authenticated status",
+				"error",
+				err,
+			)
 			return c.Redirect(http.StatusPermanentRedirect, "/500")
 		}
 
@@ -61,7 +66,12 @@ func (m *Middleware) RegisterUserContext(next echo.HandlerFunc) echo.HandlerFunc
 	return func(c echo.Context) error {
 		authenticated, userID, err := m.authSvc.IsAuthenticated(c.Request())
 		if err != nil {
-			telemetry.Logger.Error("could not get authenticated status", "error", err)
+			slog.ErrorContext(
+				c.Request().Context(),
+				"could not get authenticated status",
+				"error",
+				err,
+			)
 			return c.Redirect(http.StatusPermanentRedirect, "/500")
 		}
 
