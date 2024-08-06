@@ -1,7 +1,7 @@
 set dotenv-load
 
 # alias
-alias r := run-reload
+alias r := run-app
 
 alias wc := watch-css
 
@@ -56,7 +56,7 @@ generate-db-functions:
 	sqlc compile && sqlc generate
 
 # Application
-run-reload:
+run-app:
     wgo -file=.go -file=.templ -xfile=_templ.go templ generate :: go run cmd/app/main.go
 
 # Worker
