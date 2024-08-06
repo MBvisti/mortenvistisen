@@ -6,7 +6,6 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/MBvisti/mortenvistisen/pkg/telemetry"
 	"github.com/MBvisti/mortenvistisen/services"
 	"github.com/MBvisti/mortenvistisen/views/emails"
 	"github.com/jackc/pgx/v5"
@@ -88,7 +87,7 @@ func NewClient(pool *pgxpool.Pool, opts ...ClientCfgOpts) *river.Client[pgx.Tx] 
 		fetchCooldown:     100 * time.Millisecond,
 		fetchPollInterval: 1 * time.Second,
 		jobTimeout:        5 * time.Minute,
-		logger:            telemetry.SetupLogger(),
+		logger:            slog.Default(),
 	}
 
 	for _, opt := range opts {

@@ -20,10 +20,9 @@ import (
 )
 
 func main() {
-	logger := telemetry.SetupLogger()
-	slog.SetDefault(logger)
-
 	cfg := config.New()
+
+	telemetry.NewTelemetry(cfg, "v0.0.1", "app")
 
 	conn, err := psql.CreatePooledConnection(
 		context.Background(),
@@ -38,7 +37,7 @@ func main() {
 
 	awsSes := mail_client.NewAwsSimpleEmailService()
 
-	riverClient := queue.NewClient(conn, queue.WithLogger(logger))
+	riverClient := queue.NewClient(conn, queue.WithLogger(slog.Default()))
 
 	postManager := posts.NewPostManager()
 
@@ -108,7 +107,7 @@ func main() {
 	)
 	router.LoadInRoutes()
 
-	server := http.NewServer(router, logger, cfg)
+	server := http.NewServer(router, cfg)
 
 	server.Start()
 }

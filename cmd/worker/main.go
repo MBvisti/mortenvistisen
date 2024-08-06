@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
@@ -23,7 +24,7 @@ func main() {
 	ctx := context.Background()
 	cfg := config.New()
 
-	logger := telemetry.SetupLogger()
+	telemetry.NewTelemetry(cfg, "v0.0.1", "app")
 
 	awsSes := mail_client.NewAwsSimpleEmailService()
 	mailClient := services.NewEmailSvc(cfg, &awsSes)
@@ -52,7 +53,7 @@ func main() {
 		conn,
 		queue.WithQueues(q),
 		queue.WithWorkers(workers),
-		queue.WithLogger(logger),
+		queue.WithLogger(slog.Default()),
 		queue.WithPeriodicJobs(periodicJobs),
 	)
 
