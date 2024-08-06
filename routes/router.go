@@ -92,6 +92,8 @@ func NewRouter(
 					slog.Int("status", v.Status),
 					slog.String("uri", v.URI),
 					slog.String("error", v.Error.Error()),
+					slog.String("remote_ip", v.RemoteIP),
+					slog.String("referer", v.Referer),
 					slog.String("latency", v.Latency.String()),
 				)
 			}

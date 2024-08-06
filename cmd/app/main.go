@@ -22,9 +22,7 @@ import (
 func main() {
 	cfg := config.New()
 
-	telemetry.NewTelemetry(cfg, "v0.0.1", "app")
-
-	slog.Info("hellooooooo")
+	telemetry.NewTelemetry(cfg, "v0.0.1", "blog")
 
 	conn, err := psql.CreatePooledConnection(
 		context.Background(),
