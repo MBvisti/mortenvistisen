@@ -31,7 +31,7 @@ func NewTelemetry(cfg config.Cfg, release, service string) {
 	}
 }
 
-func productionLogger(url, tenantID, release, env, service string) *slog.Logger {
+func productionLogger(url, tenantID, release, _, service string) *slog.Logger {
 	config, _ := loki.NewDefaultConfig(url)
 	config.TenantID = tenantID
 	client, err := loki.New(config)
@@ -39,9 +39,12 @@ func productionLogger(url, tenantID, release, env, service string) *slog.Logger 
 		panic(err)
 	}
 
-	logger := slog.New(slogloki.Option{Level: slog.LevelInfo, Client: client}.NewLokiHandler())
+	defer client.Stop()
+
+	logger := slog.New(
+		slogloki.Option{Level: slog.LevelInfo, Client: client, AddSource: true}.NewLokiHandler(),
+	)
 	logger = logger.
-		With("environment", env).
 		With("release", release).
 		With("service", service)
 

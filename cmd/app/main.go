@@ -24,6 +24,8 @@ func main() {
 
 	telemetry.NewTelemetry(cfg, "v0.0.1", "app")
 
+	slog.Info("hellooooooo")
+
 	conn, err := psql.CreatePooledConnection(
 		context.Background(),
 		cfg.Db.GetUrlString(),

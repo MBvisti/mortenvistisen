@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -12,7 +13,8 @@ import (
 	"github.com/MBvisti/mortenvistisen/http/middleware"
 	"github.com/MBvisti/mortenvistisen/pkg/config"
 	"github.com/labstack/echo/v4"
-	slogecho "github.com/samber/slog-echo"
+
+	// slogecho "github.com/samber/slog-echo"
 
 	"github.com/labstack/echo-contrib/echoprometheus"
 	echomw "github.com/labstack/echo/v4/middleware"
@@ -59,7 +61,44 @@ func NewRouter(
 
 	router.Static("/static", "static")
 	router.Use(mw.RegisterUserContext)
-	router.Use(slogecho.New(slog.Default()))
+
+	// slogechoCfg := slogecho.Config{
+	// 	Filters: []slogecho.Filter{
+	// 		slogecho.IgnorePathContains("static"),
+	// 		slogecho.IgnorePathContains("health"),
+	// 	},
+	// }
+
+	// router.Use(slogecho.NewWithConfig(slog.Default(), slogechoCfg))
+	logger := slog.Default()
+	router.Use(echomw.RequestLoggerWithConfig(echomw.RequestLoggerConfig{
+		LogStatus:   true,
+		LogURI:      true,
+		LogError:    true,
+		HandleError: true, // forwards error to the global error handler, so it can decide appropriate status code
+		LogValuesFunc: func(c echo.Context, v echomw.RequestLoggerValues) error {
+			if v.Error == nil {
+				logger.LogAttrs(context.Background(), slog.LevelInfo, "REQUEST",
+					slog.String("env", cfg.App.Environment),
+					slog.String("time", v.StartTime.Format(time.RFC822)),
+					slog.Int("status", v.Status),
+					slog.String("uri", v.URI),
+					slog.String("latency", v.Latency.String()),
+				)
+			} else {
+				logger.LogAttrs(context.Background(), slog.LevelError, "REQUEST_ERROR",
+					slog.String("env", cfg.App.Environment),
+					slog.String("time", v.StartTime.Format(time.RFC822)),
+					slog.Int("status", v.Status),
+					slog.String("uri", v.URI),
+					slog.String("error", v.Error.Error()),
+					slog.String("latency", v.Latency.String()),
+				)
+			}
+
+			return nil
+		},
+	}))
 	router.Use(echomw.Recover())
 
 	router.GET("/robots.txt", func(c echo.Context) error {
@@ -87,7 +126,7 @@ func NewRouter(
 	router.GET("/static/js/:filename", func(c echo.Context) error {
 		fm := c.Param("filename")
 
-		if os.Getenv("ENVIRONMENT") == "production" {
+		if os.Getenv("ENVIRONMENT") == config.PROD_ENVIRONMENT {
 			// Set cache headers for one year (adjust as needed)
 			cacheTime := time.Now().AddDate(0, 1, 0)
 
@@ -102,7 +141,7 @@ func NewRouter(
 	router.GET("/static/images/:filename", func(c echo.Context) error {
 		fm := c.Param("filename")
 
-		if os.Getenv("ENVIRONMENT") == "production" {
+		if os.Getenv("ENVIRONMENT") == config.PROD_ENVIRONMENT {
 			// Set cache headers for one year (adjust as needed)
 			cacheTime := time.Now().AddDate(0, 1, 0)
 
