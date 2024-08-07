@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"context"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -13,6 +12,7 @@ import (
 	"github.com/MBvisti/mortenvistisen/http/middleware"
 	"github.com/MBvisti/mortenvistisen/pkg/config"
 	"github.com/labstack/echo/v4"
+	slogecho "github.com/samber/slog-echo"
 
 	// slogecho "github.com/samber/slog-echo"
 
@@ -62,52 +62,54 @@ func NewRouter(
 	router.Static("/static", "static")
 	router.Use(mw.RegisterUserContext)
 
-	// slogechoCfg := slogecho.Config{
-	// 	Filters: []slogecho.Filter{
-	// 		slogecho.IgnorePathContains("static"),
-	// 		slogecho.IgnorePathContains("health"),
-	// 	},
-	// }
-
-	// router.Use(slogecho.NewWithConfig(slog.Default(), slogechoCfg))
-	logger := slog.Default()
-	router.Use(echomw.RequestLoggerWithConfig(echomw.RequestLoggerConfig{
-		LogStatus:   true,
-		LogURI:      true,
-		LogError:    true,
-		HandleError: true, // forwards error to the global error handler, so it can decide appropriate status code
-		LogValuesFunc: func(c echo.Context, v echomw.RequestLoggerValues) error {
-			if v.Error == nil {
-				logger.LogAttrs(context.Background(), slog.LevelInfo, "request",
-					slog.String("env", cfg.App.Environment),
-					slog.String("time", v.StartTime.Format(time.RFC822)),
-					slog.Int("status", v.Status),
-					slog.String("uri", v.URI),
-					slog.String("error", v.Error.Error()),
-					slog.String("remote_ip", v.RemoteIP),
-					slog.String("referer", v.Referer),
-					slog.String("latency", v.Latency.String()),
-					slog.String("method", v.Method),
-					slog.String("agent", v.UserAgent),
-				)
-			} else {
-				logger.LogAttrs(context.Background(), slog.LevelError, "request_error",
-					slog.String("env", cfg.App.Environment),
-					slog.String("time", v.StartTime.Format(time.RFC822)),
-					slog.Int("status", v.Status),
-					slog.String("uri", v.URI),
-					slog.String("error", v.Error.Error()),
-					slog.String("remote_ip", v.RemoteIP),
-					slog.String("referer", v.Referer),
-					slog.String("latency", v.Latency.String()),
-					slog.String("method", v.Method),
-					slog.String("agent", v.UserAgent),
-				)
-			}
-
-			return nil
+	slogechoCfg := slogecho.Config{
+		WithRequestID: false,
+		WithSpanID:    true,
+		WithTraceID:   true,
+		Filters: []slogecho.Filter{
+			slogecho.IgnorePathContains("static"),
+			slogecho.IgnorePathContains("health"),
 		},
-	}))
+	}
+	router.Use(slogecho.NewWithConfig(slog.Default(), slogechoCfg))
+	// logger := slog.Default()
+	// router.Use(echomw.RequestLoggerWithConfig(echomw.RequestLoggerConfig{
+	// 	LogStatus:   true,
+	// 	LogURI:      true,
+	// 	LogError:    true,
+	// 	HandleError: true, // forwards error to the global error handler, so it can decide appropriate status code
+	// 	LogValuesFunc: func(c echo.Context, v echomw.RequestLoggerValues) error {
+	// 		if v.Error == nil {
+	// 			logger.LogAttrs(context.Background(), slog.LevelInfo, "request",
+	// 				slog.String("env", cfg.App.Environment),
+	// 				slog.String("time", v.StartTime.Format(time.RFC822)),
+	// 				slog.Int("status", v.Status),
+	// 				slog.String("uri", v.URI),
+	// 				slog.String("error", v.Error.Error()),
+	// 				slog.String("remote_ip", v.RemoteIP),
+	// 				slog.String("referer", v.Referer),
+	// 				slog.String("latency", v.Latency.String()),
+	// 				slog.String("method", v.Method),
+	// 				slog.String("agent", v.UserAgent),
+	// 			)
+	// 		} else {
+	// 			logger.LogAttrs(context.Background(), slog.LevelError, "request_error",
+	// 				slog.String("env", cfg.App.Environment),
+	// 				slog.String("time", v.StartTime.Format(time.RFC822)),
+	// 				slog.Int("status", v.Status),
+	// 				slog.String("uri", v.URI),
+	// 				slog.String("error", v.Error.Error()),
+	// 				slog.String("remote_ip", v.RemoteIP),
+	// 				slog.String("referer", v.Referer),
+	// 				slog.String("latency", v.Latency.String()),
+	// 				slog.String("method", v.Method),
+	// 				slog.String("agent", v.UserAgent),
+	// 			)
+	// 		}
+	//
+	// 		return nil
+	// 	},
+	// }))
 	router.Use(echomw.Recover())
 
 	router.GET("/robots.txt", func(c echo.Context) error {

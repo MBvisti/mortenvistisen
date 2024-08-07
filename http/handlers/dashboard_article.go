@@ -3,6 +3,7 @@ package handlers
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"slices"
 	"strconv"
 
@@ -201,7 +202,9 @@ func (d Dashboard) ArticleUpdate(ctx echo.Context) error {
 		Render(views.ExtractRenderDeps(ctx))
 }
 
-func (d Dashboard) ArticleStore(ctx echo.Context) error {
+func (d Dashboard) ArticleStore(c echo.Context) error {
+	ctx, span := d.base.Tracer.Start(c.Request().Context(), "article/store")
+
 	type newArticleFormPayload struct {
 		Title             string   `form:"title"`
 		HeaderTitle       string   `form:"header-title"`
@@ -212,7 +215,8 @@ func (d Dashboard) ArticleStore(ctx echo.Context) error {
 		Release           string   `form:"release"`
 	}
 	var postPayload newArticleFormPayload
-	if err := ctx.Bind(&postPayload); err != nil {
+	if err := c.Bind(&postPayload); err != nil {
+		slog.ErrorContext(ctx, "could not bind newArticleFormPayload", "error", err)
 		return err
 	}
 
@@ -223,6 +227,7 @@ func (d Dashboard) ArticleStore(ctx echo.Context) error {
 
 	estimatedReadTime, err := strconv.Atoi(postPayload.EstimatedReadTime)
 	if err != nil {
+		slog.ErrorContext(ctx, "could not convert estimated read time", "error", err)
 		return err
 	}
 
@@ -236,7 +241,7 @@ func (d Dashboard) ArticleStore(ctx echo.Context) error {
 		tagIDs = append(tagIDs, id)
 	}
 
-	_, err = d.articleSvc.New(ctx.Request().Context(), models.NewArticlePayload{
+	_, err = d.articleSvc.New(ctx, span, models.NewArticlePayload{
 		ReleaseNow:  releaseNow,
 		Title:       postPayload.Title,
 		HeaderTitle: postPayload.HeaderTitle,
@@ -269,7 +274,7 @@ func (d Dashboard) ArticleStore(ctx echo.Context) error {
 				}
 			}
 
-			tags, err := d.tagSvc.All(ctx.Request().Context())
+			tags, err := d.tagSvc.All(ctx)
 			if err != nil {
 				return err
 			}
@@ -287,7 +292,7 @@ func (d Dashboard) ArticleStore(ctx echo.Context) error {
 				return err
 			}
 
-			articles, err := d.articleSvc.All(ctx.Request().Context())
+			articles, err := d.articleSvc.All(ctx)
 			if err != nil {
 				return err
 			}
@@ -305,13 +310,13 @@ func (d Dashboard) ArticleStore(ctx echo.Context) error {
 			}
 
 			return dashboard.CreateArticleFormContent(mappedErrors, keywords, unusedFileNames).
-				Render(views.ExtractRenderDeps(ctx))
+				Render(views.ExtractRenderDeps(c))
 		}
 
 		return err
 	}
 
-	ctx.Response().Writer.Header().Add("HX-Redirect", "/dashboard/articles")
+	c.Response().Writer.Header().Add("HX-Redirect", "/dashboard/articles")
 	return nil
 }
 

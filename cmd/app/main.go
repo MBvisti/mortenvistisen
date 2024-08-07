@@ -26,9 +26,12 @@ func main() {
 	tp := trace.NewTracerProvider(
 		trace.WithSampler(trace.AlwaysSample()),
 	)
-	tracer := tp.Tracer("blog/handlers")
+	tracer := tp.Tracer("tracing")
 
-	telemetry.NewTelemetry(cfg, "v0.0.1")
+	client := telemetry.NewTelemetry(cfg, "v0.0.1")
+	if client != nil {
+		defer client.Stop()
+	}
 
 	conn, err := psql.CreatePooledConnection(
 		context.Background(),

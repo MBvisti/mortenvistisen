@@ -26,6 +26,7 @@ require (
 	github.com/riverqueue/river/riverdriver/riverpgxv5 v0.9.0
 	github.com/riverqueue/river/rivertype v0.9.0
 	github.com/robfig/cron/v3 v3.0.1
+	github.com/samber/slog-echo v1.14.4
 	github.com/stretchr/testify v1.9.0
 	github.com/vanng822/go-premailer v1.21.0
 	github.com/yuin/goldmark v1.7.4

@@ -9,6 +9,7 @@ import (
 	"github.com/MBvisti/mortenvistisen/pkg/validation"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type subscriberStorage interface {
@@ -199,9 +200,19 @@ func (svc *SubscriberService) Verify(ctx context.Context, subscriberID uuid.UUID
 // TODO: create job to create and send email on queue
 func (svc *SubscriberService) New(
 	ctx context.Context,
+	span trace.Span,
 	email, articleTitle string,
 	waitListBook bool,
 ) error {
+	span.AddEvent("subscriberModel/New")
+	slog.InfoContext(
+		ctx,
+		"starting to create new subscriber",
+		"email",
+		email,
+		"article_title",
+		articleTitle,
+	)
 	// 1. create type
 	// 2. store subscriber
 	// 3. create token
@@ -209,10 +220,27 @@ func (svc *SubscriberService) New(
 
 	_, err := svc.ByEmail(ctx, email)
 	if err != nil && !errors.Is(err, ErrNoRowWithIdentifier) {
-		slog.Error("could not query subscriber by email", "error", err, "email", email)
+		slog.ErrorContext(
+			ctx,
+			"could not query subscriber by email",
+			"error",
+			err,
+			"email",
+			email,
+			"article_title",
+			articleTitle,
+		)
 		return errors.Join(ErrUnrecoverableEvent, err)
 	}
 	if err == nil {
+		slog.InfoContext(
+			ctx,
+			"existing subscriber tried to sign up",
+			"email",
+			email,
+			"article_title",
+			articleTitle,
+		)
 		return ErrSubscriberExists
 	}
 
@@ -226,25 +254,56 @@ func (svc *SubscriberService) New(
 
 	// 2. store subscriber
 	if _, err := svc.storage.InsertSubscriber(ctx, subscriber); err != nil {
-		slog.Error("could not insert subscriber into database", "error", err)
+		slog.ErrorContext(
+			ctx,
+			"could not insert subscriber into database",
+			"error",
+			err,
+			"subscriber",
+			subscriber,
+		)
 		return errors.Join(ErrUnrecoverableEvent, err)
 	}
 
 	// 3. create token
 	activationTkn, err := svc.tknService.CreateSubscriberEmailValidation(ctx, subscriber.ID)
 	if err != nil {
+		slog.ErrorContext(
+			ctx,
+			"could not create subscriber email validation",
+			"error",
+			err,
+			"subscriber",
+			subscriber,
+		)
 		return errors.Join(ErrUnrecoverableEvent, err)
 	}
 
 	// 3. create token
 	unsubscribeTkn, err := svc.tknService.CreateUnsubscribeToken(ctx, subscriber.ID)
 	if err != nil {
+		slog.ErrorContext(
+			ctx,
+			"could not create subscriber email validation",
+			"error",
+			err,
+			"subscriber",
+			subscriber,
+		)
 		return errors.Join(ErrUnrecoverableEvent, err)
 	}
 
 	// 4. create email & send email
 	if !waitListBook {
 		if err := svc.emailService.SendNewSubscriberEmail(ctx, subscriber.Email, activationTkn, unsubscribeTkn); err != nil {
+			slog.ErrorContext(
+				ctx,
+				"could not send new subscriber email",
+				"error",
+				err,
+				"subscriber",
+				subscriber,
+			)
 			return errors.Join(
 				ErrUnrecoverableEvent,
 				err,
@@ -253,6 +312,16 @@ func (svc *SubscriberService) New(
 	}
 	if waitListBook {
 		if err := svc.emailService.SendNewBookSubscriberEmail(ctx, subscriber.Email, activationTkn, unsubscribeTkn); err != nil {
+			slog.ErrorContext(
+				ctx,
+				"could not send new subscriber email",
+				"error",
+				err,
+				"subscriber",
+				subscriber,
+				"wait_list",
+				waitListBook,
+			)
 			return errors.Join(
 				ErrUnrecoverableEvent,
 				err,
