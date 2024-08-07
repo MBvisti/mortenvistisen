@@ -12,7 +12,6 @@ import (
 	"github.com/MBvisti/mortenvistisen/views/authentication"
 	"github.com/gorilla/csrf"
 	"github.com/labstack/echo/v4"
-	slogecho "github.com/samber/slog-echo"
 )
 
 type App struct {
@@ -263,15 +262,9 @@ func (a App) SubscriberUnsub(ctx echo.Context) error {
 }
 
 func (a App) Article(ctx echo.Context) error {
-	c, span := a.base.Tracer.Start(ctx.Request().Context(), "tracing")
-	slogecho.AddCustomAttributes(
-		ctx,
-		slog.String("trace_id", span.SpanContext().TraceID().String()),
-	)
-	slogecho.AddCustomAttributes(ctx, slog.String("span_id", span.SpanContext().SpanID().String()))
 	postSlug := ctx.Param("postSlug")
 
-	post, err := a.articleSvc.BySlug(c, postSlug)
+	post, err := a.articleSvc.BySlug(ctx.Request().Context(), postSlug)
 	if err != nil {
 		return err
 	}
@@ -291,7 +284,7 @@ func (a App) Article(ctx echo.Context) error {
 	}
 
 	fiveRandomPosts, err := a.base.DB.GetFiveRandomPosts(
-		c,
+		ctx.Request().Context(),
 		post.ID,
 	)
 	if err != nil {
@@ -306,7 +299,6 @@ func (a App) Article(ctx echo.Context) error {
 		)
 	}
 
-	span.End()
 	return views.ArticlePage(views.ArticlePageData{
 		Content:           postContent,
 		HeaderTitle:       post.HeaderTitle,

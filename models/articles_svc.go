@@ -70,7 +70,7 @@ func (a ArticleService) New(
 	span trace.Span,
 	payload NewArticlePayload,
 ) (Article, error) {
-	span.AddEvent("articleModel/new")
+	span.AddEvent("ArticleService/New")
 	slog.InfoContext(ctx, "starting to create new article", "payload", payload)
 
 	tags, err := a.articleStorage.QueryTagsByIDs(ctx, payload.TagIDs)

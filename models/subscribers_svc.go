@@ -204,7 +204,7 @@ func (svc *SubscriberService) New(
 	email, articleTitle string,
 	waitListBook bool,
 ) error {
-	span.AddEvent("subscriberModel/New")
+	span.AddEvent("SubscriberService/New")
 	slog.InfoContext(
 		ctx,
 		"starting to create new subscriber",

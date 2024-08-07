@@ -204,6 +204,7 @@ func (d Dashboard) ArticleUpdate(ctx echo.Context) error {
 
 func (d Dashboard) ArticleStore(c echo.Context) error {
 	ctx, span := d.base.Tracer.Start(c.Request().Context(), "article/store")
+	span.AddEvent("handler/ArticleStore")
 
 	type newArticleFormPayload struct {
 		Title             string   `form:"title"`
