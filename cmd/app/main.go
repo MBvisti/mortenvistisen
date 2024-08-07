@@ -23,12 +23,26 @@ import (
 func main() {
 	cfg := config.New()
 
-	tp := trace.NewTracerProvider(
-		trace.WithSampler(trace.AlwaysSample()),
-	)
-	tracer := tp.Tracer("blog/handlers")
+	sampler := trace.WithSampler(trace.NeverSample())
+	if cfg.App.Environment == config.PROD_ENVIRONMENT {
+		sampler = trace.WithSampler(trace.AlwaysSample())
+	}
 
-	telemetry.NewTelemetry(cfg, "v0.0.1")
+	tp := trace.NewTracerProvider(
+		sampler,
+	)
+	defer func() {
+		if err := tp.Shutdown(context.Background()); err != nil {
+			panic(err)
+		}
+	}()
+
+	tracer := tp.Tracer("blog/tracer")
+
+	client := telemetry.NewTelemetry(cfg, "v0.0.1")
+	if client != nil {
+		defer client.Stop()
+	}
 
 	conn, err := psql.CreatePooledConnection(
 		context.Background(),

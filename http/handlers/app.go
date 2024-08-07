@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"errors"
+	"log/slog"
 	"net/http"
-	"time"
 
 	"github.com/MBvisti/mortenvistisen/models"
 	"github.com/MBvisti/mortenvistisen/posts"
@@ -12,7 +12,6 @@ import (
 	"github.com/MBvisti/mortenvistisen/views/authentication"
 	"github.com/gorilla/csrf"
 	"github.com/labstack/echo/v4"
-	"go.opentelemetry.io/otel/trace"
 )
 
 type App struct {
@@ -34,12 +33,7 @@ func NewApp(
 }
 
 func (a App) Index(ctx echo.Context) error {
-	c, span := a.base.Tracer.Start(ctx.Request().Context(), "app/index")
-	span.AddEvent("span started", trace.WithTimestamp(time.Now()), trace.WithStackTrace(true))
-
-	defer span.End()
-
-	data, err := a.articleSvc.List(c, 0, 50)
+	data, err := a.articleSvc.List(ctx.Request().Context(), 0, 50)
 	if err != nil {
 		return err
 	}
@@ -93,38 +87,40 @@ func (a App) Projects(ctx echo.Context) error {
 	}).Render(views.ExtractRenderDeps(ctx))
 }
 
-func (a App) SubscriptionEvent(ctx echo.Context) error {
+func (a App) SubscriptionEvent(c echo.Context) error {
+	ctx, span := a.base.Tracer.Start(c.Request().Context(), "article/store")
 	type subscriptionEventForm struct {
 		Email string `form:"hero-input"`
 		Title string `form:"article-title"`
 	}
 
 	var form subscriptionEventForm
-	if err := ctx.Bind(&form); err != nil {
-		return ctx.String(200, "You're now subscribed!")
+	if err := c.Bind(&form); err != nil {
+		slog.ErrorContext(ctx, "could not bind subscriptionEventForm", "error", err)
+		return c.String(200, "You're now subscribed!")
 	}
 
-	param := ctx.QueryParam("book")
+	param := c.QueryParam("book")
 	var bookSub bool
 	if param == "true" {
 		bookSub = true
 	}
 
-	if err := a.subscriberSvc.New(ctx.Request().Context(), form.Email, form.Title, bookSub); err != nil {
+	if err := a.subscriberSvc.New(ctx, span, form.Email, form.Title, bookSub); err != nil {
 		if errors.Is(err, models.ErrSubscriberExists) {
 			return views.SubscribeModalResponse(bookSub, true).
-				Render(views.ExtractRenderDeps(ctx))
+				Render(views.ExtractRenderDeps(c))
 		}
 		if errors.Is(err, models.ErrValidation{}) {
 			return nil
 		}
 		if errors.Is(err, models.ErrUnrecoverableEvent) {
-			return ctx.JSON(http.StatusInternalServerError, "yo")
+			return c.JSON(http.StatusInternalServerError, "yo")
 		}
 	}
 
 	return views.SubscribeModalResponse(bookSub, false).
-		Render(views.ExtractRenderDeps(ctx))
+		Render(views.ExtractRenderDeps(c))
 }
 
 func (a App) HowToStartFreelancing(ctx echo.Context) error {

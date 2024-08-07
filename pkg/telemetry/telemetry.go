@@ -13,28 +13,32 @@ import (
 	slogotel "github.com/samber/slog-otel"
 )
 
-func NewTelemetry(cfg config.Cfg, release string) {
+func NewTelemetry(cfg config.Cfg, release string) *loki.Client {
 	switch cfg.App.Environment {
 	case config.PROD_ENVIRONMENT:
-		logger := productionLogger(
+		logger, client := productionLogger(
 			cfg.Telemetry.SinkURL,
 			cfg.Telemetry.TenantID,
 			release,
 		)
 		slog.SetDefault(logger)
+		return client
 	case config.DEV_ENVIRONMENT:
 		logger := developmentLogger()
 		slog.SetDefault(logger)
+		return nil
 	default:
 		logger := developmentLogger()
 		slog.SetDefault(logger)
+
+		return nil
 	}
 }
 
-func productionLogger(url, tenantID, release string) *slog.Logger {
-	config, _ := loki.NewDefaultConfig(url)
-	config.TenantID = tenantID
-	client, err := loki.New(config)
+func productionLogger(url, tenantID, release string) (*slog.Logger, *loki.Client) {
+	cfg, _ := loki.NewDefaultConfig(url)
+	cfg.TenantID = tenantID
+	client, err := loki.New(cfg)
 	if err != nil {
 		panic(err)
 	}
@@ -49,9 +53,9 @@ func productionLogger(url, tenantID, release string) *slog.Logger {
 		}.NewLokiHandler(),
 	)
 	logger = logger.
-		With("release", release)
+		With("release", release).With("env", config.PROD_ENVIRONMENT).With("service_name", "blog")
 
-	return logger
+	return logger, client
 }
 
 func developmentLogger() *slog.Logger {
@@ -59,7 +63,6 @@ func developmentLogger() *slog.Logger {
 		tint.NewHandler(os.Stderr, &tint.Options{
 			Level:      slog.LevelDebug,
 			TimeFormat: time.Kitchen,
-			AddSource:  true,
 		}),
 	)
 }

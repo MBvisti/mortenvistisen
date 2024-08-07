@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/gosimple/slug"
 	"github.com/jackc/pgx/v5"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type articleStorage interface {
@@ -66,10 +67,15 @@ type NewArticlePayload struct {
 
 func (a ArticleService) New(
 	ctx context.Context,
+	span trace.Span,
 	payload NewArticlePayload,
 ) (Article, error) {
+	span.AddEvent("ArticleService/New")
+	slog.InfoContext(ctx, "starting to create new article", "payload", payload)
+
 	tags, err := a.articleStorage.QueryTagsByIDs(ctx, payload.TagIDs)
 	if err != nil {
+		slog.ErrorContext(ctx, "could not query tags", "error", err, "payload", payload)
 		if errors.Is(err, pgx.ErrNoRows) {
 			return Article{}, errors.Join(ErrNoRowWithIdentifier, err)
 		}
@@ -101,13 +107,23 @@ func (a ArticleService) New(
 	}
 
 	if err := a.articleStorage.InsertArticle(ctx, article); err != nil {
+		slog.ErrorContext(ctx, "could not insert article", "error", err, "payload", payload)
 		return Article{}, errors.Join(ErrUnrecoverableEvent, err)
 	}
 
 	if err := a.articleStorage.AssociateTagsWithPost(ctx, article.ID, payload.TagIDs); err != nil {
+		slog.ErrorContext(
+			ctx,
+			"could not associated tags with article",
+			"error",
+			err,
+			"payload",
+			payload,
+		)
 		return Article{}, errors.Join(ErrUnrecoverableEvent, err)
 	}
 
+	slog.InfoContext(ctx, "finished creating new article")
 	return article, nil
 }
 
