@@ -179,9 +179,22 @@ func (svc *SubscriberService) UnverifiedCount(ctx context.Context) (int64, error
 	return count, nil
 }
 
-func (svc *SubscriberService) Verify(ctx context.Context, subscriberID uuid.UUID) error {
+func (svc *SubscriberService) Verify(
+	ctx context.Context,
+	span trace.Span,
+	subscriberID uuid.UUID,
+) error {
+	ctx, span = span.TracerProvider().Tracer("tracing").Start(
+		ctx,
+		"SubscriberService/Verify",
+	)
+	span.AddEvent("Verify/start")
+
+	slog.InfoContext(ctx, "start verify subscriber", "subscriber_id", subscriberID)
+
 	subscriber, err := svc.storage.QuerySubscriberByID(ctx, subscriberID)
 	if err != nil {
+		slog.ErrorContext(ctx, "could not query subscriber", "error", err)
 		return err
 	}
 
@@ -190,8 +203,10 @@ func (svc *SubscriberService) Verify(ctx context.Context, subscriberID uuid.UUID
 
 	_, err = svc.storage.UpdateSubscriber(ctx, subscriber)
 	if err != nil {
+		slog.ErrorContext(ctx, "could not update subscriber", "error", err)
 		return err
 	}
+	span.End()
 
 	return nil
 }
@@ -204,7 +219,9 @@ func (svc *SubscriberService) New(
 	email, articleTitle string,
 	waitListBook bool,
 ) error {
-	span.AddEvent("SubscriberService/New")
+	ctx, span = span.TracerProvider().Tracer("tracing").Start(ctx, "SubscriberService/New")
+	span.AddEvent("New/Start")
+
 	slog.InfoContext(
 		ctx,
 		"starting to create new subscriber",
@@ -328,6 +345,7 @@ func (svc *SubscriberService) New(
 			) // could be retried if something goes wrong, a little TODO
 		}
 	}
+	span.End()
 
 	return nil
 }

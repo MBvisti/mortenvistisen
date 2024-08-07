@@ -89,6 +89,8 @@ func (a App) Projects(ctx echo.Context) error {
 
 func (a App) SubscriptionEvent(c echo.Context) error {
 	ctx, span := a.base.Tracer.Start(c.Request().Context(), "article/store")
+	span.AddEvent("AppHandler/SubscriptionEvent")
+
 	type subscriptionEventForm struct {
 		Email string `form:"hero-input"`
 		Title string `form:"article-title"`
@@ -119,6 +121,7 @@ func (a App) SubscriptionEvent(c echo.Context) error {
 		}
 	}
 
+	span.End()
 	return views.SubscribeModalResponse(bookSub, false).
 		Render(views.ExtractRenderDeps(c))
 }
@@ -167,32 +170,39 @@ type VerificationToken struct {
 	Token string `query:"token"`
 }
 
-func (a App) SubscriberEmailVerification(ctx echo.Context) error {
-	var payload VerificationToken
-	if err := ctx.Bind(&payload); err != nil {
-		ctx.Response().Writer.Header().Add("HX-Redirect", "/500")
-		ctx.Response().Writer.Header().Add("PreviousLocation", "/user/create")
+func (a App) SubscriberEmailVerification(c echo.Context) error {
+	ctx, span := a.base.Tracer.Start(
+		c.Request().Context(),
+		"AppHandler/SubscriberEmailVerification",
+	)
+	span.AddEvent("SubscriberEmailVerification/start")
 
-		return a.base.InternalError(ctx)
+	var payload VerificationToken
+	if err := c.Bind(&payload); err != nil {
+		slog.ErrorContext(ctx, "could not bind verification token", "error", err)
+		c.Response().Writer.Header().Add("HX-Redirect", "/500")
+		c.Response().Writer.Header().Add("PreviousLocation", "/user/create")
+
+		return a.base.InternalError(c)
 	}
 
-	if err := a.tokenService.Validate(ctx.Request().Context(), payload.Token, services.ScopeEmailVerification); err != nil {
+	if err := a.tokenService.Validate(ctx, payload.Token, services.ScopeEmailVerification); err != nil {
 		return err
 	}
 
 	subscriberID, err := a.tokenService.GetAssociatedSubscriberID(
-		ctx.Request().Context(),
+		ctx,
 		payload.Token,
 	)
 	if err != nil {
 		return err
 	}
 
-	if err := a.subscriberSvc.Verify(ctx.Request().Context(), subscriberID); err != nil {
+	if err := a.subscriberSvc.Verify(ctx, span, subscriberID); err != nil {
 		return err
 	}
 
-	if err := a.tokenService.Delete(ctx.Request().Context(), payload.Token); err != nil {
+	if err := a.tokenService.Delete(ctx, span, payload.Token); err != nil {
 		return err
 	}
 
@@ -229,36 +239,43 @@ func (a App) SubscriberEmailVerification(ctx echo.Context) error {
 	// 	return misc.InternalError(ctx)
 	// }
 
+	span.End()
 	return authentication.VerifySubscriberEmailPage(false, views.Head{}).
-		Render(views.ExtractRenderDeps(ctx))
+		Render(views.ExtractRenderDeps(c))
 }
 
-func (a App) SubscriberUnsub(ctx echo.Context) error {
+func (a App) SubscriberUnsub(c echo.Context) error {
+	ctx, span := a.base.Tracer.Start(
+		c.Request().Context(),
+		"AppHandler/SubscriberUnsub",
+	)
+	span.AddEvent("SubscriberUnsub/start")
 	var payload VerificationToken
-	if err := ctx.Bind(&payload); err != nil {
-		ctx.Response().Writer.Header().Add("HX-Redirect", "/500")
-		ctx.Response().Writer.Header().Add("PreviousLocation", "/user/create")
+	if err := c.Bind(&payload); err != nil {
+		slog.ErrorContext(ctx, "could not bind verification token", "error", err)
+		c.Response().Writer.Header().Add("HX-Redirect", "/500")
+		c.Response().Writer.Header().Add("PreviousLocation", "/user/create")
 
-		return a.base.InternalError(ctx)
+		return a.base.InternalError(c)
 	}
 
 	subscriberID, err := a.tokenService.GetAssociatedSubscriberID(
-		ctx.Request().Context(),
+		ctx,
 		payload.Token,
 	)
 	if err != nil {
 		return err
 	}
 
-	if err := a.subscriberSvc.Delete(ctx.Request().Context(), subscriberID); err != nil {
+	if err := a.subscriberSvc.Delete(ctx, subscriberID); err != nil {
 		return err
 	}
 
-	if err := a.tokenService.Delete(ctx.Request().Context(), payload.Token); err != nil {
+	if err := a.tokenService.Delete(ctx, span, payload.Token); err != nil {
 		return err
 	}
 
-	return ctx.String(http.StatusOK, "You've been unsubscribed")
+	return c.String(http.StatusOK, "You've been unsubscribed")
 }
 
 func (a App) Article(ctx echo.Context) error {
