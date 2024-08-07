@@ -24,7 +24,7 @@ func main() {
 	ctx := context.Background()
 	cfg := config.New()
 
-	telemetry.NewTelemetry(cfg, "v0.0.1", "app")
+	telemetry.NewTelemetry(cfg, "v0.0.1")
 
 	awsSes := mail_client.NewAwsSimpleEmailService()
 	mailClient := services.NewEmailSvc(cfg, &awsSes)

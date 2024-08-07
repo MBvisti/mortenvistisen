@@ -17,12 +17,18 @@ import (
 	"github.com/MBvisti/mortenvistisen/repository/psql/database"
 	"github.com/MBvisti/mortenvistisen/routes"
 	"github.com/MBvisti/mortenvistisen/services"
+	"go.opentelemetry.io/otel/sdk/trace"
 )
 
 func main() {
 	cfg := config.New()
 
-	telemetry.NewTelemetry(cfg, "v0.0.1", "blog")
+	tp := trace.NewTracerProvider(
+		trace.WithSampler(trace.AlwaysSample()),
+	)
+	tracer := tp.Tracer("blog/handlers")
+
+	telemetry.NewTelemetry(cfg, "v0.0.1")
 
 	conn, err := psql.CreatePooledConnection(
 		context.Background(),
@@ -58,6 +64,7 @@ func main() {
 		*db,
 		riverClient,
 		cookieStore,
+		tracer,
 	)
 
 	apiHandlers := handlers.NewApi(baseHandlers)

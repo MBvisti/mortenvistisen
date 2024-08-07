@@ -3,6 +3,7 @@ package handlers
 import (
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/MBvisti/mortenvistisen/models"
 	"github.com/MBvisti/mortenvistisen/posts"
@@ -11,6 +12,7 @@ import (
 	"github.com/MBvisti/mortenvistisen/views/authentication"
 	"github.com/gorilla/csrf"
 	"github.com/labstack/echo/v4"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type App struct {
@@ -32,7 +34,12 @@ func NewApp(
 }
 
 func (a App) Index(ctx echo.Context) error {
-	data, err := a.articleSvc.List(ctx.Request().Context(), 0, 50)
+	c, span := a.base.Tracer.Start(ctx.Request().Context(), "app/index")
+	span.AddEvent("span started", trace.WithTimestamp(time.Now()), trace.WithStackTrace(true))
+
+	defer span.End()
+
+	data, err := a.articleSvc.List(c, 0, 50)
 	if err != nil {
 		return err
 	}

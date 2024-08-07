@@ -14,6 +14,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
 	"github.com/riverqueue/river"
+	"go.opentelemetry.io/otel/trace"
 )
 
 // Actions:
@@ -40,6 +41,7 @@ type Base struct {
 	// UserModel       models.UserService
 	// Database        psql.Postgres
 	CookieStore CookieStore
+	Tracer      trace.Tracer
 }
 
 func NewDependencies(
@@ -57,6 +59,7 @@ func NewDependencies(
 	// userModel models.UserService,
 	// psql psql.Postgres,
 	cookieStore CookieStore,
+	tracer trace.Tracer,
 ) Base {
 	return Base{
 		db,
@@ -73,6 +76,7 @@ func NewDependencies(
 		// userModel,
 		// psql,
 		cookieStore,
+		tracer,
 	}
 }
 

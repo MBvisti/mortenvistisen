@@ -1,6 +1,7 @@
 package telemetry
 
 import (
+	"context"
 	"log/slog"
 	"os"
 	"time"
@@ -9,16 +10,16 @@ import (
 	"github.com/grafana/loki-client-go/loki"
 	"github.com/lmittmann/tint"
 	slogloki "github.com/samber/slog-loki/v3"
+	slogotel "github.com/samber/slog-otel"
 )
 
-func NewTelemetry(cfg config.Cfg, release, service string) {
+func NewTelemetry(cfg config.Cfg, release string) {
 	switch cfg.App.Environment {
 	case config.PROD_ENVIRONMENT:
 		logger := productionLogger(
 			cfg.Telemetry.SinkURL,
 			cfg.Telemetry.TenantID,
 			release,
-			service,
 		)
 		slog.SetDefault(logger)
 	case config.DEV_ENVIRONMENT:
@@ -30,7 +31,7 @@ func NewTelemetry(cfg config.Cfg, release, service string) {
 	}
 }
 
-func productionLogger(url, tenantID, release, service string) *slog.Logger {
+func productionLogger(url, tenantID, release string) *slog.Logger {
 	config, _ := loki.NewDefaultConfig(url)
 	config.TenantID = tenantID
 	client, err := loki.New(config)
@@ -39,11 +40,16 @@ func productionLogger(url, tenantID, release, service string) *slog.Logger {
 	}
 
 	logger := slog.New(
-		slogloki.Option{Level: slog.LevelInfo, Client: client}.NewLokiHandler(),
+		slogloki.Option{
+			Level:  slog.LevelInfo,
+			Client: client,
+			AttrFromContext: []func(ctx context.Context) []slog.Attr{
+				slogotel.ExtractOtelAttrFromContext([]string{"tracing"}, "trace_id", "span_id"),
+			},
+		}.NewLokiHandler(),
 	)
 	logger = logger.
-		With("release", release).
-		With("service", service)
+		With("release", release)
 
 	return logger
 }
