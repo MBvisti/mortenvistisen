@@ -140,7 +140,12 @@ func (a Authentication) CreateResetPassword(ctx echo.Context) error {
 	}, views.Head{}).Render(views.ExtractRenderDeps(ctx))
 }
 
-func (a Authentication) StoreResetPassword(ctx echo.Context) error {
+func (a Authentication) StoreResetPassword(c echo.Context) error {
+	ctx, span := a.base.Tracer.Start(
+		c.Request().Context(),
+		"AuthenticationHandler/StoreResetPassword",
+	)
+	span.AddEvent("StoreResetPassword/start")
 	type resetPasswordPayload struct {
 		Password        string `form:"password"`
 		ConfirmPassword string `form:"confirm_password"`
@@ -148,24 +153,24 @@ func (a Authentication) StoreResetPassword(ctx echo.Context) error {
 	}
 
 	var payload resetPasswordPayload
-	if err := ctx.Bind(&payload); err != nil {
+	if err := c.Bind(&payload); err != nil {
 		return authentication.ResetPasswordResponse(authentication.ResetPasswordResponseProps{
 			HasError: true,
 			Msg:      "An error occurred while trying to reset your password. Please try again.",
-		}).Render(views.ExtractRenderDeps(ctx))
+		}).Render(views.ExtractRenderDeps(c))
 	}
 
-	if err := a.tknService.Validate(ctx.Request().Context(), payload.Token, services.ScopeResetPassword); err != nil {
+	if err := a.tknService.Validate(ctx, payload.Token, services.ScopeResetPassword); err != nil {
 		return err
 	}
 
-	userID, err := a.tknService.GetAssociatedUserID(ctx.Request().Context(), payload.Token)
+	userID, err := a.tknService.GetAssociatedUserID(ctx, payload.Token)
 	if err != nil {
 		return err
 	}
 
 	user, err := a.userModel.UpdatePassword(
-		ctx.Request().Context(),
+		ctx,
 		userID,
 		payload.Password,
 		payload.ConfirmPassword,
@@ -174,7 +179,7 @@ func (a Authentication) StoreResetPassword(ctx echo.Context) error {
 		return err
 	}
 
-	if err = a.authService.CreateAuthenticatedSession(ctx.Request(), ctx.Response(), user.ID, false); err != nil {
+	if err = a.authService.CreateAuthenticatedSession(c.Request(), c.Response(), user.ID, false); err != nil {
 		return err
 	}
 
@@ -250,11 +255,11 @@ func (a Authentication) StoreResetPassword(ctx echo.Context) error {
 	// 	return misc.InternalError(ctx)
 	// }
 
-	if err := a.tknService.Delete(ctx.Request().Context(), payload.Token); err != nil {
+	if err := a.tknService.Delete(ctx, span, payload.Token); err != nil {
 		return err
 	}
 
 	return authentication.ResetPasswordResponse(authentication.ResetPasswordResponseProps{
 		HasError: false,
-	}).Render(views.ExtractRenderDeps(ctx))
+	}).Render(views.ExtractRenderDeps(c))
 }

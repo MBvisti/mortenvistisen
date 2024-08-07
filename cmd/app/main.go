@@ -37,7 +37,7 @@ func main() {
 		}
 	}()
 
-	tracer := tp.Tracer("blog/tracer")
+	tracer := tp.Tracer("tracing")
 
 	client := telemetry.NewTelemetry(cfg, "v0.0.1")
 	if client != nil {

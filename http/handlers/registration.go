@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"log/slog"
+
 	"github.com/MBvisti/mortenvistisen/models"
 	"github.com/MBvisti/mortenvistisen/services"
 	"github.com/MBvisti/mortenvistisen/views"
@@ -198,40 +200,49 @@ func (r Registration) StoreUser(ctx echo.Context) error {
 		Render(views.ExtractRenderDeps(ctx))
 }
 
-func (r Registration) UserEmailVerification(ctx echo.Context) error {
+func (r Registration) UserEmailVerification(c echo.Context) error {
+	ctx, span := r.base.Tracer.Start(
+		c.Request().Context(),
+		"RegistrationHandler/UserEmailVerification",
+	)
+	span.AddEvent("UserEmailVerification/start")
 	type verifyEmail struct {
 		Token string `query:"token"`
 	}
 
 	var payload verifyEmail
-	if err := ctx.Bind(&payload); err != nil {
-		ctx.Response().Writer.Header().Add("HX-Redirect", "/500")
-		ctx.Response().Writer.Header().Add("PreviousLocation", "/user/create")
+	if err := c.Bind(&payload); err != nil {
+		slog.ErrorContext(ctx, "could not bind verify email", "error", err)
+		c.Response().Writer.Header().Add("HX-Redirect", "/500")
+		c.Response().Writer.Header().Add("PreviousLocation", "/user/create")
 
-		return r.base.InternalError(ctx)
+		return r.base.InternalError(c)
 	}
 
-	if err := r.tokenService.Validate(ctx.Request().Context(), payload.Token, services.ScopeEmailVerification); err != nil {
+	if err := r.tokenService.Validate(ctx, payload.Token, services.ScopeEmailVerification); err != nil {
 		return err
 	}
 
-	userID, err := r.tokenService.GetAssociatedUserID(ctx.Request().Context(), payload.Token)
+	userID, err := r.tokenService.GetAssociatedUserID(ctx, payload.Token)
 	if err != nil {
 		return err
 	}
 
-	user, err := r.userModel.ConfirmEmail(ctx.Request().Context(), userID)
+	// TODO: add span
+	user, err := r.userModel.ConfirmEmail(ctx, userID)
 	if err != nil {
 		return err
 	}
 
-	if err := r.authService.CreateAuthenticatedSession(ctx.Request(), ctx.Response(), user.ID, false); err != nil {
+	if err := r.authService.CreateAuthenticatedSession(c.Request(), c.Response(), user.ID, false); err != nil {
 		return err
 	}
 
-	if err := r.tokenService.Delete(ctx.Request().Context(), payload.Token); err != nil {
+	if err := r.tokenService.Delete(ctx, span, payload.Token); err != nil {
 		return err
 	}
 
-	return authentication.VerifyEmailPage(false, views.Head{}).Render(views.ExtractRenderDeps(ctx))
+	span.End()
+
+	return authentication.VerifyEmailPage(false, views.Head{}).Render(views.ExtractRenderDeps(c))
 }
