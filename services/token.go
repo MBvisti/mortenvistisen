@@ -15,7 +15,6 @@ import (
 	"github.com/MBvisti/mortenvistisen/repository/psql/database"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"go.opentelemetry.io/otel/trace"
 )
 
 const (
@@ -321,20 +320,14 @@ func (svc *Token) GetAssociatedSubscriberID(
 	return metaData.ResourceID, nil
 }
 
-func (svc *Token) Delete(ctx context.Context, span trace.Span, token string) error {
-	ctx, span = span.TracerProvider().Tracer("tracing").Start(
-		ctx,
-		"Token/Delete",
-	)
-	span.AddEvent("Delete/start")
-
+func (svc *Token) Delete(ctx context.Context, token string) error {
+	slog.InfoContext(ctx, "starting to delete token", "token", token)
 	err := svc.storage.DeleteTokenByHash(ctx, svc.hash(token))
 	if err != nil {
 		slog.ErrorContext(ctx, "could not delete token by hash", "error", err, "token", token)
 		return err
 	}
 
-	span.End()
-
+	slog.InfoContext(ctx, "token deleted successfully")
 	return nil
 }

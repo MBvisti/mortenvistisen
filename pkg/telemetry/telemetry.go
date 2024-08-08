@@ -49,7 +49,7 @@ func productionLogger(url, tenantID, release string) (*slog.Logger, *loki.Client
 			Client: client,
 			AttrFromContext: []func(ctx context.Context) []slog.Attr{
 				slogotel.ExtractOtelAttrFromContext(
-					[]string{"tracing"},
+					[]string{"parent"},
 					"trace_id",
 					"span_id",
 				),

@@ -88,8 +88,8 @@ func (a App) Projects(ctx echo.Context) error {
 }
 
 func (a App) SubscriptionEvent(c echo.Context) error {
-	ctx, span := a.base.Tracer.Start(c.Request().Context(), "article/store")
-	span.AddEvent("AppHandler/SubscriptionEvent")
+	ctx, subscriptionEventSpan := a.base.Tracer.CreateSpan(c.Request().Context(), "article/store")
+	subscriptionEventSpan.AddEvent("AppHandler/SubscriptionEvent")
 
 	type subscriptionEventForm struct {
 		Email string `form:"hero-input"`
@@ -101,6 +101,7 @@ func (a App) SubscriptionEvent(c echo.Context) error {
 		slog.ErrorContext(ctx, "could not bind subscriptionEventForm", "error", err)
 		return c.String(200, "You're now subscribed!")
 	}
+	slog.InfoContext(ctx, "starting to create new subscriber from handler", "email", form.Email)
 
 	param := c.QueryParam("book")
 	var bookSub bool
@@ -108,7 +109,13 @@ func (a App) SubscriptionEvent(c echo.Context) error {
 		bookSub = true
 	}
 
-	if err := a.subscriberSvc.New(ctx, span, form.Email, form.Title, bookSub); err != nil {
+	newSubscriberCtx, newSubscriberSpan := a.base.Tracer.CreateChildSpan(
+		ctx,
+		subscriptionEventSpan,
+		"subscriberService/New",
+	)
+	newSubscriberSpan.AddEvent("New/Start")
+	if err := a.subscriberSvc.New(newSubscriberCtx, form.Email, form.Title, bookSub); err != nil {
 		if errors.Is(err, models.ErrSubscriberExists) {
 			return views.SubscribeModalResponse(bookSub, true).
 				Render(views.ExtractRenderDeps(c))
@@ -120,8 +127,9 @@ func (a App) SubscriptionEvent(c echo.Context) error {
 			return c.JSON(http.StatusInternalServerError, "yo")
 		}
 	}
+	newSubscriberSpan.End()
 
-	span.End()
+	subscriptionEventSpan.End()
 	return views.SubscribeModalResponse(bookSub, false).
 		Render(views.ExtractRenderDeps(c))
 }
@@ -171,7 +179,7 @@ type VerificationToken struct {
 }
 
 func (a App) SubscriberEmailVerification(c echo.Context) error {
-	ctx, span := a.base.Tracer.Start(
+	ctx, span := a.base.Tracer.CreateSpan(
 		c.Request().Context(),
 		"AppHandler/SubscriberEmailVerification",
 	)
@@ -198,13 +206,27 @@ func (a App) SubscriberEmailVerification(c echo.Context) error {
 		return err
 	}
 
-	if err := a.subscriberSvc.Verify(ctx, span, subscriberID); err != nil {
+	subVerifyCtx, subVerifySpan := a.base.Tracer.CreateChildSpan(
+		ctx,
+		span,
+		"SubscriberService/Verify",
+	)
+	subVerifySpan.AddEvent("Verify/Start")
+	if err := a.subscriberSvc.Verify(subVerifyCtx, subscriberID); err != nil {
 		return err
 	}
+	subVerifySpan.End()
 
-	if err := a.tokenService.Delete(ctx, span, payload.Token); err != nil {
+	tokenDeleteCtx, tokenDeleteSpan := a.base.Tracer.CreateChildSpan(
+		ctx,
+		span,
+		"TokenService/Delete",
+	)
+	tokenDeleteSpan.AddEvent("Delete/Start")
+	if err := a.tokenService.Delete(tokenDeleteCtx, payload.Token); err != nil {
 		return err
 	}
+	tokenDeleteSpan.End()
 
 	// hashedToken := tknManager.Hash(tkn.Token)
 	//
@@ -245,7 +267,7 @@ func (a App) SubscriberEmailVerification(c echo.Context) error {
 }
 
 func (a App) SubscriberUnsub(c echo.Context) error {
-	ctx, span := a.base.Tracer.Start(
+	ctx, span := a.base.Tracer.CreateSpan(
 		c.Request().Context(),
 		"AppHandler/SubscriberUnsub",
 	)
@@ -267,14 +289,28 @@ func (a App) SubscriberUnsub(c echo.Context) error {
 		return err
 	}
 
-	if err := a.subscriberSvc.Delete(ctx, subscriberID); err != nil {
+	subscriberDeleteCtx, subscriberDeleteSpan := a.base.Tracer.CreateChildSpan(
+		ctx,
+		span,
+		"SubscriberService/Delete",
+	)
+	subscriberDeleteSpan.AddEvent("Delete/Start")
+	if err := a.subscriberSvc.Delete(subscriberDeleteCtx, subscriberID); err != nil {
 		return err
 	}
 
-	if err := a.tokenService.Delete(ctx, span, payload.Token); err != nil {
+	tokenDeleteCtx, tokenDeleteSpan := a.base.Tracer.CreateChildSpan(
+		ctx,
+		span,
+		"TokenService/Delete",
+	)
+	tokenDeleteSpan.AddEvent("Delete/Start")
+	if err := a.tokenService.Delete(tokenDeleteCtx, payload.Token); err != nil {
 		return err
 	}
+	tokenDeleteSpan.End()
 
+	span.End()
 	return c.String(http.StatusOK, "You've been unsubscribed")
 }
 

@@ -9,7 +9,6 @@ import (
 	"github.com/MBvisti/mortenvistisen/pkg/validation"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"go.opentelemetry.io/otel/trace"
 )
 
 type subscriberStorage interface {
@@ -181,15 +180,8 @@ func (svc *SubscriberService) UnverifiedCount(ctx context.Context) (int64, error
 
 func (svc *SubscriberService) Verify(
 	ctx context.Context,
-	span trace.Span,
 	subscriberID uuid.UUID,
 ) error {
-	ctx, span = span.TracerProvider().Tracer("tracing").Start(
-		ctx,
-		"SubscriberService/Verify",
-	)
-	span.AddEvent("Verify/start")
-
 	slog.InfoContext(ctx, "start verify subscriber", "subscriber_id", subscriberID)
 
 	subscriber, err := svc.storage.QuerySubscriberByID(ctx, subscriberID)
@@ -206,7 +198,6 @@ func (svc *SubscriberService) Verify(
 		slog.ErrorContext(ctx, "could not update subscriber", "error", err)
 		return err
 	}
-	span.End()
 
 	return nil
 }
@@ -215,13 +206,9 @@ func (svc *SubscriberService) Verify(
 // TODO: create job to create and send email on queue
 func (svc *SubscriberService) New(
 	ctx context.Context,
-	span trace.Span,
 	email, articleTitle string,
 	waitListBook bool,
 ) error {
-	ctx, span = span.TracerProvider().Tracer("tracing").Start(ctx, "SubscriberService/New")
-	span.AddEvent("New/Start")
-
 	slog.InfoContext(
 		ctx,
 		"starting to create new subscriber",
@@ -345,7 +332,11 @@ func (svc *SubscriberService) New(
 			) // could be retried if something goes wrong, a little TODO
 		}
 	}
-	span.End()
+
+	slog.InfoContext(
+		ctx,
+		"new subscriber created",
+	)
 
 	return nil
 }

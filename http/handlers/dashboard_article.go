@@ -203,9 +203,10 @@ func (d Dashboard) ArticleUpdate(ctx echo.Context) error {
 }
 
 func (d Dashboard) ArticleStore(c echo.Context) error {
-	ctx, span := d.base.Tracer.Start(c.Request().Context(), "article/store")
-	span.AddEvent("handler/ArticleStore")
+	ctx, articleStoreSpan := d.base.Tracer.CreateSpan(c.Request().Context(), "article/store")
+	articleStoreSpan.AddEvent("handler/ArticleStore")
 
+	slog.InfoContext(ctx, "starting to store new article")
 	type newArticleFormPayload struct {
 		Title             string   `form:"title"`
 		HeaderTitle       string   `form:"header-title"`
@@ -242,7 +243,13 @@ func (d Dashboard) ArticleStore(c echo.Context) error {
 		tagIDs = append(tagIDs, id)
 	}
 
-	_, err = d.articleSvc.New(ctx, span, models.NewArticlePayload{
+	articleServiceCtx, articleServiceSpan := d.base.Tracer.CreateChildSpan(
+		c.Request().Context(),
+		articleStoreSpan,
+		"articleService/New",
+	)
+	articleServiceSpan.AddEvent("New/Start")
+	_, err = d.articleSvc.New(articleServiceCtx, models.NewArticlePayload{
 		ReleaseNow:  releaseNow,
 		Title:       postPayload.Title,
 		HeaderTitle: postPayload.HeaderTitle,
@@ -316,6 +323,8 @@ func (d Dashboard) ArticleStore(c echo.Context) error {
 
 		return err
 	}
+	articleServiceSpan.End()
+	articleStoreSpan.End()
 
 	c.Response().Writer.Header().Add("HX-Redirect", "/dashboard/articles")
 	return nil

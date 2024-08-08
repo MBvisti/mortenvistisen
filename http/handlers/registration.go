@@ -72,136 +72,12 @@ func (r Registration) StoreUser(ctx echo.Context) error {
 		return err
 	}
 
-	// if err != nil {
-	// 	telemetry.Logger.Info("error", "err", err)
-	// 	e, ok := err.(validator.ValidationErrors)
-	// 	if !ok {
-	// 		telemetry.Logger.WarnContext(
-	// 			ctx.Request().Context(),
-	// 			"an unrecoverable error occurred",
-	// 			"error",
-	// 			err,
-	// 		)
-	//
-	// 		return authentication.RegisterResponse("An error occurred", "Please refresh the page an try again.", true).
-	// 			Render(views.ExtractRenderDeps(ctx))
-	// 	}
-	//
-	// 	if len(e) == 0 {
-	// 		telemetry.Logger.WarnContext(
-	// 			ctx.Request().Context(),
-	// 			"an unrecoverable error occurred",
-	// 			"error",
-	// 			err,
-	// 		)
-	//
-	// 		return authentication.RegisterResponse("An error occurred", "Please refresh the page an try again.", true).
-	// 			Render(views.ExtractRenderDeps(ctx))
-	// 	}
-	//
-	// 	props := authentication.RegisterFormProps{
-	// 		NameInput: validation.InputField{
-	// 			OldValue: payload.UserName,
-	// 		},
-	// 		EmailInput: validation.InputField{
-	// 			OldValue: payload.Mail,
-	// 		},
-	// 		CsrfToken: csrf.Token(ctx.Request()),
-	// 	}
-	//
-	// 	for _, validationError := range e {
-	// 		switch validationError.StructField() {
-	// 		case "Name":
-	// 			props.NameInput.Invalid = true
-	// 			props.NameInput.InvalidMsg = validationError.Param()
-	// 		case "MailRegistered":
-	// 			props.EmailInput.Invalid = true
-	// 			props.EmailInput.InvalidMsg = validationError.Param()
-	// 		case "Password", "ConfirmPassword":
-	// 			props.PasswordInput = validation.InputField{
-	// 				Invalid:    true,
-	// 				InvalidMsg: validationError.Param(),
-	// 			}
-	// 			props.ConfirmPassword = validation.InputField{
-	// 				Invalid:    true,
-	// 				InvalidMsg: validationError.Param(),
-	// 			}
-	// 		}
-	// 	}
-	//
-	// 	return authentication.RegisterForm(props).Render(views.ExtractRenderDeps(ctx))
-	// }
-	//
-	// generatedTkn, err := tknManager.GenerateToken()
-	// if err != nil {
-	// 	telemetry.Logger.ErrorContext(ctx.Request().Context(), "could not query user", "error", err)
-	//
-	// 	return authentication.RegisterResponse("An error occurred", "Please refresh the page an try again.", true).
-	// 		Render(views.ExtractRenderDeps(ctx))
-	// }
-	//
-	// activationToken := tokens.CreateActivationToken(
-	// 	generatedTkn.PlainTextToken,
-	// 	generatedTkn.HashedToken,
-	// )
-	//
-	// if err := db.StoreToken(ctx.Request().Context(), database.StoreTokenParams{
-	// 	ID:        uuid.New(),
-	// 	CreatedAt: database.ConvertToPGTimestamptz(time.Now()),
-	// 	Hash:      activationToken.Hash,
-	// 	ExpiresAt: database.ConvertToPGTimestamptz(activationToken.GetExpirationTime()),
-	// 	Scope:     activationToken.GetScope(),
-	// 	UserID:    user.ID,
-	// }); err != nil {
-	// 	telemetry.Logger.ErrorContext(ctx.Request().Context(), "could not query user", "error", err)
-	//
-	// 	return authentication.RegisterResponse("An error occurred", "Please refresh the page an try again.", true).
-	// 		Render(views.ExtractRenderDeps(ctx))
-	// }
-	//
-	// userSignupMail := templates.UserSignupWelcomeMail{
-	// 	ConfirmationLink: fmt.Sprintf(
-	// 		"%s://%s/verify-email?token=%s",
-	// 		cfg.App.AppScheme,
-	// 		cfg.App.AppHost,
-	// 		activationToken.GetPlainText(),
-	// 	),
-	// }
-	// textVersion, err := userSignupMail.GenerateTextVersion()
-	// if err != nil {
-	// 	telemetry.Logger.ErrorContext(ctx.Request().Context(), "could not query user", "error", err)
-	//
-	// 	return authentication.RegisterResponse("An error occurred", "Please refresh the page an try again.", true).
-	// 		Render(views.ExtractRenderDeps(ctx))
-	// }
-	// htmlVersion, err := userSignupMail.GenerateHtmlVersion()
-	// if err != nil {
-	// 	telemetry.Logger.ErrorContext(ctx.Request().Context(), "could not query user", "error", err)
-	//
-	// 	return authentication.RegisterResponse("An error occurred", "Please refresh the page an try again.", true).
-	// 		Render(views.ExtractRenderDeps(ctx))
-	// }
-	//
-	// _, err = queueClient.Insert(ctx.Request().Context(), queue.EmailJobArgs{
-	// 	To:          user.Mail,
-	// 	From:        cfg.App.DefaultSenderSignature,
-	// 	Subject:     "Thanks for signing up!",
-	// 	TextVersion: textVersion,
-	// 	HtmlVersion: htmlVersion,
-	// }, nil)
-	// if err != nil {
-	// 	telemetry.Logger.ErrorContext(ctx.Request().Context(), "could not query user", "error", err)
-	//
-	// 	return authentication.RegisterResponse("An error occurred", "Please refresh the page an try again.", true).
-	// 		Render(views.ExtractRenderDeps(ctx))
-	// }
-
 	return authentication.RegisterResponse("You're now registered", "You should receive an email soon to validate your account.", false).
 		Render(views.ExtractRenderDeps(ctx))
 }
 
 func (r Registration) UserEmailVerification(c echo.Context) error {
-	ctx, span := r.base.Tracer.Start(
+	ctx, span := r.base.Tracer.CreateSpan(
 		c.Request().Context(),
 		"RegistrationHandler/UserEmailVerification",
 	)
@@ -238,7 +114,17 @@ func (r Registration) UserEmailVerification(c echo.Context) error {
 		return err
 	}
 
-	if err := r.tokenService.Delete(ctx, span, payload.Token); err != nil {
+	tokenDeleteCtx, tokenDeleteSpan := r.base.Tracer.CreateChildSpan(
+		ctx,
+		span,
+		"TokenService/Delete",
+	)
+	tokenDeleteSpan.AddEvent("Delete/Start")
+	if err := r.tokenService.Delete(tokenDeleteCtx, payload.Token); err != nil {
+		return err
+	}
+	tokenDeleteSpan.End()
+	if err := r.tokenService.Delete(tokenDeleteCtx, payload.Token); err != nil {
 		return err
 	}
 

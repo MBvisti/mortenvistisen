@@ -17,27 +17,19 @@ import (
 	"github.com/MBvisti/mortenvistisen/repository/psql/database"
 	"github.com/MBvisti/mortenvistisen/routes"
 	"github.com/MBvisti/mortenvistisen/services"
-	"go.opentelemetry.io/otel/sdk/trace"
 )
 
 func main() {
 	cfg := config.New()
 
-	sampler := trace.WithSampler(trace.NeverSample())
-	if cfg.App.Environment == config.PROD_ENVIRONMENT {
-		sampler = trace.WithSampler(trace.AlwaysSample())
-	}
-
-	tp := trace.NewTracerProvider(
-		sampler,
-	)
+	otel := telemetry.NewOtel(cfg)
 	defer func() {
-		if err := tp.Shutdown(context.Background()); err != nil {
+		if err := otel.Shutdown(); err != nil {
 			panic(err)
 		}
 	}()
 
-	tracer := tp.Tracer("tracing")
+	blogTracer := otel.NewTracer("blog/tracer")
 
 	client := telemetry.NewTelemetry(cfg, "v0.0.1")
 	if client != nil {
@@ -78,7 +70,7 @@ func main() {
 		*db,
 		riverClient,
 		cookieStore,
-		tracer,
+		blogTracer,
 	)
 
 	apiHandlers := handlers.NewApi(baseHandlers)

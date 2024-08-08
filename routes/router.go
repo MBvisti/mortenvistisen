@@ -64,8 +64,8 @@ func NewRouter(
 
 	slogechoCfg := slogecho.Config{
 		WithRequestID: false,
-		WithSpanID:    true,
-		WithTraceID:   true,
+		WithSpanID:    false,
+		WithTraceID:   false,
 		Filters: []slogecho.Filter{
 			slogecho.IgnorePathContains("static"),
 			slogecho.IgnorePathContains("health"),

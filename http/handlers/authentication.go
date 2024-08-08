@@ -141,7 +141,7 @@ func (a Authentication) CreateResetPassword(ctx echo.Context) error {
 }
 
 func (a Authentication) StoreResetPassword(c echo.Context) error {
-	ctx, span := a.base.Tracer.Start(
+	ctx, span := a.base.Tracer.CreateSpan(
 		c.Request().Context(),
 		"AuthenticationHandler/StoreResetPassword",
 	)
@@ -255,9 +255,16 @@ func (a Authentication) StoreResetPassword(c echo.Context) error {
 	// 	return misc.InternalError(ctx)
 	// }
 
-	if err := a.tknService.Delete(ctx, span, payload.Token); err != nil {
+	tokenDeleteCtx, tokenDeleteSpan := a.base.Tracer.CreateChildSpan(
+		ctx,
+		span,
+		"TokenService/Delete",
+	)
+	tokenDeleteSpan.AddEvent("Delete/Start")
+	if err := a.tknService.Delete(tokenDeleteCtx, payload.Token); err != nil {
 		return err
 	}
+	tokenDeleteSpan.End()
 
 	return authentication.ResetPasswordResponse(authentication.ResetPasswordResponseProps{
 		HasError: false,

@@ -8,13 +8,13 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/MBvisti/mortenvistisen/pkg/telemetry"
 	"github.com/MBvisti/mortenvistisen/repository/psql/database"
 	"github.com/MBvisti/mortenvistisen/views"
 	"github.com/gorilla/sessions"
 	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
 	"github.com/riverqueue/river"
-	"go.opentelemetry.io/otel/trace"
 )
 
 // Actions:
@@ -41,7 +41,7 @@ type Base struct {
 	// UserModel       models.UserService
 	// Database        psql.Postgres
 	CookieStore CookieStore
-	Tracer      trace.Tracer
+	Tracer      telemetry.Tracer
 }
 
 func NewDependencies(
@@ -59,7 +59,7 @@ func NewDependencies(
 	// userModel models.UserService,
 	// psql psql.Postgres,
 	cookieStore CookieStore,
-	tracer trace.Tracer,
+	tracer telemetry.Tracer,
 ) Base {
 	return Base{
 		db,
