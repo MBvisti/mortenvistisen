@@ -9,7 +9,7 @@ import (
 	"strconv"
 
 	"github.com/MBvisti/mortenvistisen/pkg/telemetry"
-	"github.com/MBvisti/mortenvistisen/repository/psql/database"
+	"github.com/MBvisti/mortenvistisen/psql/database"
 	"github.com/MBvisti/mortenvistisen/views"
 	"github.com/gorilla/sessions"
 	"github.com/jackc/pgx/v5"

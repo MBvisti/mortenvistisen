@@ -5,7 +5,7 @@ import (
 	"errors"
 	"log/slog"
 
-	"github.com/MBvisti/mortenvistisen/repository/psql/database"
+	"github.com/MBvisti/mortenvistisen/psql/database"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )

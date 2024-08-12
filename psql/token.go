@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/MBvisti/mortenvistisen/repository/psql/database"
+	"github.com/MBvisti/mortenvistisen/psql/database"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )

@@ -12,11 +12,10 @@ import (
 
 	"github.com/MBvisti/mortenvistisen/pkg/config"
 	"github.com/MBvisti/mortenvistisen/pkg/mail_client"
-	"github.com/MBvisti/mortenvistisen/pkg/queue"
 	"github.com/MBvisti/mortenvistisen/pkg/telemetry"
-	"github.com/MBvisti/mortenvistisen/repository/psql"
-	"github.com/MBvisti/mortenvistisen/repository/psql/database"
-	"github.com/MBvisti/mortenvistisen/services"
+	"github.com/MBvisti/mortenvistisen/psql"
+	"github.com/MBvisti/mortenvistisen/psql/database"
+	"github.com/MBvisti/mortenvistisen/queue"
 	"github.com/riverqueue/river"
 )
 
@@ -27,7 +26,6 @@ func main() {
 	telemetry.NewTelemetry(cfg, "v0.0.1")
 
 	awsSes := mail_client.NewAwsSimpleEmailService()
-	mailClient := services.NewEmailSvc(cfg, &awsSes)
 
 	conn, err := psql.CreatePooledConnection(context.Background(), cfg.Db.GetUrlString())
 	if err != nil {
@@ -39,8 +37,8 @@ func main() {
 	jobStarted := make(chan struct{})
 
 	workers, err := queue.SetupWorkers(queue.WorkerDependencies{
-		Db:         db,
-		MailClient: mailClient,
+		DB:      db,
+		Emailer: awsSes,
 	})
 	if err != nil {
 		panic(err)
