@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/MBvisti/mortenvistisen/models"
-	"github.com/MBvisti/mortenvistisen/repository/psql/database"
+	"github.com/MBvisti/mortenvistisen/psql/database"
 	"github.com/google/uuid"
 )
 

@@ -1,21 +1,21 @@
 package queue
 
 import (
-	"github.com/MBvisti/mortenvistisen/repository/psql/database"
-	"github.com/MBvisti/mortenvistisen/services"
+	"github.com/MBvisti/mortenvistisen/pkg/mail_client"
+	"github.com/MBvisti/mortenvistisen/psql/database"
 	"github.com/riverqueue/river"
 )
 
 type WorkerDependencies struct {
-	Db         *database.Queries
-	MailClient services.Email
+	DB      *database.Queries
+	Emailer mail_client.AwsSimpleEmailService
 }
 
 func SetupWorkers(deps WorkerDependencies) (*river.Workers, error) {
 	workers := river.NewWorkers()
 
 	if err := river.AddWorkerSafely(workers, &EmailJobWorker{
-		Sender: &deps.MailClient,
+		emailer: &deps.Emailer,
 	}); err != nil {
 		return nil, err
 	}

@@ -2,6 +2,7 @@ set dotenv-load
 
 # alias
 alias r := run-reload
+alias rw := run-worker
 
 alias wc := watch-css
 
