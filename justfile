@@ -19,6 +19,8 @@ alias mpts := copy-preline-to-static
 
 alias ct := compile-templates
 
+alias bp := build-and-push
+
 default:
     @just --list
 
@@ -71,3 +73,6 @@ compile-templates:
 # river
 river-migrate-up:
 	river migrate-up --database-url $QUEUE_DATABASE_URL
+
+build-and-push:
+	./build-and-push.sh
