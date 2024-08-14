@@ -15,6 +15,12 @@ func (r *Router) loadAppRoutes() {
 	router.GET("", func(c echo.Context) error {
 		return r.appHandlers.Index(c)
 	})
+	router.HEAD("/", func(c echo.Context) error {
+		return r.appHandlers.Index(c)
+	})
+	router.HEAD("", func(c echo.Context) error {
+		return r.appHandlers.Index(c)
+	})
 
 	router.GET("/about", func(c echo.Context) error {
 		return r.appHandlers.About(c)
