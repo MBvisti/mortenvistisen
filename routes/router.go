@@ -57,6 +57,16 @@ func NewRouter(
 			echoprometheus.NewMiddleware("mortenvistisen_blog"),
 		)
 		router.GET("/metrics", echoprometheus.NewHandler())
+		router.Use(echomw.CORSWithConfig(echomw.CORSConfig{
+			AllowOrigins: []string{"https://mortenvistisen.com"},
+			AllowMethods: []string{
+				http.MethodGet,
+				http.MethodPut,
+				http.MethodPost,
+				http.MethodDelete,
+				http.MethodHead,
+			},
+		}))
 	}
 
 	router.Static("/static", "static")
