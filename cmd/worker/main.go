@@ -26,7 +26,10 @@ func main() {
 	ctx := context.Background()
 	cfg := config.New(version)
 
-	telemetry.NewTelemetry(cfg, version)
+	client := telemetry.NewTelemetry(cfg, version, fmt.Sprintf("%v-worker", cfg.App.ProjectName))
+	if client != nil {
+		defer client.Stop()
+	}
 
 	awsSes := mail_client.NewAwsSimpleEmailService()
 

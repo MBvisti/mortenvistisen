@@ -34,7 +34,7 @@ func main() {
 
 	blogTracer := otel.NewTracer("blog/tracer")
 
-	client := telemetry.NewTelemetry(cfg, version)
+	client := telemetry.NewTelemetry(cfg, version, cfg.App.ProjectName)
 	if client != nil {
 		defer client.Stop()
 	}

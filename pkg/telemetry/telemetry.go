@@ -13,13 +13,14 @@ import (
 	slogotel "github.com/samber/slog-otel"
 )
 
-func NewTelemetry(cfg config.Cfg, release string) *loki.Client {
+func NewTelemetry(cfg config.Cfg, release, projectName string) *loki.Client {
 	switch cfg.App.Environment {
 	case config.PROD_ENVIRONMENT:
 		logger, client := productionLogger(
 			cfg.Telemetry.SinkURL,
 			cfg.Telemetry.TenantID,
 			release,
+			projectName,
 		)
 		slog.SetDefault(logger)
 		return client
@@ -35,7 +36,7 @@ func NewTelemetry(cfg config.Cfg, release string) *loki.Client {
 	}
 }
 
-func productionLogger(url, tenantID, release string) (*slog.Logger, *loki.Client) {
+func productionLogger(url, tenantID, release, projectName string) (*slog.Logger, *loki.Client) {
 	cfg, _ := loki.NewDefaultConfig(url)
 	cfg.TenantID = tenantID
 	client, err := loki.New(cfg)
@@ -57,7 +58,10 @@ func productionLogger(url, tenantID, release string) (*slog.Logger, *loki.Client
 		}.NewLokiHandler(),
 	)
 	logger = logger.
-		With("release", release).With("env", config.PROD_ENVIRONMENT).With("service_name", "blog")
+		With(
+			"release",
+			release,
+		).With("env", config.PROD_ENVIRONMENT).With("service_name", projectName)
 
 	return logger, client
 }
