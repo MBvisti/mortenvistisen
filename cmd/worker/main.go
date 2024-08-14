@@ -19,11 +19,14 @@ import (
 	"github.com/riverqueue/river"
 )
 
+// version is the latest commit sha at build time
+var version string
+
 func main() {
 	ctx := context.Background()
-	cfg := config.New()
+	cfg := config.New(version)
 
-	telemetry.NewTelemetry(cfg, "v0.0.1")
+	telemetry.NewTelemetry(cfg, version)
 
 	awsSes := mail_client.NewAwsSimpleEmailService()
 

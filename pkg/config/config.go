@@ -12,7 +12,7 @@ type Cfg struct {
 	Telemetry         Telemetry
 }
 
-func New() Cfg {
+func New(version string) Cfg {
 	databaseCfg := Database{}
 	if err := env.ParseWithOptions(&databaseCfg, env.Options{
 		RequiredIfNoDef: true,
@@ -27,7 +27,9 @@ func New() Cfg {
 		panic(err)
 	}
 
-	appCfg := App{}
+	appCfg := App{
+		Version: version,
+	}
 	if err := env.ParseWithOptions(&appCfg, env.Options{
 		RequiredIfNoDef: true,
 	}); err != nil {

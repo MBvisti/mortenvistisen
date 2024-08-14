@@ -8,6 +8,7 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/MBvisti/mortenvistisen/pkg/config"
 	"github.com/MBvisti/mortenvistisen/pkg/telemetry"
 	"github.com/MBvisti/mortenvistisen/psql/database"
 	"github.com/MBvisti/mortenvistisen/views"
@@ -27,7 +28,8 @@ import (
 // - destroy | DELETE
 
 type Base struct {
-	DB database.Queries
+	DB     database.Queries
+	Config config.Cfg
 	// TknManager      tokens.Manager
 	QueueClient *river.Client[pgx.Tx]
 	// PostManager     posts.PostManager
@@ -46,6 +48,7 @@ type Base struct {
 
 func NewDependencies(
 	db database.Queries,
+	config config.Cfg,
 	// tknManager tokens.Manager,
 	queueClient *river.Client[pgx.Tx],
 	// postManager posts.PostManager,
@@ -63,6 +66,7 @@ func NewDependencies(
 ) Base {
 	return Base{
 		db,
+		config,
 		// tknManager,
 		queueClient,
 		// postManager,

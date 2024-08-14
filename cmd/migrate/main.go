@@ -9,8 +9,11 @@ import (
 	"github.com/MBvisti/mortenvistisen/pkg/config"
 )
 
+// version is the latest commit sha at build time
+var version string
+
 func main() {
-	cfg := config.New()
+	cfg := config.New(version)
 
 	conn, err := sql.Open("postgres", cfg.Db.GetUrlString())
 	if err != nil {

@@ -19,8 +19,11 @@ import (
 	"github.com/MBvisti/mortenvistisen/services"
 )
 
+// version is the latest commit sha at build time
+var version string
+
 func main() {
-	cfg := config.New()
+	cfg := config.New(version)
 
 	otel := telemetry.NewOtel(cfg)
 	defer func() {
@@ -31,7 +34,7 @@ func main() {
 
 	blogTracer := otel.NewTracer("blog/tracer")
 
-	client := telemetry.NewTelemetry(cfg, "v0.0.1")
+	client := telemetry.NewTelemetry(cfg, version)
 	if client != nil {
 		defer client.Stop()
 	}
@@ -68,6 +71,7 @@ func main() {
 
 	baseHandlers := handlers.NewDependencies(
 		*db,
+		cfg,
 		riverClient,
 		cookieStore,
 		blogTracer,

@@ -13,4 +13,5 @@ type App struct {
 	ProjectName            string `env:"PROJECT_NAME"`
 	Environment            string `env:"ENVIRONMENT"`
 	DefaultSenderSignature string `env:"DEFAULT_SENDER_SIGNATURE"`
+	Version                string
 }
