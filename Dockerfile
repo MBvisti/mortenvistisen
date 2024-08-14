@@ -4,6 +4,7 @@ WORKDIR /
 
 COPY resources/ resources
 COPY static static
+COPY views views
 
 RUN cd resources && npm ci
 RUN cd resources && npm run build-css
