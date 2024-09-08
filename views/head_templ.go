@@ -260,7 +260,7 @@ func (h Head) Build() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if os.Getenv("ENVIRONMENT") == "production" {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<script defer src=\"https://analytics.mbv-labs.com/script.js\" data-website-id=\"5b82fac0-8e18-485f-81f9-76bd3449257e\"></script>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<script defer src=\"https://analytics.mbvlabs.com/script.js\" data-website-id=\"5b82fac0-8e18-485f-81f9-76bd3449257e\"></script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
