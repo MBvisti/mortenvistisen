@@ -9,7 +9,7 @@ func (r *Router) loadAuthRoutes() {
 	})
 	router.POST("/register", func(c echo.Context) error {
 		return r.registrationHandlers.StoreUser(c)
-	})
+	}, r.middleware.AdminOnly)
 
 	router.GET("/login", func(c echo.Context) error {
 		return r.authenticationHandlers.CreateSession(c)

@@ -8,32 +8,28 @@ import (
 )
 
 type Newsletter struct {
-	ID          uuid.UUID
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	Title       string
-	Edition     int32
-	ReleasedAt  time.Time
-	Released    bool
-	Paragraphs  []string
-	ArticleSlug string
+	ID         uuid.UUID
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
+	Title      string
+	Content    string
+	ReleasedAt time.Time
+	Released   bool
 }
 
 var CreateNewsletterValidations = func() map[string][]validation.Rule {
 	return map[string][]validation.Rule{
-		"ArticleSlug": {validation.RequiredRule},
+		"Title": {validation.RequiredRule},
 	}
 }
 
 var ReleaseNewsletterValidations = func() map[string][]validation.Rule {
 	return map[string][]validation.Rule{
-		"ID":          {validation.RequiredRule},
-		"Title":       {validation.RequiredRule, validation.MinLenRule(3)},
-		"Edition":     {validation.RequiredRule},
-		"Paragraphs":  {validation.RequiredRule, validation.MinLenRule(1)},
-		"ArticleSlug": {validation.RequiredRule},
-		"Released":    {validation.RequiredRule, validation.MustBeTrueRule},
-		"ReleasedAt":  {validation.RequiredRule},
+		"ID":         {validation.RequiredRule},
+		"Title":      {validation.RequiredRule, validation.MinLenRule(3)},
+		"Content":    {validation.RequiredRule, validation.MinLenRule(3)},
+		"Released":   {validation.RequiredRule, validation.MustBeTrueRule},
+		"ReleasedAt": {validation.RequiredRule},
 	}
 }
 

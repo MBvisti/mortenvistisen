@@ -74,15 +74,13 @@ type Job struct {
 }
 
 type Newsletter struct {
-	ID                  uuid.UUID
-	CreatedAt           pgtype.Timestamptz
-	UpdatedAt           pgtype.Timestamptz
-	Title               string
-	Edition             sql.NullInt32
-	Released            pgtype.Bool
-	ReleasedAt          pgtype.Timestamptz
-	Body                []byte
-	AssociatedArticleID uuid.UUID
+	ID         uuid.UUID
+	CreatedAt  pgtype.Timestamptz
+	UpdatedAt  pgtype.Timestamptz
+	Title      string
+	Released   pgtype.Bool
+	ReleasedAt pgtype.Timestamptz
+	Content    string
 }
 
 type Post struct {

@@ -101,3 +101,14 @@ func (pm *PostManager) Parse(name string) (string, error) {
 
 	return htmlOutput.String(), nil
 }
+
+func (pm *PostManager) ParseContent(content string) (string, error) {
+	// Parse Markdown content
+	var htmlOutput bytes.Buffer
+	if err := pm.markdownHandler.Convert([]byte(content), &htmlOutput); err != nil {
+		slog.Error("failed to parse markdown file", "error", err)
+		return "", err
+	}
+
+	return htmlOutput.String(), nil
+}

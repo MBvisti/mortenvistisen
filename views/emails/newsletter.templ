@@ -13,9 +13,7 @@ const newsletterTmplName = "newsletter"
 
 type NewsletterMail struct {
 	Title           string
-	Edition         string
-	Paragraphs      []string
-	ArticleLink     string
+	Content         string
 	UnsubscribeLink string
 }
 
@@ -30,9 +28,7 @@ func (n NewsletterMail) GenerateTextVersion() (string, error) {
 	var textBody bytes.Buffer
 	if err := textFile.Execute(&textBody, NewsletterMail{
 		Title:           n.Title,
-		Edition:         n.Edition,
-		Paragraphs:      n.Paragraphs,
-		ArticleLink:     n.ArticleLink,
+		Content:         n.Content,
 		UnsubscribeLink: n.UnsubscribeLink,
 	}); err != nil {
 		return "", err
@@ -127,7 +123,7 @@ templ (n NewsletterMail) template() {
     h2 {
       margin-top: 0;
       color: #333333;
-      font-size: 16px;
+      font-size: 18px;
       font-weight: bold;
       text-align: left;
     }
@@ -524,18 +520,15 @@ templ (n NewsletterMail) template() {
 										<tr>
 											<td class="content-cell">
 												<div class="f-fallback">
-													<p>Thanks for being a subscriber to this newsletter! <br/>You're currently reading <b>edition #{ n.Edition }</b></p>
-													for _, paragraph := range n.Paragraphs {
-														<p>{ paragraph }</p>
-													}
+													<h1>{ n.Title }</h1>
 													<table class="body-action" align="center" width="100%" cellpadding="0" cellspacing="0" role="presentation">
 														<tr>
-															<td align="center">
+															<td align="left">
 																<!-- Border based button https://litmus.com/blog/a-guide-to-bulletproof-buttons-in-email-design -->
 																<table width="100%" border="0" cellspacing="0" cellpadding="0" role="presentation">
 																	<tr>
-																		<td align="center">
-																			<a href={ templ.SafeURL(n.ArticleLink) } class="f-fallback button" target="_blank">Read it here</a>
+																		<td align="left">
+																			@unsafe(n.Content)
 																		</td>
 																	</tr>
 																</table>

@@ -40,22 +40,20 @@ func (q *Queries) CountReleasedNewsletters(ctx context.Context) (int64, error) {
 
 const insertNewsletter = `-- name: InsertNewsletter :one
 insert into newsletters
-	(id, created_at, updated_at, title, edition, released, released_at, body, associated_article_id)
+	(id, created_at, updated_at, title, content, released, released_at)
 values 
-	($1, $2, $3, $4, $5, $6, $7, $8, $9)
-returning id, created_at, updated_at, title, edition, released, released_at, body, associated_article_id
+	($1, $2, $3, $4, $5, $6, $7)
+returning id, created_at, updated_at, title, released, released_at, content
 `
 
 type InsertNewsletterParams struct {
-	ID                  uuid.UUID
-	CreatedAt           pgtype.Timestamptz
-	UpdatedAt           pgtype.Timestamptz
-	Title               string
-	Edition             sql.NullInt32
-	Released            pgtype.Bool
-	ReleasedAt          pgtype.Timestamptz
-	Body                []byte
-	AssociatedArticleID uuid.UUID
+	ID         uuid.UUID
+	CreatedAt  pgtype.Timestamptz
+	UpdatedAt  pgtype.Timestamptz
+	Title      string
+	Content    string
+	Released   pgtype.Bool
+	ReleasedAt pgtype.Timestamptz
 }
 
 func (q *Queries) InsertNewsletter(ctx context.Context, arg InsertNewsletterParams) (Newsletter, error) {
@@ -64,11 +62,9 @@ func (q *Queries) InsertNewsletter(ctx context.Context, arg InsertNewsletterPara
 		arg.CreatedAt,
 		arg.UpdatedAt,
 		arg.Title,
-		arg.Edition,
+		arg.Content,
 		arg.Released,
 		arg.ReleasedAt,
-		arg.Body,
-		arg.AssociatedArticleID,
 	)
 	var i Newsletter
 	err := row.Scan(
@@ -76,17 +72,15 @@ func (q *Queries) InsertNewsletter(ctx context.Context, arg InsertNewsletterPara
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Title,
-		&i.Edition,
 		&i.Released,
 		&i.ReleasedAt,
-		&i.Body,
-		&i.AssociatedArticleID,
+		&i.Content,
 	)
 	return i, err
 }
 
 const queryNewsletterByID = `-- name: QueryNewsletterByID :one
-select id, created_at, updated_at, title, edition, released, released_at, body, associated_article_id
+select id, created_at, updated_at, title, released, released_at, content
 from newsletters
 where id = $1
 `
@@ -99,17 +93,15 @@ func (q *Queries) QueryNewsletterByID(ctx context.Context, id uuid.UUID) (Newsle
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Title,
-		&i.Edition,
 		&i.Released,
 		&i.ReleasedAt,
-		&i.Body,
-		&i.AssociatedArticleID,
+		&i.Content,
 	)
 	return i, err
 }
 
 const queryNewsletterInPages = `-- name: QueryNewsletterInPages :many
-select newsletters.id, newsletters.created_at, newsletters.updated_at, newsletters.title, newsletters.edition, newsletters.released, newsletters.released_at, newsletters.body, newsletters.associated_article_id
+select newsletters.id, newsletters.created_at, newsletters.updated_at, newsletters.title, newsletters.released, newsletters.released_at, newsletters.content
 from newsletters
 limit 7
 offset $1
@@ -129,11 +121,9 @@ func (q *Queries) QueryNewsletterInPages(ctx context.Context, offset int32) ([]N
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.Title,
-			&i.Edition,
 			&i.Released,
 			&i.ReleasedAt,
-			&i.Body,
-			&i.AssociatedArticleID,
+			&i.Content,
 		); err != nil {
 			return nil, err
 		}
@@ -151,24 +141,10 @@ select
     newsletters.created_at as newsletter_created_at,
     newsletters.updated_at as newsletter_updated_at,
     newsletters.title as newsletter_title,
-    newsletters.edition as newsletter_edition,
+    newsletters.content as newsletter_content,
     newsletters.released as newsletter_released,
-    newsletters.released_at as newsletter_released_at,
-    newsletters.body as newsletter_body,
-    newsletters.associated_article_id as newsletter_associated_article_id,
-    posts.id as post_id,
-    posts.created_at as post_created_at,
-    posts.updated_at as post_updated_at,
-    posts.title as post_title,
-    posts.header_title as post_header_title,
-    posts.filename as post_filename,
-    posts.slug as post_slug,
-    posts.excerpt as post_excerpt,
-    posts.draft as post_draft,
-    posts.released_at as post_released_at,
-    posts.read_time as post_read_time
+    newsletters.released_at as newsletter_released_at
 from newsletters
-join posts on posts.id = newsletters.associated_article_id
 where
     (
         newsletters.released = $1::bool
@@ -185,26 +161,13 @@ type QueryNewslettersParams struct {
 }
 
 type QueryNewslettersRow struct {
-	NewsletterID                  uuid.UUID
-	NewsletterCreatedAt           pgtype.Timestamptz
-	NewsletterUpdatedAt           pgtype.Timestamptz
-	NewsletterTitle               string
-	NewsletterEdition             sql.NullInt32
-	NewsletterReleased            pgtype.Bool
-	NewsletterReleasedAt          pgtype.Timestamptz
-	NewsletterBody                []byte
-	NewsletterAssociatedArticleID uuid.UUID
-	PostID                        uuid.UUID
-	PostCreatedAt                 pgtype.Timestamp
-	PostUpdatedAt                 pgtype.Timestamp
-	PostTitle                     string
-	PostHeaderTitle               sql.NullString
-	PostFilename                  string
-	PostSlug                      string
-	PostExcerpt                   string
-	PostDraft                     bool
-	PostReleasedAt                pgtype.Timestamp
-	PostReadTime                  sql.NullInt32
+	NewsletterID         uuid.UUID
+	NewsletterCreatedAt  pgtype.Timestamptz
+	NewsletterUpdatedAt  pgtype.Timestamptz
+	NewsletterTitle      string
+	NewsletterContent    string
+	NewsletterReleased   pgtype.Bool
+	NewsletterReleasedAt pgtype.Timestamptz
 }
 
 func (q *Queries) QueryNewsletters(ctx context.Context, arg QueryNewslettersParams) ([]QueryNewslettersRow, error) {
@@ -221,22 +184,9 @@ func (q *Queries) QueryNewsletters(ctx context.Context, arg QueryNewslettersPara
 			&i.NewsletterCreatedAt,
 			&i.NewsletterUpdatedAt,
 			&i.NewsletterTitle,
-			&i.NewsletterEdition,
+			&i.NewsletterContent,
 			&i.NewsletterReleased,
 			&i.NewsletterReleasedAt,
-			&i.NewsletterBody,
-			&i.NewsletterAssociatedArticleID,
-			&i.PostID,
-			&i.PostCreatedAt,
-			&i.PostUpdatedAt,
-			&i.PostTitle,
-			&i.PostHeaderTitle,
-			&i.PostFilename,
-			&i.PostSlug,
-			&i.PostExcerpt,
-			&i.PostDraft,
-			&i.PostReleasedAt,
-			&i.PostReadTime,
 		); err != nil {
 			return nil, err
 		}
@@ -275,31 +225,27 @@ func (q *Queries) QueryReleasedNewslettersCount(ctx context.Context) (int64, err
 
 const updateNewsletter = `-- name: UpdateNewsletter :one
 update newsletters
-	set updated_at = $1, title = $2, edition = $3, released = $4, released_at = $5, body = $6, associated_article_id = $7
-where id = $8
-returning id, created_at, updated_at, title, edition, released, released_at, body, associated_article_id
+	set updated_at = $1, title = $2, content = $3, released = $4, released_at = $5
+where id = $6
+returning id, created_at, updated_at, title, released, released_at, content
 `
 
 type UpdateNewsletterParams struct {
-	UpdatedAt           pgtype.Timestamptz
-	Title               string
-	Edition             sql.NullInt32
-	Released            pgtype.Bool
-	ReleasedAt          pgtype.Timestamptz
-	Body                []byte
-	AssociatedArticleID uuid.UUID
-	ID                  uuid.UUID
+	UpdatedAt  pgtype.Timestamptz
+	Title      string
+	Content    string
+	Released   pgtype.Bool
+	ReleasedAt pgtype.Timestamptz
+	ID         uuid.UUID
 }
 
 func (q *Queries) UpdateNewsletter(ctx context.Context, arg UpdateNewsletterParams) (Newsletter, error) {
 	row := q.db.QueryRow(ctx, updateNewsletter,
 		arg.UpdatedAt,
 		arg.Title,
-		arg.Edition,
+		arg.Content,
 		arg.Released,
 		arg.ReleasedAt,
-		arg.Body,
-		arg.AssociatedArticleID,
 		arg.ID,
 	)
 	var i Newsletter
@@ -308,11 +254,9 @@ func (q *Queries) UpdateNewsletter(ctx context.Context, arg UpdateNewsletterPara
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Title,
-		&i.Edition,
 		&i.Released,
 		&i.ReleasedAt,
-		&i.Body,
-		&i.AssociatedArticleID,
+		&i.Content,
 	)
 	return i, err
 }

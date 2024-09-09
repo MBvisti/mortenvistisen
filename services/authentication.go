@@ -16,8 +16,10 @@ import (
 )
 
 var (
-	ErrCouldNotHashPepperPW            = errors.New("could not hash password")
-	ErrCouldNotValidatePassword        = errors.New("could not validate password")
+	ErrCouldNotHashPepperPW     = errors.New("could not hash password")
+	ErrCouldNotValidatePassword = errors.New(
+		"could not validate password",
+	)
 	ErrCouldNotGetAuthenticatedSession = errors.New("could not get session")
 )
 
@@ -54,7 +56,10 @@ func NewAuth(cfg config.Cfg, storage authStorage) Auth {
 
 func (a Auth) HashAndPepperPassword(password string) (string, error) {
 	passwordBytes := []byte(password + a.passwordPepper)
-	hashedBytes, err := bcrypt.GenerateFromPassword(passwordBytes, bcrypt.DefaultCost)
+	hashedBytes, err := bcrypt.GenerateFromPassword(
+		passwordBytes,
+		bcrypt.DefaultCost,
+	)
 	if err != nil {
 		slog.Error("could not hash password", "error", err)
 		return "", errors.Join(ErrCouldNotHashPepperPW, err)
@@ -65,7 +70,13 @@ func (a Auth) HashAndPepperPassword(password string) (string, error) {
 
 func (a Auth) ValidatePassword(password, hashedPassword string) error {
 	if err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password+a.passwordPepper)); err != nil {
-		slog.Error("could not validate password", "error", err, "pass", password)
+		slog.Error(
+			"could not validate password",
+			"error",
+			err,
+			"pass",
+			password,
+		)
 		return errors.Join(ErrCouldNotValidatePassword, err)
 	}
 
@@ -106,7 +117,7 @@ func (a Auth) CreateAuthenticatedSession(
 	userID uuid.UUID,
 	remember bool,
 ) error {
-	session, err := a.cookieStore.Get(req, "ua")
+	session, err := a.cookieStore.Get(req, "mortenvistisen-ua")
 	if err != nil {
 		return errors.Join(ErrCouldNotGetAuthenticatedSession, err)
 	}
@@ -115,9 +126,9 @@ func (a Auth) CreateAuthenticatedSession(
 	session.Options.Domain = a.cfg.App.AppHost
 	session.Options.Secure = true
 	if remember {
-		session.Options.MaxAge = 604800 // auth sess valid 1 week
+		session.Options.MaxAge = 2 * 604800 // auth sess valid 2 week
 	} else {
-		session.Options.MaxAge = 86400 // auth sess valid 1 day
+		session.Options.MaxAge = 604800 // auth sess valid 1 week
 	}
 
 	session.Values["user_id"] = userID
@@ -132,10 +143,13 @@ func (a Auth) CreateAuthenticatedSession(
 }
 
 func (a Auth) IsAuthenticated(r *http.Request) (bool, uuid.UUID, error) {
-	session, err := a.cookieStore.Get(r, "ua")
+	session, err := a.cookieStore.Get(r, "mortenvistisen-ua")
 	if err != nil {
 		slog.Error("could not get session", "error", err)
-		return false, uuid.UUID{}, errors.Join(ErrCouldNotGetAuthenticatedSession, err)
+		return false, uuid.UUID{}, errors.Join(
+			ErrCouldNotGetAuthenticatedSession,
+			err,
+		)
 	}
 
 	if session.Values["authenticated"] == nil {
@@ -146,7 +160,7 @@ func (a Auth) IsAuthenticated(r *http.Request) (bool, uuid.UUID, error) {
 }
 
 func (a Auth) IsAdmin(r *http.Request) (bool, error) {
-	session, err := a.cookieStore.Get(r, "ua")
+	session, err := a.cookieStore.Get(r, "mortenvistisen-ua")
 	if err != nil {
 		slog.Error("could not get session", "error", err)
 		return false, errors.Join(ErrCouldNotGetAuthenticatedSession, err)

@@ -56,12 +56,17 @@ func main() {
 
 	postManager := posts.NewPostManager()
 
-	mailService := services.NewEmailSvc(cfg, &awsSes)
+	mailService := services.NewEmailSvc(cfg, &awsSes, postManager)
 
 	tknService := services.NewTokenSvc(psql, cfg.Auth.TokenSigningKey)
 	authService := services.NewAuth(cfg, psql)
 
-	newsletterSvc := models.NewNewsletterSvc(psql, psql, tknService, &mailService)
+	newsletterSvc := models.NewNewsletterSvc(
+		psql,
+		psql,
+		tknService,
+		&mailService,
+	)
 	subscriberSvc := models.NewSubscriberSvc(&mailService, tknService, psql)
 	userSvc := models.NewUserSvc(authService, psql)
 	tagSvc := models.NewTagSvc(psql)

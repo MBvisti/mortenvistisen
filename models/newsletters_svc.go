@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"log/slog"
-	"strconv"
 	"time"
 
 	"github.com/MBvisti/mortenvistisen/pkg/validation"
@@ -51,10 +50,8 @@ type newsletterEmailService interface {
 	SendNewsletter(
 		ctx context.Context,
 		title string,
-		edition string,
-		paragraphs []string,
+		content string,
 		email string,
-		articleSlug string,
 		UnsubscribeTkn string,
 	) error
 }
@@ -82,7 +79,10 @@ func NewNewsletterSvc(
 	}
 }
 
-func (svc NewsletterService) ByID(ctx context.Context, id uuid.UUID) (Newsletter, error) {
+func (svc NewsletterService) ByID(
+	ctx context.Context,
+	id uuid.UUID,
+) (Newsletter, error) {
 	newsletter, err := svc.newsletterStorage.QueryNewsletterByID(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -99,7 +99,11 @@ func (svc NewsletterService) List(
 	ctx context.Context,
 	limit, offset int32,
 ) ([]Newsletter, error) {
-	return svc.newsletterStorage.ListNewsletters(ctx, nil, WithPagination(limit, offset))
+	return svc.newsletterStorage.ListNewsletters(
+		ctx,
+		nil,
+		WithPagination(limit, offset),
+	)
 }
 
 func (svc NewsletterService) Count(
@@ -113,95 +117,76 @@ func (svc NewsletterService) Count(
 	return svc.newsletterStorage.Count(ctx)
 }
 
-func (svc NewsletterService) Preview(
-	ctx context.Context,
-	paragraphIndex string,
-	action string,
-	title string,
-	paragraphElements []string,
-	newParagraphElement string,
-	articleID string,
-	edition int32,
-) (Newsletter, error) {
-	newParagraphsElements := paragraphElements
-	if paragraphIndex != "" && action == "del" {
-		index, err := strconv.Atoi(paragraphIndex)
-		if err != nil {
-			return Newsletter{}, err
-		}
-
-		if action == "del" {
-			newParagraphsElements = append(
-				newParagraphsElements[:index],
-				newParagraphsElements[index+1:]...)
-		}
-	}
-
-	if newParagraphElement != "" && action != "del" {
-		newParagraphsElements = append(
-			newParagraphsElements,
-			newParagraphElement,
-		)
-	}
-
-	var articleSlug string
-	if articleID != "" {
-		id, err := uuid.Parse(articleID)
-		if err != nil {
-			return Newsletter{}, err
-		}
-
-		article, err := svc.newsletterStorage.QueryArticleByID(ctx, id)
-		if err != nil {
-			return Newsletter{}, err
-		}
-
-		articleSlug = article.Slug
-	}
-
-	t := time.Now()
-	return Newsletter{
-		ID:          uuid.New(),
-		CreatedAt:   t,
-		UpdatedAt:   t,
-		Title:       title,
-		Edition:     edition,
-		Paragraphs:  newParagraphsElements,
-		ArticleSlug: articleSlug,
-	}, nil
-}
+// func (svc NewsletterService) Preview(
+// 	ctx context.Context,
+// 	paragraphIndex string,
+// 	action string,
+// 	title string,
+// 	paragraphElements []string,
+// 	newParagraphElement string,
+// 	articleID string,
+// 	edition int32,
+// ) (Newsletter, error) {
+// 	newParagraphsElements := paragraphElements
+// 	if paragraphIndex != "" && action == "del" {
+// 		index, err := strconv.Atoi(paragraphIndex)
+// 		if err != nil {
+// 			return Newsletter{}, err
+// 		}
+//
+// 		if action == "del" {
+// 			newParagraphsElements = append(
+// 				newParagraphsElements[:index],
+// 				newParagraphsElements[index+1:]...)
+// 		}
+// 	}
+//
+// 	if newParagraphElement != "" && action != "del" {
+// 		newParagraphsElements = append(
+// 			newParagraphsElements,
+// 			newParagraphElement,
+// 		)
+// 	}
+//
+// 	var articleSlug string
+// 	if articleID != "" {
+// 		id, err := uuid.Parse(articleID)
+// 		if err != nil {
+// 			return Newsletter{}, err
+// 		}
+//
+// 		article, err := svc.newsletterStorage.QueryArticleByID(ctx, id)
+// 		if err != nil {
+// 			return Newsletter{}, err
+// 		}
+//
+// 		articleSlug = article.Slug
+// 	}
+//
+// 	t := time.Now()
+// 	return Newsletter{
+// 		ID:          uuid.New(),
+// 		CreatedAt:   t,
+// 		UpdatedAt:   t,
+// 		Title:       title,
+// 		Edition:     edition,
+// 		Paragraphs:  newParagraphsElements,
+// 		ArticleSlug: articleSlug,
+// 	}, nil
+// }
 
 func (svc NewsletterService) CreateDraft(
 	ctx context.Context,
 	title string,
-	edition int32,
-	paragraphs []string,
-	articleID string,
+	content string,
 ) (Newsletter, error) {
-	var articleSlug string
-	if articleID != "" {
-		id, err := uuid.Parse(articleID)
-		if err != nil {
-			return Newsletter{}, err
-		}
-
-		article, err := svc.newsletterStorage.QueryArticleByID(ctx, id)
-		if err != nil {
-			return Newsletter{}, err
-		}
-
-		articleSlug = article.Slug
-	}
-
 	t := time.Now()
 	newsletter := Newsletter{
-		ID:          uuid.New(),
-		CreatedAt:   t,
-		UpdatedAt:   t,
-		Title:       title,
-		Edition:     edition,
-		Paragraphs:  paragraphs,
-		ArticleSlug: articleSlug,
+		ID:        uuid.New(),
+		CreatedAt: t,
+		UpdatedAt: t,
+		Title:     title,
+		Content:   content,
 	}
 	if err := validation.Validate(newsletter, CreateNewsletterValidations()); err != nil {
 		return Newsletter{}, errors.Join(ErrFailValidation, err)
@@ -227,7 +212,10 @@ func (svc NewsletterService) Release(
 		return Newsletter{}, err
 	}
 
-	updatedNewsletter, err := svc.newsletterStorage.UpdateNewsletter(ctx, instance)
+	updatedNewsletter, err := svc.newsletterStorage.UpdateNewsletter(
+		ctx,
+		instance,
+	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return Newsletter{}, errors.Join(ErrNewsletterNotFound, err)
@@ -252,12 +240,15 @@ func (svc NewsletterService) Release(
 	}
 
 	for _, verifiedSubscriber := range verifiedSubscribers {
-		unsubTkn, err := svc.tknService.CreateUnsubscribeToken(ctx, verifiedSubscriber.ID)
+		unsubTkn, err := svc.tknService.CreateUnsubscribeToken(
+			ctx,
+			verifiedSubscriber.ID,
+		)
 		if err != nil {
 			return Newsletter{}, errors.Join(ErrUnrecoverableEvent, err)
 		}
 
-		if err := svc.emailService.SendNewsletter(ctx, instance.Title, strconv.Itoa(int(instance.Edition)), instance.Paragraphs, verifiedSubscriber.Email, instance.ArticleSlug, unsubTkn); err != nil {
+		if err := svc.emailService.SendNewsletter(ctx, instance.Title, instance.Content, verifiedSubscriber.Email, unsubTkn); err != nil {
 			return Newsletter{}, errors.Join(ErrUnrecoverableEvent, err)
 		}
 	}
@@ -265,43 +256,43 @@ func (svc NewsletterService) Release(
 	return updatedNewsletter, nil
 }
 
-func (svc *NewsletterService) Update(
-	ctx context.Context,
-	title string,
-	edition string,
-	paragraphs []string,
-	articleID string,
-	id uuid.UUID,
-) (Newsletter, error) {
-	newsletter, err := svc.newsletterStorage.QueryNewsletterByID(ctx, id)
-	if err != nil {
-		return Newsletter{}, err
-	}
-
-	parsedArticleID, err := uuid.Parse(articleID)
-	if err != nil {
-		return Newsletter{}, err
-	}
-
-	article, err := svc.newsletterStorage.QueryArticleByID(ctx, parsedArticleID)
-	if err != nil {
-		return Newsletter{}, err
-	}
-
-	parsedEdition, err := strconv.Atoi(edition)
-	if err != nil {
-		return Newsletter{}, err
-	}
-
-	newsletter.UpdatedAt = time.Now()
-	newsletter.Title = title
-	newsletter.Edition = int32(parsedEdition)
-	newsletter.Paragraphs = paragraphs
-	newsletter.ArticleSlug = article.Slug
-
-	if _, err := svc.newsletterStorage.UpdateNewsletter(ctx, newsletter); err != nil {
-		return Newsletter{}, err
-	}
-
-	return newsletter, nil
-}
+// func (svc *NewsletterService) Update(
+// 	ctx context.Context,
+// 	title string,
+// 	edition string,
+// 	paragraphs []string,
+// 	articleID string,
+// 	id uuid.UUID,
+// ) (Newsletter, error) {
+// 	newsletter, err := svc.newsletterStorage.QueryNewsletterByID(ctx, id)
+// 	if err != nil {
+// 		return Newsletter{}, err
+// 	}
+//
+// 	parsedArticleID, err := uuid.Parse(articleID)
+// 	if err != nil {
+// 		return Newsletter{}, err
+// 	}
+//
+// 	article, err := svc.newsletterStorage.QueryArticleByID(ctx, parsedArticleID)
+// 	if err != nil {
+// 		return Newsletter{}, err
+// 	}
+//
+// 	parsedEdition, err := strconv.Atoi(edition)
+// 	if err != nil {
+// 		return Newsletter{}, err
+// 	}
+//
+// 	newsletter.UpdatedAt = time.Now()
+// 	newsletter.Title = title
+// 	newsletter.Edition = int32(parsedEdition)
+// 	newsletter.Paragraphs = paragraphs
+// 	newsletter.ArticleSlug = article.Slug
+//
+// 	if _, err := svc.newsletterStorage.UpdateNewsletter(ctx, newsletter); err != nil {
+// 		return Newsletter{}, err
+// 	}
+//
+// 	return newsletter, nil
+// }

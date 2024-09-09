@@ -6,6 +6,7 @@ import (
 	"log/slog"
 
 	"github.com/MBvisti/mortenvistisen/pkg/config"
+	"github.com/MBvisti/mortenvistisen/posts"
 	"github.com/MBvisti/mortenvistisen/views/emails"
 )
 
@@ -22,17 +23,20 @@ type MailClient interface {
 }
 
 type Email struct {
-	cfg    config.Cfg
-	client MailClient
+	cfg      config.Cfg
+	client   MailClient
+	mdParser posts.PostManager
 }
 
 func NewEmailSvc(
 	cfg config.Cfg,
 	client MailClient,
+	mdParser posts.PostManager,
 ) Email {
 	return Email{
 		cfg,
 		client,
+		mdParser,
 	}
 }
 
@@ -202,22 +206,18 @@ func (e *Email) SendPasswordReset(
 func (e *Email) SendNewsletter(
 	ctx context.Context,
 	title string,
-	edition string,
-	paragraphs []string,
+	content string,
 	email string,
-	articleSlug string,
 	UnsubscribeTkn string,
 ) error {
+	parsedContent, err := e.mdParser.ParseContent(content)
+	if err != nil {
+		return err
+	}
+
 	newsletterMail := emails.NewsletterMail{
-		Title:      title,
-		Edition:    edition,
-		Paragraphs: paragraphs,
-		ArticleLink: fmt.Sprintf(
-			"%s://%s/posts/%s",
-			e.cfg.App.AppScheme,
-			e.cfg.App.AppHost,
-			articleSlug,
-		),
+		Title:   title,
+		Content: parsedContent,
 		UnsubscribeLink: fmt.Sprintf(
 			"%s://%s/unsubscriber?token=%s",
 			e.cfg.App.AppScheme,

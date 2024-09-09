@@ -15,9 +15,12 @@ func (r *Router) loadDashboardRoutes() {
 		return r.dashboardHandlers.SubscribersIndex(c)
 	})
 
-	router.POST("/subscribers/:id/send-verification-mail", func(c echo.Context) error {
-		return r.dashboardHandlers.ResendVerificationMail(c)
-	})
+	router.POST(
+		"/subscribers/:id/send-verification-mail",
+		func(c echo.Context) error {
+			return r.dashboardHandlers.ResendVerificationMail(c)
+		},
+	)
 
 	router.GET("/articles", func(c echo.Context) error {
 		return r.dashboardHandlers.ArticlesIndex(c)
@@ -47,12 +50,12 @@ func (r *Router) loadDashboardRoutes() {
 	router.POST("/newsletters/store", func(c echo.Context) error {
 		return r.dashboardHandlers.NewsletterStore(c)
 	})
-	router.GET("/newsletters/:id/edit", func(c echo.Context) error {
-		return r.dashboardHandlers.NewslettersEdit(c)
-	})
-	router.PUT("/newsletters/:id/update", func(c echo.Context) error {
-		return r.dashboardHandlers.NewsletterUpdate(c)
-	})
+	// router.GET("/newsletters/:id/edit", func(c echo.Context) error {
+	// 	return r.dashboardHandlers.NewslettersEdit(c)
+	// })
+	// router.PUT("/newsletters/:id/update", func(c echo.Context) error {
+	// 	return r.dashboardHandlers.NewsletterUpdate(c)
+	// })
 
 	router.DELETE("/subscribers/:ID", func(c echo.Context) error {
 		return r.dashboardHandlers.DeleteSubscriber(c)

@@ -3,7 +3,6 @@ package psql
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 
 	"github.com/MBvisti/mortenvistisen/models"
 	"github.com/MBvisti/mortenvistisen/psql/database"
@@ -20,26 +19,14 @@ func (p Postgres) QueryNewsletterByID(
 		return models.Newsletter{}, err
 	}
 
-	var paragraphs []string
-	if err := json.Unmarshal(newsletter.Body, &paragraphs); err != nil {
-		return models.Newsletter{}, err
-	}
-
-	article, err := p.Queries.QueryPostByID(ctx, newsletter.AssociatedArticleID)
-	if err != nil {
-		return models.Newsletter{}, err
-	}
-
 	return models.Newsletter{
-		ID:          newsletter.ID,
-		CreatedAt:   newsletter.CreatedAt.Time,
-		UpdatedAt:   newsletter.UpdatedAt.Time,
-		Title:       newsletter.Title,
-		Edition:     newsletter.Edition.Int32,
-		ReleasedAt:  newsletter.ReleasedAt.Time,
-		Released:    newsletter.Released.Bool,
-		Paragraphs:  paragraphs,
-		ArticleSlug: article.Slug,
+		ID:         newsletter.ID,
+		CreatedAt:  newsletter.CreatedAt.Time,
+		UpdatedAt:  newsletter.UpdatedAt.Time,
+		Title:      newsletter.Title,
+		Content:    newsletter.Content,
+		ReleasedAt: newsletter.ReleasedAt.Time,
+		Released:   newsletter.Released.Bool,
 	}, nil
 }
 
@@ -75,21 +62,14 @@ func (p Postgres) ListNewsletters(
 
 	newsletters := make([]models.Newsletter, len(newsL))
 	for i, row := range newsL {
-		var paragraphs []string
-		if err := json.Unmarshal(row.NewsletterBody, &paragraphs); err != nil {
-			return nil, err
-		}
-
 		newsletters[i] = models.Newsletter{
-			ID:          row.NewsletterID,
-			CreatedAt:   row.NewsletterCreatedAt.Time,
-			UpdatedAt:   row.NewsletterUpdatedAt.Time,
-			Title:       row.NewsletterTitle,
-			Edition:     row.NewsletterEdition.Int32,
-			ReleasedAt:  row.NewsletterReleasedAt.Time,
-			Released:    row.NewsletterReleased.Bool,
-			Paragraphs:  paragraphs,
-			ArticleSlug: row.PostSlug,
+			ID:         row.NewsletterID,
+			CreatedAt:  row.NewsletterCreatedAt.Time,
+			UpdatedAt:  row.NewsletterUpdatedAt.Time,
+			Title:      row.NewsletterTitle,
+			Content:    row.NewsletterContent,
+			ReleasedAt: row.NewsletterReleasedAt.Time,
+			Released:   row.NewsletterReleased.Bool,
 		}
 	}
 
@@ -109,42 +89,26 @@ func (p Postgres) InsertNewsletter(
 		Valid: true,
 	}
 
-	article, err := p.Queries.QueryPostBySlug(ctx, data.ArticleSlug)
+	newNewsletter, err := p.Queries.InsertNewsletter(
+		ctx,
+		database.InsertNewsletterParams{
+			ID:        data.ID,
+			CreatedAt: createdAt,
+			UpdatedAt: updatedAt,
+			Title:     data.Title,
+			Content:   data.Content,
+		},
+	)
 	if err != nil {
-		return models.Newsletter{}, err
-	}
-
-	body, err := json.Marshal(data.Paragraphs)
-	if err != nil {
-		return models.Newsletter{}, err
-	}
-
-	newNewsletter, err := p.Queries.InsertNewsletter(ctx, database.InsertNewsletterParams{
-		ID:                  data.ID,
-		CreatedAt:           createdAt,
-		UpdatedAt:           updatedAt,
-		Title:               data.Title,
-		Edition:             sql.NullInt32{Int32: data.Edition, Valid: true},
-		Body:                body,
-		AssociatedArticleID: article.ID,
-	})
-	if err != nil {
-		return models.Newsletter{}, err
-	}
-
-	var paragraphs []string
-	if err := json.Unmarshal(newNewsletter.Body, &paragraphs); err != nil {
 		return models.Newsletter{}, err
 	}
 
 	return models.Newsletter{
-		ID:          newNewsletter.ID,
-		CreatedAt:   newNewsletter.CreatedAt.Time,
-		UpdatedAt:   newNewsletter.UpdatedAt.Time,
-		Title:       newNewsletter.Title,
-		Edition:     newNewsletter.Edition.Int32,
-		Paragraphs:  paragraphs,
-		ArticleSlug: article.Slug,
+		ID:        newNewsletter.ID,
+		CreatedAt: newNewsletter.CreatedAt.Time,
+		UpdatedAt: newNewsletter.UpdatedAt.Time,
+		Content:   newNewsletter.Content,
+		Title:     newNewsletter.Title,
 	}, nil
 }
 
@@ -162,45 +126,30 @@ func (p Postgres) UpdateNewsletter(
 		Valid: true,
 	}
 
-	body, err := json.Marshal(newsletter.Paragraphs)
+	updatedNewsletter, err := p.Queries.UpdateNewsletter(
+		ctx,
+		database.UpdateNewsletterParams{
+			UpdatedAt: updatedAt,
+			Title:     newsletter.Title,
+			Released: pgtype.Bool{
+				Bool:  newsletter.Released,
+				Valid: true,
+			},
+			ReleasedAt: releasedAt,
+			ID:         newsletter.ID,
+		},
+	)
 	if err != nil {
-		return models.Newsletter{}, err
-	}
-
-	article, err := p.QueryArticleBySlug(ctx, newsletter.ArticleSlug)
-	if err != nil {
-		return models.Newsletter{}, err
-	}
-
-	updatedNewsletter, err := p.Queries.UpdateNewsletter(ctx, database.UpdateNewsletterParams{
-		UpdatedAt:           updatedAt,
-		Title:               newsletter.Title,
-		Edition:             sql.NullInt32{Int32: newsletter.Edition, Valid: true},
-		Released:            pgtype.Bool{Bool: newsletter.Released, Valid: true},
-		ReleasedAt:          releasedAt,
-		Body:                body,
-		AssociatedArticleID: article.ID,
-		ID:                  newsletter.ID,
-	})
-	if err != nil {
-		return models.Newsletter{}, nil
-	}
-
-	var paragraphs []string
-	if err := json.Unmarshal(updatedNewsletter.Body, &paragraphs); err != nil {
 		return models.Newsletter{}, nil
 	}
 
 	return models.Newsletter{
-		ID:          updatedNewsletter.ID,
-		CreatedAt:   updatedNewsletter.CreatedAt.Time,
-		UpdatedAt:   updatedNewsletter.UpdatedAt.Time,
-		Title:       updatedNewsletter.Title,
-		Edition:     updatedNewsletter.Edition.Int32,
-		ReleasedAt:  updatedNewsletter.ReleasedAt.Time,
-		Released:    updatedNewsletter.Released.Bool,
-		Paragraphs:  paragraphs,
-		ArticleSlug: article.Slug,
+		ID:         updatedNewsletter.ID,
+		CreatedAt:  updatedNewsletter.CreatedAt.Time,
+		UpdatedAt:  updatedNewsletter.UpdatedAt.Time,
+		Title:      updatedNewsletter.Title,
+		ReleasedAt: updatedNewsletter.ReleasedAt.Time,
+		Released:   updatedNewsletter.Released.Bool,
 	}, nil
 }
 
