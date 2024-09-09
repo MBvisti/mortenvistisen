@@ -428,24 +428,7 @@ func CreateNewsletter(articles []models.Article, selectedArticleID uuid.UUID, ne
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"container mx-auto grid grid-cols-12 gap-4 bg-base-100\"><div class=\"col-start-2 col-span-10 mb-4\"><a class=\"hover:font-bold\" href=\"/dashboard/newsletters\">Back</a></div><div class=\"col-start-2 col-span-10\"><h2 class=\"fs-4 text-white\">New Newsletter</h2>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = NewsletterPreview(
-				articles,
-				newsletterMailPreview,
-				preview,
-				selectedArticleID,
-				make(map[string]components.InputError),
-				tkn,
-				"post",
-				"newsletters/store",
-			).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"container mx-auto grid grid-cols-12 gap-4 bg-base-100\"><div class=\"col-start-2 col-span-10 mb-4\"><a class=\"hover:font-bold\" href=\"/dashboard/newsletters\">Back</a></div><div class=\"col-start-2 col-span-10\"><h2 class=\"text-neutral-content text-xl mb-6\">New Newsletter</h2><form><input id=\"x\" type=\"hidden\" name=\"content\"> <trix-editor class=\"trix-content\" input=\"x\"></trix-editor></form></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

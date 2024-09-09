@@ -204,17 +204,21 @@ templ CreateNewsletter(articles []models.Article, selectedArticleID uuid.UUID, n
 				<a class="hover:font-bold" href="/dashboard/newsletters">Back</a>
 			</div>
 			<div class="col-start-2 col-span-10">
-				<h2 class="fs-4 text-white">New Newsletter</h2>
-				@NewsletterPreview(
-					articles,
-					newsletterMailPreview,
-					preview,
-					selectedArticleID,
-					make(map[string]components.InputError),
-					tkn,
-					"post",
-					"newsletters/store",
-				)
+				<h2 class="text-neutral-content text-xl mb-6">New Newsletter</h2>
+				<form>
+					<input id="x" type="hidden" name="content"/>
+					<trix-editor class="trix-content" input="x"></trix-editor>
+				</form>
+				//@NewsletterPreview(
+				//	articles,
+				//	newsletterMailPreview,
+				//	preview,
+				//	selectedArticleID,
+				//	make(map[string]components.InputError),
+				//	tkn,
+				//	"post",
+				//	"newsletters/store",
+				//)
 			</div>
 		</div>
 	}
