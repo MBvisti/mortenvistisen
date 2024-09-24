@@ -15,12 +15,14 @@ templ Base(head templ.Component) {
 		<body class="flex flex-col min-w-screen h-screen">
 			@components.Nav()
 			{ children... }
-			<footer class="container mx-auto footer bg-base-100 text-base-content p-4 md:px-32">
-				<aside class="flex flex-col items-center mx-auto">
-					<p>Copyright ©<span id="cur-year-footer"></span> </p>
-					<p>All right reserved by MBV Labs</p>
-				</aside>
-			</footer>
+			<div class="bg-base-200">
+				<footer class="container mx-auto footer text-base-content p-10 md:px-32">
+					<aside class="flex flex-col items-center mx-auto">
+						<p>Copyright ©<span id="cur-year-footer"></span> </p>
+						<p>All right reserved by <a class="underline decoration-secondary" href="https://mbvlabs.com">mbvlabs</a></p>
+					</aside>
+				</footer>
+			</div>
 			@currentYear()
 			<script src="/static/js/htmx.min.js"></script>
 			<script src="/static/js/alpine.js"></script>

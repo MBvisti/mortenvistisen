@@ -5,7 +5,7 @@ go 1.21.4
 toolchain go1.22.0
 
 require (
-	github.com/a-h/templ v0.2.771
+	github.com/a-h/templ v0.2.778
 	github.com/alecthomas/chroma/v2 v2.14.0
 	github.com/aws/aws-sdk-go v1.54.8
 	github.com/caarlos0/env/v10 v10.0.0

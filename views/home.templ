@@ -65,30 +65,29 @@ templ HomePage(posts []Post) {
 					</div>
 				</div>
 			</div>
-			<div class="col-span-4 mb-14 md:col-start-2 md:col-d-6 lg:col-start-4 lg:col-end-10">
-				<div class="text-xl text-base-content divider divider-primary font-bold"><h2>Book Projects</h2></div>
+			<div class="col-span-4 mb-14 md:col-start-2 md:col-d-6 lg:col-start-5 lg:col-end-9">
+				<div class="text-xl text-base-content divider divider-primary font-bold"><h2>I'm building a course!</h2></div>
 				<div class="flex flex-col card bg-base-100 mx-auto">
-					<figure>
-						<img
-							class="w-56 h-96 shadow-xl"
-							src="/static/images/book-cover-ebook-wip.svg"
-							alt="How to start freelancing book cover"
-						/>
-					</figure>
-					<a
-						data-umami-event="books--freelance-early-access-home"
-						class="text-center font-bold text-white hover:text-base-content"
-						href="/books/how-to-start-freelancing"
-					>Start Freelancing</a>
+					<p class="text-lg mb-4">Are getting my feet wet with YouTube this summer, I've started to build a course that will show you how to build a professional blog using Golang, HTMX and templ.</p>
+					<p class="text-lg mb-4">The goal is to show how you can build modern web apps using just Golang quickly shipping fast and memory efficient web sites.</p>
+					<p class="text-lg mb-4">
+						You can check it out: 
+						<a
+							data-umami-event="course--golang-blog-course"
+							class="ml-4 w-20 btn btn-sm btn-primary text-center font-bold text-white hover:text-base-content"
+							href="https://golangblogcourse.com?ref=mortenvistisen.com"
+							target="_blank"
+						>here</a>
+					</p>
 				</div>
 			</div>
-			<div class="col-span-4 h-[30rem] mb-28 md:col-start-2 md:col-end-6 lg:col-start-4 lg:col-end-10">
+			<div class="col-span-4 h-[30rem] mb-28 md:col-start-2 md:col-end-6 lg:col-start-5 lg:col-end-9">
 				<h2 class="col block text-2xl font-bold text-base-content mb-5 xl:my-8">Latest video</h2>
 				<div class="bg-base-300 w-full h-full p-4 rounded-lg">
 					<iframe width="100%" height="100%" src="https://www.youtube.com/embed/iz0eY_3TgYQ?si=zBIB19mR89n0VnjD" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 				</div>
 			</div>
-			<div class="col-span-4 md:col-start-2 md:col-end-6 lg:col-start-4 lg:col-end-10">
+			<div class="col-span-4 md:col-start-2 md:col-end-6 lg:col-start-5 lg:col-end-9">
 				<h2 class="col block text-2xl font-bold text-base-content mb-5 xl:my-8">Latest articles</h2>
 				<div class="col">
 					for _, post := range posts {
