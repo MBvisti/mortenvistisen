@@ -124,10 +124,11 @@ templ ArticlePage(data ArticlePageData, head Head) {
 					</ul>
 				</div>
 			</article>
-			@triggerModal(data.HeaderTitle)
 			switch data.HeaderTitle {
 				case "Building a blogging website with Golang", "Opinionated guide to structuring Golang apps", "Integration testing in Golang: A guide", "Why top level internal is uncessary in Golang":
 					@triggerCourse()
+				default:
+					@triggerModal(data.HeaderTitle)
 			}
 		</div>
 	}

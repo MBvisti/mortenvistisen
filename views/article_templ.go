@@ -222,13 +222,14 @@ func ArticlePage(data ArticlePageData, head Head) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = triggerModal(data.HeaderTitle).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
 			switch data.HeaderTitle {
 			case "Building a blogging website with Golang", "Opinionated guide to structuring Golang apps", "Integration testing in Golang: A guide", "Why top level internal is uncessary in Golang":
 				templ_7745c5c3_Err = triggerCourse().Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			default:
+				templ_7745c5c3_Err = triggerModal(data.HeaderTitle).Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
