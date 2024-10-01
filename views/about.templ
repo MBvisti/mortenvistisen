@@ -5,7 +5,7 @@ import "github.com/MBvisti/mortenvistisen/views/internal/layouts"
 templ AboutPage(head Head) {
 	@layouts.Base(head.Build()) {
 		<div class="bg-base-300 w-full flex-1 flex flex-col">
-			<div class="w-full flex-1 grid-rows-[100px_175px_50px_1fr] bg-base-100 max-w-screen-md md:max-w-screen-lg lg:max-w-screen-xl mx-auto grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12">
+			<div class="px-4 w-full h-full flex-1 grid-rows-[100px_175px_50px_minmax(400px,1fr)] bg-base-100 max-w-screen-md md:max-w-screen-lg lg:max-w-screen-xl mx-auto grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12">
 				<div class="grid grid-cols-subgrid col-span-full lg:col-start-3 lg:col-end-11 p-4 mt-10">
 					<h1 class="col-span-full md:col-start-2 md:col-end-6 lg:col-end-8 text-4xl font-bold tracking-tight sm:text-5xl text-center text-zinc-100">About Morten</h1>
 				</div>

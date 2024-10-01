@@ -152,7 +152,7 @@ func ArticlePage(data ArticlePageData, head Head) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"bg-base-300 w-full flex-1 flex flex-col\"><div class=\"w-full flex-1 bg-base-100 grid-rows-[100px_150px_1fr] max-w-screen-md md:max-w-screen-lg lg:max-w-screen-xl mx-auto grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12\"><div class=\"flex items-center col-span-full pl-10\"><a href=\"/\" aria-label=\"Go back to Home\" class=\"flex h-10 w-10 items-center justify-center rounded-full bg-primary shadow-md ring-1 ring-primary-content transition\"><svg viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\" class=\"h-4 w-4 stroke-primary-content transition hover:stroke-white\"><path d=\"M7.25 11.25 3.75 8m0 0 3.5-3.25M3.75 8h8.5\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg></a></div><div class=\"text-start col-span-full lg:col-start-4 lg:col-end-10 prose lg:prose-xl\"><h1 class=\"text-4xl font-bold tracking-tight text-neutral-content sm:text-5xl\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"bg-base-300 w-full flex-1 flex flex-col\"><div class=\"px-4 w-full flex-1 bg-base-100 grid-rows-[100px_150px_1fr] max-w-screen-sm md:max-w-screen-md md:max-w-screen-lg lg:max-w-screen-xl mx-auto grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12\"><div class=\"flex items-center col-span-full md:pl-10\"><a href=\"/\" aria-label=\"Go back to Home\" class=\"flex h-10 w-10 items-center justify-center rounded-full bg-primary shadow-md ring-1 ring-primary-content transition\"><svg viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\" class=\"h-4 w-4 stroke-primary-content transition hover:stroke-white\"><path d=\"M7.25 11.25 3.75 8m0 0 3.5-3.25M3.75 8h8.5\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg></a></div><div class=\"text-start col-span-full lg:col-start-4 lg:col-end-11 prose lg:prose-xl\"><h1 class=\"text-4xl font-bold tracking-tight text-neutral-content sm:text-5xl\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -178,7 +178,7 @@ func ArticlePage(data ArticlePageData, head Head) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" | By MBV</span></div><article class=\"text-neutral-content mt-20 text-start col-span-full lg:col-start-4 lg:col-end-10 prose lg:prose-xl\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" | By MBV</span></div><article class=\"text-neutral-content mt-20 text-start col-span-full lg:col-start-4 lg:col-end-11 prose lg:prose-xl\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
