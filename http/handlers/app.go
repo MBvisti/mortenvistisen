@@ -54,7 +54,8 @@ func (a App) Index(ctx echo.Context) error {
 		})
 	}
 
-	return views.HomePage(posts).Render(views.ExtractRenderDeps(ctx))
+	return views.HomePage(posts, csrf.Token(ctx.Request())).
+		Render(views.ExtractRenderDeps(ctx))
 }
 
 func (a App) About(ctx echo.Context) error {
@@ -87,8 +88,35 @@ func (a App) Projects(ctx echo.Context) error {
 	}).Render(views.ExtractRenderDeps(ctx))
 }
 
+func (a App) ArticlesOverview(ctx echo.Context) error {
+	data, err := a.articleSvc.List(ctx.Request().Context(), 0, 50)
+	if err != nil {
+		return err
+	}
+
+	posts := make([]views.Post, 0, len(data))
+	for _, d := range data {
+		var tags []string
+		for _, tag := range d.Tags {
+			tags = append(tags, tag.Name)
+		}
+
+		posts = append(posts, views.Post{
+			Title:       d.Title,
+			ReleaseDate: d.ReleaseDate.String(),
+			Excerpt:     d.Excerpt,
+			Tags:        tags,
+			Slug:        a.base.FormatArticleSlug(d.Slug),
+		})
+	}
+	return views.ArticlesOverview(posts).Render(views.ExtractRenderDeps(ctx))
+}
+
 func (a App) SubscriptionEvent(c echo.Context) error {
-	ctx, subscriptionEventSpan := a.base.Tracer.CreateSpan(c.Request().Context(), "article/store")
+	ctx, subscriptionEventSpan := a.base.Tracer.CreateSpan(
+		c.Request().Context(),
+		"article/store",
+	)
 	subscriptionEventSpan.AddEvent("AppHandler/SubscriptionEvent")
 
 	type subscriptionEventForm struct {
@@ -98,10 +126,20 @@ func (a App) SubscriptionEvent(c echo.Context) error {
 
 	var form subscriptionEventForm
 	if err := c.Bind(&form); err != nil {
-		slog.ErrorContext(ctx, "could not bind subscriptionEventForm", "error", err)
+		slog.ErrorContext(
+			ctx,
+			"could not bind subscriptionEventForm",
+			"error",
+			err,
+		)
 		return c.String(200, "You're now subscribed!")
 	}
-	slog.InfoContext(ctx, "starting to create new subscriber from handler", "email", form.Email)
+	slog.InfoContext(
+		ctx,
+		"starting to create new subscriber from handler",
+		"email",
+		form.Email,
+	)
 
 	param := c.QueryParam("book")
 	var bookSub bool
@@ -138,9 +176,11 @@ func (a App) HowToStartFreelancing(ctx echo.Context) error {
 	return views.HowToStartFreelancing(views.Head{
 		Title:       "How To Start Freelancing Book",
 		Description: "Want to start freelancing? Kickstart your journey to working on your own terms in the best possible way by signing up for the How To Start Freelancing Book.",
-		Slug:        a.base.BuildURLFromSlug("books/" + "how-to-start-freelancing"),
-		MetaType:    "website",
-		Image:       "https://mortenvistisen.com/static/images/book-cover-ebook-wip.png",
+		Slug: a.base.BuildURLFromSlug(
+			"books/" + "how-to-start-freelancing",
+		),
+		MetaType: "website",
+		Image:    "https://mortenvistisen.com/static/images/book-cover-ebook-wip.png",
 		ExtraMeta: []views.MetaContent{
 			{
 				Content: "Morten Vistisen",
@@ -187,7 +227,12 @@ func (a App) SubscriberEmailVerification(c echo.Context) error {
 
 	var payload VerificationToken
 	if err := c.Bind(&payload); err != nil {
-		slog.ErrorContext(ctx, "could not bind verification token", "error", err)
+		slog.ErrorContext(
+			ctx,
+			"could not bind verification token",
+			"error",
+			err,
+		)
 		c.Response().Writer.Header().Add("HX-Redirect", "/500")
 		c.Response().Writer.Header().Add("PreviousLocation", "/user/create")
 
@@ -274,7 +319,12 @@ func (a App) SubscriberUnsub(c echo.Context) error {
 	span.AddEvent("SubscriberUnsub/start")
 	var payload VerificationToken
 	if err := c.Bind(&payload); err != nil {
-		slog.ErrorContext(ctx, "could not bind verification token", "error", err)
+		slog.ErrorContext(
+			ctx,
+			"could not bind verification token",
+			"error",
+			err,
+		)
 		c.Response().Writer.Header().Add("HX-Redirect", "/500")
 		c.Response().Writer.Header().Add("PreviousLocation", "/user/create")
 

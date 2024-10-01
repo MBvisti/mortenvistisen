@@ -10,7 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import "github.com/MBvisti/mortenvistisen/views/internal/layouts"
 
-func AboutPage(head Head) templ.Component {
+func ArticlesOverview(posts []Post) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -43,13 +43,23 @@ func AboutPage(head Head) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"bg-base-300 w-full flex-1 flex flex-col\"><div class=\"w-full flex-1 grid-rows-[100px_175px_50px_1fr] bg-base-100 max-w-screen-md md:max-w-screen-lg lg:max-w-screen-xl mx-auto grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12\"><div class=\"grid grid-cols-subgrid col-span-full lg:col-start-3 lg:col-end-11 p-4 mt-10\"><h1 class=\"col-span-full md:col-start-2 md:col-end-6 lg:col-end-8 text-4xl font-bold tracking-tight sm:text-5xl text-center text-zinc-100\">About Morten</h1></div><div class=\"h-full col-span-full flex items-center justify-center\"><div class=\"w-40 rounded\"><img class=\"p-2 bg-base-300\" src=\"https://mortenvistisen.com/static/images/mbv.png\"></div></div><div class=\"mt-6 text-start col-span-full lg:col-start-4 lg:col-end-10 prose lg:prose-xl\"><p class=\"text-neutral-content\">I'm a self-thought developer, with a background in finance and international business and an interest in bootstrapped business and technology. I spend most of my time tinkering with projects that try to combine the two.</p><p class=\"text-neutral-content\">I specialize in Go, and after writing way too much React, actively advocate for building web apps using traditional tools. I'm also very interested in distributed systems; this is where I spend most of my professional time, helping companies build robust and scalable systems.</p><p class=\"text-neutral-content\">With the rise of machine learning and AI I also started to dabble a bit in this field and mainly focus on NLP type projects. With the huge amount of unstructured data available, and the development in new models, I think there are some very interesting opportunities.</p></div></div></div>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"bg-base-300 w-full\"><div class=\"bg-base-100 max-w-screen-md md:max-w-screen-lg lg:max-w-screen-xl mx-auto grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12\"><div class=\"grid grid-cols-subgrid col-span-full lg:col-start-3 lg:col-end-11 p-4 mt-10\"><h1 class=\"col-span-full md:col-start-2 md:col-end-6 lg:col-end-8 text-4xl font-bold tracking-tight sm:text-5xl text-center text-zinc-100\">Articles</h1></div><div class=\"p-4 md:p-0 col-span-full md:col-start-2 md:col-end-6 lg:col-start-4 lg:col-end-10 mt-10\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			for _, post := range posts {
+				templ_7745c5c3_Err = articleCard(post).Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			return templ_7745c5c3_Err
 		})
-		templ_7745c5c3_Err = layouts.Base(head.Build()).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = layouts.Base(Head{}.Default().Build()).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
