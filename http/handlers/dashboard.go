@@ -43,5 +43,26 @@ func NewDashboard(
 }
 
 func (d Dashboard) Index(ctx echo.Context) error {
-	return view.Index().Render(views.ExtractRenderDeps(ctx))
+	data, err := d.articleSvc.List(ctx.Request().Context(), 0, 50)
+	if err != nil {
+		return err
+	}
+
+	posts := make([]views.Post, 0, len(data))
+	for _, dd := range data {
+		var tags []string
+		for _, tag := range dd.Tags {
+			tags = append(tags, tag.Name)
+		}
+
+		posts = append(posts, views.Post{
+			ID:          dd.ID.String(),
+			Title:       dd.Title,
+			ReleaseDate: dd.ReleaseDate.String(),
+			Excerpt:     dd.Excerpt,
+			Tags:        tags,
+			Slug:        d.base.FormatArticleSlug(dd.Slug),
+		})
+	}
+	return view.Index(posts).Render(views.ExtractRenderDeps(ctx))
 }

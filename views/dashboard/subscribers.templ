@@ -1,13 +1,8 @@
 package dashboard
 
 import (
-	"github.com/MBvisti/mortenvistisen/views/internal/layouts"
-
 	"github.com/MBvisti/mortenvistisen/views/components"
-	"fmt"
-	"strconv"
-
-	"time"
+	"github.com/MBvisti/mortenvistisen/views/internal/layouts"
 	"github.com/golang-module/carbon/v2"
 )
 
@@ -56,70 +51,75 @@ templ Subscribers(
 	tkn string,
 ) {
 	@layouts.Dashboard() {
-		<div class="container">
-			<section class="border py-3 bg-body-secondary rounded-2">
-				<div class="row justify-content-center text-center">
-					<div class="col-md-3">
-						<h2 class="">{ strconv.Itoa(totalSubsCount) }</h2>
-						<p class="fs-5 mt-3 text-secondary-emphasis">Total Subscribers</p>
-					</div>
-					<div class="col-md-3">
-						<h2 class="">{ strconv.Itoa(newSubsCurrMonth) }</h2>
-						<p class="fs-5 mt-3 text-secondary-emphasis">New subscribers { time.Now().Month().String() }</p>
-					</div>
-					<div class="col-md-3">
-						<h2 class="">{ strconv.Itoa(unverifiedSubs) }</h2>
-						<p class="fs-5 mt-3 text-secondary-emphasis">Unverified Subscribers</p>
-					</div>
+		<div class="bg-base-100 container mx-auto grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12">
+			<div class="flex flex-col mt-10 col-span-full lg:col-start-3 lg:col-end-11 p-4 overflow-x-auto">
+				<div class="w-full flex justify-between justify-center">
+					<h2 class="text-2xl mb-6 font-semibold">Subscribers</h2>
+					<a href="/dashboard/subscribers/new" class="btn btn-sm btn-secondary">Invite</a>
 				</div>
-			</section>
-			<div class="mt-4 w-full flex justify-between">
-				<h2 class="mb-4 mt-8">Subscribers</h2>
-			</div>
-			<div class="row">
-				<div class="col">
-					<table class="rounded-2 table table-dark table-hover table-bordered">
-						<!-- head -->
-						<thead>
-							<tr>
-								<th>Send Verification mail</th>
-								<th>Email</th>
-								<th>Subscribed on</th>
-								<th>Status</th>
-								<th>Subscribed</th>
-							</tr>
-						</thead>
-						<tbody>
-							for _, sub := range data {
-								<tr class="align-middle">
-									<th scope="row">
-										<div>
-											if sub.Verified {
-												<button class="btn btn-success btn-sm" disabled>Send</button>
-											} else {
-												<button hx-target="#toast-wrapper" hx-swap="innerHTML" hx-post={ fmt.Sprintf("/dashboard/subscribers/%v/send-verification-mail", sub.ID) } class="btn btn-success btn-sm">Send</button>
-											}
-										</div>
-									</th>
-									<td>{ sub.Email }</td>
-									<td>{ sub.Refererer }</td>
-									<td>
-										if sub.Verified {
-											<span class="text-success">Verified</span>
-										} else {
-											<span class="text-danger">Not Verified</span>
-										}
+				<label class="mb-4 input input-bordered flex items-center gap-2">
+					<input type="text" class="grow border-none" placeholder="Search"/>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						viewBox="0 0 16 16"
+						fill="currentColor"
+						class="h-4 w-4 opacity-70"
+					>
+						<path
+							fill-rule="evenodd"
+							d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z"
+							clip-rule="evenodd"
+						></path>
+					</svg>
+				</label>
+				<table class="table bg-base-300">
+					<!-- head -->
+					<thead>
+						<tr>
+							<th class="text-lg">Email</th>
+							<th class="text-lg">Email Validated</th>
+							<th class="text-lg">Subscribed At</th>
+							<th class="text-lg">Edit</th>
+						</tr>
+					</thead>
+					<tbody>
+						<!-- row 1 -->
+						for _, subData := range data {
+							<tr class="h-16">
+								<td>
+									<div>
+										<div class="font-bold">{ subData.Email }</div>
+									</div>
+								</td>
+								if subData.Verified {
+									<td class="text-green-400">
+										Yes
 									</td>
-									<td>{ carbon.Parse(sub.SubscribedAt).ToDateString() }</td>
-								</tr>
-							}
-						</tbody>
-					</table>
+								}
+								if !subData.Verified {
+									<td class="text-error">
+										No
+									</td>
+								}
+								<td>{ carbon.Parse(subData.SubscribedAt, carbon.Berlin).ToDateString() }</td>
+								<th>
+									<a href={ templ.SafeURL("/dashboard/subscribers/" + subData.ID + "/edit") } class="btn btn-ghost btn-xs">details</a>
+								</th>
+							</tr>
+						}
+					</tbody>
+				</table>
+				<div class="join mt-4">
+					<input
+						class="join-item btn btn-square text-primary"
+						type="radio"
+						name="options"
+						aria-label="1"
+						checked="checked"
+					/>
+					<input class="join-item btn btn-square" type="radio" name="options" aria-label="2"/>
 				</div>
-				<div id="toast-wrapper" class="toast toast-end toast-end"></div>
 			</div>
-			@components.Pagination(paginationProps)
-			@addCSRFTkn(tkn)
 		</div>
 	}
 }

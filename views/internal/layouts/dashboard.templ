@@ -22,20 +22,70 @@ templ sideBar() {
 	</div>
 }
 
+templ dashboardHeader() {
+	<header class="bg-base-100 max-w-screen-md md:max-w-screen-lg lg:max-w-screen-xl mx-auto grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12">
+		<div class="p-0 md:p-6 col-span-full flex justify-center">
+			<div class="navbar bg-base-100 md:hidden">
+				<nav class="flex-1 flex justify-end ">
+					<ul class="menu menu-horizontal px-1 rounded shadow-lg">
+						<li class="bg-base-300 z-10">
+							<details>
+								<summary>Menu</summary>
+								<ul class="bg-base-100 rounded-t-none p-2">
+									<li>
+										<a class="relative block px-3 py-2 transition hover:text-primary" href="/dashboard">Dashboard</a>
+									</li>
+									<li>
+										<a class="relative block px-3 py-2 transition hover:text-primary" href="/dashboard/subscribers">Subscribers</a>
+									</li>
+									<li>
+										<a class="relative block px-3 py-2 transition hover:text-primary" href="/dashboard/newsletters">Newsletter</a>
+									</li>
+								</ul>
+							</details>
+						</li>
+					</ul>
+				</nav>
+			</div>
+			<nav class="lg:px-6 lg:py-4 bg-base-300 pointer-events-auto hidden md:block">
+				<ul class="flex rounded px-3 text-sm font-medium shadow-lg ring-1 backdrop-blur ring-base-100/10">
+					<li>
+						<a class="relative block px-4 py-2 transition hover:text-primary" href="/dashboard">Dashboard</a>
+					</li>
+					<li>
+						<a class="relative block px-4 py-2 transition hover:text-primary" href="/dashboard/subscribers">Subscribers</a>
+					</li>
+					<li>
+						<a class="relative block px-4 py-2 transition hover:text-primary" href="/dashboard/newsletters">Newsletter</a>
+					</li>
+					<li>
+						<details>
+							<summary class="px-4 py-2 transition hover:text-primary">support@mbvlabs.com</summary>
+							<ul class="text-end w-52 z-10 absolute bg-base-300 rounded-t-none p-2">
+								<li><a class="relative block px-3 py-2 transition hover:text-primary">Account Management</a></li>
+								<li><a class="relative block px-3 py-2 transition hover:text-primary">Logout</a></li>
+							</ul>
+						</details>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</header>
+}
+
 templ Dashboard() {
 	<!DOCTYPE html>
-	<html lang="en" data-bs-theme="dark">
+	<html lang="en" data-theme="halloween">
 		<head>
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-			<title>Grafto</title>
+			<title>
+				Dashboard
+			</title>
 			<link href="/static/css/output.css" rel="stylesheet"/>
-			<link rel="apple-touch-icon" sizes="180x180" href="/static/images/apple-touch-icon.png"/>
-			<link rel="icon" type="image/png" sizes="32x32" href="/static/images/favicon-32x32.png"/>
-			<link rel="icon" type="image/png" sizes="16x16" href="/static/images/favicon-16x16.png"/>
 		</head>
-		<body hx-ext="loading-states, remove-me" class="flex flex-col min-w-screen h-screen bg-base-100">
-			@sideBar()
+		<body class="flex flex-col min-w-screen max-w-screen min-h-screen">
+			@dashboardHeader()
 			{ children... }
 			<script src="/static/js/htmx.min.js"></script>
 			<script src="https://unpkg.com/htmx.org@1.9.12/dist/ext/loading-states.js"></script>

@@ -1,10 +1,9 @@
 package dashboard
 
 import (
-	"github.com/MBvisti/mortenvistisen/views/internal/layouts"
-	"fmt"
-	"github.com/golang-module/carbon/v2"
 	"github.com/MBvisti/mortenvistisen/views/components"
+	"github.com/MBvisti/mortenvistisen/views/internal/layouts"
+	"github.com/golang-module/carbon/v2"
 )
 
 type NewsletterViewData struct {
@@ -17,76 +16,62 @@ type NewsletterViewData struct {
 
 templ Newsletter(data []NewsletterViewData, paginationProps components.PaginationProps, tkn string, showFlash bool) {
 	@layouts.Dashboard() {
-		<div class="container">
-			if showFlash {
-				<div remove-me="2s" class="row alert alert-success" role="alert">
-					Succesfully sent newsletter to subscribers!
+		<div class="bg-base-100 container mx-auto grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12">
+			<div class="flex flex-col mt-10 col-span-full lg:col-start-3 lg:col-end-11 p-4 overflow-x-auto">
+				<div class="w-full flex justify-between justify-center">
+					<h2 class="text-2xl mb-6 font-semibold">Newsletters</h2>
+					<a href="/dashboard/newsletters/new" class="btn btn-sm btn-secondary">New</a>
 				</div>
-			}
-			<div class="row mb-4 justify-content-between">
-				<div class="col">
-					<h2 class="text-xl">Newsletter</h2>
-				</div>
-				<div class="col d-flex justify-content-end align-items-center">
-					<a role="button" href="/dashboard/newsletters/create" class="btn btn-success">New</a>
-				</div>
-			</div>
-			<div class="row">
-				<div class="col">
-					<table class="rounded-2 table table-dark table-hover table-bordered">
-						<!-- head -->
-						<thead>
-							<tr>
-								<th scope="col"></th>
-								<th scope="col">Title</th>
-								<th scope="col">Edition</th>
-								<th scope="col">Status</th>
-								<th scope="col">Released On</th>
-							</tr>
-						</thead>
-						<tbody>
-							for _, article := range data {
-								<tr class="align-middle">
-									<th scope="row">
-										<div>
-											<a
-												if article.Released {
-													disabled
-												} else {
-													href={ templ.SafeURL(fmt.Sprintf("/dashboard/newsletters/%s/edit", article.ID)) }
-												}
-											>
-												<button
-													class="btn btn-primary btn-sm"
-													if article.Released {
-														disabled
-													}
-												>Edit</button>
-											</a>
-										</div>
-									</th>
-									<td>{ article.Title }</td>
-									<td>{ article.Edition }</td>
-									<td>
-										if article.Released {
-											<span class="text-success">Released</span>
-										} else {
-											<span class="text-danger">In draft</span>
-										}
+				<table class="table bg-base-300">
+					<!-- head -->
+					<thead>
+						<tr>
+							<th class="text-lg">Title</th>
+							<th class="text-lg">Status</th>
+							<th class="text-lg">Date</th>
+							<th class="text-lg">Edit</th>
+						</tr>
+					</thead>
+					<tbody>
+						for _, newsletter := range data {
+							<!-- row 1 -->
+							<tr class="h-16">
+								<td>
+									<div>
+										<div class="font-bold">{ newsletter.Title }</div>
+									</div>
+								</td>
+								if newsletter.ReleasedAt != "" {
+									<td class="text-green-400">
+										Yes
 									</td>
-									if article.Released {
-										<td>{ carbon.Parse(article.ReleasedAt).ToDateString() }</td>
-									} else {
-										<td>Not relased yet</td>
-									}
-								</tr>
-							}
-						</tbody>
-					</table>
+								}
+								if newsletter.ReleasedAt == "" {
+									<td class="text-warning">
+										No
+									</td>
+								}
+								<td>
+									{ carbon.Parse(newsletter.ReleasedAt, carbon.Berlin).ToDateString() }
+								</td>
+								<th>
+									<a href={ templ.SafeURL("/dashboard/newsletters/" + newsletter.ID + "/edit") } class="btn btn-ghost btn-xs">details</a>
+								</th>
+							</tr>
+						}
+					</tbody>
+				</table>
+				<div class="join mt-4">
+					<input
+						class="join-item btn btn-square text-primary"
+						type="radio"
+						name="options"
+						aria-label="1"
+						checked="checked"
+					/>
+					<input class="join-item btn btn-square" type="radio" name="options" aria-label="2"/>
 				</div>
 			</div>
-			@components.Pagination(paginationProps)
-			@addCSRFTkn(tkn)
 		</div>
 	}
 }

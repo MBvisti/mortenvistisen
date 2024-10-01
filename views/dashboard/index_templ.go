@@ -8,9 +8,13 @@ package dashboard
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "github.com/MBvisti/mortenvistisen/views/internal/layouts"
+import (
+	"github.com/MBvisti/mortenvistisen/views"
+	"github.com/MBvisti/mortenvistisen/views/internal/layouts"
+	"github.com/golang-module/carbon/v2"
+)
 
-func Index() templ.Component {
+func Index(posts []views.Post) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -43,7 +47,68 @@ func Index() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"container mx-auto grid grid-cols-12\"><div class=\"col-span-12 col-start-2\"><h1>Dash home</h1></div></div>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"bg-base-100 container mx-auto grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12\"><div class=\"col-span-full lg:col-start-3 lg:col-end-11 p-4 stats shadow\"><div class=\"stat place-items-center bg-base-300\"><div class=\"stat-title\">Subscribers</div><div class=\"stat-value\">1200</div><div class=\"stat-desc\">From January 1st to February 1st</div></div><div class=\"stat place-items-center bg-base-300\"><div class=\"stat-title\">New Subscribers</div><div class=\"stat-value text-secondary\">20</div><div class=\"stat-desc\">From October 1st to November 1st</div></div><div class=\"stat place-items-center bg-base-300\"><div class=\"stat-title\">Subscriptions Per Visit</div><div class=\"stat-value\">2%</div><div class=\"stat-desc\">↘︎ 90 (14%)</div></div></div><div class=\"flex flex-col mt-10 col-span-full lg:col-start-3 lg:col-end-11 p-4 overflow-x-auto\"><div class=\"w-full flex justify-between justify-center\"><h2 class=\"text-2xl mb-6 font-semibold\">Articles</h2><a href=\"/dashboard/articles/new\" class=\"btn btn-sm btn-secondary\">New</a></div><table class=\"table bg-base-300\"><!-- head --><thead><tr><th class=\"text-lg\">Title</th><th class=\"text-lg\">Status</th><th class=\"text-lg\">Date</th><th class=\"text-lg\">Edit</th></tr></thead> <tbody>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			for _, post := range posts[:5] {
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!-- row 1 --> <tr class=\"h-16\"><td><div><div class=\"font-bold\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var3 string
+				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(post.Title)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/index.templ`, Line: 50, Col: 45}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div></td><td class=\"text-green-400\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				if post.ReleaseDate == "" {
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("TBD ")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				}
+				if post.ReleaseDate != "" {
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("Released")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</td><td>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var4 string
+				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(carbon.Parse(post.ReleaseDate, carbon.Berlin).ToDateString())
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/index.templ`, Line: 61, Col: 74}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</td><th><a href=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var5 templ.SafeURL = templ.SafeURL("/dashboard/articles/" + post.ID + "/edit")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var5)))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"btn btn-ghost btn-xs\">details</a></th></tr>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</tbody></table><div class=\"join mt-4\"><input class=\"join-item btn btn-square text-primary\" type=\"radio\" name=\"options\" aria-label=\"1\" checked=\"checked\"> <input class=\"join-item btn btn-square\" type=\"radio\" name=\"options\" aria-label=\"2\"> <input class=\"join-item btn btn-square\" type=\"radio\" name=\"options\" aria-label=\"3\"> <input class=\"join-item btn btn-square\" type=\"radio\" name=\"options\" aria-label=\"4\"></div></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

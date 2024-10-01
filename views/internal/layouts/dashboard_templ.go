@@ -37,7 +37,7 @@ func sideBar() templ.Component {
 	})
 }
 
-func Dashboard() templ.Component {
+func dashboardHeader() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -58,15 +58,44 @@ func Dashboard() templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html lang=\"en\" data-bs-theme=\"dark\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Grafto</title><link href=\"/static/css/output.css\" rel=\"stylesheet\"><link rel=\"apple-touch-icon\" sizes=\"180x180\" href=\"/static/images/apple-touch-icon.png\"><link rel=\"icon\" type=\"image/png\" sizes=\"32x32\" href=\"/static/images/favicon-32x32.png\"><link rel=\"icon\" type=\"image/png\" sizes=\"16x16\" href=\"/static/images/favicon-16x16.png\"></head><body hx-ext=\"loading-states, remove-me\" class=\"flex flex-col min-w-screen h-screen bg-base-100\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<header class=\"bg-base-100 max-w-screen-md md:max-w-screen-lg lg:max-w-screen-xl mx-auto grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12\"><div class=\"p-0 md:p-6 col-span-full flex justify-center\"><div class=\"navbar bg-base-100 md:hidden\"><nav class=\"flex-1 flex justify-end \"><ul class=\"menu menu-horizontal px-1 rounded shadow-lg\"><li class=\"bg-base-300 z-10\"><details><summary>Menu</summary><ul class=\"bg-base-100 rounded-t-none p-2\"><li><a class=\"relative block px-3 py-2 transition hover:text-primary\" href=\"/dashboard\">Dashboard</a></li><li><a class=\"relative block px-3 py-2 transition hover:text-primary\" href=\"/dashboard/subscribers\">Subscribers</a></li><li><a class=\"relative block px-3 py-2 transition hover:text-primary\" href=\"/dashboard/newsletters\">Newsletter</a></li></ul></details></li></ul></nav></div><nav class=\"lg:px-6 lg:py-4 bg-base-300 pointer-events-auto hidden md:block\"><ul class=\"flex rounded px-3 text-sm font-medium shadow-lg ring-1 backdrop-blur ring-base-100/10\"><li><a class=\"relative block px-4 py-2 transition hover:text-primary\" href=\"/dashboard\">Dashboard</a></li><li><a class=\"relative block px-4 py-2 transition hover:text-primary\" href=\"/dashboard/subscribers\">Subscribers</a></li><li><a class=\"relative block px-4 py-2 transition hover:text-primary\" href=\"/dashboard/newsletters\">Newsletter</a></li><li><details><summary class=\"px-4 py-2 transition hover:text-primary\">support@mbvlabs.com</summary><ul class=\"text-end w-52 z-10 absolute bg-base-300 rounded-t-none p-2\"><li><a class=\"relative block px-3 py-2 transition hover:text-primary\">Account Management</a></li><li><a class=\"relative block px-3 py-2 transition hover:text-primary\">Logout</a></li></ul></details></li></ul></nav></div></header>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = sideBar().Render(ctx, templ_7745c5c3_Buffer)
+		return templ_7745c5c3_Err
+	})
+}
+
+func Dashboard() templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var3 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var3 == nil {
+			templ_7745c5c3_Var3 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html lang=\"en\" data-theme=\"halloween\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Dashboard</title><link href=\"/static/css/output.css\" rel=\"stylesheet\"></head><body class=\"flex flex-col min-w-screen max-w-screen min-h-screen\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ_7745c5c3_Var2.Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = dashboardHeader().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templ_7745c5c3_Var3.Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

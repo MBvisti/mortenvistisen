@@ -1,12 +1,83 @@
 package dashboard
 
-import "github.com/MBvisti/mortenvistisen/views/internal/layouts"
+import (
+	"github.com/MBvisti/mortenvistisen/views"
+	"github.com/MBvisti/mortenvistisen/views/internal/layouts"
+	"github.com/golang-module/carbon/v2"
+)
 
-templ Index() {
+templ Index(posts []views.Post) {
 	@layouts.Dashboard() {
-		<div class="container mx-auto grid grid-cols-12">
-			<div class="col-span-12 col-start-2">
-				<h1>Dash home</h1>
+		<div class="bg-base-100 container mx-auto grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12">
+			<div class="col-span-full lg:col-start-3 lg:col-end-11 p-4 stats shadow">
+				<div class="stat place-items-center bg-base-300">
+					<div class="stat-title">Subscribers</div>
+					<div class="stat-value">1200</div>
+					<div class="stat-desc">From January 1st to February 1st</div>
+				</div>
+				<div class="stat place-items-center bg-base-300">
+					<div class="stat-title">New Subscribers</div>
+					<div class="stat-value text-secondary">20</div>
+					<div class="stat-desc">From October 1st to November 1st</div>
+				</div>
+				<div class="stat place-items-center bg-base-300">
+					<div class="stat-title">Subscriptions Per Visit</div>
+					<div class="stat-value">2%</div>
+					<div class="stat-desc">↘︎ 90 (14%)</div>
+				</div>
+			</div>
+			<div class="flex flex-col mt-10 col-span-full lg:col-start-3 lg:col-end-11 p-4 overflow-x-auto">
+				<div class="w-full flex justify-between justify-center">
+					<h2 class="text-2xl mb-6 font-semibold">Articles</h2>
+					<a href="/dashboard/articles/new" class="btn btn-sm btn-secondary">New</a>
+				</div>
+				<table class="table bg-base-300">
+					<!-- head -->
+					<thead>
+						<tr>
+							<th class="text-lg">Title</th>
+							<th class="text-lg">Status</th>
+							<th class="text-lg">Date</th>
+							<th class="text-lg">Edit</th>
+						</tr>
+					</thead>
+					<tbody>
+						for _, post := range posts[:5] {
+							<!-- row 1 -->
+							<tr class="h-16">
+								<td>
+									<div>
+										<div class="font-bold">{ post.Title }</div>
+									</div>
+								</td>
+								<td class="text-green-400">
+									if post.ReleaseDate == "" {
+										TBD
+									}
+									if post.ReleaseDate != "" {
+										Released
+									}
+								</td>
+								<td>{ carbon.Parse(post.ReleaseDate, carbon.Berlin).ToDateString() }</td>
+								<th>
+									<a href={ templ.SafeURL("/dashboard/articles/" + post.ID + "/edit") } class="btn btn-ghost btn-xs">details</a>
+								</th>
+							</tr>
+						}
+					</tbody>
+				</table>
+				<div class="join mt-4">
+					<input
+						class="join-item btn btn-square text-primary"
+						type="radio"
+						name="options"
+						aria-label="1"
+						checked="checked"
+					/>
+					<input class="join-item btn btn-square" type="radio" name="options" aria-label="2"/>
+					<input class="join-item btn btn-square" type="radio" name="options" aria-label="3"/>
+					<input class="join-item btn btn-square" type="radio" name="options" aria-label="4"/>
+				</div>
 			</div>
 		</div>
 	}
