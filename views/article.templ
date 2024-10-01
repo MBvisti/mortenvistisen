@@ -2,7 +2,6 @@ package views
 
 import (
 	"context"
-	"fmt"
 	"github.com/MBvisti/mortenvistisen/views/internal/layouts"
 	"github.com/golang-module/carbon/v2"
 	"io"
@@ -73,20 +72,22 @@ script triggerCourse() {
 
 		headers[targetHeaderNum].insertAdjacentHTML(
 				"beforeBegin", 
-				`<div class="flex flex-col bg-base-200 rounded p-4">
-						<p class="text-4xl font-bold">I'm building a course!</p>
-						<p>I'm sorry to interrupt but, the interest in building a personal blog using Golang has been huge.
-						Because of that, I've decided to turn it into a fully-fledged course that shows you to build modern web apps using Golang, HTMX and templ.
+				`<div class="flex flex-col bg-base-300 rounded p-4">
+						<p class="text-4xl font-bold !my-2">I'm building a course!</p>
+						<p class="!my-2">I'm sorry to interrupt but, the interest in building a personal blog using Golang has been huge.
 						</p>
-						<p>
+						<p class="!my-2">
+						Because of that, I've decided to build a fully-fledged course that shows you to build modern web apps using Golang, HTMX and Templ.
+						</p>
+						<p class="!mt-2 !mb-4">
 						If you want to learn how to build a professional blog with Go, check it out: 
+						</p>
 						<a
 							data-umami-event="course--golang-blog-course-article"
-							class="ml-4 w-20 btn btn-sm btn-primary text-center font-bold text-white hover:text-base-content"
+							class="w-full mx-auto btn btn-primary text-center font-bold text-white hover:text-base-content"
 							href="https://golangblogcourse.com?ref=mortenvistisen.com"
 							target="_blank"
-						>here</a>
-					</p>
+						>Here</a>
 				</div>
 				`
 		);
@@ -94,42 +95,49 @@ script triggerCourse() {
 
 templ ArticlePage(data ArticlePageData, head Head) {
 	@layouts.Base(head.Build()) {
-		<div class="mx-auto px-4 grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12">
-			<div class="col-span-4 hero md:col-start-2 md:col-end-6 lg:col-start-5 lg:col-end-9">
-				<h1 class="text-4xl md:text-6xl mb-4">{ data.HeaderTitle }</h1>
-			</div>
-			<div class="col-span-4 hero md:col-start-2 md:col-end-6 lg:col-start-5 lg:col-end-9">
-				<div class="flex mx-auto text-xl mb-10">
-					<p class="text-gray-500 mr-2">
-						{ fmt.Sprintf("%s %v, %v", carbon.CreateFromStdTime(data.ReleaseDate).ToShortMonthString(),
-		carbon.CreateFromStdTime(data.ReleaseDate).DayOfMonth(), carbon.CreateFromStdTime(data.ReleaseDate).Year()) }
-					</p>
-					<p class="text-gray-500 mr-2">|</p>
-					<p class="text-gray-500">MBV</p>
+		<div class="bg-base-300 w-full flex-1 flex flex-col">
+			<div class="px-4 w-full flex-1 bg-base-100 grid-rows-[100px_150px_1fr] max-w-screen-sm md:max-w-screen-md md:max-w-screen-lg lg:max-w-screen-xl mx-auto grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12">
+				<div class="flex items-center col-span-full md:pl-10">
+					<a href="/" aria-label="Go back to Home" class="flex h-10 w-10 items-center justify-center rounded-full bg-primary shadow-md ring-1 ring-primary-content transition">
+						<svg viewBox="0 0 16 16" fill="none" aria-hidden="true" class="h-4 w-4 stroke-primary-content transition hover:stroke-white">
+							<path d="M7.25 11.25 3.75 8m0 0 3.5-3.25M3.75 8h8.5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+						</svg>
+					</a>
 				</div>
-			</div>
-			<article
-				class="col-span-4 md:col-start-2 md:col-end-6 lg:col-start-5 lg:col-end-9 text-left text-neutral-content leading-normal prose lg:prose-2xl"
-			>
-				@unsafe(data.Content)
-				<hr/>
-				<div class="mt-10 pb-10">
-					<p>Thanks for reading. Please checkout some of my other articles, if you enjoyed this one:</p>
-					<ul>
-						for title, slug := range data.OtherArticleLinks {
-							<a href={ templ.URL(slug) } class="text-base text-blue-500 hover:text-blue-700">
-								<li>{ title }</li>
-							</a>
-						}
-					</ul>
+				<div class="text-start col-span-full lg:col-start-4 lg:col-end-11 prose lg:prose-xl">
+					<h1 class="text-4xl font-bold tracking-tight text-neutral-content sm:text-5xl">{ data.HeaderTitle }</h1>
+					<span class="text-neutral-content">
+						{ carbon.Parse(data.ReleaseDate.String(), carbon.Berlin).ToDateString() } | By MBV
+					</span>
 				</div>
-			</article>
-			switch data.HeaderTitle {
-				case "Building a blogging website with Golang", "Opinionated guide to structuring Golang apps", "Integration testing in Golang: A guide", "Why top level internal is uncessary in Golang":
-					@triggerCourse()
-				default:
-					@triggerModal(data.HeaderTitle)
-			}
+				<article class="text-neutral-content mt-20 text-start col-span-full lg:col-start-4 lg:col-end-11 prose lg:prose-xl">
+					@unsafe(data.Content)
+					<hr/>
+					<div class="mt-10">
+						<p class="text-neutral-content">
+							Thanks for reading. 
+						</p>
+						<p>
+							If you enjoyed this one you can check one some of these:
+						</p>
+						<ul class="list-disc list-outside">
+							for title, slug := range data.OtherArticleLinks {
+								<li>
+									<a href={ templ.URL(slug) } class="text-neutral-content text-base hover:text-teal-700">
+										{ title }
+									</a>
+								</li>
+							}
+						</ul>
+					</div>
+				</article>
+			</div>
 		</div>
+		switch data.HeaderTitle {
+			case "Building a blogging website with Golang", "Opinionated guide to structuring Golang apps", "Integration testing in Golang: A guide", "Why top level internal is uncessary in Golang":
+				@triggerCourse()
+			default:
+				@triggerModal(data.HeaderTitle)
+		}
 	}
 }

@@ -18,7 +18,45 @@ func setModalHideCookie() templ.ComponentScript {
 	}
 }
 
-func SubscribeModalResponse(isBookSub, subExists bool) templ.Component {
+//	templ SubscribeModalResponse(isBookSub, subExists bool) {
+//		if subExists {
+//			<div class="max-w-[450px] flex flex-col">
+//				<div class="divider"></div>
+//				<span class="font-bold py-2">
+//					Welcome back!
+//				</span>
+//				<span class="font-sm my-2">
+//					You're already on the list and will receive updates if you've confirmed your email.
+//				</span>
+//				<div class="divider"></div>
+//			</div>
+//		}
+//		if isBookSub && !subExists {
+//			<div class="max-w-[450px] flex flex-col">
+//				<div class="divider"></div>
+//				<span class="font-bold py-2">
+//					Great to have you!
+//				</span>
+//				<span class="font-sm my-2">
+//					You're on the list; please remember to confirm your email.
+//				</span>
+//				<div class="divider"></div>
+//			</div>
+//		}
+//		if !isBookSub && !subExists {
+//			<div class="w-full flex flex-col">
+//				<div class="divider"></div>
+//				<span class="font-bold py-2">
+//					Thanks for subscribing!
+//				</span>
+//				<span class="font-sm my-2">
+//					You will receive an email shortly to confirm your subscription.
+//				</span>
+//				<div class="divider"></div>
+//			</div>
+//		}
+//	}
+func SubscribeModal(csrfToken, title string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -39,59 +77,16 @@ func SubscribeModalResponse(isBookSub, subExists bool) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		if subExists {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"max-w-[450px] flex flex-col\"><div class=\"divider\"></div><span class=\"font-bold py-2\">Welcome back!</span> <span class=\"font-sm my-2\">You're already on the list and will receive updates if you've confirmed your email.</span><div class=\"divider\"></div></div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		if isBookSub && !subExists {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"max-w-[450px] flex flex-col\"><div class=\"divider\"></div><span class=\"font-bold py-2\">Great to have you!</span> <span class=\"font-sm my-2\">You're on the list; please remember to confirm your email.</span><div class=\"divider\"></div></div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		if !isBookSub && !subExists {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"w-full flex flex-col\"><div class=\"divider\"></div><span class=\"font-bold py-2\">Thanks for subscribing!</span> <span class=\"font-sm my-2\">You will receive an email shortly to confirm your subscription.</span><div class=\"divider\"></div></div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		return templ_7745c5c3_Err
-	})
-}
-
-func SubscribeModal(csrfToken, title string) templ.Component {
-	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
-		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
-		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
-			return templ_7745c5c3_CtxErr
-		}
-		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
-		if !templ_7745c5c3_IsBuffer {
-			defer func() {
-				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
-				if templ_7745c5c3_Err == nil {
-					templ_7745c5c3_Err = templ_7745c5c3_BufErr
-				}
-			}()
-		}
-		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var2 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var2 == nil {
-			templ_7745c5c3_Var2 = templ.NopComponent
-		}
-		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"subscribe-model-wrapper\"><div class=\"divider\"></div><div class=\"mx-auto text-left text-neutral-content\"><h1 class=\"text-2xl font-bold md:text-3xl md:leading-tight text-neutral-content mb-0\">Monthly technical deep dives.</h1><p class=\"mt-0 text-neutral-content leading-normal prose lg:prose-xl\">I work with everything from backend dev, systems designs to devops and machine learning. I share my learnings twice a month in tutorial form, so you can pick up new concept faster and expand your technical tool belt. <br><br>is always an option to opt-out of receiving these updates, included in each mail. One click of a button and you are out.</p></div><form class=\"mx-auto\" hx-post=\"/subscribe\" hx-target=\"#subscribe-model-wrapper\" hx-swap=\"outerHTML\" method=\"POST\" action=\"/subscribe\"><input type=\"hidden\" name=\"gorilla.csrf.Token\" value=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div id=\"subscribe-model-wrapper\"><div class=\"divider\"></div><div class=\"mx-auto text-left text-neutral-content\"><h1 class=\"text-2xl font-bold md:text-3xl md:leading-tight text-neutral-content mb-0\">Monthly technical deep dives.</h1><p class=\"!mt-0 text-neutral-content leading-normal prose lg:prose-xl\">I work with everything from backend dev, systems designs to devops and machine learning. </p><p class=\"!mt-0 text-neutral-content leading-normal prose lg:prose-xl\">I share my learnings twice a month in tutorial form, so you can pick up new concept faster and expand your technical tool belt. </p><p class=\"!mt-0 text-neutral-content leading-normal prose lg:prose-xl\">It is always an option to opt-out of receiving these updates, included in each mail. One click of a button and you are out.</p></div><form class=\"mx-auto\" hx-post=\"/subscribe\" hx-target=\"#subscribe-model-wrapper\" hx-swap=\"outerHTML\" method=\"POST\" action=\"/subscribe\"><input type=\"hidden\" name=\"gorilla.csrf.Token\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var3 string
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(csrfToken)
+		var templ_7745c5c3_Var2 string
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(csrfToken)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/subscribe_modal.templ`, Line: 59, Col: 67}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/subscribe_modal.templ`, Line: 61, Col: 67}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -99,12 +94,12 @@ func SubscribeModal(csrfToken, title string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var4 string
-		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(title)
+		var templ_7745c5c3_Var3 string
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/subscribe_modal.templ`, Line: 61, Col: 59}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/subscribe_modal.templ`, Line: 63, Col: 59}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

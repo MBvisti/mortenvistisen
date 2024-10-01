@@ -1,29 +1,93 @@
 package layouts
 
-import "github.com/MBvisti/mortenvistisen/views/internal/components"
+import (
+	"fmt"
+	"time"
+)
 
-script currentYear() {
-	const year =  new Date().getFullYear();
+templ header() {
+	<header class="bg-base-300 w-full">
+		<div class="bg-base-100 max-w-screen-md md:max-w-screen-lg lg:max-w-screen-xl mx-auto grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12">
+			<div class="p-0 md:p-6 col-span-full flex justify-center">
+				<div class="navbar bg-base-100 md:hidden">
+					<nav class="flex-1 flex justify-end ">
+						<ul class="menu menu-horizontal px-1 rounded shadow-lg">
+							<li class="bg-base-300 z-10">
+								<details>
+									<summary>Menu</summary>
+									<ul class="bg-base-100 rounded-t-none p-2">
+										<li>
+											<a class="relative block px-3 py-2 transition hover:text-primary" href="/">Home</a>
+										</li>
+										<li>
+											<a class="relative block px-3 py-2 transition hover:text-primary" href="/articles">Articles</a>
+										</li>
+										<li>
+											<a class="relative block px-3 py-2 transition hover:text-primary" href="/about">About</a>
+										</li>
+										<li>
+											<a class="relative block px-3 py-2 transition hover:text-primary" href="https://golangblogcourse.com">Golang Course</a>
+										</li>
+									</ul>
+								</details>
+							</li>
+						</ul>
+					</nav>
+				</div>
+				<nav class="bg-base-300 pointer-events-auto hidden md:block">
+					<ul class="flex rounded px-3 text-sm font-medium shadow-lg ring-1 backdrop-blur ring-base-100/10">
+						<li>
+							<a class="relative block px-3 py-2 transition hover:text-primary" href="/">Home</a>
+						</li>
+						<li>
+							<a class="relative block px-3 py-2 transition hover:text-primary" href="/articles">Articles</a>
+						</li>
+						<li>
+							<a class="relative block px-3 py-2 transition hover:text-primary" href="/about">About</a>
+						</li>
+						<li>
+							<a target="_blank" class="relative block px-3 py-2 transition hover:text-primary" href="https://golangblogcourse.com">Golang Course</a>
+						</li>
+					</ul>
+				</nav>
+			</div>
+		</div>
+	</header>
+}
 
-	document.getElementById("cur-year-footer").innerHTML = year;
+//										<li>
+//											<a class="relative block px-3 py-2 transition hover:text-primary" href="/projects">Projects</a>
+//										</li>
+//
+//						<li>
+//							<a class="relative block px-3 py-2 transition hover:text-primary" href="/projects">Projects</a>
+//						</li>
+templ footer() {
+	<footer class="bg-base-300 w-full">
+		<div class="py-4 px-10 bg-base-100 max-w-screen-xl mx-auto grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12">
+			<div class="col-span-full md:col-start-2 md:col-end-6 lg:col-start-3 lg:col-end-11 md:my-10 flex flex-col items-center justify-between gap-6">
+				<div class="flex flex-wrap justify-center gap-x-6 gap-y-1 text-sm font-medium text-zinc-200">
+					<a class="transition hover:text-teal-400" href="/">Home</a>
+					<a class="transition hover:text-teal-400" href="/articles">Articles</a>
+					<a class="transition hover:text-teal-400" href="/about">About</a>
+					<a class="transition hover:text-teal-400" target="_blank" href="https://golangblogcourse.com">Golang Course</a>
+				</div>
+				<p class="text-sm text-zinc-500">
+					{ fmt.Sprintf("© %v", time.Now().Year()) } <a href="https://mbvlabs.com">mbvlabs</a>. All rights reserved.
+				</p>
+			</div>
+		</div>
+	</footer>
 }
 
 templ Base(head templ.Component) {
 	<!DOCTYPE html>
-	<html lang="en" data-theme="dim" class="dark max-w-screen">
+	<html lang="en" data-theme="halloween" class="dark max-w-screen">
 		@head
 		<body class="flex flex-col min-w-screen h-screen">
-			@components.Nav()
+			@header()
 			{ children... }
-			<div class="bg-base-200">
-				<footer class="container mx-auto footer text-base-content p-10 md:px-32">
-					<aside class="flex flex-col items-center mx-auto">
-						<p>Copyright ©<span id="cur-year-footer"></span> </p>
-						<p>All right reserved by <a class="underline decoration-secondary" href="https://mbvlabs.com">mbvlabs</a></p>
-					</aside>
-				</footer>
-			</div>
-			@currentYear()
+			@footer()
 			<script src="/static/js/htmx.min.js"></script>
 			<script src="/static/js/alpine.js"></script>
 		</body>

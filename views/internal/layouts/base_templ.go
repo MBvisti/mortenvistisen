@@ -8,21 +8,12 @@ package layouts
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "github.com/MBvisti/mortenvistisen/views/internal/components"
+import (
+	"fmt"
+	"time"
+)
 
-func currentYear() templ.ComponentScript {
-	return templ.ComponentScript{
-		Name: `__templ_currentYear_68f4`,
-		Function: `function __templ_currentYear_68f4(){const year =  new Date().getFullYear();
-
-	document.getElementById("cur-year-footer").innerHTML = year;
-}`,
-		Call:       templ.SafeScript(`__templ_currentYear_68f4`),
-		CallInline: templ.SafeScriptInline(`__templ_currentYear_68f4`),
-	}
-}
-
-func Base(head templ.Component) templ.Component {
+func header() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -43,7 +34,87 @@ func Base(head templ.Component) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html lang=\"en\" data-theme=\"dim\" class=\"dark max-w-screen\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<header class=\"bg-base-300 w-full\"><div class=\"bg-base-100 max-w-screen-md md:max-w-screen-lg lg:max-w-screen-xl mx-auto grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12\"><div class=\"p-0 md:p-6 col-span-full flex justify-center\"><div class=\"navbar bg-base-100 md:hidden\"><nav class=\"flex-1 flex justify-end \"><ul class=\"menu menu-horizontal px-1 rounded shadow-lg\"><li class=\"bg-base-300 z-10\"><details><summary>Menu</summary><ul class=\"bg-base-100 rounded-t-none p-2\"><li><a class=\"relative block px-3 py-2 transition hover:text-primary\" href=\"/\">Home</a></li><li><a class=\"relative block px-3 py-2 transition hover:text-primary\" href=\"/articles\">Articles</a></li><li><a class=\"relative block px-3 py-2 transition hover:text-primary\" href=\"/about\">About</a></li><li><a class=\"relative block px-3 py-2 transition hover:text-primary\" href=\"https://golangblogcourse.com\">Golang Course</a></li></ul></details></li></ul></nav></div><nav class=\"bg-base-300 pointer-events-auto hidden md:block\"><ul class=\"flex rounded px-3 text-sm font-medium shadow-lg ring-1 backdrop-blur ring-base-100/10\"><li><a class=\"relative block px-3 py-2 transition hover:text-primary\" href=\"/\">Home</a></li><li><a class=\"relative block px-3 py-2 transition hover:text-primary\" href=\"/articles\">Articles</a></li><li><a class=\"relative block px-3 py-2 transition hover:text-primary\" href=\"/about\">About</a></li><li><a target=\"_blank\" class=\"relative block px-3 py-2 transition hover:text-primary\" href=\"https://golangblogcourse.com\">Golang Course</a></li></ul></nav></div></div></header>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return templ_7745c5c3_Err
+	})
+}
+
+//	<li>
+//		<a class="relative block px-3 py-2 transition hover:text-primary" href="/projects">Projects</a>
+//	</li>
+//
+// <li>
+//
+//	<a class="relative block px-3 py-2 transition hover:text-primary" href="/projects">Projects</a>
+//
+// </li>
+func footer() templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var2 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var2 == nil {
+			templ_7745c5c3_Var2 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<footer class=\"bg-base-300 w-full\"><div class=\"py-4 px-10 bg-base-100 max-w-screen-xl mx-auto grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12\"><div class=\"col-span-full md:col-start-2 md:col-end-6 lg:col-start-3 lg:col-end-11 md:my-10 flex flex-col items-center justify-between gap-6\"><div class=\"flex flex-wrap justify-center gap-x-6 gap-y-1 text-sm font-medium text-zinc-200\"><a class=\"transition hover:text-teal-400\" href=\"/\">Home</a> <a class=\"transition hover:text-teal-400\" href=\"/articles\">Articles</a> <a class=\"transition hover:text-teal-400\" href=\"/about\">About</a> <a class=\"transition hover:text-teal-400\" target=\"_blank\" href=\"https://golangblogcourse.com\">Golang Course</a></div><p class=\"text-sm text-zinc-500\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var3 string
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("© %v", time.Now().Year()))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/layouts/base.templ`, Line: 76, Col: 46}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <a href=\"https://mbvlabs.com\">mbvlabs</a>. All rights reserved.</p></div></div></footer>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return templ_7745c5c3_Err
+	})
+}
+
+func Base(head templ.Component) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var4 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var4 == nil {
+			templ_7745c5c3_Var4 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html lang=\"en\" data-theme=\"halloween\" class=\"dark max-w-screen\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -55,19 +126,15 @@ func Base(head templ.Component) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = components.Nav().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = header().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ_7745c5c3_Var1.Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = templ_7745c5c3_Var4.Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"bg-base-200\"><footer class=\"container mx-auto footer text-base-content p-10 md:px-32\"><aside class=\"flex flex-col items-center mx-auto\"><p>Copyright ©<span id=\"cur-year-footer\"></span></p><p>All right reserved by <a class=\"underline decoration-secondary\" href=\"https://mbvlabs.com\">mbvlabs</a></p></aside></footer></div>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = currentYear().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = footer().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

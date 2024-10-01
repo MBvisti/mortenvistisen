@@ -10,7 +10,6 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"context"
-	"fmt"
 	"github.com/MBvisti/mortenvistisen/views/internal/layouts"
 	"github.com/golang-module/carbon/v2"
 	"io"
@@ -89,32 +88,34 @@ func truncateSlug(slug string, maxLength int) string {
 
 func triggerCourse() templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_triggerCourse_1e3b`,
-		Function: `function __templ_triggerCourse_1e3b(){const headers = document.querySelectorAll("h2");
+		Name: `__templ_triggerCourse_01d4`,
+		Function: `function __templ_triggerCourse_01d4(){const headers = document.querySelectorAll("h2");
 		let targetHeaderNum = 0
 
 		headers[targetHeaderNum].insertAdjacentHTML(
 				"beforeBegin", 
-				` + "`" + `<div class="flex flex-col bg-base-200 rounded p-4">
-						<p class="text-4xl font-bold">I'm building a course!</p>
-						<p>I'm sorry to interrupt but, the interest in building a personal blog using Golang has been huge.
-						Because of that, I've decided to turn it into a fully-fledged course that shows you to build modern web apps using Golang, HTMX and templ.
+				` + "`" + `<div class="flex flex-col bg-base-300 rounded p-4">
+						<p class="text-4xl font-bold !my-2">I'm building a course!</p>
+						<p class="!my-2">I'm sorry to interrupt but, the interest in building a personal blog using Golang has been huge.
 						</p>
-						<p>
+						<p class="!my-2">
+						Because of that, I've decided to build a fully-fledged course that shows you to build modern web apps using Golang, HTMX and Templ.
+						</p>
+						<p class="!mt-2 !mb-4">
 						If you want to learn how to build a professional blog with Go, check it out: 
+						</p>
 						<a
 							data-umami-event="course--golang-blog-course-article"
-							class="ml-4 w-20 btn btn-sm btn-primary text-center font-bold text-white hover:text-base-content"
+							class="w-full mx-auto btn btn-primary text-center font-bold text-white hover:text-base-content"
 							href="https://golangblogcourse.com?ref=mortenvistisen.com"
 							target="_blank"
-						>here</a>
-					</p>
+						>Here</a>
 				</div>
 				` + "`" + `
 		);
 }`,
-		Call:       templ.SafeScript(`__templ_triggerCourse_1e3b`),
-		CallInline: templ.SafeScriptInline(`__templ_triggerCourse_1e3b`),
+		Call:       templ.SafeScript(`__templ_triggerCourse_01d4`),
+		CallInline: templ.SafeScriptInline(`__templ_triggerCourse_01d4`),
 	}
 }
 
@@ -151,34 +152,33 @@ func ArticlePage(data ArticlePageData, head Head) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"mx-auto px-4 grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12\"><div class=\"col-span-4 hero md:col-start-2 md:col-end-6 lg:col-start-5 lg:col-end-9\"><h1 class=\"text-4xl md:text-6xl mb-4\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"bg-base-300 w-full flex-1 flex flex-col\"><div class=\"px-4 w-full flex-1 bg-base-100 grid-rows-[100px_150px_1fr] max-w-screen-sm md:max-w-screen-md md:max-w-screen-lg lg:max-w-screen-xl mx-auto grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12\"><div class=\"flex items-center col-span-full md:pl-10\"><a href=\"/\" aria-label=\"Go back to Home\" class=\"flex h-10 w-10 items-center justify-center rounded-full bg-primary shadow-md ring-1 ring-primary-content transition\"><svg viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\" class=\"h-4 w-4 stroke-primary-content transition hover:stroke-white\"><path d=\"M7.25 11.25 3.75 8m0 0 3.5-3.25M3.75 8h8.5\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg></a></div><div class=\"text-start col-span-full lg:col-start-4 lg:col-end-11 prose lg:prose-xl\"><h1 class=\"text-4xl font-bold tracking-tight text-neutral-content sm:text-5xl\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(data.HeaderTitle)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 99, Col: 60}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 108, Col: 102}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h1></div><div class=\"col-span-4 hero md:col-start-2 md:col-end-6 lg:col-start-5 lg:col-end-9\"><div class=\"flex mx-auto text-xl mb-10\"><p class=\"text-gray-500 mr-2\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h1><span class=\"text-neutral-content\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var4 string
-			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s %v, %v", carbon.CreateFromStdTime(data.ReleaseDate).ToShortMonthString(),
-				carbon.CreateFromStdTime(data.ReleaseDate).DayOfMonth(), carbon.CreateFromStdTime(data.ReleaseDate).Year()))
+			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(carbon.Parse(data.ReleaseDate.String(), carbon.Berlin).ToDateString())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 105, Col: 109}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 110, Col: 77}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><p class=\"text-gray-500 mr-2\">|</p><p class=\"text-gray-500\">MBV</p></div></div><article class=\"col-span-4 md:col-start-2 md:col-end-6 lg:col-start-5 lg:col-end-9 text-left text-neutral-content leading-normal prose lg:prose-2xl\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" | By MBV</span></div><article class=\"text-neutral-content mt-20 text-start col-span-full lg:col-start-4 lg:col-end-11 prose lg:prose-xl\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -186,12 +186,12 @@ func ArticlePage(data ArticlePageData, head Head) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<hr><div class=\"mt-10 pb-10\"><p>Thanks for reading. Please checkout some of my other articles, if you enjoyed this one:</p><ul>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<hr><div class=\"mt-10\"><p class=\"text-neutral-content\">Thanks for reading. </p><p>If you enjoyed this one you can check one some of these:</p><ul class=\"list-disc list-outside\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			for title, slug := range data.OtherArticleLinks {
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<a href=\"")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<li><a href=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -200,25 +200,25 @@ func ArticlePage(data ArticlePageData, head Head) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"text-base text-blue-500 hover:text-blue-700\"><li>")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"text-neutral-content text-base hover:text-teal-700\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 121, Col: 19}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 127, Col: 17}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</li></a>")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a></li>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</ul></div></article>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</ul></div></article></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -233,10 +233,6 @@ func ArticlePage(data ArticlePageData, head Head) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
 			}
 			return templ_7745c5c3_Err
 		})

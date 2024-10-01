@@ -34,6 +34,10 @@ func (r *Router) loadAppRoutes() {
 		return r.appHandlers.Projects(c)
 	})
 
+	router.GET("/articles", func(c echo.Context) error {
+		return r.appHandlers.ArticlesOverview(c)
+	})
+
 	router.GET("/posts/:postSlug", func(c echo.Context) error {
 		return r.appHandlers.Article(c)
 	})
