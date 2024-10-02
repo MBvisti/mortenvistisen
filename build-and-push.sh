@@ -41,7 +41,7 @@ echo "releasing"
 # if [ $runmigs == "N" ]
 # then
 ssh admin@188.245.71.73 /bin/bash << EOF
-	cd apps;
+	cd blog;
 	docker compose pull;
 	docker rollout blog;
 	docker rollout blog-worker;
