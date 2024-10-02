@@ -73,15 +73,7 @@ templ SubscribeModalResponse(isBookSub, subExists bool) {
 }
 
 templ newsletterForm(csrfToken string) {
-	<form
-		hx-post="/subscribe"
-		hx-target="this"
-		hx-swap="outerHTML"
-		method="POST"
-		action="/subscribe"
-		class="rounded bg-base-300 border border-base-300 p-4"
-		action="/thank-you"
-	>
+	<form class="rounded bg-base-300 border border-base-300 p-4" hx-post="/subscribe" hx-target="this" hx-swap="outerHTML" method="POST" action="/subscribe">
 		<input type="hidden" name="gorilla.csrf.Token" value={ csrfToken }/>
 		<h2 class="flex text-sm font-semibold text-content-neutral">
 			<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-6 w-6 flex-none">
@@ -92,14 +84,20 @@ templ newsletterForm(csrfToken string) {
 		</h2>
 		<p class="mt-2 text-sm text-zinc-400">Get notified when I publish something new, and unsubscribe at any time.</p>
 		<div class="mt-6 flex">
+			<input type="hidden" name="article-title" value="home page"/>
 			<input
 				type="email"
 				placeholder="Email address"
 				aria-label="Email address"
-				required=""
+				required
+				name="hero-input"
 				class="min-w-0 flex-auto appearance-none rounded-md border border-zinc-900/10 bg-white px-3 py-[calc(theme(spacing.2)-1px)] shadow-md focus:outline-none focus:ring-4 sm:text-sm border-zinc-700 bg-zinc-700/[0.15] text-zinc-200 placeholder:text-zinc-500 focus:border-teal-400 focus:ring-teal-400/10"
 			/>
-			<button class="inline-flex items-center gap-2 justify-center rounded-md py-2 px-3 text-sm outline-offset-2 transition active:transition-none font-semibold bg-zinc-700 hover:bg-zinc-600 active:bg-zinc-700 active:text-zinc-100/70 ml-4 flex-none" type="submit">Join</button>
+			<button
+				data-umami-event="newsletter--home-page"
+				class="inline-flex items-center gap-2 justify-center rounded-md py-2 px-3 text-sm outline-offset-2 transition active:transition-none font-semibold bg-zinc-700 hover:bg-zinc-600 active:bg-zinc-700 active:text-zinc-100/70 ml-4 flex-none"
+				type="submit"
+			>Join</button>
 		</div>
 	</form>
 }

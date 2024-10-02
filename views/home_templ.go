@@ -162,20 +162,20 @@ func newsletterForm(csrfToken string) templ.Component {
 			templ_7745c5c3_Var7 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<form hx-post=\"/subscribe\" hx-target=\"this\" hx-swap=\"outerHTML\" method=\"POST\" action=\"/subscribe\" class=\"rounded bg-base-300 border border-base-300 p-4\" action=\"/thank-you\"><input type=\"hidden\" name=\"gorilla.csrf.Token\" value=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<form class=\"rounded bg-base-300 border border-base-300 p-4\" hx-post=\"/subscribe\" hx-target=\"this\" hx-swap=\"outerHTML\" method=\"POST\" action=\"/subscribe\"><input type=\"hidden\" name=\"gorilla.csrf.Token\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(csrfToken)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/home.templ`, Line: 85, Col: 66}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/home.templ`, Line: 77, Col: 66}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><h2 class=\"flex text-sm font-semibold text-content-neutral\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" class=\"h-6 w-6 flex-none\"><path d=\"M2.75 7.75a3 3 0 0 1 3-3h12.5a3 3 0 0 1 3 3v8.5a3 3 0 0 1-3 3H5.75a3 3 0 0 1-3-3v-8.5Z\" class=\"fill-zinc-100/10 stroke-zinc-500\"></path> <path d=\"m4 6 6.024 5.479a2.915 2.915 0 0 0 3.952 0L20 6\" class=\"stroke-zinc-500\"></path></svg> <span class=\"ml-3\">Stay up to date</span></h2><p class=\"mt-2 text-sm text-zinc-400\">Get notified when I publish something new, and unsubscribe at any time.</p><div class=\"mt-6 flex\"><input type=\"email\" placeholder=\"Email address\" aria-label=\"Email address\" required=\"\" class=\"min-w-0 flex-auto appearance-none rounded-md border border-zinc-900/10 bg-white px-3 py-[calc(theme(spacing.2)-1px)] shadow-md focus:outline-none focus:ring-4 sm:text-sm border-zinc-700 bg-zinc-700/[0.15] text-zinc-200 placeholder:text-zinc-500 focus:border-teal-400 focus:ring-teal-400/10\"> <button class=\"inline-flex items-center gap-2 justify-center rounded-md py-2 px-3 text-sm outline-offset-2 transition active:transition-none font-semibold bg-zinc-700 hover:bg-zinc-600 active:bg-zinc-700 active:text-zinc-100/70 ml-4 flex-none\" type=\"submit\">Join</button></div></form>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><h2 class=\"flex text-sm font-semibold text-content-neutral\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" class=\"h-6 w-6 flex-none\"><path d=\"M2.75 7.75a3 3 0 0 1 3-3h12.5a3 3 0 0 1 3 3v8.5a3 3 0 0 1-3 3H5.75a3 3 0 0 1-3-3v-8.5Z\" class=\"fill-zinc-100/10 stroke-zinc-500\"></path> <path d=\"m4 6 6.024 5.479a2.915 2.915 0 0 0 3.952 0L20 6\" class=\"stroke-zinc-500\"></path></svg> <span class=\"ml-3\">Stay up to date</span></h2><p class=\"mt-2 text-sm text-zinc-400\">Get notified when I publish something new, and unsubscribe at any time.</p><div class=\"mt-6 flex\"><input type=\"hidden\" name=\"article-title\" value=\"home page\"> <input type=\"email\" placeholder=\"Email address\" aria-label=\"Email address\" required name=\"hero-input\" class=\"min-w-0 flex-auto appearance-none rounded-md border border-zinc-900/10 bg-white px-3 py-[calc(theme(spacing.2)-1px)] shadow-md focus:outline-none focus:ring-4 sm:text-sm border-zinc-700 bg-zinc-700/[0.15] text-zinc-200 placeholder:text-zinc-500 focus:border-teal-400 focus:ring-teal-400/10\"> <button data-umami-event=\"newsletter--home-page\" class=\"inline-flex items-center gap-2 justify-center rounded-md py-2 px-3 text-sm outline-offset-2 transition active:transition-none font-semibold bg-zinc-700 hover:bg-zinc-600 active:bg-zinc-700 active:text-zinc-100/70 ml-4 flex-none\" type=\"submit\">Join</button></div></form>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

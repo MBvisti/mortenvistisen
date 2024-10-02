@@ -134,6 +134,7 @@ func (a App) SubscriptionEvent(c echo.Context) error {
 		)
 		return c.String(200, "You're now subscribed!")
 	}
+
 	slog.InfoContext(
 		ctx,
 		"starting to create new subscriber from handler",
