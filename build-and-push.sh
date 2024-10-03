@@ -23,28 +23,10 @@ echo "cleanup done"
 
 echo "releasing"
 
-# read -p "also run migrations?: y/N" runmigs
-# echo $runmigs
-
-# Check if the entered number is even
-# if [ $runmigs == "y" ]
-# then
-# ssh admin@188.245.71.73 /bin/bash << EOF
-# 	cd golangblogcourse;
-# 	docker compose pull;
-# 	docker compose run golangblogcourse-migration;
-# 	docker rollout golangblogcourse;
-# 	docker rollout golangblogcourse-worker;
-# EOF
-# fi
-#
-# if [ $runmigs == "N" ]
-# then
 ssh admin@188.245.71.73 /bin/bash << EOF
 	cd blog;
 	docker compose pull;
 	docker rollout blog;
 	docker rollout blog-worker;
+	docker image prune -a -f
 EOF
-# fi
-
