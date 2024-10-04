@@ -107,7 +107,7 @@ templ ArticlePage(data ArticlePageData, head Head) {
 				<div class="text-start col-span-full lg:col-start-4 lg:col-end-11 prose lg:prose-xl">
 					<h1 class="text-4xl font-bold tracking-tight text-neutral-content sm:text-5xl">{ data.HeaderTitle }</h1>
 					<span class="text-neutral-content">
-						{ carbon.Parse(data.ReleaseDate.String(), carbon.Berlin).ToDateString() } | By MBV
+						{ carbon.CreateFromStdTime(data.ReleaseDate, carbon.Berlin).ToDateString() } | By MBV
 					</span>
 				</div>
 				<article class="text-neutral-content text-start col-span-full lg:col-start-4 lg:col-end-11 prose lg:prose-xl">
@@ -133,11 +133,6 @@ templ ArticlePage(data ArticlePageData, head Head) {
 				</article>
 			</div>
 		</div>
-		switch data.HeaderTitle {
-			case "Building a blogging website with Golang", "Opinionated guide to structuring Golang apps", "Integration testing in Golang: A guide", "Why top level internal is uncessary in Golang":
-				@triggerCourse()
-			default:
-				@triggerModal(data.HeaderTitle)
-		}
+		@triggerCourse()
 	}
 }
