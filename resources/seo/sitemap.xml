@@ -92,8 +92,14 @@
   <lastmod>2024-07-19T19:00:00+00:00</lastmod>
   <priority>0.80</priority>
 </url>
+<url>
 <loc>https://mortenvistisen.com/posts/building-a-saas-in-five-days</loc>
   <lastmod>2024-09-12T12:00:00+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+<loc>https://mortenvistisen.com/posts/a-love-letter-to-golang</loc>
+  <lastmod>2024-10-04T12:00:00+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 </urlset>
