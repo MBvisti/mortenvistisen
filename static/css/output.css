@@ -3709,10 +3709,6 @@ html {
   margin-top: 0.5rem;
 }
 
-.mt-20 {
-  margin-top: 5rem;
-}
-
 .mt-3 {
   margin-top: 0.75rem;
 }
@@ -3913,10 +3909,6 @@ html {
 
 .grid-rows-\[100px_150px_1fr\] {
   grid-template-rows: 100px 150px 1fr;
-}
-
-.grid-rows-\[100px_175px_50px_1fr\] {
-  grid-template-rows: 100px 175px 50px 1fr;
 }
 
 .grid-rows-\[100px_175px_50px_minmax\(400px\2c 1fr\)\] {
@@ -4128,10 +4120,6 @@ html {
   padding: 0px;
 }
 
-.p-10 {
-  padding: 2.5rem;
-}
-
 .p-2 {
   padding: 0.5rem;
 }
@@ -4158,6 +4146,11 @@ html {
   padding-right: 0.25rem;
 }
 
+.px-10 {
+  padding-left: 2.5rem;
+  padding-right: 2.5rem;
+}
+
 .px-3 {
   padding-left: 0.75rem;
   padding-right: 0.75rem;
@@ -4166,11 +4159,6 @@ html {
 .px-4 {
   padding-left: 1rem;
   padding-right: 1rem;
-}
-
-.py-12 {
-  padding-top: 3rem;
-  padding-bottom: 3rem;
 }
 
 .py-2 {
@@ -4183,6 +4171,11 @@ html {
   padding-bottom: 0.75rem;
 }
 
+.py-4 {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
 .py-8 {
   padding-top: 2rem;
   padding-bottom: 2rem;
@@ -4191,16 +4184,6 @@ html {
 .py-\[calc\(theme\(spacing\.2\)-1px\)\] {
   padding-top: calc(0.5rem - 1px);
   padding-bottom: calc(0.5rem - 1px);
-}
-
-.px-10 {
-  padding-left: 2.5rem;
-  padding-right: 2.5rem;
-}
-
-.py-4 {
-  padding-top: 1rem;
-  padding-bottom: 1rem;
 }
 
 .pb-8 {
@@ -5578,18 +5561,14 @@ trix-editor .attachment__metadata .attachment__size {
     margin-right: auto;
   }
 
-  .md\:my-auto {
-    margin-top: auto;
-    margin-bottom: auto;
-  }
-
   .md\:my-10 {
     margin-top: 2.5rem;
     margin-bottom: 2.5rem;
   }
 
-  .md\:mt-10 {
-    margin-top: 2.5rem;
+  .md\:my-auto {
+    margin-top: auto;
+    margin-bottom: auto;
   }
 
   .md\:block {
@@ -5682,10 +5661,6 @@ trix-editor .attachment__metadata .attachment__size {
 
   .lg\:col-end-11 {
     grid-column-end: 11;
-  }
-
-  .lg\:col-end-12 {
-    grid-column-end: 12;
   }
 
   .lg\:col-end-8 {

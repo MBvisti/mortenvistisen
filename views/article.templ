@@ -110,7 +110,7 @@ templ ArticlePage(data ArticlePageData, head Head) {
 						{ carbon.Parse(data.ReleaseDate.String(), carbon.Berlin).ToDateString() } | By MBV
 					</span>
 				</div>
-				<article class="text-neutral-content mt-20 text-start col-span-full lg:col-start-4 lg:col-end-11 prose lg:prose-xl">
+				<article class="text-neutral-content text-start col-span-full lg:col-start-4 lg:col-end-11 prose lg:prose-xl">
 					@unsafe(data.Content)
 					<hr/>
 					<div class="mt-10">
