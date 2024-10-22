@@ -17,6 +17,8 @@ alias rdb := reset-db
 alias gdf := generate-db-functions
 alias mpts := copy-preline-to-static
 
+alias jg := jet-gen
+
 alias ct := compile-templates
 
 alias bp := build-and-push
@@ -76,3 +78,7 @@ river-migrate-up:
 
 build-and-push:
 	./build-and-push.sh
+
+# GO JET
+jet-gen:
+	@jet -dsn=$DATABASE_URL -schema=public -path=./models/internal

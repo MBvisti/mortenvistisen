@@ -95,6 +95,7 @@ require (
 	github.com/dlclark/regexp2 v1.11.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
 	github.com/gdey/goose/v3 v3.6.5
+	github.com/go-jet/jet/v2 v2.11.1
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect

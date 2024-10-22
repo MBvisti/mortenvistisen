@@ -2,11 +2,14 @@ package models
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"log/slog"
 	"time"
 
+	"github.com/MBvisti/mortenvistisen/models/internal/mortenvistisen_blog_dev/public/table"
 	"github.com/MBvisti/mortenvistisen/pkg/validation"
+	. "github.com/go-jet/jet/v2/postgres"
 	"github.com/google/uuid"
 	"github.com/gosimple/slug"
 	"github.com/jackc/pgx/v5"
@@ -43,7 +46,10 @@ type articleStorage interface {
 		tagIDs []uuid.UUID,
 	) error
 	CountArticles(ctx context.Context) (int64, error)
-	QueryAllArticles(ctx context.Context, limit, offset int32) ([]Article, error)
+	QueryAllArticles(
+		ctx context.Context,
+		limit, offset int32,
+	) ([]Article, error)
 }
 
 type ArticleService struct {
@@ -64,6 +70,13 @@ type NewArticlePayload struct {
 	TagIDs      []uuid.UUID
 }
 
+func ArticleNew(ctx context.Context, db *sql.DB) (Article, error) {
+	stmt := SELECT(table.Posts.AllColumns).FROM(table.Posts)
+	stmt.Query(db, nil)
+
+	return Article{}, nil
+}
+
 func (a ArticleService) New(
 	ctx context.Context,
 	payload NewArticlePayload,
@@ -72,7 +85,14 @@ func (a ArticleService) New(
 
 	tags, err := a.articleStorage.QueryTagsByIDs(ctx, payload.TagIDs)
 	if err != nil {
-		slog.ErrorContext(ctx, "could not query tags", "error", err, "payload", payload)
+		slog.ErrorContext(
+			ctx,
+			"could not query tags",
+			"error",
+			err,
+			"payload",
+			payload,
+		)
 		if errors.Is(err, pgx.ErrNoRows) {
 			return Article{}, errors.Join(ErrNoRowWithIdentifier, err)
 		}
@@ -104,7 +124,14 @@ func (a ArticleService) New(
 	}
 
 	if err := a.articleStorage.InsertArticle(ctx, article); err != nil {
-		slog.ErrorContext(ctx, "could not insert article", "error", err, "payload", payload)
+		slog.ErrorContext(
+			ctx,
+			"could not insert article",
+			"error",
+			err,
+			"payload",
+			payload,
+		)
 		return Article{}, errors.Join(ErrUnrecoverableEvent, err)
 	}
 
@@ -172,7 +199,11 @@ func (a ArticleService) List(
 	offset int32,
 	limit int32,
 ) ([]Article, error) {
-	articles, err := a.articleStorage.ListArticles(ctx, nil, WithPagination(limit, offset))
+	articles, err := a.articleStorage.ListArticles(
+		ctx,
+		nil,
+		WithPagination(limit, offset),
+	)
 	if err != nil {
 		slog.ErrorContext(ctx, "could not get list of articles", "error", err)
 		return nil, err
@@ -181,7 +212,10 @@ func (a ArticleService) List(
 	return articles, nil
 }
 
-func (a ArticleService) BySlug(ctx context.Context, slug string) (Article, error) {
+func (a ArticleService) BySlug(
+	ctx context.Context,
+	slug string,
+) (Article, error) {
 	return a.articleStorage.QueryArticleBySlug(ctx, slug)
 }
 
