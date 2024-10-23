@@ -1,30 +1,28 @@
 I've been writing Go for some time now, close to 7 years. But it wasn't where I originally started out in my tech career. 
 
-My first job was at a place where their core competency where backend and databases-bootstrap, the defacto fronted library for multiple years at the time, was something completely new to them. UI/UX was mostly an afterthought but since the clients were large accounting companies, it didn't matter. They were happy with the colour blue and lots of boxes.
+My first job was at a place where their core competency where backend and databases. Bootstrap, the defacto fronted library for multiple years at the time, was something completely new to them. 
 
-I don't have a traditional background in computer science and have been self-taught all the way which probably was also why I ended up in frontend to begin with. The thinking at my first job seemed to be: 
+UI/UX was mostly an afterthought but since the clients were large accounting companies, it didn't matter. The clients were happy with the colour blue and lots square of boxes.
 
-> How could you trust a guy who hasn't studied every algorithm under the sun to make changes to a server? A ridiculous notion. 
+I also don't have a traditional background in computer science and have been self-taught all the way which probably was also why I ended up in frontend to begin with. It was the safer place to put me.
 
-So I started learning how I did everything else, typing "how to learn frontend" into Google.
+So I started learning the same way I do for everything else, typing "how to learn frontend" into Google.
 
 React was just breaking away, in terms of popularity, from Angular at the time and was still in the good 'ol pre hook days. I eventually became proficient with React and would mainly write it (and JS/TS) for the next couple of years.
 
-But, something kept happening. Everything seemed consistently out of date as new tools/libraries/frameworks were being shipped every day that you just _had to use_. But even more important/discouraging was that things seemed to become super complex, for simple things. Do you want to submit a form? You need event listeners, and different hooks to efficiently update the state, validate the input AND then do it once more on the backend. It turned out to be a rabbit hole of complexity where you know need a PhD in hooks to be able to efficiently use them.
+But, something kept happening. Everything seemed consistently out of date as new tools/libraries/frameworks were being shipped every day that you just _had to use_ and keep up with. 
 
-And it makes sense, React has grown immensely over the last ~10 years. But they seem to have been trying to cover every requirement known to man.
+As React grew, which it did immensely over the last ~10 years, they seem to think that every requirement known to man must be covered. The move away from classes and redux to functional components and hooks felt awesome, in the beginning. Now you need a PhD to efficiently use them and either manage a large state object being passed around or an alarming number of `useState` in each component.
 
-None of the above is new in any sense, it has been written about and discussed extensively in the tech community for some time now. 
+I, thankfully, don't write much React anymore and have gone back to the roots: plain old HTML which. And thanks some [guy from Montana](https://htmx.org?ref=mortenvistisen.com) I still get 90% of the interactivity you get with a SPA app.
 
-I, thankfully, don't write much React anymore and have gone back to the roots: plain old HTML which, thanks to Go, its ecosystem, and some guy from Montana still gets like 90% of the interactivity you get with a SPA app.
+So, let me explain why I think you should use Go and why I fell in love with it.
 
-So, let me explain why I think you should use Go and why I fell in love with it. 
-
-If you just want the tl;dr: simplicity and limited choice.
+If you just want the tl;dr: there often is only one way to do a thing and that let's you focus on building the product.
 
 ## Limited choice
 
-When writing Go, you'd often find that a solution to a problem tends to converge to a common conclusion across different teams/people/etc.
+When writing Go, you'd often find that a solution to a problem tends to converge to a common conclusion across different teams/people/projects.
 
 Some time ago I was frustrated that a validation library I was using didn't make it easy to do what I wanted it to. So I did what every other good engineer does and wasted a couple of days writing my own solution. 
 
@@ -34,7 +32,9 @@ About halfway through, I started to look into what other people had done and acr
 
 Of course, this might be due to every library that comes after the first one copies the code. But that's not my general experience. Solutions to similar problems seem to converge due to Golang's strict feature set.
 
-One criticism I often see is that Go doesn't allow developers to "express" themselves in code. Which, honestly, is bullshit. You're not Picasso, you get paid tons of money to sit in a cosy office and drink kombucha directly from tab. Express yourself in system designs and elegant solutions if you'd like, but leave the code mate.
+One criticism I often see is that Go doesn't allow developers to "express" themselves in code. Which, honestly, is bullshit. You're not Picasso, you get paid tons of money to sit in a cosy office and drink kombucha directly from tab. 
+
+Express yourself in system designs and elegant solutions if you'd like, but leave the code alone mate.
 
 It's very difficult to spot an individual's contribution to a Go codebase without looking into the commit history. There is not much room to be eccentric or have your own style. Again, sounds rather boring but it ends up working extremely well when you care about building and shipping digital products.
 
@@ -44,11 +44,11 @@ The solution is what you focus on.
 
 The syntax is very minimalistic with only 25 keywords to learn from which you probably need like, what, two-thirds? 
 
-It's so fast to pick up which has also been my experience whenever I have introduced Go to teams where I've worked as a consultant. Doesn't really matter if they're completely fresh out of school, work in a different way (I'm looking at you here, data scientist) or have a lot of experience in another language.
+It's incredibly fast to pick up. Whenever I have introduced Go to teams where I've worked as a consultant people generally write good Go after a week or two. Doesn't really matter if they're completely fresh out of school, work in a different way or have a lot of experience in another language.
 
-People generally tend to pick up Go fast which I think comes from its readability. 
+People generally tend to pick up Go fast which, I think, comes from its readability. 
 
-To me, it's not beautiful as you might look at a piece of Rust code you spend 8 story points writing, only to find out that it didn't match stakeholder expectations once it finishes compiling at the end of the sprint. 
+To me, it's not as beautiful as you might look at a piece of Rust code you spend 8 story points writing, only to find out that it didn't match stakeholder expectations once it finishes compiling at the end of the sprint. 
 
 No, it's practical and boring and allows me to focus on what should be the more interesting part of my job, the problem. There is no need to argue over which linter style (or which linter) to use, it's decided for you and will be the same for everybody on the team.
 
@@ -72,7 +72,11 @@ If you've ever done any Django, rails or Laravel development this way of doing f
 
 Use a base template to wrap the application, have some views for specific pages and abstract elements like buttons, tables etc into components for re-usability so that your API is no longer JSON-driven but hypermedia-driven. 
 
-You're creating a contract as you do with JSON-based APIs but now the consumer of the contract, the client, is much more tightly coupled to the API. This makes breaking changes much less likely, maintenance requirements fall and the consequences of changes become much easier to reason about.
+You're creating a contract as you do with JSON-based APIs but now the consumer of the contract, the client, is much more tightly coupled to the API. 
+
+Ironically, this tigher coupling makes breaking changes less likely, lower maintenance and the system as a whole becomes easier to reason about. When developing this way, you don't have developers that's only frontend or backend. You must be both.
+
+You can still have a preference, of course, but the two are much closer together so changes and their effects will be easier to spot.
 
 ## A straightforward database layer
 
