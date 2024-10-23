@@ -4,20 +4,20 @@ latestCommitSha=$(git rev-parse --short HEAD)
 
 echo "starting to build docker image based on commit: ${latestCommitSha}"
 
-docker build --target app --build-arg="COMMIT_SHA=${latestCommitSha}" -t mbvofdocker/blog:"${latestCommitSha}" -t mbvofdocker/blog:latest .
+docker build --target app --build-arg="COMMIT_SHA=${latestCommitSha}" -t mbvofdocker/thelab:blog-"${latestCommitSha}" -t mbvofdocker/thelab:blog-latest .
 
-docker build --target worker --build-arg="COMMIT_SHA=${latestCommitSha}" -t mbvofdocker/blog:"${latestCommitSha}"-worker -t mbvofdocker/blog:latest-worker .
+docker build --target worker --build-arg="COMMIT_SHA=${latestCommitSha}" -t mbvofdocker/thelab:blog-worker-"${latestCommitSha}" -t mbvofdocker/thelab:blog-worker-latest .
 
 echo "build done, starting to push"
 
-docker push mbvofdocker/blog:${latestCommitSha}
-docker push mbvofdocker/blog:latest
-docker push mbvofdocker/blog:${latestCommitSha}-worker
-docker push mbvofdocker/blog:latest-worker
+docker push mbvofdocker/thelab:blog-${latestCommitSha}
+docker push mbvofdocker/thelab:blog-latest
+docker push mbvofdocker/thelab:blog-worker-${latestCommitSha} 
+docker push mbvofdocker/thelab:blog-worker-latest
 
 echo "pushed to mbvofdocker/blog, deleting images"
 
-docker image rm mbvofdocker/blog:${latestCommitSha} mbvofdocker/blog:latest mbvofdocker/blog:${latestCommitSha}-worker mbvofdocker/blog:latest-worker
+docker image rm mbvofdocker/thelab:blog-${latestCommitSha} mbvofdocker/thelab:blog-latest mbvofdocker/thelab:blog-worker-${latestCommitSha} mbvofdocker/thelab:blog-worker-latest
 
 echo "cleanup done"
 
