@@ -9,7 +9,7 @@ type Cfg struct {
 	Auth              Authentication
 	App               App
 	ExternalProviders ExternalProviders
-	Telemetry         Telemetry
+	// Telemetry         Telemetry
 }
 
 func New(version string) Cfg {
@@ -48,6 +48,6 @@ func New(version string) Cfg {
 		authCfg,
 		appCfg,
 		externalProviders,
-		newTelemetry(),
+		// newTelemetry(),
 	}
 }
