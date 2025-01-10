@@ -72,7 +72,6 @@ require (
 	github.com/opencontainers/runc v1.1.5 // indirect
 	github.com/prometheus/prometheus v0.35.0 // indirect
 	github.com/samber/lo v1.44.0 // indirect
-	github.com/samber/slog-common v0.17.0 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.46.1 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.21.0 // indirect
@@ -115,8 +114,6 @@ require (
 	github.com/prometheus/common v0.53.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/riverqueue/river/riverdriver v0.9.0 // indirect
-	github.com/samber/slog-loki/v3 v3.5.0
-	github.com/samber/slog-otel v0.0.0-20240701120852-8150bb781d6a
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/vanng822/css v1.0.1 // indirect

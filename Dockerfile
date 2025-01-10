@@ -19,7 +19,7 @@ COPY . .
 
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w -X main.version=$COMMIT_SHA" -mod=readonly -v -o worker cmd/worker/main.go
 
-FROM golang:1.22 AS build-app
+FROM golang:1.23 AS build-app
 
 ARG COMMIT_SHA=0.0.1
 
