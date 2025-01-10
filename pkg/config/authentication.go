@@ -6,4 +6,5 @@ type Authentication struct {
 	SessionEncryptionKey string `env:"SESSION_ENCRYPTION_KEY"`
 	TokenSigningKey      string `env:"TOKEN_SIGNING_KEY"`
 	CsrfToken            string `env:"CSRF_TOKEN"`
+	TurnstileSecretKey   string `env:"TURNSTILE_SECRET_KEY"`
 }

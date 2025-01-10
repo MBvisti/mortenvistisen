@@ -1,9 +1,12 @@
 package handlers
 
 import (
+	"encoding/json"
 	"errors"
 	"log/slog"
 	"net/http"
+	"net/url"
+	"strings"
 
 	"github.com/MBvisti/mortenvistisen/models"
 	"github.com/MBvisti/mortenvistisen/posts"
@@ -112,6 +115,11 @@ func (a App) ArticlesOverview(ctx echo.Context) error {
 	return views.ArticlesOverview(posts).Render(views.ExtractRenderDeps(ctx))
 }
 
+type VerificationResponse struct {
+	Success bool `json:"success"`
+	// Add other fields as needed from the Cloudflare response
+}
+
 func (a App) SubscriptionEvent(c echo.Context) error {
 	ctx, subscriptionEventSpan := a.base.Tracer.CreateSpan(
 		c.Request().Context(),
@@ -120,8 +128,9 @@ func (a App) SubscriptionEvent(c echo.Context) error {
 	subscriptionEventSpan.AddEvent("AppHandler/SubscriptionEvent")
 
 	type subscriptionEventForm struct {
-		Email string `form:"hero-input"`
-		Title string `form:"article-title"`
+		Email             string `form:"hero-input"`
+		Title             string `form:"article-title"`
+		TurnstileResponse string `form:"cf-turnstile-response"`
 	}
 
 	var form subscriptionEventForm
@@ -132,6 +141,54 @@ func (a App) SubscriptionEvent(c echo.Context) error {
 			"error",
 			err,
 		)
+		return c.String(200, "You're now subscribed!")
+	}
+
+	// Get IP address
+	ip := c.RealIP()
+
+	// Prepare form data
+	formData := url.Values{}
+	formData.Set("secret", a.base.Config.Auth.TurnstileSecretKey)
+	formData.Set("response", form.TurnstileResponse)
+	formData.Set("remoteip", ip)
+
+	// First validation request
+	cfVerifyReq, err := http.NewRequestWithContext(c.Request().Context(),
+		http.MethodPost,
+		"https://challenges.cloudflare.com/turnstile/v0/siteverify",
+		strings.NewReader(formData.Encode()),
+	)
+	if err != nil {
+		return c.String(200, "You're now subscribed!")
+	}
+
+	cfVerifyReq.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
+	slog.Info(
+		"this is verify req",
+		"req",
+		cfVerifyReq,
+		"form_data",
+		formData,
+		"f_encoded",
+		strings.NewReader(formData.Encode()),
+	)
+
+	client := http.Client{}
+	res, err := client.Do(cfVerifyReq)
+	if err != nil {
+		return c.String(200, "You're now subscribed!")
+	}
+
+	defer res.Body.Close()
+
+	var firstOutcome VerificationResponse
+	if err := json.NewDecoder(res.Body).Decode(&firstOutcome); err != nil {
+		return c.String(200, "You're now subscribed!")
+	}
+
+	if !firstOutcome.Success {
 		return c.String(200, "You're now subscribed!")
 	}
 
