@@ -1,6 +1,9 @@
 package views
 
-import "os"
+import (
+	"github.com/MBvisti/mortenvistisen/pkg/config"
+	"os"
+)
 
 type MetaContent struct {
 	Content  string
@@ -51,6 +54,10 @@ templ (h Head) Build() {
 		<meta property="og:description" content={ h.Description }/>
 		<meta property="og:url" content={ h.Slug }/>
 		<meta property="og:site_name" content="Morten Vistisen"/>
+		if os.Getenv("ENVIRONMENT") == config.PROD_ENVIRONMENT {
+			<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" defer></script>
+			<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback" defer></script>
+		}
 		if h.Image != "" {
 			<meta property="og:image" content={ h.Image }/>
 		}
