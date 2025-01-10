@@ -55,6 +55,9 @@ down-migrations-to version:
 reset-db:
 	@goose -dir migrations $DB_KIND $DATABASE_URL reset
 
+fix-db:
+	@goose -dir migrations $DB_KIND $DATABASE_URL fix
+
 generate-db-functions:
 	sqlc compile && sqlc generate
 

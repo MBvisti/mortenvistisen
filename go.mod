@@ -1,11 +1,11 @@
 module github.com/MBvisti/mortenvistisen
 
-go 1.21.4
+go 1.23
 
-toolchain go1.22.0
+toolchain go1.23.4
 
 require (
-	github.com/a-h/templ v0.2.778
+	github.com/a-h/templ v0.3.819
 	github.com/alecthomas/chroma/v2 v2.14.0
 	github.com/aws/aws-sdk-go v1.54.8
 	github.com/caarlos0/env/v10 v10.0.0
@@ -34,7 +34,7 @@ require (
 	go.opentelemetry.io/otel v1.28.0
 	go.opentelemetry.io/otel/sdk v1.28.0
 	go.opentelemetry.io/otel/trace v1.28.0
-	golang.org/x/crypto v0.26.0
+	golang.org/x/crypto v0.31.0
 )
 
 require (
@@ -87,8 +87,8 @@ require (
 )
 
 require (
-	github.com/PuerkitoBio/goquery v1.9.1 // indirect
-	github.com/andybalholm/cascadia v1.3.2 // indirect
+	github.com/PuerkitoBio/goquery v1.10.1 // indirect
+	github.com/andybalholm/cascadia v1.3.3 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -120,10 +120,10 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/vanng822/css v1.0.1 // indirect
-	golang.org/x/net v0.28.0 // indirect
-	golang.org/x/sync v0.8.0 // indirect
-	golang.org/x/sys v0.23.0 // indirect
-	golang.org/x/text v0.17.0 // indirect
+	golang.org/x/net v0.33.0 // indirect
+	golang.org/x/sync v0.10.0 // indirect
+	golang.org/x/sys v0.28.0 // indirect
+	golang.org/x/text v0.21.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
