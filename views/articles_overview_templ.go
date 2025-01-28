@@ -59,7 +59,13 @@ func ArticlesOverview(posts []Post) templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = layouts.Base(Head{}.Default().Build()).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = layouts.Base(Head{
+			Title:       "Articles",
+			Description: "Collection of all articles released on the site.",
+			Slug:        "https://mortenvistisen.com/newsletter",
+			MetaType:    "website",
+			Image:       "https://mortenvistisen.com/static/images/mbv.png",
+		}.Build()).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

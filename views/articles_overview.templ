@@ -3,7 +3,13 @@ package views
 import "github.com/MBvisti/mortenvistisen/views/internal/layouts"
 
 templ ArticlesOverview(posts []Post) {
-	@layouts.Base(Head{}.Default().Build()) {
+	@layouts.Base(Head{
+		Title:       "Articles",
+		Description: "Collection of all articles released on the site.",
+		Slug:        "https://mortenvistisen.com/newsletter",
+		MetaType:    "website",
+		Image:       "https://mortenvistisen.com/static/images/mbv.png",
+	}.Build()) {
 		<div class="bg-base-300 w-full">
 			<div class="bg-base-100 max-w-screen-md md:max-w-screen-lg lg:max-w-screen-xl mx-auto grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12">
 				<div class="grid grid-cols-subgrid col-span-full lg:col-start-3 lg:col-end-11 p-4 mt-10">
