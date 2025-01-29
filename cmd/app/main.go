@@ -17,6 +17,7 @@ import (
 	"github.com/MBvisti/mortenvistisen/queue"
 	"github.com/MBvisti/mortenvistisen/routes"
 	"github.com/MBvisti/mortenvistisen/services"
+	"github.com/riverqueue/river"
 )
 
 // version is the latest commit sha at build time
@@ -24,6 +25,7 @@ var version string
 
 func main() {
 	cfg := config.New(version)
+	ctx := context.Background()
 
 	otel := telemetry.NewOtel(cfg)
 	defer func() {
@@ -47,12 +49,34 @@ func main() {
 		panic(err)
 	}
 
+	awsSes := mail_client.NewAwsSimpleEmailService()
 	db := database.New(conn)
 	psql := psql.NewPostgres(conn)
 
-	awsSes := mail_client.NewAwsSimpleEmailService()
+	workers, err := queue.SetupWorkers(queue.WorkerDependencies{
+		DB:      db,
+		Emailer: awsSes,
+	})
+	if err != nil {
+		panic(err)
+	}
 
-	riverClient := queue.NewClient(conn, queue.WithLogger(slog.Default()))
+	periodicJobs := []*river.PeriodicJob{}
+
+	q := map[string]river.QueueConfig{river.QueueDefault: {MaxWorkers: 100}}
+	riverClient := queue.NewClient(
+		conn,
+		queue.WithQueues(q),
+		queue.WithWorkers(workers),
+		queue.WithLogger(slog.Default()),
+		queue.WithPeriodicJobs(periodicJobs),
+	)
+
+	if err := riverClient.Start(ctx); err != nil {
+		panic(err)
+	}
+
+	// riverClient := queue.NewClient(conn, queue.WithLogger(slog.Default()))
 
 	postManager := posts.NewPostManager()
 
