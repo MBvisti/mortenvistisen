@@ -3,7 +3,10 @@ package views
 import "github.com/MBvisti/mortenvistisen/views/layouts"
 
 templ ProjectsPage() {
-	@layouts.Base(Head(ctx, WithTitle("Projects"), WithDescription("Collection of current and old projects I'm working on."))) {
+	@layouts.Base(Head(
+		ctx, WithTitle("Projects"),
+		WithDescription("A collection of all projects, past and on-going, that I'm working on. Mainly content creation and one-man businesses."),
+	)) {
 		<div class="bg-base-300 w-full flex-1">
 			<div class="h-full bg-base-100 md:max-w-screen-lg lg:max-w-screen-xl mx-auto grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12">
 				<div class="grid grid-cols-subgrid col-span-full lg:col-start-3 lg:col-end-11 p-4 mt-10">

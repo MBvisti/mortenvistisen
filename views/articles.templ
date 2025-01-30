@@ -8,7 +8,9 @@ type YearlyPosts struct {
 }
 
 templ ArticlesOverview(posts []YearlyPosts) {
-	@layouts.Base(Head(ctx, WithTitle("Articles"), WithDescription("Collection of all articles released on the site."))) {
+	@layouts.Base(Head(
+		ctx, WithTitle("Articles"),
+		WithDescription("All the articles that have been released on the blog sorted by which year each was released."))) {
 		<div class="bg-base-300 w-full">
 			<div class="bg-base-100 max-w-screen-md md:max-w-screen-lg lg:max-w-screen-xl mx-auto grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12">
 				<div class="grid grid-cols-subgrid col-span-full lg:col-start-3 lg:col-end-11 p-4 mt-10">

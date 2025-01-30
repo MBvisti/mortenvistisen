@@ -35,7 +35,7 @@ type headDataOption func(*headData)
 
 func WithTitle(title string) headDataOption {
 	return func(hd *headData) {
-		hd.title = fmt.Sprintf("%s | %s", title, hd.title)
+		hd.title = title
 	}
 }
 

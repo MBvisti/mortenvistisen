@@ -3,7 +3,7 @@ package views
 import "github.com/MBvisti/mortenvistisen/views/layouts"
 
 templ NewslettersPage() {
-	@layouts.Base(Head(ctx)) {
+	@layouts.Base(Head(ctx, WithTitle("Newsletters | mortenvistisen"))) {
 		<div class="bg-base-300 w-full flex-1">
 			<div class="h-full bg-base-100 max-w-screen-md md:max-w-screen-lg lg:max-w-screen-xl mx-auto grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12">
 				<div class="grid grid-cols-subgrid col-span-full lg:col-start-3 lg:col-end-11 p-4 mt-10">

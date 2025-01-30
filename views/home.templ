@@ -73,7 +73,7 @@ templ newsletterForm(csrfToken string) {
 }
 
 templ HomePage(posts []Post, csrfToken string) {
-	@layouts.Base(Head(ctx)) {
+	@layouts.Base(Head(ctx, WithTitle("Home | mortenvistisen"))) {
 		<div class="bg-base-300 w-full">
 			<div class="bg-base-100 md:max-w-screen-lg lg:max-w-screen-xl mx-auto grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12">
 				<div class="grid grid-cols-subgrid col-span-full lg:col-start-3 lg:col-end-11 p-4 mt-10">

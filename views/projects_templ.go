@@ -67,7 +67,10 @@ func ProjectsPage() templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = layouts.Base(Head(ctx, WithTitle("Projects"), WithDescription("Collection of current and old projects I'm working on."))).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = layouts.Base(Head(
+			ctx, WithTitle("Projects"),
+			WithDescription("A collection of all projects, past and on-going, that I'm working on. Mainly content creation and one-man businesses."),
+		)).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
