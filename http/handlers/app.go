@@ -6,127 +6,158 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
+	"sort"
+	"strconv"
 	"strings"
+	"time"
 
+	"github.com/MBvisti/mortenvistisen/config"
 	"github.com/MBvisti/mortenvistisen/models"
 	"github.com/MBvisti/mortenvistisen/posts"
+	"github.com/MBvisti/mortenvistisen/psql"
 	"github.com/MBvisti/mortenvistisen/services"
 	"github.com/MBvisti/mortenvistisen/views"
-	"github.com/MBvisti/mortenvistisen/views/authentication"
+	"github.com/MBvisti/mortenvistisen/views/fragments"
 	"github.com/gorilla/csrf"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/labstack/echo/v4"
+	"github.com/maypok86/otter"
 )
 
+const landingPageCacheKey = "LandingPage"
+
 type App struct {
-	base          Base
-	articleSvc    models.ArticleService
-	subscriberSvc models.SubscriberService
-	postManager   posts.PostManager
-	tokenService  services.Token
+	db          psql.Postgres
+	cache       otter.CacheWithVariableTTL[string, string]
+	email       services.Mail
+	postManager posts.Manager
 }
 
-func NewApp(
-	base Base,
-	articleSvc models.ArticleService,
-	subscriberSvc models.SubscriberService,
-	postManager posts.PostManager,
-	tokenService services.Token,
+func newApp(
+	db psql.Postgres,
+	cache otter.CacheWithVariableTTL[string, string],
+	email services.Mail,
+	postManager posts.Manager,
 ) App {
-	return App{base, articleSvc, subscriberSvc, postManager, tokenService}
+	return App{db, cache, email, postManager}
 }
 
-func (a App) Index(ctx echo.Context) error {
-	data, err := a.articleSvc.List(ctx.Request().Context(), 0, 50)
-	if err != nil {
-		return err
-	}
-
-	posts := make([]views.Post, 0, len(data))
-	for _, d := range data {
-		var tags []string
-		for _, tag := range d.Tags {
-			tags = append(tags, tag.Name)
-		}
-
-		posts = append(posts, views.Post{
-			Title:       d.Title,
-			ReleaseDate: d.ReleaseDate.String(),
-			Excerpt:     d.Excerpt,
-			Tags:        tags,
-			Slug:        a.base.FormatArticleSlug(d.Slug),
-		})
-	}
-
-	return views.HomePage(posts, csrf.Token(ctx.Request())).
-		Render(views.ExtractRenderDeps(ctx))
-}
-
-func (a App) About(ctx echo.Context) error {
-	return views.AboutPage(views.Head{
-		Title:       "About",
-		Description: "Contains information about the site owner, Morten Vistisen, the purpose of the site and the technologies used to build it.",
-		Slug:        a.base.BuildURLFromSlug("about"),
-		Image:       "https://mortenvistisen.com/static/images/mbv.png",
-		MetaType:    "website",
-	}).Render(views.ExtractRenderDeps(ctx))
-}
-
-func (a App) Newsletter(ctx echo.Context) error {
-	return views.NewsletterPage(views.Head{
-		Title:       "Newsletter",
-		Description: "Signup page for joining Morten's newsletter where he shares his thoughts on software development, business and life.",
-		Slug:        a.base.BuildURLFromSlug("newsletter"),
-		MetaType:    "website",
-		Image:       "https://mortenvistisen.com/static/images/mbv.png",
-	}, csrf.Token(ctx.Request())).Render(views.ExtractRenderDeps(ctx))
-}
-
-func (a App) Projects(ctx echo.Context) error {
-	return views.ProjectsPage(views.Head{
-		Title:       "Projects",
-		Description: "A collection of on-going and retired projects I've build over the years. This includes business projects, open source projects and personal projects.",
-		Slug:        a.base.BuildURLFromSlug("projects"),
-		MetaType:    "website",
-		Image:       "https://mortenvistisen.com/static/images/mbv.png",
-	}).Render(views.ExtractRenderDeps(ctx))
-}
-
-func (a App) ArticlesOverview(ctx echo.Context) error {
-	data, err := a.articleSvc.List(ctx.Request().Context(), 0, 50)
-	if err != nil {
-		return err
-	}
-
-	posts := make([]views.Post, 0, len(data))
-	for _, d := range data {
-		var tags []string
-		for _, tag := range d.Tags {
-			tags = append(tags, tag.Name)
-		}
-
-		posts = append(posts, views.Post{
-			Title:       d.Title,
-			ReleaseDate: d.ReleaseDate.String(),
-			Excerpt:     d.Excerpt,
-			Tags:        tags,
-			Slug:        a.base.FormatArticleSlug(d.Slug),
-		})
-	}
-	return views.ArticlesOverview(posts).Render(views.ExtractRenderDeps(ctx))
-}
-
-type VerificationResponse struct {
-	Success bool `json:"success"`
-	// Add other fields as needed from the Cloudflare response
-}
-
-func (a App) SubscriptionEvent(c echo.Context) error {
-	ctx, subscriptionEventSpan := a.base.Tracer.CreateSpan(
+func (a *App) LandingPage(c echo.Context) error {
+	articlesPage, err := models.GetArticlesPage(
 		c.Request().Context(),
-		"article/store",
+		1,
+		5,
+		a.db.Pool,
 	)
-	subscriptionEventSpan.AddEvent("AppHandler/SubscriptionEvent")
+	if err != nil {
+		return errorPage(c, views.ErrorPage())
+	}
 
+	posts := make([]views.Post, len(articlesPage.Articles))
+	for i, article := range articlesPage.Articles {
+		tags := make([]string, len(article.Tags))
+		for i, tag := range article.Tags {
+			tags[i] = tag.Name
+		}
+
+		posts[i] = views.Post{
+			Title:       article.Title,
+			Slug:        article.Slug,
+			Excerpt:     article.Excerpt,
+			ReleaseDate: article.ReleaseDate.String(),
+			Tags:        tags,
+		}
+	}
+
+	return views.HomePage(posts, csrf.Token(c.Request())).
+		Render(renderArgs(c))
+}
+
+func (a *App) AboutPage(c echo.Context) error {
+	return views.AboutPage().Render(renderArgs(c))
+}
+
+func (a *App) ArticlePage(c echo.Context) error {
+	slug := c.Param("postSlug")
+	article, err := models.GetArticleBySlug(
+		c.Request().Context(),
+		slug,
+		a.db.Pool,
+	)
+	if err != nil {
+		return errorPage(c, views.ErrorPage())
+	}
+
+	postContent, err := a.postManager.Parse(article.Filename)
+	if err != nil {
+		return errorPage(c, views.ErrorPage())
+	}
+
+	return views.ArticlePage(views.ArticlePageData{
+		HeaderTitle: article.Title,
+		Content:     postContent,
+		ReleaseDate: article.ReleaseDate,
+	}).Render(renderArgs(c))
+}
+
+func (a *App) ArticlesPage(c echo.Context) error {
+	articles, err := models.GetAllArticles(
+		c.Request().Context(),
+		a.db.Pool,
+	)
+	if err != nil {
+		return errorPage(c, views.ErrorPage())
+	}
+
+	postsByYear := map[int][]views.Post{}
+	var years []int
+
+	for _, article := range articles {
+		year := article.ReleaseDate.Year()
+
+		if _, exists := postsByYear[year]; !exists {
+			years = append(years, year)
+		}
+
+		tags := make([]string, len(article.Tags))
+		for i, tag := range article.Tags {
+			tags[i] = tag.Name
+		}
+
+		postsByYear[year] = append(
+			postsByYear[year],
+			views.Post{
+				Title:       article.Title,
+				Slug:        article.Slug,
+				Excerpt:     article.Excerpt,
+				ReleaseDate: article.ReleaseDate.String(),
+				Tags:        tags,
+			},
+		)
+	}
+
+	sort.Sort(sort.Reverse(sort.IntSlice(years)))
+
+	orderedPosts := make([]views.YearlyPosts, len(years))
+	for i, year := range years {
+		orderedPosts[i] = views.YearlyPosts{
+			Year:     strconv.Itoa(year),
+			Articles: postsByYear[year],
+		}
+	}
+
+	return views.ArticlesOverview(orderedPosts).Render(renderArgs(c))
+}
+
+func (a *App) ProjectsPage(c echo.Context) error {
+	return views.ProjectsPage().Render(renderArgs(c))
+}
+
+func (a *App) NewslettersPage(c echo.Context) error {
+	return views.NewslettersPage().Render(renderArgs(c))
+}
+
+func (a *App) SubscriptionEvent(c echo.Context) error {
 	type subscriptionEventForm struct {
 		Email             string `form:"hero-input"`
 		Title             string `form:"article-title"`
@@ -136,359 +167,260 @@ func (a App) SubscriptionEvent(c echo.Context) error {
 	var form subscriptionEventForm
 	if err := c.Bind(&form); err != nil {
 		slog.ErrorContext(
-			ctx,
-			"could not bind subscriptionEventForm",
+			c.Request().Context(),
+			"failed to bind subscription form",
 			"error",
 			err,
 		)
-		return c.String(200, "You're now subscribed!")
+		return errorPage(c, views.ErrorPage())
 	}
 
-	// Get IP address
 	ip := c.RealIP()
 
-	// Prepare form data
 	formData := url.Values{}
-	formData.Set("secret", a.base.Config.Auth.TurnstileSecretKey)
+	formData.Set("secret", config.Cfg.TurnstileSecretKey)
 	formData.Set("response", form.TurnstileResponse)
 	formData.Set("remoteip", ip)
 
-	// First validation request
 	cfVerifyReq, err := http.NewRequestWithContext(c.Request().Context(),
 		http.MethodPost,
 		"https://challenges.cloudflare.com/turnstile/v0/siteverify",
 		strings.NewReader(formData.Encode()),
 	)
 	if err != nil {
-		return c.String(200, "You're now subscribed!")
+		slog.ErrorContext(
+			c.Request().Context(),
+			"failed to create cloudflare verification request",
+			"error",
+			err,
+		)
+
+		return errorPage(c, views.ErrorPage())
 	}
 
 	cfVerifyReq.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
-	slog.Info(
-		"this is verify req",
-		"req",
-		cfVerifyReq,
-		"form_data",
-		formData,
-		"f_encoded",
-		strings.NewReader(formData.Encode()),
-	)
-
-	client := http.Client{}
+	client := http.Client{
+		Timeout: 5 * time.Second,
+	}
 	res, err := client.Do(cfVerifyReq)
 	if err != nil {
-		return c.String(200, "You're now subscribed!")
+		slog.ErrorContext(
+			c.Request().Context(),
+			"failed to execute cloudflare verification request",
+			"error",
+			err,
+		)
+		return fragments.SubscribeResponse(false).Render(renderArgs(c))
 	}
 
 	defer res.Body.Close()
 
-	var firstOutcome VerificationResponse
+	type verificationResponse struct {
+		Success bool `json:"success"`
+	}
+
+	var firstOutcome verificationResponse
 	if err := json.NewDecoder(res.Body).Decode(&firstOutcome); err != nil {
-		return c.String(200, "You're now subscribed!")
+		slog.ErrorContext(
+			c.Request().Context(),
+			"failed to decode cloudflare verification response",
+			"error",
+			err,
+		)
+		return fragments.SubscribeResponse(false).Render(renderArgs(c))
 	}
 
-	if !firstOutcome.Success {
-		return c.String(200, "You're now subscribed!")
+	if firstOutcome.Success {
+		return fragments.SubscribeResponse(false).Render(renderArgs(c))
 	}
 
-	slog.InfoContext(
-		ctx,
-		"starting to create new subscriber from handler",
-		"email",
-		form.Email,
+	subcriber, err := models.NewSubscriber(
+		c.Request().Context(),
+		a.db.Pool,
+		models.NewSubscriberPayload{
+			Email:        form.Email,
+			SubscribedAt: time.Now(),
+			Referer:      form.Title,
+		},
 	)
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			return fragments.SubscribeResponse(true).Render(renderArgs(c))
+		}
 
-	param := c.QueryParam("book")
-	var bookSub bool
-	if param == "true" {
-		bookSub = true
+		slog.ErrorContext(
+			c.Request().Context(),
+			"failed to create new subscriber",
+			"error",
+			err,
+			"email",
+			form.Email,
+		)
+		return fragments.SubscribeResponse(false).Render(renderArgs(c))
 	}
 
-	newSubscriberCtx, newSubscriberSpan := a.base.Tracer.CreateChildSpan(
-		ctx,
-		subscriptionEventSpan,
-		"subscriberService/New",
-	)
-	newSubscriberSpan.AddEvent("New/Start")
-	if err := a.subscriberSvc.New(newSubscriberCtx, form.Email, form.Title, bookSub); err != nil {
-		if errors.Is(err, models.ErrSubscriberExists) {
-			return views.SubscribeModalResponse(bookSub, true).
-				Render(views.ExtractRenderDeps(c))
-		}
-		if errors.Is(err, models.ErrValidation{}) {
-			return nil
-		}
-		if errors.Is(err, models.ErrUnrecoverableEvent) {
-			return c.JSON(http.StatusInternalServerError, "yo")
-		}
-	}
-	newSubscriberSpan.End()
+	now := time.Now()
 
-	subscriptionEventSpan.End()
-	return views.SubscribeModalResponse(bookSub, false).
-		Render(views.ExtractRenderDeps(c))
-}
-
-func (a App) HowToStartFreelancing(ctx echo.Context) error {
-	return views.HowToStartFreelancing(views.Head{
-		Title:       "How To Start Freelancing Book",
-		Description: "Want to start freelancing? Kickstart your journey to working on your own terms in the best possible way by signing up for the How To Start Freelancing Book.",
-		Slug: a.base.BuildURLFromSlug(
-			"books/" + "how-to-start-freelancing",
-		),
-		MetaType: "website",
-		Image:    "https://mortenvistisen.com/static/images/book-cover-ebook-wip.png",
-		ExtraMeta: []views.MetaContent{
-			{
-				Content: "Morten Vistisen",
-				Name:    "author",
-			},
-			{
-				Content: "How to start freelancing book",
-				Name:    "twitter:title",
-			},
-			{
-				Content: "Want to start freelancing? Kickstart your journey to working on your own terms in the best possible way by signing up for the How To Start Freelancing Book.",
-				Name:    "twitter:description",
-			},
-			{
-				Content: "freelancing, contracting, developer, software engineer, book, tutorial",
-				Name:    "keywords",
+	activationTkn, err := models.NewToken(
+		c.Request().Context(),
+		models.NewTokenPayload{
+			Expiration: now.Add(48 * time.Hour),
+			Meta: models.MetaInformation{
+				Resource:   models.ResourceSubscriber,
+				ResourceID: subcriber.ID,
+				Scope:      models.ScopeEmailVerification,
 			},
 		},
-	},
-		csrf.Token(ctx.Request()),
-	).
-		Render(views.ExtractRenderDeps(ctx))
-}
+		a.db.Pool,
+	)
+	if err != nil {
+		slog.ErrorContext(
+			c.Request().Context(),
+			"failed to create activation token",
+			"error",
+			err,
+			"subscriber_id",
+			subcriber.ID,
+		)
+		return errorPage(c, views.ErrorPage())
+	}
 
-func (a App) RenderModal(ctx echo.Context) error {
-	return views.SubscribeModal(
-		csrf.Token(
-			ctx.Request(),
-		),
-		ctx.QueryParam("article-name"),
-	).Render(views.ExtractRenderDeps(ctx))
-}
+	unsubTkn, err := models.NewToken(
+		c.Request().Context(),
+		models.NewTokenPayload{
+			Expiration: now.Add(365 * (24 * time.Hour)),
+			Meta: models.MetaInformation{
+				Resource:   models.ResourceSubscriber,
+				ResourceID: subcriber.ID,
+				Scope:      models.ScopeUnsubscribe,
+			},
+		},
+		a.db.Pool,
+	)
+	if err != nil {
+		slog.ErrorContext(
+			c.Request().Context(),
+			"failed to create unsubscribe token",
+			"error",
+			err,
+			"subscriber_id",
+			subcriber.ID,
+		)
+		return errorPage(c, views.ErrorPage())
+	}
 
-type VerificationToken struct {
-	Token string `query:"token"`
+	if err := a.email.SendNewSubscriber(
+		c.Request().Context(), subcriber.Email, activationTkn, unsubTkn,
+	); err != nil {
+		slog.ErrorContext(
+			c.Request().Context(),
+			"failed to send new subscriber email",
+			"error",
+			err,
+			"subscriber_id",
+			subcriber.ID,
+			"email",
+			subcriber.Email,
+		)
+		return errorPage(c, views.ErrorPage())
+	}
+
+	return fragments.SubscribeResponse(false).Render(renderArgs(c))
 }
 
 func (a App) SubscriberEmailVerification(c echo.Context) error {
-	ctx, span := a.base.Tracer.CreateSpan(
-		c.Request().Context(),
-		"AppHandler/SubscriberEmailVerification",
-	)
-	span.AddEvent("SubscriberEmailVerification/start")
+	type verificationRequest struct {
+		Token string `query:"token"`
+	}
 
-	var payload VerificationToken
+	var payload verificationRequest
 	if err := c.Bind(&payload); err != nil {
-		slog.ErrorContext(
-			ctx,
-			"could not bind verification token",
-			"error",
-			err,
-		)
-		c.Response().Writer.Header().Add("HX-Redirect", "/500")
-		c.Response().Writer.Header().Add("PreviousLocation", "/user/create")
-
-		return a.base.InternalError(c)
+		return errorPage(c, views.ErrorPage())
 	}
 
-	if err := a.tokenService.Validate(ctx, payload.Token, services.ScopeEmailVerification); err != nil {
-		return err
-	}
-
-	subscriberID, err := a.tokenService.GetAssociatedSubscriberID(
-		ctx,
-		payload.Token,
-	)
+	tx, err := a.db.BeginTx(c.Request().Context())
 	if err != nil {
-		return err
+		return errorPage(c, views.ErrorPage())
+	}
+	defer tx.Rollback(c.Request().Context())
+
+	tkn, err := models.GetToken(c.Request().Context(), payload.Token, tx)
+	if err != nil {
+		return errorPage(
+			c,
+			views.ErrorPage(
+				views.WithErrPageTitle("That doesn't seem right"),
+				views.WithErrPageMsg(
+					"Your token is either not valid anymore or have been deleted. Please request a new one or contact support.",
+				),
+			),
+		)
 	}
 
-	subVerifyCtx, subVerifySpan := a.base.Tracer.CreateChildSpan(
-		ctx,
-		span,
-		"SubscriberService/Verify",
-	)
-	subVerifySpan.AddEvent("Verify/Start")
-	if err := a.subscriberSvc.Verify(subVerifyCtx, subscriberID); err != nil {
-		return err
+	if !tkn.IsValid() || tkn.Meta.Scope != models.ScopeEmailVerification {
+		return views.SubscriberVerification(false).Render(renderArgs(c))
 	}
-	subVerifySpan.End()
 
-	tokenDeleteCtx, tokenDeleteSpan := a.base.Tracer.CreateChildSpan(
-		ctx,
-		span,
-		"TokenService/Delete",
-	)
-	tokenDeleteSpan.AddEvent("Delete/Start")
-	if err := a.tokenService.Delete(tokenDeleteCtx, payload.Token); err != nil {
-		return err
+	if _, err := models.UpdateSubscriberVerification(c.Request().Context(), tx, tkn.Meta.ResourceID, true); err != nil {
+		return errorPage(c, views.ErrorPage())
 	}
-	tokenDeleteSpan.End()
 
-	// hashedToken := tknManager.Hash(tkn.Token)
-	//
-	// token, err := db.QuerySubscriberTokenByHash(ctx.Request().Context(), hashedToken)
-	// if err != nil {
-	// 	if errors.Is(err, pgx.ErrNoRows) {
-	// 		return authentication.VerifyEmailPage(true, views.Head{}).
-	// 			Render(views.ExtractRenderDeps(ctx))
-	// 	}
-	//
-	// 	ctx.Response().Writer.Header().Add("HX-Redirect", "/500")
-	// 	ctx.Response().Writer.Header().Add("PreviousLocation", "/login")
-	//
-	// 	slog.ErrorContext(ctx.Request().Context(), "could not query subscriber token", "error", err)
-	// 	return misc.InternalError(ctx)
-	// }
-	//
-	// if database.ConvertFromPGTimestamptzToTime(token.ExpiresAt).Before(time.Now()) &&
-	// 	token.Scope != tokens.ScopeEmailVerification {
-	// 	return authentication.VerifyEmailPage(true, views.Head{}).
-	// 		Render(views.ExtractRenderDeps(ctx))
-	// }
-	//
-	// if err := db.ConfirmSubscriberEmail(ctx.Request().Context(), database.ConfirmSubscriberEmailParams{
-	// 	ID:        token.SubscriberID,
-	// 	UpdatedAt: database.ConvertToPGTimestamptz(time.Now()),
-	// }); err != nil {
-	// 	ctx.Response().Writer.Header().Add("HX-Redirect", "/500")
-	// 	ctx.Response().Writer.Header().Add("PreviousLocation", "/login")
-	//
-	// 	slog.ErrorContext(ctx.Request().Context(), "could not confirm email", "error", err)
-	// 	return misc.InternalError(ctx)
-	// }
+	if err := models.DeleteToken(c.Request().Context(), tkn.ID, tx); err != nil {
+		return errorPage(c, views.ErrorPage())
+	}
 
-	span.End()
-	return authentication.VerifySubscriberEmailPage(false, views.Head{}).
-		Render(views.ExtractRenderDeps(c))
+	if err := tx.Commit(c.Request().Context()); err != nil {
+		return errorPage(c, views.ErrorPage())
+	}
+
+	return views.SubscriberVerification(true).Render(renderArgs(c))
 }
 
-func (a App) SubscriberUnsub(c echo.Context) error {
-	ctx, span := a.base.Tracer.CreateSpan(
-		c.Request().Context(),
-		"AppHandler/SubscriberUnsub",
-	)
-	span.AddEvent("SubscriberUnsub/start")
-	var payload VerificationToken
+func (a App) UnsubscriptionEvent(c echo.Context) error {
+	type unsubscribeRequest struct {
+		Token string `query:"token"`
+	}
+
+	var payload unsubscribeRequest
 	if err := c.Bind(&payload); err != nil {
-		slog.ErrorContext(
-			ctx,
-			"could not bind verification token",
-			"error",
-			err,
-		)
-		c.Response().Writer.Header().Add("HX-Redirect", "/500")
-		c.Response().Writer.Header().Add("PreviousLocation", "/user/create")
-
-		return a.base.InternalError(c)
+		return errorPage(c, views.ErrorPage())
 	}
 
-	subscriberID, err := a.tokenService.GetAssociatedSubscriberID(
-		ctx,
-		payload.Token,
-	)
+	tx, err := a.db.BeginTx(c.Request().Context())
 	if err != nil {
-		return err
+		return errorPage(c, views.ErrorPage())
 	}
+	defer tx.Rollback(c.Request().Context())
 
-	subscriberDeleteCtx, subscriberDeleteSpan := a.base.Tracer.CreateChildSpan(
-		ctx,
-		span,
-		"SubscriberService/Delete",
-	)
-	subscriberDeleteSpan.AddEvent("Delete/Start")
-	if err := a.subscriberSvc.Delete(subscriberDeleteCtx, subscriberID); err != nil {
-		return err
-	}
-
-	tokenDeleteCtx, tokenDeleteSpan := a.base.Tracer.CreateChildSpan(
-		ctx,
-		span,
-		"TokenService/Delete",
-	)
-	tokenDeleteSpan.AddEvent("Delete/Start")
-	if err := a.tokenService.Delete(tokenDeleteCtx, payload.Token); err != nil {
-		return err
-	}
-	tokenDeleteSpan.End()
-
-	span.End()
-	return c.String(http.StatusOK, "You've been unsubscribed")
-}
-
-func (a App) Article(ctx echo.Context) error {
-	postSlug := ctx.Param("postSlug")
-
-	post, err := a.articleSvc.BySlug(ctx.Request().Context(), postSlug)
+	tkn, err := models.GetToken(c.Request().Context(), payload.Token, tx)
 	if err != nil {
-		return err
-	}
-
-	postContent, err := a.postManager.Parse(post.Filename)
-	if err != nil {
-		return err
-	}
-
-	var keywords string
-	for i, tag := range post.Tags {
-		if i == len(post.Tags)-1 {
-			keywords = keywords + tag.Name
-		} else {
-			keywords = keywords + tag.Name + ", "
-		}
-	}
-
-	fiveRandomPosts, err := a.base.DB.GetFiveRandomPosts(
-		ctx.Request().Context(),
-		post.ID,
-	)
-	if err != nil {
-		return err
-	}
-
-	otherArticles := make(map[string]string, 5)
-
-	for _, article := range fiveRandomPosts {
-		otherArticles[article.Title] = a.base.BuildURLFromSlug(
-			"posts/" + article.Slug,
+		return errorPage(
+			c,
+			views.ErrorPage(
+				views.WithErrPageTitle("That doesn't seem right"),
+				views.WithErrPageMsg(
+					"Your token is either not valid anymore or have been deleted. Please request a new one or contact support.",
+				),
+			),
 		)
 	}
+	if !tkn.IsValid() || tkn.Meta.Scope != models.ScopeUnsubscribe {
+		return views.SubscriptionDeletePage(false).Render(renderArgs(c))
+	}
 
-	return views.ArticlePage(views.ArticlePageData{
-		Content:           postContent,
-		HeaderTitle:       post.HeaderTitle,
-		ReleaseDate:       post.ReleaseDate,
-		OtherArticleLinks: otherArticles,
-		CsrfToken:         csrf.Token(ctx.Request()),
-	}, views.Head{
-		Title:       post.Title,
-		Description: post.Excerpt,
-		Slug:        a.base.BuildURLFromSlug("posts/" + post.Slug),
-		MetaType:    "article",
-		Image:       "https://mortenvistisen.com/static/images/mbv.png",
-		ExtraMeta: []views.MetaContent{
-			{
-				Content: "Morten Vistisen",
-				Name:    "author",
-			},
-			{
-				Content: post.Title,
-				Name:    "twitter:title",
-			},
-			{
-				Content: post.Excerpt,
-				Name:    "twitter:description",
-			},
-			{
-				Content: keywords,
-				Name:    "keywords",
-			},
-		},
-	}).Render(views.ExtractRenderDeps(ctx))
+	if err := models.DeleteSubscriber(c.Request().Context(), tx, tkn.Meta.ResourceID); err != nil {
+		return errorPage(c, views.ErrorPage())
+	}
+
+	if err := models.DeleteToken(c.Request().Context(), tkn.ID, tx); err != nil {
+		return errorPage(c, views.ErrorPage())
+	}
+
+	if err := tx.Commit(c.Request().Context()); err != nil {
+		return errorPage(c, views.ErrorPage())
+	}
+
+	return views.SubscriptionDeletePage(true).Render(renderArgs(c))
 }

@@ -2,8 +2,8 @@ package views
 
 import (
 	"context"
-	"github.com/MBvisti/mortenvistisen/views/internal/layouts"
-	"github.com/golang-module/carbon/v2"
+	"github.com/MBvisti/mortenvistisen/views/layouts"
+	"github.com/dromara/carbon/v2"
 	"io"
 	"time"
 	"unicode/utf8"
@@ -93,8 +93,8 @@ script triggerCourse() {
 		);
 }
 
-templ ArticlePage(data ArticlePageData, head Head) {
-	@layouts.Base(head.Build()) {
+templ ArticlePage(data ArticlePageData) {
+	@layouts.Base(Head(ctx)) {
 		<div class="bg-base-300 w-full flex-1 flex flex-col">
 			<div class="px-4 w-full flex-1 bg-base-100 grid-rows-[100px_150px_1fr] max-w-screen-sm md:max-w-screen-md md:max-w-screen-lg lg:max-w-screen-xl mx-auto grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12">
 				<div class="flex items-center col-span-full md:pl-10">
@@ -105,12 +105,12 @@ templ ArticlePage(data ArticlePageData, head Head) {
 					</a>
 				</div>
 				<div class="text-start col-span-full lg:col-start-4 lg:col-end-11 prose lg:prose-xl">
-					<h1 class="text-4xl font-bold tracking-tight text-neutral-content sm:text-5xl">{ data.HeaderTitle }</h1>
-					<span class="text-neutral-content">
+					<h1 class="text-4xl font-bold tracking-tight text-base-content sm:text-5xl">{ data.HeaderTitle }</h1>
+					<span class="text-sm text-base-content">
 						{ carbon.CreateFromStdTime(data.ReleaseDate, carbon.Berlin).ToDateString() } | By MBV
 					</span>
 				</div>
-				<article class="text-neutral-content text-start col-span-full lg:col-start-4 lg:col-end-11 prose lg:prose-xl">
+				<article class="text-base-content text-start col-span-full lg:col-start-4 lg:col-end-11 prose prose-h2:text-base-content lg:prose-xl">
 					@unsafe(data.Content)
 					<hr/>
 					<div class="mt-10">

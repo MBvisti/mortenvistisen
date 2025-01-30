@@ -28,21 +28,3 @@
 **/tmp
 
 **/resources/node_modules
-
-**/bak
-
-# flyctl launch added from bak/.gitignore
-bak/target
-bak/**/node_modules
-bak/**/.env
-
-# flyctl launch added from resources/mails/.gitignore
-resources/mails/**/node_modules
-resources/mails/**/build_local
-resources/mails/**/.vscode
-resources/mails/**/.idea
-resources/mails/**/Thumbs.db
-resources/mails/**/.DS_Store
-resources/mails/**/npm-debug.log
-resources/mails/**/yarn-error.log
-fly.toml

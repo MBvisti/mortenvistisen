@@ -16,12 +16,12 @@ import (
 //go:embed *.md
 var assets embed.FS
 
-type PostManager struct {
+type Manager struct {
 	posts           embed.FS
 	markdownHandler goldmark.Markdown
 }
 
-func NewPostManager() PostManager {
+func NewManager() Manager {
 	md := goldmark.New(
 		goldmark.WithExtensions(
 			extension.GFM,
@@ -44,7 +44,7 @@ func NewPostManager() PostManager {
 		),
 	)
 
-	return PostManager{
+	return Manager{
 		posts:           assets,
 		markdownHandler: md,
 	}
@@ -75,7 +75,7 @@ func GetAllFiles() ([]string, error) {
 	return filenames, nil
 }
 
-func (pm *PostManager) GetPost(name string) (string, error) {
+func (pm *Manager) GetPost(name string) (string, error) {
 	source, err := pm.posts.ReadFile(name)
 	if err != nil {
 		slog.Error("failed to read markdown file", "error", err)
@@ -85,7 +85,7 @@ func (pm *PostManager) GetPost(name string) (string, error) {
 	return string(source), nil
 }
 
-func (pm *PostManager) Parse(name string) (string, error) {
+func (pm *Manager) Parse(name string) (string, error) {
 	source, err := pm.posts.ReadFile(name)
 	if err != nil {
 		slog.Error("failed to read markdown file", "error", err)
@@ -102,7 +102,7 @@ func (pm *PostManager) Parse(name string) (string, error) {
 	return htmlOutput.String(), nil
 }
 
-func (pm *PostManager) ParseContent(content string) (string, error) {
+func (pm *Manager) ParseContent(content string) (string, error) {
 	// Parse Markdown content
 	var htmlOutput bytes.Buffer
 	if err := pm.markdownHandler.Convert([]byte(content), &htmlOutput); err != nil {

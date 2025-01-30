@@ -8,9 +8,9 @@ package views
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "github.com/MBvisti/mortenvistisen/views/internal/layouts"
+import "github.com/MBvisti/mortenvistisen/views/layouts"
 
-func ProjectsPage(head Head) templ.Component {
+func ProjectsPage() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -43,31 +43,31 @@ func ProjectsPage(head Head) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"container mx-auto grid grid-cols-4 px-4 md:grid-cols-6 lg:grid-cols-12\"><div class=\"col-span-4 hero md:col-start-2 md:col-end-6 lg:col-start-4 lg:col-end-10\"><h1 class=\"mb-10 text-2xl mx-auto col-2 font-bold text-white sm:text-4xl\">Projects</h1></div><div class=\"col-span-4 hero md:col-start-2 md:col-end-6 lg:col-start-4 lg:col-end-10 card bg-base-200 mb-10\"><div class=\"card-body\"><div class=\"w-full flex justify-center\"><h2 class=\"card-title\">YouTube - mbv labs</h2></div><div class=\"flex flex-col my-2 py-8 rounded px-4 text-neutral-content\"><p class=\"text-start mb-2\">I've long wanted to get into creating video tutorials and content.</p><p class=\"text-start\">mbv-labs is meant to be the start of that journey; the channel will contain tutorials, but also videos building features/fixing problems/etc for my other side projects, which can contain code but also higher level discussions on indiehacking and building software.</p></div><div class=\"card-actions justify-center\"><a rel=\"nofollow\" href=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"bg-base-300 w-full flex-1\"><div class=\"h-full bg-base-100 md:max-w-screen-lg lg:max-w-screen-xl mx-auto grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12\"><div class=\"grid grid-cols-subgrid col-span-full lg:col-start-3 lg:col-end-11 p-4 mt-10\"><div class=\"col-span-full\"><h1 class=\"mb-10 text-2xl text-center font-bold text-white sm:text-4xl\">Projects</h1></div><div class=\"flex flex-col col-span-full \"><div class=\"card bg-base-200 mb-10\"><div class=\"card-body\"><div class=\"w-full flex justify-center\"><h2 class=\"card-title\">YouTube - mbv labs</h2></div><div class=\"text-lg flex flex-col my-2 py-8 rounded px-4 text-base-content\"><p class=\"text-start mb-2\">I've long wanted to get into creating video tutorials and content.</p><p class=\"text-start\">mbv-labs is meant to be the start of that journey; the channel will contain tutorials, but also videos building features/fixing problems/etc for my other side projects, which can contain code but also higher level discussions on indiehacking and building software.</p></div><div class=\"card-actions justify-center\"><a rel=\"nofollow\" href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var3 templ.SafeURL = templ.SafeURL("https://www.youtube.com/@mbvlabs")
+			var templ_7745c5c3_Var3 templ.SafeURL = templ.SafeURL("https://www.youtube.com/@MBvisti")
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var3)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\"><button data-umami-event=\"projects--youtube-mbv-labs\" class=\"btn btn-primary\">Check it out</button></a></div></div></div><div class=\"col-span-4 hero md:col-start-2 md:col-end-6 lg:col-start-4 lg:col-end-10 card bg-base-200 mb-10\"><div class=\"card-body\"><div class=\"w-full flex justify-center\"><h2 class=\"card-title\">Grafto - Go Boilerplate</h2></div><div class=\"flex flex-col my-2 py-8 rounded px-4 text-neutral-content\"><p class=\"text-start mb-2\">After hating on php for a long time I finally took some time out to try  it out, more specifically Laravel. Boy was I wrong about php.</p><p class=\"text-start mb-2\">Laravel is such a great framework with (almost) everything you need out of the box. But I love writing Go, and I've spend too much time in statically typed  languages that going back to dynamically typed languages is a no-go for me.</p><p class=\"text-start mb-2\">So, I decided to built my own Laravel inspired version in Go which I've called Grafto. It's more of a boilerplate than a framework, but it's a great starting point for building full-stack web applications in Go.</p><p class=\"text-start mb-2\">Aimed at indiehackers wanting to ship products fully in Go.</p><p class=\"text-start mb-2\">Uses: Go, templ, tailwindcss, daisyui, alpine.js and htmx.</p></div><div class=\"card-actions justify-center\"><a rel=\"nofollow\" href=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\"><button data-umami-event=\"projects--youtube-mbv-labs\" class=\"btn btn-primary\">Check it out</button></a></div></div></div><div class=\"col-span-4 hero md:col-start-2 md:col-end-6 lg:col-start-4 lg:col-end-10 card bg-base-200 mb-10\"><div class=\"card-body\"><div class=\"w-full flex justify-center\"><h2 class=\"card-title\">Grafto - Go Boilerplate</h2></div><div class=\"text-lg flex flex-col my-2 py-8 rounded px-4 text-base-content\"><p class=\"text-start mb-2\">After hating on php for a long time I finally took some time out to try  it out, more specifically Laravel. Boy was I wrong about php.</p><p class=\"text-start mb-2\">Laravel is such a great framework with (almost) everything you need out of the box. But I love writing Go, and I've spend too much time in statically typed  languages that going back to dynamically typed languages is a no-go for me.</p><p class=\"text-start mb-2\">So, I decided to built my own Laravel inspired version in Go which I've called Grafto. It's more of a boilerplate than a framework, but it's a great starting point for building full-stack web applications in Go.</p><p class=\"text-start mb-2\">Aimed at indiehackers wanting to ship products fully in Go.</p><p class=\"text-start mb-2\">Uses: Go, templ, tailwindcss, daisyui, alpine.js and htmx.</p></div><div class=\"card-actions justify-center\"><a rel=\"nofollow\" href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var4 templ.SafeURL = templ.SafeURL("https://www.github.com/mbv-labs/grafto")
+			var templ_7745c5c3_Var4 templ.SafeURL = templ.SafeURL("https://www.github.com/mbv-labs/mortenvistisen")
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var4)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\"><button data-umami-event=\"projects--youtube-mbv-labs\" class=\"btn btn-primary\">Check it out</button></a></div></div></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\"><button data-umami-event=\"projects--youtube-mbv-labs\" class=\"btn btn-primary\">Check it out</button></a></div></div></div></div></div></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = layouts.Base(head.Build()).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = layouts.Base(Head(ctx, WithTitle("Projects"), WithDescription("Collection of current and old projects I'm working on."))).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

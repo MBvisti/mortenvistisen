@@ -10,10 +10,10 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"github.com/MBvisti/mortenvistisen/views"
-	"github.com/MBvisti/mortenvistisen/views/internal/layouts"
+	"github.com/MBvisti/mortenvistisen/views/layouts"
 )
 
-func VerifyEmailPage(tokenInvalid bool, head views.Head) templ.Component {
+func VerifyEmailPage(tokenInvalid bool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -67,7 +67,12 @@ func VerifyEmailPage(tokenInvalid bool, head views.Head) templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = layouts.Base(head.Build()).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = layouts.Base(
+			views.Head(
+				ctx,
+				views.WithTitle("Verify Email"),
+			),
+		).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

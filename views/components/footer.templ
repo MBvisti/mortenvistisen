@@ -1,0 +1,24 @@
+package components
+
+import (
+	"fmt"
+	"github.com/MBvisti/mortenvistisen/views/paths"
+	"time"
+)
+
+templ Footer() {
+	<footer class="bg-base-300 w-full">
+		<div class="py-4 px-10 bg-base-100 max-w-screen-xl mx-auto grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12">
+			<div class="col-span-full md:col-start-2 md:col-end-6 lg:col-start-3 lg:col-end-11 md:my-10 flex flex-col items-center justify-between gap-6">
+				<div class="flex flex-wrap justify-center gap-x-6 gap-y-1 text-sm font-medium text-zinc-200">
+					<a class="transition hover:text-teal-400" target="_blank" href="https://golangblogcourse.com">Golang Course</a>
+					<a class="transition hover:text-teal-400" href={ paths.GetSafeURL(ctx, paths.NewslettersPage) }>Newsletters</a>
+					<a class="transition hover:text-teal-400" target="_blank" href="https://mbvlabs.com">Consulting</a>
+				</div>
+				<p class="text-sm text-zinc-500">
+					{ fmt.Sprintf("© %v", time.Now().Year()) } <a href="https://mbvlabs.com">mbvlabs</a>. All rights reserved.
+				</p>
+			</div>
+		</div>
+	</footer>
+}

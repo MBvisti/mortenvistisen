@@ -1,0 +1,53 @@
+package components
+
+import "github.com/MBvisti/mortenvistisen/views/paths"
+
+templ Nav() {
+	<header class="bg-base-300 w-full">
+		<div class="bg-base-100 max-w-screen-md md:max-w-screen-lg lg:max-w-screen-xl mx-auto grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12">
+			<div class="p-0 md:p-6 col-span-full flex justify-center">
+				<div class="navbar bg-base-100 md:hidden">
+					<nav class="flex-1 flex justify-end ">
+						<ul class="menu menu-horizontal px-1 rounded shadow-lg">
+							<li class="bg-base-300 z-10">
+								<details>
+									<summary>Menu</summary>
+									<ul class="bg-base-100 rounded-t-none p-2">
+										<li>
+											<a class="relative block px-3 py-2 transition hover:text-primary" href={ paths.GetSafeURL(ctx, paths.HomePage) }>Home</a>
+										</li>
+										<li>
+											<a class="relative block px-3 py-2 transition hover:text-primary" href={ paths.GetSafeURL(ctx, paths.NewslettersPage) }>Newsletters</a>
+										</li>
+										<li>
+											<a class="relative block px-3 py-2 transition hover:text-primary" href={ paths.GetSafeURL(ctx, paths.ProjectsPage) }>Projects</a>
+										</li>
+										<li>
+											<a class="relative block px-3 py-2 transition hover:text-primary" href={ paths.GetSafeURL(ctx, paths.AboutPage) }>About</a>
+										</li>
+									</ul>
+								</details>
+							</li>
+						</ul>
+					</nav>
+				</div>
+				<nav class="bg-base-300 pointer-events-auto hidden md:block">
+					<ul class="flex rounded px-3 text-sm font-medium shadow-lg ring-1 backdrop-blur ring-base-100/10">
+						<li>
+							<a class="relative block px-3 py-2 transition hover:text-primary" href={ paths.GetSafeURL(ctx, paths.HomePage) }>Home</a>
+						</li>
+						<li>
+							<a class="relative block px-3 py-2 transition hover:text-primary" href={ paths.GetSafeURL(ctx, paths.NewslettersPage) }>Newsletters</a>
+						</li>
+						<li>
+							<a class="relative block px-3 py-2 transition hover:text-primary" href={ paths.GetSafeURL(ctx, paths.ProjectsPage) }>Projects</a>
+						</li>
+						<li>
+							<a class="relative block px-3 py-2 transition hover:text-primary" href={ paths.GetSafeURL(ctx, paths.AboutPage) }>About</a>
+						</li>
+					</ul>
+				</nav>
+			</div>
+		</div>
+	</header>
+}

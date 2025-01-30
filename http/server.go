@@ -3,82 +3,105 @@ package http
 import (
 	"context"
 	"fmt"
-	"log"
 	"log/slog"
+	"net"
 	"net/http"
-	"os"
-	"os/signal"
+	"strings"
 	"time"
 
-	"github.com/MBvisti/mortenvistisen/pkg/config"
-	"github.com/MBvisti/mortenvistisen/routes"
 	"github.com/gorilla/csrf"
+	"github.com/labstack/echo/v4"
+	"github.com/MBvisti/mortenvistisen/config"
+	"golang.org/x/sync/errgroup"
 )
 
 type Server struct {
-	router *routes.Router
+	router *echo.Echo
 	host   string
 	port   string
-	cfg    config.Cfg
 	srv    *http.Server
 }
 
 func NewServer(
-	router *routes.Router,
-	cfg config.Cfg,
+	ctx context.Context,
+	router *echo.Echo,
 ) Server {
-	host := cfg.App.ServerHost
-	port := cfg.App.ServerPort
-	isProduction := cfg.App.Environment == "production"
+	port := config.Cfg.ServerPort
+	host := config.Cfg.ServerHost
 
 	srv := &http.Server{
 		Addr: fmt.Sprintf("%v:%v", host, port),
-		Handler: csrf.Protect(
-			[]byte(
-				cfg.Auth.CsrfToken,
-			),
-			csrf.Secure(isProduction),
-			csrf.Path("/"),
-		)(
-			router.GetInstance(),
-		),
-		ReadTimeout:  30 * time.Second,
-		WriteTimeout: 30 * time.Second,
+		Handler: func(handler http.Handler) http.Handler {
+			return http.HandlerFunc(
+				func(w http.ResponseWriter, r *http.Request) {
+					if strings.HasPrefix(r.URL.Path, "/api") ||
+						strings.HasPrefix(r.URL.Path, "/river") {
+
+						handler.ServeHTTP(w, r)
+						return
+					}
+					csrf.Protect(
+						[]byte(
+							config.Cfg.CsrfToken,
+						),
+						csrf.Secure(
+							config.Cfg.Environment == config.PROD_ENVIRONMENT,
+						),
+						csrf.Path("/"),
+					)(handler).ServeHTTP(w, r)
+				},
+			)
+		}(router),
+		ReadTimeout:  1 * time.Second,
+		WriteTimeout: 5 * time.Second,
+		BaseContext:  func(_ net.Listener) context.Context { return ctx },
 	}
 
 	return Server{
 		router,
 		host,
 		port,
-		cfg,
 		srv,
 	}
 }
 
-func (s *Server) Start() {
-	slog.Info("starting server on", "host", s.host, "port", s.port)
+func (s *Server) Start(ctx context.Context) error {
+	eg, egCtx := errgroup.WithContext(ctx)
 
 	// Start server
-	go func() {
-		if err := s.srv.ListenAndServe(); err != http.ErrServerClosed {
-			log.Fatal(err)
+	eg.Go(func() error {
+		slog.Info("starting server on", "host", s.host, "port", s.port)
+		if err := s.srv.ListenAndServe(); err != nil {
+			return fmt.Errorf("server error: %w", err)
 		}
-	}()
 
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
-	defer stop()
+		return nil
+	})
 
-	// Wait for interrupt signal to gracefully shutdown the server with a timeout of 10 seconds.
-	<-ctx.Done()
+	// Handle shutdown on context cancellation
+	// eg.Go(func() error {
+	<-egCtx.Done()
+	slog.Info("initiating graceful shutdown")
 
-	toCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	shutdownCtx, cancel := context.WithTimeout(
+		context.Background(),
+		10*time.Second,
+	)
 	defer cancel()
 
-	log.Print("initiating shutdown")
-	err := s.srv.Shutdown(toCtx)
-	if err != nil {
-		log.Fatal(err)
+	if err := s.srv.Shutdown(shutdownCtx); err != nil {
+		return fmt.Errorf("shutdown error: %w", err)
 	}
 
-	log.Print("shutdown complete")
+	// 	return nil
+	// })
+
+	// Wait for either server error or successful shutdown
+	if err := eg.Wait(); err != nil {
+		slog.Info("wait error", "e", err)
+		return err
+	}
+
+	slog.Info("done")
+	return nil
 }

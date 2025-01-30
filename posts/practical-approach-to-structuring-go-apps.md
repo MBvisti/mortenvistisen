@@ -1158,7 +1158,7 @@ We have almost everything we need now. The last thing we need is to add routes a
 
 Hopefully, this tutorial gave you some insights on how to structure your Golang applications. It was a long one I know, but hopefully, you didn’t waste your time. In a part two, I will show how to add Makefile commands, integration tests and easily deploy the application. If you have any questions or criticisms, please do not hesitate to reach out.
 
-My [twitter](https://twitter.com/mbvisti) and [github](https://github.com/mbvisti).
+My [twitter](https://twitter.com/MBvisti) and [github](https://github.com/MBvisti).
 
 ### Resources
 

@@ -2,158 +2,138 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
+	"os"
+	"os/signal"
+	"time"
 
+	"github.com/MBvisti/mortenvistisen/config"
 	"github.com/MBvisti/mortenvistisen/http"
 	"github.com/MBvisti/mortenvistisen/http/handlers"
-	mw "github.com/MBvisti/mortenvistisen/http/middleware"
-	"github.com/MBvisti/mortenvistisen/models"
-	"github.com/MBvisti/mortenvistisen/pkg/config"
-	"github.com/MBvisti/mortenvistisen/pkg/mail_client"
-	"github.com/MBvisti/mortenvistisen/pkg/telemetry"
 	"github.com/MBvisti/mortenvistisen/posts"
 	"github.com/MBvisti/mortenvistisen/psql"
-	"github.com/MBvisti/mortenvistisen/psql/database"
 	"github.com/MBvisti/mortenvistisen/queue"
+	"github.com/MBvisti/mortenvistisen/queue/workers"
 	"github.com/MBvisti/mortenvistisen/routes"
 	"github.com/MBvisti/mortenvistisen/services"
-	"github.com/riverqueue/river"
+	"github.com/lmittmann/tint"
+	"github.com/maypok86/otter"
+	"riverqueue.com/riverui"
 )
 
-// version is the latest commit sha at build time
-var version string
+var appRelease string
 
-func main() {
-	cfg := config.New(version)
-	ctx := context.Background()
+func developmentLogger() *slog.Logger {
+	return slog.New(
+		tint.NewHandler(os.Stderr, &tint.Options{
+			Level:      slog.LevelDebug,
+			TimeFormat: time.Kitchen,
+		}),
+	)
+}
 
-	otel := telemetry.NewOtel(cfg)
-	defer func() {
-		if err := otel.Shutdown(); err != nil {
-			panic(err)
-		}
-	}()
+func run(ctx context.Context) error {
+	cfg := config.NewConfig()
 
-	blogTracer := otel.NewTracer("blog/tracer")
+	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
+	defer cancel()
 
-	client := telemetry.NewTelemetry(cfg, version, cfg.App.ProjectName)
-	if client != nil {
-		defer client.Stop()
-	}
+	// otel := telemetry.NewOtel()
+	// defer func() {
+	// 	if err := otel.Shutdown(); err != nil {
+	// 		panic(err)
+	// 	}
+	// }()
+
+	// appTracer := otel.NewTracer("app/tracer")
+
+	// client := telemetry.NewTelemetry(
+	// 	cfg,
+	// 	appRelease,
+	// 	strings.ToLower(cfg.ProjectName),
+	// )
+	// if client != nil {
+	// 	defer client.Stop()
+	// }
+
+	slog.SetDefault(developmentLogger())
 
 	conn, err := psql.CreatePooledConnection(
-		context.Background(),
-		cfg.Db.GetUrlString(),
+		ctx,
+		cfg.GetDatabaseURL(),
 	)
 	if err != nil {
-		panic(err)
+		return err
 	}
-
-	awsSes := mail_client.NewAwsSimpleEmailService()
-	db := database.New(conn)
-	psql := psql.NewPostgres(conn)
-
-	workers, err := queue.SetupWorkers(queue.WorkerDependencies{
-		DB:      db,
-		Emailer: awsSes,
-	})
+	queueWorkers, err := workers.SetupWorkers(workers.WorkerDependencies{})
 	if err != nil {
-		panic(err)
+		return err
 	}
-
-	periodicJobs := []*river.PeriodicJob{}
-
-	q := map[string]river.QueueConfig{river.QueueDefault: {MaxWorkers: 100}}
 	riverClient := queue.NewClient(
 		conn,
-		queue.WithQueues(q),
-		queue.WithWorkers(workers),
 		queue.WithLogger(slog.Default()),
-		queue.WithPeriodicJobs(periodicJobs),
+		queue.WithWorkers(queueWorkers),
 	)
+	psql := psql.NewPostgres(conn, riverClient)
 
-	if err := riverClient.Start(ctx); err != nil {
-		panic(err)
+	opts := &riverui.ServerOpts{
+		Client: riverClient,
+		DB:     conn,
+		Logger: slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+			Level: slog.SetLogLoggerLevel(slog.LevelError),
+		})),
+		Prefix: "/river",
+	}
+	riverUI, err := riverui.NewServer(opts)
+	if err != nil {
+		return err
 	}
 
-	// riverClient := queue.NewClient(conn, queue.WithLogger(slog.Default()))
+	// Start the server to initialize background processes for caching and periodic queries:
+	if err := riverUI.Start(ctx); err != nil {
+		return err
+	}
 
-	postManager := posts.NewPostManager()
+	authSvc := services.NewAuth(psql)
+	emailSvc := services.NewMail()
 
-	mailService := services.NewEmailSvc(cfg, &awsSes, postManager)
+	cacheBuilder, err := otter.NewBuilder[string, string](20)
+	if err != nil {
+		return err
+	}
 
-	tknService := services.NewTokenSvc(psql, cfg.Auth.TokenSigningKey)
-	authService := services.NewAuth(cfg, psql)
+	pageCacher, err := cacheBuilder.WithVariableTTL().Build()
+	if err != nil {
+		return err
+	}
 
-	newsletterSvc := models.NewNewsletterSvc(
+	postManager := posts.NewManager()
+
+	handlers := handlers.NewHandlers(
 		psql,
-		psql,
-		tknService,
-		&mailService,
-	)
-	subscriberSvc := models.NewSubscriberSvc(&mailService, tknService, psql)
-	userSvc := models.NewUserSvc(authService, psql)
-	tagSvc := models.NewTagSvc(psql)
-	articleSvc := models.NewArticleSvc(psql)
-
-	cookieStore := handlers.NewCookieStore(cfg.Auth.SessionKey)
-
-	baseHandlers := handlers.NewDependencies(
-		*db,
-		cfg,
-		riverClient,
-		cookieStore,
-		blogTracer,
-	)
-
-	apiHandlers := handlers.NewApi(baseHandlers)
-	appHandlers := handlers.NewApp(
-		baseHandlers,
-		articleSvc,
-		subscriberSvc,
+		pageCacher,
+		authSvc,
+		emailSvc,
 		postManager,
-		*tknService,
-	)
-	authHandlers := handlers.NewAuthentication(
-		baseHandlers,
-		authService,
-		userSvc,
-		mailService,
-		*tknService,
-		cfg,
-	)
-	dashboardHandlers := handlers.NewDashboard(
-		baseHandlers,
-		articleSvc,
-		tagSvc,
-		postManager,
-		newsletterSvc,
-		subscriberSvc,
-		*tknService,
-		mailService,
-	)
-	registerHanlders := handlers.NewRegistration(
-		baseHandlers,
-		authService,
-		userSvc,
-		*tknService,
-		mailService,
 	)
 
-	middleware := mw.NewMiddleware(authService)
-	router := routes.NewRouter(
-		middleware,
-		cfg,
-		apiHandlers,
-		appHandlers,
-		authHandlers,
-		dashboardHandlers,
-		registerHanlders,
-		baseHandlers,
+	routes := routes.NewRoutes(
+		handlers,
+		riverUI,
 	)
-	router.LoadInRoutes()
 
-	server := http.NewServer(router, cfg)
+	router, c := routes.SetupRoutes(ctx)
 
-	server.Start()
+	server := http.NewServer(c, router)
+
+	return server.Start(c)
+}
+
+func main() {
+	ctx := context.Background()
+	if err := run(ctx); err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err)
+		os.Exit(1)
+	}
 }

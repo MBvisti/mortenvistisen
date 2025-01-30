@@ -1,59 +1,44 @@
-FROM node:18.16.1 AS build-resources
+FROM node:22.6.0 AS build-resources
 
 WORKDIR /
 
-COPY resources/ resources
-COPY static static
+COPY resources resources
 COPY views views
+COPY package.json package.json
+COPY package-lock.json package-lock.json
+COPY vite.config.js vite.config.js
 
-RUN cd resources && npm ci
-RUN cd resources && npm run build-css
+RUN npm ci
+RUN npm run build
 
-FROM golang:1.22 AS build-worker
+FROM golang:1.23 AS build-go
 
-ARG COMMIT_SHA=0.0.1
+ARG appRelease=0.0.1
+
+ENV APP_RELEASE=$appRelease
 
 WORKDIR /
+
+RUN go install github.com/a-h/templ/cmd/templ@latest
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w -X main.version=$COMMIT_SHA" -mod=readonly -v -o worker cmd/worker/main.go
+RUN templ generate
 
-FROM golang:1.23 AS build-app
+COPY --from=build-resources static/css static/css
 
-ARG COMMIT_SHA=0.0.1
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w -X 'main.$APP_RELEASE'" -mod=readonly -v -o app cmd/app/main.go
 
-WORKDIR /
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w -X 'main.$APP_RELEASE'" -mod=readonly -v -o worker cmd/worker/main.go
 
-COPY . .
-
-COPY --from=build-resources static static
-
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w -X main.version=$COMMIT_SHA" -mod=readonly -v -o app cmd/app/main.go
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w -X main.version=$COMMIT_SHA" -mod=readonly -v -o healthcheck cmd/healthcheck/main.go
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w -X main.version=$COMMIT_SHA" -mod=readonly -v -o migrate cmd/migrate/main.go
-
-FROM scratch AS worker
+FROM scratch
 
 WORKDIR /
 
-COPY --from=build-worker /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=build-worker worker worker
+COPY --from=build-go /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=build-go app app
+COPY --from=build-go worker worker
+COPY --from=build-go static static 
+COPY --from=build-go resources/seo resources/seo
 
-CMD ["./worker"]
-
-FROM scratch AS app
-
-WORKDIR /
-
-COPY --from=build-app /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=build-app app app
-COPY --from=build-app migrate migrate
-COPY --from=build-app migrations migrations
-COPY --from=build-app healthcheck healthcheck
-COPY --from=build-app static static 
-COPY --from=build-app resources/seo resources/seo
-
-HEALTHCHECK --interval=30s --timeout=3s CMD ["./healthcheck"]
-
-CMD ["./app", "./migrate"]
+CMD ["app", "worker"]
