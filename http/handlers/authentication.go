@@ -25,10 +25,10 @@ func newAuthentication(
 	return Authentication{authSvc, db, email}
 }
 
-func (a *Authentication) CreateAuthenticatedSession(ctx echo.Context) error {
+func (a *Authentication) CreateAuthenticatedSession(c echo.Context) error {
 	return authentication.LoginPage(authentication.LoginPageProps{
-		CsrfToken: csrf.Token(ctx.Request()),
-	}).Render(renderArgs(ctx))
+		CsrfToken: csrf.Token(c.Request()),
+	}).Render(renderArgs(c))
 }
 
 type StoreAuthenticatedSessionPayload struct {
@@ -37,27 +37,27 @@ type StoreAuthenticatedSessionPayload struct {
 	RememberMe string `form:"remember_me"`
 }
 
-func (a *Authentication) StoreAuthenticatedSession(ctx echo.Context) error {
+func (a *Authentication) StoreAuthenticatedSession(c echo.Context) error {
 	var payload StoreAuthenticatedSessionPayload
-	if err := ctx.Bind(&payload); err != nil {
+	if err := c.Bind(&payload); err != nil {
 		slog.ErrorContext(
-			ctx.Request().Context(),
+			c.Request().Context(),
 			"could not parse UserLoginPayload",
 			"error",
 			err,
 		)
 
-		return views.ErrorPage().Render(renderArgs(ctx))
+		return views.ErrorPage().Render(renderArgs(c))
 	}
 
 	authedUser, err := a.authService.AuthenticateUser(
-		ctx.Request().Context(),
+		c.Request().Context(),
 		payload.Mail,
 		payload.Password,
 	)
 	if err != nil {
 		slog.ErrorContext(
-			ctx.Request().Context(),
+			c.Request().Context(),
 			"could not authenticate user",
 			"error",
 			err,
@@ -72,31 +72,31 @@ func (a *Authentication) StoreAuthenticatedSession(ctx echo.Context) error {
 			errors[authentication.ErrEmailNotValidated] = "Your email has not yet been verified."
 		}
 
-		return authentication.LoginForm(csrf.Token(ctx.Request()), false, errors).
-			Render(renderArgs(ctx))
+		return authentication.LoginForm(csrf.Token(c.Request()), false, errors).
+			Render(renderArgs(c))
 	}
 
-	if err := createAuthSession(ctx, true, authedUser); err != nil {
-		return views.ErrorPage().Render(renderArgs(ctx))
+	if err := createAuthSession(c, true, authedUser); err != nil {
+		return views.ErrorPage().Render(renderArgs(c))
 	}
 
-	return authentication.LoginForm(csrf.Token(ctx.Request()), true, nil).
-		Render(renderArgs(ctx))
+	return authentication.LoginForm(csrf.Token(c.Request()), true, nil).
+		Render(renderArgs(c))
 }
 
-func (a *Authentication) CreatePasswordReset(ctx echo.Context) error {
-	return authentication.ForgottenPasswordPage(csrf.Token(ctx.Request())).
-		Render(renderArgs(ctx))
+func (a *Authentication) CreatePasswordReset(c echo.Context) error {
+	return authentication.ForgottenPasswordPage(csrf.Token(c.Request())).
+		Render(renderArgs(c))
 }
 
 type StorePasswordResetPayload struct {
 	Email string `form:"email"`
 }
 
-func (a *Authentication) StorePasswordReset(ctx echo.Context) error {
+func (a *Authentication) StorePasswordReset(c echo.Context) error {
 	var payload StorePasswordResetPayload
-	if err := ctx.Bind(&payload); err != nil {
-		return views.ErrorPage().Render(renderArgs(ctx))
+	if err := c.Bind(&payload); err != nil {
+		return views.ErrorPage().Render(renderArgs(c))
 	}
 
 	// user, err := a.db.QueryUserByEmail(ctx.Request().Context(), payload.Email)
@@ -128,24 +128,24 @@ func (a *Authentication) StorePasswordReset(ctx echo.Context) error {
 	// }
 
 	return authentication.ForgottenPasswordForm(authentication.ForgottenPasswordFormProps{
-		CsrfToken: csrf.Token(ctx.Request()),
+		CsrfToken: csrf.Token(c.Request()),
 		Success:   true,
 	}).
-		Render(renderArgs(ctx))
+		Render(renderArgs(c))
 }
 
 type PasswordResetTokenPayload struct {
 	Token string `query:"token"`
 }
 
-func (a *Authentication) CreateResetPassword(ctx echo.Context) error {
+func (a *Authentication) CreateResetPassword(c echo.Context) error {
 	var passwordResetToken PasswordResetTokenPayload
-	if err := ctx.Bind(&passwordResetToken); err != nil {
-		return views.ErrorPage().Render(renderArgs(ctx))
+	if err := c.Bind(&passwordResetToken); err != nil {
+		return views.ErrorPage().Render(renderArgs(c))
 	}
 
-	return authentication.ResetPasswordPage(false, false, csrf.Token(ctx.Request()), passwordResetToken.Token).
-		Render(renderArgs(ctx))
+	return authentication.ResetPasswordPage(false, false, csrf.Token(c.Request()), passwordResetToken.Token).
+		Render(renderArgs(c))
 }
 
 type ResetPasswordPayload struct {
@@ -154,10 +154,10 @@ type ResetPasswordPayload struct {
 	Token           string `form:"token"`
 }
 
-func (a *Authentication) StoreResetPassword(ctx echo.Context) error {
+func (a *Authentication) StoreResetPassword(c echo.Context) error {
 	var payload ResetPasswordPayload
-	if err := ctx.Bind(&payload); err != nil {
-		return views.ErrorPage().Render(renderArgs(ctx))
+	if err := c.Bind(&payload); err != nil {
+		return views.ErrorPage().Render(renderArgs(c))
 	}
 
 	// if err := a.tknService.Validate(
@@ -214,5 +214,5 @@ func (a *Authentication) StoreResetPassword(ctx echo.Context) error {
 	// }
 
 	return authentication.ResetPasswordForm(authentication.ResetPasswordFormProps{}).
-		Render(renderArgs(ctx))
+		Render(renderArgs(c))
 }

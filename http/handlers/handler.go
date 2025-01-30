@@ -44,19 +44,19 @@ type Handlers struct {
 	Resource       Resource
 }
 
-func setAppCtx(ctx echo.Context) context.Context {
-	appCtxKey := contexts.AppKey{}
-	appCtx := ctx.Get(appCtxKey.String())
+func setAppc(c echo.Context) context.Context {
+	appcKey := contexts.AppKey{}
+	appc := c.Get(appcKey.String())
 
 	return context.WithValue(
-		ctx.Request().Context(),
-		appCtxKey,
-		appCtx,
+		c.Request().Context(),
+		appcKey,
+		appc,
 	)
 }
 
-func renderArgs(ctx echo.Context) (context.Context, io.Writer) {
-	return setAppCtx(ctx), ctx.Response().Writer
+func renderArgs(c echo.Context) (context.Context, io.Writer) {
+	return setAppc(c), c.Response().Writer
 }
 
 func NewHandlers(

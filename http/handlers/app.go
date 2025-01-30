@@ -42,15 +42,15 @@ func newApp(
 	return App{db, cache, email, postManager}
 }
 
-func (a *App) LandingPage(ctx echo.Context) error {
+func (a *App) LandingPage(c echo.Context) error {
 	articlesPage, err := models.GetArticlesPage(
-		ctx.Request().Context(),
+		c.Request().Context(),
 		1,
 		5,
 		a.db.Pool,
 	)
 	if err != nil {
-		return views.ErrorPage().Render(renderArgs(ctx))
+		return errorPage(c, views.ErrorPage())
 	}
 
 	posts := make([]views.Post, len(articlesPage.Articles))
@@ -69,44 +69,44 @@ func (a *App) LandingPage(ctx echo.Context) error {
 		}
 	}
 
-	return views.HomePage(posts, csrf.Token(ctx.Request())).
-		Render(renderArgs(ctx))
+	return views.HomePage(posts, csrf.Token(c.Request())).
+		Render(renderArgs(c))
 }
 
-func (a *App) AboutPage(ctx echo.Context) error {
-	return views.AboutPage().Render(renderArgs(ctx))
+func (a *App) AboutPage(c echo.Context) error {
+	return views.AboutPage().Render(renderArgs(c))
 }
 
-func (a *App) ArticlePage(ctx echo.Context) error {
-	slug := ctx.Param("postSlug")
+func (a *App) ArticlePage(c echo.Context) error {
+	slug := c.Param("postSlug")
 	article, err := models.GetArticleBySlug(
-		ctx.Request().Context(),
+		c.Request().Context(),
 		slug,
 		a.db.Pool,
 	)
 	if err != nil {
-		return views.ErrorPage().Render(renderArgs(ctx))
+		return errorPage(c, views.ErrorPage())
 	}
 
 	postContent, err := a.postManager.Parse(article.Filename)
 	if err != nil {
-		return err
+		return errorPage(c, views.ErrorPage())
 	}
 
 	return views.ArticlePage(views.ArticlePageData{
 		HeaderTitle: article.Title,
 		Content:     postContent,
 		ReleaseDate: article.ReleaseDate,
-	}).Render(renderArgs(ctx))
+	}).Render(renderArgs(c))
 }
 
-func (a *App) ArticlesPage(ctx echo.Context) error {
+func (a *App) ArticlesPage(c echo.Context) error {
 	articles, err := models.GetAllArticles(
-		ctx.Request().Context(),
+		c.Request().Context(),
 		a.db.Pool,
 	)
 	if err != nil {
-		return views.ErrorPage().Render(renderArgs(ctx))
+		return errorPage(c, views.ErrorPage())
 	}
 
 	postsByYear := map[int][]views.Post{}
@@ -146,15 +146,15 @@ func (a *App) ArticlesPage(ctx echo.Context) error {
 		}
 	}
 
-	return views.ArticlesOverview(orderedPosts).Render(renderArgs(ctx))
+	return views.ArticlesOverview(orderedPosts).Render(renderArgs(c))
 }
 
-func (a *App) ProjectsPage(ctx echo.Context) error {
-	return views.ProjectsPage().Render(renderArgs(ctx))
+func (a *App) ProjectsPage(c echo.Context) error {
+	return views.ProjectsPage().Render(renderArgs(c))
 }
 
-func (a *App) NewslettersPage(ctx echo.Context) error {
-	return views.NewslettersPage().Render(renderArgs(ctx))
+func (a *App) NewslettersPage(c echo.Context) error {
+	return views.NewslettersPage().Render(renderArgs(c))
 }
 
 func (a *App) SubscriptionEvent(c echo.Context) error {
@@ -172,9 +172,7 @@ func (a *App) SubscriptionEvent(c echo.Context) error {
 			"error",
 			err,
 		)
-		c.Response().Header().Add("HX-Retarget", "body")
-		c.Response().Header().Add("HX-Reswap", "outerHTML")
-		return views.ErrorPage().Render(renderArgs(c))
+		return errorPage(c, views.ErrorPage())
 	}
 
 	ip := c.RealIP()
@@ -286,7 +284,7 @@ func (a *App) SubscriptionEvent(c echo.Context) error {
 			"subscriber_id",
 			subcriber.ID,
 		)
-		return err
+		return errorPage(c, views.ErrorPage())
 	}
 
 	unsubTkn, err := models.NewToken(
@@ -310,7 +308,7 @@ func (a *App) SubscriptionEvent(c echo.Context) error {
 			"subscriber_id",
 			subcriber.ID,
 		)
-		return err
+		return errorPage(c, views.ErrorPage())
 	}
 
 	if err := a.email.SendNewSubscriber(
@@ -326,7 +324,7 @@ func (a *App) SubscriptionEvent(c echo.Context) error {
 			"email",
 			subcriber.Email,
 		)
-		return err
+		return errorPage(c, views.ErrorPage())
 	}
 
 	return fragments.SubscribeResponse(false).Render(renderArgs(c))

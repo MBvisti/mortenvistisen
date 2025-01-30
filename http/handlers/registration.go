@@ -28,10 +28,10 @@ func newRegistration(
 	return Registration{authSvc, db, email}
 }
 
-func (r *Registration) CreateUser(ctx echo.Context) error {
+func (r *Registration) CreateUser(c echo.Context) error {
 	return authentication.RegisterPage(authentication.RegisterFormProps{
-		CsrfToken: csrf.Token(ctx.Request()),
-	}).Render(renderArgs(ctx))
+		CsrfToken: csrf.Token(c.Request()),
+	}).Render(renderArgs(c))
 }
 
 type StoreUserPayload struct {
@@ -41,14 +41,14 @@ type StoreUserPayload struct {
 	ConfirmPassword string `form:"confirm_password"`
 }
 
-func (r *Registration) StoreUser(ctx echo.Context) error {
+func (r *Registration) StoreUser(c echo.Context) error {
 	var payload StoreUserPayload
-	if err := ctx.Bind(&payload); err != nil {
-		return views.ErrorPage().Render(renderArgs(ctx))
+	if err := c.Bind(&payload); err != nil {
+		return views.ErrorPage().Render(renderArgs(c))
 	}
 
 	err := r.authSvc.RegisterUser(
-		ctx.Request().
+		c.Request().
 			Context(),
 		payload.UserName,
 		payload.Email,
@@ -57,13 +57,13 @@ func (r *Registration) StoreUser(ctx echo.Context) error {
 	)
 	if err != nil {
 		if errors.Is(err, services.ErrUnrecoverable) {
-			return views.ErrorPage().Render(renderArgs(ctx))
+			return views.ErrorPage().Render(renderArgs(c))
 		}
 
 		if errors.Is(err, models.ErrDomainValidation) {
 			var validationErrors validator.ValidationErrors
 			if ok := errors.As(err, &validationErrors); !ok {
-				return views.ErrorPage().Render(renderArgs(ctx))
+				return views.ErrorPage().Render(renderArgs(c))
 			}
 
 			fields := make(
@@ -80,75 +80,75 @@ func (r *Registration) StoreUser(ctx echo.Context) error {
 			props := authentication.RegisterFormProps{
 				SuccessRegister: false,
 				Fields:          fields,
-				CsrfToken:       csrf.Token(ctx.Request()),
+				CsrfToken:       csrf.Token(c.Request()),
 			}
 			return authentication.RegisterForm(props).
-				Render(renderArgs(ctx))
+				Render(renderArgs(c))
 		}
 	}
 
 	props := authentication.RegisterFormProps{
 		SuccessRegister: true,
-		CsrfToken:       csrf.Token(ctx.Request()),
+		CsrfToken:       csrf.Token(c.Request()),
 	}
 	return authentication.RegisterForm(props).
-		Render(renderArgs(ctx))
+		Render(renderArgs(c))
 }
 
 type verificationTokenPayload struct {
 	Token string `query:"token"`
 }
 
-func (r *Registration) VerifyUserEmail(ctx echo.Context) error {
+func (r *Registration) VerifyUserEmail(c echo.Context) error {
 	var payload verificationTokenPayload
-	if err := ctx.Bind(&payload); err != nil {
-		return views.ErrorPage().Render(renderArgs(ctx))
+	if err := c.Bind(&payload); err != nil {
+		return views.ErrorPage().Render(renderArgs(c))
 	}
 
-	// if err := r.tknService.Validate(ctx.Request().Context(), payload.Token, services.ScopeEmailVerification); err != nil {
-	// 	if err := ctx.Bind(&payload); err != nil {
-	// 		ctx.Response().Writer.Header().Add("HX-Redirect", "/500")
-	// 		ctx.Response().
+	// if err := r.tknService.Validate(c.Request().Context(), payload.Token, services.ScopeEmailVerification); err != nil {
+	// 	if err := c.Bind(&payload); err != nil {
+	// 		c.Response().Writer.Header().Add("HX-Redirect", "/500")
+	// 		c.Response().
 	// 			Writer.Header().
 	// 			Add("PreviousLocation", "/user/create")
 	//
-	// 		return views.ErrorPage().Render(renderArgs(ctx))
+	// 		return views.ErrorPage().Render(renderArgs(c))
 	// 	}
 	// }
 
 	// userID, err := r.tknService.GetAssociatedUserID(
-	// 	ctx.Request().Context(),
+	// 	c.Request().Context(),
 	// 	payload.Token,
 	// )
 	// if err != nil {
-	// 	if err := ctx.Bind(&payload); err != nil {
-	// 		ctx.Response().Writer.Header().Add("HX-Redirect", "/500")
-	// 		ctx.Response().
+	// 	if err := c.Bind(&payload); err != nil {
+	// 		c.Response().Writer.Header().Add("HX-Redirect", "/500")
+	// 		c.Response().
 	// 			Writer.Header().
 	// 			Add("PreviousLocation", "/user/create")
 	//
-	// 		return r.InternalError(ctx)
+	// 		return r.InternalError(c)
 	// 	}
 	// }
 	//
-	// user, err := r.db.QueryUserByID(ctx.Request().Context(), userID)
+	// user, err := r.db.QueryUserByID(c.Request().Context(), userID)
 	// if err != nil {
-	// 	return r.InternalError(ctx)
+	// 	return r.InternalError(c)
 	// }
 
-	// if err := r.userModel.VerifyEmail(ctx.Request().Context(), user.Email); err != nil {
-	// 	return r.InternalError(ctx)
+	// if err := r.userModel.VerifyEmail(c.Request().Context(), user.Email); err != nil {
+	// 	return r.InternalError(c)
 	// }
 	//
 	// _, err = r.authService.NewUserSession(
-	// 	ctx.Request(),
-	// 	ctx.Response(),
+	// 	c.Request(),
+	// 	c.Response(),
 	// 	user.ID,
 	// )
 	// if err != nil {
-	// 	return r.InternalError(ctx)
+	// 	return r.InternalError(c)
 	// }
 
 	return authentication.VerifyEmailPage(false).
-		Render(renderArgs(ctx))
+		Render(renderArgs(c))
 }
