@@ -1,0 +1,46 @@
+package emails
+
+import "context"
+
+type NewsletterWelcomeMail struct {
+	ConfirmationLink string
+	UnsubscribeLink  string
+}
+
+var _ TemplateHandler = (*NewsletterWelcomeMail)(nil)
+
+func (n NewsletterWelcomeMail) Generate(ctx context.Context) (Html, Text, error) {
+	html, plainText, err := processEmail(ctx, n.template())
+	if err != nil {
+		return Html(""), Text(""), err
+	}
+
+	return Html(html), Text(plainText), nil
+}
+
+templ (n NewsletterWelcomeMail) template() {
+	@base() {
+		@header("Thanks for joining my newsletter!")
+		@section() {
+			<h1>Welcome!</h1>
+			<p>Thanks for joining my newsletter. I'm super excited to have you here. To receive the monthly deep dives, I first need you to confirm your mail:</p>
+		}
+		@section() {
+			@link(linkProps{text: "Confirm mail", url: n.ConfirmationLink})
+		}
+		@section() {
+			<p>Thanks again,</p>
+			<br/>
+			<p>Morten (from https://mortenvistisen.com)</p>
+		}
+		@section() {
+			<p class="f-fallback sub">
+				If you’re having trouble with the button above, copy and paste the URL below into your web browser.
+			</p>
+			<p class="f-fallback sub">
+				{ n.ConfirmationLink }
+			</p>
+		}
+		@footerWithUnsub(n.UnsubscribeLink)
+	}
+}

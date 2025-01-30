@@ -1,81 +1,85 @@
 set dotenv-load
 
 # alias
-alias r := run-reload
+alias r := run-app
 alias rw := run-worker
+alias re := run-email
 
 alias wc := watch-css
 
-alias sm := serve-mails
-
-alias mm := make-migration
-alias gms := get-migration-status
+alias cm := create-migration
+alias ms := migration-status
 alias um := up-migrations
 alias dm := down-migrations
 alias dmt := down-migrations-to
 alias rdb := reset-db
+
+alias s := seed
+
 alias gdf := generate-db-functions
-alias mpts := copy-preline-to-static
 
 alias ct := compile-templates
+alias ft := fmt-templates
 
-alias bp := build-and-push
+alias ex := explore
 
 default:
     @just --list
 
 # CSS
 watch-css:
-    @cd resources && npm run watch-css
-
-# Preline
-copy-preline-to-static:
-    @cp -r ./resources/node_modules/preline/dist/ ./static/js/preline
-
-# Mails
-serve-mails:
-    @cd ./views/emails/ && wgo -file=.go -file=.templ -xfile=_templ.go templ generate :: go run ./server/main.go
+    npm run dev
 
 # Database 
-get-migration-status: 
-	@goose -dir migrations $DB_KIND $DATABASE_URL status
+create-migration name:
+	@goose -dir psql/migrations postgres $DB_KIND://$DB_USER:$DB_PASSWORD@localhost:5432/$DB_NAME create {{name}} sql
 
-make-migration name:
-	@goose -dir migrations $DB_KIND $DATABASE_URL create {{name}} sql
+migration-status:
+	go run cmd/migration/main.go --cmd "status"
 
 up-migrations:
-	@goose -dir migrations $DB_KIND $DATABASE_URL up
+	go run cmd/migration/main.go --cmd "up"
+
+up-migrations-by-one:
+	go run cmd/migration/main.go --cmd "upbyone"
 
 down-migrations:
-	@goose -dir migrations $DB_KIND $DATABASE_URL down
+	go run cmd/migration/main.go --cmd "down"
 
 down-migrations-to version:
-	@goose -dir migrations $DB_KIND $DATABASE_URL down-to {{version}}
+	go run cmd/migration/main.go --cmd "down" --version {{version}}
+
+fix-migrations:
+	@goose -dir psql/migrations postgres $DB_KIND://$DB_USER:$DB_PASSWORD@localhost:5432/$DB_NAME fix
 
 reset-db:
-	@goose -dir migrations $DB_KIND $DATABASE_URL reset
-
-fix-db:
-	@goose -dir migrations $DB_KIND $DATABASE_URL fix
+	go run cmd/migration/main.go --cmd "reset"
 
 generate-db-functions:
-	sqlc compile && sqlc generate
+	@sqlc compile && sqlc generate
 
 # Application
-run-reload:
-    wgo -file=.go -file=.templ -xfile=_templ.go templ generate :: go run cmd/app/main.go
+run-app:
+    wgo -xdir ./views/emails -file=.go -file=.templ -xfile=_templ.go templ generate :: go run cmd/app/main.go
 
 # Worker
 run-worker:
     @go run ./cmd/worker/main.go
 
+# Emails
+run-email:
+    wgo -dir ./emails -file=.txt -file=.go -file=.templ -xfile=_templ.go templ generate :: go run cmd/email/*.go
+
 # templates
 compile-templates:
-    templ generate 
+    templ generate
 
-# river
-river-migrate-up:
-	river migrate-up --database-url $QUEUE_DATABASE_URL
+fmt-templates:
+    cd views && templ fmt .
 
-build-and-push:
-	./build-and-push.sh
+# exploration
+explore:
+    @go run ./cmd/explore/main.go
+
+seed:
+	@go run ./cmd/seed/main.go

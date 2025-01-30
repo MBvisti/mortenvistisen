@@ -8,9 +8,9 @@ package views
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "github.com/MBvisti/mortenvistisen/views/internal/layouts"
+import "github.com/MBvisti/mortenvistisen/views/layouts"
 
-func ProjectsPage(head Head) templ.Component {
+func ProjectsPage() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -47,7 +47,7 @@ func ProjectsPage(head Head) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var3 templ.SafeURL = templ.SafeURL("https://www.youtube.com/@mbvlabs")
+			var templ_7745c5c3_Var3 templ.SafeURL = templ.SafeURL("https://www.youtube.com/@MBvisti")
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var3)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -56,7 +56,7 @@ func ProjectsPage(head Head) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var4 templ.SafeURL = templ.SafeURL("https://www.github.com/mbv-labs/grafto")
+			var templ_7745c5c3_Var4 templ.SafeURL = templ.SafeURL("https://www.github.com/mbv-labs/mortenvistisen")
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var4)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -67,7 +67,7 @@ func ProjectsPage(head Head) templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = layouts.Base(head.Build()).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = layouts.Base(Head(ctx, WithTitle("Projects"), WithDescription("Collection of current and old projects I'm working on."))).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

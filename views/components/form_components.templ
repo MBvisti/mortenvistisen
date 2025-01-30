@@ -1,135 +1,137 @@
 package components
 
-import "strings"
+import (
+	"fmt"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
+	"strings"
+)
 
-type InputError struct {
-	Msg      string
-	OldValue string
+type InputFieldProps struct {
+	Value     string
+	ErrorMsgs []string
 }
 
-type InputElementData struct {
-	ID string
-	// InputType defaults to "text"
-	InputType   string
-	Value       string
-	Name        string
-	Err         InputError
-	Title       string
-	Required    bool
-	Placeholder string
-	HxTrigger   string
-	// HxAction is the endpoint to send the request to
-	HxAction string
-	// HxMethod accepts: GET, POST, PUT, DELETE
-	HxMethod string
-	HxTarget string
-	HxSwap   string
+func UppercaseFirstWord(sentence string) string {
+	sentenceElements := strings.Split(sentence, " ")
+
+	var s string
+	for _, otherElements := range sentenceElements[1:] {
+		s = s + " " + otherElements
+	}
+
+	caser := cases.Title(language.AmericanEnglish)
+	return fmt.Sprintf("%v %v", caser.String(sentenceElements[0]), s)
 }
 
-templ InputElement(data InputElementData) {
-	<label
-		if data.ID != "" {
-			for={ data.ID }
-		}
-		if data.Err.Msg != "" {
-			class="input input-bordered input-error flex items-center gap-2 my-4"
-		} else {
-			class="input input-bordered flex items-center gap-2 my-4"
-		}
-	>
-		{ data.Title }
+templ InputField(title, fieldType, fieldName, placeholder string, attributes templ.Attributes, props InputFieldProps) {
+	<label class="form-control w-full">
+		<div class="label">
+			<span class="label-text md:text-lg">{ title }</span>
+		</div>
 		<input
-			class="grow border-none input-error"
-			if data.Placeholder != "" {
-				placeholder={ data.Placeholder }
-			}
-			if data.ID != "" {
-				id={ data.ID }
-			}
-			if data.Name != "" {
-				name={ data.Name }
-			}
-			if data.Err.Msg != "" && data.Err.OldValue != "" {
-				value={ data.Err.OldValue }
-			} else {
-				value={ data.Value }
-			}
-			if data.InputType != "" {
-				type={ data.InputType }
-			} else {
-				type="text"
-			}
-			if data.Required {
-				required
-			}
-			if data.HxTrigger != "" {
-				hx-trigger={ data.HxTrigger }
-			}
-			if data.HxTarget != "" {
-				hx-target={ data.HxTarget }
-			}
-			if data.HxSwap != "" {
-				hx-swap={ data.HxSwap }
-			}
-			if strings.ToLower(data.HxMethod) == "get" && data.HxAction != "" {
-				hx-get={ data.HxAction }
-			}
-			if strings.ToLower(data.HxMethod) == "post" && data.HxAction != "" {
-				hx-post={ data.HxAction }
-			}
-			if strings.ToLower(data.HxMethod) == "put" && data.HxAction != "" {
-				hx-put={ data.HxAction }
-			}
-			if strings.ToLower(data.HxMethod) == "delete" && data.HxAction != "" {
-				hx-delete={ data.HxAction }
-			}
+			{ attributes... }
+			class={ "input input-bordered w-full", templ.KV("input-error", len(props.ErrorMsgs)> 0) }
+			type={ fieldType }
+			placeholder={ placeholder }
+			value={ props.Value }
+			name={ fieldName }
 		/>
-		if data.Err.Msg != "" {
-			<div class="invalid-feedback">
-				{ data.Err.Msg }
+		if props.ErrorMsgs != nil {
+			<div class="label">
+				for _, errMsg := range props.ErrorMsgs {
+					<span class="label-text-alt">{ UppercaseFirstWord(errMsg) }</span>
+				}
 			</div>
 		}
 	</label>
 }
 
-type TextareaData struct {
-	// ID string
-	// InputType defaults to "text"
-	// InputType string
-	// Value     string
-	Name        string
-	Err         InputError
-	Placeholder string
-	// Title     string
-	// Required  bool
-	// HxTrigger string
-	// HxAction is the endpoint to send the request to
-	// HxAction string
-	// HxMethod accepts: GET, POST, PUT, DELETE
-	// HxMethod string
-	// HxTarget string
-	// HxSwap   string
+templ InfoFlag(msg string) {
+	<div
+		role="alert"
+		class="alert alert-info"
+	>
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			class="h-6 w-6 shrink-0 stroke-current"
+			fill="none"
+			viewBox="0 0 24 24"
+		>
+			<path
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				stroke-width="2"
+				d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+			></path>
+		</svg>
+		<span>{ msg }</span>
+	</div>
 }
 
-templ TextareaElement(data TextareaData) {
-	<textarea
-		name={ data.Name }
-		if data.Err.Msg != "" {
-			class="w-full h-auto textarea textarea-bordered"
-		} else {
-			class="w-full h-full textarea textarea-bordered"
-		}
-		if data.Placeholder != "" {
-			placeholder={ data.Placeholder }
-		}
-		maxLength="160"
-		minLength="130"
-		x-ref="countme"
-		x-on:keyup="count = $refs.countme.value.length"
-	></textarea>
-	if data.Err.Msg != "" {
-		<div class="invalid-feedback mb-4">
-			{ data.Err.Msg }
-		</div>
-	}
+templ SuccessFlag(msg string, attributes templ.Attributes) {
+	<div
+		role="alert"
+		class="alert alert-success"
+		{ attributes... }
+	>
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			class="h-6 w-6 shrink-0 stroke-current"
+			fill="none"
+			viewBox="0 0 24 24"
+		>
+			<path
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				stroke-width="2"
+				d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+			></path>
+		</svg>
+		<span>{ msg }</span>
+	</div>
+}
+
+templ WarningFlag(msg string) {
+	<div
+		role="alert"
+		class="alert alert-warning"
+	>
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			class="h-6 w-6 shrink-0 stroke-current"
+			fill="none"
+			viewBox="0 0 24 24"
+		>
+			<path
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				stroke-width="2"
+				d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+			></path>
+		</svg>
+		<span>{ msg }</span>
+	</div>
+}
+
+templ ErrorFlag(msg string) {
+	<div
+		role="alert"
+		class="alert alert-error"
+	>
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			class="h-6 w-6 shrink-0 stroke-current"
+			fill="none"
+			viewBox="0 0 24 24"
+		>
+			<path
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				stroke-width="2"
+				d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+			></path>
+		</svg>
+		<span>{ msg }</span>
+	</div>
 }

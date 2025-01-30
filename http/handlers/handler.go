@@ -1,197 +1,136 @@
 package handlers
 
 import (
+	"context"
+	"encoding/gob"
 	"fmt"
-	"log/slog"
-	"math"
+	"io"
 	"net/http"
-	"os"
-	"strconv"
 
-	"github.com/MBvisti/mortenvistisen/pkg/config"
-	"github.com/MBvisti/mortenvistisen/pkg/telemetry"
-	"github.com/MBvisti/mortenvistisen/psql/database"
-	"github.com/MBvisti/mortenvistisen/views"
+	"github.com/MBvisti/mortenvistisen/config"
+	"github.com/MBvisti/mortenvistisen/models"
+	"github.com/MBvisti/mortenvistisen/posts"
+	"github.com/MBvisti/mortenvistisen/psql"
+	"github.com/MBvisti/mortenvistisen/services"
+	"github.com/MBvisti/mortenvistisen/views/contexts"
+	"github.com/google/uuid"
 	"github.com/gorilla/sessions"
-	"github.com/jackc/pgx/v5"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
-	"github.com/riverqueue/river"
+	"github.com/maypok86/otter"
 )
 
-// Actions:
-// - index | GET
-// - create | GET
-// - store | POST
-// - show | GET
-// - edit | GET
-// - update | PUT/PATCH
-// - destroy | DELETE
+var AuthenticatedSessionName = fmt.Sprintf(
+	"ua-%s-%s",
+	config.Cfg.ProjectName,
+	config.Cfg.Environment,
+)
 
-type Base struct {
-	DB     database.Queries
-	Config config.Cfg
-	// TknManager      tokens.Manager
-	QueueClient *river.Client[pgx.Tx]
-	// PostManager     posts.PostManager
-	// EmailService    services.Email
-	// AuthService     services.Auth
-	// TokenService    services.TokenSvc
-	// NewsletterModel models.NewsletterService
-	// SubscriberModel models.SubscriberService
-	// ArticleModel    models.ArticleService
-	// TagModel        models.TagService
-	// UserModel       models.UserService
-	// Database        psql.Postgres
-	CookieStore CookieStore
-	Tracer      telemetry.Tracer
+const (
+	SessIsAuthName   = "is_authenticated"
+	SessUserID       = "user_id"
+	SessUserEmail    = "user_email"
+	SessIsAdmin      = "is_admin"
+	oneWeekInSeconds = 604800
+)
+
+type Handlers struct {
+	Api            Api
+	App            App
+	Authentication Authentication
+	Dashboard      Dashboard
+	Registration   Registration
+	Resource       Resource
 }
 
-func NewDependencies(
-	db database.Queries,
-	config config.Cfg,
-	// tknManager tokens.Manager,
-	queueClient *river.Client[pgx.Tx],
-	// postManager posts.PostManager,
-	// emailService services.Email,
-	// tokenService services.TokenSvc,
-	// authService services.Auth,
-	// newsletterModel models.NewsletterService,
-	// subscriberModel models.SubscriberService,
-	// articleModel models.ArticleService,
-	// tagModel models.TagService,
-	// userModel models.UserService,
-	// psql psql.Postgres,
-	cookieStore CookieStore,
-	tracer telemetry.Tracer,
-) Base {
-	return Base{
-		db,
-		config,
-		// tknManager,
-		queueClient,
-		// postManager,
-		// emailService,
-		// authService,
-		// tokenService,
-		// newsletterModel,
-		// subscriberModel,
-		// articleModel,
-		// tagModel,
-		// userModel,
-		// psql,
-		cookieStore,
-		tracer,
+func setAppCtx(ctx echo.Context) context.Context {
+	appCtxKey := contexts.AppKey{}
+	appCtx := ctx.Get(appCtxKey.String())
+
+	return context.WithValue(
+		ctx.Request().Context(),
+		appCtxKey,
+		appCtx,
+	)
+}
+
+func renderArgs(ctx echo.Context) (context.Context, io.Writer) {
+	return setAppCtx(ctx), ctx.Response().Writer
+}
+
+func NewHandlers(
+	db psql.Postgres,
+	cache otter.CacheWithVariableTTL[string, string],
+	authSvc services.Auth,
+	email services.Mail,
+	postManager posts.Manager,
+) Handlers {
+	gob.Register(uuid.UUID{})
+
+	api := newApi()
+	app := newApp(db, cache, email, postManager)
+	auth := newAuthentication(authSvc, db, email)
+	dashboard := newDashboard()
+	registration := newRegistration(authSvc, db, email)
+	resource := newResource(db)
+
+	return Handlers{
+		api,
+		app,
+		auth,
+		dashboard,
+		registration,
+		resource,
 	}
 }
 
-func (bd Base) RedirectHx(w http.ResponseWriter, url string) error {
-	slog.Info("redirecting", "url", url)
+func redirectHx(w http.ResponseWriter, url string) error {
 	w.Header().Set("HX-Redirect", url)
 	w.WriteHeader(http.StatusSeeOther)
 
 	return nil
 }
 
-func (bd Base) Redirect(w http.ResponseWriter, r *http.Request, url string) error {
+func getContext(c echo.Context) context.Context {
+	return c.Request().Context()
+}
+
+func redirect(
+	w http.ResponseWriter,
+	r *http.Request,
+	url string,
+) {
 	http.Redirect(w, r, url, http.StatusSeeOther)
-
-	return nil
 }
 
-func (bd Base) InternalError(ctx echo.Context) error {
-	from := "/"
-
-	return views.InternalServerErr(ctx, views.InternalServerErrData{
-		FromLocation: from,
-	})
-}
-
-func (bd Base) CalculateNumberOfPages(totalItems, pageSize int) int {
-	return int(math.Ceil(float64(totalItems) / float64(pageSize)))
-}
-
-func (bd Base) GetOffsetAndCurrPage(page string, limit int) (int, int, error) {
-	var currentPage int
-	if page == "" {
-		currentPage = 1
-	}
-	if page != "" {
-		cp, err := strconv.Atoi(page)
-		if err != nil {
-			return 0, 0, err
-		}
-
-		currentPage = cp
-	}
-
-	offset := 0
-	if currentPage == 2 {
-		offset = limit
-	}
-
-	if currentPage > 2 {
-		offset = limit * (currentPage - 1)
-	}
-
-	return offset, currentPage, nil
-}
-
-func (bd Base) FormatArticleSlug(slug string) string {
-	return fmt.Sprintf("posts/%s", slug)
-}
-
-func (bd Base) BuildURLFromSlug(slug string) string {
-	return fmt.Sprintf("%s://%s/%s", os.Getenv("APP_SCHEME"), os.Getenv("APP_HOST"), slug)
-}
-
-type CookieStore struct {
-	store *sessions.CookieStore
-}
-
-func NewCookieStore(sessionKey string) CookieStore {
-	store := sessions.NewCookieStore([]byte(sessionKey))
-	return CookieStore{store}
-}
-
-func (cs CookieStore) CreateFlashMsg(
-	r *http.Request,
-	rw http.ResponseWriter,
-	key string,
-	args ...string,
+func createAuthSession(
+	c echo.Context,
+	extend bool,
+	user models.User,
 ) error {
-	s, err := cs.store.Get(r, "flashMsg")
+	sess, err := session.Get(AuthenticatedSessionName, c)
 	if err != nil {
 		return err
 	}
 
-	s.AddFlash(key, args...)
-	if err := s.Save(r, rw); err != nil {
+	maxAge := oneWeekInSeconds
+	if extend {
+		maxAge = oneWeekInSeconds * 2
+	}
+
+	sess.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   maxAge,
+		HttpOnly: true,
+	}
+	sess.Values[SessIsAuthName] = true
+	sess.Values[SessUserID] = user.ID
+	sess.Values[SessUserEmail] = user.Email
+	sess.Values[SessIsAdmin] = user.IsAdmin
+
+	if err := sess.Save(c.Request(), c.Response()); err != nil {
 		return err
 	}
 
 	return nil
-}
-
-func (cs CookieStore) GetFlashMessages(
-	r *http.Request,
-	rw http.ResponseWriter,
-	key string,
-) ([]string, error) {
-	s, err := cs.store.Get(r, "flashMsg")
-	if err != nil {
-		return nil, err
-	}
-
-	var msgs []string
-	if key != "" {
-		for _, f := range s.Flashes(key) {
-			msgs = append(msgs, f.(string))
-		}
-	} else {
-		for _, f := range s.Flashes() {
-			msgs = append(msgs, f.(string))
-		}
-	}
-
-	return msgs, nil
 }

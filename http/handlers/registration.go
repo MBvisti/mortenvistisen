@@ -1,134 +1,154 @@
 package handlers
 
 import (
-	"log/slog"
+	"errors"
 
 	"github.com/MBvisti/mortenvistisen/models"
+	"github.com/MBvisti/mortenvistisen/psql"
 	"github.com/MBvisti/mortenvistisen/services"
 	"github.com/MBvisti/mortenvistisen/views"
 	"github.com/MBvisti/mortenvistisen/views/authentication"
+	"github.com/MBvisti/mortenvistisen/views/components"
+	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/csrf"
 	"github.com/labstack/echo/v4"
 )
 
 type Registration struct {
-	base         Base
-	authService  services.Auth
-	userModel    models.UserService
-	tokenService services.Token
-	emailService services.Email
+	authSvc services.Auth
+	db      psql.Postgres
+	email   services.Mail
 }
 
-func NewRegistration(
-	base Base,
-	authService services.Auth,
-	userModel models.UserService,
-	tokenService services.Token,
-	emailService services.Email,
+func newRegistration(
+	authSvc services.Auth,
+	db psql.Postgres,
+	email services.Mail,
 ) Registration {
-	return Registration{base, authService, userModel, tokenService, emailService}
+	return Registration{authSvc, db, email}
 }
 
-func (r Registration) CreateUser(ctx echo.Context) error {
+func (r *Registration) CreateUser(ctx echo.Context) error {
 	return authentication.RegisterPage(authentication.RegisterFormProps{
 		CsrfToken: csrf.Token(ctx.Request()),
-	}, views.Head{}).Render(views.ExtractRenderDeps(ctx))
+	}).Render(renderArgs(ctx))
 }
 
-func (r Registration) StoreUser(ctx echo.Context) error {
-	type storeUserPayload struct {
-		UserName        string `form:"user_name"`
-		Mail            string `form:"email"`
-		Password        string `form:"password"`
-		ConfirmPassword string `form:"confirm_password"`
-	}
+type StoreUserPayload struct {
+	UserName        string `form:"username"`
+	Email           string `form:"email"`
+	Password        string `form:"password"`
+	ConfirmPassword string `form:"confirm_password"`
+}
 
-	var payload storeUserPayload
+func (r *Registration) StoreUser(ctx echo.Context) error {
+	var payload StoreUserPayload
 	if err := ctx.Bind(&payload); err != nil {
-		return authentication.RegisterResponse("An error occurred", "Please refresh the page an try again.", true).
-			Render(views.ExtractRenderDeps(ctx))
+		return views.ErrorPage().Render(renderArgs(ctx))
 	}
 
-	user, err := r.userModel.New(
-		ctx.Request().Context(),
+	err := r.authSvc.RegisterUser(
+		ctx.Request().
+			Context(),
 		payload.UserName,
-		payload.Mail,
+		payload.Email,
 		payload.Password,
 		payload.ConfirmPassword,
 	)
 	if err != nil {
-		return err
+		if errors.Is(err, services.ErrUnrecoverable) {
+			return views.ErrorPage().Render(renderArgs(ctx))
+		}
+
+		if errors.Is(err, models.ErrDomainValidation) {
+			var validationErrors validator.ValidationErrors
+			if ok := errors.As(err, &validationErrors); !ok {
+				return views.ErrorPage().Render(renderArgs(ctx))
+			}
+
+			fields := make(
+				map[string]components.InputFieldProps,
+				len(validationErrors),
+			)
+			for _, validationError := range validationErrors {
+				fields[validationError.StructField()] = components.InputFieldProps{
+					Value:     validationError.Value().(string),
+					ErrorMsgs: []string{validationError.Error()},
+				}
+			}
+
+			props := authentication.RegisterFormProps{
+				SuccessRegister: false,
+				Fields:          fields,
+				CsrfToken:       csrf.Token(ctx.Request()),
+			}
+			return authentication.RegisterForm(props).
+				Render(renderArgs(ctx))
+		}
 	}
 
-	activationToken, err := r.tokenService.CreateUserEmailVerification(
-		ctx.Request().Context(),
-		user.ID,
-	)
-	if err != nil {
-		return err
+	props := authentication.RegisterFormProps{
+		SuccessRegister: true,
+		CsrfToken:       csrf.Token(ctx.Request()),
 	}
-
-	if err := r.emailService.SendUserSignup(ctx.Request().Context(), user.Mail, activationToken); err != nil {
-		return err
-	}
-
-	return authentication.RegisterResponse("You're now registered", "You should receive an email soon to validate your account.", false).
-		Render(views.ExtractRenderDeps(ctx))
+	return authentication.RegisterForm(props).
+		Render(renderArgs(ctx))
 }
 
-func (r Registration) UserEmailVerification(c echo.Context) error {
-	ctx, span := r.base.Tracer.CreateSpan(
-		c.Request().Context(),
-		"RegistrationHandler/UserEmailVerification",
-	)
-	span.AddEvent("UserEmailVerification/start")
-	type verifyEmail struct {
-		Token string `query:"token"`
+type verificationTokenPayload struct {
+	Token string `query:"token"`
+}
+
+func (r *Registration) VerifyUserEmail(ctx echo.Context) error {
+	var payload verificationTokenPayload
+	if err := ctx.Bind(&payload); err != nil {
+		return views.ErrorPage().Render(renderArgs(ctx))
 	}
 
-	var payload verifyEmail
-	if err := c.Bind(&payload); err != nil {
-		slog.ErrorContext(ctx, "could not bind verify email", "error", err)
-		c.Response().Writer.Header().Add("HX-Redirect", "/500")
-		c.Response().Writer.Header().Add("PreviousLocation", "/user/create")
+	// if err := r.tknService.Validate(ctx.Request().Context(), payload.Token, services.ScopeEmailVerification); err != nil {
+	// 	if err := ctx.Bind(&payload); err != nil {
+	// 		ctx.Response().Writer.Header().Add("HX-Redirect", "/500")
+	// 		ctx.Response().
+	// 			Writer.Header().
+	// 			Add("PreviousLocation", "/user/create")
+	//
+	// 		return views.ErrorPage().Render(renderArgs(ctx))
+	// 	}
+	// }
 
-		return r.base.InternalError(c)
-	}
+	// userID, err := r.tknService.GetAssociatedUserID(
+	// 	ctx.Request().Context(),
+	// 	payload.Token,
+	// )
+	// if err != nil {
+	// 	if err := ctx.Bind(&payload); err != nil {
+	// 		ctx.Response().Writer.Header().Add("HX-Redirect", "/500")
+	// 		ctx.Response().
+	// 			Writer.Header().
+	// 			Add("PreviousLocation", "/user/create")
+	//
+	// 		return r.InternalError(ctx)
+	// 	}
+	// }
+	//
+	// user, err := r.db.QueryUserByID(ctx.Request().Context(), userID)
+	// if err != nil {
+	// 	return r.InternalError(ctx)
+	// }
 
-	if err := r.tokenService.Validate(ctx, payload.Token, services.ScopeEmailVerification); err != nil {
-		return err
-	}
+	// if err := r.userModel.VerifyEmail(ctx.Request().Context(), user.Email); err != nil {
+	// 	return r.InternalError(ctx)
+	// }
+	//
+	// _, err = r.authService.NewUserSession(
+	// 	ctx.Request(),
+	// 	ctx.Response(),
+	// 	user.ID,
+	// )
+	// if err != nil {
+	// 	return r.InternalError(ctx)
+	// }
 
-	userID, err := r.tokenService.GetAssociatedUserID(ctx, payload.Token)
-	if err != nil {
-		return err
-	}
-
-	// TODO: add span
-	user, err := r.userModel.ConfirmEmail(ctx, userID)
-	if err != nil {
-		return err
-	}
-
-	if err := r.authService.CreateAuthenticatedSession(c.Request(), c.Response(), user.ID, false); err != nil {
-		return err
-	}
-
-	tokenDeleteCtx, tokenDeleteSpan := r.base.Tracer.CreateChildSpan(
-		ctx,
-		span,
-		"TokenService/Delete",
-	)
-	tokenDeleteSpan.AddEvent("Delete/Start")
-	if err := r.tokenService.Delete(tokenDeleteCtx, payload.Token); err != nil {
-		return err
-	}
-	tokenDeleteSpan.End()
-	if err := r.tokenService.Delete(tokenDeleteCtx, payload.Token); err != nil {
-		return err
-	}
-
-	span.End()
-
-	return authentication.VerifyEmailPage(false, views.Head{}).Render(views.ExtractRenderDeps(c))
+	return authentication.VerifyEmailPage(false).
+		Render(renderArgs(ctx))
 }

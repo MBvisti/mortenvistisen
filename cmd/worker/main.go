@@ -10,55 +10,61 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/MBvisti/mortenvistisen/pkg/config"
-	"github.com/MBvisti/mortenvistisen/pkg/mail_client"
-	"github.com/MBvisti/mortenvistisen/pkg/telemetry"
+	"github.com/MBvisti/mortenvistisen/config"
 	"github.com/MBvisti/mortenvistisen/psql"
-	"github.com/MBvisti/mortenvistisen/psql/database"
 	"github.com/MBvisti/mortenvistisen/queue"
+	"github.com/MBvisti/mortenvistisen/queue/workers"
 	"github.com/riverqueue/river"
 )
 
-// version is the latest commit sha at build time
-var version string
+var appRelease string
 
 func main() {
 	ctx := context.Background()
-	cfg := config.New(version)
+	cfg := config.NewConfig()
 
-	client := telemetry.NewTelemetry(cfg, version, fmt.Sprintf("%v-worker", cfg.App.ProjectName))
-	if client != nil {
-		defer client.Stop()
-	}
+	// otel := telemetry.NewOtel(cfg)
+	// defer func() {
+	// 	if err := otel.Shutdown(); err != nil {
+	// 		panic(err)
+	// 	}
+	// }()
+	//
+	// workerTracer := otel.NewTracer("worker/tracer")
 
-	awsSes := mail_client.NewAwsSimpleEmailService()
+	// client := telemetry.NewTelemetry(cfg, appRelease, "mortenvistisen-worker")
+	// if client != nil {
+	// 	defer client.Stop()
+	// }
 
-	conn, err := psql.CreatePooledConnection(context.Background(), cfg.Db.GetUrlString())
+	conn, err := psql.CreatePooledConnection(
+		context.Background(),
+		cfg.GetDatabaseURL(),
+	)
 	if err != nil {
 		panic(err)
 	}
-
-	db := database.New(conn)
+	// db := psql.New(conn)
 
 	jobStarted := make(chan struct{})
 
-	workers, err := queue.SetupWorkers(queue.WorkerDependencies{
-		DB:      db,
-		Emailer: awsSes,
+	workers, err := workers.SetupWorkers(workers.WorkerDependencies{
+		// DB:      db,
+		// Tracer:  nil,
 	})
 	if err != nil {
 		panic(err)
 	}
 
-	periodicJobs := []*river.PeriodicJob{}
-
-	q := map[string]river.QueueConfig{river.QueueDefault: {MaxWorkers: 100}}
+	q := map[string]river.QueueConfig{
+		river.QueueDefault: {MaxWorkers: 5},
+		"high":             {MaxWorkers: 100},
+	}
 	riverClient := queue.NewClient(
 		conn,
 		queue.WithQueues(q),
 		queue.WithWorkers(workers),
 		queue.WithLogger(slog.Default()),
-		queue.WithPeriodicJobs(periodicJobs),
 	)
 
 	if err := riverClient.Start(ctx); err != nil {
@@ -81,7 +87,10 @@ func main() {
 			"Received SIGINT/SIGTERM; initiating soft stop (try to wait for jobs to finish)\n",
 		)
 
-		softStopCtx, softStopCtxCancel := context.WithTimeout(ctx, 10*time.Second)
+		softStopCtx, softStopCtxCancel := context.WithTimeout(
+			ctx,
+			10*time.Second,
+		)
 		defer softStopCtxCancel()
 
 		go func() {
@@ -92,7 +101,9 @@ func main() {
 				)
 				softStopCtxCancel()
 			case <-softStopCtx.Done():
-				fmt.Printf("Soft stop timeout; initiating hard stop (cancel everything)\n")
+				fmt.Printf(
+					"Soft stop timeout; initiating hard stop (cancel everything)\n",
+				)
 			}
 		}()
 
@@ -106,7 +117,10 @@ func main() {
 			return
 		}
 
-		hardStopCtx, hardStopCtxCancel := context.WithTimeout(ctx, 10*time.Second)
+		hardStopCtx, hardStopCtxCancel := context.WithTimeout(
+			ctx,
+			10*time.Second,
+		)
 		defer hardStopCtxCancel()
 
 		// As long as all jobs respect context cancellation, StopAndCancel will
@@ -115,7 +129,9 @@ func main() {
 		// result (what's shown here) or have a supervisor kill the process.
 		err = riverClient.StopAndCancel(hardStopCtx)
 		if err != nil && errors.Is(err, context.DeadlineExceeded) {
-			fmt.Printf("Hard stop timeout; ignoring stop procedure and exiting unsafely\n")
+			fmt.Printf(
+				"Hard stop timeout; ignoring stop procedure and exiting unsafely\n",
+			)
 		} else if err != nil {
 			panic(err)
 		}

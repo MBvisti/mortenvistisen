@@ -1,0 +1,33 @@
+package emails
+
+import "context"
+
+type NewsletterMail struct {
+	Title           string
+	Content         string
+	UnsubscribeLink string
+}
+
+var _ TemplateHandler = (*NewsletterMail)(nil)
+
+func (n NewsletterMail) Generate(ctx context.Context) (Html, Text, error) {
+	html, plainText, err := processEmail(ctx, n.template())
+	if err != nil {
+		return Html(""), Text(""), err
+	}
+
+	return Html(html), Text(plainText), nil
+}
+
+templ (n NewsletterMail) template() {
+	@base() {
+		@header(n.Title)
+		@section() {
+			<h1>{ n.Title }</h1>
+		}
+		@section() {
+			@unsafe(n.Content)
+		}
+		@footerWithUnsub(n.UnsubscribeLink)
+	}
+}
