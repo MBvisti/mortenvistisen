@@ -94,7 +94,8 @@ func (a *App) ArticlePage(c echo.Context) error {
 	}
 
 	return views.ArticlePage(views.ArticlePageData{
-		HeaderTitle: article.Title,
+		Title:       article.Title,
+		HeaderTitle: article.HeaderTitle,
 		Content:     postContent,
 		ReleaseDate: article.ReleaseDate,
 	}).Render(renderArgs(c))
@@ -231,7 +232,7 @@ func (a *App) SubscriptionEvent(c echo.Context) error {
 		return fragments.SubscribeResponse(false).Render(renderArgs(c))
 	}
 
-	if firstOutcome.Success {
+	if !firstOutcome.Success {
 		return fragments.SubscribeResponse(false).Render(renderArgs(c))
 	}
 

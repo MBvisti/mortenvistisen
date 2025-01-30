@@ -9,6 +9,7 @@ import (
 	"github.com/MBvisti/mortenvistisen/http"
 	"github.com/MBvisti/mortenvistisen/http/handlers"
 	"github.com/gorilla/sessions"
+	"github.com/gosimple/slug"
 	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
@@ -39,7 +40,7 @@ func NewRoutes(
 			},
 		}))
 		router.Use(
-			echoprometheus.NewMiddleware(config.Cfg.ProjectName),
+			echoprometheus.NewMiddleware(slug.Make(config.Cfg.ProjectName)),
 		)
 		router.GET("/metrics", echoprometheus.NewHandler())
 	}

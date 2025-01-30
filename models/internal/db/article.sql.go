@@ -34,24 +34,26 @@ func (q *Queries) DeleteArticleTags(ctx context.Context, db DBTX, postID uuid.UU
 const insertArticle = `-- name: InsertArticle :one
 INSERT INTO posts (
     id, created_at, updated_at, title, filename,
-    slug, excerpt, draft, released_at, read_time
+    slug, excerpt, draft, released_at, read_time,
+	header_title
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
+    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
 )
 RETURNING id
 `
 
 type InsertArticleParams struct {
-	ID         uuid.UUID
-	CreatedAt  pgtype.Timestamp
-	UpdatedAt  pgtype.Timestamp
-	Title      string
-	Filename   string
-	Slug       string
-	Excerpt    string
-	Draft      bool
-	ReleasedAt pgtype.Timestamp
-	ReadTime   sql.NullInt32
+	ID          uuid.UUID
+	CreatedAt   pgtype.Timestamp
+	UpdatedAt   pgtype.Timestamp
+	Title       string
+	Filename    string
+	Slug        string
+	Excerpt     string
+	Draft       bool
+	ReleasedAt  pgtype.Timestamp
+	ReadTime    sql.NullInt32
+	HeaderTitle sql.NullString
 }
 
 func (q *Queries) InsertArticle(ctx context.Context, db DBTX, arg InsertArticleParams) (uuid.UUID, error) {
@@ -66,6 +68,7 @@ func (q *Queries) InsertArticle(ctx context.Context, db DBTX, arg InsertArticleP
 		arg.Draft,
 		arg.ReleasedAt,
 		arg.ReadTime,
+		arg.HeaderTitle,
 	)
 	var id uuid.UUID
 	err := row.Scan(&id)
@@ -135,7 +138,7 @@ const queryArticleBySlug = `-- name: QueryArticleBySlug :one
 SELECT 
     p.id, p.created_at, p.updated_at, p.title, p.filename, 
     p.slug, p.excerpt, p.draft, p.released_at as release_date, 
-    p.read_time
+    p.read_time, p.header_title
 FROM posts p
 WHERE p.slug = $1
 `
@@ -151,6 +154,7 @@ type QueryArticleBySlugRow struct {
 	Draft       bool
 	ReleaseDate pgtype.Timestamp
 	ReadTime    sql.NullInt32
+	HeaderTitle sql.NullString
 }
 
 func (q *Queries) QueryArticleBySlug(ctx context.Context, db DBTX, slug string) (QueryArticleBySlugRow, error) {
@@ -167,6 +171,7 @@ func (q *Queries) QueryArticleBySlug(ctx context.Context, db DBTX, slug string) 
 		&i.Draft,
 		&i.ReleaseDate,
 		&i.ReadTime,
+		&i.HeaderTitle,
 	)
 	return i, err
 }

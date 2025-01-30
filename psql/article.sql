@@ -35,9 +35,10 @@ WHERE pt.post_id = $1;
 -- name: InsertArticle :one
 INSERT INTO posts (
     id, created_at, updated_at, title, filename,
-    slug, excerpt, draft, released_at, read_time
+    slug, excerpt, draft, released_at, read_time,
+	header_title
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
+    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
 )
 RETURNING id;
 
@@ -71,6 +72,6 @@ DELETE FROM posts_tags WHERE post_id = $1;
 SELECT 
     p.id, p.created_at, p.updated_at, p.title, p.filename, 
     p.slug, p.excerpt, p.draft, p.released_at as release_date, 
-    p.read_time
+    p.read_time, p.header_title
 FROM posts p
 WHERE p.slug = $1;

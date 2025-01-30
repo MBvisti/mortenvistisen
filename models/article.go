@@ -150,6 +150,7 @@ func GetArticleBySlug(
 		CreatedAt:   article.CreatedAt.Time,
 		UpdatedAt:   article.UpdatedAt.Time,
 		Title:       article.Title,
+		HeaderTitle: article.HeaderTitle.String,
 		Filename:    article.Filename,
 		Slug:        article.Slug,
 		Excerpt:     article.Excerpt,

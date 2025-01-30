@@ -10,6 +10,7 @@ require (
 	github.com/dromara/carbon/v2 v2.5.2
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/sessions v1.2.2
+	github.com/gosimple/slug v1.15.0
 	github.com/jaytaylor/html2text v0.0.0-20180606194806-57d518f124b0
 	github.com/lmittmann/tint v1.0.1
 	github.com/riverqueue/river v0.14.2
@@ -40,6 +41,7 @@ require (
 	github.com/gorilla/context v1.1.2 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/gorilla/securecookie v1.1.2 // indirect
+	github.com/gosimple/unidecode v1.0.1 // indirect
 	github.com/jackc/pgerrcode v0.0.0-20240316143900-6e2875d9b438 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
