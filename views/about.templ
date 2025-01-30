@@ -5,7 +5,8 @@ import "github.com/MBvisti/mortenvistisen/views/layouts"
 const AboutPageRoute = "about"
 
 templ AboutPage() {
-	@layouts.Base(Head(ctx), WithTitle("About | mortenvistisen")) {
+	@layouts.Base(Head(ctx, WithTitle("About | mortenvistisen"))) {
+		_
 		<div class="bg-base-300 w-full flex-1 flex flex-col">
 			<div class="px-4 w-full h-full flex-1 grid-rows-[100px_175px_50px_minmax(400px,1fr)] bg-base-100 max-w-screen-md md:max-w-screen-lg lg:max-w-screen-xl mx-auto grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12">
 				<div class="grid grid-cols-subgrid col-span-full lg:col-start-3 lg:col-end-11 p-4 mt-10">
