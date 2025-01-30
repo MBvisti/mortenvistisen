@@ -24,6 +24,9 @@ const (
 	ArticlesPage       = "articlesPage"
 	ProjectsPage       = "projectsPage"
 	NewslettersPage    = "newslettersPage"
+	SubscribeEvent     = "subscribeEvent"
+	VerifySubEvent     = "verifySubEvent"
+	UnsubscribeEvent   = "unsubscribeEvent"
 )
 
 func Get(ctx context.Context, name string) string {

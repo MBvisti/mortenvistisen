@@ -10,7 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import "github.com/MBvisti/mortenvistisen/views/layouts"
 
-func NewslettersPage() templ.Component {
+func SubscriptionDeletePage(validToken bool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -43,7 +43,23 @@ func NewslettersPage() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"bg-base-300 w-full flex-1\"><div class=\"h-full bg-base-100 max-w-screen-md md:max-w-screen-lg lg:max-w-screen-xl mx-auto grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12\"><div class=\"grid grid-cols-subgrid col-span-full lg:col-start-3 lg:col-end-11 p-4 mt-10\"><div class=\"col-span-full hero\"><div class=\"flex flex-col\"><div class=\"card-body rounded mb-5 p-0\"><h1 class=\"card-title text-2xl font-bold md:text-3xl md:leading-tight text-white mb-4\">Monthly technical deep dives.</h1><p class=\"text-base\">I work with everything from backend dev, systems designs to devops and machine learning. I share my learnings twice a month in tutorial form, so you can pick up new concept faster and expand your technical tool belt. </p><p class=\"text-base\">There is always an option to opt-out of receiving these updates, included in each mail. One click of a button and you are out.</p></div><div class=\"col-span-4 hero md:col-start-2 md:col-end-6 lg:col-start-4 lg:col-end-10\"><form class=\"w-full\" hx-post=\"/subscribe\" hx-target=\"this\" hx-swap=\"outerHTML\" method=\"POST\" action=\"/subscribe\"><div class=\"flex flex-col\"><input type=\"hidden\" name=\"article-title\" value=\"newsletter-page\"> <input required type=\"email\" id=\"hero-input\" name=\"hero-input\" class=\"input input-bordered input-primary w-full mb-4\" placeholder=\"your-mail@here.com\"> <button data-umami-event=\"newsletter--newsletter-page\" type=\"submit\" class=\"btn btn-outline btn-primary\">Receive Updates</button></div></form></div></div></div></div></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"bg-base-300 w-full flex-1\"><div class=\"h-full bg-base-100 md:max-w-screen-lg lg:max-w-screen-xl mx-auto grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12\"><div class=\"flex flex-col justify-center items-center col-span-full\"><div class=\"mt-7 p-8 border rounded-xl shadow-sm bg-gray-800 border-gray-700\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if !validToken {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<p class=\"text-base-content\">Your token is not valid; please request a new one.</p>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			if validToken {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<p class=\"text-base-content\">Your email has been removed; I hope you consider joining again another time.</p>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div></div></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

@@ -6,7 +6,7 @@ templ Base(head templ.Component) {
 	<!DOCTYPE html>
 	<html lang="en" data-theme="blog">
 		@head
-		<body class="flex flex-col min-w-screen h-screen">
+		<body class="flex flex-col min-w-screen max-w-[100vw] overflow-x-hidden h-screen">
 			@components.Nav()
 			{ children... }
 			@components.Footer()

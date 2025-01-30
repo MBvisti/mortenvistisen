@@ -11,7 +11,8 @@ SELECT
     p.id, p.created_at, p.updated_at, p.title, p.filename, 
     p.slug, p.excerpt, p.draft, p.released_at as release_date, 
     p.read_time
-FROM posts p;
+FROM posts p
+ORDER BY p.created_at DESC;
 
 -- name: QueryArticlesPage :many
 SELECT 

@@ -50,7 +50,7 @@ type Token struct {
 }
 
 func (te Token) IsValid() bool {
-	return time.Now().After(te.Expiration)
+	return time.Now().Before(te.Expiration)
 }
 
 type NewTokenPayload struct {
@@ -84,7 +84,7 @@ func NewToken(
 	tkn := Token{
 		ID:         uuid.New(),
 		CreatedAt:  now,
-		Expiration: now,
+		Expiration: data.Expiration,
 		Hash:       hash,
 		Plain:      plainText,
 		Meta:       data.Meta,
@@ -103,7 +103,7 @@ func NewToken(
 		},
 		Hash: hash,
 		ExpiresAt: pgtype.Timestamptz{
-			Time:  tkn.CreatedAt,
+			Time:  tkn.Expiration,
 			Valid: true,
 		},
 		MetaInformation: metaData,
@@ -137,4 +137,17 @@ func GetToken(
 		Hash:       tkn.Hash,
 		Meta:       meta,
 	}, nil
+}
+
+func DeleteToken(
+	ctx context.Context,
+	tokenID uuid.UUID,
+	dbtx db.DBTX,
+) error {
+	err := db.Stmts.DeleteToken(ctx, dbtx, tokenID)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

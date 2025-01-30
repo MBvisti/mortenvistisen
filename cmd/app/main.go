@@ -123,11 +123,11 @@ func run(ctx context.Context) error {
 		riverUI,
 	)
 
-	router := routes.SetupRoutes()
+	router, c := routes.SetupRoutes(ctx)
 
-	server := http.NewServer(ctx, router)
+	server := http.NewServer(c, router)
 
-	return server.Start(ctx)
+	return server.Start(c)
 }
 
 func main() {

@@ -204,6 +204,7 @@ SELECT
     p.slug, p.excerpt, p.draft, p.released_at as release_date, 
     p.read_time
 FROM posts p
+ORDER BY p.created_at DESC
 `
 
 type QueryArticlesRow struct {

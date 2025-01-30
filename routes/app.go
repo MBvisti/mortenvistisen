@@ -32,13 +32,13 @@ func appRoutes(router *echo.Echo, handlers handlers.App) {
 
 	router.POST("/subscribe", func(c echo.Context) error {
 		return handlers.SubscriptionEvent(c)
-	})
+	}).Name = paths.SubscribeEvent
 
-	// router.GET("/verify-subscriber", func(c echo.Context) error {
-	// 	return handlers.SubscriberEmailVerification(c)
-	// })
-	//
-	// router.GET("/unsubscriber", func(c echo.Context) error {
-	// 	return handlers.UnsubscriptionEvent(c)
-	// })
+	router.GET("/verify-subscriber", func(c echo.Context) error {
+		return handlers.SubscriberEmailVerification(c)
+	}).Name = paths.VerifySubEvent
+
+	router.GET("/unsubscribe", func(c echo.Context) error {
+		return handlers.UnsubscriptionEvent(c)
+	}).Name = paths.UnsubscribeEvent
 }

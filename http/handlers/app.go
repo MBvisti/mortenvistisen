@@ -6,6 +6,8 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
+	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -50,8 +52,6 @@ func (a *App) LandingPage(ctx echo.Context) error {
 	if err != nil {
 		return views.ErrorPage().Render(renderArgs(ctx))
 	}
-
-	slog.Info("articles", "num", len(articlesPage.Articles))
 
 	posts := make([]views.Post, len(articlesPage.Articles))
 	for i, article := range articlesPage.Articles {
@@ -109,22 +109,44 @@ func (a *App) ArticlesPage(ctx echo.Context) error {
 		return views.ErrorPage().Render(renderArgs(ctx))
 	}
 
-	posts := make([]views.Post, len(articles))
-	for i, article := range articles {
+	postsByYear := map[int][]views.Post{}
+	var years []int
+
+	for _, article := range articles {
+		year := article.ReleaseDate.Year()
+
+		if _, exists := postsByYear[year]; !exists {
+			years = append(years, year)
+		}
+
 		tags := make([]string, len(article.Tags))
 		for i, tag := range article.Tags {
 			tags[i] = tag.Name
 		}
-		posts[i] = views.Post{
-			Title:       article.Title,
-			Slug:        article.Slug,
-			Excerpt:     article.Excerpt,
-			ReleaseDate: article.ReleaseDate.String(),
-			Tags:        tags,
+
+		postsByYear[year] = append(
+			postsByYear[year],
+			views.Post{
+				Title:       article.Title,
+				Slug:        article.Slug,
+				Excerpt:     article.Excerpt,
+				ReleaseDate: article.ReleaseDate.String(),
+				Tags:        tags,
+			},
+		)
+	}
+
+	sort.Sort(sort.Reverse(sort.IntSlice(years)))
+
+	orderedPosts := make([]views.YearlyPosts, len(years))
+	for i, year := range years {
+		orderedPosts[i] = views.YearlyPosts{
+			Year:     strconv.Itoa(year),
+			Articles: postsByYear[year],
 		}
 	}
 
-	return views.ArticlesOverview(posts).Render(renderArgs(ctx))
+	return views.ArticlesOverview(orderedPosts).Render(renderArgs(ctx))
 }
 
 func (a *App) ProjectsPage(ctx echo.Context) error {
@@ -175,9 +197,7 @@ func (a *App) SubscriptionEvent(c echo.Context) error {
 			err,
 		)
 
-		c.Response().Header().Add("HX-Retarget", "body")
-		c.Response().Header().Add("HX-Reswap", "outerHTML")
-		return views.ErrorPage().Render(renderArgs(c))
+		return errorPage(c, views.ErrorPage())
 	}
 
 	cfVerifyReq.Header.Add("Content-Type", "application/x-www-form-urlencoded")
@@ -310,4 +330,99 @@ func (a *App) SubscriptionEvent(c echo.Context) error {
 	}
 
 	return fragments.SubscribeResponse(false).Render(renderArgs(c))
+}
+
+func (a App) SubscriberEmailVerification(c echo.Context) error {
+	type verificationRequest struct {
+		Token string `query:"token"`
+	}
+
+	var payload verificationRequest
+	if err := c.Bind(&payload); err != nil {
+		return errorPage(c, views.ErrorPage())
+	}
+
+	tx, err := a.db.BeginTx(c.Request().Context())
+	if err != nil {
+		return errorPage(c, views.ErrorPage())
+	}
+	defer tx.Rollback(c.Request().Context())
+
+	tkn, err := models.GetToken(c.Request().Context(), payload.Token, tx)
+	if err != nil {
+		return errorPage(
+			c,
+			views.ErrorPage(
+				views.WithErrPageTitle("That doesn't seem right"),
+				views.WithErrPageMsg(
+					"Your token is either not valid anymore or have been deleted. Please request a new one or contact support.",
+				),
+			),
+		)
+	}
+
+	if !tkn.IsValid() || tkn.Meta.Scope != models.ScopeEmailVerification {
+		return views.SubscriberVerification(false).Render(renderArgs(c))
+	}
+
+	if _, err := models.UpdateSubscriberVerification(c.Request().Context(), tx, tkn.Meta.ResourceID, true); err != nil {
+		return errorPage(c, views.ErrorPage())
+	}
+
+	if err := models.DeleteToken(c.Request().Context(), tkn.ID, tx); err != nil {
+		return errorPage(c, views.ErrorPage())
+	}
+
+	if err := tx.Commit(c.Request().Context()); err != nil {
+		return errorPage(c, views.ErrorPage())
+	}
+
+	return views.SubscriberVerification(true).Render(renderArgs(c))
+}
+
+func (a App) UnsubscriptionEvent(c echo.Context) error {
+	type unsubscribeRequest struct {
+		Token string `query:"token"`
+	}
+
+	var payload unsubscribeRequest
+	if err := c.Bind(&payload); err != nil {
+		return errorPage(c, views.ErrorPage())
+	}
+
+	tx, err := a.db.BeginTx(c.Request().Context())
+	if err != nil {
+		return errorPage(c, views.ErrorPage())
+	}
+	defer tx.Rollback(c.Request().Context())
+
+	tkn, err := models.GetToken(c.Request().Context(), payload.Token, tx)
+	if err != nil {
+		return errorPage(
+			c,
+			views.ErrorPage(
+				views.WithErrPageTitle("That doesn't seem right"),
+				views.WithErrPageMsg(
+					"Your token is either not valid anymore or have been deleted. Please request a new one or contact support.",
+				),
+			),
+		)
+	}
+	if !tkn.IsValid() || tkn.Meta.Scope != models.ScopeUnsubscribe {
+		return views.SubscriptionDeletePage(false).Render(renderArgs(c))
+	}
+
+	if err := models.DeleteSubscriber(c.Request().Context(), tx, tkn.Meta.ResourceID); err != nil {
+		return errorPage(c, views.ErrorPage())
+	}
+
+	if err := models.DeleteToken(c.Request().Context(), tkn.ID, tx); err != nil {
+		return errorPage(c, views.ErrorPage())
+	}
+
+	if err := tx.Commit(c.Request().Context()); err != nil {
+		return errorPage(c, views.ErrorPage())
+	}
+
+	return views.SubscriptionDeletePage(true).Render(renderArgs(c))
 }

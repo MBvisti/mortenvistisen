@@ -7,6 +7,7 @@ import (
 	"github.com/MBvisti/mortenvistisen/config"
 	"github.com/MBvisti/mortenvistisen/emails"
 	"github.com/MBvisti/mortenvistisen/models"
+	"github.com/MBvisti/mortenvistisen/views/paths"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -61,13 +62,15 @@ func (m *Mail) SendNewSubscriber(
 ) error {
 	newsletterMail := emails.NewsletterWelcomeMail{
 		ConfirmationLink: fmt.Sprintf(
-			"%s/verify-subscriber?token=%s",
+			"%s%s?token=%s",
 			config.Cfg.GetFullDomain(),
+			ctx.Value(paths.VerifySubEvent).(string),
 			activationToken.Hash,
 		),
 		UnsubscribeLink: fmt.Sprintf(
-			"%s/unsubscriber?token=%s",
+			"%s%s?token=%s",
 			config.Cfg.GetFullDomain(),
+			ctx.Value(paths.UnsubscribeEvent).(string),
 			unsubscribeToken.Hash,
 		),
 	}

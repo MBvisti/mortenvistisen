@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"context"
 	"log/slog"
 	"strings"
 
@@ -83,9 +84,15 @@ func (r *Routes) api() {
 	apiV1Routes(apiV1Router, r.handlers.Api)
 }
 
-func (r *Routes) SetupRoutes() *echo.Echo {
+func (r *Routes) SetupRoutes(
+	ctx context.Context,
+) (*echo.Echo, context.Context) {
 	r.web()
 	r.api()
 
-	return r.router
+	for _, route := range r.router.Routes() {
+		ctx = context.WithValue(ctx, route.Name, route.Path)
+	}
+
+	return r.router, ctx
 }

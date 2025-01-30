@@ -13,6 +13,7 @@ import (
 	"github.com/MBvisti/mortenvistisen/psql"
 	"github.com/MBvisti/mortenvistisen/services"
 	"github.com/MBvisti/mortenvistisen/views/contexts"
+	"github.com/a-h/templ"
 	"github.com/google/uuid"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
@@ -93,6 +94,12 @@ func redirectHx(w http.ResponseWriter, url string) error {
 
 func getContext(c echo.Context) context.Context {
 	return c.Request().Context()
+}
+
+func errorPage(c echo.Context, page templ.Component) error {
+	c.Response().Header().Add("HX-Retarget", "body")
+	c.Response().Header().Add("HX-Reswap", "outerHTML")
+	return page.Render(renderArgs(c))
 }
 
 func redirect(

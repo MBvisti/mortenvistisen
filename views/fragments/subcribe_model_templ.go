@@ -36,7 +36,7 @@ func SubscribeResponse(subExists bool) templ.Component {
 			}
 		}
 		if !subExists {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"rounded bg-base-300 border border-base-300 p-4\"><div class=\"divider\"></div><span class=\"font-bold py-2\">Thanks for subscribing!</span> <span class=\"font-sm my-2\">You will receive an email shortly to confirm your subscription.</span><div class=\"divider\"></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"rounded bg-base-300 border border-base-300 p-4\"><div class=\"divider\"></div><div class=\"flex flex-col\"><span class=\"font-bold py-2\">Thanks for subscribing!</span> <span class=\"font-sm my-2\">You will receive an email shortly to confirm your subscription.</span></div><div class=\"divider\"></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
