@@ -233,7 +233,8 @@ func (a *App) SubscriptionEvent(c echo.Context) error {
 	}
 
 	if !firstOutcome.Success {
-		return fragments.SubscribeResponse(false).Render(renderArgs(c))
+		return fragments.NewsletterForm(true, csrf.Token(c.Request())).
+			Render(renderArgs(c))
 	}
 
 	subcriber, err := models.NewSubscriber(
