@@ -1,10 +1,14 @@
 package fragments
 
+script resetCaptcha() {
+  turnstile.implicitRender()
+}
+
 templ NewsletterForm(failedCaptcha bool, csrfToken string) {
-  if failedCaptcha {
-	<div class="mb-2 flex justify-center w-full">
-	  <p class="font-bold">You didn't complete the captcha, please try again.</p>
-	</div>
+	if failedCaptcha {
+		<div class="mb-2 flex justify-center w-full">
+			<p class="font-bold">You didn't complete the captcha, please try again.</p>
+		</div>
 	}
 	<form class="rounded bg-base-300 border border-base-300 p-4" hx-post="/subscribe" hx-target="this" hx-swap="outerHTML" method="POST" action="/subscribe">
 		<input type="hidden" name="gorilla.csrf.Token" value={ csrfToken }/>
@@ -34,4 +38,7 @@ templ NewsletterForm(failedCaptcha bool, csrfToken string) {
 		</div>
 		<div class="mt-6 w-full cf-turnstile" data-sitekey="0x4AAAAAAAzdx8YPjdxurU_N"></div>
 	</form>
+	if failedCaptcha {
+		@resetCaptcha()
+	}
 }

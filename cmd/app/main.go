@@ -33,6 +33,15 @@ func developmentLogger() *slog.Logger {
 	)
 }
 
+func productionLogger() *slog.Logger {
+	return slog.New(
+		tint.NewHandler(os.Stderr, &tint.Options{
+			Level:      slog.LevelError,
+			TimeFormat: time.Kitchen,
+		}),
+	)
+}
+
 func run(ctx context.Context) error {
 	cfg := config.NewConfig()
 
@@ -57,7 +66,7 @@ func run(ctx context.Context) error {
 	// 	defer client.Stop()
 	// }
 
-	slog.SetDefault(developmentLogger())
+	slog.SetDefault(productionLogger())
 
 	conn, err := psql.CreatePooledConnection(
 		ctx,
@@ -72,7 +81,6 @@ func run(ctx context.Context) error {
 	}
 	riverClient := queue.NewClient(
 		conn,
-		queue.WithLogger(slog.Default()),
 		queue.WithWorkers(queueWorkers),
 	)
 	psql := psql.NewPostgres(conn, riverClient)
