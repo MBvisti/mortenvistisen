@@ -1,16 +1,38 @@
 package dashboard
 
-import "github.com/MBvisti/mortenvistisen/views/layouts"
+import (
+	"github.com/MBvisti/mortenvistisen/views/components"
+	"github.com/MBvisti/mortenvistisen/views/layouts"
+	"github.com/dromara/carbon/v2"
+)
 
-templ Home() {
+type HomeProps struct {
+	UnverifiedSubscribers string
+	NewSubscribers        string
+	VerifiedSubscribers   string
+}
+
+templ Home(props HomeProps) {
 	@layouts.Dashboard() {
-		<main class="container mx-auto">
-			<h1>
-				Dashboard
-			</h1>
-			<p>
-				Dashboard content
-			</p>
+		@components.DashboardNav()
+		<main class="flex flex-col items-center container mx-auto">
+			<div class="my-10 stats shadow">
+				<div class="stat place-items-center">
+					<div class="font-bold stat-title">Unverified Subscribers</div>
+					<div class="stat-value">{ props.UnverifiedSubscribers }</div>
+					<div class="stat-desc"></div>
+				</div>
+				<div class="stat place-items-center">
+					<div class="font-bold stat-title">New Subscribers</div>
+					<div class="stat-value">{ props.NewSubscribers }</div>
+					<div class="stat-desc">for month of { carbon.Now().ToShortMonthString() }</div>
+				</div>
+				<div class="stat place-items-center">
+					<div class="font-bold stat-title">Verified Subscribers</div>
+					<div class="stat-value">{ props.VerifiedSubscribers }</div>
+					<div class="stat-desc"></div>
+				</div>
+			</div>
 		</main>
 	}
 }

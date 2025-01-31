@@ -2,8 +2,11 @@ package main
 
 import (
 	"context"
+	"log/slog"
+	"time"
 
 	"github.com/MBvisti/mortenvistisen/config"
+	"github.com/MBvisti/mortenvistisen/models/seeds"
 	"github.com/MBvisti/mortenvistisen/psql"
 )
 
@@ -17,8 +20,26 @@ func main() {
 	}
 
 	ctx := context.Background()
-	_, err = pool.Begin(ctx)
+	tx, err := pool.Begin(ctx)
 	if err != nil {
 		panic(err)
 	}
+
+	seeder := seeds.NewSeeder(tx)
+
+	admin, err := seeder.PlantUser(
+		ctx,
+		seeds.WithUserEmail("admin@mortenvistisen.com"),
+		seeds.WithUserIsAdmin(true),
+		seeds.WithUserEmailVerifiedAt(time.Now()),
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		panic(err)
+	}
+
+	slog.Info("created admin user", "email", admin.Email)
 }

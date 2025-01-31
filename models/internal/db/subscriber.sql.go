@@ -211,6 +211,64 @@ func (q *Queries) QuerySubscribersPage(ctx context.Context, db DBTX, arg QuerySu
 	return items, nil
 }
 
+const queryUnverifiedSubscribers = `-- name: QueryUnverifiedSubscribers :many
+SELECT 
+    id, created_at, updated_at, email, 
+    subscribed_at, referer, is_verified
+FROM subscribers
+WHERE is_verified = false
+ORDER BY created_at DESC
+`
+
+func (q *Queries) QueryUnverifiedSubscribers(ctx context.Context, db DBTX) ([]Subscriber, error) {
+	rows, err := db.Query(ctx, queryUnverifiedSubscribers)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Subscriber
+	for rows.Next() {
+		var i Subscriber
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Email,
+			&i.SubscribedAt,
+			&i.Referer,
+			&i.IsVerified,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const queryVerifiedSubscriberCountByMonth = `-- name: QueryVerifiedSubscriberCountByMonth :one
+SELECT 
+    count(id)
+FROM subscribers
+WHERE is_verified = true AND created_at > $1::timestamp AND created_at < $2::timestamp
+GROUP BY created_at
+ORDER BY created_at DESC
+`
+
+type QueryVerifiedSubscriberCountByMonthParams struct {
+	StartMonth pgtype.Timestamp
+	EndMonth   pgtype.Timestamp
+}
+
+func (q *Queries) QueryVerifiedSubscriberCountByMonth(ctx context.Context, db DBTX, arg QueryVerifiedSubscriberCountByMonthParams) (int64, error) {
+	row := db.QueryRow(ctx, queryVerifiedSubscriberCountByMonth, arg.StartMonth, arg.EndMonth)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const queryVerifiedSubscribers = `-- name: QueryVerifiedSubscribers :many
 SELECT 
     id, created_at, updated_at, email, 

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/MBvisti/mortenvistisen/models/internal/db"
+	"github.com/dromara/carbon/v2"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -162,6 +163,50 @@ func GetVerifiedSubscribers(
 	}
 
 	return subscribers, nil
+}
+
+func GetUnverifiedSubscribers(
+	ctx context.Context,
+	dbtx db.DBTX,
+) ([]Subscriber, error) {
+	dbSubs, err := db.Stmts.QueryUnverifiedSubscribers(ctx, dbtx)
+	if err != nil {
+		return nil, err
+	}
+
+	subscribers := make([]Subscriber, len(dbSubs))
+	for i, dbSub := range dbSubs {
+		subscribers[i] = convertDBSubscriber(dbSub)
+	}
+
+	return subscribers, nil
+}
+
+func GetNewVerifiedSubsCurrentMonth(
+	ctx context.Context,
+	dbtx db.DBTX,
+) (int64, error) {
+	now := carbon.Now()
+
+	count, err := db.Stmts.QueryVerifiedSubscriberCountByMonth(
+		ctx,
+		dbtx,
+		db.QueryVerifiedSubscriberCountByMonthParams{
+			StartMonth: pgtype.Timestamp{
+				Time:  now.StartOfMonth().StdTime(),
+				Valid: true,
+			},
+			EndMonth: pgtype.Timestamp{
+				Time:  now.EndOfMonth().StdTime(),
+				Valid: true,
+			},
+		},
+	)
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
 }
 
 type UpdateSubscriberPayload struct {

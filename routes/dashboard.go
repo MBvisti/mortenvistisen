@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"github.com/MBvisti/mortenvistisen/http"
 	"github.com/MBvisti/mortenvistisen/http/handlers"
 	"github.com/MBvisti/mortenvistisen/views/paths"
 	"github.com/labstack/echo/v4"
@@ -15,5 +14,5 @@ func dashboardRoutes(
 
 	dashboardRouter.GET("", func(c echo.Context) error {
 		return ctrl.Index(c)
-	}, http.AuthOnly).Name = paths.DashboardHomePage
+	}).Name = paths.DashboardHomePage
 }

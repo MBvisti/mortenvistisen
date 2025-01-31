@@ -185,7 +185,6 @@ type User struct {
 	ID             uuid.UUID
 	CreatedAt      pgtype.Timestamptz
 	UpdatedAt      pgtype.Timestamptz
-	Name           string
 	Mail           string
 	MailVerifiedAt pgtype.Timestamptz
 	Password       string
