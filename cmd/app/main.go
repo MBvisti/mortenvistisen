@@ -66,7 +66,12 @@ func run(ctx context.Context) error {
 	// 	defer client.Stop()
 	// }
 
-	slog.SetDefault(productionLogger())
+	if cfg.Environment == config.DEV_ENVIRONMENT {
+		slog.SetDefault(developmentLogger())
+	}
+	if cfg.Environment == config.PROD_ENVIRONMENT {
+		slog.SetDefault(productionLogger())
+	}
 
 	conn, err := psql.CreatePooledConnection(
 		ctx,
