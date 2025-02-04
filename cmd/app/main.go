@@ -140,6 +140,10 @@ func run(ctx context.Context) error {
 
 	server := http.NewServer(c, router)
 
+	if err := riverClient.Start(ctx); err != nil {
+		return err
+	}
+
 	return server.Start(c)
 }
 

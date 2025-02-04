@@ -1,5 +1,7 @@
 package layouts
 
+import "github.com/MBvisti/mortenvistisen/views/components"
+
 templ Dashboard() {
 	<!DOCTYPE html>
 	<html lang="en">
@@ -9,10 +11,11 @@ templ Dashboard() {
 			<title>Grafto</title>
 			<link rel="apple-touch-icon" sizes="180x180" href="/static/images/apple-touch-icon.png"/>
 			<link rel="icon" type="image/png" sizes="32x32" href="/static/images/favicon-32x32.png"/>
-		<link href="/static/css/main-dev.css" rel="stylesheet"/>
+			<link href="/static/css/main-dev.css" rel="stylesheet"/>
 			<link rel="icon" type="image/png" sizes="16x16" href="/static/images/favicon-16x16.png"/>
 		</head>
 		<body class="flex flex-col min-w-screen max-w-screen h-screen">
+			@components.DashboardNav()
 			{ children... }
 			<script src="/static/js/htmx.min.js"></script>
 			<script src="/static/js/alpine.js"></script>

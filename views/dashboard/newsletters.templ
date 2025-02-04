@@ -1,0 +1,91 @@
+package dashboard
+
+import (
+	"fmt"
+	"github.com/MBvisti/mortenvistisen/models"
+	"github.com/MBvisti/mortenvistisen/views/layouts"
+	"github.com/MBvisti/mortenvistisen/views/paths"
+)
+
+type NewsletterPageData struct {
+	Newsletters []models.Newsletter
+	CurrentPage int
+	TotalPages  int
+	TotalItems  int64
+}
+
+templ Newsletters(data NewsletterPageData) {
+	@layouts.Dashboard() {
+		<div class="mt-20 lg:w-1/2 mx-auto">
+			<div class="sm:flex sm:items-center">
+				<div class="sm:flex-auto">
+					<h1 class="text-xl text-base font-semibold leading-6 text-base-content">Newsletters</h1>
+				</div>
+				<div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+					<a href={ paths.GetSafeURL(ctx, paths.DashboardNewsletterNew) } class="block rounded-md bg-primary px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-primary/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-success">
+						Create Newsletter
+					</a>
+				</div>
+			</div>
+			<div class="my-10 border border-slate-800 rounded overflow-x-auto">
+				<table class="table">
+					<thead>
+						<tr>
+							<th>
+								<label>
+									<input type="checkbox" class="checkbox"/>
+								</label>
+							</th>
+							<th>Title</th>
+							<th>Release Date</th>
+							<th>Status</th>
+							<th>Created At</th>
+						</tr>
+					</thead>
+					<tbody>
+						for _, newsletter := range data.Newsletters {
+							<tr>
+								<th>
+									<label>
+										<input type="checkbox" class="checkbox"/>
+									</label>
+								</th>
+								<td>
+									{ newsletter.Title }
+								</td>
+								<td>
+									{ newsletter.ReleasedAt.Format("2006-01-02 15:04") }
+								</td>
+								<td>
+									if newsletter.Released {
+										<div class="text-white badge badge-success">Released</div>
+									} else {
+										<div class="badge badge-accent">Not Released</div>
+									}
+								</td>
+								<th>
+									{ newsletter.CreatedAt.Format("2006-01-02 15:04") }
+								</th>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+			<div class="mt-4 flex items-center justify-between">
+				<div class="flex items-center">
+					<p class="text-sm text-base-content">
+						Showing page <span class="font-medium">{ fmt.Sprint(data.CurrentPage) }</span> of <span class="font-medium">{ fmt.Sprint(data.TotalPages) }</span>
+					</p>
+				</div>
+				<div class="flex items-center space-x-2">
+					if data.CurrentPage > 1 {
+						<a href={ templ.SafeURL(fmt.Sprintf("/dashboard/newsletters?page=%d", data.CurrentPage-1)) } class="relative inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-base-content ring-1 ring-inset ring-gray-300 hover:bg-gray-50">Previous</a>
+					}
+					if data.CurrentPage < data.TotalPages {
+						<a href={ templ.SafeURL(fmt.Sprintf("/dashboard/newsletters?page=%d", data.CurrentPage+1)) } class="relative inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50">Next</a>
+					}
+				</div>
+			</div>
+		</div>
+	}
+}

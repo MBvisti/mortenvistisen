@@ -136,7 +136,7 @@ func DashboardNav() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var11 templ.SafeURL = paths.GetSafeURL(ctx, paths.HomePage)
+		var templ_7745c5c3_Var11 templ.SafeURL = paths.GetSafeURL(ctx, paths.DashboardHomePage)
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var11)))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -145,7 +145,7 @@ func DashboardNav() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var12 templ.SafeURL = paths.GetSafeURL(ctx, paths.NewslettersPage)
+		var templ_7745c5c3_Var12 templ.SafeURL = paths.GetSafeURL(ctx, paths.DashboardNewsletter)
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var12)))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
