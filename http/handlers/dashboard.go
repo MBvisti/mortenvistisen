@@ -169,7 +169,7 @@ func (d Dashboard) StoreNewsletter(c echo.Context) error {
 	}
 
 	const (
-		emailsPerDay = 2
+		emailsPerDay = 50
 	)
 
 	totalDays := int(
