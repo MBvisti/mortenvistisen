@@ -23,9 +23,6 @@ templ (n NewsletterMail) template() {
 	@base() {
 		@header(n.Title)
 		@section() {
-			<h1>{ n.Title }</h1>
-		}
-		@section() {
 			@unsafe(n.Content)
 		}
 		@footerWithUnsub(n.UnsubscribeLink)

@@ -14,11 +14,14 @@ func dashboardRoutes(
 
 	dashboardRouter.GET("", func(c echo.Context) error {
 		return handlers.Home(c)
-	}).Name = paths.DashboardHomePage
+	}).Name = paths.DashboardHomePage.ToString()
 	dashboardRouter.GET("/newsletters", func(c echo.Context) error {
 		return handlers.Newsletters(c)
-	}).Name = paths.DashboardNewsletter
+	}).Name = paths.DashboardNewsletter.ToString()
 	dashboardRouter.GET("/newsletters/new", func(c echo.Context) error {
 		return handlers.CreateNewsletters(c)
-	}).Name = paths.DashboardNewsletterNew
+	}).Name = paths.DashboardNewsletterNew.ToString()
+	dashboardRouter.POST("/newsletters/new", func(c echo.Context) error {
+		return handlers.StoreNewsletter(c)
+	}).Name = paths.DashboardNewsletterStore.ToString()
 }

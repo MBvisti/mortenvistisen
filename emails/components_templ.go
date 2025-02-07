@@ -174,7 +174,7 @@ func footerWithUnsub(unsubURl string) templ.Component {
 			templ_7745c5c3_Var8 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<tr><td><table align=\"center\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\"><tr><td style=\"color: #999999; text-align: center;\"><p>If you didn't signup, or want to stop receiving these emails, click here:</p><p><a href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<tr><td><table cellpadding=\"0\" cellspacing=\"0\"><tr><td style=\"color: #999999; text-align: left;\"><p>If you didn't signup, or want to stop receiving these emails, click here:</p><p><a href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -183,7 +183,7 @@ func footerWithUnsub(unsubURl string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" target=\"_blank\">Unsubscribe me!</a></p></td></tr></table></td><table align=\"center\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" target=\"_blank\">Unsubscribe me!</a></p></td></tr></table></td><table cellpadding=\"0\" cellspacing=\"0\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

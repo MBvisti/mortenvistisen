@@ -9,36 +9,36 @@ import (
 func appRoutes(router *echo.Echo, handlers handlers.App) {
 	router.GET("/", func(c echo.Context) error {
 		return handlers.LandingPage(c)
-	}).Name = paths.HomePage
+	}).Name = paths.HomePage.ToString()
 
 	router.GET("/about", func(c echo.Context) error {
 		return handlers.AboutPage(c)
-	}).Name = paths.AboutPage
+	}).Name = paths.AboutPage.ToString()
 
 	router.GET("/posts/:postSlug", func(c echo.Context) error {
 		return handlers.ArticlePage(c)
-	}).Name = paths.ArticlePage
+	}).Name = paths.ArticlePage.ToString()
 	router.GET("/articles", func(c echo.Context) error {
 		return handlers.ArticlesPage(c)
-	}).Name = paths.ArticlesPage
+	}).Name = paths.ArticlesPage.ToString()
 
 	router.GET("/projects", func(c echo.Context) error {
 		return handlers.ProjectsPage(c)
-	}).Name = paths.ProjectsPage
+	}).Name = paths.ProjectsPage.ToString()
 
 	router.GET("/newsletters", func(c echo.Context) error {
 		return handlers.NewslettersPage(c)
-	}).Name = paths.NewslettersPage
+	}).Name = paths.NewslettersPage.ToString()
 
 	router.POST("/subscribe", func(c echo.Context) error {
 		return handlers.SubscriptionEvent(c)
-	}).Name = paths.SubscribeEvent
+	}).Name = paths.SubscribeEvent.ToString()
 
 	router.GET("/verify-subscriber", func(c echo.Context) error {
 		return handlers.SubscriberEmailVerification(c)
-	}).Name = paths.VerifySubEvent
+	}).Name = paths.VerifySubEvent.ToString()
 
 	router.GET("/unsubscribe", func(c echo.Context) error {
 		return handlers.UnsubscriptionEvent(c)
-	}).Name = paths.UnsubscribeEvent
+	}).Name = paths.UnsubscribeEvent.ToString()
 }

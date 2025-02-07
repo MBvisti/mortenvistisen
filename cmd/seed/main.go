@@ -2,8 +2,6 @@ package main
 
 import (
 	"context"
-	"log/slog"
-	"time"
 
 	"github.com/MBvisti/mortenvistisen/config"
 	"github.com/MBvisti/mortenvistisen/models/seeds"
@@ -27,11 +25,34 @@ func main() {
 
 	seeder := seeds.NewSeeder(tx)
 
-	admin, err := seeder.PlantUser(
+	_, err = seeder.PlantSubscriber(
 		ctx,
-		seeds.WithUserEmail("admin@mortenvistisen.com"),
-		seeds.WithUserIsAdmin(true),
-		seeds.WithUserEmailVerifiedAt(time.Now()),
+		seeds.WithSubscriberEmail("hello@mbvlabs.com"),
+		seeds.WithSubscriberIsVerified(true),
+	)
+	if err != nil {
+		panic(err)
+	}
+	_, err = seeder.PlantSubscriber(
+		ctx,
+		seeds.WithSubscriberEmail("hello1@mbvlabs.com"),
+		seeds.WithSubscriberIsVerified(true),
+	)
+	if err != nil {
+		panic(err)
+	}
+	_, err = seeder.PlantSubscriber(
+		ctx,
+		seeds.WithSubscriberEmail("hello2@mbvlabs.com"),
+		seeds.WithSubscriberIsVerified(true),
+	)
+	if err != nil {
+		panic(err)
+	}
+	_, err = seeder.PlantSubscriber(
+		ctx,
+		seeds.WithSubscriberEmail("hello3@mbvlabs.com"),
+		seeds.WithSubscriberIsVerified(true),
 	)
 	if err != nil {
 		panic(err)
@@ -40,6 +61,4 @@ func main() {
 	if err := tx.Commit(ctx); err != nil {
 		panic(err)
 	}
-
-	slog.Info("created admin user", "email", admin.Email)
 }

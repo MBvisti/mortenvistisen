@@ -10,28 +10,33 @@ import (
 type Route string
 
 const (
-	HomePage               Route = "homePage"
-	AboutPage              Route = "aboutPage"
-	LoginPage              Route = "loginPage"
-	Login                  Route = "login"
-	ForgotPasswordPage     Route = "forgotPasswordPage"
-	ForgotPassword         Route = "forgotPassword"
-	ResetPasswordPage      Route = "resetPasswordPage"
-	ResetPassword          Route = "resetPassword"
-	RegisterPage           Route = "registerPage"
-	RegisterUser           Route = "registerUser"
-	VerifyEmailPage        Route = "verifyEmailPage"
-	ArticlePage            Route = "articlePage"
-	ArticlesPage           Route = "articlesPage"
-	ProjectsPage           Route = "projectsPage"
-	NewslettersPage        Route = "newslettersPage"
-	SubscribeEvent         Route = "subscribeEvent"
-	VerifySubEvent         Route = "verifySubEvent"
-	UnsubscribeEvent       Route = "unsubscribeEvent"
-	DashboardHomePage      Route = "dashbordHomePage"
-	DashboardNewsletter    Route = "dashboardNewsletter"
-	DashboardNewsletterNew Route = "dashboardNewsletterNew"
+	HomePage                 Route = "homePage"
+	AboutPage                Route = "aboutPage"
+	LoginPage                Route = "loginPage"
+	Login                    Route = "login"
+	ForgotPasswordPage       Route = "forgotPasswordPage"
+	ForgotPassword           Route = "forgotPassword"
+	ResetPasswordPage        Route = "resetPasswordPage"
+	ResetPassword            Route = "resetPassword"
+	RegisterPage             Route = "registerPage"
+	RegisterUser             Route = "registerUser"
+	VerifyEmailPage          Route = "verifyEmailPage"
+	ArticlePage              Route = "articlePage"
+	ArticlesPage             Route = "articlesPage"
+	ProjectsPage             Route = "projectsPage"
+	NewslettersPage          Route = "newslettersPage"
+	SubscribeEvent           Route = "subscribeEvent"
+	VerifySubEvent           Route = "verifySubEvent"
+	UnsubscribeEvent         Route = "unsubscribeEvent"
+	DashboardHomePage        Route = "dashbordHomePage"
+	DashboardNewsletter      Route = "dashboardNewsletter"
+	DashboardNewsletterNew   Route = "dashboardNewsletterNew"
+	DashboardNewsletterStore Route = "dashboardNewsletterStore"
 )
+
+func (r Route) ToString() string {
+	return string(r)
+}
 
 func Get(ctx context.Context, route Route) string {
 	return contexts.ExtractApp(ctx).Routes[string(route)]
