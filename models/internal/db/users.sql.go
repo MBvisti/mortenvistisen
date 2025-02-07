@@ -41,7 +41,7 @@ insert into
     users (id, created_at, updated_at, mail, password)
 values
     ($1, $2, $3, $4, $5)
-returning id, created_at, updated_at, name, mail, mail_verified_at, password
+returning id, created_at, updated_at, mail, mail_verified_at, password
 `
 
 type InsertUserParams struct {
@@ -65,7 +65,6 @@ func (q *Queries) InsertUser(ctx context.Context, db DBTX, arg InsertUserParams)
 		&i.ID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.Name,
 		&i.Mail,
 		&i.MailVerifiedAt,
 		&i.Password,
@@ -74,7 +73,7 @@ func (q *Queries) InsertUser(ctx context.Context, db DBTX, arg InsertUserParams)
 }
 
 const queryFirstUser = `-- name: QueryFirstUser :one
-select id, created_at, updated_at, name, mail, mail_verified_at, password from users order by created_at asc limit 1
+select id, created_at, updated_at, mail, mail_verified_at, password from users order by created_at asc limit 1
 `
 
 func (q *Queries) QueryFirstUser(ctx context.Context, db DBTX) (User, error) {
@@ -84,7 +83,6 @@ func (q *Queries) QueryFirstUser(ctx context.Context, db DBTX) (User, error) {
 		&i.ID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.Name,
 		&i.Mail,
 		&i.MailVerifiedAt,
 		&i.Password,
@@ -93,7 +91,7 @@ func (q *Queries) QueryFirstUser(ctx context.Context, db DBTX) (User, error) {
 }
 
 const queryUserByID = `-- name: QueryUserByID :one
-select id, created_at, updated_at, name, mail, mail_verified_at, password from users where id=$1
+select id, created_at, updated_at, mail, mail_verified_at, password from users where id=$1
 `
 
 func (q *Queries) QueryUserByID(ctx context.Context, db DBTX, id uuid.UUID) (User, error) {
@@ -103,7 +101,6 @@ func (q *Queries) QueryUserByID(ctx context.Context, db DBTX, id uuid.UUID) (Use
 		&i.ID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.Name,
 		&i.Mail,
 		&i.MailVerifiedAt,
 		&i.Password,
@@ -112,7 +109,7 @@ func (q *Queries) QueryUserByID(ctx context.Context, db DBTX, id uuid.UUID) (Use
 }
 
 const queryUserByMail = `-- name: QueryUserByMail :one
-select id, created_at, updated_at, name, mail, mail_verified_at, password from users where mail=$1
+select id, created_at, updated_at, mail, mail_verified_at, password from users where mail=$1
 `
 
 func (q *Queries) QueryUserByMail(ctx context.Context, db DBTX, mail string) (User, error) {
@@ -122,7 +119,6 @@ func (q *Queries) QueryUserByMail(ctx context.Context, db DBTX, mail string) (Us
 		&i.ID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.Name,
 		&i.Mail,
 		&i.MailVerifiedAt,
 		&i.Password,
@@ -131,7 +127,7 @@ func (q *Queries) QueryUserByMail(ctx context.Context, db DBTX, mail string) (Us
 }
 
 const queryUsers = `-- name: QueryUsers :many
-select id, created_at, updated_at, name, mail, mail_verified_at, password from users
+select id, created_at, updated_at, mail, mail_verified_at, password from users
 `
 
 func (q *Queries) QueryUsers(ctx context.Context, db DBTX) ([]User, error) {
@@ -147,7 +143,6 @@ func (q *Queries) QueryUsers(ctx context.Context, db DBTX) ([]User, error) {
 			&i.ID,
 			&i.CreatedAt,
 			&i.UpdatedAt,
-			&i.Name,
 			&i.Mail,
 			&i.MailVerifiedAt,
 			&i.Password,
@@ -166,7 +161,7 @@ const updateUser = `-- name: UpdateUser :one
 update users
     set updated_at=$2, mail=$3
 where id = $1
-returning id, created_at, updated_at, name, mail, mail_verified_at, password
+returning id, created_at, updated_at, mail, mail_verified_at, password
 `
 
 type UpdateUserParams struct {
@@ -182,7 +177,6 @@ func (q *Queries) UpdateUser(ctx context.Context, db DBTX, arg UpdateUserParams)
 		&i.ID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.Name,
 		&i.Mail,
 		&i.MailVerifiedAt,
 		&i.Password,
@@ -195,7 +189,7 @@ UPDATE users
 SET 
     updated_at = $2
 WHERE id = $1
-RETURNING id, created_at, updated_at, name, mail, mail_verified_at, password
+RETURNING id, created_at, updated_at, mail, mail_verified_at, password
 `
 
 type UpdateUserIsAdminParams struct {
@@ -210,7 +204,6 @@ func (q *Queries) UpdateUserIsAdmin(ctx context.Context, db DBTX, arg UpdateUser
 		&i.ID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.Name,
 		&i.Mail,
 		&i.MailVerifiedAt,
 		&i.Password,

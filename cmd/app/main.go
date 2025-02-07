@@ -80,7 +80,12 @@ func run(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	queueWorkers, err := workers.SetupWorkers(workers.WorkerDependencies{})
+
+	emailSvc := services.NewMail()
+
+	queueWorkers, err := workers.SetupWorkers(workers.WorkerDependencies{
+		Emailer: emailSvc,
+	})
 	if err != nil {
 		return err
 	}
@@ -109,7 +114,6 @@ func run(ctx context.Context) error {
 	}
 
 	authSvc := services.NewAuth(psql)
-	emailSvc := services.NewMail()
 
 	cacheBuilder, err := otter.NewBuilder[string, string](20)
 	if err != nil {
@@ -139,6 +143,10 @@ func run(ctx context.Context) error {
 	router, c := routes.SetupRoutes(ctx)
 
 	server := http.NewServer(c, router)
+
+	if err := riverClient.Start(c); err != nil {
+		return err
+	}
 
 	return server.Start(c)
 }

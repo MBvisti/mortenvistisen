@@ -65,10 +65,10 @@ func createSitemap(c echo.Context, db psql.Postgres) (Sitemap, error) {
 	routes := c.Echo().Routes()
 	for _, r := range routes {
 		switch r.Name {
-		case paths.AboutPage,
-			paths.ArticlesPage,
-			paths.ProjectsPage,
-			paths.NewslettersPage:
+		case paths.AboutPage.ToString(),
+			paths.ArticlesPage.ToString(),
+			paths.ProjectsPage.ToString(),
+			paths.NewslettersPage.ToString():
 			urls = append(urls, URL{
 				Loc: fmt.Sprintf(
 					"%s%s",

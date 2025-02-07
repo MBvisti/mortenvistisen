@@ -8,6 +8,7 @@ import (
 	"github.com/MBvisti/mortenvistisen/config"
 	"github.com/MBvisti/mortenvistisen/http"
 	"github.com/MBvisti/mortenvistisen/http/handlers"
+	"github.com/MBvisti/mortenvistisen/views/paths"
 	"github.com/gorilla/sessions"
 	"github.com/gosimple/slug"
 	"github.com/labstack/echo-contrib/echoprometheus"
@@ -92,7 +93,7 @@ func (r *Routes) SetupRoutes(
 	r.api()
 
 	for _, route := range r.router.Routes() {
-		ctx = context.WithValue(ctx, route.Name, route.Path)
+		ctx = context.WithValue(ctx, paths.Route(route.Name), route.Path)
 	}
 
 	return r.router, ctx

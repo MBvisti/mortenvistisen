@@ -3,16 +3,16 @@ package http
 import (
 	"net/http"
 
+	"github.com/MBvisti/mortenvistisen/http/handlers"
+	"github.com/MBvisti/mortenvistisen/views/contexts"
 	"github.com/google/uuid"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
-	"github.com/MBvisti/mortenvistisen/http/handlers"
-	"github.com/MBvisti/mortenvistisen/views/contexts"
 )
 
 func AuthOnly(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		sess, err := session.Get("session", c)
+		sess, err := session.Get(handlers.AuthenticatedSessionName, c)
 		if err != nil {
 			return next(c)
 		}

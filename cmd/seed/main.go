@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/MBvisti/mortenvistisen/config"
+	"github.com/MBvisti/mortenvistisen/models/seeds"
 	"github.com/MBvisti/mortenvistisen/psql"
 )
 
@@ -17,8 +18,47 @@ func main() {
 	}
 
 	ctx := context.Background()
-	_, err = pool.Begin(ctx)
+	tx, err := pool.Begin(ctx)
 	if err != nil {
+		panic(err)
+	}
+
+	seeder := seeds.NewSeeder(tx)
+
+	_, err = seeder.PlantSubscriber(
+		ctx,
+		seeds.WithSubscriberEmail("hello@mbvlabs.com"),
+		seeds.WithSubscriberIsVerified(true),
+	)
+	if err != nil {
+		panic(err)
+	}
+	_, err = seeder.PlantSubscriber(
+		ctx,
+		seeds.WithSubscriberEmail("hello1@mbvlabs.com"),
+		seeds.WithSubscriberIsVerified(true),
+	)
+	if err != nil {
+		panic(err)
+	}
+	_, err = seeder.PlantSubscriber(
+		ctx,
+		seeds.WithSubscriberEmail("hello2@mbvlabs.com"),
+		seeds.WithSubscriberIsVerified(true),
+	)
+	if err != nil {
+		panic(err)
+	}
+	_, err = seeder.PlantSubscriber(
+		ctx,
+		seeds.WithSubscriberEmail("hello3@mbvlabs.com"),
+		seeds.WithSubscriberIsVerified(true),
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	if err := tx.Commit(ctx); err != nil {
 		panic(err)
 	}
 }

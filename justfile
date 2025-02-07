@@ -9,6 +9,7 @@ alias wc := watch-css
 
 alias cm := create-migration
 alias ms := migration-status
+alias fm := fix-migrations
 alias um := up-migrations
 alias dm := down-migrations
 alias dmt := down-migrations-to

@@ -80,7 +80,7 @@ func (m *Mail) SendNewSubscriber(
 		return err
 	}
 
-	return m.send(ctx, MailPayload{
+	return m.Send(MailPayload{
 		To:       subscriberEmail,
 		From:     "newsletter@mortenvistisen.com",
 		Subject:  "Morten Vistisen Newsletter - action required",
@@ -228,8 +228,7 @@ func (m *Mail) SendNewSubscriber(
 // 	})
 // }
 
-func (m *Mail) send(
-	ctx context.Context,
+func (m *Mail) Send(
 	payload MailPayload,
 ) error {
 	from := payload.From

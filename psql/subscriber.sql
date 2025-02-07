@@ -38,6 +38,22 @@ FROM subscribers
 WHERE is_verified = true
 ORDER BY created_at DESC;
 
+-- name: QueryUnverifiedSubscribers :many
+SELECT 
+    id, created_at, updated_at, email, 
+    subscribed_at, referer, is_verified
+FROM subscribers
+WHERE is_verified = false
+ORDER BY created_at DESC;
+
+-- name: QueryVerifiedSubscriberCountByMonth :one
+SELECT 
+    count(id)
+FROM subscribers
+WHERE is_verified = true AND created_at > sqlc.arg(start_month)::timestamp AND created_at < sqlc.arg(end_month)::timestamp
+GROUP BY created_at
+ORDER BY created_at DESC;
+
 -- name: InsertSubscriber :one
 INSERT INTO subscribers (
     id, created_at, updated_at, email,
