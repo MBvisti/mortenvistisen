@@ -84,3 +84,9 @@ explore:
 
 seed:
 	@go run ./cmd/seed/main.go
+
+lint:
+	golangci-lint run
+
+deploy: lint
+	fly deploy --build-arg COMMIT_SHA=$(git rev-parse --short HEAD)
