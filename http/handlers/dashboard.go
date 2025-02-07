@@ -180,6 +180,7 @@ func (d Dashboard) StoreNewsletter(c echo.Context) error {
 
 	startTime := time.Now()
 
+	var insertMany []river.InsertManyParams
 	for i, subscriber := range subscribers {
 		dayOffset := i / emailsPerDay
 		emailNumberForDay := i % emailsPerDay
@@ -230,29 +231,42 @@ func (d Dashboard) StoreNewsletter(c echo.Context) error {
 			return errorPage(c, views.ErrorPage())
 		}
 
-		if _, err := d.db.Queue.Insert(
-			c.Request().Context(),
-			jobs.EmailJobArgs{
+		insertMany = append(insertMany, river.InsertManyParams{
+			Args: jobs.EmailJobArgs{
 				To:          subscriber.Email,
 				From:        "newsletter@mortenvistisen.com",
-				Subject:     "Newsletter - mortenvistisen.com",
+				Subject:     "newsletter - mortenvistisen.com",
 				TextVersion: txt.String(),
 				HtmlVersion: html.String(),
 			},
-			&river.InsertOpts{
+			InsertOpts: &river.InsertOpts{
 				ScheduledAt: scheduleTime,
 			},
-		); err != nil {
-			slog.ErrorContext(
-				c.Request().Context(),
-				"failed to schedule email",
-				"error", err,
-				"subscriber_id", subscriber.ID,
-				"scheduled_time", scheduleTime,
-			)
-			return errorPage(c, views.ErrorPage())
-		}
-
+		})
+		// if _, err := d.db.Queue.InsertManyTx(
+		// 	c.Request().Context(),
+		// 	tx,
+		// 	jobs.EmailJobArgs{
+		// 		To:          subscriber.Email,
+		// 		From:        "newsletter@mortenvistisen.com",
+		// 		Subject:     "Newsletter - mortenvistisen.com",
+		// 		TextVersion: txt.String(),
+		// 		HtmlVersion: html.String(),
+		// 	},
+		// 	&river.InsertOpts{
+		// 		ScheduledAt: scheduleTime,
+		// 	},
+		// ); err != nil {
+		// 	slog.ErrorContext(
+		// 		c.Request().Context(),
+		// 		"failed to schedule email",
+		// 		"error", err,
+		// 		"subscriber_id", subscriber.ID,
+		// 		"scheduled_time", scheduleTime,
+		// 	)
+		// 	return errorPage(c, views.ErrorPage())
+		// }
+		//
 		slog.InfoContext(
 			c.Request().Context(),
 			"scheduled newsletter email",
@@ -262,6 +276,10 @@ func (d Dashboard) StoreNewsletter(c echo.Context) error {
 			"day", dayOffset+1,
 			"total_days", totalDays,
 		)
+	}
+
+	if _, err := d.db.Queue.InsertManyTx(c.Request().Context(), tx, insertMany); err != nil {
+		return errorPage(c, views.ErrorPage())
 	}
 
 	if err := tx.Commit(c.Request().Context()); err != nil {
