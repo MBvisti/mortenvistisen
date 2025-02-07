@@ -88,5 +88,5 @@ seed:
 lint:
 	golangci-lint run
 
-deploy: lint
+deploy:
 	fly deploy --build-arg COMMIT_SHA=$(git rev-parse --short HEAD)

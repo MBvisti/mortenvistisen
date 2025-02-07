@@ -163,7 +163,7 @@ func (d Dashboard) StoreNewsletter(c echo.Context) error {
 		return views.ErrorPage().Render(renderArgs(c))
 	}
 
-	subscribers, err := models.GetAllSubscribers(c.Request().Context(), tx)
+	subscribers, err := models.GetVerifiedSubscribers(c.Request().Context(), tx)
 	if err != nil {
 		return views.ErrorPage().Render(renderArgs(c))
 	}
