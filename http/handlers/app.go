@@ -387,6 +387,14 @@ func (a App) UnsubscriptionEvent(c echo.Context) error {
 
 	var payload unsubscribeRequest
 	if err := c.Bind(&payload); err != nil {
+		slog.ErrorContext(
+			c.Request().Context(),
+			"UnsubscriptionEvent",
+			"error",
+			err,
+			"token",
+			payload.Token,
+		)
 		return errorPage(c, views.ErrorPage())
 	}
 
@@ -398,6 +406,14 @@ func (a App) UnsubscriptionEvent(c echo.Context) error {
 
 	tkn, err := models.GetToken(c.Request().Context(), payload.Token, tx)
 	if err != nil {
+		slog.ErrorContext(
+			c.Request().Context(),
+			"UnsubscriptionEvent",
+			"error",
+			err,
+			"token",
+			payload.Token,
+		)
 		return errorPage(
 			c,
 			views.ErrorPage(
