@@ -19,11 +19,7 @@ ENV APP_RELEASE=$appRelease
 
 WORKDIR /
 
-RUN go install github.com/a-h/templ/cmd/templ@latest
-
 COPY . .
-
-RUN templ generate ./...
 
 COPY --from=build-resources static/css static/css
 

@@ -8,6 +8,7 @@ import (
 	"github.com/MBvisti/mortenvistisen/config"
 	"github.com/MBvisti/mortenvistisen/http"
 	"github.com/MBvisti/mortenvistisen/http/handlers"
+	"github.com/MBvisti/mortenvistisen/static"
 	"github.com/MBvisti/mortenvistisen/views/paths"
 	"github.com/gorilla/sessions"
 	"github.com/gosimple/slug"
@@ -45,7 +46,9 @@ func NewRoutes(
 		)
 		router.GET("/metrics", echoprometheus.NewHandler())
 	}
-	router.Static("/static", "static")
+
+	echo.MustSubFS(static.Files, "static")
+	router.StaticFS("/static", static.Files)
 
 	router.Use(
 		session.Middleware(
