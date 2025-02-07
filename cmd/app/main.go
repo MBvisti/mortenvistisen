@@ -6,7 +6,6 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
-	"time"
 
 	"github.com/MBvisti/mortenvistisen/config"
 	"github.com/MBvisti/mortenvistisen/http"
@@ -17,30 +16,12 @@ import (
 	"github.com/MBvisti/mortenvistisen/queue/workers"
 	"github.com/MBvisti/mortenvistisen/routes"
 	"github.com/MBvisti/mortenvistisen/services"
-	"github.com/lmittmann/tint"
+	"github.com/MBvisti/mortenvistisen/telemetry"
 	"github.com/maypok86/otter"
 	"riverqueue.com/riverui"
 )
 
 var appRelease string
-
-func developmentLogger() *slog.Logger {
-	return slog.New(
-		tint.NewHandler(os.Stderr, &tint.Options{
-			Level:      slog.LevelDebug,
-			TimeFormat: time.Kitchen,
-		}),
-	)
-}
-
-func productionLogger() *slog.Logger {
-	return slog.New(
-		tint.NewHandler(os.Stderr, &tint.Options{
-			Level:      slog.LevelError,
-			TimeFormat: time.Kitchen,
-		}),
-	)
-}
 
 func run(ctx context.Context) error {
 	cfg := config.NewConfig()
@@ -67,10 +48,10 @@ func run(ctx context.Context) error {
 	// }
 
 	if cfg.Environment == config.DEV_ENVIRONMENT {
-		slog.SetDefault(developmentLogger())
+		slog.SetDefault(telemetry.DevelopmentLogger())
 	}
 	if cfg.Environment == config.PROD_ENVIRONMENT {
-		slog.SetDefault(productionLogger())
+		slog.SetDefault(telemetry.ProductionLogger())
 	}
 
 	conn, err := psql.CreatePooledConnection(

@@ -2,13 +2,13 @@ package routes
 
 import (
 	"context"
-	"log/slog"
 	"strings"
 
 	"github.com/MBvisti/mortenvistisen/config"
 	"github.com/MBvisti/mortenvistisen/http"
 	"github.com/MBvisti/mortenvistisen/http/handlers"
 	"github.com/MBvisti/mortenvistisen/static"
+	"github.com/MBvisti/mortenvistisen/telemetry"
 	"github.com/MBvisti/mortenvistisen/views/paths"
 	"github.com/gorilla/sessions"
 	"github.com/gosimple/slug"
@@ -59,13 +59,15 @@ func NewRoutes(
 
 	slogechoCfg := slogecho.Config{
 		WithRequestID: false,
-		WithTraceID:   false,
+		WithTraceID:   true,
 		Filters: []slogecho.Filter{
 			slogecho.IgnorePathContains("static"),
 			slogecho.IgnorePathContains("health"),
 		},
 	}
-	router.Use(slogecho.NewWithConfig(slog.Default(), slogechoCfg))
+	router.Use(
+		slogecho.NewWithConfig(telemetry.DevelopmentLogger(), slogechoCfg),
+	)
 	router.Use(echomw.Recover())
 
 	router.Any("/river*", echo.WrapHandler(riverUI), http.AuthOnly)
