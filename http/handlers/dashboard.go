@@ -16,6 +16,7 @@ import (
 	"github.com/MBvisti/mortenvistisen/queue/jobs"
 	"github.com/MBvisti/mortenvistisen/views"
 	"github.com/MBvisti/mortenvistisen/views/dashboard"
+	"github.com/MBvisti/mortenvistisen/views/paths"
 	"github.com/gorilla/csrf"
 	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
@@ -213,9 +214,9 @@ func (d Dashboard) StoreNewsletter(c echo.Context) error {
 			Title:   newsletter.Title,
 			Content: newsletter.Content,
 			UnsubscribeLink: fmt.Sprintf(
-				"%s/unsubscribe?token=%s",
+				"%s%s?token=%s",
 				config.Cfg.GetFullDomain(),
-				// paths.Get(c.Request().Context(), paths.UnsubscribeEvent),
+				paths.Get(c.Request().Context(), paths.UnsubscribeEvent),
 				unsubTkn.Hash,
 			),
 		}.Generate(c.Request().Context())

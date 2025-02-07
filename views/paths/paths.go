@@ -3,7 +3,6 @@ package paths
 import (
 	"context"
 
-	"github.com/MBvisti/mortenvistisen/views/contexts"
 	"github.com/a-h/templ"
 )
 
@@ -39,9 +38,9 @@ func (r Route) ToString() string {
 }
 
 func Get(ctx context.Context, route Route) string {
-	return contexts.ExtractApp(ctx).Routes[string(route)]
+	return ctx.Value(route).(string)
 }
 
 func GetSafeURL(ctx context.Context, route Route) templ.SafeURL {
-	return templ.SafeURL(contexts.ExtractApp(ctx).Routes[string(route)])
+	return templ.SafeURL(ctx.Value(route).(string))
 }
