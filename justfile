@@ -33,7 +33,7 @@ watch-css:
 
 # Database 
 create-migration name:
-	@goose -dir psql/migrations postgres $DB_KIND://$DB_USER:$DB_PASSWORD@localhost:5432/$DB_NAME create {{name}} sql
+	@goose -dir psql/migrations postgres $DB_KIND://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME create {{name}} sql
 
 migration-status:
 	go run cmd/migration/main.go --cmd "status"

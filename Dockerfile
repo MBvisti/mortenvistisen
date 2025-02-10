@@ -38,3 +38,4 @@ COPY --from=build-go static/images static/images
 COPY --from=build-go resources/seo resources/seo
 
 CMD ["./app"]
+EXPOSE 8080
