@@ -42,7 +42,6 @@ templ articleCard(post Post) {
 	</a>
 }
 
-
 templ HomePage(posts []Post, csrfToken string) {
 	@layouts.Base(Head(ctx, WithTitle("Home | mortenvistisen"))) {
 		<div class="bg-base-300 w-full">
@@ -50,7 +49,7 @@ templ HomePage(posts []Post, csrfToken string) {
 				<div class="grid grid-cols-subgrid col-span-full lg:col-start-3 lg:col-end-11 p-4 mt-10">
 					<div class="w-full flex justify-center mb-6 avatar col-span-full">
 						<div class="w-40 h-40 rounded">
-							<img class="p-2 bg-base-300" src="https://mortenvistisen.com/static/images/mbv.png"/>
+							<img class="p-2 bg-base-300" src="https://media.mortenvistisen.com/mig_selv-removebg-preview.png"/>
 						</div>
 					</div>
 					<h1 class="col-span-full md:col-start-2 md:col-end-6 lg:col-end-8 text-4xl font-bold tracking-tight sm:text-5xl text-center text-zinc-100">Software engineer, bootstrapper and tech enjoyer.</h1>
