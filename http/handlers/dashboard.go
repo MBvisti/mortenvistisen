@@ -218,7 +218,7 @@ func (d Dashboard) StoreNewsletter(c echo.Context) error {
 				"%s%s?token=%s",
 				config.Cfg.GetFullDomain(),
 				paths.Get(c.Request().Context(), paths.UnsubscribeEvent),
-				unsubTkn.Hash,
+				unsubTkn.Plain,
 			),
 		}.Generate(c.Request().Context())
 		if err != nil {
