@@ -11,7 +11,6 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"github.com/MBvisti/mortenvistisen/models"
 	"github.com/MBvisti/mortenvistisen/views/layouts"
-	"github.com/dromara/carbon/v2"
 	"github.com/gosimple/slug"
 )
 
@@ -65,7 +64,7 @@ func NewslettersPage(newletters []YearlyNewsletters) templ.Component {
 				var templ_7745c5c3_Var3 string
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(yearlyNewsletter.Year)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/newsletters.templ`, Line: 56, Col: 80}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/newsletters.templ`, Line: 55, Col: 80}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
@@ -90,9 +89,9 @@ func NewslettersPage(newletters []YearlyNewsletters) templ.Component {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var5 string
-					templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(carbon.CreateFromStdTime(newsletter.ReleasedAt, carbon.Berlin).ToDateString())
+					templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(formatDate(newsletter.ReleasedAt))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/newsletters.templ`, Line: 62, Col: 93}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/newsletters.templ`, Line: 61, Col: 49}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 					if templ_7745c5c3_Err != nil {
@@ -105,7 +104,7 @@ func NewslettersPage(newletters []YearlyNewsletters) templ.Component {
 					var templ_7745c5c3_Var6 string
 					templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(newsletter.Title)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/newsletters.templ`, Line: 64, Col: 76}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/newsletters.templ`, Line: 63, Col: 76}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 					if templ_7745c5c3_Err != nil {

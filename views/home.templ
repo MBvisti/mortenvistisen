@@ -2,8 +2,9 @@ package views
 
 import (
 	"github.com/MBvisti/mortenvistisen/views/layouts"
-	"github.com/dromara/carbon/v2"
 	"github.com/MBvisti/mortenvistisen/views/fragments"
+	"time"
+	"fmt"
 )
 
 templ CsrfToken(token string) {
@@ -16,10 +17,15 @@ templ loadCsrfToken() {
 
 type Post struct {
 	Title       string
-	ReleaseDate string
+	ReleaseDate time.Time
 	Tags        []string
 	Slug        string
 	Excerpt     string
+}
+
+func formatDate(date time.Time) string {
+	y, m, d := date.Date()
+	return fmt.Sprintf("%v-%v-%v", y, m, d)
 }
 
 templ articleCard(post Post) {
@@ -29,7 +35,7 @@ templ articleCard(post Post) {
 				{ post.Title }
 			</h2>
 			<time class="z-10 order-first mb-3 flex items-center text-sm text-zinc-500" datetime="2022-07-14">
-				{ carbon.Parse(post.ReleaseDate, carbon.Berlin).ToDateString() }
+				{ formatDate(post.ReleaseDate) }
 			</time>
 			<p class="mt-2 text-sm text-content-neutral">{ post.Excerpt }</p>
 			<div aria-hidden="true" class="mt-4 flex items-center text-sm font-medium text-primary hover:text-secondary">

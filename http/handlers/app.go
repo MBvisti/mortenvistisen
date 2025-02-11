@@ -64,7 +64,7 @@ func (a *App) LandingPage(c echo.Context) error {
 			Title:       article.Title,
 			Slug:        article.Slug,
 			Excerpt:     article.Excerpt,
-			ReleaseDate: article.ReleaseDate.String(),
+			ReleaseDate: article.ReleaseDate,
 			Tags:        tags,
 		}
 	}
@@ -131,7 +131,7 @@ func (a *App) ArticlesPage(c echo.Context) error {
 				Title:       article.Title,
 				Slug:        article.Slug,
 				Excerpt:     article.Excerpt,
-				ReleaseDate: article.ReleaseDate.String(),
+				ReleaseDate: article.ReleaseDate,
 				Tags:        tags,
 			},
 		)
