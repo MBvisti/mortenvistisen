@@ -35,9 +35,9 @@ templ articleCard(post Post) {
 			<h2 class="text-base font-semibold tracking-tight text-content-neutral">
 				{ post.Title }
 			</h2>
-			<time class="z-10 order-first mb-3 flex items-center text-sm text-zinc-500" datetime="2022-07-14">
-				{ formatDate(post.ReleaseDate) }
-			</time>
+			<p class="z-10 order-first mb-3 flex items-center text-sm text-zinc-500">
+				{ carbon.CreateFromStdTime(post.ReleaseDate).ToDateString() }
+			</p>
 			<p class="mt-2 text-sm text-content-neutral">{ post.Excerpt }</p>
 			<div aria-hidden="true" class="mt-4 flex items-center text-sm font-medium text-primary hover:text-secondary">
 				Read article
@@ -91,7 +91,6 @@ templ HomePage(posts []Post, csrfToken string) {
 				</div>
 				<div class="p-4 md:p-0 col-span-full md:col-start-2 md:col-end-6 lg:col-start-4 lg:col-end-10 mt-10">
 					<h2 class="text-2xl text-content-neutral font-semibold">Latest articles</h2>
-					{ carbon.CreateFromStdTime(time.Now()).ToDateString() }
 					for _, post := range posts {
 						@articleCard(post)
 					}
