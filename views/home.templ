@@ -5,6 +5,7 @@ import (
 	"github.com/MBvisti/mortenvistisen/views/fragments"
 	"time"
 	"fmt"
+	"github.com/dromara/carbon/v2"
 )
 
 templ CsrfToken(token string) {
@@ -90,6 +91,7 @@ templ HomePage(posts []Post, csrfToken string) {
 				</div>
 				<div class="p-4 md:p-0 col-span-full md:col-start-2 md:col-end-6 lg:col-start-4 lg:col-end-10 mt-10">
 					<h2 class="text-2xl text-content-neutral font-semibold">Latest articles</h2>
+					{ carbon.CreateFromStdTime(time.Now()).ToDateString() }
 					for _, post := range posts {
 						@articleCard(post)
 					}

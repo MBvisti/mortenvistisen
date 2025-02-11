@@ -195,6 +195,7 @@ func GetAllNewsletters(
 			Content:    row.Content,
 			ReleasedAt: row.ReleasedAt.Time,
 			Released:   row.Released.Bool,
+			Slug:       row.Slug.String,
 		}
 	}
 
