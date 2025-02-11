@@ -53,6 +53,11 @@ func createSitemap(c echo.Context, db psql.Postgres) (Sitemap, error) {
 		return Sitemap{}, err
 	}
 
+	newsletters, err := models.GetAllNewsletters(context.Background(), db.Pool)
+	if err != nil {
+		return Sitemap{}, err
+	}
+
 	var urls []URL
 
 	urls = append(urls, URL{
@@ -89,6 +94,20 @@ func createSitemap(c echo.Context, db psql.Postgres) (Sitemap, error) {
 			),
 			ChangeFreq: "monthly",
 			LastMod: carbon.CreateFromStdTime(article.UpdatedAt).
+				ToDateString(),
+			Priority: "0.9",
+		})
+	}
+
+	for _, newsletter := range newsletters {
+		urls = append(urls, URL{
+			Loc: fmt.Sprintf(
+				"%v/newsletters/%v",
+				baseUrl,
+				newsletter.Slug,
+			),
+			ChangeFreq: "monthly",
+			LastMod: carbon.CreateFromStdTime(newsletter.UpdatedAt).
 				ToDateString(),
 			Priority: "0.9",
 		})

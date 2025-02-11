@@ -17,6 +17,7 @@ import (
 	"github.com/MBvisti/mortenvistisen/routes"
 	"github.com/MBvisti/mortenvistisen/services"
 	"github.com/MBvisti/mortenvistisen/telemetry"
+	"github.com/dromara/carbon/v2"
 	"github.com/maypok86/otter"
 	"riverqueue.com/riverui"
 )
@@ -25,6 +26,12 @@ var appRelease string
 
 func run(ctx context.Context) error {
 	cfg := config.NewConfig()
+	carbon.SetDefault(carbon.Default{
+		Layout:       carbon.DateTimeLayout,
+		Timezone:     carbon.UTC,
+		WeekStartsAt: carbon.Monday,
+		Locale:       "en",
+	})
 
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
