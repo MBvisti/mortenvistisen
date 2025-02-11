@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"math"
 	"math/rand"
+	"net/url"
 	"strconv"
 	"time"
 
@@ -215,10 +216,11 @@ func (d Dashboard) StoreNewsletter(c echo.Context) error {
 			Title:   newsletter.Title,
 			Content: newsletter.Content,
 			UnsubscribeLink: fmt.Sprintf(
-				"%s%s?token=%s",
+				"%s%s?token=%s&email=%s",
 				config.Cfg.GetFullDomain(),
 				paths.Get(c.Request().Context(), paths.UnsubscribeEvent),
-				unsubTkn.Plain,
+				url.QueryEscape(unsubTkn.Hash),
+				url.QueryEscape(subscriber.Email),
 			),
 		}.Generate(c.Request().Context())
 		if err != nil {

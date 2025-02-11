@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"fmt"
+	"net/url"
 
 	"github.com/MBvisti/mortenvistisen/config"
 	"github.com/MBvisti/mortenvistisen/emails"
@@ -65,14 +66,15 @@ func (m *Mail) SendNewSubscriber(
 			"%s%s?token=%s",
 			config.Cfg.GetFullDomain(),
 			ctx.Value(paths.VerifySubEvent).(string),
-			activationToken.Hash,
+			url.QueryEscape(activationToken.Hash),
 		),
-		UnsubscribeLink: fmt.Sprintf(
-			"%s%s?token=%s",
+		UnsubscribeLink: url.QueryEscape(fmt.Sprintf(
+			"%s%s?token=%s?email=%s",
 			config.Cfg.GetFullDomain(),
 			ctx.Value(paths.UnsubscribeEvent).(string),
-			unsubscribeToken.Hash,
-		),
+			url.QueryEscape(unsubscribeToken.Hash),
+			url.QueryEscape(subscriberEmail),
+		)),
 	}
 
 	htmlVersion, textVersion, err := newsletterMail.Generate(ctx)

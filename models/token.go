@@ -5,7 +5,7 @@ import (
 	"crypto/hmac"
 	"crypto/rand"
 	"crypto/sha256"
-	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"time"
@@ -45,7 +45,6 @@ type Token struct {
 	CreatedAt  time.Time
 	Expiration time.Time
 	Hash       string
-	Plain      string
 	Meta       MetaInformation
 }
 
@@ -68,17 +67,11 @@ func NewToken(
 	}
 
 	b := make([]byte, 32)
-	_, err := rand.Read(b)
-	if err != nil {
+	if _, err := rand.Read(b); err != nil {
 		return Token{}, err
 	}
 
-	plainText := base64.URLEncoding.EncodeToString(b)
-	h.Reset()
-	h.Write([]byte(plainText))
-	bytes := h.Sum(nil)
-
-	hash := base64.URLEncoding.EncodeToString(bytes)
+	hash := hex.EncodeToString(b)
 
 	now := time.Now()
 	tkn := Token{
@@ -86,7 +79,6 @@ func NewToken(
 		CreatedAt:  now,
 		Expiration: data.Expiration,
 		Hash:       hash,
-		Plain:      plainText,
 		Meta:       data.Meta,
 	}
 
