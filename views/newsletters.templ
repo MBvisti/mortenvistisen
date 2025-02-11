@@ -1,8 +1,18 @@
 package views
 
-import "github.com/MBvisti/mortenvistisen/views/layouts"
+import (
+	"github.com/MBvisti/mortenvistisen/views/layouts"
+	"github.com/MBvisti/mortenvistisen/models"
+	"github.com/dromara/carbon/v2"
+	"github.com/gosimple/slug"
+)
 
-templ NewslettersPage() {
+type YearlyNewsletters struct {
+	Year        string
+	Newsletters []models.Newsletter
+}
+
+templ NewslettersPage(newletters []YearlyNewsletters) {
 	@layouts.Base(Head(ctx, WithTitle("Newsletters | mortenvistisen"))) {
 		<div class="bg-base-300 w-full flex-1">
 			<div class="h-full bg-base-100 max-w-screen-md md:max-w-screen-lg lg:max-w-screen-xl mx-auto grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12">
@@ -39,6 +49,30 @@ templ NewslettersPage() {
 										</button>
 									</div>
 								</form>
+							</div>
+							<h2 class="card-title text-xl font-bold md:text-2xl md:leading-tight text-white mt-10">Newsletters</h2>
+							<div class="p-4 md:p-0 col-span-full md:col-start-2 md:col-end-6 lg:col-start-4 lg:col-end-10 mt-4">
+								for _, yearlyNewsletter := range newletters {
+									<h2 class="my-6 text-accent text-2xl font-bold">{ yearlyNewsletter.Year }</h2>
+									for _, newsletter := range yearlyNewsletter.Newsletters {
+										<a href={ templ.SafeURL("/newsletters/" + slug.Make(newsletter.Title)) }>
+											<div class="cursor-pointer rounded bg-base-300 p-4 flex justify-between my-6 items-center">
+												<div class="flex flex-col items-start">
+													<time class="z-10 order-first mb-3 flex items-center text-sm text-zinc-500" datetime="2022-07-14">
+														{ carbon.CreateFromStdTime(newsletter.ReleasedAt, carbon.Berlin).ToDateString() }
+													</time>
+													<p class="mt-2 text-sm text-content-neutral">{ newsletter.Title }</p>
+												</div>
+												<div aria-hidden="true" class="mt-4 flex items-center text-sm font-medium text-primary hover:text-secondary">
+													Read
+													<svg viewBox="0 0 16 16" fill="none" aria-hidden="true" class="ml-1 h-4 w-4 stroke-current">
+														<path d="M6.75 5.75 9.25 8l-2.5 2.25" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+													</svg>
+												</div>
+											</div>
+										</a>
+									}
+								}
 							</div>
 						</div>
 					</div>

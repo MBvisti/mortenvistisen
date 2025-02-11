@@ -19,13 +19,6 @@ SELECT
 FROM subscribers
 ORDER BY created_at DESC;
 
--- name: QuerySubscribers :many
-SELECT 
-    id, created_at, updated_at, email, 
-    subscribed_at, referer, is_verified
-FROM subscribers
-ORDER BY created_at DESC;
-
 -- name: QuerySubscribersPage :many
 SELECT 
     id, created_at, updated_at, email, 

@@ -154,8 +154,63 @@ func (a *App) ProjectsPage(c echo.Context) error {
 	return views.ProjectsPage().Render(renderArgs(c))
 }
 
+func (a *App) NewsletterPage(c echo.Context) error {
+	newsletter, err := models.GetNewsletterBySlug(
+		c.Request().Context(),
+		a.db.Pool,
+		c.Param("slug"),
+	)
+	if err != nil {
+		return errorPage(c, views.ErrorPage())
+	}
+
+	return views.NewsletterPage(newsletter).Render(renderArgs(c))
+}
+
 func (a *App) NewslettersPage(c echo.Context) error {
-	return views.NewslettersPage().Render(renderArgs(c))
+	newsletters, err := models.GetAllNewsletters(
+		c.Request().Context(),
+		a.db.Pool,
+	)
+	if err != nil {
+		return errorPage(c, views.ErrorPage())
+	}
+
+	newslettersByYear := map[int][]models.Newsletter{}
+	var years []int
+
+	for _, newsletter := range newsletters {
+		year := newsletter.ReleasedAt.Year()
+
+		if _, exists := newslettersByYear[year]; !exists {
+			years = append(years, year)
+		}
+
+		newslettersByYear[year] = append(
+			newslettersByYear[year],
+			models.Newsletter{
+				ID:         newsletter.ID,
+				CreatedAt:  newsletter.CreatedAt,
+				UpdatedAt:  newsletter.UpdatedAt,
+				Title:      newsletter.Title,
+				Content:    newsletter.Content,
+				ReleasedAt: newsletter.ReleasedAt,
+				Released:   newsletter.Released,
+			},
+		)
+	}
+
+	sort.Sort(sort.Reverse(sort.IntSlice(years)))
+
+	orderedNewsletters := make([]views.YearlyNewsletters, len(years))
+	for i, year := range years {
+		orderedNewsletters[i] = views.YearlyNewsletters{
+			Year:        strconv.Itoa(year),
+			Newsletters: newslettersByYear[year],
+		}
+	}
+
+	return views.NewslettersPage(orderedNewsletters).Render(renderArgs(c))
 }
 
 func (a *App) SubscriptionEvent(c echo.Context) error {

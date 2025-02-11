@@ -24,6 +24,7 @@ const (
 	ArticlesPage             Route = "articlesPage"
 	ProjectsPage             Route = "projectsPage"
 	NewslettersPage          Route = "newslettersPage"
+	NewsletterPage           Route = "newsletterPage"
 	SubscribeEvent           Route = "subscribeEvent"
 	VerifySubEvent           Route = "verifySubEvent"
 	UnsubscribeEvent         Route = "unsubscribeEvent"

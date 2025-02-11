@@ -29,6 +29,9 @@ func appRoutes(router *echo.Echo, handlers handlers.App) {
 	router.GET("/newsletters", func(c echo.Context) error {
 		return handlers.NewslettersPage(c)
 	}).Name = paths.NewslettersPage.ToString()
+	router.GET("/newsletters/:slug", func(c echo.Context) error {
+		return handlers.NewsletterPage(c)
+	}).Name = paths.NewsletterPage.ToString()
 
 	router.POST("/subscribe", func(c echo.Context) error {
 		return handlers.SubscriptionEvent(c)

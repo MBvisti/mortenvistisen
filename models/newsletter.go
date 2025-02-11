@@ -2,9 +2,11 @@ package models
 
 import (
 	"context"
+	"database/sql"
 	"time"
 
 	"github.com/MBvisti/mortenvistisen/models/internal/db"
+	"github.com/gosimple/slug"
 	"github.com/jackc/pgx/v5/pgtype"
 
 	"github.com/google/uuid"
@@ -18,6 +20,7 @@ type Newsletter struct {
 	Content    string
 	ReleasedAt time.Time
 	Released   bool
+	Slug       string
 }
 
 type NewNewsletterPayload struct {
@@ -43,10 +46,14 @@ func NewNewsletter(
 	id := uuid.New()
 
 	dbID, err := db.Stmts.InsertNewsletter(ctx, dbtx, db.InsertNewsletterParams{
-		ID:         id,
-		CreatedAt:  now,
-		UpdatedAt:  now,
-		Title:      payload.Title,
+		ID:        id,
+		CreatedAt: now,
+		UpdatedAt: now,
+		Title:     payload.Title,
+		Slug: sql.NullString{
+			String: slug.Make(payload.Title),
+			Valid:  true,
+		},
 		Content:    payload.Content,
 		ReleasedAt: releasedAt,
 		Released: pgtype.Bool{
@@ -166,10 +173,67 @@ func UpdateNewsletter(
 	return GetNewsletterByID(ctx, dbtx, newsletter.ID)
 }
 
+func GetAllNewsletters(
+	ctx context.Context,
+	dbtx db.DBTX,
+) ([]Newsletter, error) {
+	newsletterRows, err := db.Stmts.QueryAllNewsletters(
+		ctx,
+		dbtx,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	newsletters := make([]Newsletter, len(newsletterRows))
+	for i, row := range newsletterRows {
+		newsletters[i] = Newsletter{
+			ID:         row.ID,
+			CreatedAt:  row.CreatedAt.Time,
+			UpdatedAt:  row.UpdatedAt.Time,
+			Title:      row.Title,
+			Content:    row.Content,
+			ReleasedAt: row.ReleasedAt.Time,
+			Released:   row.Released.Bool,
+		}
+	}
+
+	return newsletters, nil
+}
+
 func DeleteNewsletter(
 	ctx context.Context,
 	dbtx db.DBTX,
 	id uuid.UUID,
 ) error {
 	return db.Stmts.DeleteNewsletter(ctx, dbtx, id)
+}
+
+func GetNewsletterBySlug(
+	ctx context.Context,
+	dbtx db.DBTX,
+	slug string,
+) (Newsletter, error) {
+	newsletterRow, err := db.Stmts.QueryNewsletterBySlug(
+		ctx,
+		dbtx,
+		sql.NullString{
+			String: slug,
+			Valid:  true,
+		},
+	)
+	if err != nil {
+		return Newsletter{}, err
+	}
+
+	return Newsletter{
+		ID:         newsletterRow.ID,
+		CreatedAt:  newsletterRow.CreatedAt.Time,
+		UpdatedAt:  newsletterRow.UpdatedAt.Time,
+		Title:      newsletterRow.Title,
+		Content:    newsletterRow.Content,
+		ReleasedAt: newsletterRow.ReleasedAt.Time,
+		Released:   newsletterRow.Released.Bool,
+		Slug:       newsletterRow.Slug.String,
+	}, nil
 }
