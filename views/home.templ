@@ -35,7 +35,7 @@ templ articleCard(post Post) {
 			<h2 class="text-base font-semibold tracking-tight text-content-neutral">
 				{ post.Title }
 			</h2>
-			<p class="z-10 order-first mb-3 flex items-center text-sm text-zinc-500">
+			<p class="mb-3 text-sm text-zinc-500">
 				{ carbon.CreateFromStdTime(post.ReleaseDate).ToDateString() }
 			</p>
 			<p class="mt-2 text-sm text-content-neutral">{ post.Excerpt }</p>

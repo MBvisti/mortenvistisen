@@ -179,7 +179,7 @@ func ArticlePage(data ArticlePageData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</p></div><article class=\"text-base-content text-start col-span-full lg:col-start-4 lg:col-end-11 prose prose-h2:text-base-content lg:prose-xl\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, " by mbv</p></div><article class=\"text-base-content text-start col-span-full lg:col-start-4 lg:col-end-11 prose prose-h2:text-base-content lg:prose-xl\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
