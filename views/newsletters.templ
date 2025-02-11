@@ -4,6 +4,7 @@ import (
 	"github.com/MBvisti/mortenvistisen/views/layouts"
 	"github.com/MBvisti/mortenvistisen/models"
 	"github.com/gosimple/slug"
+	"github.com/dromara/carbon/v2"
 )
 
 type YearlyNewsletters struct {
@@ -57,9 +58,9 @@ templ NewslettersPage(newletters []YearlyNewsletters) {
 										<a href={ templ.SafeURL("/newsletters/" + slug.Make(newsletter.Title)) }>
 											<div class="cursor-pointer rounded bg-base-300 p-4 flex justify-between my-6 items-center">
 												<div class="flex flex-col items-start">
-													<time class="z-10 order-first mb-3 flex items-center text-sm text-zinc-500" datetime="2022-07-14">
-														{ formatDate(newsletter.ReleasedAt) }
-													</time>
+													<p class="mb-3 text-sm text-zinc-500">
+														{ carbon.CreateFromStdTime(newsletter.ReleasedAt).ToDateString() }
+													</p>
 													<p class="mt-2 text-sm text-content-neutral">{ newsletter.Title }</p>
 												</div>
 												<div aria-hidden="true" class="mt-4 flex items-center text-sm font-medium text-primary hover:text-secondary">

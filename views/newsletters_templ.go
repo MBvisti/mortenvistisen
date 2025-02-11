@@ -11,6 +11,7 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"github.com/MBvisti/mortenvistisen/models"
 	"github.com/MBvisti/mortenvistisen/views/layouts"
+	"github.com/dromara/carbon/v2"
 	"github.com/gosimple/slug"
 )
 
@@ -64,7 +65,7 @@ func NewslettersPage(newletters []YearlyNewsletters) templ.Component {
 				var templ_7745c5c3_Var3 string
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(yearlyNewsletter.Year)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/newsletters.templ`, Line: 55, Col: 80}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/newsletters.templ`, Line: 56, Col: 80}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
@@ -84,27 +85,27 @@ func NewslettersPage(newletters []YearlyNewsletters) templ.Component {
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\"><div class=\"cursor-pointer rounded bg-base-300 p-4 flex justify-between my-6 items-center\"><div class=\"flex flex-col items-start\"><time class=\"z-10 order-first mb-3 flex items-center text-sm text-zinc-500\" datetime=\"2022-07-14\">")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\"><div class=\"cursor-pointer rounded bg-base-300 p-4 flex justify-between my-6 items-center\"><div class=\"flex flex-col items-start\"><p class=\"mb-3 text-sm text-zinc-500\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var5 string
-					templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(formatDate(newsletter.ReleasedAt))
+					templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(carbon.CreateFromStdTime(newsletter.ReleasedAt).ToDateString())
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/newsletters.templ`, Line: 61, Col: 49}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/newsletters.templ`, Line: 62, Col: 78}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</time><p class=\"mt-2 text-sm text-content-neutral\">")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</p><p class=\"mt-2 text-sm text-content-neutral\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var6 string
 					templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(newsletter.Title)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/newsletters.templ`, Line: 63, Col: 76}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/newsletters.templ`, Line: 64, Col: 76}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 					if templ_7745c5c3_Err != nil {

@@ -6,6 +6,7 @@ import (
 	"io"
 	"time"
 	"unicode/utf8"
+	"github.com/dromara/carbon/v2"
 )
 
 type ArticlePageData struct {
@@ -106,9 +107,9 @@ templ ArticlePage(data ArticlePageData) {
 				</div>
 				<div class="text-start col-span-full lg:col-start-4 lg:col-end-11 prose lg:prose-xl">
 					<h1 class="text-4xl font-bold tracking-tight text-base-content sm:text-5xl">{ data.Title }</h1>
-					<span class="text-sm text-base-content">
-						{ formatDate(data.ReleaseDate) } | By MBV
-					</span>
+					<p class="text-sm text-base-content">
+						{ carbon.CreateFromStdTime(data.ReleaseDate).ToDateString() }
+					</p>
 				</div>
 				<article class="text-base-content text-start col-span-full lg:col-start-4 lg:col-end-11 prose prose-h2:text-base-content lg:prose-xl">
 					@unsafe(data.Content)

@@ -5,6 +5,7 @@ import (
 	"github.com/MBvisti/mortenvistisen/views/layouts"
 	"fmt"
 	"github.com/MBvisti/mortenvistisen/views/paths"
+	"github.com/dromara/carbon/v2"
 )
 
 templ NewsletterPage(data models.Newsletter) {
@@ -20,9 +21,9 @@ templ NewsletterPage(data models.Newsletter) {
 				</div>
 				<div class="text-start col-span-full lg:col-start-4 lg:col-end-11">
 					<h1 class="mb-4 text-4xl font-bold tracking-tight text-base-content sm:text-5xl">{ data.Title }</h1>
-					<span class="text-sm text-base-content">
-						{ formatDate(data.ReleasedAt) } | By MBV
-					</span>
+					<p class="mb-3 text-sm text-zinc-500">
+						{ carbon.CreateFromStdTime(data.ReleasedAt).ToDateString() }
+					</p>
 				</div>
 				<article class="text-base-content text-start col-span-full lg:col-start-4 lg:col-end-11 prose prose-h2:text-base-content lg:prose-xl">
 					@unsafe(data.Content)
