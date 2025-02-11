@@ -34,6 +34,7 @@ func NewRoutes(
 	router.Debug = true
 
 	if config.Cfg.Environment == config.PROD_ENVIRONMENT {
+		router.Pre(echomw.NonWWWRedirect())
 		router.Debug = false
 		router.Use(echomw.GzipWithConfig(echomw.GzipConfig{
 			Level: 5,
