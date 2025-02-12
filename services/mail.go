@@ -68,13 +68,13 @@ func (m *Mail) SendNewSubscriber(
 			ctx.Value(paths.VerifySubEvent).(string),
 			url.QueryEscape(activationToken.Hash),
 		),
-		UnsubscribeLink: url.QueryEscape(fmt.Sprintf(
+		UnsubscribeLink: fmt.Sprintf(
 			"%s%s?token=%s?email=%s",
 			config.Cfg.GetFullDomain(),
 			ctx.Value(paths.UnsubscribeEvent).(string),
 			url.QueryEscape(unsubscribeToken.Hash),
 			url.QueryEscape(subscriberEmail),
-		)),
+		),
 	}
 
 	htmlVersion, textVersion, err := newsletterMail.Generate(ctx)
