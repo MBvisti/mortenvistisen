@@ -61,7 +61,7 @@ func renderArgs(c echo.Context) (context.Context, io.Writer) {
 
 func NewHandlers(
 	db psql.Postgres,
-	cache otter.CacheWithVariableTTL[string, string],
+	cache otter.CacheWithVariableTTL[string, templ.Component],
 	authSvc services.Auth,
 	email services.Mail,
 	postManager posts.Manager,

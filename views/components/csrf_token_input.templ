@@ -5,5 +5,5 @@ func Csrf() string {
 }
 
 templ CsrfField(csrfToken string) {
-	<input type="hidden" name="_csrf" value={ csrfToken }/>
+	<input type="hidden" name="gorilla.csrf.Token" value={ csrfToken }/>
 }

@@ -18,7 +18,7 @@ import (
 	"github.com/MBvisti/mortenvistisen/services"
 	"github.com/MBvisti/mortenvistisen/views"
 	"github.com/MBvisti/mortenvistisen/views/fragments"
-	"github.com/gorilla/csrf"
+	"github.com/a-h/templ"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/labstack/echo/v4"
 	"github.com/maypok86/otter"
@@ -28,14 +28,14 @@ const landingPageCacheKey = "LandingPage"
 
 type App struct {
 	db          psql.Postgres
-	cache       otter.CacheWithVariableTTL[string, string]
+	cache       otter.CacheWithVariableTTL[string, templ.Component]
 	email       services.Mail
 	postManager posts.Manager
 }
 
 func newApp(
 	db psql.Postgres,
-	cache otter.CacheWithVariableTTL[string, string],
+	cache otter.CacheWithVariableTTL[string, templ.Component],
 	email services.Mail,
 	postManager posts.Manager,
 ) App {
@@ -43,6 +43,13 @@ func newApp(
 }
 
 func (a *App) LandingPage(c echo.Context) error {
+	if value, ok := a.cache.Get(landingPageCacheKey); ok {
+		slog.Info(
+			"$$$$$$$$$$$$$$$$$$$$$$$$$ CACHE HIT $$$$$$$$$$$$$$$$$$$$$$$$$$",
+		)
+		return views.HomePage(value).Render(renderArgs(c))
+	}
+
 	articlesPage, err := models.GetArticlesPage(
 		c.Request().Context(),
 		1,
@@ -69,7 +76,12 @@ func (a *App) LandingPage(c echo.Context) error {
 		}
 	}
 
-	return views.HomePage(posts, csrf.Token(c.Request())).
+	cachedComponent := views.Home(posts)
+	if ok := a.cache.Set(landingPageCacheKey, cachedComponent, time.Hour*time.Duration(24)); !ok {
+		return views.HomePage(cachedComponent).Render(renderArgs(c))
+	}
+
+	return views.HomePage(cachedComponent).
 		Render(renderArgs(c))
 }
 
@@ -288,7 +300,7 @@ func (a *App) SubscriptionEvent(c echo.Context) error {
 	}
 
 	if !firstOutcome.Success {
-		return fragments.NewsletterForm(true, csrf.Token(c.Request())).
+		return fragments.NewsletterForm(true).
 			Render(renderArgs(c))
 	}
 
