@@ -17,6 +17,7 @@ import (
 	"github.com/MBvisti/mortenvistisen/routes"
 	"github.com/MBvisti/mortenvistisen/services"
 	"github.com/MBvisti/mortenvistisen/telemetry"
+	"github.com/a-h/templ"
 	"github.com/dromara/carbon/v2"
 	"github.com/maypok86/otter"
 	"riverqueue.com/riverui"
@@ -103,7 +104,7 @@ func run(ctx context.Context) error {
 
 	authSvc := services.NewAuth(psql)
 
-	cacheBuilder, err := otter.NewBuilder[string, string](20)
+	cacheBuilder, err := otter.NewBuilder[string, templ.Component](20)
 	if err != nil {
 		return err
 	}

@@ -2,6 +2,7 @@ package routes
 
 import (
 	"context"
+	h "net/http"
 	"strings"
 
 	"github.com/MBvisti/mortenvistisen/config"
@@ -46,6 +47,17 @@ func NewRoutes(
 			echoprometheus.NewMiddleware(slug.Make(config.Cfg.ProjectName)),
 		)
 		router.GET("/metrics", echoprometheus.NewHandler())
+		router.Use(echomw.CORSWithConfig(echomw.CORSConfig{
+			AllowOrigins: []string{
+				"https://mortenvistisen.com",
+			},
+			AllowMethods: []string{
+				h.MethodGet,
+				h.MethodPut,
+				h.MethodPost,
+				h.MethodDelete,
+			},
+		}))
 	}
 
 	echo.MustSubFS(static.Files, "static")
@@ -85,6 +97,7 @@ func (r *Routes) web() {
 	dashboardRoutes(r.router, r.handlers.Dashboard)
 	appRoutes(r.router, r.handlers.App)
 	registrationRoutes(r.router, r.handlers.Registration)
+	fragmentRoutes(r.router)
 }
 
 func (r *Routes) api() {
