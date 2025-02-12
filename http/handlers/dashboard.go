@@ -86,8 +86,9 @@ func (d Dashboard) Home(c echo.Context) error {
 	var recent []dashboard.RecentActivity
 	for _, rs := range recentSubs {
 		recent = append(recent, dashboard.RecentActivity{
-			When:  rs.CreatedAt,
-			Email: rs.Email,
+			When:     rs.CreatedAt,
+			Email:    rs.Email,
+			Verified: rs.IsVerified,
 		})
 	}
 

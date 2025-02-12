@@ -4,11 +4,13 @@ import (
 	"github.com/MBvisti/mortenvistisen/views/layouts"
 	"time"
 	"github.com/dromara/carbon/v2"
+	"fmt"
 )
 
 type RecentActivity struct {
-	When  time.Time
-	Email string
+	When     time.Time
+	Email    string
+	Verified bool
 }
 
 type HomeProps struct {
@@ -69,6 +71,7 @@ templ Home(props HomeProps) {
 											<h6 class="mb-1">New subscriber</h6>
 											<p class="text-muted small mb-0">{ recent.Email }</p>
 										</div>
+										<p class="text-muted small mb-0">{ fmt.Sprintf("%v", recent.Email) }</p>
 										<small class="text-muted">{ carbon.CreateFromStdTime(recent.When).DiffInString() }</small>
 									</div>
 								}
