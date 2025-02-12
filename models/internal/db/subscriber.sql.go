@@ -76,6 +76,43 @@ func (q *Queries) InsertSubscriber(ctx context.Context, db DBTX, arg InsertSubsc
 	return i, err
 }
 
+const queryRecentSubscribers = `-- name: QueryRecentSubscribers :many
+SELECT 
+    id, created_at, updated_at, email, 
+    subscribed_at, referer, is_verified
+FROM subscribers
+ORDER BY created_at DESC
+LIMIT 10
+`
+
+func (q *Queries) QueryRecentSubscribers(ctx context.Context, db DBTX) ([]Subscriber, error) {
+	rows, err := db.Query(ctx, queryRecentSubscribers)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Subscriber
+	for rows.Next() {
+		var i Subscriber
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Email,
+			&i.SubscribedAt,
+			&i.Referer,
+			&i.IsVerified,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const querySubscriberByEmail = `-- name: QuerySubscriberByEmail :one
 SELECT 
     id, created_at, updated_at, email, 

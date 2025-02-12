@@ -132,7 +132,7 @@ func DashboardNav() templ.Component {
 			templ_7745c5c3_Var10 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<header class=\"bg-base-100 w-full\"><div class=\"bg-base-100 max-w-screen-md md:max-w-screen-lg lg:max-w-screen-xl mx-auto grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12\"><div class=\"p-0 md:p-6 col-span-full flex justify-center\"><nav class=\"bg-base-300 pointer-events-auto hidden md:block\"><ul class=\"flex rounded p-3 text-sm font-medium shadow-lg ring-1 backdrop-blur ring-base-100/10\"><li><a class=\"text-base relative block px-3 py-2 transition hover:text-primary\" href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<ul class=\"nav justify-content-center my-4\"><li class=\"nav-item\"><a class=\"nav-link active\" href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -141,34 +141,25 @@ func DashboardNav() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\">Home</a></li><li><a class=\"text-base relative block px-3 py-2 transition hover:text-primary\" href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\">Dashboard</a></li><li class=\"nav-item\"><a class=\"nav-link\" href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var12 templ.SafeURL = paths.GetSafeURL(ctx, paths.DashboardNewsletter)
+		var templ_7745c5c3_Var12 templ.SafeURL = paths.GetSafeURL(ctx, paths.DashboardHomePage)
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var12)))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\">Newsletters</a></li><li><a class=\"text-base relative block px-3 py-2 transition hover:text-primary\" href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\">Subscribers</a></li><li class=\"nav-item\"><a class=\"nav-link\" href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var13 templ.SafeURL = paths.GetSafeURL(ctx, paths.ProjectsPage)
+		var templ_7745c5c3_Var13 templ.SafeURL = paths.GetSafeURL(ctx, paths.DashboardNewsletter)
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var13)))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\">Subscribers</a></li><li><a class=\"text-base relative block px-3 py-2 transition hover:text-primary\" href=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var14 templ.SafeURL = paths.GetSafeURL(ctx, paths.AboutPage)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var14)))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\">Articles</a></li></ul></nav></div></div></header>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\">Newsletters</a></li></ul>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

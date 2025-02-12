@@ -282,6 +282,23 @@ func DeleteSubscriberByEmail(
 	)
 }
 
+func GetRecentSubscribers(
+	ctx context.Context,
+	dbtx db.DBTX,
+) ([]Subscriber, error) {
+	rows, err := db.Stmts.QueryRecentSubscribers(ctx, dbtx)
+	if err != nil {
+		return nil, err
+	}
+
+	subscribers := make([]Subscriber, len(rows))
+	for i, dbSub := range rows {
+		subscribers[i] = convertDBSubscriber(dbSub)
+	}
+
+	return subscribers, nil
+}
+
 func convertDBSubscriber(dbSub db.Subscriber) Subscriber {
 	return Subscriber{
 		ID:           dbSub.ID,

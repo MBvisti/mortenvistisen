@@ -53,26 +53,15 @@ templ Nav() {
 }
 
 templ DashboardNav() {
-	<header class="bg-base-100 w-full">
-		<div class="bg-base-100 max-w-screen-md md:max-w-screen-lg lg:max-w-screen-xl mx-auto grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12">
-			<div class="p-0 md:p-6 col-span-full flex justify-center">
-				<nav class="bg-base-300 pointer-events-auto hidden md:block">
-					<ul class="flex rounded p-3 text-sm font-medium shadow-lg ring-1 backdrop-blur ring-base-100/10">
-						<li>
-							<a class="text-base relative block px-3 py-2 transition hover:text-primary" href={ paths.GetSafeURL(ctx, paths.DashboardHomePage) }>Home</a>
-						</li>
-						<li>
-							<a class="text-base relative block px-3 py-2 transition hover:text-primary" href={ paths.GetSafeURL(ctx, paths.DashboardNewsletter) }>Newsletters</a>
-						</li>
-						<li>
-							<a class="text-base relative block px-3 py-2 transition hover:text-primary" href={ paths.GetSafeURL(ctx, paths.ProjectsPage) }>Subscribers</a>
-						</li>
-						<li>
-							<a class="text-base relative block px-3 py-2 transition hover:text-primary" href={ paths.GetSafeURL(ctx, paths.AboutPage) }>Articles</a>
-						</li>
-					</ul>
-				</nav>
-			</div>
-		</div>
-	</header>
+	<ul class="nav justify-content-center my-4">
+		<li class="nav-item">
+			<a class="nav-link active" href={ paths.GetSafeURL(ctx, paths.DashboardHomePage) }>Dashboard</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" href={ paths.GetSafeURL(ctx, paths.DashboardHomePage) }>Subscribers</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" href={ paths.GetSafeURL(ctx, paths.DashboardNewsletter) }>Newsletters</a>
+		</li>
+	</ul>
 }

@@ -11,12 +11,19 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"github.com/MBvisti/mortenvistisen/views/layouts"
 	"github.com/dromara/carbon/v2"
+	"time"
 )
+
+type RecentActivity struct {
+	When  time.Time
+	Email string
+}
 
 type HomeProps struct {
 	UnverifiedSubscribers string
 	NewSubscribers        string
 	VerifiedSubscribers   string
+	RecentActivities      []RecentActivity
 }
 
 func Home(props HomeProps) templ.Component {
@@ -52,59 +59,82 @@ func Home(props HomeProps) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<main class=\"flex flex-col items-center container mx-auto\"><div class=\"my-10 stats shadow\"><div class=\"stat place-items-center\"><div class=\"font-bold stat-title\">Unverified Subscribers</div><div class=\"stat-value\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"py-4\"><!-- Statistics Cards --><div class=\"row text-center justify-content-center\"><!-- Users Card --><div class=\"col-3\"><div class=\"card stat-card border-0 shadow-sm\"><div class=\"card-body\"><h6 class=\"text-muted mb-2\">Unverified Subscribers</h6><h4 class=\"mb-3\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(props.UnverifiedSubscribers)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/home.templ`, Line: 20, Col: 58}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/home.templ`, Line: 31, Col: 53}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div><div class=\"stat-desc\"></div></div><div class=\"stat place-items-center\"><div class=\"font-bold stat-title\">New Subscribers</div><div class=\"stat-value\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</h4></div></div></div><!-- Orders Card --><div class=\"col-3\"><div class=\"card stat-card border-0 shadow-sm\"><div class=\"card-body\"><h6 class=\"text-muted mb-2\">New Subscribers</h6><h4 class=\"mb-3\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.NewSubscribers)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/home.templ`, Line: 25, Col: 51}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/home.templ`, Line: 40, Col: 46}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div><div class=\"stat-desc\">for month of ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</h4></div></div></div><!-- Revenue Card --><div class=\"col-3\"><div class=\"card stat-card border-0 shadow-sm\"><div class=\"card-body\"><h6 class=\"text-muted mb-2\">Verified Subscribers</h6><h4 class=\"mb-3\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var5 string
-			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(carbon.Now().ToShortMonthString())
+			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(props.VerifiedSubscribers)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/home.templ`, Line: 26, Col: 76}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/home.templ`, Line: 49, Col: 51}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div></div><div class=\"stat place-items-center\"><div class=\"font-bold stat-title\">Verified Subscribers</div><div class=\"stat-value\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</h4></div></div></div></div><!-- Activity Section --><div class=\"row mt-4 border\"><div class=\"col-12\"><div class=\"card border-0 shadow-sm\"><div class=\"card-body\"><div class=\"d-flex justify-content-between align-items-center mb-4\"><h5 class=\"card-title mb-0\">Recent Activity</h5></div><div class=\"list-group list-group-flush\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var6 string
-			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(props.VerifiedSubscribers)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/home.templ`, Line: 30, Col: 56}
+			for _, recent := range props.RecentActivities {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"list-group-item border-0 d-flex align-items-center px-0\"><div class=\"avatar-sm bg-primary bg-opacity-10 rounded-circle p-2 me-3\"><i class=\"fas fa-shopping-cart text-primary\"></i></div><div class=\"flex-grow-1\"><h6 class=\"mb-1\">New subscriber</h6><p class=\"text-muted small mb-0\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var6 string
+				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(recent.Email)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/home.templ`, Line: 70, Col: 58}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</p></div><small class=\"text-muted\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var7 string
+				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(carbon.CreateFromStdTime(recent.When).DiffInString())
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/home.templ`, Line: 72, Col: 90}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</small></div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div><div class=\"stat-desc\"></div></div></div></main>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div></div></div></div></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

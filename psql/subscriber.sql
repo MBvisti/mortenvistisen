@@ -19,6 +19,14 @@ SELECT
 FROM subscribers
 ORDER BY created_at DESC;
 
+-- name: QueryRecentSubscribers :many
+SELECT 
+    id, created_at, updated_at, email, 
+    subscribed_at, referer, is_verified
+FROM subscribers
+ORDER BY created_at DESC
+LIMIT 10;
+
 -- name: QuerySubscribersPage :many
 SELECT 
     id, created_at, updated_at, email, 
@@ -82,7 +90,6 @@ SET
     is_verified = $3
 WHERE id = $1
 RETURNING *;
-
 
 -- name: DeleteSubscriber :exec
 DELETE FROM subscribers 
