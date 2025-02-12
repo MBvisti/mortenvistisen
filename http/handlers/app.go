@@ -24,7 +24,13 @@ import (
 	"github.com/maypok86/otter"
 )
 
-const landingPageCacheKey = "LandingPage"
+const (
+	landingPageCacheKey     = "landingPage"
+	articlesPageCacheKey    = "articlesPage"
+	newslettersPageCacheKey = "newslettersPage"
+)
+
+var cacheDuration = time.Hour * time.Duration(168)
 
 type App struct {
 	db          psql.Postgres
@@ -44,9 +50,6 @@ func newApp(
 
 func (a *App) LandingPage(c echo.Context) error {
 	if value, ok := a.cache.Get(landingPageCacheKey); ok {
-		slog.Info(
-			"$$$$$$$$$$$$$$$$$$$$$$$$$ CACHE HIT $$$$$$$$$$$$$$$$$$$$$$$$$$",
-		)
 		return views.HomePage(value).Render(renderArgs(c))
 	}
 
@@ -77,7 +80,7 @@ func (a *App) LandingPage(c echo.Context) error {
 	}
 
 	cachedComponent := views.Home(posts)
-	if ok := a.cache.Set(landingPageCacheKey, cachedComponent, time.Hour*time.Duration(24)); !ok {
+	if ok := a.cache.Set(landingPageCacheKey, cachedComponent, cacheDuration); !ok {
 		return views.HomePage(cachedComponent).Render(renderArgs(c))
 	}
 
@@ -114,6 +117,10 @@ func (a *App) ArticlePage(c echo.Context) error {
 }
 
 func (a *App) ArticlesPage(c echo.Context) error {
+	if value, ok := a.cache.Get(articlesPageCacheKey); ok {
+		return views.ArticlesPage(value).Render(renderArgs(c))
+	}
+
 	articles, err := models.GetAllArticles(
 		c.Request().Context(),
 		a.db.Pool,
@@ -159,7 +166,12 @@ func (a *App) ArticlesPage(c echo.Context) error {
 		}
 	}
 
-	return views.ArticlesOverview(orderedPosts).Render(renderArgs(c))
+	cachedComponent := views.Articles(orderedPosts)
+	if ok := a.cache.Set(articlesPageCacheKey, cachedComponent, cacheDuration); !ok {
+		return views.ArticlesPage(cachedComponent).Render(renderArgs(c))
+	}
+
+	return views.ArticlesPage(cachedComponent).Render(renderArgs(c))
 }
 
 func (a *App) ProjectsPage(c echo.Context) error {
@@ -180,6 +192,10 @@ func (a *App) NewsletterPage(c echo.Context) error {
 }
 
 func (a *App) NewslettersPage(c echo.Context) error {
+	if value, ok := a.cache.Get(newslettersPageCacheKey); ok {
+		return views.NewslettersPage(value).Render(renderArgs(c))
+	}
+
 	newsletters, err := models.GetAllNewsletters(
 		c.Request().Context(),
 		a.db.Pool,
@@ -222,7 +238,12 @@ func (a *App) NewslettersPage(c echo.Context) error {
 		}
 	}
 
-	return views.NewslettersPage(orderedNewsletters).Render(renderArgs(c))
+	cachedComponent := views.Newsletters(orderedNewsletters)
+	if ok := a.cache.Set(newslettersPageCacheKey, cachedComponent, cacheDuration); !ok {
+		return views.NewslettersPage(cachedComponent).Render(renderArgs(c))
+	}
+
+	return views.NewslettersPage(cachedComponent).Render(renderArgs(c))
 }
 
 func (a *App) SubscriptionEvent(c echo.Context) error {
