@@ -75,10 +75,27 @@ func (d Dashboard) Home(c echo.Context) error {
 		return errorPage(c, views.ErrorPage())
 	}
 
+	recentSubs, err := models.GetRecentSubscribers(
+		c.Request().Context(),
+		d.db.Pool,
+	)
+	if err != nil {
+		return errorPage(c, views.ErrorPage())
+	}
+
+	var recent []dashboard.RecentActivity
+	for _, rs := range recentSubs {
+		recent = append(recent, dashboard.RecentActivity{
+			When:  rs.CreatedAt,
+			Email: rs.Email,
+		})
+	}
+
 	return dashboard.Home(dashboard.HomeProps{
 		UnverifiedSubscribers: strconv.Itoa(len(unverifiedSubsCount)),
 		VerifiedSubscribers:   strconv.Itoa(len(verifiedSubsCount)),
 		NewSubscribers:        strconv.Itoa(int(newVerifiedSubsCount)),
+		RecentActivities:      recent,
 	}).Render(renderArgs(c))
 }
 
