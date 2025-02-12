@@ -19,7 +19,7 @@ templ Newsletters(data NewsletterPageData) {
 		<div class="container py-4">
 			<div class="d-flex justify-content-between align-items-center mb-4">
 				<h2 class="h4 mb-0">Newsletters</h2>
-				<a href={ templ.SafeURL(paths.DashboardNewsletterNew) } class="btn btn-primary">
+				<a href={ paths.GetSafeURL(ctx, paths.DashboardNewsletterNew) } class="btn btn-primary">
 					<i class="fas fa-plus me-2"></i>Create Newsletter
 				</a>
 			</div>
@@ -44,9 +44,10 @@ templ Newsletters(data NewsletterPageData) {
 									<tr>
 										<td>{ newsletter.Title }</td>
 										<td>
-											if newsletter.ReleasedAt.IsZero() {
+											if !newsletter.ReleasedAt.IsZero() {
 												<span class="badge bg-success">Published</span>
-											} else {
+											}
+											if newsletter.ReleasedAt.IsZero() {
 												<span class="badge bg-warning">Draft</span>
 											}
 										</td>
