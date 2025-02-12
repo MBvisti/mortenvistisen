@@ -71,7 +71,7 @@ templ Home(props HomeProps) {
 											<h6 class="mb-1">New subscriber</h6>
 											<p class="text-muted small mb-0">{ recent.Email }</p>
 										</div>
-										<p class="text-muted small mb-0">{ fmt.Sprintf("%v", recent.Email) }</p>
+										<p class="text-muted small mr-4">{ fmt.Sprintf("%v", recent.Verified) }</p>
 										<small class="text-muted">{ carbon.CreateFromStdTime(recent.When).DiffInString() }</small>
 									</div>
 								}
