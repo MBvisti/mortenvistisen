@@ -99,3 +99,8 @@ WHERE id = $1;
 DELETE FROM subscribers 
 WHERE email = $1;
 
+
+-- name: DeleteSubsOlderThanMonth :exec
+DELETE FROM subscribers
+WHERE is_verified = false 
+AND subscribed_at < sqlc.arg(older_than)::timestamp;

@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"log/slog"
 	"time"
 
 	"github.com/MBvisti/mortenvistisen/models/internal/db"
@@ -46,10 +47,11 @@ func NewSubscriber(
 
 	now := time.Now()
 	params := db.InsertSubscriberParams{
-		ID:        uuid.New(),
-		CreatedAt: pgtype.Timestamptz{Time: now, Valid: true},
-		UpdatedAt: pgtype.Timestamptz{Time: now, Valid: true},
-		Email:     sql.NullString{String: payload.Email, Valid: true},
+		ID:         uuid.New(),
+		CreatedAt:  pgtype.Timestamptz{Time: now, Valid: true},
+		UpdatedAt:  pgtype.Timestamptz{Time: now, Valid: true},
+		Email:      sql.NullString{String: payload.Email, Valid: true},
+		IsVerified: pgtype.Bool{Bool: false, Valid: true},
 		SubscribedAt: pgtype.Timestamptz{
 			Time:  payload.SubscribedAt,
 			Valid: true,
@@ -309,4 +311,17 @@ func convertDBSubscriber(dbSub db.Subscriber) Subscriber {
 		Referer:      dbSub.Referer.String,
 		IsVerified:   dbSub.IsVerified.Bool,
 	}
+}
+
+func ClearOldUnverifiedSubs(ctx context.Context, dbtx db.DBTX) error {
+	olderThan := time.Now().AddDate(0, -1, 0)
+	slog.Info("OLDER THAN", "val", olderThan)
+	return db.Stmts.DeleteSubsOlderThanMonth(
+		ctx,
+		dbtx,
+		pgtype.Timestamp{
+			Time:  olderThan,
+			Valid: true,
+		},
+	)
 }

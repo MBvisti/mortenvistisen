@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
+	"time"
 
 	"github.com/MBvisti/mortenvistisen/config"
 	"github.com/MBvisti/mortenvistisen/http"
@@ -13,6 +14,7 @@ import (
 	"github.com/MBvisti/mortenvistisen/posts"
 	"github.com/MBvisti/mortenvistisen/psql"
 	"github.com/MBvisti/mortenvistisen/queue"
+	"github.com/MBvisti/mortenvistisen/queue/jobs"
 	"github.com/MBvisti/mortenvistisen/queue/workers"
 	"github.com/MBvisti/mortenvistisen/routes"
 	"github.com/MBvisti/mortenvistisen/services"
@@ -20,6 +22,7 @@ import (
 	"github.com/a-h/templ"
 	"github.com/dromara/carbon/v2"
 	"github.com/maypok86/otter"
+	"github.com/riverqueue/river"
 	"riverqueue.com/riverui"
 )
 
@@ -74,13 +77,26 @@ func run(ctx context.Context) error {
 
 	queueWorkers, err := workers.SetupWorkers(workers.WorkerDependencies{
 		Emailer: emailSvc,
+		Conn:    conn,
 	})
 	if err != nil {
 		return err
 	}
+
+	periodicJobs := []*river.PeriodicJob{
+		river.NewPeriodicJob(
+			river.PeriodicInterval(24*time.Hour),
+			func() (river.JobArgs, *river.InsertOpts) {
+				return jobs.SubscriberCleanupJobArgs{}, nil
+			},
+			&river.PeriodicJobOpts{RunOnStart: true},
+		),
+	}
+
 	riverClient := queue.NewClient(
 		conn,
 		queue.WithWorkers(queueWorkers),
+		queue.WithPeriodicJobs(periodicJobs),
 	)
 	psql := psql.NewPostgres(conn, riverClient)
 

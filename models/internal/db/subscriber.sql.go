@@ -13,6 +13,17 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const deleteSubsOlderThanMonth = `-- name: DeleteSubsOlderThanMonth :exec
+DELETE FROM subscribers
+WHERE is_verified = false 
+AND subscribed_at < $1::timestamp
+`
+
+func (q *Queries) DeleteSubsOlderThanMonth(ctx context.Context, db DBTX, olderThan pgtype.Timestamp) error {
+	_, err := db.Exec(ctx, deleteSubsOlderThanMonth, olderThan)
+	return err
+}
+
 const deleteSubscriber = `-- name: DeleteSubscriber :exec
 DELETE FROM subscribers 
 WHERE id = $1
