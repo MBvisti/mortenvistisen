@@ -1,7 +1,10 @@
 package routes
 
 import (
+	"log/slog"
+
 	"github.com/MBvisti/mortenvistisen/http/handlers"
+	"github.com/MBvisti/mortenvistisen/static"
 	"github.com/labstack/echo/v4"
 )
 
@@ -24,5 +27,20 @@ func resourceRoutes(router *echo.Echo, handlers handlers.Resource) {
 
 	router.GET("/favicon.ico", func(c echo.Context) error {
 		return c.File("./static/images/favicon.ico")
+	})
+
+	router.GET("/script.js", func(c echo.Context) error {
+		bytes, err := static.Files.ReadFile("js/analytics.js")
+		if err != nil {
+			slog.ErrorContext(
+				c.Request().Context(),
+				"ANALYTICS SCRIPT",
+				"error",
+				err,
+			)
+			return err
+		}
+
+		return c.Blob(200, "application/javascript", bytes)
 	})
 }

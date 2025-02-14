@@ -61,6 +61,33 @@ func (ns NullRiverJobState) Value() (driver.Value, error) {
 	return string(ns.RiverJobState), nil
 }
 
+type Analytic struct {
+	ID          uuid.UUID
+	Timestamp   pgtype.Timestamptz
+	WebsiteID   pgtype.UUID
+	Type        sql.NullString
+	Url         sql.NullString
+	Path        sql.NullString
+	Referrer    sql.NullString
+	Title       sql.NullString
+	Screen      sql.NullString
+	Language    sql.NullString
+	VisitorID   pgtype.UUID
+	SessionID   pgtype.UUID
+	ScrollDepth sql.NullInt32
+}
+
+type AnalyticEvent struct {
+	ID           uuid.UUID
+	AnalyticsID  pgtype.UUID
+	ElementTag   sql.NullString
+	ElementText  sql.NullString
+	ElementClass sql.NullString
+	ElementID    sql.NullString
+	ElementHref  sql.NullString
+	CustomData   sql.NullString
+}
+
 type Job struct {
 	ID             uuid.UUID
 	CreatedAt      pgtype.Timestamptz

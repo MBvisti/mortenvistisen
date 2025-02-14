@@ -12,4 +12,8 @@ func apiV1Routes(
 	router.GET("/health", func(c echo.Context) error {
 		return handlers.AppHealth(c)
 	})
+
+	router.POST("/collect", func(c echo.Context) error {
+		return handlers.Collect(c)
+	})
 }

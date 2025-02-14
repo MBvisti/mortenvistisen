@@ -320,7 +320,7 @@ func head(data headData) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if os.Getenv("ENVIRONMENT") == "production" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<script defer src=\"https://lab-analytics.fly.dev/script.js\" data-website-id=\"15aa0aa0-0777-474f-a8da-7687ef7edbd3\"></script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<script defer src=\"https://lab-analytics.fly.dev/script.js\" data-website-id=\"15aa0aa0-0777-474f-a8da-7687ef7edbd3\"></script> <script defer src=\"http://mortenvistisen.com/script.js\" data-website-id=\"0210debc-df55-4c4c-a2f2-01c268a04911\"></script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
