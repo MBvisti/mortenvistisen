@@ -131,6 +131,7 @@ FROM analytics
 WHERE 
     website_id = $1 
     AND DATE(timestamp) = DATE($2)
+	AND type='pageview'
 `
 
 type QueryDailyViewsParams struct {
