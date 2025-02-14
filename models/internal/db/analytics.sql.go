@@ -13,24 +13,6 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const deleteAnalytics = `-- name: DeleteAnalytics :exec
-delete from analytics where id = $1
-`
-
-func (q *Queries) DeleteAnalytics(ctx context.Context, db DBTX, id uuid.UUID) error {
-	_, err := db.Exec(ctx, deleteAnalytics, id)
-	return err
-}
-
-const deleteAnalyticsByWebsiteID = `-- name: DeleteAnalyticsByWebsiteID :exec
-delete from analytics where website_id = $1
-`
-
-func (q *Queries) DeleteAnalyticsByWebsiteID(ctx context.Context, db DBTX, websiteID pgtype.UUID) error {
-	_, err := db.Exec(ctx, deleteAnalyticsByWebsiteID, websiteID)
-	return err
-}
-
 const insertAnalytic = `-- name: InsertAnalytic :exec
 insert into analytics (
     id,
@@ -89,50 +71,16 @@ func (q *Queries) InsertAnalytic(ctx context.Context, db DBTX, arg InsertAnalyti
 	return err
 }
 
-const queryAnalytics = `-- name: QueryAnalytics :many
-select id, timestamp, website_id, type, url, path, referrer, title, screen, language, visitor_id, session_id, scroll_depth, real_ip from analytics
-`
-
-func (q *Queries) QueryAnalytics(ctx context.Context, db DBTX) ([]Analytic, error) {
-	rows, err := db.Query(ctx, queryAnalytics)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Analytic
-	for rows.Next() {
-		var i Analytic
-		if err := rows.Scan(
-			&i.ID,
-			&i.Timestamp,
-			&i.WebsiteID,
-			&i.Type,
-			&i.Url,
-			&i.Path,
-			&i.Referrer,
-			&i.Title,
-			&i.Screen,
-			&i.Language,
-			&i.VisitorID,
-			&i.SessionID,
-			&i.ScrollDepth,
-			&i.RealIp,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const queryAnalyticsByDateRange = `-- name: QueryAnalyticsByDateRange :many
-select id, timestamp, website_id, type, url, path, referrer, title, screen, language, visitor_id, session_id, scroll_depth, real_ip from analytics 
-where website_id = $1 
-and timestamp between $2 and $3
-order by timestamp desc
+select 
+	id, timestamp, website_id, type, url, path, referrer, title, screen, language, visitor_id, session_id, scroll_depth, real_ip 
+from analytics 
+where 
+	website_id = $1 
+and 
+	timestamp between $2 and $3
+order by 
+	timestamp desc
 `
 
 type QueryAnalyticsByDateRangeParams struct {
@@ -176,145 +124,44 @@ func (q *Queries) QueryAnalyticsByDateRange(ctx context.Context, db DBTX, arg Qu
 	return items, nil
 }
 
-const queryAnalyticsByID = `-- name: QueryAnalyticsByID :one
-select id, timestamp, website_id, type, url, path, referrer, title, screen, language, visitor_id, session_id, scroll_depth, real_ip from analytics where id = $1
+const queryDailyViews = `-- name: QueryDailyViews :one
+SELECT 
+    COUNT(*) as view_count
+FROM analytics 
+WHERE 
+    website_id = $1 
+    AND DATE(timestamp) = DATE($2)
 `
 
-func (q *Queries) QueryAnalyticsByID(ctx context.Context, db DBTX, id uuid.UUID) (Analytic, error) {
-	row := db.QueryRow(ctx, queryAnalyticsByID, id)
-	var i Analytic
-	err := row.Scan(
-		&i.ID,
-		&i.Timestamp,
-		&i.WebsiteID,
-		&i.Type,
-		&i.Url,
-		&i.Path,
-		&i.Referrer,
-		&i.Title,
-		&i.Screen,
-		&i.Language,
-		&i.VisitorID,
-		&i.SessionID,
-		&i.ScrollDepth,
-		&i.RealIp,
-	)
-	return i, err
+type QueryDailyViewsParams struct {
+	WebsiteID pgtype.UUID
+	Date      interface{}
 }
 
-const queryAnalyticsBySessionID = `-- name: QueryAnalyticsBySessionID :many
-select id, timestamp, website_id, type, url, path, referrer, title, screen, language, visitor_id, session_id, scroll_depth, real_ip from analytics where session_id = $1
-`
-
-func (q *Queries) QueryAnalyticsBySessionID(ctx context.Context, db DBTX, sessionID pgtype.UUID) ([]Analytic, error) {
-	rows, err := db.Query(ctx, queryAnalyticsBySessionID, sessionID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Analytic
-	for rows.Next() {
-		var i Analytic
-		if err := rows.Scan(
-			&i.ID,
-			&i.Timestamp,
-			&i.WebsiteID,
-			&i.Type,
-			&i.Url,
-			&i.Path,
-			&i.Referrer,
-			&i.Title,
-			&i.Screen,
-			&i.Language,
-			&i.VisitorID,
-			&i.SessionID,
-			&i.ScrollDepth,
-			&i.RealIp,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
+func (q *Queries) QueryDailyViews(ctx context.Context, db DBTX, arg QueryDailyViewsParams) (int64, error) {
+	row := db.QueryRow(ctx, queryDailyViews, arg.WebsiteID, arg.Date)
+	var view_count int64
+	err := row.Scan(&view_count)
+	return view_count, err
 }
 
-const queryAnalyticsByVisitorID = `-- name: QueryAnalyticsByVisitorID :many
-select id, timestamp, website_id, type, url, path, referrer, title, screen, language, visitor_id, session_id, scroll_depth, real_ip from analytics where visitor_id = $1
+const queryDailyVisits = `-- name: QueryDailyVisits :one
+SELECT 
+    COUNT(DISTINCT visitor_id) as visit_count
+FROM analytics 
+WHERE 
+    website_id = $1 
+    AND DATE(timestamp) = DATE($2)
 `
 
-func (q *Queries) QueryAnalyticsByVisitorID(ctx context.Context, db DBTX, visitorID pgtype.UUID) ([]Analytic, error) {
-	rows, err := db.Query(ctx, queryAnalyticsByVisitorID, visitorID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Analytic
-	for rows.Next() {
-		var i Analytic
-		if err := rows.Scan(
-			&i.ID,
-			&i.Timestamp,
-			&i.WebsiteID,
-			&i.Type,
-			&i.Url,
-			&i.Path,
-			&i.Referrer,
-			&i.Title,
-			&i.Screen,
-			&i.Language,
-			&i.VisitorID,
-			&i.SessionID,
-			&i.ScrollDepth,
-			&i.RealIp,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
+type QueryDailyVisitsParams struct {
+	WebsiteID pgtype.UUID
+	Date      interface{}
 }
 
-const queryAnalyticsByWebsiteID = `-- name: QueryAnalyticsByWebsiteID :many
-select id, timestamp, website_id, type, url, path, referrer, title, screen, language, visitor_id, session_id, scroll_depth, real_ip from analytics where website_id = $1
-`
-
-func (q *Queries) QueryAnalyticsByWebsiteID(ctx context.Context, db DBTX, websiteID pgtype.UUID) ([]Analytic, error) {
-	rows, err := db.Query(ctx, queryAnalyticsByWebsiteID, websiteID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Analytic
-	for rows.Next() {
-		var i Analytic
-		if err := rows.Scan(
-			&i.ID,
-			&i.Timestamp,
-			&i.WebsiteID,
-			&i.Type,
-			&i.Url,
-			&i.Path,
-			&i.Referrer,
-			&i.Title,
-			&i.Screen,
-			&i.Language,
-			&i.VisitorID,
-			&i.SessionID,
-			&i.ScrollDepth,
-			&i.RealIp,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
+func (q *Queries) QueryDailyVisits(ctx context.Context, db DBTX, arg QueryDailyVisitsParams) (int64, error) {
+	row := db.QueryRow(ctx, queryDailyVisits, arg.WebsiteID, arg.Date)
+	var visit_count int64
+	err := row.Scan(&visit_count)
+	return visit_count, err
 }

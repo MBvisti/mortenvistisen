@@ -22,10 +22,10 @@ type RecentActivity struct {
 }
 
 type HomeProps struct {
-	UnverifiedSubscribers string
-	NewSubscribers        string
-	VerifiedSubscribers   string
-	RecentActivities      []RecentActivity
+	DailyVisits         string
+	DailyViews          string
+	VerifiedSubscribers string
+	RecentActivities    []RecentActivity
 }
 
 func Home(props HomeProps) templ.Component {
@@ -61,27 +61,27 @@ func Home(props HomeProps) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"py-4\"><!-- Statistics Cards --><div class=\"row text-center justify-content-center\"><!-- Users Card --><div class=\"col-3\"><div class=\"card stat-card border-0 shadow-sm\"><div class=\"card-body\"><h6 class=\"text-muted mb-2\">Unverified Subscribers</h6><h4 class=\"mb-3\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"py-4\"><!-- Statistics Cards --><div class=\"row text-center justify-content-center\"><!-- Users Card --><div class=\"col-3\"><div class=\"card stat-card border-0 shadow-sm\"><div class=\"card-body\"><h6 class=\"text-muted mb-2\">Daily Visits</h6><h4 class=\"mb-3\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
-			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(props.UnverifiedSubscribers)
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(props.DailyVisits)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/home.templ`, Line: 33, Col: 53}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/home.templ`, Line: 33, Col: 43}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</h4></div></div></div><!-- Orders Card --><div class=\"col-3\"><div class=\"card stat-card border-0 shadow-sm\"><div class=\"card-body\"><h6 class=\"text-muted mb-2\">New Subscribers</h6><h4 class=\"mb-3\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</h4></div></div></div><!-- Orders Card --><div class=\"col-3\"><div class=\"card stat-card border-0 shadow-sm\"><div class=\"card-body\"><h6 class=\"text-muted mb-2\">Daily Views</h6><h4 class=\"mb-3\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var4 string
-			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.NewSubscribers)
+			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.DailyViews)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/home.templ`, Line: 42, Col: 46}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/home.templ`, Line: 42, Col: 42}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {

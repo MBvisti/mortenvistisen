@@ -33,17 +33,8 @@ func newDashboard(db psql.Postgres) Dashboard {
 }
 
 func (d Dashboard) Home(c echo.Context) error {
-	newVerifiedSubsCount, err := models.GetNewVerifiedSubsCurrentMonth(
-		c.Request().Context(),
-		d.db.Pool,
-	)
-	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
-		slog.ErrorContext(
-			c.Request().Context(),
-			"could not get new verified sub count",
-			"error",
-			err,
-		)
+	dailyVisits, err := models.GetDailyVisits(c.Request().Context(), d.db.Pool)
+	if err != nil {
 		return errorPage(c, views.ErrorPage())
 	}
 
@@ -61,17 +52,8 @@ func (d Dashboard) Home(c echo.Context) error {
 		return errorPage(c, views.ErrorPage())
 	}
 
-	unverifiedSubsCount, err := models.GetUnverifiedSubscribers(
-		c.Request().Context(),
-		d.db.Pool,
-	)
+	dailyViews, err := models.GetDailyViews(c.Request().Context(), d.db.Pool)
 	if err != nil {
-		slog.ErrorContext(
-			c.Request().Context(),
-			"could not get unverified sub count",
-			"error",
-			err,
-		)
 		return errorPage(c, views.ErrorPage())
 	}
 
@@ -93,10 +75,10 @@ func (d Dashboard) Home(c echo.Context) error {
 	}
 
 	return dashboard.Home(dashboard.HomeProps{
-		UnverifiedSubscribers: strconv.Itoa(len(unverifiedSubsCount)),
-		VerifiedSubscribers:   strconv.Itoa(len(verifiedSubsCount)),
-		NewSubscribers:        strconv.Itoa(int(newVerifiedSubsCount)),
-		RecentActivities:      recent,
+		DailyVisits:         strconv.Itoa(int(dailyVisits)),
+		VerifiedSubscribers: strconv.Itoa(len(verifiedSubsCount)),
+		DailyViews:          strconv.Itoa(int(dailyViews)),
+		RecentActivities:    recent,
 	}).Render(renderArgs(c))
 }
 

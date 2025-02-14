@@ -194,6 +194,50 @@ func NewAnalyticEvent(
 	})
 }
 
+func GetDailyVisits(
+	ctx context.Context,
+	dbtx db.DBTX,
+) (int64, error) {
+	visits, err := db.Stmts.QueryDailyVisits(
+		ctx,
+		dbtx,
+		db.QueryDailyVisitsParams{
+			WebsiteID: pgtype.UUID{
+				Bytes: uuid.MustParse("0210debc-df55-4c4c-a2f2-01c268a04911"),
+				Valid: true,
+			},
+			Date: time.Now(),
+		},
+	)
+	if err != nil {
+		return 0, err
+	}
+
+	return visits, nil
+}
+
+func GetDailyViews(
+	ctx context.Context,
+	dbtx db.DBTX,
+) (int64, error) {
+	views, err := db.Stmts.QueryDailyViews(
+		ctx,
+		dbtx,
+		db.QueryDailyViewsParams{
+			WebsiteID: pgtype.UUID{
+				Bytes: uuid.MustParse("0210debc-df55-4c4c-a2f2-01c268a04911"),
+				Valid: true,
+			},
+			Date: time.Now(),
+		},
+	)
+	if err != nil {
+		return 0, err
+	}
+
+	return views, nil
+}
+
 // func DeleteAnalytic(
 // 	ctx context.Context,
 // 	id uuid.UUID,
