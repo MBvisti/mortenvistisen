@@ -97,6 +97,7 @@ func run(ctx context.Context) error {
 		conn,
 		queue.WithWorkers(queueWorkers),
 		queue.WithPeriodicJobs(periodicJobs),
+		queue.WithLogger(telemetry.ProductionLogger()),
 	)
 	psql := psql.NewPostgres(conn, riverClient)
 

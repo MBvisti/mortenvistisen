@@ -82,6 +82,7 @@ type NewAnalyticPayload struct {
 	VisitorID   uuid.UUID
 	SessionID   uuid.UUID
 	ScrollDepth int32
+	RealIP      string
 }
 
 func NewAnalytic(
@@ -133,6 +134,10 @@ func NewAnalytic(
 		ScrollDepth: sql.NullInt32{
 			Int32: data.ScrollDepth,
 			Valid: true,
+		},
+		RealIp: sql.NullString{
+			String: data.RealIP,
+			Valid:  true,
 		},
 	}); err != nil {
 		return uuid.Nil, err

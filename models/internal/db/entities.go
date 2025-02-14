@@ -75,6 +75,7 @@ type Analytic struct {
 	VisitorID   pgtype.UUID
 	SessionID   pgtype.UUID
 	ScrollDepth sql.NullInt32
+	RealIp      sql.NullString
 }
 
 type AnalyticEvent struct {

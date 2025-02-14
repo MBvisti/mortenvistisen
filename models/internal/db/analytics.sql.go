@@ -45,9 +45,10 @@ insert into analytics (
     language,
     visitor_id,
     session_id,
-    scroll_depth
+    scroll_depth,
+	real_ip
 ) values (
-    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
+    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14
 )
 `
 
@@ -65,6 +66,7 @@ type InsertAnalyticParams struct {
 	VisitorID   pgtype.UUID
 	SessionID   pgtype.UUID
 	ScrollDepth sql.NullInt32
+	RealIp      sql.NullString
 }
 
 func (q *Queries) InsertAnalytic(ctx context.Context, db DBTX, arg InsertAnalyticParams) error {
@@ -82,12 +84,13 @@ func (q *Queries) InsertAnalytic(ctx context.Context, db DBTX, arg InsertAnalyti
 		arg.VisitorID,
 		arg.SessionID,
 		arg.ScrollDepth,
+		arg.RealIp,
 	)
 	return err
 }
 
 const queryAnalytics = `-- name: QueryAnalytics :many
-select id, timestamp, website_id, type, url, path, referrer, title, screen, language, visitor_id, session_id, scroll_depth from analytics
+select id, timestamp, website_id, type, url, path, referrer, title, screen, language, visitor_id, session_id, scroll_depth, real_ip from analytics
 `
 
 func (q *Queries) QueryAnalytics(ctx context.Context, db DBTX) ([]Analytic, error) {
@@ -113,6 +116,7 @@ func (q *Queries) QueryAnalytics(ctx context.Context, db DBTX) ([]Analytic, erro
 			&i.VisitorID,
 			&i.SessionID,
 			&i.ScrollDepth,
+			&i.RealIp,
 		); err != nil {
 			return nil, err
 		}
@@ -125,7 +129,7 @@ func (q *Queries) QueryAnalytics(ctx context.Context, db DBTX) ([]Analytic, erro
 }
 
 const queryAnalyticsByDateRange = `-- name: QueryAnalyticsByDateRange :many
-select id, timestamp, website_id, type, url, path, referrer, title, screen, language, visitor_id, session_id, scroll_depth from analytics 
+select id, timestamp, website_id, type, url, path, referrer, title, screen, language, visitor_id, session_id, scroll_depth, real_ip from analytics 
 where website_id = $1 
 and timestamp between $2 and $3
 order by timestamp desc
@@ -160,6 +164,7 @@ func (q *Queries) QueryAnalyticsByDateRange(ctx context.Context, db DBTX, arg Qu
 			&i.VisitorID,
 			&i.SessionID,
 			&i.ScrollDepth,
+			&i.RealIp,
 		); err != nil {
 			return nil, err
 		}
@@ -172,7 +177,7 @@ func (q *Queries) QueryAnalyticsByDateRange(ctx context.Context, db DBTX, arg Qu
 }
 
 const queryAnalyticsByID = `-- name: QueryAnalyticsByID :one
-select id, timestamp, website_id, type, url, path, referrer, title, screen, language, visitor_id, session_id, scroll_depth from analytics where id = $1
+select id, timestamp, website_id, type, url, path, referrer, title, screen, language, visitor_id, session_id, scroll_depth, real_ip from analytics where id = $1
 `
 
 func (q *Queries) QueryAnalyticsByID(ctx context.Context, db DBTX, id uuid.UUID) (Analytic, error) {
@@ -192,12 +197,13 @@ func (q *Queries) QueryAnalyticsByID(ctx context.Context, db DBTX, id uuid.UUID)
 		&i.VisitorID,
 		&i.SessionID,
 		&i.ScrollDepth,
+		&i.RealIp,
 	)
 	return i, err
 }
 
 const queryAnalyticsBySessionID = `-- name: QueryAnalyticsBySessionID :many
-select id, timestamp, website_id, type, url, path, referrer, title, screen, language, visitor_id, session_id, scroll_depth from analytics where session_id = $1
+select id, timestamp, website_id, type, url, path, referrer, title, screen, language, visitor_id, session_id, scroll_depth, real_ip from analytics where session_id = $1
 `
 
 func (q *Queries) QueryAnalyticsBySessionID(ctx context.Context, db DBTX, sessionID pgtype.UUID) ([]Analytic, error) {
@@ -223,6 +229,7 @@ func (q *Queries) QueryAnalyticsBySessionID(ctx context.Context, db DBTX, sessio
 			&i.VisitorID,
 			&i.SessionID,
 			&i.ScrollDepth,
+			&i.RealIp,
 		); err != nil {
 			return nil, err
 		}
@@ -235,7 +242,7 @@ func (q *Queries) QueryAnalyticsBySessionID(ctx context.Context, db DBTX, sessio
 }
 
 const queryAnalyticsByVisitorID = `-- name: QueryAnalyticsByVisitorID :many
-select id, timestamp, website_id, type, url, path, referrer, title, screen, language, visitor_id, session_id, scroll_depth from analytics where visitor_id = $1
+select id, timestamp, website_id, type, url, path, referrer, title, screen, language, visitor_id, session_id, scroll_depth, real_ip from analytics where visitor_id = $1
 `
 
 func (q *Queries) QueryAnalyticsByVisitorID(ctx context.Context, db DBTX, visitorID pgtype.UUID) ([]Analytic, error) {
@@ -261,6 +268,7 @@ func (q *Queries) QueryAnalyticsByVisitorID(ctx context.Context, db DBTX, visito
 			&i.VisitorID,
 			&i.SessionID,
 			&i.ScrollDepth,
+			&i.RealIp,
 		); err != nil {
 			return nil, err
 		}
@@ -273,7 +281,7 @@ func (q *Queries) QueryAnalyticsByVisitorID(ctx context.Context, db DBTX, visito
 }
 
 const queryAnalyticsByWebsiteID = `-- name: QueryAnalyticsByWebsiteID :many
-select id, timestamp, website_id, type, url, path, referrer, title, screen, language, visitor_id, session_id, scroll_depth from analytics where website_id = $1
+select id, timestamp, website_id, type, url, path, referrer, title, screen, language, visitor_id, session_id, scroll_depth, real_ip from analytics where website_id = $1
 `
 
 func (q *Queries) QueryAnalyticsByWebsiteID(ctx context.Context, db DBTX, websiteID pgtype.UUID) ([]Analytic, error) {
@@ -299,6 +307,7 @@ func (q *Queries) QueryAnalyticsByWebsiteID(ctx context.Context, db DBTX, websit
 			&i.VisitorID,
 			&i.SessionID,
 			&i.ScrollDepth,
+			&i.RealIp,
 		); err != nil {
 			return nil, err
 		}

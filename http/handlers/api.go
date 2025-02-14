@@ -68,6 +68,7 @@ func (a *Api) Collect(c echo.Context) error {
 			VisitorID:   payload.VisitorID,
 			SessionID:   payload.SessionID,
 			ScrollDepth: payload.ScrollDepth,
+			RealIP:      c.RealIP(),
 		},
 		a.db.Pool,
 	)

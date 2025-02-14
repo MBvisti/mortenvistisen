@@ -319,13 +319,19 @@ func head(data headData) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if os.Getenv("ENVIRONMENT") == "production" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<script defer src=\"https://lab-analytics.fly.dev/script.js\" data-website-id=\"15aa0aa0-0777-474f-a8da-7687ef7edbd3\"></script> <script defer src=\"http://mortenvistisen.com/script.js\" data-website-id=\"0210debc-df55-4c4c-a2f2-01c268a04911\"></script>")
+		if os.Getenv("ENVIRONMENT") == config.PROD_ENVIRONMENT {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<script defer src=\"https://lab-analytics.fly.dev/script.js\" data-website-id=\"15aa0aa0-0777-474f-a8da-7687ef7edbd3\"></script> <script defer src=\"https://mortenvistisen.com/script.js\" data-website-id=\"0210debc-df55-4c4c-a2f2-01c268a04911\"></script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "</head>")
+		if os.Getenv("ENVIRONMENT") == config.DEV_ENVIRONMENT {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<script defer src=\"http://localhost:8080/script.js\" data-website-id=\"0210debc-df55-4c4c-a2f2-01c268a04911\"></script>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "</head>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -21,9 +21,10 @@ insert into analytics (
     language,
     visitor_id,
     session_id,
-    scroll_depth
+    scroll_depth,
+	real_ip
 ) values (
-    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
+    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14
 );
 
 -- name: DeleteAnalytics :exec

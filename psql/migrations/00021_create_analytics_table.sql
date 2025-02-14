@@ -14,7 +14,8 @@ create table if not exists analytics (
     language VARCHAR,
     visitor_id UUID,
     session_id UUID,
-    scroll_depth integer
+    scroll_depth INTEGER,
+	real_ip VARCHAR
 );
 -- +goose StatementEnd
 
