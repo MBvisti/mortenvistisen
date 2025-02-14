@@ -216,7 +216,7 @@ func Home(posts []Post) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<a class=\"btn btn-primary\" href=\"/articles\">See more</a></div></div><button id=\"ann-plan\" class=\"btn btn-primary\" data-analytics=\"pricing-annual-plan-selected\">Choose Annual Plan</button></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<a class=\"btn btn-primary\" href=\"/articles\">See more</a></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
