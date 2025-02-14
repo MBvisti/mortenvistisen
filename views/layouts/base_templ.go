@@ -55,7 +55,7 @@ func Base(head templ.Component) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<script src=\"/static/js/htmx.min.js\"></script><script src=\"/static/js/alpine.js\"></script><script defer src=\"http://localhost:8080/script.js\" data-website-id=\"0210debc-df55-4c4c-a2f2-01c268a04911\"></script></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<script src=\"/static/js/htmx.min.js\"></script><script src=\"/static/js/alpine.js\"></script></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -63,5 +63,4 @@ func Base(head templ.Component) templ.Component {
 	})
 }
 
-// <script defer src="https://your-analytics-domain.com/script.js" data-website-id="your-website-id"></script>
 var _ = templruntime.GeneratedTemplate
