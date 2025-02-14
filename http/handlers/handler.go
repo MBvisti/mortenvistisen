@@ -68,7 +68,7 @@ func NewHandlers(
 ) Handlers {
 	gob.Register(uuid.UUID{})
 
-	api := newApi()
+	api := newApi(db)
 	app := newApp(db, cache, email, postManager)
 	auth := newAuthentication(authSvc, db, email)
 	dashboard := newDashboard(db)

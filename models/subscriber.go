@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"log/slog"
 	"time"
 
 	"github.com/MBvisti/mortenvistisen/models/internal/db"
@@ -315,7 +314,6 @@ func convertDBSubscriber(dbSub db.Subscriber) Subscriber {
 
 func ClearOldUnverifiedSubs(ctx context.Context, dbtx db.DBTX) error {
 	olderThan := time.Now().AddDate(0, -1, 0)
-	slog.Info("OLDER THAN", "val", olderThan)
 	return db.Stmts.DeleteSubsOlderThanMonth(
 		ctx,
 		dbtx,
