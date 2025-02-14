@@ -30,7 +30,7 @@ func formatDate(date time.Time) string {
 }
 
 templ articleCard(post Post) {
-	<a href={ templ.SafeURL("/posts/" + post.Slug) }>
+	<a href={ templ.SafeURL("/posts/" + post.Slug) } data-analytics={ fmt.Sprintf("article-%v-selected", post.Slug) }>
 		<article class="cursor-pointer rounded bg-base-300 p-4 flex flex-col items-start my-6">
 			<h2 class="text-base font-semibold tracking-tight text-content-neutral">
 				{ post.Title }
