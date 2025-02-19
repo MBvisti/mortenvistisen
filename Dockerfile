@@ -32,6 +32,7 @@ FROM scratch
 WORKDIR /
 
 COPY --from=build-go /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=build-go /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=build-go app app
 # COPY --from=build-go worker worker
 COPY --from=build-go static/images static/images
