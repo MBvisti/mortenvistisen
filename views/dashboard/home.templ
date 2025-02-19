@@ -13,11 +13,63 @@ type RecentActivity struct {
 	Verified bool
 }
 
+type HourlyStat struct {
+	Hour   string `json:"hour"`
+	Visits int64  `json:"visits"`
+	Views  int64  `json:"views"`
+}
+
 type HomeProps struct {
 	DailyVisits         string
 	DailyViews          string
 	VerifiedSubscribers string
 	RecentActivities    []RecentActivity
+	HourlyStats         string
+}
+
+script loadStatsGraph() {
+	const hourlyStats =	JSON.parse(JSON.parse(document.getElementById('hourlyAnalytics').dataset.stats));
+
+	const hourlyData = {
+		labels: hourlyStats.map(stat => stat.hour),
+		datasets: [
+			{
+				label: 'Visits',
+				data: hourlyStats.map(stat => stat.visits),
+				backgroundColor: 'rgba(54, 162, 235, 0.5)',
+				borderColor: 'rgba(54, 162, 235, 1)',
+				borderWidth: 1
+			},
+			{
+				label: 'Views',
+				data: hourlyStats.map(stat => stat.views),
+				backgroundColor: 'rgba(255, 99, 132, 0.5)',
+				borderColor: 'rgba(255, 99, 132, 1)',
+				borderWidth: 1
+			}
+		]
+	};
+
+	new Chart(document.getElementById('hourlyAnalytics'), {
+		type: 'bar',
+		data: hourlyData,
+		options: {
+			responsive: true,
+			scales: {
+				y: {
+					beginAtZero: true
+				}
+			},
+			plugins: {
+				legend: {
+					position: 'top'
+				},
+				title: {
+					display: false
+				}
+			}
+		}
+	});
 }
 
 templ Home(props HomeProps) {
@@ -53,6 +105,13 @@ templ Home(props HomeProps) {
 					</div>
 				</div>
 			</div>
+			<!-- Hourly Analytics Chart -->
+			<div class="row mt-4">
+				<div class="col-12">
+					<h5 class="card-title">Last 24 Hours Analytics</h5>
+					<canvas id="hourlyAnalytics" data-stats={ templ.JSONString(props.HourlyStats) }></canvas>
+				</div>
+			</div>
 			<!-- Activity Section -->
 			<div class="row mt-4 border">
 				<div class="col-12">
@@ -81,5 +140,7 @@ templ Home(props HomeProps) {
 				</div>
 			</div>
 		</div>
+		<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+		@loadStatsGraph()
 	}
 }

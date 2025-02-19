@@ -166,3 +166,45 @@ func (q *Queries) QueryDailyVisits(ctx context.Context, db DBTX, arg QueryDailyV
 	err := row.Scan(&visit_count)
 	return visit_count, err
 }
+
+const queryHourlyStats = `-- name: QueryHourlyStats :many
+SELECT 
+  DATE_TRUNC('hour', timestamp)::timestamp AS hour,
+  COUNT(id) AS views,
+  COUNT(distinct session_id) as visits
+FROM analytics
+WHERE 
+  type = 'pageview'
+  AND timestamp >= NOW() - INTERVAL '24 hours'
+  AND timestamp < NOW()
+GROUP BY 
+  DATE_TRUNC('hour', timestamp)
+ORDER BY 
+  hour ASC
+`
+
+type QueryHourlyStatsRow struct {
+	Hour   pgtype.Timestamp
+	Views  int64
+	Visits int64
+}
+
+func (q *Queries) QueryHourlyStats(ctx context.Context, db DBTX) ([]QueryHourlyStatsRow, error) {
+	rows, err := db.Query(ctx, queryHourlyStats)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []QueryHourlyStatsRow
+	for rows.Next() {
+		var i QueryHourlyStatsRow
+		if err := rows.Scan(&i.Hour, &i.Views, &i.Visits); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

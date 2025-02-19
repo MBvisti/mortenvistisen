@@ -45,3 +45,18 @@ WHERE
     website_id = $1 
     AND DATE(timestamp) = DATE($2)
 	AND type='pageview';
+
+-- name: QueryHourlyStats :many
+SELECT 
+  DATE_TRUNC('hour', timestamp)::timestamp AS hour,
+  COUNT(id) AS views,
+  COUNT(distinct session_id) as visits
+FROM analytics
+WHERE 
+  type = 'pageview'
+  AND timestamp >= NOW() - INTERVAL '24 hours'
+  AND timestamp < NOW()
+GROUP BY 
+  DATE_TRUNC('hour', timestamp)
+ORDER BY 
+  hour ASC;
