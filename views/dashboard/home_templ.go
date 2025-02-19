@@ -21,11 +21,69 @@ type RecentActivity struct {
 	Verified bool
 }
 
+type HourlyStat struct {
+	Hour   string `json:"hour"`
+	Visits int64  `json:"visits"`
+	Views  int64  `json:"views"`
+}
+
 type HomeProps struct {
 	DailyVisits         string
 	DailyViews          string
 	VerifiedSubscribers string
 	RecentActivities    []RecentActivity
+	HourlyStats         string
+}
+
+func loadStatsGraph() templ.ComponentScript {
+	return templ.ComponentScript{
+		Name: `__templ_loadStatsGraph_59b0`,
+		Function: `function __templ_loadStatsGraph_59b0(){const hourlyStats =	JSON.parse(JSON.parse(document.getElementById('hourlyAnalytics').dataset.stats));
+
+	const hourlyData = {
+		labels: hourlyStats.map(stat => stat.hour),
+		datasets: [
+			{
+				label: 'Visits',
+				data: hourlyStats.map(stat => stat.visits),
+				backgroundColor: 'rgba(54, 162, 235, 0.5)',
+				borderColor: 'rgba(54, 162, 235, 1)',
+				borderWidth: 1
+			},
+			{
+				label: 'Views',
+				data: hourlyStats.map(stat => stat.views),
+				backgroundColor: 'rgba(255, 99, 132, 0.5)',
+				borderColor: 'rgba(255, 99, 132, 1)',
+				borderWidth: 1
+			}
+		]
+	};
+
+	new Chart(document.getElementById('hourlyAnalytics'), {
+		type: 'bar',
+		data: hourlyData,
+		options: {
+			responsive: true,
+			scales: {
+				y: {
+					beginAtZero: true
+				}
+			},
+			plugins: {
+				legend: {
+					position: 'top'
+				},
+				title: {
+					display: false
+				}
+			}
+		}
+	});
+}`,
+		Call:       templ.SafeScript(`__templ_loadStatsGraph_59b0`),
+		CallInline: templ.SafeScriptInline(`__templ_loadStatsGraph_59b0`),
+	}
 }
 
 func Home(props HomeProps) templ.Component {
@@ -68,7 +126,7 @@ func Home(props HomeProps) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(props.DailyVisits)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/home.templ`, Line: 33, Col: 43}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/home.templ`, Line: 85, Col: 43}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -81,7 +139,7 @@ func Home(props HomeProps) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.DailyViews)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/home.templ`, Line: 42, Col: 42}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/home.templ`, Line: 94, Col: 42}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -94,62 +152,79 @@ func Home(props HomeProps) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(props.VerifiedSubscribers)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/home.templ`, Line: 51, Col: 51}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/home.templ`, Line: 103, Col: 51}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</h4></div></div></div></div><!-- Activity Section --><div class=\"row mt-4 border\"><div class=\"col-12\"><div class=\"card border-0 shadow-sm\"><div class=\"card-body\"><div class=\"d-flex justify-content-between align-items-center mb-4\"><h5 class=\"card-title mb-0\">Recent Activity</h5></div><div class=\"list-group list-group-flush\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</h4></div></div></div></div><!-- Hourly Analytics Chart --><div class=\"row mt-4\"><div class=\"col-12\"><h5 class=\"card-title\">Last 24 Hours Analytics</h5><canvas id=\"hourlyAnalytics\" data-stats=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var6 string
+			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(templ.JSONString(props.HourlyStats))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/home.templ`, Line: 112, Col: 82}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\"></canvas></div></div><!-- Activity Section --><div class=\"row mt-4 border\"><div class=\"col-12\"><div class=\"card border-0 shadow-sm\"><div class=\"card-body\"><div class=\"d-flex justify-content-between align-items-center mb-4\"><h5 class=\"card-title mb-0\">Recent Activity</h5></div><div class=\"list-group list-group-flush\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			for _, recent := range props.RecentActivities {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"list-group-item border-0 d-flex align-items-center px-0\"><div class=\"avatar-sm bg-primary bg-opacity-10 rounded-circle p-2 me-3\"><i class=\"fas fa-shopping-cart text-primary\"></i></div><div class=\"flex-grow-1\"><h6 class=\"mb-1\">New subscriber</h6><p class=\"text-muted small mb-0\">")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var6 string
-				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(recent.Email)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/home.templ`, Line: 72, Col: 58}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</p></div><p class=\"text-muted small mr-4\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div class=\"list-group-item border-0 d-flex align-items-center px-0\"><div class=\"avatar-sm bg-primary bg-opacity-10 rounded-circle p-2 me-3\"><i class=\"fas fa-shopping-cart text-primary\"></i></div><div class=\"flex-grow-1\"><h6 class=\"mb-1\">New subscriber</h6><p class=\"text-muted small mb-0\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var7 string
-				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%v", recent.Verified))
+				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(recent.Email)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/home.templ`, Line: 74, Col: 79}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/home.templ`, Line: 131, Col: 58}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</p><small class=\"text-muted\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</p></div><p class=\"text-muted small mr-4\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var8 string
-				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(carbon.CreateFromStdTime(recent.When).DiffInString())
+				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%v", recent.Verified))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/home.templ`, Line: 75, Col: 90}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/home.templ`, Line: 133, Col: 79}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</small></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</p><small class=\"text-muted\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var9 string
+				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(carbon.CreateFromStdTime(recent.When).DiffInString())
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/home.templ`, Line: 134, Col: 90}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</small></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div></div></div></div></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</div></div></div></div></div></div><script src=\"https://cdn.jsdelivr.net/npm/chart.js\"></script> ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = loadStatsGraph().Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

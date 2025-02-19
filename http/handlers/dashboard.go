@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -74,7 +75,28 @@ func (d Dashboard) Home(c echo.Context) error {
 		})
 	}
 
+	dailyStats, err := models.GetDailyStats(c.Request().Context(), d.db.Pool)
+	if err != nil {
+		slog.Error("ERRROR", "error", err)
+		return errorPage(c, views.ErrorPage())
+	}
+
+	stats := make([]dashboard.HourlyStat, len(dailyStats))
+	for i, sd := range dailyStats {
+		stats[i] = dashboard.HourlyStat{
+			Hour:   sd.Hour,
+			Visits: sd.Visits,
+			Views:  sd.Views,
+		}
+	}
+
+	mStats, err := json.Marshal(stats)
+	if err != nil {
+		return errorPage(c, views.ErrorPage())
+	}
+
 	return dashboard.Home(dashboard.HomeProps{
+		HourlyStats:         string(mStats),
 		DailyVisits:         strconv.Itoa(int(dailyVisits)),
 		VerifiedSubscribers: strconv.Itoa(len(verifiedSubsCount)),
 		DailyViews:          strconv.Itoa(int(dailyViews)),

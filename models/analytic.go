@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/MBvisti/mortenvistisen/models/internal/db"
+	"github.com/dromara/carbon/v2"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -236,6 +237,39 @@ func GetDailyViews(
 	}
 
 	return views, nil
+}
+
+type Stat struct {
+	Hour   string
+	Views  int64
+	Visits int64
+}
+
+func GetDailyStats(
+	ctx context.Context,
+	dbtx db.DBTX,
+) ([]Stat, error) {
+	statRows, err := db.Stmts.QueryHourlyStats(
+		ctx,
+		dbtx,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	stats := make([]Stat, len(statRows))
+	for i, s := range statRows {
+		h := carbon.CreateFromStdTime(s.Hour.Time).
+			ToKitchenString("Europe/Berlin")
+
+		stats[i] = Stat{
+			Hour:   h,
+			Views:  s.Views,
+			Visits: s.Visits,
+		}
+	}
+
+	return stats, nil
 }
 
 // func DeleteAnalytic(
