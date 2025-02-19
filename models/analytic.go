@@ -260,7 +260,7 @@ func GetDailyStats(
 	stats := make([]Stat, len(statRows))
 	for i, s := range statRows {
 		h := carbon.CreateFromStdTime(s.Hour.Time).
-			ToKitchenString("Europe/Berlin")
+			ToKitchenString(carbon.Berlin)
 
 		stats[i] = Stat{
 			Hour:   h,
