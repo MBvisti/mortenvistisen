@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	"encoding/json"
-	"errors"
 	"fmt"
 	"log/slog"
 	"math"
@@ -20,7 +18,6 @@ import (
 	"github.com/MBvisti/mortenvistisen/views/dashboard"
 	"github.com/MBvisti/mortenvistisen/views/paths"
 	"github.com/gorilla/csrf"
-	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
 	"github.com/riverqueue/river"
 )
@@ -34,73 +31,73 @@ func newDashboard(db psql.Postgres) Dashboard {
 }
 
 func (d Dashboard) Home(c echo.Context) error {
-	dailyVisits, err := models.GetDailyVisits(c.Request().Context(), d.db.Pool)
-	if err != nil {
-		return errorPage(c, views.ErrorPage())
-	}
-
-	verifiedSubsCount, err := models.GetVerifiedSubscribers(
-		c.Request().Context(),
-		d.db.Pool,
-	)
-	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
-		slog.ErrorContext(
-			c.Request().Context(),
-			"could not get verified sub count",
-			"error",
-			err,
-		)
-		return errorPage(c, views.ErrorPage())
-	}
-
-	dailyViews, err := models.GetDailyViews(c.Request().Context(), d.db.Pool)
-	if err != nil {
-		return errorPage(c, views.ErrorPage())
-	}
-
-	recentSubs, err := models.GetRecentSubscribers(
-		c.Request().Context(),
-		d.db.Pool,
-	)
-	if err != nil {
-		return errorPage(c, views.ErrorPage())
-	}
-
-	var recent []dashboard.RecentActivity
-	for _, rs := range recentSubs {
-		recent = append(recent, dashboard.RecentActivity{
-			When:     rs.CreatedAt,
-			Email:    rs.Email,
-			Verified: rs.IsVerified,
-		})
-	}
-
-	dailyStats, err := models.GetDailyStats(c.Request().Context(), d.db.Pool)
-	if err != nil {
-		slog.Error("ERRROR", "error", err)
-		return errorPage(c, views.ErrorPage())
-	}
-
-	stats := make([]dashboard.HourlyStat, len(dailyStats))
-	for i, sd := range dailyStats {
-		stats[i] = dashboard.HourlyStat{
-			Hour:   sd.Hour,
-			Visits: sd.Visits,
-			Views:  sd.Views,
-		}
-	}
-
-	mStats, err := json.Marshal(stats)
-	if err != nil {
-		return errorPage(c, views.ErrorPage())
-	}
+	// dailyVisits, err := models.GetDailyVisits(c.Request().Context(), d.db.Pool)
+	// if err != nil {
+	// 	return errorPage(c, views.ErrorPage())
+	// }
+	//
+	// verifiedSubsCount, err := models.GetVerifiedSubscribers(
+	// 	c.Request().Context(),
+	// 	d.db.Pool,
+	// )
+	// if err != nil && !errors.Is(err, pgx.ErrNoRows) {
+	// 	slog.ErrorContext(
+	// 		c.Request().Context(),
+	// 		"could not get verified sub count",
+	// 		"error",
+	// 		err,
+	// 	)
+	// 	return errorPage(c, views.ErrorPage())
+	// }
+	//
+	// dailyViews, err := models.GetDailyViews(c.Request().Context(), d.db.Pool)
+	// if err != nil {
+	// 	return errorPage(c, views.ErrorPage())
+	// }
+	//
+	// recentSubs, err := models.GetRecentSubscribers(
+	// 	c.Request().Context(),
+	// 	d.db.Pool,
+	// )
+	// if err != nil {
+	// 	return errorPage(c, views.ErrorPage())
+	// }
+	//
+	// var recent []dashboard.RecentActivity
+	// for _, rs := range recentSubs {
+	// 	recent = append(recent, dashboard.RecentActivity{
+	// 		When:     rs.CreatedAt,
+	// 		Email:    rs.Email,
+	// 		Verified: rs.IsVerified,
+	// 	})
+	// }
+	//
+	// dailyStats, err := models.GetDailyStats(c.Request().Context(), d.db.Pool)
+	// if err != nil {
+	// 	slog.Error("ERRROR", "error", err)
+	// 	return errorPage(c, views.ErrorPage())
+	// }
+	//
+	// stats := make([]dashboard.HourlyStat, len(dailyStats))
+	// for i, sd := range dailyStats {
+	// 	stats[i] = dashboard.HourlyStat{
+	// 		Hour:   sd.Hour,
+	// 		Visits: sd.Visits,
+	// 		Views:  sd.Views,
+	// 	}
+	// }
+	//
+	// mStats, err := json.Marshal(stats)
+	// if err != nil {
+	// 	return errorPage(c, views.ErrorPage())
+	// }
 
 	return dashboard.Home(dashboard.HomeProps{
-		HourlyStats:         string(mStats),
-		DailyVisits:         strconv.Itoa(int(dailyVisits)),
-		VerifiedSubscribers: strconv.Itoa(len(verifiedSubsCount)),
-		DailyViews:          strconv.Itoa(int(dailyViews)),
-		RecentActivities:    recent,
+		// HourlyStats:         string(mStats),
+		// DailyVisits:         strconv.Itoa(int(dailyVisits)),
+		// VerifiedSubscribers: strconv.Itoa(len(verifiedSubsCount)),
+		// DailyViews:          strconv.Itoa(int(dailyViews)),
+		// RecentActivities:    recent,
 	}).Render(renderArgs(c))
 }
 

@@ -37,6 +37,7 @@ COPY --from=build-go app app
 # COPY --from=build-go worker worker
 COPY --from=build-go static/images static/images
 COPY --from=build-go resources/seo resources/seo
+COPY --from=build-go data data
 
 EXPOSE 8080
 CMD ["./app"]

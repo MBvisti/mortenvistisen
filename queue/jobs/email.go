@@ -4,7 +4,7 @@ import (
 	"context"
 )
 
-const emailJobKind string = "email_job"
+const emailJobKind string = "EmailJob"
 
 type EmailJobArgs struct {
 	To          string `json:"to"`

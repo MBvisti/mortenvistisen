@@ -1,20 +1,6 @@
 (function() {
   const script = document.currentScript;
-  const websiteId = script.getAttribute('data-website-id');
 
-  // Session and visitor tracking
-  const getOrCreateId = (key) => {
-    let id = localStorage.getItem(key);
-    if (!id) {
-      id = typeof crypto !== 'undefined' && crypto.randomUUID 
-        ? crypto.randomUUID() 
-        : Math.random().toString(36).substring(2, 15);
-      localStorage.setItem(key, id);
-    }
-    return id;
-  };
-
-  // Bot/crawler detection
   const isBotOrCrawler = () => {
     const botPatterns = [
       /bot/i, /crawl/i, /spider/i, 
@@ -27,7 +13,6 @@
     );
   };
 
-  // Scroll tracking
   let maxScrollDepth = 0;
   const updateScrollDepth = () => {
     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
@@ -43,21 +28,17 @@
     maxScrollDepth = Math.max(maxScrollDepth, scrollPercent);
   };
 
-  // Page exit tracking
   const trackPageExit = () => {
     const payload = {
-	  website_id: websiteId,
-      type: 'pageleave',
+      type: 'page_leave',
       url: window.location.href,
       scroll_depth: maxScrollDepth,
       title: document.title
     };
-    sendEvent(payload, 'pageleave');
+    sendEvent(payload, 'page_leave');
   };
 
-  // Send event function
   function sendEvent(payload, eventType = 'event') {
-    // Skip for bots and local development
     if (isBotOrCrawler() || 
         /^localhost$|^127\./.test(window.location.hostname) || 
         window.localStorage.getItem('analytics-disabled')) {
@@ -65,17 +46,15 @@
     }
 
     const finalPayload = {
-	  website_id: websiteId,
       type: eventType,
       url: window.location.href,
       path: window.location.pathname,
+	  user_agent: navigator.userAgent,
       referrer: document.referrer,
       title: document.title,
       timestamp: new Date().toISOString(),
       screen: `${window.screen.width}x${window.screen.height}`,
       language: navigator.language || navigator.userLanguage,
-      visitor_id: getOrCreateId('analytics-visitor-id'),
-      session_id: getOrCreateId('analytics-session-id'),
       ...payload
     };
 
@@ -92,12 +71,8 @@
     }
   }
 
-  // Initialize tracking
-  if (websiteId) {
-    // Track page view
-    sendEvent({}, 'pageview');
+    sendEvent({}, 'page_view');
 
-    // Track clicks
     document.addEventListener('click', (event) => {
       const target = event.target.closest('a, button, [data-analytics]');
       if (target) {
@@ -113,15 +88,11 @@
       }
     });
 
-    // Scroll tracking
     window.addEventListener('scroll', updateScrollDepth);
 
-    // Page exit tracking
     window.addEventListener('beforeunload', trackPageExit);
 
-    // Handle history changes for SPA
     window.addEventListener('popstate', () => {
-      sendEvent({}, 'pageview');
+      sendEvent({}, 'page_view');
     });
-  }
 })();

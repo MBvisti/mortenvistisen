@@ -1,6 +1,6 @@
 package jobs
 
-const subscriberCleanupJobKind string = "subscriber_cleanup_job"
+const subscriberCleanupJobKind string = "SubscriberCleanupJob"
 
 type SubscriberCleanupJobArgs struct{}
 
