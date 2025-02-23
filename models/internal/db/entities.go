@@ -61,32 +61,47 @@ func (ns NullRiverJobState) Value() (driver.Value, error) {
 	return string(ns.RiverJobState), nil
 }
 
-type Analytic struct {
-	ID          uuid.UUID
-	Timestamp   pgtype.Timestamptz
-	WebsiteID   pgtype.UUID
-	Type        sql.NullString
-	Url         sql.NullString
-	Path        sql.NullString
-	Referrer    sql.NullString
-	Title       sql.NullString
-	Screen      sql.NullString
-	Language    sql.NullString
-	VisitorID   pgtype.UUID
-	SessionID   pgtype.UUID
-	ScrollDepth sql.NullInt32
-	RealIp      sql.NullString
+type SiteEvent string
+
+const (
+	SiteEventPageView  SiteEvent = "page_view"
+	SiteEventPageLeave SiteEvent = "page_leave"
+	SiteEventClick     SiteEvent = "click"
+)
+
+func (e *SiteEvent) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = SiteEvent(s)
+	case string:
+		*e = SiteEvent(s)
+	default:
+		return fmt.Errorf("unsupported scan type for SiteEvent: %T", src)
+	}
+	return nil
 }
 
-type AnalyticEvent struct {
-	ID           uuid.UUID
-	AnalyticsID  pgtype.UUID
-	ElementTag   sql.NullString
-	ElementText  sql.NullString
-	ElementClass sql.NullString
-	ElementID    sql.NullString
-	ElementHref  sql.NullString
-	CustomData   sql.NullString
+type NullSiteEvent struct {
+	SiteEvent SiteEvent
+	Valid     bool // Valid is true if SiteEvent is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullSiteEvent) Scan(value interface{}) error {
+	if value == nil {
+		ns.SiteEvent, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.SiteEvent.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullSiteEvent) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.SiteEvent), nil
 }
 
 type Job struct {
@@ -185,6 +200,37 @@ type RiverQueue struct {
 	Metadata  []byte
 	PausedAt  pgtype.Timestamptz
 	UpdatedAt pgtype.Timestamptz
+}
+
+type SiteSession struct {
+	ID           uuid.UUID
+	CreatedAt    pgtype.Timestamptz
+	Hostname     sql.NullString
+	Browser      sql.NullString
+	Os           sql.NullString
+	Device       sql.NullString
+	Screen       sql.NullString
+	Lang         sql.NullString
+	Country      sql.NullString
+	Subdivision1 sql.NullString
+	Subdivision2 sql.NullString
+	City         sql.NullString
+	Finger       sql.NullString
+}
+
+type SiteView struct {
+	ID             int64
+	SessionID      pgtype.UUID
+	VisitorID      pgtype.UUID
+	CreatedAt      pgtype.Timestamptz
+	UrlPath        sql.NullString
+	UrlQuery       sql.NullString
+	ReferrerPath   sql.NullString
+	ReferrerQuery  sql.NullString
+	ReferrerDomain sql.NullString
+	PageTitle      sql.NullString
+	EventType      NullSiteEvent
+	EventName      sql.NullString
 }
 
 type Subscriber struct {
