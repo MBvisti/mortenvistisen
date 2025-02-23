@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"net"
+	"strings"
 	"time"
 
 	"github.com/MBvisti/mortenvistisen/models/internal/db"
@@ -85,11 +86,11 @@ func GOCSiteSession(
 			Valid:  true,
 		},
 		Browser: sql.NullString{
-			String: payload.Browser,
+			String: strings.ToLower(payload.Browser),
 			Valid:  true,
 		},
 		Os: sql.NullString{
-			String: payload.OS,
+			String: strings.ToLower(payload.OS),
 			Valid:  true,
 		},
 		Device: sql.NullString{

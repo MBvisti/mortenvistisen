@@ -102,6 +102,17 @@ func (a *Api) Collect(c echo.Context) error {
 		return c.JSON(http.StatusOK, "bot visit")
 	}
 
+	device := "unknown"
+	if ua.Desktop {
+		device = "desktop"
+	}
+	if ua.Mobile {
+		device = "mobile"
+	}
+	if ua.Tablet {
+		device = "table"
+	}
+
 	session, err := models.GOCSiteSession(
 		c.Request().Context(),
 		a.db.Pool,
@@ -111,7 +122,7 @@ func (a *Api) Collect(c echo.Context) error {
 			Hostname:  c.Request().Host,
 			Browser:   ua.Name,
 			OS:        ua.OS,
-			Device:    ua.Device,
+			Device:    device,
 			Screen:    payload.Screen,
 			Lang:      payload.Language,
 			IPAddress: c.RealIP(),
