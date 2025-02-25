@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/MBvisti/mortenvistisen/models/internal/db"
+	"github.com/dromara/carbon/v2"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -43,6 +44,7 @@ type SiteView struct {
 	PageTitle      string
 	EventType      string
 	EventName      string
+	VisitorID      uuid.UUID
 	Session        SiteSession
 }
 
@@ -127,4 +129,104 @@ func NewSiteView(
 	}
 
 	return db.Stmts.InsertSiteView(ctx, dbtx, params)
+}
+
+func GetSiteViewsByDate(
+	ctx context.Context,
+	dbtx db.DBTX,
+	start time.Time,
+	end time.Time,
+) ([]SiteView, error) {
+	rows, err := db.Stmts.QueryViewsByDate(
+		ctx,
+		dbtx,
+		db.QueryViewsByDateParams{
+			StartDate: pgtype.Timestamp{
+				Time:  start,
+				Valid: true,
+			},
+			EndDate: pgtype.Timestamp{
+				Time:  end,
+				Valid: true,
+			},
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	siteViews := make([]SiteView, len(rows))
+	for i, row := range rows {
+		siteViews[i] = SiteView{
+			ID:             row.SiteView.ID,
+			CreatedAt:      row.SiteView.CreatedAt.Time,
+			UrlPath:        row.SiteView.UrlPath.String,
+			UrlQuery:       row.SiteView.UrlQuery.String,
+			ReferrerPath:   row.SiteView.ReferrerPath.String,
+			ReferrerQuery:  row.SiteView.ReferrerQuery.String,
+			ReferrerDomain: row.SiteView.ReferrerDomain.String,
+			PageTitle:      row.SiteView.PageTitle.String,
+			EventType:      string(row.SiteView.EventType.SiteEvent),
+			EventName:      row.SiteView.EventName.String,
+			VisitorID:      row.SiteView.VisitorID.Bytes,
+			Session: SiteSession{
+				ID:           row.SiteSession.ID,
+				CreatedAt:    row.SiteSession.CreatedAt.Time,
+				Hostname:     row.SiteSession.Hostname.String,
+				Browser:      row.SiteSession.Browser.String,
+				OS:           row.SiteSession.Os.String,
+				Device:       row.SiteSession.Device.String,
+				Screen:       row.SiteSession.Screen.String,
+				Lang:         row.SiteSession.Lang.String,
+				Country:      row.SiteSession.Country.String,
+				Subdivision1: row.SiteSession.Subdivision1.String,
+				Subdivision2: row.SiteSession.Subdivision2.String,
+				City:         row.SiteSession.City.String,
+			},
+		}
+	}
+
+	return siteViews, nil
+}
+
+type TrafficCount struct {
+	Visits int64
+	Views  int64
+}
+
+func GetHourlyTrafficCounts(
+	ctx context.Context,
+	dbtx db.DBTX,
+) (map[time.Time]TrafficCount, error) {
+	end := carbon.Now().EndOfHour()
+	// start := now.StartOfDay()
+	start := end.SubHours(24)
+
+	rows, err := db.Stmts.QueryTrafficCountsByDate(
+		ctx,
+		dbtx,
+		db.QueryTrafficCountsByDateParams{
+			StartDate: pgtype.Timestamp{
+				Time:  start.StdTime(),
+				Valid: true,
+			},
+			EndDate: pgtype.Timestamp{
+				Time:  end.StdTime(),
+				Valid: true,
+			},
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	hourlyVisitCounts := make(map[time.Time]TrafficCount, len(rows))
+	for _, r := range rows {
+		hourlyVisitCounts[r.Hour.Time] = TrafficCount{
+			Visits: r.VisitorCount,
+			Views:  r.Views,
+		}
+	}
+
+	return hourlyVisitCounts, nil
 }

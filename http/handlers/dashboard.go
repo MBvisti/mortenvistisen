@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"log/slog"
 	"math"
@@ -17,7 +19,10 @@ import (
 	"github.com/MBvisti/mortenvistisen/views"
 	"github.com/MBvisti/mortenvistisen/views/dashboard"
 	"github.com/MBvisti/mortenvistisen/views/paths"
+	"github.com/dromara/carbon/v2"
+	"github.com/google/uuid"
 	"github.com/gorilla/csrf"
+	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
 	"github.com/riverqueue/river"
 )
@@ -31,73 +36,99 @@ func newDashboard(db psql.Postgres) Dashboard {
 }
 
 func (d Dashboard) Home(c echo.Context) error {
-	// dailyVisits, err := models.GetDailyVisits(c.Request().Context(), d.db.Pool)
-	// if err != nil {
-	// 	return errorPage(c, views.ErrorPage())
-	// }
-	//
-	// verifiedSubsCount, err := models.GetVerifiedSubscribers(
-	// 	c.Request().Context(),
-	// 	d.db.Pool,
-	// )
-	// if err != nil && !errors.Is(err, pgx.ErrNoRows) {
-	// 	slog.ErrorContext(
-	// 		c.Request().Context(),
-	// 		"could not get verified sub count",
-	// 		"error",
-	// 		err,
-	// 	)
-	// 	return errorPage(c, views.ErrorPage())
-	// }
-	//
-	// dailyViews, err := models.GetDailyViews(c.Request().Context(), d.db.Pool)
-	// if err != nil {
-	// 	return errorPage(c, views.ErrorPage())
-	// }
-	//
-	// recentSubs, err := models.GetRecentSubscribers(
-	// 	c.Request().Context(),
-	// 	d.db.Pool,
-	// )
-	// if err != nil {
-	// 	return errorPage(c, views.ErrorPage())
-	// }
-	//
-	// var recent []dashboard.RecentActivity
-	// for _, rs := range recentSubs {
-	// 	recent = append(recent, dashboard.RecentActivity{
-	// 		When:     rs.CreatedAt,
-	// 		Email:    rs.Email,
-	// 		Verified: rs.IsVerified,
-	// 	})
-	// }
-	//
-	// dailyStats, err := models.GetDailyStats(c.Request().Context(), d.db.Pool)
-	// if err != nil {
-	// 	slog.Error("ERRROR", "error", err)
-	// 	return errorPage(c, views.ErrorPage())
-	// }
-	//
-	// stats := make([]dashboard.HourlyStat, len(dailyStats))
-	// for i, sd := range dailyStats {
-	// 	stats[i] = dashboard.HourlyStat{
-	// 		Hour:   sd.Hour,
-	// 		Visits: sd.Visits,
-	// 		Views:  sd.Views,
-	// 	}
-	// }
-	//
-	// mStats, err := json.Marshal(stats)
-	// if err != nil {
-	// 	return errorPage(c, views.ErrorPage())
-	// }
+	end := carbon.Now().EndOfHour()
+	start := end.SubHours(24)
+
+	dailyViews, err := models.GetSiteViewsByDate(
+		c.Request().Context(),
+		d.db.Pool,
+		start.StdTime(),
+		end.StdTime(),
+	)
+	if err != nil {
+		slog.ErrorContext(c.Request().Context(), "ERROR", "error_value", err)
+		return errorPage(c, views.ErrorPage())
+	}
+
+	verifiedSubsCount, err := models.GetVerifiedSubscribers(
+		c.Request().Context(),
+		d.db.Pool,
+	)
+	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
+		slog.ErrorContext(
+			c.Request().Context(),
+			"could not get verified sub count",
+			"error",
+			err,
+		)
+		return errorPage(c, views.ErrorPage())
+	}
+
+	recentSubs, err := models.GetRecentSubscribers(
+		c.Request().Context(),
+		d.db.Pool,
+	)
+	if err != nil {
+		slog.ErrorContext(c.Request().Context(), "ERROR", "error_value", err)
+		return errorPage(c, views.ErrorPage())
+	}
+
+	var recent []dashboard.RecentActivity
+	for _, rs := range recentSubs {
+		recent = append(recent, dashboard.RecentActivity{
+			When:     rs.CreatedAt,
+			Email:    rs.Email,
+			Verified: rs.IsVerified,
+		})
+	}
+
+	var stats []dashboard.HourlyStat
+
+	oneDayAgo := carbon.Now(carbon.Berlin).SubDay()
+	for i := range 24 {
+		h := oneDayAgo.StartOfHour().
+			AddHours(i + 1).
+			ToKitchenString(carbon.Berlin)
+		stat := dashboard.HourlyStat{
+			Hour: h,
+		}
+		var visi int64
+		var vies int64
+		for _, dv := range dailyViews {
+			kitchenTime := carbon.CreateFromStdTime(dv.CreatedAt, carbon.Berlin).
+				StartOfHour().
+				ToKitchenString()
+			if kitchenTime == h {
+				visi++
+				vies++
+			}
+		}
+
+		stat.Visits = visi
+		stat.Views = vies
+
+		stats = append(stats, stat)
+	}
+
+	mStats, err := json.Marshal(stats)
+	if err != nil {
+		slog.ErrorContext(c.Request().Context(), "ERROR", "error_value", err)
+		return errorPage(c, views.ErrorPage())
+	}
+
+	uniqueVisitors := make(map[uuid.UUID]struct{})
+	for _, dv := range dailyViews {
+		if dv.VisitorID != uuid.Nil {
+			uniqueVisitors[dv.VisitorID] = struct{}{}
+		}
+	}
 
 	return dashboard.Home(dashboard.HomeProps{
-		// HourlyStats:         string(mStats),
-		// DailyVisits:         strconv.Itoa(int(dailyVisits)),
-		// VerifiedSubscribers: strconv.Itoa(len(verifiedSubsCount)),
-		// DailyViews:          strconv.Itoa(int(dailyViews)),
-		// RecentActivities:    recent,
+		HourlyStats:         string(mStats),
+		DailyVisits:         strconv.Itoa(len(uniqueVisitors)),
+		VerifiedSubscribers: strconv.Itoa(len(verifiedSubsCount)),
+		DailyViews:          strconv.Itoa(len(dailyViews)),
+		RecentActivities:    recent,
 	}).Render(renderArgs(c))
 }
 
