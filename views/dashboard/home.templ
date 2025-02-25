@@ -56,9 +56,12 @@ script loadStatsGraph() {
 		options: {
 			responsive: true,
 			scales: {
-				y: {
-					beginAtZero: true
-				}
+				x: {
+        			stacked: true,
+      			},
+      			y: {
+      			  stacked: true
+      			}
 			},
 			plugins: {
 				legend: {

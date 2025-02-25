@@ -9,9 +9,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/MBvisti/mortenvistisen/config"
 	"github.com/gorilla/csrf"
 	"github.com/labstack/echo/v4"
-	"github.com/MBvisti/mortenvistisen/config"
 	"golang.org/x/sync/errgroup"
 )
 
