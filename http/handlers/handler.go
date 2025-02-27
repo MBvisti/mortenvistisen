@@ -18,7 +18,6 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
-	"github.com/maypok86/otter"
 )
 
 var AuthenticatedSessionName = fmt.Sprintf(
@@ -61,7 +60,6 @@ func renderArgs(c echo.Context) (context.Context, io.Writer) {
 
 func NewHandlers(
 	db psql.Postgres,
-	cache otter.CacheWithVariableTTL[string, templ.Component],
 	authSvc services.Auth,
 	email services.Mail,
 	postManager posts.Manager,
@@ -69,7 +67,7 @@ func NewHandlers(
 	gob.Register(uuid.UUID{})
 
 	api := newApi(db)
-	app := newApp(db, cache, email, postManager)
+	app := newApp(db, email, postManager)
 	auth := newAuthentication(authSvc, db, email)
 	dashboard := newDashboard(db)
 	registration := newRegistration(authSvc, db, email)

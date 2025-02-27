@@ -41,10 +41,19 @@ type App struct {
 
 func newApp(
 	db psql.Postgres,
-	cache otter.CacheWithVariableTTL[string, templ.Component],
 	email services.Mail,
 	postManager posts.Manager,
 ) App {
+	cacheBuilder, err := otter.NewBuilder[string, templ.Component](20)
+	if err != nil {
+		panic(err)
+	}
+
+	cache, err := cacheBuilder.WithVariableTTL().Build()
+	if err != nil {
+		panic(err)
+	}
+
 	return App{db, cache, email, postManager}
 }
 
