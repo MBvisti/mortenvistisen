@@ -93,7 +93,7 @@ SELECT
     subscribed_at, referer, is_verified
 FROM subscribers
 ORDER BY created_at DESC
-LIMIT 5
+LIMIT 10
 `
 
 func (q *Queries) QueryRecentSubscribers(ctx context.Context, db DBTX) ([]Subscriber, error) {

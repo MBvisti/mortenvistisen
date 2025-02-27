@@ -2,7 +2,9 @@ package routes
 
 import (
 	"log/slog"
+	"net/http"
 
+	"github.com/MBvisti/mortenvistisen/config"
 	"github.com/MBvisti/mortenvistisen/http/handlers"
 	"github.com/MBvisti/mortenvistisen/static"
 	"github.com/labstack/echo/v4"
@@ -11,6 +13,67 @@ import (
 func resourceRoutes(router *echo.Echo, handlers handlers.Resource) {
 	router.GET("/robots.txt", func(c echo.Context) error {
 		return c.File("./resources/seo/robots.txt")
+	})
+
+	router.GET("/css/bootstrap", func(c echo.Context) error {
+		stylesheet, err := static.Files.ReadFile(
+			"css/bootstrap-v5_3_0.css",
+		)
+		if err != nil {
+			return err
+		}
+
+		if config.Cfg.Environment == config.PROD_ENVIRONMENT {
+			c.Response().
+				Header().
+				Set("Cache-Control", "public, max-age=31536000, immutable")
+			c.Response().
+				Header().
+				Set("Vary", "Accept-Encoding")
+			c.Response().
+				Header().
+				Set("ETag", "\"bootstrap-v5_3_0\"")
+		}
+
+		return c.Blob(http.StatusOK, "text/css", stylesheet)
+	})
+	router.GET("/css/bootstrap-overrides", func(c echo.Context) error {
+		stylesheet, err := static.Files.ReadFile(
+			"css/bs-color-overrides.css",
+		)
+		if err != nil {
+			return err
+		}
+
+		if config.Cfg.Environment == config.PROD_ENVIRONMENT {
+			c.Response().
+				Header().
+				Set("Cache-Control", "public, max-age=2592000, immutable")
+			c.Response().
+				Header().
+				Set("Vary", "Accept-Encoding")
+		}
+
+		return c.Blob(http.StatusOK, "text/css", stylesheet)
+	})
+	router.GET("/css/tailwind", func(c echo.Context) error {
+		stylesheet, err := static.Files.ReadFile(
+			"css/main-dev.css",
+		)
+		if err != nil {
+			return err
+		}
+
+		if config.Cfg.Environment == config.PROD_ENVIRONMENT {
+			c.Response().
+				Header().
+				Set("Cache-Control", "public, max-age=2592000, immutable")
+			c.Response().
+				Header().
+				Set("Vary", "Accept-Encoding")
+		}
+
+		return c.Blob(http.StatusOK, "text/css", stylesheet)
 	})
 
 	router.GET(
@@ -39,6 +102,15 @@ func resourceRoutes(router *echo.Echo, handlers handlers.Resource) {
 				err,
 			)
 			return err
+		}
+
+		if config.Cfg.Environment == config.PROD_ENVIRONMENT {
+			c.Response().
+				Header().
+				Set("Cache-Control", "public, max-age=2592000, immutable")
+			c.Response().
+				Header().
+				Set("Vary", "Accept-Encoding")
 		}
 
 		return c.Blob(200, "application/javascript", bytes)

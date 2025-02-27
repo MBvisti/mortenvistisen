@@ -1,0 +1,48 @@
+package dashboard
+
+import (
+	"github.com/MBvisti/mortenvistisen/views/layouts"
+	"time"
+)
+
+type ShowSubscriberProps struct {
+	Email        string
+	SubscribedAt time.Time
+	Referere     string
+	Verified     bool
+}
+
+templ ShowSubscriber(props ShowSubscriberProps) {
+	@layouts.Dashboard() {
+		<div class="py-4">
+			<div class="row">
+				<h2 class="offset-4 col-4 align-self-center text-white mb-4">Details</h2>
+				<div class="col-4 offset-4 mb-3 text-white">
+					<label for="subscriberEmail" class="form-label text-muted">Email address</label>
+					<input disabled type="email" value={ props.Email } class="form-control text-white" id="subscriberEmail"/>
+				</div>
+				<div class="col-4 offset-4 mb-3 text-white">
+					<label for="subscriberAt" class="form-label text-muted">Subscribed At</label>
+					<input disabled type="text" value={ props.SubscribedAt.String() } class="form-control text-white" id="subscriberAt"/>
+				</div>
+				<div class="col-4 offset-4 mb-3 text-white">
+					<label for="subscriberReferere" class="form-label text-muted">Referere</label>
+					<input disabled type="email" value={ props.Referere } class="form-control text-white" id="subscriberReferere"/>
+				</div>
+				<div class="my-4 d-flex justify-content-center col-4 offset-4 form-check form-switch">
+					if props.Verified {
+						<input checked="checked" class="form-check-input" type="checkbox" id="flexSwitchCheckReverse"/>
+					}
+					if !props.Verified {
+						<input class="form-check-input" type="checkbox" id="flexSwitchCheckReverse"/>
+					}
+					<label class="form-check-label" for="flexSwitchCheckReverse">Validated</label>
+				</div>
+				<div class="col-4 offset-4 d-flex justify-content-around">
+					<button type="button" class="btn bg-warning text-white">Delete</button>
+					<button type="button" class="btn bg-primary text-white">Update</button>
+				</div>
+			</div>
+		</div>
+	}
+}
