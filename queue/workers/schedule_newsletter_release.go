@@ -57,7 +57,7 @@ func (w *ScheduleNewsletterReleaseWorker) Work(
 	// 	math.Ceil(float64(len(subscribers)) / float64(emailsPerDay)),
 	// )
 
-	minutesBetweenEmails := 5 + rand.Intn(6) // Random number between 5-10
+	minutesBetweenEmails := 1 + rand.Intn(4) // Random number between 2-5
 
 	startTime := time.Now()
 
