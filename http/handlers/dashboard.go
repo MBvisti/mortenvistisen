@@ -76,6 +76,7 @@ func (d Dashboard) Home(c echo.Context) error {
 	var recent []dashboard.RecentActivity
 	for _, rs := range recentSubs {
 		recent = append(recent, dashboard.RecentActivity{
+			ID:       rs.ID,
 			When:     rs.CreatedAt,
 			Email:    rs.Email,
 			Verified: rs.IsVerified,
@@ -344,5 +345,32 @@ func (d Dashboard) StoreNewsletter(c echo.Context) error {
 	}
 
 	return dashboard.NewsletterCreate(csrf.Token(c.Request()), true).
+		Render(renderArgs(c))
+}
+
+func (d Dashboard) ShowSubscriber(c echo.Context) error {
+	subID := c.Param("id")
+	id, err := uuid.Parse(subID)
+	if err != nil {
+		slog.ErrorContext(c.Request().Context(), "ShowSubscriber", "error", err)
+		return errorPage(c, views.ErrorPage())
+	}
+
+	subcriber, err := models.GetSubscriberByID(
+		c.Request().Context(),
+		d.db.Pool,
+		id,
+	)
+	if err != nil {
+		slog.ErrorContext(c.Request().Context(), "ShowSubscriber", "error", err)
+		return errorPage(c, views.ErrorPage())
+	}
+
+	return dashboard.ShowSubscriber(dashboard.ShowSubscriberProps{
+		Email:        subcriber.Email,
+		SubscribedAt: subcriber.SubscribedAt,
+		Referere:     subcriber.Referer,
+		Verified:     subcriber.IsVerified,
+	}).
 		Render(renderArgs(c))
 }

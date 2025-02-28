@@ -15,6 +15,11 @@ func dashboardRoutes(
 	dashboardRouter.GET("", func(c echo.Context) error {
 		return handlers.Home(c)
 	}).Name = paths.DashboardHomePage.ToString()
+
+	dashboardRouter.GET("/subscribers/:id", func(c echo.Context) error {
+		return handlers.ShowSubscriber(c)
+	}).Name = paths.DashboardSubscriberPage.ToString()
+
 	dashboardRouter.GET("/newsletters", func(c echo.Context) error {
 		return handlers.Newsletters(c)
 	}).Name = paths.DashboardNewsletter.ToString()

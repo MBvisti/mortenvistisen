@@ -29,6 +29,7 @@ const (
 	VerifySubEvent           Route = "verifySubEvent"
 	UnsubscribeEvent         Route = "unsubscribeEvent"
 	DashboardHomePage        Route = "dashbordHomePage"
+	DashboardSubscriberPage  Route = "dashbordSubscriberPage"
 	DashboardNewsletter      Route = "dashboardNewsletter"
 	DashboardNewsletterNew   Route = "dashboardNewsletterNew"
 	DashboardNewsletterStore Route = "dashboardNewsletterStore"

@@ -128,7 +128,7 @@ func head(data headData) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><link href=\"/static/css/main-dev.css\" rel=\"stylesheet\"><link rel=\"apple-touch-icon\" sizes=\"180x180\" href=\"/static/images/apple-touch-icon.png\"><link rel=\"icon\" type=\"image/png\" sizes=\"32x32\" href=\"/static/images/favicon-32x32.png\"><link rel=\"icon\" type=\"image/png\" sizes=\"16x16\" href=\"/static/images/favicon-16x16.png\"><meta property=\"og:type\" content=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><link href=\"/css/tailwind\" rel=\"stylesheet\"><link rel=\"apple-touch-icon\" sizes=\"180x180\" href=\"/static/images/apple-touch-icon.png\"><link rel=\"icon\" type=\"image/png\" sizes=\"32x32\" href=\"/static/images/favicon-32x32.png\"><link rel=\"icon\" type=\"image/png\" sizes=\"16x16\" href=\"/static/images/favicon-16x16.png\"><meta property=\"og:type\" content=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -320,13 +320,13 @@ func head(data headData) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if os.Getenv("ENVIRONMENT") == config.PROD_ENVIRONMENT {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<script defer src=\"https://lab-analytics.fly.dev/script.js\" data-website-id=\"15aa0aa0-0777-474f-a8da-7687ef7edbd3\"></script> <script defer src=\"https://mortenvistisen.com/script.js\" data-website-id=\"0210debc-df55-4c4c-a2f2-01c268a04911\"></script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<script defer src=\"https://lab-analytics.fly.dev/script.js\" data-website-id=\"15aa0aa0-0777-474f-a8da-7687ef7edbd3\"></script> <script defer src=\"/script.js\" data-website-id=\"0210debc-df55-4c4c-a2f2-01c268a04911\"></script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
 		if os.Getenv("ENVIRONMENT") == config.DEV_ENVIRONMENT {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<script defer src=\"http://localhost:8080/script.js\" data-website-id=\"0210debc-df55-4c4c-a2f2-01c268a04911\"></script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<script defer src=\"/script.js\" data-website-id=\"0210debc-df55-4c4c-a2f2-01c268a04911\"></script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

@@ -25,7 +25,7 @@ SELECT
     subscribed_at, referer, is_verified
 FROM subscribers
 ORDER BY created_at DESC
-LIMIT 5;
+LIMIT 10;
 
 -- name: QuerySubscribersPage :many
 SELECT 

@@ -1,0 +1,84 @@
+// Custom.scss with colors converted from Tailwind OKLCH values
+
+// 1. Include functions first
+@import "../../node_modules/bootstrap/scss/functions";
+
+// 2. Include variable overrides here
+// Converted from OKLCH to hex values for compatibility
+
+// Primary: oklch(67.76% 0.038 213.41) -> #95a5d7
+$primary: #95a5d7;
+$primary-text: #1c1d1f;  // primary-content: oklch(10.51% 0.003 300.00)
+
+// Secondary: oklch(63.94% 0.060 320.91) -> #c690b3
+$secondary: #c690b3;
+$secondary-text: #1c1d1f;  // secondary-content: oklch(10.51% 0.003 300.00)
+
+// Success: oklch(62.76% 0.048 113.41) -> #7bb073
+$success: #7bb073;
+$success-text: #1c1d1f;  // success-content: oklch(10.51% 0.003 300.00)
+
+// Info: oklch(71.76% 0.078 213.41) -> #8cb5e8
+$info: #8cb5e8;
+$info-text: #1c1d1f;  // info-content: oklch(10.51% 0.003 300.00)
+
+// Warning: oklch(82.76% 0.098 77.96) -> #f3c87c
+$warning: #f3c87c;
+$warning-text: #1c1d1f;  // warning-content: oklch(10.51% 0.003 300.00)
+
+// Danger/Error: oklch(58.76% 0.108 23.41) -> #db7b56
+$danger: #db7b56;
+$danger-text: #1c1d1f;  // error-content: oklch(10.51% 0.003 300.00)
+
+// Light/Neutral: oklch(77.95% 0.075 84.44) -> #c6c99d
+$light: #f1f2eb;  // Lightened version of neutral for better contrast
+$dark: #1c1d1f;   // Based on base-300: oklch(10.51% 0.003 300.00)
+
+// Body background (base-100): oklch(20.51% 0.003 300.00) -> #323135
+$body-bg: #323135;
+$body-color: #ccd8d1;  // base-content: oklch(80.51% 0.010 147.37)
+
+// Additional color system adjustments
+$theme-colors: (
+  "primary": $primary,
+  "secondary": $secondary,
+  "success": $success,
+  "info": $info,
+  "warning": $warning,
+  "danger": $danger,
+  "light": $light,
+  "dark": $dark,
+  "accent": #dad178,  // accent: oklch(72.95% 0.082 77.96)
+);
+
+// Adjust component colors for dark theme
+$input-bg: #3f3f44;              // Slightly lighter than body-bg
+$input-color: $body-color;
+$input-border-color: #454549;
+$card-bg: #383840;
+$card-border-color: rgba(255, 255, 255, 0.125);
+$modal-content-bg: #383840;
+$modal-header-border-color: rgba(255, 255, 255, 0.125);
+$dropdown-bg: #383840;
+$dropdown-border-color: rgba(255, 255, 255, 0.15);
+$dropdown-divider-bg: rgba(255, 255, 255, 0.15);
+$dropdown-link-color: $body-color;
+$dropdown-link-hover-color: darken($body-color, 5%);
+$dropdown-link-hover-bg: rgba(255, 255, 255, 0.1);
+
+// Enable dark theme by default
+$enable-dark-mode: true;
+$color-mode-type: data;
+
+// Link colors
+$link-color: $primary;
+$link-hover-color: lighten($link-color, 10%);
+
+// Other settings
+$enable-shadows: true;
+$enable-gradients: false;
+$enable-negative-margins: true;
+$font-family-sans-serif: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+// 3. Include all of Bootstrap
+@import "../../node_modules/bootstrap/scss/bootstrap";
