@@ -3,28 +3,21 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log/slog"
 	"math"
-	"math/rand"
-	"net/url"
 	"strconv"
 	"time"
 
-	"github.com/MBvisti/mortenvistisen/config"
-	"github.com/MBvisti/mortenvistisen/emails"
 	"github.com/MBvisti/mortenvistisen/models"
 	"github.com/MBvisti/mortenvistisen/psql"
 	"github.com/MBvisti/mortenvistisen/queue/jobs"
 	"github.com/MBvisti/mortenvistisen/views"
 	"github.com/MBvisti/mortenvistisen/views/dashboard"
-	"github.com/MBvisti/mortenvistisen/views/paths"
 	"github.com/dromara/carbon/v2"
 	"github.com/google/uuid"
 	"github.com/gorilla/csrf"
 	"github.com/jackc/pgx/v5"
 	"github.com/labstack/echo/v4"
-	"github.com/riverqueue/river"
 )
 
 type Dashboard struct {
@@ -192,11 +185,23 @@ func (d Dashboard) StoreNewsletter(c echo.Context) error {
 	}
 	var payload newsletterPayload
 	if err := c.Bind(&payload); err != nil {
+		slog.ErrorContext(
+			c.Request().Context(),
+			"StoreNewsletter",
+			"error",
+			err,
+		)
 		return views.ErrorPage().Render(renderArgs(c))
 	}
 
 	tx, err := d.db.BeginTx(c.Request().Context())
 	if err != nil {
+		slog.ErrorContext(
+			c.Request().Context(),
+			"StoreNewsletter",
+			"error",
+			err,
+		)
 		return views.ErrorPage().Render(renderArgs(c))
 	}
 	defer tx.Rollback(c.Request().Context())
@@ -212,136 +217,29 @@ func (d Dashboard) StoreNewsletter(c echo.Context) error {
 		},
 	)
 	if err != nil {
+		slog.ErrorContext(
+			c.Request().Context(),
+			"StoreNewsletter",
+			"error",
+			err,
+		)
 		return views.ErrorPage().Render(renderArgs(c))
 	}
 
-	subscribers, err := models.GetVerifiedSubscribers(c.Request().Context(), tx)
-	if err != nil {
+	if _, err := d.db.Queue.InsertTx(c.Request().Context(), tx, jobs.ScheduleNewsletterRelease{
+		NewsletterID: newsletter.ID,
+	}, nil); err != nil {
+		slog.ErrorContext(
+			c.Request().Context(),
+			"StoreNewsletter",
+			"error",
+			err,
+		)
 		return views.ErrorPage().Render(renderArgs(c))
-	}
-
-	const (
-		emailsPerDay = 50
-	)
-
-	totalDays := int(
-		math.Ceil(float64(len(subscribers)) / float64(emailsPerDay)),
-	)
-
-	minutesBetweenEmails := 5 + rand.Intn(6) // Random number between 5-10
-
-	startTime := time.Now()
-
-	var insertMany []river.InsertManyParams
-	for i, subscriber := range subscribers {
-		dayOffset := i / emailsPerDay
-		emailNumberForDay := i % emailsPerDay
-
-		scheduleTime := startTime.
-			Add(time.Duration(dayOffset) * 24 * time.Hour).
-			Add(time.Duration(emailNumberForDay*minutesBetweenEmails) * time.Minute)
-
-		unsubTkn, err := models.NewToken(
-			c.Request().Context(),
-			models.NewTokenPayload{
-				Expiration: time.Now().Add(365 * (24 * time.Hour)),
-				Meta: models.MetaInformation{
-					Resource:   models.ResourceSubscriber,
-					ResourceID: subscriber.ID,
-					Scope:      models.ScopeUnsubscribe,
-				},
-			},
-			tx,
-		)
-		if err != nil {
-			slog.ErrorContext(
-				c.Request().Context(),
-				"failed to create unsubscribe token",
-				"error", err,
-				"subscriber_id", subscriber.ID,
-			)
-			return errorPage(c, views.ErrorPage())
-		}
-
-		html, txt, err := emails.NewsletterMail{
-			Title:   newsletter.Title,
-			Content: newsletter.Content,
-			UnsubscribeLink: fmt.Sprintf(
-				"%s%s?token=%s&email=%s",
-				config.Cfg.GetFullDomain(),
-				paths.Get(c.Request().Context(), paths.UnsubscribeEvent),
-				url.QueryEscape(unsubTkn.Hash),
-				url.QueryEscape(subscriber.Email),
-			),
-		}.Generate(c.Request().Context())
-		if err != nil {
-			slog.ErrorContext(
-				c.Request().Context(),
-				"failed to generate email content",
-				"error", err,
-				"subscriber_id", subscriber.ID,
-			)
-			return errorPage(c, views.ErrorPage())
-		}
-
-		insertMany = append(insertMany, river.InsertManyParams{
-			Args: jobs.EmailJobArgs{
-				To:          subscriber.Email,
-				From:        "newsletter@mortenvistisen.com",
-				Subject:     "newsletter - mortenvistisen.com",
-				TextVersion: txt.String(),
-				HtmlVersion: html.String(),
-			},
-			InsertOpts: &river.InsertOpts{
-				ScheduledAt: scheduleTime,
-			},
-		})
-		// if _, err := d.db.Queue.InsertManyTx(
-		// 	c.Request().Context(),
-		// 	tx,
-		// 	jobs.EmailJobArgs{
-		// 		To:          subscriber.Email,
-		// 		From:        "newsletter@mortenvistisen.com",
-		// 		Subject:     "Newsletter - mortenvistisen.com",
-		// 		TextVersion: txt.String(),
-		// 		HtmlVersion: html.String(),
-		// 	},
-		// 	&river.InsertOpts{
-		// 		ScheduledAt: scheduleTime,
-		// 	},
-		// ); err != nil {
-		// 	slog.ErrorContext(
-		// 		c.Request().Context(),
-		// 		"failed to schedule email",
-		// 		"error", err,
-		// 		"subscriber_id", subscriber.ID,
-		// 		"scheduled_time", scheduleTime,
-		// 	)
-		// 	return errorPage(c, views.ErrorPage())
-		// }
-		//
-		slog.InfoContext(
-			c.Request().Context(),
-			"scheduled newsletter email",
-			"subscriber_id", subscriber.ID,
-			"email", subscriber.Email,
-			"scheduled_time", scheduleTime,
-			"day", dayOffset+1,
-			"total_days", totalDays,
-		)
-	}
-
-	if _, err := d.db.Queue.InsertManyTx(c.Request().Context(), tx, insertMany); err != nil {
-		return errorPage(c, views.ErrorPage())
 	}
 
 	if err := tx.Commit(c.Request().Context()); err != nil {
-		slog.ErrorContext(
-			c.Request().Context(),
-			"failed to commit transaction",
-			"error", err,
-		)
-		return errorPage(c, views.ErrorPage())
+		return views.ErrorPage().Render(renderArgs(c))
 	}
 
 	return dashboard.NewsletterCreate(csrf.Token(c.Request()), true).

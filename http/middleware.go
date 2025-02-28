@@ -22,7 +22,7 @@ func AuthOnly(next echo.HandlerFunc) echo.HandlerFunc {
 			return next(c)
 		}
 
-		return c.Redirect(http.StatusPermanentRedirect, "/login")
+		return c.Redirect(http.StatusTemporaryRedirect, "/login")
 	}
 }
 

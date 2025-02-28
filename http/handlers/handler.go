@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 
 	"github.com/MBvisti/mortenvistisen/config"
 	"github.com/MBvisti/mortenvistisen/models"
@@ -22,7 +23,7 @@ import (
 
 var AuthenticatedSessionName = fmt.Sprintf(
 	"ua-%s-%s",
-	config.Cfg.ProjectName,
+	strings.ToLower(config.Cfg.ProjectName),
 	config.Cfg.Environment,
 )
 
