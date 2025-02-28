@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"github.com/MBvisti/mortenvistisen/http"
 	"github.com/MBvisti/mortenvistisen/http/handlers"
 	"github.com/MBvisti/mortenvistisen/views/paths"
 	"github.com/labstack/echo/v4"
@@ -10,7 +11,7 @@ func dashboardRoutes(
 	router *echo.Echo,
 	handlers handlers.Dashboard,
 ) {
-	dashboardRouter := router.Group("/dashboard")
+	dashboardRouter := router.Group("/dashboard", http.AuthOnly)
 
 	dashboardRouter.GET("", func(c echo.Context) error {
 		return handlers.Home(c)

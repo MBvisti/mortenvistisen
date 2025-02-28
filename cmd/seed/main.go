@@ -24,37 +24,11 @@ func main() {
 	}
 
 	seeder := seeds.NewSeeder(tx)
-
-	_, err = seeder.PlantSubscriber(
+	if _, err := seeder.PlantUser(
 		ctx,
-		seeds.WithSubscriberEmail("hello@mbvlabs.com"),
-		seeds.WithSubscriberIsVerified(true),
-	)
-	if err != nil {
-		panic(err)
-	}
-	_, err = seeder.PlantSubscriber(
-		ctx,
-		seeds.WithSubscriberEmail("hello1@mbvlabs.com"),
-		seeds.WithSubscriberIsVerified(true),
-	)
-	if err != nil {
-		panic(err)
-	}
-	_, err = seeder.PlantSubscriber(
-		ctx,
-		seeds.WithSubscriberEmail("hello2@mbvlabs.com"),
-		seeds.WithSubscriberIsVerified(true),
-	)
-	if err != nil {
-		panic(err)
-	}
-	_, err = seeder.PlantSubscriber(
-		ctx,
-		seeds.WithSubscriberEmail("hello3@mbvlabs.com"),
-		seeds.WithSubscriberIsVerified(true),
-	)
-	if err != nil {
+		seeds.WithUserEmail("admin@mbvlabs.com"),
+		seeds.WithUserIsAdmin(true),
+	); err != nil {
 		panic(err)
 	}
 
