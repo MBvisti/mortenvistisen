@@ -15,6 +15,29 @@ func resourceRoutes(router *echo.Echo, handlers handlers.Resource) {
 		return c.File("./resources/seo/robots.txt")
 	})
 
+	router.GET("/css/trix", func(c echo.Context) error {
+		stylesheet, err := static.Files.ReadFile(
+			"css/trix.css",
+		)
+		if err != nil {
+			return err
+		}
+
+		if config.Cfg.Environment == config.PROD_ENVIRONMENT {
+			c.Response().
+				Header().
+				Set("Cache-Control", "public, max-age=31536000, immutable")
+			c.Response().
+				Header().
+				Set("Vary", "Accept-Encoding")
+			c.Response().
+				Header().
+				Set("ETag", "\"bootstrap-v5_3_0\"")
+		}
+
+		return c.Blob(http.StatusOK, "text/css", stylesheet)
+	})
+
 	router.GET("/css/bootstrap", func(c echo.Context) error {
 		stylesheet, err := static.Files.ReadFile(
 			"css/bootstrap-v5_3_0.css",

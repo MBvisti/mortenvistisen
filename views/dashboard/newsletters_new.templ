@@ -7,22 +7,22 @@ import (
 
 templ NewsletterCreate(csrfToken string, success bool) {
 	@layouts.Dashboard() {
-		<div class="container mx-auto grid grid-cols-12 gap-4 bg-base-100">
-			<div class="col-start-2 col-span-10 mb-4">
-				<a class="hover:font-bold" href="/dashboard/newsletters">Back</a>
-			</div>
-			<div class="col-start-2 col-span-10">
+		<div class="py-4">
+			<div class="row">
 				if success {
-					<p class="font-bold my-4 text-base-neutral">Newsletter send!</p>
+					<p class="">Newsletter send!</p>
 				}
-				<h2 class="text-base-content text-xl mb-6">New Newsletter</h2>
-				<form method="post" action={ paths.GetSafeURL(ctx, paths.DashboardNewsletterStore) }>
+				<h2 class="col-12 font-bold text-white">New Newsletter</h2>
+				<form class="col-12" method="post" action={ paths.GetSafeURL(ctx, paths.DashboardNewsletterStore) }>
 					<input type="hidden" name="gorilla.csrf.Token" value={ csrfToken }/>
-					<input type="checkbox" name="release-on-create" checked="checked" class="hidden"/>
-					<input name="title" class="input input-bordered w-full mb-6" type="text" placeholder="Newsletter Title"/>
+					<input name="title" class="form-control rounded my-4" type="text" placeholder="Newsletter Title"/>
 					<input id="x" type="hidden" name="content"/>
 					<trix-editor class="trix-content" input="x"></trix-editor>
-					<button class="mt-4 w-44 btn btn-success text-white">Send it!</button>
+					<div class="form-check form-switch mt-4">
+						<input name="form-control" class="form-check-input" type="checkbox" role="switch" id="releaseOnCreateCheck" checked/>
+						<label class="form-check-label" for="releaseOnCreateCheck">Release on create</label>
+					</div>
+					<button class="mt-4 btn btn-success">Send it!</button>
 				</form>
 			</div>
 		</div>

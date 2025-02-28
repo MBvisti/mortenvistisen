@@ -46,17 +46,17 @@ func NewsletterCreate(csrfToken string, success bool) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"container mx-auto grid grid-cols-12 gap-4 bg-base-100\"><div class=\"col-start-2 col-span-10 mb-4\"><a class=\"hover:font-bold\" href=\"/dashboard/newsletters\">Back</a></div><div class=\"col-start-2 col-span-10\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"py-4\"><div class=\"row\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if success {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<p class=\"font-bold my-4 text-base-neutral\">Newsletter send!</p>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<p class=\"\">Newsletter send!</p>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<h2 class=\"text-base-content text-xl mb-6\">New Newsletter</h2><form method=\"post\" action=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<h2 class=\"col-12 font-bold text-white\">New Newsletter</h2><form class=\"col-12\" method=\"post\" action=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -72,13 +72,13 @@ func NewsletterCreate(csrfToken string, success bool) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(csrfToken)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletters_new.templ`, Line: 20, Col: 69}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletters_new.templ`, Line: 17, Col: 69}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\"> <input type=\"checkbox\" name=\"release-on-create\" checked=\"checked\" class=\"hidden\"> <input name=\"title\" class=\"input input-bordered w-full mb-6\" type=\"text\" placeholder=\"Newsletter Title\"> <input id=\"x\" type=\"hidden\" name=\"content\"> <trix-editor class=\"trix-content\" input=\"x\"></trix-editor> <button class=\"mt-4 w-44 btn btn-success text-white\">Send it!</button></form></div></div><script src=\"/static/js/trix.min.js\"></script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\"> <input name=\"title\" class=\"form-control rounded my-4\" type=\"text\" placeholder=\"Newsletter Title\"> <input id=\"x\" type=\"hidden\" name=\"content\"> <trix-editor class=\"trix-content\" input=\"x\"></trix-editor><div class=\"form-check form-switch mt-4\"><input name=\"form-control\" class=\"form-check-input\" type=\"checkbox\" role=\"switch\" id=\"releaseOnCreateCheck\" checked> <label class=\"form-check-label\" for=\"releaseOnCreateCheck\">Release on create</label></div><button class=\"mt-4 btn btn-success\">Send it!</button></form></div></div><script src=\"/static/js/trix.min.js\"></script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
