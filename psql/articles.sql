@@ -75,3 +75,15 @@ SELECT
     p.read_time, p.header_title
 FROM posts p
 WHERE p.slug = $1;
+
+-- name: QueryRandomArticles :many
+SELECT 
+    p.id, p.created_at, p.updated_at, p.title, p.filename, 
+    p.slug, p.excerpt, p.draft, p.released_at as release_date, 
+    p.read_time, p.header_title
+FROM posts p
+WHERE p.slug != $1 
+    AND p.draft = false 
+    AND p.released_at <= CURRENT_TIMESTAMP
+ORDER BY RANDOM()
+LIMIT 5;

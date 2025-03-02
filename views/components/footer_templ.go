@@ -35,7 +35,7 @@ func Footer() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<footer class=\"bg-base-300 w-full\"><div class=\"py-4 px-10 bg-base-100 max-w-screen-xl mx-auto grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12\"><div class=\"col-span-full md:col-start-2 md:col-end-6 lg:col-start-3 lg:col-end-11 md:my-10 flex flex-col items-center justify-between gap-6\"><div class=\"flex flex-wrap justify-center gap-x-6 gap-y-1 text-sm font-medium text-zinc-200\"><a class=\"transition hover:text-teal-400\" target=\"_blank\" href=\"https://golangblogcourse.com\">Golang Course</a> <a class=\"transition hover:text-teal-400\" href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<footer class=\"d-flex flex-column pb-5 mt-5\"><div class=\"mx-auto mb-2\"><a class=\"transition hover:text-teal-400\" target=\"_blank\" href=\"https://golangblogcourse.com\">Golang Course</a> <a class=\"transition hover:text-teal-400\" href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -44,20 +44,20 @@ func Footer() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\">Newsletters</a> <a class=\"transition hover:text-teal-400\" target=\"_blank\" href=\"https://mbvlabs.com\">Consulting</a></div><p class=\"text-sm text-zinc-500\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\">Newsletters</a> <a class=\"transition hover:text-teal-400\" target=\"_blank\" href=\"https://mbvlabs.com\">Consulting</a></div><p class=\"mx-auto\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("© %v", time.Now().Year()))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/footer.templ`, Line: 19, Col: 46}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/footer.templ`, Line: 17, Col: 44}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, " <a href=\"https://mbvlabs.com\">mbvlabs</a>. All rights reserved.</p></div></div></footer>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, " <a href=\"https://mbvlabs.com\">mbvlabs</a>. All rights reserved.</p></footer>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

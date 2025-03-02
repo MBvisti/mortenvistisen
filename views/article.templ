@@ -11,6 +11,7 @@ import (
 
 type ArticlePageData struct {
 	Title             string
+	Slug              string
 	Content           string
 	HeaderTitle       string
 	CsrfToken         string
@@ -67,26 +68,24 @@ func truncateSlug(slug string, maxLength int) string {
 	return truncatedSlug
 }
 
-script triggerCourse() {
+script triggerCourse(article string) {
 		const headers = document.querySelectorAll("h2");
 		let targetHeaderNum = 0
 
 		headers[targetHeaderNum].insertAdjacentHTML(
 				"beforeBegin", 
-				`<div class="flex flex-col bg-base-300 rounded p-4">
-						<p class="text-4xl font-bold !my-2">I'm building a course!</p>
-						<p class="!my-2">I'm sorry to interrupt but, the interest in building a personal blog using Golang has been huge.
+				`<div class="bg-body p-4 my-4">
+						<p class="fw-semibold fs-4">I'm building a course!</p>
+						<p class="fs-6">
+							Sorry to interrupt, I'm working on a course that shows you to build modern web apps using Golang, HTMX and Templ.
 						</p>
-						<p class="!my-2">
-						Because of that, I've decided to build a fully-fledged course that shows you to build modern web apps using Golang, HTMX and Templ.
-						</p>
-						<p class="!mt-2 !mb-4">
-						If you want to learn how to build a professional blog with Go, check it out: 
+						<p class="fs-6">
+							If you want to learn how to build a professional blog with Go, like this one, check it out: 
 						</p>
 						<a
 							data-umami-event="course--golang-blog-course-article"
-							class="w-full mx-auto btn btn-primary text-center font-bold text-white hover:text-base-content"
-							href="https://golangblogcourse.com?ref=mortenvistisen.com"
+							class="btn bg-primary"
+							href="https://golangblogcourse.com?ref=mortenvistisen.com/${article}"
 							target="_blank"
 						>Here</a>
 				</div>
@@ -96,22 +95,23 @@ script triggerCourse() {
 
 templ ArticlePage(data ArticlePageData) {
 	@layouts.Base(Head(ctx, WithTitle(data.HeaderTitle))) {
-		<div class="bg-base-300 w-full flex-1 flex flex-col">
-			<div class="px-4 w-full flex-1 bg-base-100 grid-rows-[100px_150px_1fr] max-w-screen-sm md:max-w-screen-md md:max-w-screen-lg lg:max-w-screen-xl mx-auto grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12">
-				<div class="flex items-center col-span-full md:pl-10">
-					<a href="/" aria-label="Go back to Home" class="flex h-10 w-10 items-center justify-center rounded-full bg-primary shadow-md ring-1 ring-primary-content transition">
-						<svg viewBox="0 0 16 16" fill="none" aria-hidden="true" class="h-4 w-4 stroke-primary-content transition hover:stroke-white">
-							<path d="M7.25 11.25 3.75 8m0 0 3.5-3.25M3.75 8h8.5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-						</svg>
-					</a>
-				</div>
-				<div class="text-start col-span-full lg:col-start-4 lg:col-end-11 prose lg:prose-xl">
-					<h1 class="text-4xl font-bold tracking-tight text-base-content sm:text-5xl">{ data.Title }</h1>
-					<p class="text-sm text-base-content">
+		<div class="d-none d-sm-block position-fixed top-10">
+			<a href="/" aria-label="Go back" class="text-white" x-data="{ isHovered: false }" @mouseenter="isHovered = true" @mouseleave="isHovered = false">
+				<svg x-show="isHovered" x-transition xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left-short" viewBox="0 0 16 16">
+					<path fill-rule="evenodd" d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5"></path>
+				</svg>
+				Back
+			</a>
+		</div>
+		<div class="row mt-5">
+			<div class="col col-md-7 mx-auto">
+				<div class="text-center">
+					<h1 class="fw-semibold">{ data.Title }</h1>
+					<p class="fs-6">
 						{ carbon.CreateFromStdTime(data.ReleaseDate).ToDateString() } by mbv
 					</p>
 				</div>
-				<article class="text-base-content text-start col-span-full lg:col-start-4 lg:col-end-11 prose prose-h2:text-base-content lg:prose-xl">
+				<article class="fs-5">
 					@unsafe(data.Content)
 					<hr/>
 					<div class="mt-10">
@@ -134,6 +134,6 @@ templ ArticlePage(data ArticlePageData) {
 				</article>
 			</div>
 		</div>
-		@triggerCourse()
+		@triggerCourse(data.Slug)
 	}
 }

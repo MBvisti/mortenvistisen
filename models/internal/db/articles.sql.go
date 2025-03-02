@@ -326,6 +326,65 @@ func (q *Queries) QueryArticlesPage(ctx context.Context, db DBTX, arg QueryArtic
 	return items, nil
 }
 
+const queryRandomArticles = `-- name: QueryRandomArticles :many
+SELECT 
+    p.id, p.created_at, p.updated_at, p.title, p.filename, 
+    p.slug, p.excerpt, p.draft, p.released_at as release_date, 
+    p.read_time, p.header_title
+FROM posts p
+WHERE p.slug != $1 
+    AND p.draft = false 
+    AND p.released_at <= CURRENT_TIMESTAMP
+ORDER BY RANDOM()
+LIMIT 5
+`
+
+type QueryRandomArticlesRow struct {
+	ID          uuid.UUID
+	CreatedAt   pgtype.Timestamp
+	UpdatedAt   pgtype.Timestamp
+	Title       string
+	Filename    string
+	Slug        string
+	Excerpt     string
+	Draft       bool
+	ReleaseDate pgtype.Timestamp
+	ReadTime    sql.NullInt32
+	HeaderTitle sql.NullString
+}
+
+func (q *Queries) QueryRandomArticles(ctx context.Context, db DBTX, slug string) ([]QueryRandomArticlesRow, error) {
+	rows, err := db.Query(ctx, queryRandomArticles, slug)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []QueryRandomArticlesRow
+	for rows.Next() {
+		var i QueryRandomArticlesRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Title,
+			&i.Filename,
+			&i.Slug,
+			&i.Excerpt,
+			&i.Draft,
+			&i.ReleaseDate,
+			&i.ReadTime,
+			&i.HeaderTitle,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateArticle = `-- name: UpdateArticle :exec
 UPDATE posts
 SET 

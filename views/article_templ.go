@@ -19,6 +19,7 @@ import (
 
 type ArticlePageData struct {
 	Title             string
+	Slug              string
 	Content           string
 	HeaderTitle       string
 	CsrfToken         string
@@ -87,36 +88,34 @@ func truncateSlug(slug string, maxLength int) string {
 	return truncatedSlug
 }
 
-func triggerCourse() templ.ComponentScript {
+func triggerCourse(article string) templ.ComponentScript {
 	return templ.ComponentScript{
-		Name: `__templ_triggerCourse_01d4`,
-		Function: `function __templ_triggerCourse_01d4(){const headers = document.querySelectorAll("h2");
+		Name: `__templ_triggerCourse_13a2`,
+		Function: `function __templ_triggerCourse_13a2(article){const headers = document.querySelectorAll("h2");
 		let targetHeaderNum = 0
 
 		headers[targetHeaderNum].insertAdjacentHTML(
 				"beforeBegin", 
-				` + "`" + `<div class="flex flex-col bg-base-300 rounded p-4">
-						<p class="text-4xl font-bold !my-2">I'm building a course!</p>
-						<p class="!my-2">I'm sorry to interrupt but, the interest in building a personal blog using Golang has been huge.
+				` + "`" + `<div class="bg-body p-4 my-4">
+						<p class="fw-semibold fs-4">I'm building a course!</p>
+						<p class="fs-6">
+							Sorry to interrupt, I'm working on a course that shows you to build modern web apps using Golang, HTMX and Templ.
 						</p>
-						<p class="!my-2">
-						Because of that, I've decided to build a fully-fledged course that shows you to build modern web apps using Golang, HTMX and Templ.
-						</p>
-						<p class="!mt-2 !mb-4">
-						If you want to learn how to build a professional blog with Go, check it out: 
+						<p class="fs-6">
+							If you want to learn how to build a professional blog with Go, like this one, check it out: 
 						</p>
 						<a
 							data-umami-event="course--golang-blog-course-article"
-							class="w-full mx-auto btn btn-primary text-center font-bold text-white hover:text-base-content"
-							href="https://golangblogcourse.com?ref=mortenvistisen.com"
+							class="btn bg-primary"
+							href="https://golangblogcourse.com?ref=mortenvistisen.com/${article}"
 							target="_blank"
 						>Here</a>
 				</div>
 				` + "`" + `
 		);
 }`,
-		Call:       templ.SafeScript(`__templ_triggerCourse_01d4`),
-		CallInline: templ.SafeScriptInline(`__templ_triggerCourse_01d4`),
+		Call:       templ.SafeScript(`__templ_triggerCourse_13a2`, article),
+		CallInline: templ.SafeScriptInline(`__templ_triggerCourse_13a2`, article),
 	}
 }
 
@@ -153,20 +152,20 @@ func ArticlePage(data ArticlePageData) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"bg-base-300 w-full flex-1 flex flex-col\"><div class=\"px-4 w-full flex-1 bg-base-100 grid-rows-[100px_150px_1fr] max-w-screen-sm md:max-w-screen-md md:max-w-screen-lg lg:max-w-screen-xl mx-auto grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12\"><div class=\"flex items-center col-span-full md:pl-10\"><a href=\"/\" aria-label=\"Go back to Home\" class=\"flex h-10 w-10 items-center justify-center rounded-full bg-primary shadow-md ring-1 ring-primary-content transition\"><svg viewBox=\"0 0 16 16\" fill=\"none\" aria-hidden=\"true\" class=\"h-4 w-4 stroke-primary-content transition hover:stroke-white\"><path d=\"M7.25 11.25 3.75 8m0 0 3.5-3.25M3.75 8h8.5\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path></svg></a></div><div class=\"text-start col-span-full lg:col-start-4 lg:col-end-11 prose lg:prose-xl\"><h1 class=\"text-4xl font-bold tracking-tight text-base-content sm:text-5xl\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"d-none d-sm-block position-fixed top-10\"><a href=\"/\" aria-label=\"Go back\" class=\"text-white\" x-data=\"{ isHovered: false }\" @mouseenter=\"isHovered = true\" @mouseleave=\"isHovered = false\"><svg x-show=\"isHovered\" x-transition xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" fill=\"currentColor\" class=\"bi bi-arrow-left-short\" viewBox=\"0 0 16 16\"><path fill-rule=\"evenodd\" d=\"M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5\"></path></svg> Back</a></div><div class=\"row mt-5\"><div class=\"col col-md-7 mx-auto\"><div class=\"text-center\"><h1 class=\"fw-semibold\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(data.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 109, Col: 93}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 109, Col: 41}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</h1><p class=\"text-sm text-base-content\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</h1><p class=\"fs-6\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -179,7 +178,7 @@ func ArticlePage(data ArticlePageData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, " by mbv</p></div><article class=\"text-base-content text-start col-span-full lg:col-start-4 lg:col-end-11 prose prose-h2:text-base-content lg:prose-xl\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, " by mbv</p></div><article class=\"fs-5\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -223,7 +222,7 @@ func ArticlePage(data ArticlePageData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = triggerCourse().Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = triggerCourse(data.Slug).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

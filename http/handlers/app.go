@@ -117,11 +117,27 @@ func (a *App) ArticlePage(c echo.Context) error {
 		return errorPage(c, views.ErrorPage())
 	}
 
+	otherArticles, err := models.GetRelatedArticles(
+		c.Request().Context(),
+		a.db.Pool,
+		slug,
+	)
+	if err != nil {
+		return errorPage(c, views.ErrorPage())
+	}
+
+	otherArticleLink := make(map[string]string, len(otherArticles))
+	for _, oa := range otherArticles {
+		otherArticleLink[oa.Title] = oa.Slug
+	}
+
 	return views.ArticlePage(views.ArticlePageData{
-		Title:       article.Title,
-		HeaderTitle: article.HeaderTitle,
-		Content:     postContent,
-		ReleaseDate: article.ReleaseDate,
+		Slug:              article.Slug,
+		Title:             article.Title,
+		HeaderTitle:       article.HeaderTitle,
+		Content:           postContent,
+		ReleaseDate:       article.ReleaseDate,
+		OtherArticleLinks: otherArticleLink,
 	}).Render(renderArgs(c))
 }
 

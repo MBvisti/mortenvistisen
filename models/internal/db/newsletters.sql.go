@@ -65,6 +65,7 @@ SELECT
     id, created_at, updated_at, title,
     content, released_at, released, slug
 FROM newsletters
+ORDER BY created_at DESC
 `
 
 type QueryAllNewslettersRow struct {
