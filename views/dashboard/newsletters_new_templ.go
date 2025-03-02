@@ -78,7 +78,7 @@ func NewsletterCreate(csrfToken string, success bool) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\"> <input name=\"title\" class=\"form-control rounded my-4\" type=\"text\" placeholder=\"Newsletter Title\"> <input id=\"x\" type=\"hidden\" name=\"content\"> <trix-editor class=\"trix-content\" input=\"x\"></trix-editor><div class=\"form-check form-switch mt-4\"><input name=\"form-control\" class=\"form-check-input\" type=\"checkbox\" role=\"switch\" id=\"releaseOnCreateCheck\" checked> <label class=\"form-check-label\" for=\"releaseOnCreateCheck\">Release on create</label></div><button class=\"mt-4 btn btn-success\">Send it!</button></form></div></div><script src=\"/static/js/trix.min.js\"></script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\"> <input name=\"title\" class=\"form-control rounded my-4\" type=\"text\" placeholder=\"Newsletter Title\"> <input id=\"x\" type=\"hidden\" name=\"content\"> <trix-editor class=\"trix-content\" input=\"x\"></trix-editor><div class=\"form-check form-switch mt-4\"><input name=\"form-control\" class=\"form-check-input\" type=\"checkbox\" role=\"switch\" id=\"releaseOnCreateCheck\" checked> <label class=\"form-check-label\" for=\"releaseOnCreateCheck\">Release on create</label></div><button class=\"mt-4 btn btn-success\">Send it!</button></form></div></div><script src=\"/js/trix.js\"></script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
