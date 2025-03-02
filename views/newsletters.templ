@@ -45,8 +45,10 @@ templ newsletterSignup() {
 }
 
 templ Newsletters(newletters []YearlyNewsletters) {
-	<div class="row mt-5 d-flex flex-column">
-		<h2 class="col text-center fw-semibold mb-5">Newsletters</h2>
+	<div class="row mt-5 flex-grow-1 d-flex flex-column">
+		<div class="text-center mb-5">
+			<h2 class="fw-semibold">Newsletters</h2>
+		</div>
 		<div class="col col-md-8 mx-auto mb-3">
 			for _, yearlyNewsletter := range newletters {
 				<h3 class="fw-semibold">{ yearlyNewsletter.Year }</h3>

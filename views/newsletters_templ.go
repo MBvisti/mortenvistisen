@@ -70,7 +70,7 @@ func Newsletters(newletters []YearlyNewsletters) templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"row mt-5 d-flex flex-column\"><h2 class=\"col text-center fw-semibold mb-5\">Newsletters</h2><div class=\"col col-md-8 mx-auto mb-3\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"row mt-5 flex-grow-1 d-flex flex-column\"><div class=\"text-center mb-5\"><h2 class=\"fw-semibold\">Newsletters</h2></div><div class=\"col col-md-8 mx-auto mb-3\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -82,7 +82,7 @@ func Newsletters(newletters []YearlyNewsletters) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(yearlyNewsletter.Year)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/newsletters.templ`, Line: 52, Col: 51}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/newsletters.templ`, Line: 54, Col: 51}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -109,7 +109,7 @@ func Newsletters(newletters []YearlyNewsletters) templ.Component {
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(carbon.CreateFromStdTime(newsletter.ReleasedAt).ToDateString())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/newsletters.templ`, Line: 57, Col: 72}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/newsletters.templ`, Line: 59, Col: 72}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -122,7 +122,7 @@ func Newsletters(newletters []YearlyNewsletters) templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(newsletter.Title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/newsletters.templ`, Line: 59, Col: 64}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/newsletters.templ`, Line: 61, Col: 64}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {

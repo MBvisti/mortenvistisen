@@ -7,7 +7,7 @@ templ Base(head templ.Component) {
 	<html lang="en" data-bs-theme="gruvbox-dark">
 		@head
 		<body>
-			<div class="container bg-dark-subtle">
+			<div class="min-vh-100 d-flex flex-column container bg-dark-subtle">
 				@components.Nav()
 				{ children... }
 				@components.Footer()

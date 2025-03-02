@@ -6,26 +6,28 @@ const AboutPageRoute = "about"
 
 templ AboutPage() {
 	@layouts.Base(Head(ctx, WithTitle("About | mortenvistisen"))) {
-		<div class="mt-5 row">
-			<h1 class="col fw-semibold text-center">About Morten</h1>
-		</div>
-		<div class="row mb-5">
-			<img class="mx-auto col-10 col-md-2 img-thumbnail" alt="Picture of Morten Vistisen (author of the blog)" src="https://media.mortenvistisen.com/mig_selv-removebg-preview.png"/>
-		</div>
-		<div class="row fs-5">
-			<p class="col-12 col-md-7 mx-auto">
-				I'm a self-thought developer, with a background in finance and international business and an interest in bootstrapped
-				business and technology. I spend most of my time tinkering with projects that try to combine the two.
-			</p>
-			<p class="col-12 col-md-7 mx-auto">
-				I specialize in Go, and after writing way too much React, actively advocate for building web apps using
-				traditional tools. I'm also very interested in distributed systems; this is where I spend most of my
-				professional time, helping companies build robust and scalable systems.
-			</p>
-			<p class="col-12 col-md-7 mx-auto">
-				With the rise of machine learning and AI I also started to dabble a bit in this field and mainly focus on NLP type projects.
-				With the huge amount of unstructured data available, and the development in new models, I think there are some very interesting opportunities.
-			</p>
+		<div class="flex-grow-1">
+			<div class="mt-5 row">
+				<h1 class="col fw-semibold text-center">About Morten</h1>
+			</div>
+			<div class="row mb-5">
+				<img class="mx-auto col-10 col-md-2 img-thumbnail" alt="Picture of Morten Vistisen (author of the blog)" src="https://media.mortenvistisen.com/mig_selv-removebg-preview.png"/>
+			</div>
+			<div class="row fs-5">
+				<p class="col-12 col-md-7 mx-auto">
+					I'm a self-thought developer, with a background in finance and international business and an interest in bootstrapped
+					business and technology. I spend most of my time tinkering with projects that try to combine the two.
+				</p>
+				<p class="col-12 col-md-7 mx-auto">
+					I specialize in Go, and after writing way too much React, actively advocate for building web apps using
+					traditional tools. I'm also very interested in distributed systems; this is where I spend most of my
+					professional time, helping companies build robust and scalable systems.
+				</p>
+				<p class="col-12 col-md-7 mx-auto">
+					With the rise of machine learning and AI I also started to dabble a bit in this field and mainly focus on NLP type projects.
+					With the huge amount of unstructured data available, and the development in new models, I think there are some very interesting opportunities.
+				</p>
+			</div>
 		</div>
 	}
 }
