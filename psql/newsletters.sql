@@ -2,7 +2,9 @@
 SELECT 
     id, created_at, updated_at, title,
     content, released_at, released, slug
-FROM newsletters;
+FROM newsletters
+ORDER BY created_at DESC;
+;
 
 -- name: QueryNewsletterBySlug :one
 SELECT 

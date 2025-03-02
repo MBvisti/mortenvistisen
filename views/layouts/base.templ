@@ -4,14 +4,18 @@ import "github.com/MBvisti/mortenvistisen/views/components"
 
 templ Base(head templ.Component) {
 	<!DOCTYPE html>
-	<html lang="en" data-theme="blog">
+	<html lang="en">
 		@head
-		<body class="flex flex-col min-w-screen max-w-[100vw] overflow-x-hidden h-screen">
-			@components.Nav()
-			{ children... }
-			@components.Footer()
-			<script src="/static/js/htmx.min.js"></script>
-			<script src="/static/js/alpine.js"></script>
+		<body>
+			<div class="container bg-dark-subtle">
+				@components.Nav()
+				{ children... }
+				@components.Footer()
+			</div>
+			<script src="/js/htmx.js"></script>
+			<script src="/js/alpine.js"></script>
+			<script src="/js/popper.js"></script>
+			<script src="/js/bootstrap.js"></script>
 		</body>
 	</html>
 }

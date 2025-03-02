@@ -175,3 +175,32 @@ func GetArticleBySlug(
 
 	return result, nil
 }
+
+func GetRelatedArticles(
+	ctx context.Context,
+	dbtx db.DBTX,
+	slug string,
+) ([]Article, error) {
+	articles, err := db.Stmts.QueryRandomArticles(ctx, dbtx, slug)
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]Article, len(articles))
+	for i, article := range articles {
+		result[i] = Article{
+			ID:          article.ID,
+			CreatedAt:   article.CreatedAt.Time,
+			UpdatedAt:   article.UpdatedAt.Time,
+			Title:       article.Title,
+			Filename:    article.Filename,
+			Slug:        article.Slug,
+			Excerpt:     article.Excerpt,
+			Draft:       article.Draft,
+			ReleaseDate: article.ReleaseDate.Time,
+			ReadTime:    article.ReadTime.Int32,
+		}
+	}
+
+	return result, nil
+}
