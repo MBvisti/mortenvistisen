@@ -15,7 +15,7 @@ func resourceRoutes(router *echo.Echo, handlers handlers.Resource) {
 		return c.File("./resources/seo/robots.txt")
 	})
 
-	router.GET("/css/trix", func(c echo.Context) error {
+	router.GET("/css/trix.css", func(c echo.Context) error {
 		stylesheet, err := static.Files.ReadFile(
 			"css/trix.css",
 		)
@@ -38,7 +38,28 @@ func resourceRoutes(router *echo.Echo, handlers handlers.Resource) {
 		return c.Blob(http.StatusOK, "text/css", stylesheet)
 	})
 
-	router.GET("/css/bootstrap", func(c echo.Context) error {
+	router.GET("/js/theme-switcher.js", func(c echo.Context) error {
+		stylesheet, err := static.Files.ReadFile(
+			"js/themeSwitcher.js",
+		)
+		if err != nil {
+			return err
+		}
+
+		if config.Cfg.Environment == config.PROD_ENVIRONMENT {
+			c.Response().
+				Header().
+				Set("Cache-Control", "public, max-age=31536000, immutable")
+			c.Response().
+				Header().
+				Set("Vary", "Accept-Encoding")
+			c.Response()
+		}
+
+		return c.Blob(http.StatusOK, "text/javascript", stylesheet)
+	})
+
+	router.GET("/css/bootstrap.css", func(c echo.Context) error {
 		stylesheet, err := static.Files.ReadFile(
 			"css/bootstrap-v5_3_0.css",
 		)
@@ -60,7 +81,7 @@ func resourceRoutes(router *echo.Echo, handlers handlers.Resource) {
 
 		return c.Blob(http.StatusOK, "text/css", stylesheet)
 	})
-	router.GET("/css/bootstrap-overrides", func(c echo.Context) error {
+	router.GET("/css/bootstrap-overrides.css", func(c echo.Context) error {
 		stylesheet, err := static.Files.ReadFile(
 			"css/bs-color-overrides.css",
 		)
@@ -79,6 +100,7 @@ func resourceRoutes(router *echo.Echo, handlers handlers.Resource) {
 
 		return c.Blob(http.StatusOK, "text/css", stylesheet)
 	})
+
 	router.GET("/css/tailwind", func(c echo.Context) error {
 		stylesheet, err := static.Files.ReadFile(
 			"css/main-dev.css",

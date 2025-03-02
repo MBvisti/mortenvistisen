@@ -4,7 +4,7 @@ import "github.com/MBvisti/mortenvistisen/views/components"
 
 templ Dashboard() {
 	<!DOCTYPE html>
-	<html lang="en" data-bs-theme="dark">
+	<html lang="en" data-bs-theme="auto">
 		<head>
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -12,9 +12,10 @@ templ Dashboard() {
 			<link rel="apple-touch-icon" sizes="180x180" href="/static/images/apple-touch-icon.png"/>
 			<link rel="icon" type="image/png" sizes="32x32" href="/static/images/favicon-32x32.png"/>
 			<link rel="icon" type="image/png" sizes="16x16" href="/static/images/favicon-16x16.png"/>
-			<link href="/css/bootstrap" rel="stylesheet"/>
-			<link href="/static/css/bs-color-overrides.css" rel="stylesheet"/>
-			<link href="/static/css/trix.css" rel="stylesheet"/>
+			<script src="/js/theme-switcher.js"></script>
+			<link href="/css/bootstrap.css" rel="stylesheet"/>
+			<link href="/css/bootstrap-overrides.css" rel="stylesheet"/>
+			<link href="/css/trix.css" rel="stylesheet"/>
 		</head>
 		<body class="container">
 			@components.DashboardNav()
