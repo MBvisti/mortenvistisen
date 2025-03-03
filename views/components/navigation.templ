@@ -25,6 +25,8 @@ templ Nav() {
 					aria-expanded="false"
 					data-bs-toggle="dropdown"
 					data-bs-display="static"
+					data-umami-event="theme--icon-selector"
+					data-analytics="theme--icon-selector"
 				>
 					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-moon-stars-fill" viewBox="0 0 16 16">
 						<path d="M6 .278a.77.77 0 0 1 .08.858 7.2 7.2 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277q.792-.001 1.533-.16a.79.79 0 0 1 .81.316.73.73 0 0 1-.031.893A8.35 8.35 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.75.75 0 0 1 6 .278"></path>
@@ -33,12 +35,26 @@ templ Nav() {
 				</button>
 				<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="bd-theme">
 					<li>
-						<button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="gruvbox-light" aria-pressed="false" data-analytics="theme--gruvbox-light-selected">
+						<button
+							data-umami-event="theme--gruvbox-light-selected"
+							type="button"
+							class="dropdown-item d-flex align-items-center"
+							data-bs-theme-value="gruvbox-light"
+							aria-pressed="false"
+							data-analytics="theme--gruvbox-light-selected"
+						>
 							Light
 						</button>
 					</li>
 					<li>
-						<button type="button" class="dropdown-item d-flex align-items-center active" data-bs-theme-value="gruvbox-dark" aria-pressed="false" data-analytics="theme--gruvbox-dark-selected">
+						<button
+							type="button"
+							data-umami-event="theme--gruvbox-dark-selected"
+							class="dropdown-item d-flex align-items-center active"
+							data-bs-theme-value="gruvbox-dark"
+							aria-pressed="false"
+							data-analytics="theme--gruvbox-dark-selected"
+						>
 							Dark
 						</button>
 					</li>
