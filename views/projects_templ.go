@@ -52,7 +52,7 @@ func ProjectsPage() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\"><button data-umami-event=\"projects--youtube-mbv-labs\" class=\"btn btn-primary mt-2\">Check it out</button></a></div><div class=\"bg-body p-4 mb-5\"><h2 class=\"fw-semibold\">Grafto</h2><p class=\"mb-2\">After hating on php for a long time I finally took some time out to try  it out, more specifically Laravel. Boy was I wrong about php.</p><p class=\"mb-2\">Laravel is such a great framework with (almost) everything you need out of the box. But I love writing Go, and I've spend too much time in statically typed  languages that going back to dynamically typed languages is a no-go for me.</p><p class=\"mb-2\">So, I decided to built my own Laravel inspired version in Go which I've called Grafto. It's more of a boilerplate than a framework, but it's a great starting point for building</p><p class=\"mb-2\">Aimed at indiehackers wanting to ship products fully in Go.</p><p class=\"mb-2\">Uses: Go, templ, tailwindcss, daisyui, alpine.js and htmx.</p><a rel=\"nofollow\" href=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\"><button data-umami-event=\"projects--youtube-mbv-labs\" class=\"btn bg-primary mt-2\">Check it out</button></a></div><div class=\"bg-body p-4 mb-5\"><h2 class=\"fw-semibold\">Grafto</h2><p class=\"mb-2\">After hating on php for a long time I finally took some time out to try  it out, more specifically Laravel. Boy was I wrong about php.</p><p class=\"mb-2\">Laravel is such a great framework with (almost) everything you need out of the box. But I love writing Go, and I've spend too much time in statically typed  languages that going back to dynamically typed languages is a no-go for me.</p><p class=\"mb-2\">So, I decided to built my own Laravel inspired version in Go which I've called Grafto. It's more of a boilerplate than a framework, but it's a great starting point for building</p><p class=\"mb-2\">Aimed at indiehackers wanting to ship products fully in Go.</p><p class=\"mb-2\">Uses: Go, templ, tailwindcss, daisyui, alpine.js and htmx.</p><a rel=\"nofollow\" href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -61,7 +61,7 @@ func ProjectsPage() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\"><button data-umami-event=\"projects--youtube-mbv-labs\" class=\"btn btn-primary mt-2\">Check it out</button></a></div></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\"><button data-umami-event=\"projects--youtube-mbv-labs\" class=\"btn bg-primary mt-2\">Check it out</button></a></div></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
