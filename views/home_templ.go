@@ -262,7 +262,7 @@ func Home(posts []Post) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</div></div><div class=\"row mt-5\"><div class=\"col col-md-8 mx-auto\"><h2 class=\"fw-bold fs-3 mb-2\">Latest articles</h2>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</div></div><div class=\"row mt-5\"><div class=\"col col-md-8 mx-auto\"><h2 class=\"fw-bold fs-3\">Latest articles</h2>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

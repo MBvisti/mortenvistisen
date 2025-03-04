@@ -105,7 +105,7 @@ templ Home(posts []Post) {
 	</div>
 	<div class="row mt-5">
 		<div class="col col-md-8 mx-auto">
-			<h2 class="fw-bold fs-3 mb-2">Latest articles</h2>
+			<h2 class="fw-bold fs-3">Latest articles</h2>
 			for _, post := range posts {
 				@articleCard(post)
 			}
