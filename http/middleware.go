@@ -55,7 +55,41 @@ func RegisterAppContext(
 			ac.Routes[r.Name] = r.Path
 		}
 
-		c.Set(string(contexts.AppKey{}.String()), ac)
+		c.Set(contexts.AppKey{}.String(), ac)
+
+		return next(c)
+	}
+}
+
+func RegisterFlashMessagesContext(
+	next echo.HandlerFunc,
+) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		// Get the session
+		session, err := session.Get(handlers.FlashSessionKey, c)
+		if err != nil {
+			return err
+		}
+
+		// Retrieve flash messages from the session
+		flashMessages := []contexts.FlashMessage{}
+		if flashes := session.Flashes(handlers.FlashSessionKey); len(
+			flashes,
+		) > 0 {
+			for _, flash := range flashes {
+				if msg, ok := flash.(contexts.FlashMessage); ok {
+					flashMessages = append(flashMessages, msg)
+				}
+			}
+
+			// Clear the flashes after retrieving
+			if err := session.Save(c.Request(), c.Response()); err != nil {
+				panic(err)
+			}
+		}
+
+		// Add flash messages to the context
+		c.Set(contexts.FlashKey{}.String(), flashMessages)
 
 		return next(c)
 	}

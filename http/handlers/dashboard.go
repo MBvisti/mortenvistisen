@@ -6,17 +6,21 @@ import (
 	"log/slog"
 	"math"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/MBvisti/mortenvistisen/models"
 	"github.com/MBvisti/mortenvistisen/psql"
 	"github.com/MBvisti/mortenvistisen/queue/jobs"
 	"github.com/MBvisti/mortenvistisen/views"
+	"github.com/MBvisti/mortenvistisen/views/contexts"
 	"github.com/MBvisti/mortenvistisen/views/dashboard"
+	"github.com/MBvisti/mortenvistisen/views/paths"
 	"github.com/dromara/carbon/v2"
 	"github.com/google/uuid"
 	"github.com/gorilla/csrf"
 	"github.com/jackc/pgx/v5"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 )
 
@@ -265,10 +269,193 @@ func (d Dashboard) ShowSubscriber(c echo.Context) error {
 	}
 
 	return dashboard.ShowSubscriber(dashboard.ShowSubscriberProps{
+		Csrf:         csrf.Token(c.Request()),
+		ID:           subcriber.ID,
 		Email:        subcriber.Email,
 		SubscribedAt: subcriber.SubscribedAt,
 		Referere:     subcriber.Referer,
 		Verified:     subcriber.IsVerified,
 	}).
 		Render(renderArgs(c))
+}
+
+func (d Dashboard) UpdateSubscriber(c echo.Context) error {
+	type updateSubscriberPayload struct {
+		ID         uuid.UUID `param:"id"`
+		IsVerified string    `           form:"is_verified"`
+	}
+
+	var payload updateSubscriberPayload
+	if err := c.Bind(&payload); err != nil {
+		slog.Info("1")
+		return errorPage(c, views.ErrorPage())
+	}
+
+	verified := payload.IsVerified == "on"
+
+	slog.Info("2")
+
+	session, err := session.Get(FlashSessionKey, c)
+	if err != nil {
+		slog.Info("3")
+		return errorPage(c, views.ErrorPage())
+	}
+
+	subscriber, err := models.GetSubscriberByID(
+		c.Request().Context(),
+		d.db.Pool,
+		payload.ID,
+	)
+	if err != nil {
+		slog.Info("4")
+		session.AddFlash(contexts.FlashMessage{
+			ID:        uuid.New(),
+			Type:      contexts.FlashError,
+			CreatedAt: time.Now(),
+			Message:   "Could not get subscriber.",
+		}, "flash_messages")
+
+		if err := session.Save(c.Request(), c.Response()); err != nil {
+			slog.Info("5")
+			return errorPage(c, views.ErrorPage())
+		}
+
+		return redirectHx(
+			c.Response(),
+			strings.Replace(
+				paths.Get(
+					c.Request().Context(),
+					paths.DashboardSubscriberPage,
+				),
+				":id",
+				payload.ID.String(),
+				1,
+			),
+		)
+	}
+
+	updatedSubscriber, err := models.UpdateSubscriber(
+		c.Request().Context(),
+		d.db.Pool,
+		models.UpdateSubscriberPayload{
+			ID:           payload.ID,
+			Email:        subscriber.Email,
+			SubscribedAt: subscriber.SubscribedAt,
+			Referer:      subscriber.Referer,
+			IsVerified:   verified,
+		},
+	)
+	if err != nil {
+		slog.Info("errrrooooooooooooooooorrrrrrrrrrrrr", "e", err)
+		session.AddFlash(contexts.FlashMessage{
+			ID:        uuid.New(),
+			Type:      contexts.FlashError,
+			CreatedAt: time.Now(),
+			Message:   "Could not update subscriber.",
+		}, "flash_messages")
+
+		if err := session.Save(c.Request(), c.Response()); err != nil {
+			slog.Info("7")
+			return errorPage(c, views.ErrorPage())
+		}
+
+		return redirectHx(
+			c.Response(),
+			strings.Replace(
+				paths.Get(
+					c.Request().Context(),
+					paths.DashboardSubscriberPage,
+				),
+				":id",
+				updatedSubscriber.ID.String(),
+				1,
+			),
+		)
+	}
+
+	session.AddFlash(contexts.FlashMessage{
+		ID:        uuid.New(),
+		Type:      contexts.FlashSuccess,
+		CreatedAt: time.Now(),
+		Message:   "Subscriber updated.",
+	}, "flash_messages")
+
+	if err := session.Save(c.Request(), c.Response()); err != nil {
+		return errorPage(c, views.ErrorPage())
+	}
+
+	return redirectHx(
+		c.Response(),
+		strings.Replace(
+			paths.Get(
+				c.Request().Context(),
+				paths.DashboardSubscriberPage,
+			),
+			":id",
+			updatedSubscriber.ID.String(),
+			1,
+		),
+	)
+}
+
+func (d Dashboard) DeleteSubscriber(c echo.Context) error {
+	type deleteSubscriberPayload struct {
+		ID uuid.UUID `param:"id"`
+	}
+
+	session, err := session.Get(FlashSessionKey, c)
+	if err != nil {
+		return errorPage(c, views.ErrorPage())
+	}
+
+	var payload deleteSubscriberPayload
+	if err := c.Bind(&payload); err != nil {
+		return errorPage(c, views.ErrorPage())
+	}
+
+	if err := models.DeleteSubscriber(
+		c.Request().Context(),
+		d.db.Pool,
+		payload.ID,
+	); err != nil {
+		session.AddFlash(contexts.FlashMessage{
+			ID:        uuid.New(),
+			Type:      contexts.FlashError,
+			CreatedAt: time.Now(),
+			Message:   "Could not delete subscriber.",
+		}, "flash_messages")
+
+		if err := session.Save(c.Request(), c.Response()); err != nil {
+			return errorPage(c, views.ErrorPage())
+		}
+
+		return redirectHx(
+			c.Response(),
+			strings.Replace(
+				paths.Get(
+					c.Request().Context(),
+					paths.DashboardSubscriberPage,
+				),
+				":id",
+				payload.ID.String(),
+				1,
+			),
+		)
+	}
+
+	session.AddFlash(contexts.FlashMessage{
+		ID:        uuid.New(),
+		Type:      contexts.FlashInfo,
+		CreatedAt: time.Now(),
+		Message:   "Subscriber deleted.",
+	}, "flash_messages")
+
+	if err := session.Save(c.Request(), c.Response()); err != nil {
+		return errorPage(c, views.ErrorPage())
+	}
+
+	return redirectHx(
+		c.Response(),
+		paths.Get(c.Request().Context(), paths.DashboardHomePage),
+	)
 }

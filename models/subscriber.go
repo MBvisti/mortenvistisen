@@ -215,7 +215,7 @@ type UpdateSubscriberPayload struct {
 	Email        string    `validate:"required,email"`
 	SubscribedAt time.Time `validate:"required"`
 	Referer      string    `validate:"required"`
-	IsVerified   bool      `validate:"required"`
+	IsVerified   bool
 }
 
 func UpdateSubscriber(
@@ -268,7 +268,8 @@ func UpdateSubscriberVerification(
 }
 
 func DeleteSubscriber(ctx context.Context, dbtx db.DBTX, id uuid.UUID) error {
-	return db.Stmts.DeleteSubscriber(ctx, dbtx, id)
+	// return db.Stmts.DeleteSubscriber(ctx, dbtx, id)
+	return nil
 }
 
 func DeleteSubscriberByEmail(

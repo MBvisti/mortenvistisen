@@ -9,15 +9,21 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
+	"github.com/MBvisti/mortenvistisen/views/components"
 	"github.com/MBvisti/mortenvistisen/views/layouts"
+	"github.com/MBvisti/mortenvistisen/views/paths"
+	"github.com/google/uuid"
+	"strings"
 	"time"
 )
 
 type ShowSubscriberProps struct {
+	ID           uuid.UUID
 	Email        string
 	SubscribedAt time.Time
 	Referere     string
 	Verified     bool
+	Csrf         string
 }
 
 func ShowSubscriber(props ShowSubscriberProps) templ.Component {
@@ -53,62 +59,96 @@ func ShowSubscriber(props ShowSubscriberProps) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"py-4\"><div class=\"row\"><h2 class=\"offset-4 col-4 align-self-center text-white mb-4\">Details</h2><div class=\"col-4 offset-4 mb-3 text-white\"><label for=\"subscriberEmail\" class=\"form-label text-muted\">Email address</label> <input disabled type=\"email\" value=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"py-4\"><form hx-put=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
-			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(props.Email)
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(strings.Replace(paths.Get(ctx, paths.DashboardSubscriberUpdate), ":id", props.ID.String(), 1))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/show_subscriber.templ`, Line: 22, Col: 53}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/show_subscriber.templ`, Line: 24, Col: 111}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" class=\"form-control text-white\" id=\"subscriberEmail\"></div><div class=\"col-4 offset-4 mb-3 text-white\"><label for=\"subscriberAt\" class=\"form-label text-muted\">Subscribed At</label> <input disabled type=\"text\" value=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" class=\"row\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = components.CsrfField(props.Csrf).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<h2 class=\"offset-4 col-4 align-self-center text-white mb-4\">Details</h2><div class=\"col-4 offset-4 mb-3 text-white\"><label for=\"subscriberEmail\" class=\"form-label text-muted\">Email address</label> <input disabled name=\"email\" type=\"email\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var4 string
-			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.SubscribedAt.String())
+			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.Email)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/show_subscriber.templ`, Line: 26, Col: 68}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/show_subscriber.templ`, Line: 29, Col: 66}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" class=\"form-control text-white\" id=\"subscriberAt\"></div><div class=\"col-4 offset-4 mb-3 text-white\"><label for=\"subscriberReferere\" class=\"form-label text-muted\">Referere</label> <input disabled type=\"email\" value=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" class=\"form-control text-white\" id=\"subscriberEmail\"></div><div class=\"col-4 offset-4 mb-3 text-white\"><label for=\"subscriberAt\" class=\"form-label text-muted\">Subscribed At</label> <input disabled name=\"subscribed_at\" type=\"text\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var5 string
-			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(props.Referere)
+			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(props.SubscribedAt.String())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/show_subscriber.templ`, Line: 30, Col: 56}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/show_subscriber.templ`, Line: 33, Col: 89}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" class=\"form-control text-white\" id=\"subscriberReferere\"></div><div class=\"my-4 d-flex justify-content-center col-4 offset-4 form-check form-switch\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" class=\"form-control text-white\" id=\"subscriberAt\"></div><div class=\"col-4 offset-4 mb-3 text-white\"><label for=\"subscriberReferere\" class=\"form-label text-muted\">Referere</label> <input disabled name=\"referere\" type=\"text\" value=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var6 string
+			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(props.Referere)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/show_subscriber.templ`, Line: 37, Col: 71}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" class=\"form-control text-white\" id=\"subscriberReferere\"></div><div class=\"my-4 d-flex justify-content-center col-4 offset-4 form-check form-switch\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if props.Verified {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<input checked=\"checked\" class=\"form-check-input\" type=\"checkbox\" id=\"flexSwitchCheckReverse\"> ")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<input name=\"is_verified\" checked=\"checked\" class=\"form-check-input\" type=\"checkbox\" id=\"flexSwitchCheckReverse\"> ")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
 			if !props.Verified {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<input class=\"form-check-input\" type=\"checkbox\" id=\"flexSwitchCheckReverse\"> ")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<input name=\"is_verified\" class=\"form-check-input\" type=\"checkbox\" id=\"flexSwitchCheckReverse\"> ")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<label class=\"form-check-label\" for=\"flexSwitchCheckReverse\">Validated</label></div><div class=\"col-4 offset-4 d-flex justify-content-around\"><button type=\"button\" class=\"btn bg-warning text-white\">Delete</button> <button type=\"button\" class=\"btn bg-primary text-white\">Update</button></div></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<label class=\"form-check-label\" for=\"flexSwitchCheckReverse\">Validated</label></div><div class=\"col-4 offset-4 d-flex justify-content-around\"><button hx-delete=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var7 string
+			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(strings.Replace(paths.Get(ctx, paths.DashboardSubscriberDelete), ":id", props.ID.String(), 1))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/show_subscriber.templ`, Line: 49, Col: 118}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" type=\"button\" class=\"btn bg-warning text-white\">Delete</button> <button type=\"submit\" class=\"btn bg-primary text-white\">Update</button></div></form></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

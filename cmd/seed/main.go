@@ -24,13 +24,16 @@ func main() {
 	}
 
 	seeder := seeds.NewSeeder(tx)
-	if _, err := seeder.PlantUser(
-		ctx,
-		seeds.WithUserEmail("admin@mbvlabs.com"),
-		seeds.WithUserIsAdmin(true),
-	); err != nil {
+	if _, err := seeder.PlantSubscribers(ctx, 10); err != nil {
 		panic(err)
 	}
+	// if _, err := seeder.PlantUser(
+	// 	ctx,
+	// 	seeds.WithUserEmail("admin@mbvlabs.com"),
+	// 	seeds.WithUserIsAdmin(true),
+	// ); err != nil {
+	// 	panic(err)
+	// }
 
 	if err := tx.Commit(ctx); err != nil {
 		panic(err)

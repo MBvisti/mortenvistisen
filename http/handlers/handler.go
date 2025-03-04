@@ -27,6 +27,8 @@ var AuthenticatedSessionName = fmt.Sprintf(
 	config.Cfg.Environment,
 )
 
+const FlashSessionKey = "flash_messages"
+
 const (
 	SessIsAuthName   = "is_authenticated"
 	SessUserID       = "user_id"
@@ -48,10 +50,19 @@ func setAppc(c echo.Context) context.Context {
 	appcKey := contexts.AppKey{}
 	appc := c.Get(appcKey.String())
 
-	return context.WithValue(
+	cOne := context.WithValue(
 		c.Request().Context(),
 		appcKey,
 		appc,
+	)
+
+	flashcKey := contexts.FlashKey{}
+	flashc := c.Get(flashcKey.String())
+
+	return context.WithValue(
+		cOne,
+		flashcKey,
+		flashc,
 	)
 }
 
@@ -66,6 +77,7 @@ func NewHandlers(
 	postManager posts.Manager,
 ) Handlers {
 	gob.Register(uuid.UUID{})
+	gob.Register(contexts.FlashMessage{})
 
 	api := newApi(db)
 	app := newApp(db, email, postManager)

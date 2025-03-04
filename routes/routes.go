@@ -69,6 +69,7 @@ func NewRoutes(
 		),
 	)
 	router.Use(http.RegisterAppContext)
+	router.Use(http.RegisterFlashMessagesContext)
 
 	slogechoCfg := slogecho.Config{
 		WithRequestID: false,

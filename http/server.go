@@ -35,7 +35,10 @@ func NewServer(
 			return http.HandlerFunc(
 				func(w http.ResponseWriter, r *http.Request) {
 					if strings.HasPrefix(r.URL.Path, "/api") ||
-						strings.HasPrefix(r.URL.Path, "/river") {
+						strings.HasPrefix(
+							r.URL.Path,
+							"/river",
+						) || strings.HasPrefix(r.URL.Path, "/dashboard") {
 
 						handler.ServeHTTP(w, r)
 						return

@@ -20,6 +20,12 @@ func dashboardRoutes(
 	dashboardRouter.GET("/subscribers/:id", func(c echo.Context) error {
 		return handlers.ShowSubscriber(c)
 	}).Name = paths.DashboardSubscriberPage.ToString()
+	dashboardRouter.PUT("/subscribers/:id", func(c echo.Context) error {
+		return handlers.UpdateSubscriber(c)
+	}).Name = paths.DashboardSubscriberUpdate.ToString()
+	dashboardRouter.DELETE("/subscribers/:id", func(c echo.Context) error {
+		return handlers.DeleteSubscriber(c)
+	}).Name = paths.DashboardSubscriberDelete.ToString()
 
 	dashboardRouter.GET("/newsletters", func(c echo.Context) error {
 		return handlers.Newsletters(c)
