@@ -1,5 +1,7 @@
 package fragments
 
+import "github.com/MBvisti/mortenvistisen/routes/paths"
+
 script resetCaptcha() {
   turnstile.implicitRender()
 }
@@ -14,7 +16,7 @@ templ NewsletterForm(failedCaptcha bool) {
 			<p class="font-bold">You didn't complete the captcha, please try again.</p>
 		</div>
 	}
-	<form class="bg-body border rounded d-flex flex-column p-4" hx-post="/subscribe" hx-target="this" hx-swap="outerHTML" method="POST" action="/subscribe">
+	<form class="bg-body border rounded d-flex flex-column p-4" hx-post={ paths.GP(ctx, paths.CreateSubscription, nil, nil) } hx-target="this" hx-swap="outerHTML" method="POST">
 		@loadCsrfToken()
 		<h2 class="d-flex">Stay up to date</h2>
 		<p class="mt-2">Get notified when I publish something new, and unsubscribe at any time.</p>

@@ -1,21 +1,21 @@
 package components
 
-import "github.com/MBvisti/mortenvistisen/views/paths"
+import "github.com/MBvisti/mortenvistisen/routes/paths"
 
 templ Nav() {
 	<header class="d-flex pt-4">
 		<ul class="mx-auto bg-body nav">
 			<li class="nav-item">
-				<a class="text-primary nav-link active" href={ paths.GetSafeURL(ctx, paths.HomePage) }>Home</a>
+				<a class="text-primary nav-link active" href={ paths.GSP(ctx, paths.Home, nil, nil) }>Home</a>
 			</li>
 			<li class="nav-item">
-				<a class="text-primary nav-link active" href={ paths.GetSafeURL(ctx, paths.NewslettersPage) }>Newsletters</a>
+				<a class="text-primary nav-link active" href={ paths.GSP(ctx, paths.Newsletters, nil, nil) }>Newsletters</a>
 			</li>
 			<li class="nav-item">
-				<a class="text-primary nav-link active" href={ paths.GetSafeURL(ctx, paths.ProjectsPage) }>Projects</a>
+				<a class="text-primary nav-link active" href={ paths.GSP(ctx, paths.Projects, nil, nil) }>Projects</a>
 			</li>
 			<li class="nav-item">
-				<a class="text-primary nav-link active" href={ paths.GetSafeURL(ctx, paths.AboutPage) }>About</a>
+				<a class="text-primary nav-link active" href={ paths.GSP(ctx, paths.About, nil, nil) }>About</a>
 			</li>
 			<li class="nav-item dropdown d-flex mx-2">
 				<button
@@ -112,13 +112,13 @@ templ Nav() {
 templ DashboardNav() {
 	<ul class="nav justify-content-center my-4">
 		<li class="nav-item">
-			<a class="text-primary nav-link active" href={ paths.GetSafeURL(ctx, paths.DashboardHomePage) }>Dashboard</a>
+			<a class="text-primary nav-link active" href={ paths.GSP(ctx, paths.Dashboard, nil, nil) }>Dashboard</a>
 		</li>
 		<li class="nav-item">
-			<a class="text-primary nav-link" href={ paths.GetSafeURL(ctx, paths.DashboardHomePage) }>Subscribers</a>
+			<a class="text-primary nav-link" href={ paths.GSP(ctx, paths.DashboardSubscribers, nil, nil) }>Subscribers</a>
 		</li>
 		<li class="nav-item">
-			<a class="text-primary nav-link" href={ paths.GetSafeURL(ctx, paths.DashboardNewsletter) }>Newsletters</a>
+			<a class="text-primary nav-link" href={ paths.GSP(ctx, paths.DashboardNewsletters, nil, nil) }>Newsletters</a>
 		</li>
 		<li class="nav-item dropdown d-flex">
 			<button

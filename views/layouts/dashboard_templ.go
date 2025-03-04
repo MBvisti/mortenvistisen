@@ -10,8 +10,8 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"context"
+	"github.com/MBvisti/mortenvistisen/routes/contexts"
 	"github.com/MBvisti/mortenvistisen/views/components"
-	"github.com/MBvisti/mortenvistisen/views/contexts"
 	"github.com/dromara/carbon/v2"
 )
 

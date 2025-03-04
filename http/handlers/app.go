@@ -271,7 +271,7 @@ func (a *App) NewslettersPage(c echo.Context) error {
 	return views.NewslettersPage(cachedComponent).Render(renderArgs(c))
 }
 
-func (a *App) SubscriptionEvent(c echo.Context) error {
+func (a *App) CreateSubscription(c echo.Context) error {
 	type subscriptionEventForm struct {
 		Email             string `form:"hero-input"`
 		Title             string `form:"article-title"`
@@ -493,7 +493,7 @@ func (a App) SubscriberEmailVerification(c echo.Context) error {
 	return views.SubscriberVerification(true).Render(renderArgs(c))
 }
 
-func (a App) UnsubscriptionEvent(c echo.Context) error {
+func (a App) DeleteSubscription(c echo.Context) error {
 	type unsubscribeRequest struct {
 		Token string `query:"token"`
 	}

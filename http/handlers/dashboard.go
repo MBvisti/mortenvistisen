@@ -6,16 +6,15 @@ import (
 	"log/slog"
 	"math"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/MBvisti/mortenvistisen/models"
 	"github.com/MBvisti/mortenvistisen/psql"
 	"github.com/MBvisti/mortenvistisen/queue/jobs"
+	"github.com/MBvisti/mortenvistisen/routes/contexts"
+	"github.com/MBvisti/mortenvistisen/routes/paths"
 	"github.com/MBvisti/mortenvistisen/views"
-	"github.com/MBvisti/mortenvistisen/views/contexts"
 	"github.com/MBvisti/mortenvistisen/views/dashboard"
-	"github.com/MBvisti/mortenvistisen/views/paths"
 	"github.com/dromara/carbon/v2"
 	"github.com/google/uuid"
 	"github.com/gorilla/csrf"
@@ -177,12 +176,12 @@ func (d Dashboard) Newsletters(c echo.Context) error {
 		Render(renderArgs(c))
 }
 
-func (d Dashboard) CreateNewsletters(c echo.Context) error {
+func (d Dashboard) NewNewsletters(c echo.Context) error {
 	return dashboard.NewsletterCreate(csrf.Token(c.Request()), false).
 		Render(renderArgs(c))
 }
 
-func (d Dashboard) StoreNewsletter(c echo.Context) error {
+func (d Dashboard) CreateNewsletter(c echo.Context) error {
 	type newsletterPayload struct {
 		Title   string `form:"title"`
 		Content string `form:"content"`
@@ -287,17 +286,13 @@ func (d Dashboard) UpdateSubscriber(c echo.Context) error {
 
 	var payload updateSubscriberPayload
 	if err := c.Bind(&payload); err != nil {
-		slog.Info("1")
 		return errorPage(c, views.ErrorPage())
 	}
 
 	verified := payload.IsVerified == "on"
 
-	slog.Info("2")
-
 	session, err := session.Get(FlashSessionKey, c)
 	if err != nil {
-		slog.Info("3")
 		return errorPage(c, views.ErrorPage())
 	}
 
@@ -307,7 +302,6 @@ func (d Dashboard) UpdateSubscriber(c echo.Context) error {
 		payload.ID,
 	)
 	if err != nil {
-		slog.Info("4")
 		session.AddFlash(contexts.FlashMessage{
 			ID:        uuid.New(),
 			Type:      contexts.FlashError,
@@ -316,20 +310,16 @@ func (d Dashboard) UpdateSubscriber(c echo.Context) error {
 		}, "flash_messages")
 
 		if err := session.Save(c.Request(), c.Response()); err != nil {
-			slog.Info("5")
 			return errorPage(c, views.ErrorPage())
 		}
 
 		return redirectHx(
 			c.Response(),
-			strings.Replace(
-				paths.Get(
-					c.Request().Context(),
-					paths.DashboardSubscriberPage,
-				),
-				":id",
-				payload.ID.String(),
-				1,
+			paths.GP(
+				c.Request().Context(),
+				paths.DashboardShowSubscriber,
+				paths.Params{"id": payload.ID.String()},
+				nil,
 			),
 		)
 	}
@@ -346,7 +336,6 @@ func (d Dashboard) UpdateSubscriber(c echo.Context) error {
 		},
 	)
 	if err != nil {
-		slog.Info("errrrooooooooooooooooorrrrrrrrrrrrr", "e", err)
 		session.AddFlash(contexts.FlashMessage{
 			ID:        uuid.New(),
 			Type:      contexts.FlashError,
@@ -355,20 +344,16 @@ func (d Dashboard) UpdateSubscriber(c echo.Context) error {
 		}, "flash_messages")
 
 		if err := session.Save(c.Request(), c.Response()); err != nil {
-			slog.Info("7")
 			return errorPage(c, views.ErrorPage())
 		}
 
 		return redirectHx(
 			c.Response(),
-			strings.Replace(
-				paths.Get(
-					c.Request().Context(),
-					paths.DashboardSubscriberPage,
-				),
-				":id",
-				updatedSubscriber.ID.String(),
-				1,
+			paths.GP(
+				c.Request().Context(),
+				paths.DashboardShowSubscriber,
+				paths.Params{"id": updatedSubscriber.ID.String()},
+				nil,
 			),
 		)
 	}
@@ -386,14 +371,11 @@ func (d Dashboard) UpdateSubscriber(c echo.Context) error {
 
 	return redirectHx(
 		c.Response(),
-		strings.Replace(
-			paths.Get(
-				c.Request().Context(),
-				paths.DashboardSubscriberPage,
-			),
-			":id",
-			updatedSubscriber.ID.String(),
-			1,
+		paths.GP(
+			c.Request().Context(),
+			paths.DashboardShowSubscriber,
+			paths.Params{"id": payload.ID.String()},
+			nil,
 		),
 	)
 }
@@ -431,14 +413,11 @@ func (d Dashboard) DeleteSubscriber(c echo.Context) error {
 
 		return redirectHx(
 			c.Response(),
-			strings.Replace(
-				paths.Get(
-					c.Request().Context(),
-					paths.DashboardSubscriberPage,
-				),
-				":id",
-				payload.ID.String(),
-				1,
+			paths.GP(
+				c.Request().Context(),
+				paths.DashboardShowSubscriber,
+				paths.Params{"id": payload.ID.String()},
+				nil,
 			),
 		)
 	}
@@ -456,6 +435,11 @@ func (d Dashboard) DeleteSubscriber(c echo.Context) error {
 
 	return redirectHx(
 		c.Response(),
-		paths.Get(c.Request().Context(), paths.DashboardHomePage),
+		paths.GP(
+			c.Request().Context(),
+			paths.Dashboard,
+			nil,
+			nil,
+		),
 	)
 }

@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/MBvisti/mortenvistisen/http/handlers"
-	"github.com/MBvisti/mortenvistisen/views/contexts"
+	"github.com/MBvisti/mortenvistisen/routes/contexts"
 	"github.com/google/uuid"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
@@ -40,7 +40,7 @@ func RegisterAppContext(
 		userEmail, _ := sess.Values[handlers.SessUserEmail].(string)
 		isAdmin, _ := sess.Values[handlers.SessIsAdmin].(bool)
 
-		routes := c.Echo().Routes()
+		// routes := c.Echo().Routes()
 		ac := &contexts.App{
 			Context:         c,
 			UserID:          userID,
@@ -48,12 +48,12 @@ func RegisterAppContext(
 			IsAuthenticated: isAuth,
 			IsAdmin:         isAdmin,
 			CurrentPath:     c.Request().URL.Path,
-			Routes:          make(map[string]string, len(routes)),
+			// Routes:          make(map[string]string, len(routes)),
 		}
 
-		for _, r := range routes {
-			ac.Routes[r.Name] = r.Path
-		}
+		// for _, r := range routes {
+		// 	ac.Routes[r.Name] = r.Path
+		// }
 
 		c.Set(contexts.AppKey{}.String(), ac)
 

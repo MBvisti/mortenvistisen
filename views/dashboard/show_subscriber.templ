@@ -3,8 +3,7 @@ package dashboard
 import (
 	"github.com/MBvisti/mortenvistisen/views/layouts"
 	"time"
-	"github.com/MBvisti/mortenvistisen/views/paths"
-	"strings"
+	"github.com/MBvisti/mortenvistisen/routes/paths"
 	"github.com/google/uuid"
 	"github.com/MBvisti/mortenvistisen/views/components"
 )
@@ -21,7 +20,7 @@ type ShowSubscriberProps struct {
 templ ShowSubscriber(props ShowSubscriberProps) {
 	@layouts.Dashboard() {
 		<div class="py-4">
-			<form hx-put={ strings.Replace(paths.Get(ctx, paths.DashboardSubscriberUpdate), ":id", props.ID.String(), 1) } class="row">
+			<form hx-put={ paths.GP(ctx, paths.DashboardUpdateSubscriber, paths.Params{"id": props.ID.String()}, nil) } class="row">
 				@components.CsrfField(props.Csrf)
 				<h2 class="offset-4 col-4 align-self-center text-white mb-4">Details</h2>
 				<div class="col-4 offset-4 mb-3 text-white">
@@ -46,7 +45,7 @@ templ ShowSubscriber(props ShowSubscriberProps) {
 					<label class="form-check-label" for="flexSwitchCheckReverse">Validated</label>
 				</div>
 				<div class="col-4 offset-4 d-flex justify-content-around">
-					<button hx-delete={ strings.Replace(paths.Get(ctx, paths.DashboardSubscriberDelete), ":id", props.ID.String(), 1) } type="button" class="btn bg-warning text-white">Delete</button>
+					<button hx-delete={ paths.GP(ctx, paths.DashboardDeleteSubscriber, paths.Params{"id": props.ID.String()}, nil) } type="button" class="btn bg-warning text-white">Delete</button>
 					<button type="submit" class="btn bg-primary text-white">Update</button>
 				</div>
 			</form>

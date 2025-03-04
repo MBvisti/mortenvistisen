@@ -2,7 +2,7 @@ package dashboard
 
 import (
 	"github.com/MBvisti/mortenvistisen/views/layouts"
-	"github.com/MBvisti/mortenvistisen/views/paths"
+	"github.com/MBvisti/mortenvistisen/routes/paths"
 )
 
 templ NewsletterCreate(csrfToken string, success bool) {
@@ -13,7 +13,7 @@ templ NewsletterCreate(csrfToken string, success bool) {
 					<p class="">Newsletter send!</p>
 				}
 				<h2 class="col-12 font-bold text-white">New Newsletter</h2>
-				<form class="col-12" method="post" action={ paths.GetSafeURL(ctx, paths.DashboardNewsletterStore) }>
+				<form class="col-12" method="post" action={ paths.GSP(ctx, paths.DashboardCreateNewsletter, nil, nil) }>
 					<input type="hidden" name="gorilla.csrf.Token" value={ csrfToken }/>
 					<input name="title" class="form-control rounded my-4" type="text" placeholder="Newsletter Title"/>
 					<input id="x" type="hidden" name="content"/>

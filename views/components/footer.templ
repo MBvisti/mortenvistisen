@@ -2,7 +2,7 @@ package components
 
 import (
 	"fmt"
-	"github.com/MBvisti/mortenvistisen/views/paths"
+	"github.com/MBvisti/mortenvistisen/routes/paths"
 	"time"
 )
 
@@ -10,7 +10,7 @@ templ Footer() {
 	<footer class="d-flex flex-column pb-5 mt-5">
 		<div class="mx-auto mb-2">
 			<a class="transition hover:text-teal-400" target="_blank" href="https://golangblogcourse.com">Golang Course</a>
-			<a class="transition hover:text-teal-400" href={ paths.GetSafeURL(ctx, paths.NewslettersPage) }>Newsletters</a>
+			<a class="transition hover:text-teal-400" href={ paths.GSP(ctx, paths.Newsletters, nil, nil) }>Newsletters</a>
 			<a class="transition hover:text-teal-400" target="_blank" href="https://mbvlabs.com">Consulting</a>
 		</div>
 		<p class="mx-auto">
