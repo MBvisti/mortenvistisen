@@ -113,7 +113,14 @@ func (r *Routes) SetupRoutes(
 	r.api()
 
 	for _, route := range r.router.Routes() {
-		ctx = context.WithValue(ctx, paths.Name(route.Name), route.Path)
+		for _, path := range paths.Paths {
+			if route.Name == path.String() {
+				ctx = context.WithValue(
+					ctx, paths.Name(route.Name),
+					route.Path,
+				)
+			}
+		}
 	}
 
 	return r.router, ctx

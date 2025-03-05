@@ -40,7 +40,6 @@ func RegisterAppContext(
 		userEmail, _ := sess.Values[handlers.SessUserEmail].(string)
 		isAdmin, _ := sess.Values[handlers.SessIsAdmin].(bool)
 
-		// routes := c.Echo().Routes()
 		ac := &contexts.App{
 			Context:         c,
 			UserID:          userID,
@@ -48,12 +47,7 @@ func RegisterAppContext(
 			IsAuthenticated: isAuth,
 			IsAdmin:         isAdmin,
 			CurrentPath:     c.Request().URL.Path,
-			// Routes:          make(map[string]string, len(routes)),
 		}
-
-		// for _, r := range routes {
-		// 	ac.Routes[r.Name] = r.Path
-		// }
 
 		c.Set(contexts.AppKey{}.String(), ac)
 
@@ -65,13 +59,11 @@ func RegisterFlashMessagesContext(
 	next echo.HandlerFunc,
 ) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		// Get the session
 		session, err := session.Get(handlers.FlashSessionKey, c)
 		if err != nil {
 			return err
 		}
 
-		// Retrieve flash messages from the session
 		flashMessages := []contexts.FlashMessage{}
 		if flashes := session.Flashes(handlers.FlashSessionKey); len(
 			flashes,
@@ -82,13 +74,11 @@ func RegisterFlashMessagesContext(
 				}
 			}
 
-			// Clear the flashes after retrieving
 			if err := session.Save(c.Request(), c.Response()); err != nil {
 				panic(err)
 			}
 		}
 
-		// Add flash messages to the context
 		c.Set(contexts.FlashKey{}.String(), flashMessages)
 
 		return next(c)
