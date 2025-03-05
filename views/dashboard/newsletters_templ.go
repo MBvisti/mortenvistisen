@@ -11,8 +11,9 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"fmt"
 	"github.com/MBvisti/mortenvistisen/models"
+	"github.com/MBvisti/mortenvistisen/routes/paths"
 	"github.com/MBvisti/mortenvistisen/views/layouts"
-	"github.com/MBvisti/mortenvistisen/views/paths"
+	"strconv"
 )
 
 type NewsletterPageData struct {
@@ -59,7 +60,7 @@ func Newsletters(data NewsletterPageData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var3 templ.SafeURL = paths.GetSafeURL(ctx, paths.DashboardNewsletterNew)
+			var templ_7745c5c3_Var3 templ.SafeURL = paths.GSP(ctx, paths.DashboardNewNewsletter, nil, nil)
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var3)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -86,7 +87,7 @@ func Newsletters(data NewsletterPageData) templ.Component {
 					var templ_7745c5c3_Var4 string
 					templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(newsletter.Title)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletters.templ`, Line: 45, Col: 32}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletters.templ`, Line: 46, Col: 32}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 					if templ_7745c5c3_Err != nil {
@@ -115,7 +116,7 @@ func Newsletters(data NewsletterPageData) templ.Component {
 					var templ_7745c5c3_Var5 string
 					templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(newsletter.CreatedAt.Format("Jan 02, 2006"))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletters.templ`, Line: 54, Col: 59}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletters.templ`, Line: 55, Col: 59}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 					if templ_7745c5c3_Err != nil {
@@ -125,7 +126,7 @@ func Newsletters(data NewsletterPageData) templ.Component {
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					var templ_7745c5c3_Var6 templ.SafeURL = templ.SafeURL(fmt.Sprintf("/dashboard/newsletters/%v", newsletter.ID))
+					var templ_7745c5c3_Var6 templ.SafeURL = paths.GSP(ctx, paths.DashboardShowNewsletter, paths.Params{"id": newsletter.ID.String()}, nil)
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var6)))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
@@ -135,9 +136,9 @@ func Newsletters(data NewsletterPageData) templ.Component {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var7 string
-					templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/dashboard/newsletters/%v", newsletter.ID))
+					templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(paths.GP(ctx, paths.DashboardDeleteNewsletter, paths.Params{"id": newsletter.ID.String()}, nil))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletters.templ`, Line: 65, Col: 80}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletters.templ`, Line: 66, Col: 120}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 					if templ_7745c5c3_Err != nil {
@@ -162,7 +163,7 @@ func Newsletters(data NewsletterPageData) templ.Component {
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						var templ_7745c5c3_Var8 templ.SafeURL = templ.SafeURL(fmt.Sprintf("/dashboard/newsletters?page=%d", data.CurrentPage-1))
+						var templ_7745c5c3_Var8 templ.SafeURL = paths.GSP(ctx, paths.DashboardNewsletters, nil, paths.QueryParams{"page": strconv.Itoa(data.CurrentPage - 1)})
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var8)))
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
@@ -195,7 +196,7 @@ func Newsletters(data NewsletterPageData) templ.Component {
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						var templ_7745c5c3_Var11 templ.SafeURL = templ.SafeURL(fmt.Sprintf("/dashboard/newsletters?page=%d", i))
+						var templ_7745c5c3_Var11 templ.SafeURL = paths.GSP(ctx, paths.DashboardNewsletters, nil, paths.QueryParams{"page": strconv.Itoa(i)})
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var11)))
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
@@ -207,7 +208,7 @@ func Newsletters(data NewsletterPageData) templ.Component {
 						var templ_7745c5c3_Var12 string
 						templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(i))
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletters.templ`, Line: 91, Col: 25}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletters.templ`, Line: 92, Col: 25}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 						if templ_7745c5c3_Err != nil {
@@ -223,7 +224,7 @@ func Newsletters(data NewsletterPageData) templ.Component {
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
-						var templ_7745c5c3_Var13 templ.SafeURL = templ.SafeURL(fmt.Sprintf("/dashboard/newsletters?page=%d", data.CurrentPage+1))
+						var templ_7745c5c3_Var13 templ.SafeURL = paths.GSP(ctx, paths.DashboardNewsletters, nil, paths.QueryParams{"page": strconv.Itoa(data.CurrentPage + 1)})
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var13)))
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
@@ -245,7 +246,7 @@ func Newsletters(data NewsletterPageData) templ.Component {
 				var templ_7745c5c3_Var14 string
 				templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%v", len(data.Newsletters)))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletters.templ`, Line: 106, Col: 62}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletters.templ`, Line: 107, Col: 62}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 				if templ_7745c5c3_Err != nil {
@@ -258,7 +259,7 @@ func Newsletters(data NewsletterPageData) templ.Component {
 				var templ_7745c5c3_Var15 string
 				templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%v", data.TotalItems))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletters.templ`, Line: 106, Col: 104}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletters.templ`, Line: 107, Col: 104}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 				if templ_7745c5c3_Err != nil {

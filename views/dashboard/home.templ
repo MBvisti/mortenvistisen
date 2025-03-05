@@ -3,9 +3,8 @@ package dashboard
 import (
 	"github.com/MBvisti/mortenvistisen/views/layouts"
 	"time"
-	"strings"
 	"github.com/dromara/carbon/v2"
-	"github.com/MBvisti/mortenvistisen/views/paths"
+	"github.com/MBvisti/mortenvistisen/routes/paths"
 	"github.com/google/uuid"
 )
 
@@ -121,7 +120,7 @@ templ Home(props HomeProps) {
 							</div>
 							<div class="list-group list-group-flush">
 								for _, recent := range props.RecentActivities {
-									<a class="" href={ templ.SafeURL(strings.Replace(paths.Get(ctx, paths.DashboardSubscriberPage), ":id", recent.ID.String(), 1)) }>
+									<a class="" href={ paths.GSP(ctx, paths.DashboardShowSubscriber, paths.Params{"id": recent.ID.String()}, nil) }>
 										<div class="list-group-item border-0 d-flex justify-content-between align-items-center px-0">
 											if recent.Verified {
 												<div class="avatar-sm bg-success bg-opacity-80 rounded-circle p-2 me-3">

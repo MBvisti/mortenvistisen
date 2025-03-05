@@ -28,7 +28,7 @@ func newRegistration(
 	return Registration{authSvc, db, email}
 }
 
-func (r *Registration) CreateUser(c echo.Context) error {
+func (r *Registration) NewUser(c echo.Context) error {
 	return authentication.RegisterPage(authentication.RegisterFormProps{
 		CsrfToken: csrf.Token(c.Request()),
 	}).Render(renderArgs(c))
@@ -41,7 +41,7 @@ type StoreUserPayload struct {
 	ConfirmPassword string `form:"confirm_password"`
 }
 
-func (r *Registration) StoreUser(c echo.Context) error {
+func (r *Registration) CreateUser(c echo.Context) error {
 	var payload StoreUserPayload
 	if err := c.Bind(&payload); err != nil {
 		return views.ErrorPage().Render(renderArgs(c))

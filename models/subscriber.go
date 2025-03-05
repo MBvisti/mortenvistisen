@@ -268,8 +268,7 @@ func UpdateSubscriberVerification(
 }
 
 func DeleteSubscriber(ctx context.Context, dbtx db.DBTX, id uuid.UUID) error {
-	// return db.Stmts.DeleteSubscriber(ctx, dbtx, id)
-	return nil
+	return db.Stmts.DeleteSubscriber(ctx, dbtx, id)
 }
 
 func DeleteSubscriberByEmail(

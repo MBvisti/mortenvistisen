@@ -9,11 +9,10 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
+	"github.com/MBvisti/mortenvistisen/routes/paths"
 	"github.com/MBvisti/mortenvistisen/views/components"
 	"github.com/MBvisti/mortenvistisen/views/layouts"
-	"github.com/MBvisti/mortenvistisen/views/paths"
 	"github.com/google/uuid"
-	"strings"
 	"time"
 )
 
@@ -64,9 +63,9 @@ func ShowSubscriber(props ShowSubscriberProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
-			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(strings.Replace(paths.Get(ctx, paths.DashboardSubscriberUpdate), ":id", props.ID.String(), 1))
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(paths.GP(ctx, paths.DashboardUpdateSubscriber, paths.Params{"id": props.ID.String()}, nil))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/show_subscriber.templ`, Line: 24, Col: 111}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/show_subscriber.templ`, Line: 23, Col: 108}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -87,7 +86,7 @@ func ShowSubscriber(props ShowSubscriberProps) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(props.Email)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/show_subscriber.templ`, Line: 29, Col: 66}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/show_subscriber.templ`, Line: 28, Col: 66}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -100,7 +99,7 @@ func ShowSubscriber(props ShowSubscriberProps) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(props.SubscribedAt.String())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/show_subscriber.templ`, Line: 33, Col: 89}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/show_subscriber.templ`, Line: 32, Col: 89}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -113,7 +112,7 @@ func ShowSubscriber(props ShowSubscriberProps) templ.Component {
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(props.Referere)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/show_subscriber.templ`, Line: 37, Col: 71}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/show_subscriber.templ`, Line: 36, Col: 71}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -140,9 +139,9 @@ func ShowSubscriber(props ShowSubscriberProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var7 string
-			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(strings.Replace(paths.Get(ctx, paths.DashboardSubscriberDelete), ":id", props.ID.String(), 1))
+			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(paths.GP(ctx, paths.DashboardDeleteSubscriber, paths.Params{"id": props.ID.String()}, nil))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/show_subscriber.templ`, Line: 49, Col: 118}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/show_subscriber.templ`, Line: 48, Col: 115}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {

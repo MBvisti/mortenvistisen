@@ -9,7 +9,7 @@ import (
 	"github.com/MBvisti/mortenvistisen/config"
 	"github.com/MBvisti/mortenvistisen/models"
 	"github.com/MBvisti/mortenvistisen/psql"
-	"github.com/MBvisti/mortenvistisen/views/paths"
+	"github.com/MBvisti/mortenvistisen/routes/paths"
 	"github.com/dromara/carbon/v2"
 	"github.com/labstack/echo/v4"
 )
@@ -70,10 +70,10 @@ func createSitemap(c echo.Context, db psql.Postgres) (Sitemap, error) {
 	routes := c.Echo().Routes()
 	for _, r := range routes {
 		switch r.Name {
-		case paths.AboutPage.ToString(),
-			paths.ArticlesPage.ToString(),
-			paths.ProjectsPage.ToString(),
-			paths.NewslettersPage.ToString():
+		case paths.About.String(),
+			paths.Articles.String(),
+			paths.Projects.String(),
+			paths.Newsletters.String():
 			urls = append(urls, URL{
 				Loc: fmt.Sprintf(
 					"%s%s",

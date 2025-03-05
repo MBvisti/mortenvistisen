@@ -11,7 +11,7 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"context"
 	"github.com/MBvisti/mortenvistisen/config"
-	"github.com/MBvisti/mortenvistisen/views/contexts"
+	"github.com/MBvisti/mortenvistisen/routes/contexts"
 	"os"
 )
 

@@ -8,6 +8,8 @@ package fragments
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
+import "github.com/MBvisti/mortenvistisen/routes/paths"
+
 func resetCaptcha() templ.ComponentScript {
 	return templ.ComponentScript{
 		Name: `__templ_resetCaptcha_812f`,
@@ -74,7 +76,20 @@ func NewsletterForm(failedCaptcha bool) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<form class=\"bg-body border rounded d-flex flex-column p-4\" hx-post=\"/subscribe\" hx-target=\"this\" hx-swap=\"outerHTML\" method=\"POST\" action=\"/subscribe\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<form class=\"bg-body border rounded d-flex flex-column p-4\" hx-post=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var3 string
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(paths.GP(ctx, paths.CreateSubscription, nil, nil))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/fragments/newsletter_subscription.templ`, Line: 19, Col: 120}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" hx-target=\"this\" hx-swap=\"outerHTML\" method=\"POST\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -82,7 +97,7 @@ func NewsletterForm(failedCaptcha bool) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<h2 class=\"d-flex\">Stay up to date</h2><p class=\"mt-2\">Get notified when I publish something new, and unsubscribe at any time.</p><div class=\"mt-2 d-flex\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<h2 class=\"d-flex\">Stay up to date</h2><p class=\"mt-2\">Get notified when I publish something new, and unsubscribe at any time.</p><div class=\"mt-2 d-flex\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -90,7 +105,7 @@ func NewsletterForm(failedCaptcha bool) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<input type=\"hidden\" name=\"article-title\" value=\"home page\"><div class=\"input-group\"><input type=\"email\" placeholder=\"Email address\" aria-label=\"Email address\" required name=\"hero-input\" class=\"form-control\"> <button data-umami-event=\"newsletter--home-page\" class=\"btn bg-primary\" type=\"submit\">Join</button></div></div><div class=\"mt-5 w-100 cf-turnstile\" data-sitekey=\"0x4AAAAAAAzdx8YPjdxurU_N\"></div></form>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<input type=\"hidden\" name=\"article-title\" value=\"home page\"><div class=\"input-group\"><input type=\"email\" placeholder=\"Email address\" aria-label=\"Email address\" required name=\"hero-input\" class=\"form-control\"> <button data-umami-event=\"newsletter--home-page\" class=\"btn bg-primary\" type=\"submit\">Join</button></div></div><div class=\"mt-5 w-100 cf-turnstile\" data-sitekey=\"0x4AAAAAAAzdx8YPjdxurU_N\"></div></form>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

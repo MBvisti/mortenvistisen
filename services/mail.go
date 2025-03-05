@@ -8,7 +8,7 @@ import (
 	"github.com/MBvisti/mortenvistisen/config"
 	"github.com/MBvisti/mortenvistisen/emails"
 	"github.com/MBvisti/mortenvistisen/models"
-	"github.com/MBvisti/mortenvistisen/views/paths"
+	"github.com/MBvisti/mortenvistisen/routes/paths"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -65,13 +65,13 @@ func (m *Mail) SendNewSubscriber(
 		ConfirmationLink: fmt.Sprintf(
 			"%s%s?token=%s",
 			config.Cfg.GetFullDomain(),
-			ctx.Value(paths.VerifySubEvent).(string),
+			paths.GP(ctx, paths.VerifyEmail, nil, nil),
 			url.QueryEscape(activationToken.Hash),
 		),
 		UnsubscribeLink: fmt.Sprintf(
 			"%s%s?token=%s?email=%s",
 			config.Cfg.GetFullDomain(),
-			ctx.Value(paths.UnsubscribeEvent).(string),
+			paths.GP(ctx, paths.UnSubscribe, nil, nil),
 			url.QueryEscape(unsubscribeToken.Hash),
 			url.QueryEscape(subscriberEmail),
 		),

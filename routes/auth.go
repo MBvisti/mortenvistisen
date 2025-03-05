@@ -2,7 +2,7 @@ package routes
 
 import (
 	"github.com/MBvisti/mortenvistisen/http/handlers"
-	"github.com/MBvisti/mortenvistisen/views/paths"
+	"github.com/MBvisti/mortenvistisen/routes/paths"
 	"github.com/labstack/echo/v4"
 )
 
@@ -12,22 +12,25 @@ func authRoutes(
 ) {
 	router.GET("/login", func(c echo.Context) error {
 		return handlers.CreateAuthenticatedSession(c)
-	}).Name = paths.LoginPage.ToString()
+	}).Name = paths.Login.String()
+
 	router.POST("/login", func(c echo.Context) error {
 		return handlers.StoreAuthenticatedSession(c)
-	}).Name = paths.Login.ToString()
+	}).Name = paths.StoreAuthenticatedSession.String()
 
 	router.GET("/forgot-password", func(c echo.Context) error {
 		return handlers.CreatePasswordReset(c)
-	}).Name = paths.ForgotPasswordPage.ToString()
+	}).Name = paths.ForgotPassword.String()
+
 	router.POST("/forgot-password", func(c echo.Context) error {
 		return handlers.StorePasswordReset(c)
-	}).Name = paths.ForgotPassword.ToString()
+	}).Name = paths.StoreForgotPassword.String()
 
 	router.GET("/reset-password", func(c echo.Context) error {
 		return handlers.CreateResetPassword(c)
-	}).Name = paths.ResetPasswordPage.ToString()
+	}).Name = paths.ResetPassword.String()
+
 	router.POST("/reset-password", func(c echo.Context) error {
 		return handlers.StoreResetPassword(c)
-	}).Name = paths.ResetPassword.ToString()
+	}).Name = paths.StoreResetPassword.String()
 }

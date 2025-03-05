@@ -12,8 +12,8 @@ import (
 	"github.com/MBvisti/mortenvistisen/emails"
 	"github.com/MBvisti/mortenvistisen/models"
 	"github.com/MBvisti/mortenvistisen/queue/jobs"
+	"github.com/MBvisti/mortenvistisen/routes/paths"
 	"github.com/MBvisti/mortenvistisen/services"
-	"github.com/MBvisti/mortenvistisen/views/paths"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/riverqueue/river"
@@ -98,7 +98,7 @@ func (w *ScheduleNewsletterReleaseWorker) Work(
 			UnsubscribeLink: fmt.Sprintf(
 				"%s%s?token=%s&email=%s",
 				config.Cfg.GetFullDomain(),
-				paths.Get(ctx, paths.UnsubscribeEvent),
+				paths.GP(ctx, paths.UnSubscribe, nil, nil),
 				url.QueryEscape(unsubTkn.Hash),
 				url.QueryEscape(subscriber.Email),
 			),
