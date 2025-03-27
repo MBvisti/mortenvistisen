@@ -11,7 +11,7 @@ import (
 templ NewsletterPage(data models.Newsletter) {
 	@layouts.Base(Head(ctx, WithTitle(fmt.Sprintf("%s | mortenvistisen", data.Title)))) {
 		<div class="row mt-5">
-			<div class="position-fixed top-10">
+			<div class="text-white rposition-fixed top-10">
 				<a href={ paths.GetSafeURL(ctx, paths.NewslettersPage) } aria-label="Go back" class="text-white" x-data="{ isHovered: false }" @mouseenter="isHovered = true" @mouseleave="isHovered = false">
 					<svg x-show="isHovered" x-transition xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left-short" viewBox="0 0 16 16">
 						<path fill-rule="evenodd" d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5"></path>
@@ -19,7 +19,7 @@ templ NewsletterPage(data models.Newsletter) {
 					Back
 				</a>
 			</div>
-			<div class="col col-md-7 mx-auto">
+			<div class="text-white col col-md-7 mx-auto">
 				<div class="text-center">
 					<h1 class="mb-4">{ data.Title }</h1>
 					<p class="mb-3">

@@ -41,7 +41,7 @@ func newsletterSignup() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"p-4 bg-body\"><h2 class=\"fw-semibold fs-3\">Monthly technical deep dives.</h2><p>I work with everything from backend dev, systems designs to devops and machine learning. I share my learnings twice a month in tutorial form, so you can pick up new concept faster and expand your technical tool belt. </p><p>There is always an option to opt-out of receiving these updates, included in each mail. One click of a button and you are out.</p><form class=\"w-full\" hx-post=\"/subscribe\" hx-target=\"this\" hx-swap=\"outerHTML\" method=\"POST\" action=\"/subscribe\"><div class=\"input-group\"><input type=\"hidden\" name=\"article-title\" value=\"newsletter-page\"> <input required type=\"email\" id=\"hero-input\" name=\"hero-input\" class=\"form-control\" placeholder=\"your-mail@here.com\"> <button data-umami-event=\"newsletter--newsletter-page\" type=\"submit\" class=\"btn bg-primary\">Receive Updates</button></div></form></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"text-white p-4 bg-body\"><h2 class=\"fw-semibold fs-3\">Monthly technical deep dives.</h2><p>I work with everything from backend dev, systems designs to devops and machine learning. I share my learnings twice a month in tutorial form, so you can pick up new concept faster and expand your technical tool belt. </p><p>There is always an option to opt-out of receiving these updates, included in each mail. One click of a button and you are out.</p><form class=\"w-full\" hx-post=\"/subscribe\" hx-target=\"this\" hx-swap=\"outerHTML\" method=\"POST\" action=\"/subscribe\"><div class=\"input-group\"><input type=\"hidden\" name=\"article-title\" value=\"newsletter-page\"> <input required type=\"email\" id=\"hero-input\" name=\"hero-input\" class=\"form-control\" placeholder=\"your-mail@here.com\"> <button data-umami-event=\"newsletter--newsletter-page\" type=\"submit\" class=\"btn bg-primary\">Receive Updates</button></div></form></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -70,7 +70,7 @@ func Newsletters(newletters []YearlyNewsletters) templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"row mt-5 flex-grow-1 d-flex flex-column\"><div class=\"text-center mb-5\"><h2 class=\"fw-semibold\">Newsletters</h2></div><div class=\"col col-md-8 mx-auto mb-3\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"row mt-5 flex-grow-1 d-flex flex-column\"><div class=\"text-white text-center mb-5\"><h2 class=\"fw-semibold\">Newsletters</h2></div><div class=\"text-white col col-md-8 mx-auto mb-3\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

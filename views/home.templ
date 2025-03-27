@@ -68,8 +68,8 @@ templ Home(posts []Post) {
 		<img class="mx-auto col-10 col-md-2 img-thumbnail" alt="Picture of Morten Vistisen (author of the blog)" src="https://media.mortenvistisen.com/mig_selv-removebg-preview.png"/>
 	</div>
 	<div class="row d-flex flex-column mt-4 text-center">
-		<h1 class="col col-md-7 mx-auto">software engineer, freelancer, bootstrapper.</h1>
-		<p class="col col-md-8 mx-auto fs-5">
+		<h1 class="text-white col col-md-7 mx-auto">software engineer, freelancer, bootstrapper.</h1>
+		<p class="text-white col col-md-8 mx-auto fs-5">
 			I'm Morten, software engineer from Denmark living in Spain. I write a lot of Golang while trying to build online businesses. I share my learnings here.
 		</p>
 	</div>
@@ -105,7 +105,7 @@ templ Home(posts []Post) {
 	</div>
 	<div class="row mt-5">
 		<div class="col col-md-8 mx-auto">
-			<h2 class="fw-bold fs-3 mb-2">Latest articles</h2>
+			<h2 class="text-white fw-bold fs-3 mb-2">Latest articles</h2>
 			for _, post := range posts {
 				@articleCard(post)
 			}

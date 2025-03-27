@@ -82,7 +82,7 @@ func NewsletterForm(failedCaptcha bool) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<h2 class=\"d-flex\">Stay up to date</h2><p class=\"mt-2\">Get notified when I publish something new, and unsubscribe at any time.</p><div class=\"mt-2 d-flex\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<h2 class=\"text-white d-flex\">Stay up to date</h2><p class=\"text-white mt-2\">Get notified when I publish something new, and unsubscribe at any time.</p><div class=\"mt-2 d-flex\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -113,8 +113,10 @@ templ LoginPage(data LoginPageProps) {
 			views.WithTitle("Login"),
 		),
 	) {
-		<main class="container mx-auto my-auto grid grid-cols-4 px-4 md:grid-cols-6 lg:grid-cols-12">
-			@LoginForm(data.CsrfToken, false, data.Errors)
+		<main class="container mx-auto min-h-screen flex items-center justify-center px-4">
+			<div class="w-full max-w-md">
+				@LoginForm(data.CsrfToken, false, data.Errors)
+			</div>
 		</main>
 	}
 }

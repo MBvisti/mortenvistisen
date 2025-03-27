@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"net/url"
@@ -28,15 +29,17 @@ const (
 	landingPageCacheKey     = "landingPage"
 	articlesPageCacheKey    = "articlesPage"
 	newslettersPageCacheKey = "newslettersPage"
+	articlePageCacheKey     = "articlePage-%s"
 )
 
 var cacheDuration = time.Hour * time.Duration(168)
 
 type App struct {
-	db          psql.Postgres
-	cache       otter.CacheWithVariableTTL[string, templ.Component]
-	email       services.Mail
-	postManager posts.Manager
+	db           psql.Postgres
+	cache        otter.CacheWithVariableTTL[string, templ.Component]
+	articleCache otter.Cache[string, map[string]templ.Component]
+	email        services.Mail
+	postManager  posts.Manager
 }
 
 func newApp(
@@ -54,7 +57,16 @@ func newApp(
 		panic(err)
 	}
 
-	return App{db, cache, email, postManager}
+	articleCache, err := otter.MustBuilder[string, map[string]templ.Component](
+		100,
+	).
+		WithTTL(cacheDuration).
+		Build()
+	if err != nil {
+		panic(err)
+	}
+
+	return App{db, cache, articleCache, email, postManager}
 }
 
 func (a *App) LandingPage(c echo.Context) error {
@@ -103,6 +115,19 @@ func (a *App) AboutPage(c echo.Context) error {
 
 func (a *App) ArticlePage(c echo.Context) error {
 	slug := c.Param("postSlug")
+	key := fmt.Sprintf(articlePageCacheKey, slug)
+
+	if value, ok := a.articleCache.Get(key); ok {
+		var header string
+		var comp templ.Component
+		for headerTitle, component := range value {
+			header = headerTitle
+			comp = component
+		}
+
+		return views.ArticlePage(header, comp).Render(renderArgs(c))
+	}
+
 	article, err := models.GetArticleBySlug(
 		c.Request().Context(),
 		slug,
@@ -131,14 +156,21 @@ func (a *App) ArticlePage(c echo.Context) error {
 		otherArticleLink[oa.Title] = oa.Slug
 	}
 
-	return views.ArticlePage(views.ArticlePageData{
+	cachedComponent := views.Article(views.ArticlePageData{
 		Slug:              article.Slug,
 		Title:             article.Title,
 		HeaderTitle:       article.HeaderTitle,
 		Content:           postContent,
 		ReleaseDate:       article.ReleaseDate,
 		OtherArticleLinks: otherArticleLink,
-	}).Render(renderArgs(c))
+	})
+	if ok := a.articleCache.Set(key, map[string]templ.Component{article.HeaderTitle: cachedComponent}); !ok {
+		return views.ArticlePage(article.HeaderTitle, cachedComponent).
+			Render(renderArgs(c))
+	}
+
+	return views.ArticlePage(article.HeaderTitle, cachedComponent).
+		Render(renderArgs(c))
 }
 
 func (a *App) ArticlesPage(c echo.Context) error {
