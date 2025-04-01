@@ -1,11 +1,11 @@
 module github.com/MBvisti/mortenvistisen
 
-go 1.23
+go 1.23.0
 
-toolchain go1.23.4
+toolchain go1.24.1
 
 require (
-	github.com/a-h/templ v0.3.833
+	github.com/a-h/templ v0.3.857
 	github.com/alecthomas/chroma/v2 v2.15.0
 	github.com/dromara/carbon/v2 v2.5.2
 	github.com/google/uuid v1.6.0
@@ -18,10 +18,10 @@ require (
 	github.com/vanng822/go-premailer v1.20.2
 	github.com/yuin/goldmark v1.4.15
 	github.com/yuin/goldmark-highlighting/v2 v2.0.0-20230729083705-37449abec8cc
-	golang.org/x/crypto v0.31.0
-	golang.org/x/net v0.33.0
-	golang.org/x/sync v0.10.0
-	golang.org/x/text v0.21.0
+	golang.org/x/crypto v0.36.0
+	golang.org/x/net v0.37.0
+	golang.org/x/sync v0.12.0
+	golang.org/x/text v0.23.0
 	riverqueue.com/riverui v0.6.0
 )
 
@@ -98,5 +98,5 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/pressly/goose/v3 v3.23.0
 	github.com/samber/slog-echo v1.14.4
-	golang.org/x/sys v0.28.0 // indirect
+	golang.org/x/sys v0.31.0 // indirect
 )

@@ -106,10 +106,6 @@ templ head(data headData) {
 		<meta property="og:description" content={ data.description }/>
 		<meta property="og:url" content={ data.slug }/>
 		<meta property="og:site_name" content={ data.title }/>
-		if os.Getenv("ENVIRONMENT") == config.PROD_ENVIRONMENT {
-			<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" defer></script>
-			<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback" defer></script>
-		}
 		if data.image != "" {
 			<meta property="og:image" content={ data.image }/>
 		}

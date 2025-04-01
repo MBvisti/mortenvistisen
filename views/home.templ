@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"github.com/dromara/carbon/v2"
 	"github.com/MBvisti/mortenvistisen/views/fragments"
+	"os"
+	"github.com/MBvisti/mortenvistisen/config"
 )
 
 templ CsrfToken(token string) {
@@ -161,7 +163,14 @@ templ Home(posts []Post) {
 //		</div>
 //	</div>
 templ HomePage(content templ.Component) {
-	@layouts.Base(Head(ctx, WithTitle("Home | mortenvistisen"))) {
+	@layouts.Base(Head(
+		ctx,
+		WithTitle("Home | mortenvistisen"),
+	)) {
 		@content
+		if os.Getenv("ENVIRONMENT") == config.PROD_ENVIRONMENT {
+			<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" defer></script>
+			<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback" defer></script>
+		}
 	}
 }
