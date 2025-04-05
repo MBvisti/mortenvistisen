@@ -1,8 +1,6 @@
 module github.com/MBvisti/mortenvistisen
 
-go 1.23.0
-
-toolchain go1.24.1
+go 1.24.1
 
 require (
 	github.com/a-h/templ v0.3.857
@@ -13,6 +11,7 @@ require (
 	github.com/gosimple/slug v1.15.0
 	github.com/jaytaylor/html2text v0.0.0-20180606194806-57d518f124b0
 	github.com/lmittmann/tint v1.0.1
+	github.com/mileusna/useragent v1.3.5
 	github.com/riverqueue/river v0.14.2
 	github.com/riverqueue/river/riverdriver/riverpgxv5 v0.14.2
 	github.com/vanng822/go-premailer v1.20.2
@@ -53,7 +52,6 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.2 // indirect
 	github.com/mfridman/interpolate v0.0.2 // indirect
-	github.com/mileusna/useragent v1.3.5 // indirect
 	github.com/olekukonko/tablewriter v0.0.0-20170122224234-a0225b3f23b5 // indirect
 	github.com/oschwald/maxminddb-golang v1.13.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
