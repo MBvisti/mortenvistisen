@@ -9,7 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ses"
 	jwEmail "github.com/jordan-wright/email"
-	"github.com/mbvlabs/grafto/config"
+	"github.com/mbvisti/mortenvistisen/config"
 )
 
 type EmailPayload struct {

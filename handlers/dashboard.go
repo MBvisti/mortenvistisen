@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/mbvlabs/grafto/views/dashboard"
+	"github.com/mbvisti/mortenvistisen/views/dashboard"
 )
 
 type Dashboard struct{}

@@ -8,7 +8,7 @@ package layouts
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "github.com/mbvlabs/grafto/router/routes"
+import "github.com/mbvisti/mortenvistisen/router/routes"
 import "time"
 import "fmt"
 

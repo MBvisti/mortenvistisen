@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/mbvlabs/grafto/models"
+	"github.com/mbvisti/mortenvistisen/models"
 )
 
 type tokenSeedData struct {

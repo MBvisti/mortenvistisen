@@ -9,8 +9,8 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"github.com/mbvlabs/grafto/router/contexts"
-	"github.com/mbvlabs/grafto/views/internal/components"
+	"github.com/mbvisti/mortenvistisen/router/contexts"
+	"github.com/mbvisti/mortenvistisen/views/internal/components"
 )
 
 func Base(headOpts ...components.HeadDataOption) templ.Component {
@@ -34,7 +34,7 @@ func Base(headOpts ...components.HeadDataOption) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\" data-theme=\"grafto\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\" data-theme=\"mortenvistisen\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

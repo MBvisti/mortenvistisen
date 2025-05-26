@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
-	"github.com/mbvlabs/grafto/config"
+	"github.com/mbvisti/mortenvistisen/config"
 	"golang.org/x/sync/errgroup"
 )
 

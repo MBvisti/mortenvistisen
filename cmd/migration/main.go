@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/stdlib"
-	"github.com/mbvlabs/grafto/config"
-	"github.com/mbvlabs/grafto/psql"
+	"github.com/mbvisti/mortenvistisen/config"
+	"github.com/mbvisti/mortenvistisen/psql"
 	"github.com/pressly/goose/v3"
 	"github.com/pressly/goose/v3/lock"
 )

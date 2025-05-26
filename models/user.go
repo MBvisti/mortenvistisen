@@ -8,8 +8,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/mbvlabs/grafto/config"
-	"github.com/mbvlabs/grafto/models/internal/db"
+	"github.com/mbvisti/mortenvistisen/config"
+	"github.com/mbvisti/mortenvistisen/models/internal/db"
 	"golang.org/x/crypto/argon2"
 )
 

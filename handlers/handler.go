@@ -13,11 +13,11 @@ import (
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/maypok86/otter"
-	"github.com/mbvlabs/grafto/handlers/middleware"
-	"github.com/mbvlabs/grafto/models"
-	"github.com/mbvlabs/grafto/psql"
-	"github.com/mbvlabs/grafto/router/contexts"
-	"github.com/mbvlabs/grafto/services"
+	"github.com/mbvisti/mortenvistisen/handlers/middleware"
+	"github.com/mbvisti/mortenvistisen/models"
+	"github.com/mbvisti/mortenvistisen/psql"
+	"github.com/mbvisti/mortenvistisen/router/contexts"
+	"github.com/mbvisti/mortenvistisen/services"
 )
 
 const (

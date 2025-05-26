@@ -10,9 +10,9 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/maypok86/otter"
-	"github.com/mbvlabs/grafto/assets"
-	"github.com/mbvlabs/grafto/config"
-	"github.com/mbvlabs/grafto/router/routes"
+	"github.com/mbvisti/mortenvistisen/assets"
+	"github.com/mbvisti/mortenvistisen/config"
+	"github.com/mbvisti/mortenvistisen/router/routes"
 	"gopkg.in/yaml.v2"
 )
 

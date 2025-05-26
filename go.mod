@@ -1,4 +1,4 @@
-module github.com/mbvlabs/grafto
+module github.com/mbvisti/mortenvistisen
 
 go 1.24.0
 

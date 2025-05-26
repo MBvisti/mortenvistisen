@@ -9,9 +9,9 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"github.com/mbvlabs/grafto/config"
-	"github.com/mbvlabs/grafto/router/contexts"
-	"github.com/mbvlabs/grafto/router/routes"
+	"github.com/mbvisti/mortenvistisen/config"
+	"github.com/mbvisti/mortenvistisen/router/contexts"
+	"github.com/mbvisti/mortenvistisen/router/routes"
 )
 
 func NavItem(name, pathName, path string, attrs templ.Attributes) templ.Component {

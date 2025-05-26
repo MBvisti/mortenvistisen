@@ -314,7 +314,7 @@ func head(data headData) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if os.Getenv("ENVIRONMENT") == config.PROD_ENVIRONMENT {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<script defer src=\"/script.js\" data-website-id=\"0210debc-df55-4c4c-a2f2-01c268a04911\"></script> <script defer data-domain=\"mortenvistisen.com\" src=\"https://analytics.mbvlabs.com/js/script.hash.tagged-events.js\"></script> <script>window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }</script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<script defer src=\"/script.js\" data-website-id=\"0210debc-df55-4c4c-a2f2-01c268a04911\"></script> <script defer data-domain=\"mortenvistisen.com\" src=\"https://analytics.mbvisti.com/js/script.hash.tagged-events.js\"></script> <script>window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }</script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

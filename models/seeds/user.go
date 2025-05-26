@@ -6,8 +6,8 @@ import (
 	"github.com/go-faker/faker/v4"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/mbvlabs/grafto/models"
-	"github.com/mbvlabs/grafto/models/internal/db"
+	"github.com/mbvisti/mortenvistisen/models"
+	"github.com/mbvisti/mortenvistisen/models/internal/db"
 	"golang.org/x/net/context"
 )
 

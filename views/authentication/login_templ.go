@@ -10,10 +10,10 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
-	"github.com/mbvlabs/grafto/router/routes"
-	"github.com/mbvlabs/grafto/views"
-	"github.com/mbvlabs/grafto/views/internal/components"
-	"github.com/mbvlabs/grafto/views/internal/layouts"
+	"github.com/mbvisti/mortenvistisen/router/routes"
+	"github.com/mbvisti/mortenvistisen/views"
+	"github.com/mbvisti/mortenvistisen/views/internal/components"
+	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
 )
 
 var (

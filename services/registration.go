@@ -5,10 +5,10 @@ import (
 	"errors"
 	"time"
 
-	"github.com/mbvlabs/grafto/clients"
-	"github.com/mbvlabs/grafto/emails"
-	"github.com/mbvlabs/grafto/models"
-	"github.com/mbvlabs/grafto/psql"
+	"github.com/mbvisti/mortenvistisen/clients"
+	"github.com/mbvisti/mortenvistisen/emails"
+	"github.com/mbvisti/mortenvistisen/models"
+	"github.com/mbvisti/mortenvistisen/psql"
 )
 
 type EmailSender interface {

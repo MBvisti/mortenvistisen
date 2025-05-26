@@ -44,7 +44,7 @@ func Footer() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\">Newsletters</a> <a class=\"transition hover:text-teal-400\" target=\"_blank\" href=\"https://mbvlabs.com\">Consulting</a></div><p class=\"mx-auto\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\">Newsletters</a> <a class=\"transition hover:text-teal-400\" target=\"_blank\" href=\"https://mbvisti.com\">Consulting</a></div><p class=\"mx-auto\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -57,7 +57,7 @@ func Footer() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, " <a href=\"https://mbvlabs.com\">mbvlabs</a>. All rights reserved.</p></footer>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, " <a href=\"https://mbvisti.com\">mbvisti</a>. All rights reserved.</p></footer>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

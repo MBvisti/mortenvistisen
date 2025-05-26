@@ -5,11 +5,11 @@ import (
 
 	"github.com/gorilla/csrf"
 	"github.com/labstack/echo/v4"
-	"github.com/mbvlabs/grafto/psql"
-	"github.com/mbvlabs/grafto/services"
-	"github.com/mbvlabs/grafto/views"
-	"github.com/mbvlabs/grafto/views/authentication"
-	"github.com/mbvlabs/grafto/views/fragments"
+	"github.com/mbvisti/mortenvistisen/psql"
+	"github.com/mbvisti/mortenvistisen/services"
+	"github.com/mbvisti/mortenvistisen/views"
+	"github.com/mbvisti/mortenvistisen/views/authentication"
+	"github.com/mbvisti/mortenvistisen/views/fragments"
 )
 
 type Registration struct {

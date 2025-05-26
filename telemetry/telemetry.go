@@ -6,7 +6,7 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/mbvlabs/grafto/config"
+	"github.com/mbvisti/mortenvistisen/config"
 	"go.opentelemetry.io/otel"
 	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"

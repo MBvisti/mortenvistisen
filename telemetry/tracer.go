@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/mbvlabs/grafto/config"
+	"github.com/mbvisti/mortenvistisen/config"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"

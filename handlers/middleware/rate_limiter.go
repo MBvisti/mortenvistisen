@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/mbvlabs/grafto/views/authentication"
+	"github.com/mbvisti/mortenvistisen/views/authentication"
 )
 
 func (m MW) LoginRateLimiter() echo.MiddlewareFunc {

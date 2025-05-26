@@ -26,7 +26,7 @@ func main() {
 	seeder := seeds.NewSeeder(tx)
 	if _, err := seeder.PlantUser(
 		ctx,
-		seeds.WithUserEmail("admin@mbvlabs.com"),
+		seeds.WithUserEmail("admin@mbvisti.com"),
 		seeds.WithUserIsAdmin(true),
 	); err != nil {
 		panic(err)

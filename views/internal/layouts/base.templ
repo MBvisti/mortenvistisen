@@ -1,13 +1,13 @@
 package layouts
 
 import (
-	"github.com/mbvlabs/grafto/views/internal/components"
-	"github.com/mbvlabs/grafto/router/contexts"
+	"github.com/mbvisti/mortenvistisen/views/internal/components"
+	"github.com/mbvisti/mortenvistisen/router/contexts"
 )
 
 templ Base(headOpts ...components.HeadDataOption) {
 	<!DOCTYPE html>
-	<html lang="en" data-theme="grafto">
+	<html lang="en" data-theme="mortenvistisen">
 		@components.SetupHead(ctx, headOpts...)
 		<body>
 			@components.Nav()

@@ -20,8 +20,8 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5/stdlib"
-	"github.com/mbvlabs/grafto/config"
-	"github.com/mbvlabs/grafto/psql/queue"
+	"github.com/mbvisti/mortenvistisen/config"
+	"github.com/mbvisti/mortenvistisen/psql/queue"
 	"github.com/pressly/goose/v3"
 	"github.com/pressly/goose/v3/lock"
 	"github.com/riverqueue/river"
@@ -149,9 +149,9 @@ func NewPostgresTest(
 		panic("don't NewPostgresTest in production")
 	}
 
-	user := "grafto"
-	password := "grafto"
-	database := fmt.Sprintf("grafto_test_%s", faker.DomainName())
+	user := "mortenvistisen"
+	password := "mortenvistisen"
+	database := fmt.Sprintf("mortenvistisen_test_%s", faker.DomainName())
 
 	port, err := getFreePort()
 	if err != nil {

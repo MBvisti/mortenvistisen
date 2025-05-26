@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/maypok86/otter"
-	"github.com/mbvlabs/grafto/config"
-	"github.com/mbvlabs/grafto/telemetry"
+	"github.com/mbvisti/mortenvistisen/config"
+	"github.com/mbvisti/mortenvistisen/telemetry"
 	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/trace"
 )

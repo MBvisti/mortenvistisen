@@ -8,8 +8,8 @@ package views
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "github.com/mbvlabs/grafto/views/internal/layouts"
-import "github.com/mbvlabs/grafto/router/routes"
+import "github.com/mbvisti/mortenvistisen/views/internal/layouts"
+import "github.com/mbvisti/mortenvistisen/router/routes"
 
 func AboutPage() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {

@@ -15,10 +15,10 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/mbvlabs/grafto/clients"
-	"github.com/mbvlabs/grafto/models"
-	"github.com/mbvlabs/grafto/models/seeds"
-	"github.com/mbvlabs/grafto/router/routes"
+	"github.com/mbvisti/mortenvistisen/clients"
+	"github.com/mbvisti/mortenvistisen/models"
+	"github.com/mbvisti/mortenvistisen/models/seeds"
+	"github.com/mbvisti/mortenvistisen/router/routes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )

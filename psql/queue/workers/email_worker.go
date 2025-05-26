@@ -5,9 +5,9 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/mbvlabs/grafto/clients"
-	"github.com/mbvlabs/grafto/config"
-	"github.com/mbvlabs/grafto/psql/queue/jobs"
+	"github.com/mbvisti/mortenvistisen/clients"
+	"github.com/mbvisti/mortenvistisen/config"
+	"github.com/mbvisti/mortenvistisen/psql/queue/jobs"
 	"github.com/riverqueue/river"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"

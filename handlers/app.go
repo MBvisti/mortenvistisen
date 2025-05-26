@@ -6,9 +6,9 @@ import (
 	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
 	"github.com/maypok86/otter"
-	"github.com/mbvlabs/grafto/psql"
-	"github.com/mbvlabs/grafto/router/routes"
-	"github.com/mbvlabs/grafto/views"
+	"github.com/mbvisti/mortenvistisen/psql"
+	"github.com/mbvisti/mortenvistisen/router/routes"
+	"github.com/mbvisti/mortenvistisen/views"
 )
 
 type App struct {

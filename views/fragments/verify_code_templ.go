@@ -9,8 +9,8 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"github.com/mbvlabs/grafto/router/routes"
-	"github.com/mbvlabs/grafto/views/internal/components"
+	"github.com/mbvisti/mortenvistisen/router/routes"
+	"github.com/mbvisti/mortenvistisen/views/internal/components"
 )
 
 type VerifyCodeProps struct {

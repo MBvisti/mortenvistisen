@@ -5,9 +5,9 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/mbvlabs/grafto/config"
-	"github.com/mbvlabs/grafto/models/seeds"
-	"github.com/mbvlabs/grafto/psql"
+	"github.com/mbvisti/mortenvistisen/config"
+	"github.com/mbvisti/mortenvistisen/models/seeds"
+	"github.com/mbvisti/mortenvistisen/psql"
 )
 
 func main() {

@@ -8,7 +8,7 @@ package views
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "github.com/mbvlabs/grafto/views/internal/layouts"
+import "github.com/mbvisti/mortenvistisen/views/internal/layouts"
 
 type errorPageData struct {
 	link      string

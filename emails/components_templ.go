@@ -260,7 +260,7 @@ func footerWithUnsubscribe(unsubscribeLink string) templ.Component {
 			templ_7745c5c3_Var12 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<div class=\"footer\" style=\"clear: both; padding-top: 24px; padding-bottom: 24px; text-align: center; width: 100%;\"><table role=\"presentation\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%;\" width=\"100%\"><tr><td class=\"content-block\" style=\"font-family: Helvetica, sans-serif; vertical-align: top; color: #9a9ea6; font-size: 16px; text-align: center;\" valign=\"top\" align=\"center\"><span class=\"apple-link\" style=\"color: #9a9ea6; font-size: 16px; text-align: center;\">mbvlabs inc</span> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<div class=\"footer\" style=\"clear: both; padding-top: 24px; padding-bottom: 24px; text-align: center; width: 100%;\"><table role=\"presentation\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%;\" width=\"100%\"><tr><td class=\"content-block\" style=\"font-family: Helvetica, sans-serif; vertical-align: top; color: #9a9ea6; font-size: 16px; text-align: center;\" valign=\"top\" align=\"center\"><span class=\"apple-link\" style=\"color: #9a9ea6; font-size: 16px; text-align: center;\">mbvisti inc</span> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -279,7 +279,7 @@ func footerWithUnsubscribe(unsubscribeLink string) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</td></tr><tr><td class=\"content-block powered-by\" style=\"font-family: Helvetica, sans-serif; vertical-align: top; color: #9a9ea6; font-size: 16px; text-align: center;\" valign=\"top\" align=\"center\">Powered by <a href=\"https://github.com/mbvlabs/grafto\" style=\"color: #9a9ea6; font-size: 16px; text-align: center; text-decoration: none;\">Grafto</a></td></tr></table></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</td></tr><tr><td class=\"content-block powered-by\" style=\"font-family: Helvetica, sans-serif; vertical-align: top; color: #9a9ea6; font-size: 16px; text-align: center;\" valign=\"top\" align=\"center\">Powered by <a href=\"https://github.com/mbvisti/mortenvistisen\" style=\"color: #9a9ea6; font-size: 16px; text-align: center; text-decoration: none;\">Grafto</a></td></tr></table></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -308,7 +308,7 @@ func footer() templ.Component {
 			templ_7745c5c3_Var14 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<div class=\"footer\" style=\"clear: both; padding-top: 24px; padding-bottom: 24px; text-align: center; width: 100%;\"><table role=\"presentation\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%;\" width=\"100%\"><tr><td class=\"content-block\" style=\"font-family: Helvetica, sans-serif; vertical-align: top; color: #9a9ea6; font-size: 16px; text-align: center;\" valign=\"top\" align=\"center\"><span class=\"apple-link\" style=\"color: #9a9ea6; font-size: 16px; text-align: center;\">mbvlabs inc</span></td></tr><tr><td class=\"content-block powered-by\" style=\"font-family: Helvetica, sans-serif; vertical-align: top; color: #9a9ea6; font-size: 16px; text-align: center;\" valign=\"top\" align=\"center\">Powered by <a href=\"https://github.com/mbvlabs/grafto\" style=\"color: #9a9ea6; font-size: 16px; text-align: center; text-decoration: none;\">Grafto</a></td></tr></table></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<div class=\"footer\" style=\"clear: both; padding-top: 24px; padding-bottom: 24px; text-align: center; width: 100%;\"><table role=\"presentation\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%;\" width=\"100%\"><tr><td class=\"content-block\" style=\"font-family: Helvetica, sans-serif; vertical-align: top; color: #9a9ea6; font-size: 16px; text-align: center;\" valign=\"top\" align=\"center\"><span class=\"apple-link\" style=\"color: #9a9ea6; font-size: 16px; text-align: center;\">mbvisti inc</span></td></tr><tr><td class=\"content-block powered-by\" style=\"font-family: Helvetica, sans-serif; vertical-align: top; color: #9a9ea6; font-size: 16px; text-align: center;\" valign=\"top\" align=\"center\">Powered by <a href=\"https://github.com/mbvisti/mortenvistisen\" style=\"color: #9a9ea6; font-size: 16px; text-align: center; text-decoration: none;\">Grafto</a></td></tr></table></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -10,11 +10,11 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/mbvlabs/grafto/clients"
-	"github.com/mbvlabs/grafto/config"
-	"github.com/mbvlabs/grafto/psql"
-	"github.com/mbvlabs/grafto/psql/queue"
-	"github.com/mbvlabs/grafto/psql/queue/workers"
+	"github.com/mbvisti/mortenvistisen/clients"
+	"github.com/mbvisti/mortenvistisen/config"
+	"github.com/mbvisti/mortenvistisen/psql"
+	"github.com/mbvisti/mortenvistisen/psql/queue"
+	"github.com/mbvisti/mortenvistisen/psql/queue/workers"
 	"github.com/riverqueue/river"
 )
 

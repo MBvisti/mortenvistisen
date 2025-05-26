@@ -3,8 +3,8 @@ package views
 import (
 	"fmt"
 
-	"github.com/mbvlabs/grafto/config"
-	"github.com/mbvlabs/grafto/views/internal/components"
+	"github.com/mbvisti/mortenvistisen/config"
+	"github.com/mbvisti/mortenvistisen/views/internal/components"
 )
 
 func WithTitle(title string) components.HeadDataOption {

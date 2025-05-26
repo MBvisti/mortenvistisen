@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mbvlabs/grafto/clients"
-	"github.com/mbvlabs/grafto/config"
-	"github.com/mbvlabs/grafto/emails"
-	"github.com/mbvlabs/grafto/models"
-	"github.com/mbvlabs/grafto/psql"
-	"github.com/mbvlabs/grafto/router/routes"
+	"github.com/mbvisti/mortenvistisen/clients"
+	"github.com/mbvisti/mortenvistisen/config"
+	"github.com/mbvisti/mortenvistisen/emails"
+	"github.com/mbvisti/mortenvistisen/models"
+	"github.com/mbvisti/mortenvistisen/psql"
+	"github.com/mbvisti/mortenvistisen/router/routes"
 )
 
 var (

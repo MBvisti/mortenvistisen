@@ -14,7 +14,7 @@ import (
 
 func (m MW) Logging() echo.MiddlewareFunc {
 	otelMiddleware := otelecho.Middleware(
-		"grafto",
+		"mortenvistisen",
 		otelecho.WithTracerProvider(m.tp),
 	)
 

@@ -8,8 +8,8 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/mbvlabs/grafto/config"
-	"github.com/mbvlabs/grafto/emails"
+	"github.com/mbvisti/mortenvistisen/config"
+	"github.com/mbvisti/mortenvistisen/emails"
 )
 
 func main() {

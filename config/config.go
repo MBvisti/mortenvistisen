@@ -64,7 +64,7 @@ func newTestConfig() Config {
 			DefaultSenderSignature: "test@testing.com",
 		},
 		Telemetry: Telemetry{
-			ServiceName:  "grafto-test",
+			ServiceName:  "mortenvistisen-test",
 			OtlpEndpoint: "",
 		},
 		AwsAccessKeyID:     "",

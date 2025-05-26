@@ -1,7 +1,7 @@
 package seeds
 
 import (
-	"github.com/mbvlabs/grafto/models/internal/db"
+	"github.com/mbvisti/mortenvistisen/models/internal/db"
 )
 
 type Seeder struct {
