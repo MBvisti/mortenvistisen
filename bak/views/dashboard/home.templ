@@ -1,0 +1,152 @@
+package dashboard
+
+import (
+	"github.com/MBvisti/mortenvistisen/views/layouts"
+	"time"
+	"strings"
+	"github.com/dromara/carbon/v2"
+	"github.com/MBvisti/mortenvistisen/views/paths"
+	"github.com/google/uuid"
+)
+
+type RecentActivity struct {
+	ID       uuid.UUID
+	When     time.Time
+	Email    string
+	Verified bool
+}
+
+type HourlyStat struct {
+	Hour   string `json:"hour"`
+	Visits int64  `json:"visits"`
+	Views  int64  `json:"views"`
+}
+
+type HomeProps struct {
+	DailyVisits         string
+	DailyViews          string
+	VerifiedSubscribers string
+	RecentActivities    []RecentActivity
+	HourlyStats         string
+}
+
+script loadStatsGraph() {
+	const hourlyStats =	JSON.parse(JSON.parse(document.getElementById('hourlyAnalytics').dataset.stats));
+
+	const hourlyData = {
+		labels: hourlyStats.map(stat => stat.hour),
+		datasets: [
+			{
+				label: 'Visits',
+				data: hourlyStats.map(stat => stat.visits),
+				backgroundColor: 'rgb(125, 158, 166)',
+			},
+			{
+				label: 'Views',
+				data: hourlyStats.map(stat => stat.views),
+				backgroundColor: 'rgb(157, 128, 163)',
+			}
+		]
+	};
+
+	new Chart(document.getElementById('hourlyAnalytics'), {
+		type: 'bar',
+		data: hourlyData,
+		options: {
+			responsive: true,
+			scales: {
+				x: {
+        			stacked: true,
+      			},
+      			y: {
+      			  stacked: true
+      			}
+			},
+			plugins: {
+				legend: {
+					position: 'bottom'
+				},
+				title: {
+					display: false
+				}
+			}
+		}
+	});
+}
+
+templ Home(props HomeProps) {
+	@layouts.Dashboard() {
+		<div class="py-4 ">
+			<!-- Statistics Cards -->
+			<div class="row text-center justify-content-center">
+				<!-- Users Card -->
+				<div class="col-3">
+					<div class="card stat-card bg-primary-subtle border-0 shadow-sm">
+						<div class="card-body">
+							<h6 class="text-white fw-semibold text-muted mb-2">Daily Visits</h6>
+							<h4 class="text-white mb-3">{ props.DailyVisits }</h4>
+						</div>
+					</div>
+				</div>
+				<!-- Orders Card -->
+				<div class="col-3">
+					<div class="card stat-card bg-primary-subtle border-0 shadow-sm">
+						<div class="card-body">
+							<h6 class="text-white fw-semibold text-muted mb-2">Daily Views</h6>
+							<h4 class="text-white mb-3">{ props.DailyViews }</h4>
+						</div>
+					</div>
+				</div>
+				<!-- Revenue Card -->
+				<div class="col-3">
+					<div class="card stat-card bg-primary-subtle border-0 shadow-sm">
+						<div class="card-body">
+							<h6 class="text-white fw-semibold text-muted mb-2">Verified Subscribers</h6>
+							<h4 class="text-white mb-3">{ props.VerifiedSubscribers }</h4>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- Hourly Analytics Chart -->
+			<div class="row mt-5">
+				<div class="d-flex flex-column justify-content-center col-md-7 col-sm-12 border rounded p-3 mb-4 mb-md-0">
+					<h5 class="card-title text-white mb-4">Last 24 Hours Analytics</h5>
+					<canvas class="flex-grow-1" id="hourlyAnalytics" data-stats={ templ.JSONString(props.HourlyStats) }></canvas>
+				</div>
+				<div class="col-md-4 col-sm-12 offset-md-1 d-flex p-0">
+					<div class="flex-grow-1 card border-0 shadow-sm">
+						<div class="card-body border rounded">
+							<div class="d-flex justify-content-between align-items-center mb-4">
+								<h5 class="card-title mb-0 text-white">Recent Activity</h5>
+							</div>
+							<div class="list-group list-group-flush">
+								for _, recent := range props.RecentActivities {
+									<a class="" href={ templ.SafeURL(strings.Replace(paths.Get(ctx, paths.DashboardSubscriberPage), ":id", recent.ID.String(), 1)) }>
+										<div class="list-group-item border-0 d-flex justify-content-between align-items-center px-0">
+											if recent.Verified {
+												<div class="avatar-sm bg-success bg-opacity-80 rounded-circle p-2 me-3">
+													<i class="fas fa-shopping-cart text-success"></i>
+												</div>
+											}
+											if !recent.Verified {
+												<div class="avatar-sm bg-secondary bg-opacity-80 rounded-circle p-2 me-3">
+													<i class="fas fa-shopping-cart text-secondary"></i>
+												</div>
+											}
+											<div class="flex-grow-1">
+												<p class="text-white small mb-0">{ recent.Email }</p>
+											</div>
+											<small class="text-muted">{ carbon.CreateFromStdTime(recent.When).DiffInString() }</small>
+										</div>
+									</a>
+								}
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+		@loadStatsGraph()
+	}
+}

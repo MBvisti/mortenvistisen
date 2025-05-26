@@ -1,0 +1,111 @@
+package dashboard
+
+import (
+	"fmt"
+	"github.com/MBvisti/mortenvistisen/models"
+	"github.com/MBvisti/mortenvistisen/views/layouts"
+	"github.com/MBvisti/mortenvistisen/views/paths"
+)
+
+type NewsletterPageData struct {
+	Newsletters []models.Newsletter
+	CurrentPage int
+	TotalPages  int
+	TotalItems  int64
+}
+
+templ Newsletters(data NewsletterPageData) {
+	@layouts.Dashboard() {
+		<div class="container py-4">
+			<div class="d-flex justify-content-between align-items-center mb-4">
+				<h2 class="h4 mb-0">Newsletters</h2>
+				<a href={ paths.GetSafeURL(ctx, paths.DashboardNewsletterNew) } class="btn btn-primary">
+					<i class="fas fa-plus me-2"></i>Create Newsletter
+				</a>
+			</div>
+			if len(data.Newsletters) == 0 {
+				<div class="alert alert-info" role="alert">
+					No newsletters found. Create your first newsletter to get started!
+				</div>
+			} else {
+				<div class="card border-0 shadow-sm">
+					<div class="table-responsive">
+						<table class="table table-hover mb-0">
+							<thead>
+								<tr>
+									<th>Title</th>
+									<th>Status</th>
+									<th>Created</th>
+									<th>Actions</th>
+								</tr>
+							</thead>
+							<tbody>
+								for _, newsletter := range data.Newsletters {
+									<tr>
+										<td>{ newsletter.Title }</td>
+										<td>
+											if !newsletter.ReleasedAt.IsZero() {
+												<span class="badge bg-success">Published</span>
+											}
+											if newsletter.ReleasedAt.IsZero() {
+												<span class="badge bg-warning">Draft</span>
+											}
+										</td>
+										<td>{ newsletter.CreatedAt.Format("Jan 02, 2006") }</td>
+										<td>
+											<div class="btn-group">
+												<a
+													href={ templ.SafeURL(fmt.Sprintf("/dashboard/newsletters/%v", newsletter.ID)) }
+													class="btn btn-sm btn-outline-primary"
+												>
+													View
+												</a>
+												<button
+													class="btn btn-sm btn-outline-danger"
+													hx-delete={ fmt.Sprintf("/dashboard/newsletters/%v", newsletter.ID) }
+													hx-confirm="Are you sure you want to delete this newsletter?"
+												>
+													Delete
+												</button>
+											</div>
+										</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+					</div>
+				</div>
+				if data.TotalPages > 1 {
+					<nav aria-label="Newsletter pagination" class="mt-4">
+						<ul class="pagination justify-content-center">
+							if data.CurrentPage > 1 {
+								<li class="page-item">
+									<a class="page-link" href={ templ.SafeURL(fmt.Sprintf("/dashboard/newsletters?page=%d", data.CurrentPage-1)) }>
+										Previous
+									</a>
+								</li>
+							}
+							for i := 1; i <= data.TotalPages; i++ {
+								<li class={ "page-item" }>
+									<a class="page-link" href={ templ.SafeURL(fmt.Sprintf("/dashboard/newsletters?page=%d", i)) }>
+										{ fmt.Sprint(i) }
+									</a>
+								</li>
+							}
+							if data.CurrentPage < data.TotalPages {
+								<li class="page-item">
+									<a class="page-link" href={ templ.SafeURL(fmt.Sprintf("/dashboard/newsletters?page=%d", data.CurrentPage+1)) }>
+										Next
+									</a>
+								</li>
+							}
+						</ul>
+					</nav>
+				}
+				<div class="text-muted text-center mt-2">
+					<small>Showing { fmt.Sprintf("%v", len(data.Newsletters)) } of { fmt.Sprintf("%v" ,data.TotalItems) } newsletters</small>
+				</div>
+			}
+		</div>
+	}
+}

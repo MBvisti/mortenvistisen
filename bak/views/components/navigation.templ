@@ -1,0 +1,151 @@
+package components
+
+import "github.com/MBvisti/mortenvistisen/views/paths"
+
+templ Nav() {
+	<header class="d-flex pt-4">
+		<ul class="mx-auto bg-body nav">
+			<li class="nav-item">
+				<a class="text-primary nav-link active" href={ paths.GetSafeURL(ctx, paths.HomePage) }>Home</a>
+			</li>
+			<li class="nav-item">
+				<a class="text-primary nav-link active" href={ paths.GetSafeURL(ctx, paths.NewslettersPage) }>Newsletters</a>
+			</li>
+			<li class="nav-item">
+				<a class="text-primary nav-link active" href={ paths.GetSafeURL(ctx, paths.ProjectsPage) }>Projects</a>
+			</li>
+			<li class="nav-item">
+				<a class="text-primary nav-link active" href={ paths.GetSafeURL(ctx, paths.AboutPage) }>About</a>
+			</li>
+			<li class="nav-item dropdown d-flex mx-2">
+				<button
+					class="btn btn-link px-0 text-decoration-none dropdown-toggle d-flex align-items-center"
+					id="bd-theme"
+					type="button"
+					aria-expanded="false"
+					data-bs-toggle="dropdown"
+					data-bs-display="static"
+					data-umami-event="theme--icon-selector"
+					data-analytics="theme--icon-selector"
+				>
+					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-moon-stars-fill" viewBox="0 0 16 16">
+						<path d="M6 .278a.77.77 0 0 1 .08.858 7.2 7.2 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277q.792-.001 1.533-.16a.79.79 0 0 1 .81.316.73.73 0 0 1-.031.893A8.35 8.35 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.75.75 0 0 1 6 .278"></path>
+						<path d="M10.794 3.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.579.924 1.097 1.097l1.162.387a.217.217 0 0 1 0 .412l-1.162.387a1.73 1.73 0 0 0-1.097 1.097l-.387 1.162a.217.217 0 0 1-.412 0l-.387-1.162A1.73 1.73 0 0 0 9.31 6.593l-1.162-.387a.217.217 0 0 1 0-.412l1.162-.387a1.73 1.73 0 0 0 1.097-1.097zM13.863.099a.145.145 0 0 1 .274 0l.258.774c.115.346.386.617.732.732l.774.258a.145.145 0 0 1 0 .274l-.774.258a1.16 1.16 0 0 0-.732.732l-.258.774a.145.145 0 0 1-.274 0l-.258-.774a1.16 1.16 0 0 0-.732-.732l-.774-.258a.145.145 0 0 1 0-.274l.774-.258c.346-.115.617-.386.732-.732z"></path>
+					</svg>
+				</button>
+				<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="bd-theme">
+					<li>
+						<button
+							data-umami-event="theme--gruvbox-light-selected"
+							type="button"
+							class="dropdown-item d-flex align-items-center"
+							data-bs-theme-value="gruvbox-light"
+							aria-pressed="false"
+							data-analytics="theme--gruvbox-light-selected"
+						>
+							Light
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-umami-event="theme--gruvbox-dark-selected"
+							class="dropdown-item d-flex align-items-center active"
+							data-bs-theme-value="gruvbox-dark"
+							aria-pressed="false"
+							data-analytics="theme--gruvbox-dark-selected"
+						>
+							Dark
+						</button>
+					</li>
+				</ul>
+			</li>
+		</ul>
+	</header>
+}
+
+//<div class="bg-base-100 max-w-screen-md md:max-w-screen-lg lg:max-w-screen-xl mx-auto grid grid-cols-4 md:grid-cols-6 lg:grid-cols-12">
+//	<div class="p-0 md:p-6 col-span-full flex justify-center">
+//		<div class="navbar bg-base-100 md:hidden">
+//			<nav class="flex-1 flex justify-end ">
+//				<ul class="menu menu-horizontal px-1 rounded shadow-lg">
+//					<li class="bg-base-300 z-10">
+//						<details>
+//							<summary>Menu</summary>
+//							<ul class="bg-base-100 rounded-t-none p-2">
+//								<li>
+//									<a class="relative block px-3 py-2 transition hover:text-primary" href={ paths.GetSafeURL(ctx, paths.HomePage) }>Home</a>
+//								</li>
+//								<li>
+//									<a class="relative block px-3 py-2 transition hover:text-primary" href={ paths.GetSafeURL(ctx, paths.NewslettersPage) }>Newsletters</a>
+//								</li>
+//								<li>
+//									<a class="relative block px-3 py-2 transition hover:text-primary" href={ paths.GetSafeURL(ctx, paths.ProjectsPage) }>Projects</a>
+//								</li>
+//								<li>
+//									<a class="relative block px-3 py-2 transition hover:text-primary" href={ paths.GetSafeURL(ctx, paths.AboutPage) }>About</a>
+//								</li>
+//							</ul>
+//						</details>
+//					</li>
+//				</ul>
+//			</nav>
+//		</div>
+//		<nav class="bg-base-300 pointer-events-auto hidden md:block">
+//			<ul class="flex rounded px-3 text-sm font-medium shadow-lg ring-1 backdrop-blur ring-base-100/10">
+//				<li>
+//					<a class="relative block px-3 py-2 transition hover:text-primary" href={ paths.GetSafeURL(ctx, paths.HomePage) }>Home</a>
+//				</li>
+//				<li>
+//					<a class="relative block px-3 py-2 transition hover:text-primary" href={ paths.GetSafeURL(ctx, paths.NewslettersPage) }>Newsletters</a>
+//				</li>
+//				<li>
+//					<a class="relative block px-3 py-2 transition hover:text-primary" href={ paths.GetSafeURL(ctx, paths.ProjectsPage) }>Projects</a>
+//				</li>
+//				<li>
+//					<a class="relative block px-3 py-2 transition hover:text-primary" href={ paths.GetSafeURL(ctx, paths.AboutPage) }>About</a>
+//				</li>
+//			</ul>
+//		</nav>
+//	</div>
+//</div>
+templ DashboardNav() {
+	<ul class="nav justify-content-center my-4">
+		<li class="nav-item">
+			<a class="text-primary nav-link active" href={ paths.GetSafeURL(ctx, paths.DashboardHomePage) }>Dashboard</a>
+		</li>
+		<li class="nav-item">
+			<a class="text-primary nav-link" href={ paths.GetSafeURL(ctx, paths.DashboardHomePage) }>Subscribers</a>
+		</li>
+		<li class="nav-item">
+			<a class="text-primary nav-link" href={ paths.GetSafeURL(ctx, paths.DashboardNewsletter) }>Newsletters</a>
+		</li>
+		<li class="nav-item dropdown d-flex">
+			<button
+				class="btn btn-link px-0 text-decoration-none dropdown-toggle d-flex align-items-center"
+				id="bd-theme"
+				type="button"
+				aria-expanded="false"
+				data-bs-toggle="dropdown"
+				data-bs-display="static"
+			>
+				<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-moon-stars-fill" viewBox="0 0 16 16">
+					<path d="M6 .278a.77.77 0 0 1 .08.858 7.2 7.2 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277q.792-.001 1.533-.16a.79.79 0 0 1 .81.316.73.73 0 0 1-.031.893A8.35 8.35 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.75.75 0 0 1 6 .278"></path>
+					<path d="M10.794 3.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.579.924 1.097 1.097l1.162.387a.217.217 0 0 1 0 .412l-1.162.387a1.73 1.73 0 0 0-1.097 1.097l-.387 1.162a.217.217 0 0 1-.412 0l-.387-1.162A1.73 1.73 0 0 0 9.31 6.593l-1.162-.387a.217.217 0 0 1 0-.412l1.162-.387a1.73 1.73 0 0 0 1.097-1.097zM13.863.099a.145.145 0 0 1 .274 0l.258.774c.115.346.386.617.732.732l.774.258a.145.145 0 0 1 0 .274l-.774.258a1.16 1.16 0 0 0-.732.732l-.258.774a.145.145 0 0 1-.274 0l-.258-.774a1.16 1.16 0 0 0-.732-.732l-.774-.258a.145.145 0 0 1 0-.274l.774-.258c.346-.115.617-.386.732-.732z"></path>
+				</svg>
+			</button>
+			<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="bd-theme">
+				<li>
+					<button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="gruvbox-light" aria-pressed="false">
+						Light
+					</button>
+				</li>
+				<li>
+					<button type="button" class="dropdown-item d-flex align-items-center active" data-bs-theme-value="gruvbox-dark" aria-pressed="false">
+						Dark
+					</button>
+				</li>
+			</ul>
+		</li>
+	</ul>
+}

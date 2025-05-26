@@ -1,0 +1,9 @@
+package components
+
+func Csrf() string {
+	return ""
+}
+
+templ CsrfField(csrfToken string) {
+	<input type="hidden" name="gorilla.csrf.Token" value={ csrfToken }/>
+}

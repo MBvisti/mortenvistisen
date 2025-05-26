@@ -1,0 +1,46 @@
+package components
+
+import (
+	"github.com/mbvlabs/grafto/router/contexts"
+	"github.com/mbvlabs/grafto/router/routes"
+	"github.com/mbvlabs/grafto/config"
+)
+
+templ NavItem(name, pathName, path string, attrs templ.Attributes) {
+	<a
+		class="navItem"
+		{ attrs... }
+		data-navItemPath={ pathName }
+		href={ templ.SafeURL(path) }
+	>{ name }</a>
+}
+
+templ Nav() {
+	<nav id="navigation" class="container nav">
+		<div class="nav-content">
+			<div class="nav-logo">
+				<a class="logo" href={ templ.SafeURL(routes.LandingPage.Path) }>{ config.Cfg.ProjectName }</a>
+			</div>
+			<button class="nav-toggle" aria-label="toggle navigation">
+				<span class="hamburger"></span>
+			</button>
+			<div class="nav-menu">
+				<ul class="menu">
+					<li>
+						@NavItem("Home", routes.LandingPage.Name, routes.LandingPage.Path, nil)
+					</li>
+					<li>
+						@NavItem("About", routes.AboutPage.Name, routes.AboutPage.Path, nil)
+					</li>
+					<li>
+						if contexts.ExtractApp(ctx).IsAuthenticated {
+							@NavItem("Logout", routes.DestroyAuthSession.Name, routes.DestroyAuthSession.Path, nil)
+						} else {
+							@NavItem("Login", routes.LoginPage.Name, routes.LoginPage.Path, nil)
+						}
+					</li>
+				</ul>
+			</div>
+		</div>
+	</nav>
+}

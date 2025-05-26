@@ -1,0 +1,41 @@
+package emails
+
+import (
+	"context"
+	"github.com/mbvlabs/grafto/config"
+	"strings"
+)
+
+type SignupWelcome struct {
+	VerificationCode string
+}
+
+var _ TemplateHandler = (*SignupWelcome)(nil)
+
+func (s SignupWelcome) Generate(ctx context.Context) (Html, Text, error) {
+	html, plainText, err := processEmail(ctx, s.template())
+	if err != nil {
+		return Html(""), Text(""), err
+	}
+
+	return Html(html), Text(plainText), nil
+}
+
+templ (s SignupWelcome) template() {
+	@base("Grafto Newsleter") {
+		@mainContent() {
+			@brandBanner()
+			@header() {
+				Welcome onboard!
+			}
+			@paragraph() {
+				Thanks for signing up for { config.Cfg.ProjectName }. We’re thrilled to have you on board.
+			}
+			@paragraph() {
+				To start using our service, you need to verify your email address. Please enter the code below into the form shown on the page after you signed up.
+			}
+			@codeBlock(strings.ToUpper(s.VerificationCode))
+		}
+		@footer()
+	}
+}
