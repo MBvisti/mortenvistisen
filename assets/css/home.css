@@ -13,15 +13,29 @@
 	border-radius: var(--radius-2);
 	background-color: var(--color-base-300);
 	margin-bottom: var(--size-3);
+
+	@media (min-width: 768px) {
+		width: 20%;
+	}
 }
 
 .hero>h1 {
 	font-size: var(--font-size-5);
 	text-align: center;
 	margin-bottom: var(--size-3);
+
+	@media (min-width: 768px) {
+		margin-right: auto;
+		margin-left: auto;
+	}
 }
 
 .hero>p {
+	@media (min-width: 768px) {
+		margin-right: auto;
+		margin-left: auto;
+	}
+
 	letter-spacing: var(--font-letterspacing-2);
 }
 
@@ -30,6 +44,12 @@
 	display: flex;
 	justify-content: space-around;
 	margin-bottom: var(--size-5);
+
+	@media (min-width: 768px) {
+		width: 50%;
+		margin-right: auto;
+		margin-left: auto;
+	}
 }
 
 .socials>a {
@@ -41,6 +61,12 @@
 .latest-articles {
 	display: flex;
 	flex-direction: column;
+
+	@media (min-width: 768px) {
+		width: 70%;
+		margin-right: auto;
+		margin-left: auto;
+	}
 }
 
 .latest-articles>h2 {
@@ -52,6 +78,7 @@
 	flex-direction: column;
 	background-color: var(--color-base-300);
 	padding: var(--size-3);
+	margin-bottom: var(--size-7);
 }
 
 .article-card>h3 {
