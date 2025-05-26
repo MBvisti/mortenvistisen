@@ -72,7 +72,7 @@ func NewsletterCreate(csrfToken string, success bool) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(csrfToken)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/newsletters_new.templ`, Line: 17, Col: 69}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `bak/views/dashboard/newsletters_new.templ`, Line: 17, Col: 69}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {

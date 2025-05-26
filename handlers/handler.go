@@ -7,12 +7,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/a-h/templ"
 	"github.com/google/uuid"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
-	"github.com/maypok86/otter"
 	"github.com/mbvisti/mortenvistisen/handlers/middleware"
 	"github.com/mbvisti/mortenvistisen/models"
 	"github.com/mbvisti/mortenvistisen/psql"
@@ -79,14 +77,13 @@ func renderArgs(ctx echo.Context) (context.Context, io.Writer) {
 
 func NewHandlers(
 	db psql.Postgres,
-	cache otter.CacheWithVariableTTL[string, templ.Component],
 	emailSvc services.EmailSender,
 ) Handlers {
 	gob.Register(uuid.UUID{})
 	gob.Register(contexts.FlashMessage{})
 
 	api := newApi()
-	app := newApp(db, cache)
+	app := newApp(db)
 	auth := newAuthentication(db, emailSvc)
 	dashboard := newDashboard()
 	registration := newRegistration(db, emailSvc)

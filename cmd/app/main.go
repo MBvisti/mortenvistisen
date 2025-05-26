@@ -7,8 +7,6 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/a-h/templ"
-	"github.com/maypok86/otter"
 	"github.com/mbvisti/mortenvistisen/clients"
 	"github.com/mbvisti/mortenvistisen/config"
 	"github.com/mbvisti/mortenvistisen/handlers"
@@ -103,19 +101,8 @@ func run(ctx context.Context) error {
 
 	emailClient := clients.NewEmail()
 
-	cacheBuilder, err := otter.NewBuilder[string, templ.Component](20)
-	if err != nil {
-		return err
-	}
-
-	pageCacher, err := cacheBuilder.WithVariableTTL().Build()
-	if err != nil {
-		return err
-	}
-
 	handlers := handlers.NewHandlers(
 		psql,
-		pageCacher,
 		emailClient,
 	)
 

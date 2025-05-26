@@ -40,7 +40,7 @@ func CsrfField(csrfToken string) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(csrfToken)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/components/csrf_token_input.templ`, Line: 8, Col: 65}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `bak/views/components/csrf_token_input.templ`, Line: 8, Col: 65}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {

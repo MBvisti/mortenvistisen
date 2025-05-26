@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"log/slog"
+	"time"
 
 	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
@@ -11,20 +12,35 @@ import (
 	"github.com/mbvisti/mortenvistisen/views"
 )
 
+const landingPageCacheKey = "landingPage"
+
 type App struct {
 	db    psql.Postgres
-	cache otter.CacheWithVariableTTL[string, templ.Component]
+	cache otter.Cache[string, templ.Component]
 }
 
 func newApp(
 	db psql.Postgres,
-	cache otter.CacheWithVariableTTL[string, templ.Component],
 ) App {
-	return App{db, cache}
+	cacheBuilder, err := otter.NewBuilder[string, templ.Component](20)
+	if err != nil {
+		panic(err)
+	}
+
+	pageCacher, err := cacheBuilder.WithTTL(48 * time.Hour).Build()
+	if err != nil {
+		panic(err)
+	}
+
+	return App{db, pageCacher}
 }
 
 func (a App) LandingPage(c echo.Context) error {
-	return views.HomePage().Render(renderArgs(c))
+	if value, ok := a.cache.Get(landingPageCacheKey); ok {
+		return views.HomePage(value).Render(renderArgs(c))
+	}
+
+	return views.HomePage(views.Home()).Render(renderArgs(c))
 }
 
 func (a App) AboutPage(c echo.Context) error {

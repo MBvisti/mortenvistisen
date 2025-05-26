@@ -82,7 +82,7 @@ func Newsletters(newletters []YearlyNewsletters) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(yearlyNewsletter.Year)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/newsletters.templ`, Line: 54, Col: 51}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `bak/views/newsletters.templ`, Line: 54, Col: 51}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -109,7 +109,7 @@ func Newsletters(newletters []YearlyNewsletters) templ.Component {
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(carbon.CreateFromStdTime(newsletter.ReleasedAt).ToDateString())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/newsletters.templ`, Line: 59, Col: 72}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `bak/views/newsletters.templ`, Line: 59, Col: 72}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -122,7 +122,7 @@ func Newsletters(newletters []YearlyNewsletters) templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(newsletter.Title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/newsletters.templ`, Line: 61, Col: 64}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `bak/views/newsletters.templ`, Line: 61, Col: 64}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
