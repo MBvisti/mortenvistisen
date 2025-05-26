@@ -33,7 +33,7 @@ func Footer() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<footer class=\"d-flex flex-column pb-5 mt-5\"><div class=\"mx-auto mb-2\"><a class=\"\" target=\"_blank\" href=\"https://golangblogcourse.com\">Golang Course</a> <a class=\"\" href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<footer class=\"footer\"><div><a target=\"_blank\" href=\"https://golangblogcourse.com\">Golang Course</a> <a href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -42,7 +42,7 @@ func Footer() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\">Newsletters</a> <a class=\"\" target=\"_blank\" href=\"https://mbvisti.com\">YouTube</a></div><p class=\"mx-auto\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\">Newsletters</a> <a target=\"_blank\" href=\"https://mbvisti.com\">YouTube</a></div><p>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -1,0 +1,18 @@
+.footer {
+	display: flex;
+	flex-direction: column;
+	margin-right: auto;
+	margin-left: auto;
+	margin-top: var(--size-7);
+	margin-bottom: var(--size-7);
+
+	a {
+		color: var(--color-secondary);
+
+	}
+}
+
+.footer>div {
+	display: flex;
+	justify-content: space-around;
+}

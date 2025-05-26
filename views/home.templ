@@ -3,18 +3,46 @@ package views
 import (
 	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
 	"github.com/mbvisti/mortenvistisen/router/routes"
+	"time"
 )
+
+templ Link(title string) {
+	<a href="">{ title }</a>
+}
+
+templ ArticleCard() {
+	<div class="article-card">
+		<h3>Why you should use Go</h3>
+		<p>{ time.Now().Format("2006-06-06") }</p>
+		<p>
+			A personal love letter to Golang, why I think more people should use it for full-stack web development and embrace traditional server-side rendered apps.
+		</p>
+		<span>
+			tags: 
+			<p>#golang</p>
+			<p>#indiehacking</p>
+		</span>
+		<a href="">Read article</a>
+	</div>
+}
 
 templ Home() {
 	<main class="container main main--grow">
-		<div class="hero">
-			<h1>Grafto</h1>
-			<p>
-				grafto is a kickstarter template for full-stack Go apps, using your grandfather's technology. It focuses
-				on simplicity, fast iteration and easy deployments. Built for indiehacking Gophers, by indiehacking Gophers.
-			</p>
-			<div></div>
-		</div>
+		<section class="hero">
+			<img class="" alt="Picture of Morten Vistisen (author of the blog)" src="https://media.mortenvistisen.com/mig_selv-removebg-preview.png"/>
+			<h1>software engineer, freelancer, bootstrapper.</h1>
+			<p>I'm Morten, software engineer from Denmark living in Spain. I write a lot of Golang while trying to build online businesses. I share my learnings here.</p>
+		</section>
+		<section class="socials">
+			@Link("Twitter")
+			@Link("Github")
+			@Link("YouTube")
+			@Link("LinkedIn")
+		</section>
+		<section class="latest-articles">
+			<h2>Latest Articles</h2>
+			@ArticleCard()
+		</section>
 	</main>
 }
 
