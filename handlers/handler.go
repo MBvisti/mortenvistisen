@@ -3,10 +3,13 @@ package handlers
 import (
 	"context"
 	"encoding/gob"
+	"errors"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo-contrib/session"
@@ -50,6 +53,33 @@ func setAppCtx(ctx echo.Context) context.Context {
 		flashCKey,
 		flashC,
 	)
+}
+
+// extractValidationErrors extracts validation errors from a validator error
+// and returns them in a format suitable for form rendering
+func extractValidationErrors(err error) map[string][]string {
+	var validationErrors validator.ValidationErrors
+	if !errors.As(err, &validationErrors) {
+		return nil
+	}
+
+	errorMap := make(map[string][]string)
+	for _, fieldError := range validationErrors {
+		fieldName := strings.ToLower(fieldError.Field())
+		// Convert field names to match form field names
+		switch fieldName {
+		case "metatitle":
+			fieldName = "meta_title"
+		case "metadescription":
+			fieldName = "meta_description"
+		case "imagelink":
+			fieldName = "image_link"
+		}
+
+		errorMap[fieldName] = append(errorMap[fieldName], fieldError.Tag())
+	}
+
+	return errorMap
 }
 
 //nolint:unused // needed helper method

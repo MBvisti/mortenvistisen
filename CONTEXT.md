@@ -1,5 +1,7 @@
 # CONTEXT.md
 
+NEVER RUN `go build`!!
+
 ## Build/Test Commands
 - `just golangci` (alias: `just ci`) - Run golangci-lint
 - `just test-units` (alias: `just tu`) - Run unit tests with `-tags=unit`

@@ -1,0 +1,229 @@
+package dashboard
+
+import "github.com/mbvisti/mortenvistisen/views/internal/layouts"
+import "github.com/mbvisti/mortenvistisen/views/internal/components"
+
+type NewArticleFormData struct {
+	Title           string
+	Excerpt         string
+	MetaTitle       string
+	MetaDescription string
+	Slug            string
+	ImageLink       string
+	Content         string
+	CsrfToken       string
+	Errors          map[string][]string
+}
+
+templ NewArticle(formData NewArticleFormData) {
+	@layouts.Dashboard() {
+		<!-- Page Header -->
+		<div class="dashboard-header">
+			<div class="header-content">
+				<h1 class="dashboard-title">Create New Article</h1>
+				<div class="header-actions">
+					<a href="/dashboard" class="btn-secondary">← Back to Dashboard</a>
+				</div>
+			</div>
+		</div>
+
+		<!-- Article Creation Form -->
+		<div class="article-form-container">
+			<form method="POST" action="/dashboard/articles/new" class="article-form">
+				@components.CsrfField(formData.CsrfToken)
+				
+				<!-- Article Metadata Section -->
+				<div class="form-section">
+					<h2 class="section-title">Article Information</h2>
+					<div class="form-grid">
+						<div class="form-row">
+							@components.InputField(
+								"Title",
+								"text",
+								"title",
+								"Enter article title",
+								templ.Attributes{"required": true, "maxlength": "100"},
+								components.InputFieldProps{
+									Value:     formData.Title,
+									ErrorMsgs: formData.Errors["title"],
+								},
+							)
+						</div>
+						
+						<div class="form-row">
+							@components.InputField(
+								"Slug",
+								"text",
+								"slug",
+								"article-slug-url",
+								templ.Attributes{"required": true, "maxlength": "255"},
+								components.InputFieldProps{
+									Value:     formData.Slug,
+									ErrorMsgs: formData.Errors["slug"],
+								},
+							)
+						</div>
+						
+						<div class="form-row">
+							<label class="form-control w-full">
+								<div class="label">
+									<span class="label-text md:text-lg">Excerpt</span>
+								</div>
+								<textarea
+									class={ "textarea textarea-bordered w-full", templ.KV("textarea-error", len(formData.Errors["excerpt"]) > 0) }
+									name="excerpt"
+									placeholder="Brief description of the article"
+									rows="3"
+									maxlength="255"
+									required
+								>{ formData.Excerpt }</textarea>
+								if formData.Errors["excerpt"] != nil {
+									<div class="label">
+										for _, errMsg := range formData.Errors["excerpt"] {
+											<span class="label-text-alt">{ components.UppercaseFirstWord(errMsg) }</span>
+										}
+									</div>
+								}
+							</label>
+						</div>
+						
+						<div class="form-row">
+							@components.InputField(
+								"Featured Image URL",
+								"url",
+								"image_link",
+								"https://example.com/image.jpg",
+								templ.Attributes{"maxlength": "255"},
+								components.InputFieldProps{
+									Value:     formData.ImageLink,
+									ErrorMsgs: formData.Errors["image_link"],
+								},
+							)
+						</div>
+					</div>
+				</div>
+
+				<!-- SEO Metadata Section -->
+				<div class="form-section">
+					<h2 class="section-title">SEO Metadata</h2>
+					<div class="form-grid">
+						<div class="form-row">
+							@components.InputField(
+								"Meta Title",
+								"text",
+								"meta_title",
+								"SEO title for search engines",
+								templ.Attributes{"required": true, "maxlength": "100"},
+								components.InputFieldProps{
+									Value:     formData.MetaTitle,
+									ErrorMsgs: formData.Errors["meta_title"],
+								},
+							)
+						</div>
+						
+						<div class="form-row">
+							<label class="form-control w-full">
+								<div class="label">
+									<span class="label-text md:text-lg">Meta Description</span>
+								</div>
+								<textarea
+									class={ "textarea textarea-bordered w-full", templ.KV("textarea-error", len(formData.Errors["meta_description"]) > 0) }
+									name="meta_description"
+									placeholder="SEO description for search engines"
+									rows="2"
+									maxlength="100"
+									required
+								>{ formData.MetaDescription }</textarea>
+								if formData.Errors["meta_description"] != nil {
+									<div class="label">
+										for _, errMsg := range formData.Errors["meta_description"] {
+											<span class="label-text-alt">{ components.UppercaseFirstWord(errMsg) }</span>
+										}
+									</div>
+								}
+							</label>
+						</div>
+					</div>
+				</div>
+
+				<!-- Content Editor Section -->
+				<div class="form-section">
+					<h2 class="section-title">Article Content</h2>
+					<div class="editor-container">
+						<div class="editor-toolbar">
+							<div class="toolbar-group">
+								<button type="button" class="toolbar-btn" title="Bold">
+									<strong>B</strong>
+								</button>
+								<button type="button" class="toolbar-btn" title="Italic">
+									<em>I</em>
+								</button>
+								<button type="button" class="toolbar-btn" title="Underline">
+									<u>U</u>
+								</button>
+							</div>
+							<div class="toolbar-group">
+								<button type="button" class="toolbar-btn" title="Heading 1">
+									H1
+								</button>
+								<button type="button" class="toolbar-btn" title="Heading 2">
+									H2
+								</button>
+								<button type="button" class="toolbar-btn" title="Heading 3">
+									H3
+								</button>
+							</div>
+							<div class="toolbar-group">
+								<button type="button" class="toolbar-btn" title="Bullet List">
+									• List
+								</button>
+								<button type="button" class="toolbar-btn" title="Numbered List">
+									1. List
+								</button>
+							</div>
+							<div class="toolbar-group">
+								<button type="button" class="toolbar-btn" title="Link">
+									🔗 Link
+								</button>
+								<button type="button" class="toolbar-btn" title="Image">
+									🖼️ Image
+								</button>
+							</div>
+						</div>
+						
+						<div class="editor-content">
+							<textarea
+								class="editor-textarea"
+								name="content"
+								placeholder="Start writing your article content here...
+
+This is where the WYSIWYG editor will be integrated. For now, you can write in Markdown or HTML."
+								rows="20"
+							>{ formData.Content }</textarea>
+						</div>
+						
+						<div class="editor-footer">
+							<div class="editor-help">
+								<small class="text-muted">
+									💡 Tip: WYSIWYG editor will be integrated here. Currently supports Markdown and HTML.
+								</small>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Form Actions -->
+				<div class="form-actions">
+					<div class="action-buttons">
+						<button type="submit" name="action" value="save_draft" class="btn-secondary">
+							💾 Save as Draft
+						</button>
+						<button type="submit" name="action" value="publish" class="btn-primary">
+							🚀 Publish Article
+						</button>
+					</div>
+				</div>
+			</form>
+		</div>
+	}
+}

@@ -3,6 +3,7 @@ package layouts
 import "github.com/mbvisti/mortenvistisen/router/routes"
 import "time"
 import "fmt"
+import "github.com/mbvisti/mortenvistisen/config"
 
 templ Dashboard() {
 	<!DOCTYPE html>
@@ -11,7 +12,7 @@ templ Dashboard() {
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 			<title>Dashboard - Grafto</title>
-			<link href={ routes.CssEntrypoint.Path } rel="stylesheet"/>
+			<link href={ config.Cfg.GetFullDomain() + "/" + routes.CssEntrypoint.Path } rel="stylesheet"/>
 			<link rel="icon" type="image/png" sizes="16x16" href={ routes.Favicon16.Path }/>
 			<link rel="icon" type="image/png" sizes="32x32" href={ routes.Favicon32.Path }/>
 			<script src={ fmt.Sprintf("%v?%v", routes.JsEntrypoint.Path, time.Now().Unix()) } type="module"></script>
@@ -19,10 +20,8 @@ templ Dashboard() {
 		<body>
 			<!-- Mobile Navigation Toggle -->
 			<button class="mobile-nav-toggle" onclick="toggleMobileNav()">☰</button>
-			
 			<!-- Sidebar Overlay for Mobile -->
 			<div class="sidebar-overlay" onclick="closeMobileNav()"></div>
-			
 			<div class="dashboard-layout">
 				<!-- Sidebar -->
 				<aside class="dashboard-sidebar" id="sidebar">
@@ -58,13 +57,11 @@ templ Dashboard() {
 						</ul>
 					</nav>
 				</aside>
-
 				<!-- Main Content -->
 				<main class="dashboard-main">
 					{ children... }
 				</main>
 			</div>
-
 			<script>
 				function toggleMobileNav() {
 					const sidebar = document.getElementById('sidebar');
