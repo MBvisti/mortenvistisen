@@ -195,6 +195,79 @@ func GetDraftArticles(
 	return articles, nil
 }
 
+type PaginationResult struct {
+	Articles    []Article
+	TotalCount  int64
+	Page        int
+	PageSize    int
+	TotalPages  int
+	HasNext     bool
+	HasPrevious bool
+}
+
+func GetArticlesPaginated(
+	ctx context.Context,
+	dbtx db.DBTX,
+	page int,
+	pageSize int,
+) (PaginationResult, error) {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 10
+	}
+	if pageSize > 100 {
+		pageSize = 100 // Limit max page size
+	}
+
+	offset := (page - 1) * pageSize
+
+	// Get total count
+	totalCount, err := db.Stmts.CountArticles(ctx, dbtx)
+	if err != nil {
+		return PaginationResult{}, err
+	}
+
+	// Get paginated articles
+	rows, err := db.Stmts.QueryArticlesPaginated(ctx, dbtx, db.QueryArticlesPaginatedParams{
+		Limit:  int32(pageSize), //nolint:gosec // pageSize is bounded above
+		Offset: int32(offset),   //nolint:gosec // offset is calculated from bounded values
+	})
+	if err != nil {
+		return PaginationResult{}, err
+	}
+
+	articles := make([]Article, len(rows))
+	for i, row := range rows {
+		articles[i] = Article{
+			ID:              row.ID,
+			CreatedAt:       row.CreatedAt.Time,
+			UpdatedAt:       row.UpdatedAt.Time,
+			PublishedAt:     nullTimeToPointer(row.PublishedAt),
+			Title:           row.Title,
+			Excerpt:         row.Excerpt,
+			MetaTitle:       row.MetaTitle,
+			MetaDescription: row.MetaDescription,
+			Slug:            row.Slug,
+			ImageLink:       nullStringToPointer(row.ImageLink),
+			Content:         nullStringToPointer(row.Content),
+		}
+	}
+
+	totalPages := int((totalCount + int64(pageSize) - 1) / int64(pageSize))
+
+	return PaginationResult{
+		Articles:    articles,
+		TotalCount:  totalCount,
+		Page:        page,
+		PageSize:    pageSize,
+		TotalPages:  totalPages,
+		HasNext:     page < totalPages,
+		HasPrevious: page > 1,
+	}, nil
+}
+
 type NewArticlePayload struct {
 	Title           string  `validate:"required,max=100"`
 	Excerpt         string  `validate:"required,max=255"`

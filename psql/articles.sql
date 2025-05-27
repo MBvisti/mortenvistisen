@@ -16,6 +16,14 @@ select * from articles where published_at is not null order by published_at desc
 -- name: QueryDraftArticles :many
 select * from articles where published_at is null order by created_at desc;
 
+-- name: QueryArticlesPaginated :many
+select * from articles 
+order by created_at desc 
+limit $1 offset $2;
+
+-- name: CountArticles :one
+select count(*) from articles;
+
 -- name: InsertArticle :one
 insert into
     articles (id, created_at, updated_at, published_at, title, excerpt, meta_title, meta_description, slug, image_link, content)

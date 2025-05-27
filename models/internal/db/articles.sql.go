@@ -13,6 +13,17 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const countArticles = `-- name: CountArticles :one
+select count(*) from articles
+`
+
+func (q *Queries) CountArticles(ctx context.Context, db DBTX) (int64, error) {
+	row := db.QueryRow(ctx, countArticles)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const deleteArticle = `-- name: DeleteArticle :exec
 delete from articles where id=$1
 `
@@ -182,6 +193,49 @@ select id, created_at, updated_at, published_at, title, excerpt, meta_title, met
 
 func (q *Queries) QueryArticles(ctx context.Context, db DBTX) ([]Article, error) {
 	rows, err := db.Query(ctx, queryArticles)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Article
+	for rows.Next() {
+		var i Article
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.PublishedAt,
+			&i.Title,
+			&i.Excerpt,
+			&i.MetaTitle,
+			&i.MetaDescription,
+			&i.Slug,
+			&i.ImageLink,
+			&i.Content,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const queryArticlesPaginated = `-- name: QueryArticlesPaginated :many
+select id, created_at, updated_at, published_at, title, excerpt, meta_title, meta_description, slug, image_link, content from articles 
+order by created_at desc 
+limit $1 offset $2
+`
+
+type QueryArticlesPaginatedParams struct {
+	Limit  int32
+	Offset int32
+}
+
+func (q *Queries) QueryArticlesPaginated(ctx context.Context, db DBTX, arg QueryArticlesPaginatedParams) ([]Article, error) {
+	rows, err := db.Query(ctx, queryArticlesPaginated, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
