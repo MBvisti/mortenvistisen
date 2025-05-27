@@ -33,7 +33,7 @@ func Dashboard() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Grafto</title><link href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Dashboard - Grafto</title><link href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -85,7 +85,15 @@ func Dashboard() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" type=\"module\"></script></head><body></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" type=\"module\"></script></head><body><!-- Mobile Navigation Toggle --><button class=\"mobile-nav-toggle\" onclick=\"toggleMobileNav()\">☰</button><!-- Sidebar Overlay for Mobile --><div class=\"sidebar-overlay\" onclick=\"closeMobileNav()\"></div><div class=\"dashboard-layout\"><!-- Sidebar --><aside class=\"dashboard-sidebar\" id=\"sidebar\"><div class=\"sidebar-header\"><h2 class=\"sidebar-title\">Grafto</h2></div><nav><ul class=\"sidebar-nav\"><li class=\"nav-item\"><a href=\"/dashboard\" class=\"nav-link active\"><span class=\"nav-icon\">📊</span> Dashboard</a></li><li class=\"nav-item\"><a href=\"/dashboard/articles\" class=\"nav-link\"><span class=\"nav-icon\">📝</span> Articles</a></li><li class=\"nav-item\"><a href=\"/dashboard/analytics\" class=\"nav-link\"><span class=\"nav-icon\">📈</span> Analytics</a></li><li class=\"nav-item\"><a href=\"/dashboard/settings\" class=\"nav-link\"><span class=\"nav-icon\">⚙️</span> Settings</a></li></ul></nav></aside><!-- Main Content --><main class=\"dashboard-main\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templ_7745c5c3_Var1.Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</main></div><script>\n\t\t\t\tfunction toggleMobileNav() {\n\t\t\t\t\tconst sidebar = document.getElementById('sidebar');\n\t\t\t\t\tconst overlay = document.querySelector('.sidebar-overlay');\n\t\t\t\t\t\n\t\t\t\t\tsidebar.classList.toggle('open');\n\t\t\t\t\toverlay.classList.toggle('open');\n\t\t\t\t}\n\n\t\t\t\tfunction closeMobileNav() {\n\t\t\t\t\tconst sidebar = document.getElementById('sidebar');\n\t\t\t\t\tconst overlay = document.querySelector('.sidebar-overlay');\n\t\t\t\t\t\n\t\t\t\t\tsidebar.classList.remove('open');\n\t\t\t\t\toverlay.classList.remove('open');\n\t\t\t\t}\n\n\t\t\t\t// Close sidebar when clicking on nav links on mobile\n\t\t\t\tdocument.querySelectorAll('.nav-link').forEach(link => {\n\t\t\t\t\tlink.addEventListener('click', () => {\n\t\t\t\t\t\tif (window.innerWidth <= 768) {\n\t\t\t\t\t\t\tcloseMobileNav();\n\t\t\t\t\t\t}\n\t\t\t\t\t});\n\t\t\t\t});\n\t\t\t</script></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

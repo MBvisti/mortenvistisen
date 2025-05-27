@@ -19,5 +19,5 @@
 - **Handlers**: Return `error`, use Echo context, validate payloads, render templates with `Render(renderArgs(ctx))`
 - **Services**: Accept context first, return domain entities, handle business logic
 - **Comments**: Minimal comments, focus on why not what, use TODO for future improvements
-- **Styling**: Use vanilla CSS for creating styles
+- **Styling**: Use vanilla CSS for creating styles. NEVER use inline styles.
 - **Views**: Only edit the .templ files and run `just ct` to compile the result
