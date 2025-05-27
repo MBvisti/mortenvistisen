@@ -136,10 +136,8 @@ templ NewArticle(formData NewArticleFormData) {
 				</div>
 				<div class="form-section">
 					<h2 class="section-title">Article Content</h2>
-					<div class="trix-editor-container">
-						<input id="my-text-area" name="content"/>
-						<!-- <input type="hidden" name="content" id="article-content" value={ formData.Content }/>-->
-						<!-- <trix-editor class="trix-content" input="x"></trix-editor> -->
+					<div class="easymde-editor-container">
+						<input id="my-text-area" name="content" value={ formData.Content }/>
 					</div>
 				</div>
 				<div class="form-actions">
@@ -153,7 +151,6 @@ templ NewArticle(formData NewArticleFormData) {
 					</div>
 				</div>
 			</form>
-			<link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css"/>
 			<script type="module" src="/assets/js/easymde.js"></script>
 		</div>
 	}
