@@ -272,20 +272,20 @@ func NewArticle(formData NewArticleFormData) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "</label></div></div></div><div class=\"form-section\"><h2 class=\"section-title\">Article Content</h2><div class=\"easymde-editor-container\"><textarea id=\"my-text-area\" name=\"content\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "</label></div></div></div><div class=\"form-section\"><h2 class=\"section-title\">Article Content</h2><textarea id=\"editorTarget\" name=\"content\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(formData.Content)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/new_article.templ`, Line: 140, Col: 67}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/new_article.templ`, Line: 139, Col: 66}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "</textarea></div></div><div class=\"form-actions\"><div class=\"action-buttons\"><button type=\"submit\" name=\"action\" value=\"save_draft\" class=\"btn-secondary\">Save as Draft</button> <button type=\"submit\" name=\"action\" value=\"publish\" class=\"btn-primary\">Publish Article</button></div></div></form><script type=\"module\" src=\"/assets/js/easymde.js\"></script></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "</textarea></div><div class=\"form-actions\"><div class=\"action-buttons\"><button type=\"submit\" name=\"action\" value=\"save_draft\" class=\"btn-secondary\">Save as Draft</button> <button type=\"submit\" name=\"action\" value=\"publish\" class=\"btn-primary\">Publish Article</button></div></div></form><script type=\"module\" src=\"/assets/js/easymde.js\"></script></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/csrf"
 	"github.com/labstack/echo/v4"
 	"github.com/mbvisti/mortenvistisen/models"
@@ -166,6 +167,156 @@ func (d Dashboard) StoreArticle(c echo.Context) error {
 		c,
 		contexts.FlashSuccess,
 		"Article saved as draft successfully!",
+	); err != nil {
+		return err
+	}
+
+	// Redirect to dashboard
+	return c.Redirect(302, "/dashboard")
+}
+
+func (d Dashboard) EditArticle(c echo.Context) error {
+	idParam := c.Param("id")
+	articleID, err := uuid.Parse(idParam)
+	if err != nil {
+		if err := addFlash(
+			c,
+			contexts.FlashError,
+			"Invalid article ID.",
+		); err != nil {
+			return err
+		}
+		return c.Redirect(302, "/dashboard")
+	}
+
+	article, err := models.GetArticleByID(
+		extractCtx(c),
+		d.db.Pool,
+		articleID,
+	)
+	if err != nil {
+		if err := addFlash(
+			c,
+			contexts.FlashError,
+			"Article not found.",
+		); err != nil {
+			return err
+		}
+		return c.Redirect(302, "/dashboard")
+	}
+
+	formData := dashboard.EditArticleFormData{
+		ID:              article.ID.String(),
+		Title:           article.Title,
+		Excerpt:         article.Excerpt,
+		MetaTitle:       article.MetaTitle,
+		MetaDescription: article.MetaDescription,
+		Slug:            article.Slug,
+		ImageLink:       article.ImageLink,
+		Content:         article.Content,
+		CsrfToken:       csrf.Token(c.Request()),
+		Errors:          make(map[string][]string),
+	}
+
+	return dashboard.EditArticle(formData).Render(renderArgs(c))
+}
+
+func (d Dashboard) UpdateArticle(c echo.Context) error {
+	idParam := c.Param("id")
+	articleID, err := uuid.Parse(idParam)
+	if err != nil {
+		if err := addFlash(
+			c,
+			contexts.FlashError,
+			"Invalid article ID.",
+		); err != nil {
+			return err
+		}
+		return c.Redirect(302, "/dashboard")
+	}
+
+	type payload struct {
+		Title           string `form:"title"`
+		Excerpt         string `form:"excerpt"`
+		MetaTitle       string `form:"meta_title"`
+		MetaDescription string `form:"meta_description"`
+		Slug            string `form:"slug"`
+		ImageLink       string `form:"image_link"`
+		Content         string `form:"content"`
+		Action          string `form:"action"`
+	}
+
+	var articlePayload payload
+	if err := c.Bind(&articlePayload); err != nil {
+		return err
+	}
+
+	updatePayload := models.UpdateArticlePayload{
+		ID:              articleID,
+		UpdatedAt:       time.Now(),
+		Title:           articlePayload.Title,
+		Excerpt:         articlePayload.Excerpt,
+		MetaTitle:       articlePayload.MetaTitle,
+		MetaDescription: articlePayload.MetaDescription,
+		Slug:            articlePayload.Slug,
+		ImageLink:       articlePayload.ImageLink,
+		Content:         articlePayload.Content,
+	}
+
+	if articlePayload.Action == "publish" {
+		updatePayload.PublishedAt = time.Now()
+	}
+
+	article, err := models.UpdateArticle(
+		extractCtx(c),
+		d.db.Pool,
+		updatePayload,
+	)
+	if err != nil {
+		if validationErrors := extractValidationErrors(err); validationErrors != nil {
+			slog.ErrorContext(
+				extractCtx(c),
+				"could not validate article payload",
+				"error",
+				err,
+			)
+		}
+
+		if err := addFlash(
+			c,
+			contexts.FlashError,
+			"Failed to update article. Please try again.",
+		); err != nil {
+			return err
+		}
+
+		formData := dashboard.EditArticleFormData{
+			ID:              articleID.String(),
+			Title:           articlePayload.Title,
+			Excerpt:         articlePayload.Excerpt,
+			MetaTitle:       articlePayload.MetaTitle,
+			MetaDescription: articlePayload.MetaDescription,
+			Slug:            articlePayload.Slug,
+			ImageLink:       articlePayload.ImageLink,
+			Content:         articlePayload.Content,
+			CsrfToken:       csrf.Token(c.Request()),
+			Errors:          make(map[string][]string),
+		}
+
+		return dashboard.EditArticle(formData).Render(renderArgs(c))
+	}
+
+	var successMsg string
+	if article.IsPublished() {
+		successMsg = "Article updated and published successfully!"
+	} else {
+		successMsg = "Article updated as draft successfully!"
+	}
+
+	if err := addFlash(
+		c,
+		contexts.FlashSuccess,
+		successMsg,
 	); err != nil {
 		return err
 	}

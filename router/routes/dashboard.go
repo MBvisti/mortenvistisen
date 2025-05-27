@@ -13,6 +13,8 @@ var Dashboard = []Route{
 	DashboardHome,
 	DashboardNewArticle,
 	DashboardStoreArticle,
+	DashboardEditArticle,
+	DashboardUpdateArticle,
 }
 
 var DashboardHome = Route{
@@ -40,6 +42,26 @@ var DashboardStoreArticle = Route{
 	Path:        dashboardRoutePrefix + "/articles/new",
 	Method:      http.MethodPost,
 	HandlerName: "StoreArticle",
+	Middleware: []string{
+		"AuthOnly",
+	},
+}
+
+var DashboardEditArticle = Route{
+	Name:        dashboardNamePrefix + ".articles.edit",
+	Path:        dashboardRoutePrefix + "/articles/:id/edit",
+	Method:      http.MethodGet,
+	HandlerName: "EditArticle",
+	Middleware: []string{
+		"AuthOnly",
+	},
+}
+
+var DashboardUpdateArticle = Route{
+	Name:        dashboardNamePrefix + ".articles.update",
+	Path:        dashboardRoutePrefix + "/articles/:id/edit",
+	Method:      http.MethodPost,
+	HandlerName: "UpdateArticle",
 	Middleware: []string{
 		"AuthOnly",
 	},

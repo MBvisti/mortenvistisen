@@ -3,7 +3,8 @@ package dashboard
 import "github.com/mbvisti/mortenvistisen/views/internal/layouts"
 import "github.com/mbvisti/mortenvistisen/views/internal/components"
 
-type NewArticleFormData struct {
+type EditArticleFormData struct {
+	ID              string
 	Title           string
 	Excerpt         string
 	MetaTitle       string
@@ -15,18 +16,18 @@ type NewArticleFormData struct {
 	Errors          map[string][]string
 }
 
-templ NewArticle(formData NewArticleFormData) {
+templ EditArticle(formData EditArticleFormData) {
 	@layouts.Dashboard() {
 		<div class="dashboard-header">
 			<div class="header-content">
-				<h1 class="dashboard-title">Create New Article</h1>
+				<h1 class="dashboard-title">Edit Article</h1>
 				<div class="header-actions">
 					<a href="/dashboard" class="btn-secondary">← Back to Dashboard</a>
 				</div>
 			</div>
 		</div>
 		<div class="article-form-container">
-			<form method="POST" action="/dashboard/articles/new" class="article-form">
+			<form method="POST" action={ templ.URL("/dashboard/articles/" + formData.ID + "/edit") } class="article-form">
 				@components.CsrfField(formData.CsrfToken)
 				<div class="form-section">
 					<h2 class="section-title">Article Information</h2>
@@ -136,7 +137,9 @@ templ NewArticle(formData NewArticleFormData) {
 				</div>
 				<div class="form-section">
 					<h2 class="section-title">Article Content</h2>
-					<textarea id="editorTarget" name="content">{ formData.Content }</textarea>
+					<div class="easymde-editor-container">
+						<textarea id="editorTarget" name="content">{ formData.Content }</textarea>
+					</div>
 				</div>
 				<div class="form-actions">
 					<div class="action-buttons">

@@ -72,7 +72,7 @@ templ Home(result models.PaginationResult) {
 								<td>
 									<div class="action-buttons">
 										<a href={ templ.URL("/articles/" + article.Slug) } class="btn-sm btn-secondary">View</a>
-										<a href={ templ.URL("/dashboard/articles/edit/" + fmt.Sprintf("%d", article.ID)) } class="btn-sm btn-secondary">Edit</a>
+										<a href={ templ.URL("/dashboard/articles/" + article.ID.String() + "/edit") } class="btn-sm btn-secondary">Edit</a>
 										<button class="btn-sm btn-danger">Delete</button>
 									</div>
 								</td>

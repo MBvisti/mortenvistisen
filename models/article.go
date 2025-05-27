@@ -378,7 +378,7 @@ func UpdateArticle(
 		},
 		Content: sql.NullString{
 			String: data.Content,
-			Valid:  data.ImageLink != "",
+			Valid:  data.Content != "",
 		},
 	})
 	if err != nil {
