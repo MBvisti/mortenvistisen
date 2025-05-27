@@ -1,8 +1,17 @@
 package dashboard
 
 import "github.com/mbvisti/mortenvistisen/views/internal/layouts"
+import "github.com/mbvisti/mortenvistisen/models"
+import "fmt"
 
-templ Home() {
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+templ Home(result models.PaginationResult) {
 	@layouts.Dashboard() {
 		<!-- Dashboard Header -->
 		<div class="dashboard-header">
@@ -15,7 +24,7 @@ templ Home() {
 		<!-- Statistics Cards -->
 		<div class="stats-grid">
 			<div class="stat-card">
-				<h3 class="stat-number">24</h3>
+				<h3 class="stat-number">{ fmt.Sprintf("%d", result.TotalCount) }</h3>
 				<p class="stat-label">Total Articles</p>
 			</div>
 			<div class="stat-card">
@@ -45,73 +54,62 @@ templ Home() {
 					</tr>
 				</thead>
 				<tbody>
-					<tr>
-						<td>How to Build a Simple Blog Using Rust</td>
-						<td><span class="status-badge status-published">Published</span></td>
-						<td>2024-01-15</td>
-						<td>8 min</td>
-						<td>
-							<div class="action-buttons">
-								<a href="/articles/how-to-build-a-simple-blog-using-rust" class="btn-sm btn-secondary">View</a>
-								<a href="/dashboard/articles/edit/1" class="btn-sm btn-secondary">Edit</a>
-								<button class="btn-sm btn-danger">Delete</button>
-							</div>
-						</td>
-					</tr>
-					<tr>
-						<td>Create a SaaS in Five Days</td>
-						<td><span class="status-badge status-published">Published</span></td>
-						<td>2024-01-12</td>
-						<td>12 min</td>
-						<td>
-							<div class="action-buttons">
-								<a href="/articles/create-a-saas-in-five-days" class="btn-sm btn-secondary">View</a>
-								<a href="/dashboard/articles/edit/2" class="btn-sm btn-secondary">Edit</a>
-								<button class="btn-sm btn-danger">Delete</button>
-							</div>
-						</td>
-					</tr>
-					<tr>
-						<td>Integration Tests with Docker and Go</td>
-						<td><span class="status-badge status-draft">Draft</span></td>
-						<td>2024-01-10</td>
-						<td>15 min</td>
-						<td>
-							<div class="action-buttons">
-								<a href="/articles/integration-tests-docker-and-go" class="btn-sm btn-secondary">View</a>
-								<a href="/dashboard/articles/edit/3" class="btn-sm btn-secondary">Edit</a>
-								<button class="btn-sm btn-danger">Delete</button>
-							</div>
-						</td>
-					</tr>
-					<tr>
-						<td>Practical Approach to Structuring Go Apps</td>
-						<td><span class="status-badge status-published">Published</span></td>
-						<td>2024-01-08</td>
-						<td>10 min</td>
-						<td>
-							<div class="action-buttons">
-								<a href="/articles/practical-approach-to-structuring-go-apps" class="btn-sm btn-secondary">View</a>
-								<a href="/dashboard/articles/edit/4" class="btn-sm btn-secondary">Edit</a>
-								<button class="btn-sm btn-danger">Delete</button>
-							</div>
-						</td>
-					</tr>
-					<tr>
-						<td>Why Go?</td>
-						<td><span class="status-badge status-draft">Draft</span></td>
-						<td>2024-01-05</td>
-						<td>6 min</td>
-						<td>
-							<div class="action-buttons">
-								<a href="/articles/why-go" class="btn-sm btn-secondary">View</a>
-								<a href="/dashboard/articles/edit/5" class="btn-sm btn-secondary">Edit</a>
-								<button class="btn-sm btn-danger">Delete</button>
-							</div>
-						</td>
-					</tr>
+					if len(result.Articles) == 0 {
+						<tr>
+							<td colspan="5" class="text-center">No articles found</td>
+						</tr>
+					} else {
+						for _, article := range result.Articles {
+							<tr>
+								<td>{ article.Title }</td>
+								<td>
+									if article.PublishedAt != nil {
+										<span class="status-badge status-published">Published</span>
+									} else {
+										<span class="status-badge status-draft">Draft</span>
+									}
+								</td>
+								<td>{ article.CreatedAt.Format("2006-01-02") }</td>
+								<td>5 min</td>
+								<td>
+									<div class="action-buttons">
+										<a href={ templ.URL("/articles/" + article.Slug) } class="btn-sm btn-secondary">View</a>
+										<a href={ templ.URL("/dashboard/articles/edit/" + fmt.Sprintf("%d", article.ID)) } class="btn-sm btn-secondary">Edit</a>
+										<button class="btn-sm btn-danger">Delete</button>
+									</div>
+								</td>
+							</tr>
+						}
+					}
 				</tbody>
 			</table>
+			
+			<!-- Pagination Controls -->
+			if result.TotalPages > 1 {
+				<div class="pagination-container">
+					<div class="pagination">
+						if result.HasPrevious {
+							<a href={ templ.URL("?page=" + fmt.Sprintf("%d", result.Page-1)) } class="pagination-btn">← Previous</a>
+						}
+						
+						for i := 1; i <= result.TotalPages; i++ {
+							if i == result.Page {
+								<span class="pagination-btn pagination-current">{ fmt.Sprintf("%d", i) }</span>
+							} else {
+								<a href={ templ.URL("?page=" + fmt.Sprintf("%d", i)) } class="pagination-btn">{ fmt.Sprintf("%d", i) }</a>
+							}
+						}
+						
+						if result.HasNext {
+							<a href={ templ.URL("?page=" + fmt.Sprintf("%d", result.Page+1)) } class="pagination-btn">Next →</a>
+						}
+					</div>
+					
+					<div class="pagination-info">
+						Showing { fmt.Sprintf("%d", (result.Page-1)*result.PageSize+1) } to { fmt.Sprintf("%d", min(result.Page*result.PageSize, int(result.TotalCount))) } of { fmt.Sprintf("%d", result.TotalCount) } articles
+					</div>
+				</div>
+			}
 		</div>
 	}
 }

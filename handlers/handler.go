@@ -85,7 +85,7 @@ func NewHandlers(
 	api := newApi()
 	app := newApp(db)
 	auth := newAuthentication(db, emailSvc)
-	dashboard := newDashboard()
+	dashboard := newDashboard(db)
 	registration := newRegistration(db, emailSvc)
 	assets := newAssets()
 

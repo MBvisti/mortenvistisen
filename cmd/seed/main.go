@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"log/slog"
-	"time"
 
 	"github.com/mbvisti/mortenvistisen/config"
 	"github.com/mbvisti/mortenvistisen/models/seeds"
@@ -31,14 +30,24 @@ func main() {
 	slog.Info("Starting seed script...")
 
 	seeder := seeds.NewSeeder(pool)
-	_, err = seeder.PlantUser(
-		ctx,
-		seeds.WithUserEmailVerifiedAt(time.Now()),
-		seeds.WithUserEmail("admin@mortenvistisen.com"),
-	)
+
+	// // Create admin user
+	// _, err = seeder.PlantUser(
+	// 	ctx,
+	// 	seeds.WithUserEmailVerifiedAt(time.Now()),
+	// 	seeds.WithUserEmail("admin@mortenvistisen.com"),
+	// )
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// slog.Info("Created admin user")
+	//
+	// Create sample articles for pagination testing
+	articles, err := seeder.PlantArticles(ctx, 25)
 	if err != nil {
 		panic(err)
 	}
+	slog.Info("Created sample articles", "count", len(articles))
 
 	if err := tx.Commit(ctx); err != nil {
 		panic(err)
