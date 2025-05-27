@@ -272,20 +272,20 @@ func NewArticle(formData NewArticleFormData) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "</label></div></div></div><!-- Content Editor Section --><div class=\"form-section\"><h2 class=\"section-title\">Article Content</h2><div class=\"editor-container\"><div class=\"editor-toolbar\"><div class=\"toolbar-group\"><button type=\"button\" class=\"toolbar-btn\" title=\"Bold\"><strong>B</strong></button> <button type=\"button\" class=\"toolbar-btn\" title=\"Italic\"><em>I</em></button> <button type=\"button\" class=\"toolbar-btn\" title=\"Underline\"><u>U</u></button></div><div class=\"toolbar-group\"><button type=\"button\" class=\"toolbar-btn\" title=\"Heading 1\">H1</button> <button type=\"button\" class=\"toolbar-btn\" title=\"Heading 2\">H2</button> <button type=\"button\" class=\"toolbar-btn\" title=\"Heading 3\">H3</button></div><div class=\"toolbar-group\"><button type=\"button\" class=\"toolbar-btn\" title=\"Bullet List\">• List</button> <button type=\"button\" class=\"toolbar-btn\" title=\"Numbered List\">1. List</button></div><div class=\"toolbar-group\"><button type=\"button\" class=\"toolbar-btn\" title=\"Link\">🔗 Link</button> <button type=\"button\" class=\"toolbar-btn\" title=\"Image\">🖼️ Image</button></div></div><div class=\"editor-content\"><textarea class=\"editor-textarea\" name=\"content\" placeholder=\"Start writing your article content here...\n\nThis is where the WYSIWYG editor will be integrated. For now, you can write in Markdown or HTML.\" rows=\"20\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "</label></div></div></div><!-- Content Editor Section --><div class=\"form-section\"><h2 class=\"section-title\">Article Content</h2><div class=\"trix-editor-container\"><!-- Load Trix CSS and JS --><link rel=\"stylesheet\" type=\"text/css\" href=\"/assets/css/trix.css\"><script type=\"text/javascript\" src=\"/assets/js/trix-2.0.8.min.js\"></script><script type=\"text/javascript\" src=\"/assets/js/trix-markdown.js\"></script><!-- Hidden input to store markdown content --><input type=\"hidden\" name=\"content\" id=\"article-content\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(formData.Content)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/new_article.templ`, Line: 202, Col: 26}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/new_article.templ`, Line: 159, Col: 87}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "</textarea></div><div class=\"editor-footer\"><div class=\"editor-help\"><small class=\"text-muted\">💡 Tip: WYSIWYG editor will be integrated here. Currently supports Markdown and HTML.</small></div></div></div></div><!-- Form Actions --><div class=\"form-actions\"><div class=\"action-buttons\"><button type=\"submit\" name=\"action\" value=\"save_draft\" class=\"btn-secondary\">💾 Save as Draft</button> <button type=\"submit\" name=\"action\" value=\"publish\" class=\"btn-primary\">🚀 Publish Article</button></div></div></form></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "\"><!-- Trix Editor --><trix-editor data-markdown-target=\"article-content\" placeholder=\"Start writing your article content here...\" class=\"trix-content\"></trix-editor><div class=\"editor-footer\"><div class=\"editor-help\"><small class=\"text-muted\">💡 Content will be automatically converted to Markdown format for storage.</small></div></div></div></div><!-- Form Actions --><div class=\"form-actions\"><div class=\"action-buttons\"><button type=\"submit\" name=\"action\" value=\"save_draft\" class=\"btn-secondary\">💾 Save as Draft</button> <button type=\"submit\" name=\"action\" value=\"publish\" class=\"btn-primary\">🚀 Publish Article</button></div></div></form></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

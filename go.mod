@@ -18,6 +18,8 @@ require (
 	github.com/riverqueue/river/riverdriver/riverpgxv5 v0.22.0
 	github.com/stretchr/testify v1.10.0
 	github.com/vanng822/go-premailer v1.20.2
+	github.com/yuin/goldmark v1.4.15
+	github.com/yuin/goldmark-highlighting/v2 v2.0.0-20230729083705-37449abec8cc
 	go.opentelemetry.io/otel v1.36.0
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp v1.36.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.36.0
@@ -34,9 +36,11 @@ require (
 )
 
 require (
+	github.com/alecthomas/chroma/v2 v2.2.0 // indirect
 	github.com/andybalholm/cascadia v1.3.3 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.2 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
+	github.com/dlclark/regexp2 v1.7.0 // indirect
 	github.com/dolthub/maphash v0.1.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.8 // indirect
 	github.com/gammazero/deque v0.2.1 // indirect

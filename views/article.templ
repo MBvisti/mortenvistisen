@@ -1,6 +1,8 @@
 package views
 
 import "github.com/mbvisti/mortenvistisen/views/internal/layouts"
+import "context"
+import "io"
 
 templ ArticleCallToAction() {
 	<section class="article-cta full-width article-grid">
@@ -8,125 +10,17 @@ templ ArticleCallToAction() {
 	</section>
 }
 
-templ Article() {
+func unsafe(html string) templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
+		_, err = io.WriteString(w, html)
+		return
+	})
+}
+
+templ Article(content string) {
 	<main class="main">
 		<article class="article-grid">
-			<img class="article-img" src="https://plus.unsplash.com/premium_photo-1661877737564-3dfd7282efcb?q=80&w=1500&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"/>
-			<h1>Why you should use Go</h1>
-			<p>2024-10-04 by mbv</p>
-			<p>I've been writing Go for some time now, close to 7 years. But it wasn't where I originally started out in my tech career.</p>
-			<p>My first job was at a place where their core competency where backend and databases. Bootstrap, the defacto fronted library for multiple years at the time, was something completely new to them.</p>
-			<p>UI/UX was mostly an afterthought but since the clients were large accounting companies, it didn't matter. The clients were happy with the colour blue and lots square of boxes.</p>
-			<pre class="breakout" style="color:#ebdbb2;background-color:#282828;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
-				<code>
-					<span style="display:flex;">
-						<span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#756d59">
-							1
-						</span>
-						<span>
-							<span style="color:#fe8019">package</span> posts
-						</span>
-					</span>
-					<span style="display:flex;">
-						<span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#756d59">2</span>
-						<span></span>
-					</span>
-					<span style="display:flex;">
-						<span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#756d59">3</span>
-						<span>
-							<span style="color:#928374;font-style:italic">
-								// imports omitted</span>
-							</span>
-						</span>
-						<span style="display:flex;">
-							<span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#756d59">4</span>
-							<span></span>
-						</span>
-						<span style="display:flex;">
-							<span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#756d59">5</span>
-							<span>
-								<span style="color:#928374;font-style:italic">
-									//go:embed *.md</span>
-								</span>
-							</span>
-							<span style="display:flex;">
-								<span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#756d59">6</span>
-								<span>
-									<span style="color:#fe8019">var</span> Assets embed.FS
-								</span>
-							</span>
-						</span>
-					</span>
-				</code>
-			</pre>
-			<p>I also don't have a traditional background in computer science and have been self-taught all the way which probably was also why I ended up in frontend to begin with. It was the safer place to put me.</p>
-			@ArticleCallToAction()
-			<p>So I started learning the same way I do for everything else, typing "how to learn frontend" into Google.</p>
-			<p>React was just breaking away, in terms of popularity, from Angular at the time and was still in the good 'ol pre hook days. I eventually became proficient with React and would mainly write it (and JS/TS) for the next couple of years.</p>
-			<p>But, something kept happening. Everything seemed consistently out of date as new tools/libraries/frameworks were being shipped every day that you just <em>had to use</em> and keep up with.</p>
-			<p>As React grew, which it did immensely over the last ~10 years, they seem to think that every requirement known to man must be covered. The move away from classes and redux to functional components and hooks felt awesome, in the beginning. Now you need a PhD to efficiently use them and either manage a large state object being passed around or an alarming number of <code>useState</code> in each component.</p>
-			<p>I, thankfully, don't write much React anymore and have gone back to the roots: plain old HTML which. And thanks some <a href="https://htmx.org?ref=mortenvistisen.com">guy from Montana</a> I still get 90% of the interactivity you get with a SPA app.</p>
-			<p>So, let me explain why I think you should use Go and why I fell in love with it.</p>
-			<p>If you just want the tl;dr: there often is only one way to do a thing and that let's you focus on building the product.</p>
-			<div class="bg-body p-4 my-4">
-				<p class="fw-semibold fs-4">I'm building a course!</p>
-				<p class="fs-6">
-					Sorry to interrupt, I'm working on a course that shows you to build modern web apps using Golang, HTMX and Templ.
-				</p>
-				<p class="fs-6">
-					If you want to learn how to build a professional blog with Go, like this one, check it out: 
-				</p>
-				<a data-umami-event="course--golang-blog-course-article" class="btn bg-primary" href="https://golangblogcourse.com?ref=mortenvistisen.com/a-love-letter-to-golang" target="_blank">Here</a>
-			</div>
-			<h2 id="limited-choice">Limited choice</h2>
-			<p>When writing Go, you'd often find that a solution to a problem tends to converge to a common conclusion across different teams/people/projects.</p>
-			<p>Some time ago I was frustrated that a validation library I was using didn't make it easy to do what I wanted it to. So I did what every other good engineer does and wasted a couple of days writing my own solution.</p>
-			<p>This was on my own time, after all, so fuck it.</p>
-			<p>About halfway through, I started to look into what other people had done and across multiple different projects, the solution to the problem was implemented in a very similar way.</p>
-			<p>Of course, this might be due to every library that comes after the first one copies the code. But that's not my general experience. Solutions to similar problems seem to converge due to Golang's strict feature set.</p>
-			<p>One criticism I often see is that Go doesn't allow developers to "express" themselves in code. Which, honestly, is bullshit. You're not Picasso, you get paid tons of money to sit in a cosy office and drink kombucha directly from tab.</p>
-			<p>Express yourself in system designs and elegant solutions if you'd like, but leave the code alone mate.</p>
-			<p>It's very difficult to spot an individual's contribution to a Go codebase without looking into the commit history. There is not much room to be eccentric or have your own style. Again, sounds rather boring but it ends up working extremely well when you care about building and shipping digital products.</p>
-			<p>The solution is what you focus on.</p>
-			<h3 id="simple-syntax--easy-onboarding">Simple syntax &amp; easy onboarding</h3>
-			<p>The syntax is very minimalistic with only 25 keywords to learn from which you probably need like, what, two-thirds?</p>
-			<p>It's incredibly fast to pick up. Whenever I have introduced Go to teams where I've worked as a consultant people generally write good Go after a week or two. Doesn't really matter if they're completely fresh out of school, work in a different way or have a lot of experience in another language.</p>
-			<p>People generally tend to pick up Go fast which, I think, comes from its readability.</p>
-			<p>To me, it's not as beautiful as you might look at a piece of Rust code you spend 8 story points writing, only to find out that it didn't match stakeholder expectations once it finishes compiling at the end of the sprint.</p>
-			<p>No, it's practical and boring and allows me to focus on what should be the more interesting part of my job, the problem. There is no need to argue over which linter style (or which linter) to use, it's decided for you and will be the same for everybody on the team.</p>
-			<h2 id="everything-you-need-in-one-place">Everything you need in one place</h2>
-			<p>The standard library is fucking amazing. It brings a certain amount of calm to your projects as you can be certain that it will be maintained and won't have to make tons of rewrites to update.</p>
-			<p>Most things you want to build related to the web you can get done using just the standard library. There are other libraries that make certain parts better but they are not strictly necessary.</p>
-			<p>But, maybe just as important, the Golang toolchain ships with a linter and a standard for how to apply linting rules. This is generally something most developers have an opinion on that doesn't really add value, only take away value, if different styles are used. Just use one and get on with it.</p>
-			<h2 id="go-is-ripe-for-web-development">Go is ripe for Web Development</h2>
-			<p>In recent years, projects in the Go ecosystem have made it even easier to build full-stack apps only using Go.</p>
-			<p>The main thing, in my opinion, that has come out of the ecosystem that will help propel full-stack development in Go is Templ.</p>
-			<p>The creators behind it talk about (paraphrasing) that one of the "issues" we see is that lots of frontend/full-stack developers have only seen the SPA way of doing things. Hypermedia, anchor tags and forms are, in their native form, strange concepts. So, they wanted to create something that would allow them to think in components but still be completely valid HTML.</p>
-			<p>If you've ever done any Django, rails or Laravel development this way of doing frontends is most likely very familiar to you.</p>
-			<p>Use a base template to wrap the application, have some views for specific pages and abstract elements like buttons, tables etc into components for re-usability so that your API is no longer JSON-driven but hypermedia-driven.</p>
-			<p>You're creating a contract as you do with JSON-based APIs but now the consumer of the contract, the client, is much more tightly coupled to the API.</p>
-			<p>Ironically, this tigher coupling makes breaking changes less likely, lower maintenance and the system as a whole becomes easier to reason about. When developing this way, you don't have developers that's only frontend or backend. You must be both.</p>
-			<p>You can still have a preference, of course, but the two are much closer together so changes and their effects will be easier to spot.</p>
-			<h2 id="a-straightforward-database-layer">A straightforward database layer</h2>
-			<p>When I first started out in Go, the database layer was one of the most repetitive parts. Lots of "=+" for setting up query statements, scanning the rows into structures etc. You were writing sql but also not really.</p>
-			<p>Sqlc gets mentioned on forums quite often, and for good reasons, it lets you stay in the domain of SQL and solves the majority of queries I have.</p>
-			<p>It removes a lot of the boilerplate by generating type-safe code and takes care of scanning the results into what matches your database structure, validates that the fields are correct.</p>
-			<p>You'll have to reach for something else when doing dynamic queries, but adding something like squirrel to the mix is quite straightfoward. And since you can quite easily just add the generated methods from sqlc as a dependency to a database struct, having both is trivial.</p>
-			<h2 id="deployment-is-a-joy">Deployment is a joy</h2>
-			<p>Once you've tasted the joy of single binary deployments it's hard to Go back.</p>
-			<p>You can go super simple: rent a VPS, add a service to Systemd and you're up and running.</p>
-			<p>But as you might have experienced if you've written some Go, it works very well with Docker. Given that it builds and outputs a single binary, you can get super slim docker images. Like 10mbs slim. Just getting started doing that with Python and you quickly approach 1gb. But storage is cheap I guess.</p>
-			<p>I tend to build a docker image that contains the app and some tooling, for things like running migrations, and I often end up with a docker image around 100mb.</p>
-			<h2 id="concurrency">Concurrency</h2>
-			<p>It's rather hard to make a Go appreciation post without talking about concurrency. It's very good, but I honestly don't use it that often.</p>
-			<p>I usually take advantage of it whenever I have to do some data processing but in most of my work, it's not really that common. It's built into the packages you rely on and given its, comparatively, easy approach it becomes much more approachable.</p>
-			<p>It's there if I do need it.</p>
-			<h2 id="performant-and-efficient">Performant and efficient</h2>
-			<p>This is always nice to throw in the mix when trying to shill Golang to other people.</p>
-			<p>Even though it's not the main reason for choosing Go it is very nice to know that your APIs are performant almost straight out of the box and don't eat up a lot of RAM. Depending on what you're doing this can have a financial benefit as you'd be using up fewer cloud resources.</p>
-			<p>I'm hosting quite a few apps on a small VM right now where the memory overhead is negligible.</p>
-			<hr/>
-			<div class="mt-10"><p class="text-white text-neutral-content">Thanks for reading. </p><p class="text-white">If you enjoyed this one you can check one some of these:</p><ul class="list-disc list-outside"><li><a href="practical-approach-to-structuring-go-apps" class="text-neutral-content text-base hover:text-teal-700">Opinionated guide to structuring Golang apps</a></li><li><a href="how-to-build-a-simple-blog-using-rust" class="text-neutral-content text-base hover:text-teal-700">Building a blogging website with Rust</a></li><li><a href="one-month-one-dollar-part-two" class="text-neutral-content text-base hover:text-teal-700">One month to make one dollar: Part two</a></li><li><a href="how-to-create-a-blog-using-golang" class="text-neutral-content text-base hover:text-teal-700">Building a blogging website with Golang</a></li><li><a href="building-a-saas-in-five-days" class="text-neutral-content text-base hover:text-teal-700">Reflections on trying to build a saas product in 5 days</a></li></ul></div>
+			@unsafe(content)
 		</article>
 	</main>
 }
