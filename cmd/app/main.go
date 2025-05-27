@@ -41,11 +41,13 @@ func run(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("failed to initialize telemetry: %w", err)
 	}
-	defer func() {
-		if err := tel.Shutdown(ctx); err != nil {
-			slog.Error("Failed to shutdown telemetry", "error", err)
-		}
-	}()
+	if cfg.Environment == config.PROD_ENVIRONMENT {
+		defer func() {
+			if err := tel.Shutdown(ctx); err != nil {
+				slog.Error("Failed to shutdown telemetry", "error", err)
+			}
+		}()
+	}
 
 	if err := telemetry.SetupRuntimeMetricsInCallback(telemetry.GetMeter()); err != nil {
 		return fmt.Errorf("failed to setup callback metrics: %w", err)
@@ -70,11 +72,13 @@ func run(ctx context.Context) error {
 			WithTraces: true,
 		},
 	)
-	defer func() {
-		if err := queueLoggerShutdown(ctx); err != nil {
-			slog.Error("Failed to shutdown telemetry", "error", err)
-		}
-	}()
+	if cfg.Environment == config.PROD_ENVIRONMENT {
+		defer func() {
+			if err := queueLoggerShutdown(ctx); err != nil {
+				slog.Error("Failed to shutdown telemetry", "error", err)
+			}
+		}()
+	}
 
 	psql := psql.NewPostgres(conn, nil)
 	psql.NewQueue(
@@ -126,6 +130,7 @@ func run(ctx context.Context) error {
 	if err := psql.Queue().Start(ctx); err != nil {
 		return err
 	}
+
 	return server.Start(c)
 }
 

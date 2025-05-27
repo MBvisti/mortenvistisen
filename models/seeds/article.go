@@ -16,14 +16,14 @@ type articleSeedData struct {
 	ID              uuid.UUID
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
-	PublishedAt     *time.Time
+	PublishedAt     time.Time
 	Title           string
 	Excerpt         string
 	MetaTitle       string
 	MetaDescription string
 	Slug            string
-	ImageLink       *string
-	Content         *string
+	ImageLink       string
+	Content         string
 }
 
 type articleSeedOption func(*articleSeedData)
@@ -48,7 +48,7 @@ func WithArticleUpdatedAt(updatedAt time.Time) articleSeedOption {
 
 func WithArticlePublishedAt(publishedAt time.Time) articleSeedOption {
 	return func(asd *articleSeedData) {
-		asd.PublishedAt = &publishedAt
+		asd.PublishedAt = publishedAt
 	}
 }
 
@@ -92,13 +92,13 @@ func WithArticleSlug(slug string) articleSeedOption {
 
 func WithArticleImageLink(imageLink string) articleSeedOption {
 	return func(asd *articleSeedData) {
-		asd.ImageLink = &imageLink
+		asd.ImageLink = imageLink
 	}
 }
 
 func WithArticleContent(content string) articleSeedOption {
 	return func(asd *articleSeedData) {
-		asd.Content = &content
+		asd.Content = content
 	}
 }
 
@@ -107,13 +107,13 @@ func WithPublishedArticle() articleSeedOption {
 		publishedAt := asd.CreatedAt.Add(
 			time.Duration(rand.IntN(24)) * time.Hour,
 		)
-		asd.PublishedAt = &publishedAt
+		asd.PublishedAt = publishedAt
 	}
 }
 
 func WithDraftArticle() articleSeedOption {
 	return func(asd *articleSeedData) {
-		asd.PublishedAt = nil
+		asd.PublishedAt = time.Time{}
 	}
 }
 
@@ -133,7 +133,7 @@ func (s Seeder) PlantArticle(
 		MetaTitle:       title,
 		MetaDescription: generateMetaDescription(),
 		Slug:            generateSlug(title),
-		Content:         stringPtr(generateContent()),
+		Content:         generateContent(),
 	}
 
 	// 70% chance of being published
@@ -141,7 +141,7 @@ func (s Seeder) PlantArticle(
 		publishedAt := data.CreatedAt.Add(
 			time.Duration(rand.IntN(24)) * time.Hour,
 		)
-		data.PublishedAt = &publishedAt
+		data.PublishedAt = publishedAt
 	}
 
 	for _, opt := range opts {
@@ -164,7 +164,7 @@ func (s Seeder) PlantArticle(
 	// Update timestamps and published status if needed
 	if !data.CreatedAt.Equal(article.CreatedAt) ||
 		!data.UpdatedAt.Equal(article.UpdatedAt) ||
-		data.PublishedAt != nil {
+		!data.PublishedAt.IsZero() {
 		article, err = models.UpdateArticle(
 			ctx,
 			s.dbtx,

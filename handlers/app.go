@@ -72,8 +72,16 @@ func (a App) ArticlePage(c echo.Context) error {
 		return err
 	}
 
+	slog.Info(
+		"$$$$$$$$$$$$$$$$$$$$$$$$",
+		"article",
+		article.Content,
+		"id",
+		article.ID,
+	)
+
 	manager := NewManager()
-	ar, e := manager.ParseContent(*article.Content)
+	ar, e := manager.ParseContent(article.Content)
 	if e != nil {
 		return err
 	}

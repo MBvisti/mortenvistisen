@@ -17,7 +17,6 @@ type NewArticleFormData struct {
 
 templ NewArticle(formData NewArticleFormData) {
 	@layouts.Dashboard() {
-		<!-- Page Header -->
 		<div class="dashboard-header">
 			<div class="header-content">
 				<h1 class="dashboard-title">Create New Article</h1>
@@ -26,13 +25,9 @@ templ NewArticle(formData NewArticleFormData) {
 				</div>
 			</div>
 		</div>
-
-		<!-- Article Creation Form -->
 		<div class="article-form-container">
 			<form method="POST" action="/dashboard/articles/new" class="article-form">
 				@components.CsrfField(formData.CsrfToken)
-				
-				<!-- Article Metadata Section -->
 				<div class="form-section">
 					<h2 class="section-title">Article Information</h2>
 					<div class="form-grid">
@@ -49,7 +44,6 @@ templ NewArticle(formData NewArticleFormData) {
 								},
 							)
 						</div>
-						
 						<div class="form-row">
 							@components.InputField(
 								"Slug",
@@ -63,7 +57,6 @@ templ NewArticle(formData NewArticleFormData) {
 								},
 							)
 						</div>
-						
 						<div class="form-row">
 							<label class="form-control w-full">
 								<div class="label">
@@ -86,7 +79,6 @@ templ NewArticle(formData NewArticleFormData) {
 								}
 							</label>
 						</div>
-						
 						<div class="form-row">
 							@components.InputField(
 								"Featured Image URL",
@@ -102,8 +94,6 @@ templ NewArticle(formData NewArticleFormData) {
 						</div>
 					</div>
 				</div>
-
-				<!-- SEO Metadata Section -->
 				<div class="form-section">
 					<h2 class="section-title">SEO Metadata</h2>
 					<div class="form-grid">
@@ -120,7 +110,6 @@ templ NewArticle(formData NewArticleFormData) {
 								},
 							)
 						</div>
-						
 						<div class="form-row">
 							<label class="form-control w-full">
 								<div class="label">
@@ -145,48 +134,27 @@ templ NewArticle(formData NewArticleFormData) {
 						</div>
 					</div>
 				</div>
-
-				<!-- Content Editor Section -->
 				<div class="form-section">
 					<h2 class="section-title">Article Content</h2>
 					<div class="trix-editor-container">
-						<!-- Load Trix CSS and JS -->
-						<link rel="stylesheet" type="text/css" href="/assets/css/trix.css"/>
-						<script type="text/javascript" src="/assets/js/trix-2.0.8.min.js"></script>
-						<script type="text/javascript" src="/assets/js/trix-markdown.js"></script>
-						
-						<!-- Hidden input to store markdown content -->
-						<input type="hidden" name="content" id="article-content" value={ formData.Content }/>
-						
-						<!-- Trix Editor -->
-						<trix-editor 
-							data-markdown-target="article-content"
-							placeholder="Start writing your article content here..."
-							class="trix-content"
-						></trix-editor>
-						
-						<div class="editor-footer">
-							<div class="editor-help">
-								<small class="text-muted">
-									💡 Content will be automatically converted to Markdown format for storage.
-								</small>
-							</div>
-						</div>
+						<input id="my-text-area" name="content"/>
+						<!-- <input type="hidden" name="content" id="article-content" value={ formData.Content }/>-->
+						<!-- <trix-editor class="trix-content" input="x"></trix-editor> -->
 					</div>
 				</div>
-
-				<!-- Form Actions -->
 				<div class="form-actions">
 					<div class="action-buttons">
 						<button type="submit" name="action" value="save_draft" class="btn-secondary">
-							💾 Save as Draft
+							Save as Draft
 						</button>
 						<button type="submit" name="action" value="publish" class="btn-primary">
-							🚀 Publish Article
+							Publish Article
 						</button>
 					</div>
 				</div>
 			</form>
+			<link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css"/>
+			<script type="module" src="/assets/js/easymde.js"></script>
 		</div>
 	}
 }

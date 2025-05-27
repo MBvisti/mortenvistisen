@@ -20,7 +20,6 @@ templ Home(result models.PaginationResult) {
 				Welcome back, Admin
 			</div>
 		</div>
-
 		<!-- Statistics Cards -->
 		<div class="stats-grid">
 			<div class="stat-card">
@@ -36,7 +35,6 @@ templ Home(result models.PaginationResult) {
 				<p class="stat-label">Drafts</p>
 			</div>
 		</div>
-
 		<!-- Articles Section -->
 		<div class="articles-section">
 			<div class="section-header">
@@ -63,7 +61,7 @@ templ Home(result models.PaginationResult) {
 							<tr>
 								<td>{ article.Title }</td>
 								<td>
-									if article.PublishedAt != nil {
+									if !article.PublishedAt.IsZero() {
 										<span class="status-badge status-published">Published</span>
 									} else {
 										<span class="status-badge status-draft">Draft</span>
@@ -83,7 +81,6 @@ templ Home(result models.PaginationResult) {
 					}
 				</tbody>
 			</table>
-			
 			<!-- Pagination Controls -->
 			if result.TotalPages > 1 {
 				<div class="pagination-container">
@@ -91,7 +88,6 @@ templ Home(result models.PaginationResult) {
 						if result.HasPrevious {
 							<a href={ templ.URL("?page=" + fmt.Sprintf("%d", result.Page-1)) } class="pagination-btn">← Previous</a>
 						}
-						
 						for i := 1; i <= result.TotalPages; i++ {
 							if i == result.Page {
 								<span class="pagination-btn pagination-current">{ fmt.Sprintf("%d", i) }</span>
@@ -99,12 +95,10 @@ templ Home(result models.PaginationResult) {
 								<a href={ templ.URL("?page=" + fmt.Sprintf("%d", i)) } class="pagination-btn">{ fmt.Sprintf("%d", i) }</a>
 							}
 						}
-						
 						if result.HasNext {
 							<a href={ templ.URL("?page=" + fmt.Sprintf("%d", result.Page+1)) } class="pagination-btn">Next →</a>
 						}
 					</div>
-					
 					<div class="pagination-info">
 						Showing { fmt.Sprintf("%d", (result.Page-1)*result.PageSize+1) } to { fmt.Sprintf("%d", min(result.Page*result.PageSize, int(result.TotalCount))) } of { fmt.Sprintf("%d", result.TotalCount) } articles
 					</div>

@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"context"
+	"log/slog"
 	"strconv"
 	"time"
 
@@ -8,6 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/mbvisti/mortenvistisen/models"
 	"github.com/mbvisti/mortenvistisen/psql"
+	"github.com/mbvisti/mortenvistisen/router/contexts"
 	"github.com/mbvisti/mortenvistisen/views/dashboard"
 )
 
@@ -21,9 +24,13 @@ func newDashboard(db psql.Postgres) Dashboard {
 	}
 }
 
-func (d Dashboard) Index(ctx echo.Context) error {
+func extractCtx(c echo.Context) context.Context {
+	return c.Request().Context()
+}
+
+func (d Dashboard) Index(c echo.Context) error {
 	// Get page parameter from query string, default to 1
-	pageStr := ctx.QueryParam("page")
+	pageStr := c.QueryParam("page")
 	page := 1
 	if pageStr != "" {
 		if p, err := strconv.Atoi(pageStr); err == nil && p > 0 {
@@ -34,7 +41,7 @@ func (d Dashboard) Index(ctx echo.Context) error {
 	// Get articles with pagination
 	pageSize := 10
 	result, err := models.GetArticlesPaginated(
-		setAppCtx(ctx),
+		extractCtx(c),
 		d.db.Pool,
 		page,
 		pageSize,
@@ -52,89 +59,117 @@ func (d Dashboard) Index(ctx echo.Context) error {
 		}
 	}
 
-	return dashboard.Home(result).Render(renderArgs(ctx))
+	return dashboard.Home(result).Render(renderArgs(c))
 }
 
-func (d Dashboard) NewArticle(ctx echo.Context) error {
+func (d Dashboard) NewArticle(c echo.Context) error {
 	formData := dashboard.NewArticleFormData{
-		CsrfToken: csrf.Token(ctx.Request()),
+		CsrfToken: csrf.Token(c.Request()),
 		Errors:    make(map[string][]string),
 	}
 
-	return dashboard.NewArticle(formData).Render(renderArgs(ctx))
+	return dashboard.NewArticle(formData).Render(renderArgs(c))
 }
 
-func (d Dashboard) StoreArticle(ctx echo.Context) error {
-	// Parse form data
-	title := ctx.FormValue("title")
-	excerpt := ctx.FormValue("excerpt")
-	metaTitle := ctx.FormValue("meta_title")
-	metaDescription := ctx.FormValue("meta_description")
-	slug := ctx.FormValue("slug")
-	imageLink := ctx.FormValue("image_link")
-	content := ctx.FormValue("content")
-	action := ctx.FormValue("action") // "save_draft" or "publish"
-
-	// Prepare form data for re-rendering on error
-	formData := dashboard.NewArticleFormData{
-		Title:           title,
-		Excerpt:         excerpt,
-		MetaTitle:       metaTitle,
-		MetaDescription: metaDescription,
-		Slug:            slug,
-		ImageLink:       imageLink,
-		Content:         content,
-		CsrfToken:       csrf.Token(ctx.Request()),
-		Errors:          make(map[string][]string),
+func (d Dashboard) StoreArticle(c echo.Context) error {
+	type payload struct {
+		Title           string `form:"title"`
+		Excerpt         string `form:"excerpt"`
+		MetaTitle       string `form:"meta_title"`
+		MetaDescription string `form:"meta_description"`
+		Slug            string `form:"slug"`
+		ImageLink       string `form:"image_link"`
+		Content         string `form:"content"`
+		Action          string `form:"action"`
 	}
 
-	// Prepare payload
-	payload := models.NewArticlePayload{
-		Title:           title,
-		Excerpt:         excerpt,
-		MetaTitle:       metaTitle,
-		MetaDescription: metaDescription,
-		Slug:            slug,
-		Content:         &content,
+	var articlePayload payload
+	if err := c.Bind(&articlePayload); err != nil {
+		return err
 	}
 
-	// Handle optional image link
-	if imageLink != "" {
-		payload.ImageLink = &imageLink
-	}
+	slog.Info(
+		"################### CONTENT ###################",
+		"content",
+		articlePayload.Content,
+	)
 
-	// Create the article
-	article, err := models.NewArticle(setAppCtx(ctx), d.db.Pool, payload)
+	article, err := models.NewArticle(
+		extractCtx(c),
+		d.db.Pool,
+		models.NewArticlePayload{
+			Title:           articlePayload.Title,
+			Excerpt:         articlePayload.Excerpt,
+			MetaTitle:       articlePayload.MetaTitle,
+			MetaDescription: articlePayload.MetaDescription,
+			Slug:            articlePayload.Slug,
+			ImageLink:       articlePayload.ImageLink,
+			Content:         articlePayload.Content,
+		},
+	)
 	if err != nil {
-		// Handle validation errors
 		if validationErrors := extractValidationErrors(err); validationErrors != nil {
-			formData.Errors = validationErrors
-			return dashboard.NewArticle(formData).Render(renderArgs(ctx))
+			// formData.Errors = validationErrors
+			// return dashboard.NewArticle(formData).Render(renderArgs(c))
+			slog.ErrorContext(
+				extractCtx(c),
+				"could not validate article payload",
+				"error",
+				err,
+			)
 		}
 
-		// Handle other errors (like duplicate slug)
-		_ = addFlash(ctx, "error", "Failed to create article. Please try again.")
-		return dashboard.NewArticle(formData).Render(renderArgs(ctx))
+		if err := addFlash(
+			c,
+			contexts.FlashError,
+			"Failed to create article. Please try again.",
+		); err != nil {
+			return err
+		}
+
+		return dashboard.NewArticle(dashboard.NewArticleFormData{}).
+			Render(renderArgs(c))
 	}
 
-	// If action is "publish", publish the article
-	if action == "publish" {
+	if articlePayload.Action == "on" {
 		now := time.Now()
-		_, err = models.PublishArticle(setAppCtx(ctx), d.db.Pool, models.PublishArticlePayload{
-			ID:          article.ID,
-			UpdatedAt:   now,
-			PublishedAt: now,
-		})
+		_, err = models.PublishArticle(
+			extractCtx(c),
+			d.db.Pool,
+			models.PublishArticlePayload{
+				ID:          article.ID,
+				UpdatedAt:   now,
+				PublishedAt: now,
+			},
+		)
 		if err != nil {
 			// Article was created but publishing failed
-			_ = addFlash(ctx, "warning", "Article created as draft. Publishing failed.")
-		} else {
-			_ = addFlash(ctx, "success", "Article published successfully!")
+			if err := addFlash(
+				c,
+				contexts.FlashError,
+				"Article created as draft. Publishing failed.",
+			); err != nil {
+				return err
+			}
 		}
-	} else {
-		_ = addFlash(ctx, "success", "Article saved as draft!")
+
+		if err := addFlash(
+			c,
+			contexts.FlashSuccess,
+			"Article published successfully!",
+		); err != nil {
+			return err
+		}
+	}
+
+	if err := addFlash(
+		c,
+		contexts.FlashSuccess,
+		"Article saved as draft successfully!",
+	); err != nil {
+		return err
 	}
 
 	// Redirect to dashboard
-	return ctx.Redirect(302, "/dashboard")
+	return c.Redirect(302, "/dashboard")
 }

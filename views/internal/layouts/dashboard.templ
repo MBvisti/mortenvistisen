@@ -11,10 +11,10 @@ templ Dashboard() {
 		<head>
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-			<title>Dashboard - Grafto</title>
+			<title>Dashboard - MBV</title>
 			<link href={ fmt.Sprintf("%s/%v?%v", config.Cfg.GetFullDomain(), routes.CssEntrypoint.Path, time.Now().Unix()) } rel="stylesheet"/>
-			<link rel="icon" type="image/png" sizes="16x16" href={ routes.Favicon16.Path }/>
-			<link rel="icon" type="image/png" sizes="32x32" href={ routes.Favicon32.Path }/>
+			<!-- <link rel="icon" type="image/png" sizes="16x16" href={ routes.Favicon16.Path }/> -->
+			<!-- <link rel="icon" type="image/png" sizes="32x32" href={ routes.Favicon32.Path }/> -->
 			<script src={ fmt.Sprintf("%s/%v?%v", config.Cfg.GetFullDomain(), routes.JsEntrypoint.Path, time.Now().Unix()) } type="module"></script>
 		</head>
 		<body>

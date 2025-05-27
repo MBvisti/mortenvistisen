@@ -15,18 +15,18 @@ type Article struct {
 	ID              uuid.UUID
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
-	PublishedAt     *time.Time
+	PublishedAt     time.Time
 	Title           string
 	Excerpt         string
 	MetaTitle       string
 	MetaDescription string
 	Slug            string
-	ImageLink       *string
-	Content         *string
+	ImageLink       string
+	Content         string
 }
 
 func (a Article) IsPublished() bool {
-	return a.PublishedAt != nil && !a.PublishedAt.IsZero()
+	return !a.PublishedAt.IsZero()
 }
 
 func (a Article) IsDraft() bool {
@@ -47,14 +47,14 @@ func GetArticleByID(
 		ID:              row.ID,
 		CreatedAt:       row.CreatedAt.Time,
 		UpdatedAt:       row.UpdatedAt.Time,
-		PublishedAt:     nullTimeToPointer(row.PublishedAt),
+		PublishedAt:     row.PublishedAt.Time,
 		Title:           row.Title,
 		Excerpt:         row.Excerpt,
 		MetaTitle:       row.MetaTitle,
 		MetaDescription: row.MetaDescription,
 		Slug:            row.Slug,
-		ImageLink:       nullStringToPointer(row.ImageLink),
-		Content:         nullStringToPointer(row.Content),
+		ImageLink:       row.ImageLink.String,
+		Content:         row.Content.String,
 	}, nil
 }
 
@@ -72,14 +72,14 @@ func GetArticleByTitle(
 		ID:              row.ID,
 		CreatedAt:       row.CreatedAt.Time,
 		UpdatedAt:       row.UpdatedAt.Time,
-		PublishedAt:     nullTimeToPointer(row.PublishedAt),
+		PublishedAt:     row.PublishedAt.Time,
 		Title:           row.Title,
 		Excerpt:         row.Excerpt,
 		MetaTitle:       row.MetaTitle,
 		MetaDescription: row.MetaDescription,
 		Slug:            row.Slug,
-		ImageLink:       nullStringToPointer(row.ImageLink),
-		Content:         nullStringToPointer(row.Content),
+		ImageLink:       row.ImageLink.String,
+		Content:         row.Content.String,
 	}, nil
 }
 
@@ -97,14 +97,14 @@ func GetArticleBySlug(
 		ID:              row.ID,
 		CreatedAt:       row.CreatedAt.Time,
 		UpdatedAt:       row.UpdatedAt.Time,
-		PublishedAt:     nullTimeToPointer(row.PublishedAt),
+		PublishedAt:     row.PublishedAt.Time,
 		Title:           row.Title,
 		Excerpt:         row.Excerpt,
 		MetaTitle:       row.MetaTitle,
 		MetaDescription: row.MetaDescription,
 		Slug:            row.Slug,
-		ImageLink:       nullStringToPointer(row.ImageLink),
-		Content:         nullStringToPointer(row.Content),
+		ImageLink:       row.ImageLink.String,
+		Content:         row.Content.String,
 	}, nil
 }
 
@@ -123,14 +123,14 @@ func GetArticles(
 			ID:              row.ID,
 			CreatedAt:       row.CreatedAt.Time,
 			UpdatedAt:       row.UpdatedAt.Time,
-			PublishedAt:     nullTimeToPointer(row.PublishedAt),
+			PublishedAt:     row.PublishedAt.Time,
 			Title:           row.Title,
 			Excerpt:         row.Excerpt,
 			MetaTitle:       row.MetaTitle,
 			MetaDescription: row.MetaDescription,
 			Slug:            row.Slug,
-			ImageLink:       nullStringToPointer(row.ImageLink),
-			Content:         nullStringToPointer(row.Content),
+			ImageLink:       row.ImageLink.String,
+			Content:         row.Content.String,
 		}
 	}
 
@@ -152,14 +152,14 @@ func GetPublishedArticles(
 			ID:              row.ID,
 			CreatedAt:       row.CreatedAt.Time,
 			UpdatedAt:       row.UpdatedAt.Time,
-			PublishedAt:     nullTimeToPointer(row.PublishedAt),
+			PublishedAt:     row.PublishedAt.Time,
 			Title:           row.Title,
 			Excerpt:         row.Excerpt,
 			MetaTitle:       row.MetaTitle,
 			MetaDescription: row.MetaDescription,
 			Slug:            row.Slug,
-			ImageLink:       nullStringToPointer(row.ImageLink),
-			Content:         nullStringToPointer(row.Content),
+			ImageLink:       row.ImageLink.String,
+			Content:         row.Content.String,
 		}
 	}
 
@@ -181,14 +181,14 @@ func GetDraftArticles(
 			ID:              row.ID,
 			CreatedAt:       row.CreatedAt.Time,
 			UpdatedAt:       row.UpdatedAt.Time,
-			PublishedAt:     nullTimeToPointer(row.PublishedAt),
+			PublishedAt:     row.PublishedAt.Time,
 			Title:           row.Title,
 			Excerpt:         row.Excerpt,
 			MetaTitle:       row.MetaTitle,
 			MetaDescription: row.MetaDescription,
 			Slug:            row.Slug,
-			ImageLink:       nullStringToPointer(row.ImageLink),
-			Content:         nullStringToPointer(row.Content),
+			ImageLink:       row.ImageLink.String,
+			Content:         row.Content.String,
 		}
 	}
 
@@ -230,10 +230,16 @@ func GetArticlesPaginated(
 	}
 
 	// Get paginated articles
-	rows, err := db.Stmts.QueryArticlesPaginated(ctx, dbtx, db.QueryArticlesPaginatedParams{
-		Limit:  int32(pageSize), //nolint:gosec // pageSize is bounded above
-		Offset: int32(offset),   //nolint:gosec // offset is calculated from bounded values
-	})
+	rows, err := db.Stmts.QueryArticlesPaginated(
+		ctx,
+		dbtx,
+		db.QueryArticlesPaginatedParams{
+			Limit: int32(pageSize), //nolint:gosec // pageSize is bounded above
+			Offset: int32(
+				offset,
+			), //nolint:gosec // offset is calculated from bounded values
+		},
+	)
 	if err != nil {
 		return PaginationResult{}, err
 	}
@@ -244,14 +250,14 @@ func GetArticlesPaginated(
 			ID:              row.ID,
 			CreatedAt:       row.CreatedAt.Time,
 			UpdatedAt:       row.UpdatedAt.Time,
-			PublishedAt:     nullTimeToPointer(row.PublishedAt),
+			PublishedAt:     row.PublishedAt.Time,
 			Title:           row.Title,
 			Excerpt:         row.Excerpt,
 			MetaTitle:       row.MetaTitle,
 			MetaDescription: row.MetaDescription,
 			Slug:            row.Slug,
-			ImageLink:       nullStringToPointer(row.ImageLink),
-			Content:         nullStringToPointer(row.Content),
+			ImageLink:       row.ImageLink.String,
+			Content:         row.Content.String,
 		}
 	}
 
@@ -269,13 +275,13 @@ func GetArticlesPaginated(
 }
 
 type NewArticlePayload struct {
-	Title           string  `validate:"required,max=100"`
-	Excerpt         string  `validate:"required,max=255"`
-	MetaTitle       string  `validate:"required,max=100"`
-	MetaDescription string  `validate:"required,max=100"`
-	Slug            string  `validate:"required,max=255"`
-	ImageLink       *string `validate:"omitempty,max=255"`
-	Content         *string
+	Title           string `validate:"required,max=100"`
+	Excerpt         string `validate:"required,max=255"`
+	MetaTitle       string `validate:"required,max=100"`
+	MetaDescription string `validate:"required,max=100"`
+	Slug            string `validate:"required,max=255"`
+	ImageLink       string `validate:"omitempty,max=255"`
+	Content         string
 }
 
 func NewArticle(
@@ -301,17 +307,29 @@ func NewArticle(
 	}
 
 	_, err := db.Stmts.InsertArticle(ctx, dbtx, db.InsertArticleParams{
-		ID:              article.ID,
-		CreatedAt:       pgtype.Timestamptz{Time: article.CreatedAt, Valid: true},
-		UpdatedAt:       pgtype.Timestamptz{Time: article.UpdatedAt, Valid: true},
+		ID: article.ID,
+		CreatedAt: pgtype.Timestamptz{
+			Time:  article.CreatedAt,
+			Valid: true,
+		},
+		UpdatedAt: pgtype.Timestamptz{
+			Time:  article.UpdatedAt,
+			Valid: true,
+		},
 		PublishedAt:     pgtype.Timestamptz{Valid: false},
 		Title:           article.Title,
 		Excerpt:         article.Excerpt,
 		MetaTitle:       article.MetaTitle,
 		MetaDescription: article.MetaDescription,
 		Slug:            article.Slug,
-		ImageLink:       stringPointerToNullString(article.ImageLink),
-		Content:         stringPointerToNullString(article.Content),
+		ImageLink: sql.NullString{
+			String: article.ImageLink,
+			Valid:  article.ImageLink != "",
+		},
+		Content: sql.NullString{
+			String: article.Content,
+			Valid:  article.Content != "",
+		},
 	})
 	if err != nil {
 		return Article{}, err
@@ -323,14 +341,14 @@ func NewArticle(
 type UpdateArticlePayload struct {
 	ID              uuid.UUID `validate:"required,uuid"`
 	UpdatedAt       time.Time `validate:"required"`
-	PublishedAt     *time.Time
-	Title           string  `validate:"required,max=100"`
-	Excerpt         string  `validate:"required,max=255"`
-	MetaTitle       string  `validate:"required,max=100"`
-	MetaDescription string  `validate:"required,max=100"`
-	Slug            string  `validate:"required,max=255"`
-	ImageLink       *string `validate:"omitempty,max=255"`
-	Content         *string
+	PublishedAt     time.Time
+	Title           string `validate:"required,max=100"`
+	Excerpt         string `validate:"required,max=255"`
+	MetaTitle       string `validate:"required,max=100"`
+	MetaDescription string `validate:"required,max=100"`
+	Slug            string `validate:"required,max=255"`
+	ImageLink       string `validate:"omitempty,max=255"`
+	Content         string
 }
 
 func UpdateArticle(
@@ -343,16 +361,25 @@ func UpdateArticle(
 	}
 
 	row, err := db.Stmts.UpdateArticle(ctx, dbtx, db.UpdateArticleParams{
-		ID:              data.ID,
-		UpdatedAt:       pgtype.Timestamptz{Time: data.UpdatedAt, Valid: true},
-		PublishedAt:     timePointerToNullTime(data.PublishedAt),
+		ID:        data.ID,
+		UpdatedAt: pgtype.Timestamptz{Time: data.UpdatedAt, Valid: true},
+		PublishedAt: pgtype.Timestamptz{
+			Time:  data.PublishedAt,
+			Valid: !data.PublishedAt.IsZero(),
+		},
 		Title:           data.Title,
 		Excerpt:         data.Excerpt,
 		MetaTitle:       data.MetaTitle,
 		MetaDescription: data.MetaDescription,
 		Slug:            data.Slug,
-		ImageLink:       stringPointerToNullString(data.ImageLink),
-		Content:         stringPointerToNullString(data.Content),
+		ImageLink: sql.NullString{
+			String: data.ImageLink,
+			Valid:  data.ImageLink != "",
+		},
+		Content: sql.NullString{
+			String: data.Content,
+			Valid:  data.ImageLink != "",
+		},
 	})
 	if err != nil {
 		return Article{}, err
@@ -362,21 +389,21 @@ func UpdateArticle(
 		ID:              row.ID,
 		CreatedAt:       row.CreatedAt.Time,
 		UpdatedAt:       row.UpdatedAt.Time,
-		PublishedAt:     nullTimeToPointer(row.PublishedAt),
+		PublishedAt:     row.PublishedAt.Time,
 		Title:           row.Title,
 		Excerpt:         row.Excerpt,
 		MetaTitle:       row.MetaTitle,
 		MetaDescription: row.MetaDescription,
 		Slug:            row.Slug,
-		ImageLink:       nullStringToPointer(row.ImageLink),
-		Content:         nullStringToPointer(row.Content),
+		ImageLink:       row.ImageLink.String,
+		Content:         row.Content.String,
 	}, nil
 }
 
 type UpdateArticleContentPayload struct {
 	ID        uuid.UUID `validate:"required,uuid"`
 	UpdatedAt time.Time `validate:"required"`
-	Content   *string
+	Content   string
 }
 
 func UpdateArticleContent(
@@ -388,11 +415,18 @@ func UpdateArticleContent(
 		return Article{}, errors.Join(ErrDomainValidation, err)
 	}
 
-	row, err := db.Stmts.UpdateArticleContent(ctx, dbtx, db.UpdateArticleContentParams{
-		ID:        data.ID,
-		UpdatedAt: pgtype.Timestamptz{Time: data.UpdatedAt, Valid: true},
-		Content:   stringPointerToNullString(data.Content),
-	})
+	row, err := db.Stmts.UpdateArticleContent(
+		ctx,
+		dbtx,
+		db.UpdateArticleContentParams{
+			ID:        data.ID,
+			UpdatedAt: pgtype.Timestamptz{Time: data.UpdatedAt, Valid: true},
+			Content: sql.NullString{
+				String: data.Content,
+				Valid:  data.Content != "",
+			},
+		},
+	)
 	if err != nil {
 		return Article{}, err
 	}
@@ -401,14 +435,14 @@ func UpdateArticleContent(
 		ID:              row.ID,
 		CreatedAt:       row.CreatedAt.Time,
 		UpdatedAt:       row.UpdatedAt.Time,
-		PublishedAt:     nullTimeToPointer(row.PublishedAt),
+		PublishedAt:     row.PublishedAt.Time,
 		Title:           row.Title,
 		Excerpt:         row.Excerpt,
 		MetaTitle:       row.MetaTitle,
 		MetaDescription: row.MetaDescription,
 		Slug:            row.Slug,
-		ImageLink:       nullStringToPointer(row.ImageLink),
-		Content:         nullStringToPointer(row.Content),
+		ImageLink:       row.ImageLink.String,
+		Content:         row.Content.String,
 	}, nil
 }
 
@@ -420,7 +454,7 @@ type UpdateArticleMetadataPayload struct {
 	MetaTitle       string    `validate:"required,max=100"`
 	MetaDescription string    `validate:"required,max=100"`
 	Slug            string    `validate:"required,max=255"`
-	ImageLink       *string   `validate:"omitempty,max=255"`
+	ImageLink       string    `validate:"omitempty,max=255"`
 }
 
 func UpdateArticleMetadata(
@@ -432,16 +466,26 @@ func UpdateArticleMetadata(
 		return Article{}, errors.Join(ErrDomainValidation, err)
 	}
 
-	row, err := db.Stmts.UpdateArticleMetadata(ctx, dbtx, db.UpdateArticleMetadataParams{
-		ID:              data.ID,
-		UpdatedAt:       pgtype.Timestamptz{Time: data.UpdatedAt, Valid: true},
-		Title:           data.Title,
-		Excerpt:         data.Excerpt,
-		MetaTitle:       data.MetaTitle,
-		MetaDescription: data.MetaDescription,
-		Slug:            data.Slug,
-		ImageLink:       stringPointerToNullString(data.ImageLink),
-	})
+	row, err := db.Stmts.UpdateArticleMetadata(
+		ctx,
+		dbtx,
+		db.UpdateArticleMetadataParams{
+			ID: data.ID,
+			UpdatedAt: pgtype.Timestamptz{
+				Time:  data.UpdatedAt,
+				Valid: true,
+			},
+			Title:           data.Title,
+			Excerpt:         data.Excerpt,
+			MetaTitle:       data.MetaTitle,
+			MetaDescription: data.MetaDescription,
+			Slug:            data.Slug,
+			ImageLink: sql.NullString{
+				String: data.ImageLink,
+				Valid:  data.ImageLink != "",
+			},
+		},
+	)
 	if err != nil {
 		return Article{}, err
 	}
@@ -450,14 +494,14 @@ func UpdateArticleMetadata(
 		ID:              row.ID,
 		CreatedAt:       row.CreatedAt.Time,
 		UpdatedAt:       row.UpdatedAt.Time,
-		PublishedAt:     nullTimeToPointer(row.PublishedAt),
+		PublishedAt:     row.PublishedAt.Time,
 		Title:           row.Title,
 		Excerpt:         row.Excerpt,
 		MetaTitle:       row.MetaTitle,
 		MetaDescription: row.MetaDescription,
 		Slug:            row.Slug,
-		ImageLink:       nullStringToPointer(row.ImageLink),
-		Content:         nullStringToPointer(row.Content),
+		ImageLink:       row.ImageLink.String,
+		Content:         row.Content.String,
 	}, nil
 }
 
@@ -489,14 +533,14 @@ func PublishArticle(
 		ID:              row.ID,
 		CreatedAt:       row.CreatedAt.Time,
 		UpdatedAt:       row.UpdatedAt.Time,
-		PublishedAt:     nullTimeToPointer(row.PublishedAt),
+		PublishedAt:     row.PublishedAt.Time,
 		Title:           row.Title,
 		Excerpt:         row.Excerpt,
 		MetaTitle:       row.MetaTitle,
 		MetaDescription: row.MetaDescription,
 		Slug:            row.Slug,
-		ImageLink:       nullStringToPointer(row.ImageLink),
-		Content:         nullStringToPointer(row.Content),
+		ImageLink:       row.ImageLink.String,
+		Content:         row.Content.String,
 	}, nil
 }
 
@@ -526,14 +570,14 @@ func UnpublishArticle(
 		ID:              row.ID,
 		CreatedAt:       row.CreatedAt.Time,
 		UpdatedAt:       row.UpdatedAt.Time,
-		PublishedAt:     nullTimeToPointer(row.PublishedAt),
+		PublishedAt:     row.PublishedAt.Time,
 		Title:           row.Title,
 		Excerpt:         row.Excerpt,
 		MetaTitle:       row.MetaTitle,
 		MetaDescription: row.MetaDescription,
 		Slug:            row.Slug,
-		ImageLink:       nullStringToPointer(row.ImageLink),
-		Content:         nullStringToPointer(row.Content),
+		ImageLink:       row.ImageLink.String,
+		Content:         row.Content.String,
 	}, nil
 }
 
@@ -543,33 +587,4 @@ func DeleteArticle(
 	id uuid.UUID,
 ) error {
 	return db.Stmts.DeleteArticle(ctx, dbtx, id)
-}
-
-// Helper functions for handling nullable types
-func nullTimeToPointer(nt pgtype.Timestamptz) *time.Time {
-	if !nt.Valid {
-		return nil
-	}
-	return &nt.Time
-}
-
-func timePointerToNullTime(t *time.Time) pgtype.Timestamptz {
-	if t == nil {
-		return pgtype.Timestamptz{Valid: false}
-	}
-	return pgtype.Timestamptz{Time: *t, Valid: true}
-}
-
-func nullStringToPointer(ns sql.NullString) *string {
-	if !ns.Valid {
-		return nil
-	}
-	return &ns.String
-}
-
-func stringPointerToNullString(s *string) sql.NullString {
-	if s == nil {
-		return sql.NullString{Valid: false}
-	}
-	return sql.NullString{String: *s, Valid: true}
 }

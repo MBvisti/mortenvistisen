@@ -34,7 +34,7 @@ func Dashboard() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Dashboard - Grafto</title><link href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><title>Dashboard - MBV</title><link href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -47,46 +47,20 @@ func Dashboard() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" rel=\"stylesheet\"><link rel=\"icon\" type=\"image/png\" sizes=\"16x16\" href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" rel=\"stylesheet\"><!-- <link rel=\"icon\" type=\"image/png\" sizes=\"16x16\" href={ routes.Favicon16.Path }/> --><!-- <link rel=\"icon\" type=\"image/png\" sizes=\"32x32\" href={ routes.Favicon32.Path }/> --><script src=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(routes.Favicon16.Path)
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s/%v?%v", config.Cfg.GetFullDomain(), routes.JsEntrypoint.Path, time.Now().Unix()))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/layouts/dashboard.templ`, Line: 16, Col: 79}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/layouts/dashboard.templ`, Line: 18, Col: 113}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\"><link rel=\"icon\" type=\"image/png\" sizes=\"32x32\" href=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var4 string
-		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(routes.Favicon32.Path)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/layouts/dashboard.templ`, Line: 17, Col: 79}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\"><script src=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var5 string
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s/%v?%v", config.Cfg.GetFullDomain(), routes.JsEntrypoint.Path, time.Now().Unix()))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/layouts/dashboard.templ`, Line: 18, Col: 113}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" type=\"module\"></script></head><body><!-- Mobile Navigation Toggle --><button class=\"mobile-nav-toggle\" onclick=\"toggleMobileNav()\">☰</button><!-- Sidebar Overlay for Mobile --><div class=\"sidebar-overlay\" onclick=\"closeMobileNav()\"></div><div class=\"dashboard-layout\"><!-- Sidebar --><aside class=\"dashboard-sidebar\" id=\"sidebar\"><div class=\"sidebar-header\"><h2 class=\"sidebar-title\">Grafto</h2></div><nav><ul class=\"sidebar-nav\"><li class=\"nav-item\"><a href=\"/dashboard\" class=\"nav-link active\"><span class=\"nav-icon\">📊</span> Dashboard</a></li><li class=\"nav-item\"><a href=\"/dashboard/articles\" class=\"nav-link\"><span class=\"nav-icon\">📝</span> Articles</a></li><li class=\"nav-item\"><a href=\"/dashboard/analytics\" class=\"nav-link\"><span class=\"nav-icon\">📈</span> Analytics</a></li><li class=\"nav-item\"><a href=\"/dashboard/settings\" class=\"nav-link\"><span class=\"nav-icon\">⚙️</span> Settings</a></li></ul></nav></aside><!-- Main Content --><main class=\"dashboard-main\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" type=\"module\"></script></head><body><!-- Mobile Navigation Toggle --><button class=\"mobile-nav-toggle\" onclick=\"toggleMobileNav()\">☰</button><!-- Sidebar Overlay for Mobile --><div class=\"sidebar-overlay\" onclick=\"closeMobileNav()\"></div><div class=\"dashboard-layout\"><!-- Sidebar --><aside class=\"dashboard-sidebar\" id=\"sidebar\"><div class=\"sidebar-header\"><h2 class=\"sidebar-title\">Grafto</h2></div><nav><ul class=\"sidebar-nav\"><li class=\"nav-item\"><a href=\"/dashboard\" class=\"nav-link active\"><span class=\"nav-icon\">📊</span> Dashboard</a></li><li class=\"nav-item\"><a href=\"/dashboard/articles\" class=\"nav-link\"><span class=\"nav-icon\">📝</span> Articles</a></li><li class=\"nav-item\"><a href=\"/dashboard/analytics\" class=\"nav-link\"><span class=\"nav-icon\">📈</span> Analytics</a></li><li class=\"nav-item\"><a href=\"/dashboard/settings\" class=\"nav-link\"><span class=\"nav-icon\">⚙️</span> Settings</a></li></ul></nav></aside><!-- Main Content --><main class=\"dashboard-main\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -94,7 +68,7 @@ func Dashboard() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</main></div><script>\n\t\t\t\tfunction toggleMobileNav() {\n\t\t\t\t\tconst sidebar = document.getElementById('sidebar');\n\t\t\t\t\tconst overlay = document.querySelector('.sidebar-overlay');\n\t\t\t\t\t\n\t\t\t\t\tsidebar.classList.toggle('open');\n\t\t\t\t\toverlay.classList.toggle('open');\n\t\t\t\t}\n\n\t\t\t\tfunction closeMobileNav() {\n\t\t\t\t\tconst sidebar = document.getElementById('sidebar');\n\t\t\t\t\tconst overlay = document.querySelector('.sidebar-overlay');\n\t\t\t\t\t\n\t\t\t\t\tsidebar.classList.remove('open');\n\t\t\t\t\toverlay.classList.remove('open');\n\t\t\t\t}\n\n\t\t\t\t// Close sidebar when clicking on nav links on mobile\n\t\t\t\tdocument.querySelectorAll('.nav-link').forEach(link => {\n\t\t\t\t\tlink.addEventListener('click', () => {\n\t\t\t\t\t\tif (window.innerWidth <= 768) {\n\t\t\t\t\t\t\tcloseMobileNav();\n\t\t\t\t\t\t}\n\t\t\t\t\t});\n\t\t\t\t});\n\t\t\t</script></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</main></div><script>\n\t\t\t\tfunction toggleMobileNav() {\n\t\t\t\t\tconst sidebar = document.getElementById('sidebar');\n\t\t\t\t\tconst overlay = document.querySelector('.sidebar-overlay');\n\t\t\t\t\t\n\t\t\t\t\tsidebar.classList.toggle('open');\n\t\t\t\t\toverlay.classList.toggle('open');\n\t\t\t\t}\n\n\t\t\t\tfunction closeMobileNav() {\n\t\t\t\t\tconst sidebar = document.getElementById('sidebar');\n\t\t\t\t\tconst overlay = document.querySelector('.sidebar-overlay');\n\t\t\t\t\t\n\t\t\t\t\tsidebar.classList.remove('open');\n\t\t\t\t\toverlay.classList.remove('open');\n\t\t\t\t}\n\n\t\t\t\t// Close sidebar when clicking on nav links on mobile\n\t\t\t\tdocument.querySelectorAll('.nav-link').forEach(link => {\n\t\t\t\t\tlink.addEventListener('click', () => {\n\t\t\t\t\t\tif (window.innerWidth <= 768) {\n\t\t\t\t\t\t\tcloseMobileNav();\n\t\t\t\t\t\t}\n\t\t\t\t\t});\n\t\t\t\t});\n\t\t\t</script></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
