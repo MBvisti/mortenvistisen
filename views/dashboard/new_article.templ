@@ -137,7 +137,7 @@ templ NewArticle(formData NewArticleFormData) {
 				<div class="form-section">
 					<h2 class="section-title">Article Content</h2>
 					<div class="easymde-editor-container">
-						<input id="my-text-area" name="content" value={ formData.Content }/>
+						<textarea id="my-text-area" name="content">{ formData.Content }</textarea>
 					</div>
 				</div>
 				<div class="form-actions">

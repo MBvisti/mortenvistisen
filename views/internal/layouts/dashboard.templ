@@ -4,6 +4,8 @@ import "github.com/mbvisti/mortenvistisen/router/routes"
 import "time"
 import "fmt"
 import "github.com/mbvisti/mortenvistisen/config"
+import "github.com/mbvisti/mortenvistisen/router/contexts"
+import "github.com/mbvisti/mortenvistisen/views/internal/components"
 
 templ Dashboard() {
 	<!DOCTYPE html>
@@ -61,6 +63,11 @@ templ Dashboard() {
 				<main class="dashboard-main">
 					{ children... }
 				</main>
+				<div class="toast toast-end">
+					for _, flash := range contexts.ExtractFlashMessages(ctx) {
+						@components.ToastMessage(flash)
+					}
+				</div>
 			</div>
 			<script>
 				function toggleMobileNav() {

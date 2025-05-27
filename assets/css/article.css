@@ -29,10 +29,13 @@
 	}
 }
 
+.article-grid>ul {
+	color: var(--color-base-content);
+}
+
 @media (max-width: 768px) {
 	.article-grid>h1 {
 		font-size: var(--font-size-6);
-
 	}
 }
 
@@ -55,6 +58,7 @@
 }
 
 .article-grid>pre {
+	min-width: 100%;
 	grid-column: breakout;
 }
 

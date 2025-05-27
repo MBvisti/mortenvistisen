@@ -81,21 +81,31 @@
 	border-top: none !important;
 	border-radius: 0 0 0.25rem 0.25rem !important;
 	padding: 1rem !important;
-	min-height: 400px !important;
+	/* min-height: 400px !important; */
+	/* max-height: 600px !important; */
 	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
 	font-size: 1rem !important;
 	line-height: 1.6 !important;
 	background-color: var(--color-base-100) !important;
 	color: var(--color-base-content) !important;
 	transition: border-color 0.2s !important;
+	overflow-y: auto !important;
+	position: relative !important;
 }
 
 .EasyMDEContainer .CodeMirror:focus-within {
 	border-color: var(--color-primary) !important;
+	outline: none !important;
 }
 
 .EasyMDEContainer .CodeMirror-focused {
 	border-color: var(--color-primary) !important;
+	outline: none !important;
+}
+
+.EasyMDEContainer .CodeMirror-focused .CodeMirror-cursor {
+	visibility: visible !important;
+	opacity: 1 !important;
 }
 
 /* CodeMirror text content */
@@ -103,6 +113,7 @@
 	color: var(--color-base-content) !important;
 	font-size: 1rem !important;
 	line-height: 1.6 !important;
+	position: relative !important;
 }
 
 .EasyMDEContainer .CodeMirror pre.CodeMirror-line {
@@ -110,17 +121,36 @@
 	font-size: 1rem !important;
 	line-height: 1.6 !important;
 	padding: 0 !important;
+	position: relative !important;
 }
 
 .EasyMDEContainer .CodeMirror pre.CodeMirror-line-like {
 	color: var(--color-base-content) !important;
 	font-size: 1rem !important;
 	line-height: 1.6 !important;
+	position: relative !important;
 }
 
 /* CodeMirror cursor and selection */
 .EasyMDEContainer .CodeMirror-cursor {
 	border-left: 2px solid var(--color-base-content) !important;
+	position: absolute !important;
+	z-index: 10 !important;
+	pointer-events: none !important;
+	animation: blink 1.2s infinite !important;
+}
+
+@keyframes blink {
+
+	0%,
+	50% {
+		opacity: 1;
+	}
+
+	51%,
+	100% {
+		opacity: 0;
+	}
 }
 
 .EasyMDEContainer .CodeMirror-selected {
@@ -322,7 +352,23 @@
 	position: relative;
 	background-color: var(--color-base-100);
 	border-radius: 0.25rem;
-	overflow: hidden;
+	overflow: visible;
+	z-index: 1;
+}
+
+/* Fix CodeMirror scrolling */
+.EasyMDEContainer .CodeMirror-scroll {
+	overflow-y: auto !important;
+	overflow-x: auto !important;
+	height: auto !important;
+	/* min-height: 400px !important; */
+	/* max-height: 600px !important; */
+}
+
+.EasyMDEContainer .CodeMirror-sizer {
+	position: relative !important;
+	border-right: 30px solid transparent !important;
+	min-height: 400px !important;
 }
 
 .easymde-editor-container .EasyMDEContainer .editor-toolbar {

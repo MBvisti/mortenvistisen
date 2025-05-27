@@ -24,6 +24,12 @@ p {
 	color: var(--color-base-content)
 }
 
+body {
+	min-height: 100vh;
+	min-height: 100dvh;
+	display: grid;
+	grid-template-rows: 10ch 1fr 10ch;
+}
 
 .main {
 	display: flex;

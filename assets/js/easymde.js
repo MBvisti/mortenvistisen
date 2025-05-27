@@ -5,13 +5,13 @@ import "./easymde-2_26_0.min.js";
 	if (element) {
 		new window.EasyMDE({
 			element: element,
-			placeholder: "Write your article content in Markdown...",
+			// placeholder: "Write your article content in Markdown...",
 			spellChecker: false,
 			hideIcons: ["guide", "fullscreen", "side-by-side"],
 			showIcons: ["code", "table"],
 			status: ["autosave", "lines", "words", "cursor"],
 			tabSize: 4,
-			indentWithTabs: false,
+			indentWithTabs: true,
 			lineWrapping: true,
 			autofocus: false,
 			toolbar: [
