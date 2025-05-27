@@ -12,7 +12,10 @@ import (
 	"github.com/mbvisti/mortenvistisen/views"
 )
 
-const landingPageCacheKey = "landingPage"
+const (
+	landingPageCacheKey = "landingPage"
+	articlePageCacheKey = "articlePage"
+)
 
 type App struct {
 	db    psql.Postgres
@@ -45,6 +48,18 @@ func (a App) LandingPage(c echo.Context) error {
 
 func (a App) AboutPage(c echo.Context) error {
 	return views.AboutPage().Render(renderArgs(c))
+}
+
+func (a App) ArticlePage(c echo.Context) error {
+	slug := c.Param("articleSlug")
+
+	if value, ok := a.cache.Get(articlePageCacheKey); ok {
+		return views.ArticlePage("A love letter to Go", slug, "desc", value).
+			Render(renderArgs(c))
+	}
+
+	return views.ArticlePage("A love letter to Go", slug, "desc", views.Article()).
+		Render(renderArgs(c))
 }
 
 func (a App) Redirect(c echo.Context) error {

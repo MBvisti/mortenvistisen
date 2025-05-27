@@ -10,6 +10,7 @@ const appNamePrefix = "app"
 var App = []Route{
 	LandingPage,
 	AboutPage,
+	ArticlePage,
 	Redirect.Route,
 }
 
@@ -25,6 +26,13 @@ var AboutPage = Route{
 	Path:        "/about",
 	Method:      http.MethodGet,
 	HandlerName: "AboutPage",
+}
+
+var ArticlePage = Route{
+	Name:        appNamePrefix + ".article_page",
+	Path:        "/posts/:articleSlug",
+	Method:      http.MethodGet,
+	HandlerName: "ArticlePage",
 }
 
 var Redirect = redirect{

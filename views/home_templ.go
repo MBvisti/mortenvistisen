@@ -90,7 +90,7 @@ func ArticleCard() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</p><p>A personal love letter to Golang, why I think more people should use it for full-stack web development and embrace traditional server-side rendered apps.</p><span>tags: <p>#golang</p><p>#indiehacking</p></span> <a href=\"\">Read article</a></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</p><p>A personal love letter to Golang, why I think more people should use it for full-stack web development and embrace traditional server-side rendered apps.</p><span>tags: <p>#golang</p><p>#indiehacking</p></span> <a href=\"/posts/a-love-letter-to-golang\">Read article</a></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -68,19 +68,13 @@ templ head(data HeadData) {
 }
 
 func SetupHead(ctx context.Context, opts ...HeadDataOption) templ.Component {
-	//slug := config.Cfg.GetFullDomain()
-	//appCtx := contexts.ExtractApp(ctx)
-	//if appCtx.CurrentPath != "" {
-	//	slug = slug + appCtx.CurrentPath
-	//}
-
 	data := &HeadData{
 		Title:          config.Cfg.ProjectName,
 		Description:    "A starter template for building one-man businesses using Golang.",
 		Slug:           "/",
 		MetaType:       "website",
-		StylesheetHref: fmt.Sprintf("%v?%v", routes.CssEntrypoint.Path, time.Now().Unix()),
-		ScriptSrc:      fmt.Sprintf("%v?%v", routes.JsEntrypoint.Path, time.Now().Unix()),
+		StylesheetHref: fmt.Sprintf("%s/%s?%v", config.Cfg.GetFullDomain(), routes.CssEntrypoint.Path, time.Now().Unix()),
+		ScriptSrc:      fmt.Sprintf("%s/%s?%v", config.Cfg.GetFullDomain(), routes.JsEntrypoint.Path, time.Now().Unix()),
 	}
 
 	for _, opt := range opts {
