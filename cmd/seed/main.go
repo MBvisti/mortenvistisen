@@ -34,7 +34,7 @@ func main() {
 	_, err = seeder.PlantUser(
 		ctx,
 		seeds.WithUserEmailVerifiedAt(time.Now()),
-		seeds.WithUserEmail("aryastark@gmail.com"),
+		seeds.WithUserEmail("admin@mortenvistisen.com"),
 	)
 	if err != nil {
 		panic(err)

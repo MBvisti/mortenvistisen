@@ -7,7 +7,7 @@ import (
 
 templ Base(headOpts ...components.HeadDataOption) {
 	<!DOCTYPE html>
-	<html lang="en" data-theme="mortenvistisen">
+	<html lang="en">
 		@components.SetupHead(ctx, headOpts...)
 		<body>
 			@components.Nav()
