@@ -146,10 +146,8 @@ func run(ctx context.Context) error {
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
 
-	if cfg.Environment == config.PROD_ENVIRONMENT {
-		if err := migrate(ctx); err != nil {
-			panic(err)
-		}
+	if err := migrate(ctx); err != nil {
+		panic(err)
 	}
 
 	tel, err := telemetry.New(
