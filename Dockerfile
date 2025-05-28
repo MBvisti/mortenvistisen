@@ -16,5 +16,6 @@ WORKDIR /
 
 COPY --from=build-go /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=build-go app app
+COPY --from=build-go psql psql
 
 CMD ["./app"]

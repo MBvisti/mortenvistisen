@@ -18,11 +18,14 @@ import (
 	"github.com/mbvisti/mortenvistisen/handlers"
 	"github.com/mbvisti/mortenvistisen/handlers/middleware"
 	"github.com/mbvisti/mortenvistisen/psql"
+	"github.com/mbvisti/mortenvistisen/psql/queue"
+	"github.com/mbvisti/mortenvistisen/psql/queue/workers"
 	"github.com/mbvisti/mortenvistisen/router"
 	"github.com/mbvisti/mortenvistisen/server"
 	"github.com/mbvisti/mortenvistisen/telemetry"
 	"github.com/pressly/goose/v3"
 	"github.com/pressly/goose/v3/lock"
+	"riverqueue.com/riverui"
 )
 
 var appVersion string
@@ -143,8 +146,10 @@ func run(ctx context.Context) error {
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
 
-	if err := migrate(ctx); err != nil {
-		panic(err)
+	if cfg.Environment == config.PROD_ENVIRONMENT {
+		if err := migrate(ctx); err != nil {
+			panic(err)
+		}
 	}
 
 	tel, err := telemetry.New(
@@ -179,48 +184,48 @@ func run(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	// queueWorkers, err := workers.SetupWorkers(workers.WorkerDependencies{})
-	// if err != nil {
-	// 	return err
-	// }
-	//
-	// queueLogger, queueLoggerShutdown := telemetry.NewLogger(
-	// 	ctx,
-	// 	&telemetry.StdoutExporter{
-	// 		LogLevel:   slog.LevelError,
-	// 		WithTraces: true,
-	// 	},
-	// )
-	// if cfg.Environment == config.PROD_ENVIRONMENT {
-	// 	defer func() {
-	// 		if err := queueLoggerShutdown(ctx); err != nil {
-	// 			slog.Error("Failed to shutdown telemetry", "error", err)
-	// 		}
-	// 	}()
-	// }
-	//
+	queueWorkers, err := workers.SetupWorkers(workers.WorkerDependencies{})
+	if err != nil {
+		return err
+	}
+
+	queueLogger, queueLoggerShutdown := telemetry.NewLogger(
+		ctx,
+		&telemetry.StdoutExporter{
+			LogLevel:   slog.LevelError,
+			WithTraces: true,
+		},
+	)
+	if cfg.Environment == config.PROD_ENVIRONMENT {
+		defer func() {
+			if err := queueLoggerShutdown(ctx); err != nil {
+				slog.Error("Failed to shutdown telemetry", "error", err)
+			}
+		}()
+	}
+
 	psql := psql.NewPostgres(conn, nil)
-	// psql.NewQueue(
-	// 	queue.WithLogger(queueLogger),
-	// 	queue.WithWorkers(queueWorkers),
-	// )
-	//
-	// opts := &riverui.ServerOpts{
-	// 	Client: psql.Queue(),
-	// 	DB:     conn,
-	// 	Logger: slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
-	// 		Level: slog.SetLogLoggerLevel(slog.LevelError),
-	// 	})),
-	// 	Prefix: "/river",
-	// }
-	// riverUI, err := riverui.NewServer(opts)
-	// if err != nil {
-	// 	return err
-	// }
-	//
-	// if err := riverUI.Start(ctx); err != nil {
-	// 	return err
-	// }
+	psql.NewQueue(
+		queue.WithLogger(queueLogger),
+		queue.WithWorkers(queueWorkers),
+	)
+
+	opts := &riverui.ServerOpts{
+		Client: psql.Queue(),
+		DB:     conn,
+		Logger: slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+			Level: slog.SetLogLoggerLevel(slog.LevelError),
+		})),
+		Prefix: "/river",
+	}
+	riverUI, err := riverui.NewServer(opts)
+	if err != nil {
+		return err
+	}
+
+	if err := riverUI.Start(ctx); err != nil {
+		return err
+	}
 
 	emailClient := clients.NewEmail()
 
@@ -238,8 +243,7 @@ func run(ctx context.Context) error {
 		ctx,
 		handlers,
 		mw,
-		nil,
-		// riverUI,
+		riverUI,
 		tel.AppTracerProvider,
 	)
 
@@ -247,10 +251,10 @@ func run(ctx context.Context) error {
 
 	server := server.NewHttp(c, router)
 
-	// if err := psql.Queue().Start(ctx); err != nil {
-	// 	return err
-	// }
-	//
+	if err := psql.Queue().Start(ctx); err != nil {
+		return err
+	}
+
 	return server.Start(c)
 }
 
