@@ -247,10 +247,10 @@ func run(ctx context.Context) error {
 
 	server := server.NewHttp(c, router)
 
-	if err := psql.Queue().Start(ctx); err != nil {
-		return err
-	}
-
+	// if err := psql.Queue().Start(ctx); err != nil {
+	// 	return err
+	// }
+	//
 	return server.Start(c)
 }
 
