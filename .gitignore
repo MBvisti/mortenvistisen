@@ -30,3 +30,5 @@ OpenCode.md
 .opencode/
 cmd/explore/main.go
 task.xml
+
+task.md

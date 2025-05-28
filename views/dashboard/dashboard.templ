@@ -1,8 +1,11 @@
 package dashboard
 
-import "github.com/mbvisti/mortenvistisen/views/internal/layouts"
-import "github.com/mbvisti/mortenvistisen/models"
-import "fmt"
+import (
+	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
+	"github.com/mbvisti/mortenvistisen/views/fragments"
+	"github.com/mbvisti/mortenvistisen/models"
+	"fmt"
+)
 
 func min(a, b int) int {
 	if a < b {
@@ -73,7 +76,10 @@ templ Home(result models.PaginationResult) {
 									<div class="action-buttons">
 										<a href={ templ.URL("/posts/" + article.Slug) } class="btn-sm btn-secondary">View</a>
 										<a href={ templ.URL("/dashboard/articles/" + article.ID.String() + "/edit") } class="btn-sm btn-secondary">Edit</a>
-										<button class="btn-sm btn-danger">Delete</button>
+										<button
+											class="btn-sm btn-danger"
+											onClick={ showDeleteModal(article.ID.String(), article.Title) }
+										>Delete</button>
 									</div>
 								</td>
 							</tr>
@@ -105,5 +111,35 @@ templ Home(result models.PaginationResult) {
 				</div>
 			}
 		</div>
+		@fragments.DeleteConfirmationModal("", "")
 	}
+}
+
+script showDeleteModal(articleID string, articleTitle string) {
+console.log("yoyuo");
+		let currentArticleId = '';
+		let currentArticleTitle = '';
+		
+		currentArticleId = articleID;
+		currentArticleTitle = articleTitle;
+		
+		const modal = document.getElementById('delete-modal');
+		const modalBody = modal.querySelector('.modal-body p');
+		const form = modal.querySelector('form');
+		
+		modalBody.innerHTML = `Are you sure you want to delete the article "<strong>${articleTitle}</strong>"?<br><span class="text-warning">This action cannot be undone.</span>`;
+		form.action = `/dashboard/articles/${articleID}/delete`;
+		
+		modal.style.display = 'flex';
+		
+		function hideDeleteModal() {
+			document.getElementById('delete-modal').style.display = 'none';
+		}
+		
+		// Close modal when clicking outside
+		document.getElementById('delete-modal').addEventListener('click', function(e) {
+			if (e.target === this) {
+				hideDeleteModal();
+			}
+		});
 }

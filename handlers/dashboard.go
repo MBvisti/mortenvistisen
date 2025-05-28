@@ -324,3 +324,63 @@ func (d Dashboard) UpdateArticle(c echo.Context) error {
 	// Redirect to dashboard
 	return c.Redirect(302, "/dashboard")
 }
+
+func (d Dashboard) DeleteArticle(c echo.Context) error {
+	idParam := c.Param("id")
+	articleID, err := uuid.Parse(idParam)
+	if err != nil {
+		if err := addFlash(
+			c,
+			contexts.FlashError,
+			"Invalid article ID.",
+		); err != nil {
+			return err
+		}
+		return c.Redirect(302, "/dashboard")
+	}
+
+	// Check if article exists before deleting
+	_, err = models.GetArticleByID(
+		extractCtx(c),
+		d.db.Pool,
+		articleID,
+	)
+	if err != nil {
+		if err := addFlash(
+			c,
+			contexts.FlashError,
+			"Article not found.",
+		); err != nil {
+			return err
+		}
+		return c.Redirect(302, "/dashboard")
+	}
+
+	// Delete the article
+	err = models.DeleteArticle(
+		extractCtx(c),
+		d.db.Pool,
+		articleID,
+	)
+	if err != nil {
+		if err := addFlash(
+			c,
+			contexts.FlashError,
+			"Failed to delete article. Please try again.",
+		); err != nil {
+			return err
+		}
+		return c.Redirect(302, "/dashboard")
+	}
+
+	if err := addFlash(
+		c,
+		contexts.FlashSuccess,
+		"Article deleted successfully!",
+	); err != nil {
+		return err
+	}
+
+	// Redirect to dashboard
+	return c.Redirect(302, "/dashboard")
+}

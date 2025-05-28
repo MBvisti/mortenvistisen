@@ -1,0 +1,23 @@
+package fragments
+
+templ DeleteConfirmationModal(articleID, articleTitle string) {
+	<div id="delete-modal" class="modal-overlay" style="display: none;">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3>Delete Article</h3>
+				<button class="modal-close" onclick="hideDeleteModal()">&times;</button>
+			</div>
+			<div class="modal-body">
+				<p>Are you sure you want to delete the article "<strong>{ articleTitle }</strong>"?</p>
+				<p class="text-warning">This action cannot be undone.</p>
+			</div>
+			<div class="modal-footer">
+				<button class="btn-sm btn-secondary" onclick="hideDeleteModal()">Cancel</button>
+				<form style="display: inline;" method="POST" action={ templ.URL("/dashboard/articles/" + articleID + "/delete") }>
+					<button type="submit" class="btn-sm btn-danger">Delete</button>
+				</form>
+			</div>
+		</div>
+	</div>
+}
+

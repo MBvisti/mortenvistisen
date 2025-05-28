@@ -15,6 +15,7 @@ var Dashboard = []Route{
 	DashboardStoreArticle,
 	DashboardEditArticle,
 	DashboardUpdateArticle,
+	DashboardDeleteArticle,
 }
 
 var DashboardHome = Route{
@@ -62,6 +63,16 @@ var DashboardUpdateArticle = Route{
 	Path:        dashboardRoutePrefix + "/articles/:id/edit",
 	Method:      http.MethodPost,
 	HandlerName: "UpdateArticle",
+	Middleware: []string{
+		"AuthOnly",
+	},
+}
+
+var DashboardDeleteArticle = Route{
+	Name:        dashboardNamePrefix + ".articles.delete",
+	Path:        dashboardRoutePrefix + "/articles/:id/delete",
+	Method:      http.MethodPost,
+	HandlerName: "DeleteArticle",
 	Middleware: []string{
 		"AuthOnly",
 	},
