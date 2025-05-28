@@ -2,13 +2,11 @@ package main
 
 import (
 	"context"
-	"flag"
 	"fmt"
 	"io/fs"
 	"log/slog"
 	"os"
 	"os/signal"
-	"strconv"
 
 	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/mbvisti/mortenvistisen/clients"
@@ -61,73 +59,9 @@ func migrate(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-
-	ops := flag.String("cmd", "", "")
-	version := flag.String("version", "", "")
-	flag.Parse()
-
-	if *version != "" {
-		v, err := strconv.Atoi(*version)
-		if err != nil {
-			return err
-		}
-
-		switch *ops {
-		case "up":
-			_, err = gooseProvider.UpTo(ctx, int64(v))
-			if err != nil {
-				return err
-			}
-		case "down":
-			_, err = gooseProvider.DownTo(ctx, int64(v))
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	if *version == "" {
-		switch *ops {
-		case "up":
-			_, err = gooseProvider.Up(ctx)
-			if err != nil {
-				return err
-			}
-		case "down":
-			_, err = gooseProvider.Down(ctx)
-			if err != nil {
-				return err
-			}
-		case "upbyone":
-			_, err = gooseProvider.UpByOne(ctx)
-			if err != nil {
-				return err
-			}
-		case "reset":
-			_, err = gooseProvider.DownTo(ctx, 0)
-			if err != nil {
-				return err
-			}
-		case "status":
-			statuses, err := gooseProvider.Status(ctx)
-			if err != nil {
-				return err
-			}
-
-			for _, status := range statuses {
-				slog.Info(
-					"database status",
-					"version",
-					status.Source.Version,
-					"file_name",
-					status.Source.Path,
-					"state",
-					status.State,
-					"applied_at",
-					status.AppliedAt,
-				)
-			}
-		}
+	_, err = gooseProvider.Up(ctx)
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -138,15 +72,12 @@ func run(ctx context.Context) error {
 
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
-	migs, err := psql.Migrations.ReadDir("migrations")
-	if err != nil {
-		return err
+
+	if cfg.Environment == config.PROD_ENVIRONMENT {
+		if err := migrate(ctx); err != nil {
+			return err
+		}
 	}
-	slog.Info("STARTING TO MIGRATE", "migs", migs)
-	if err := migrate(ctx); err != nil {
-		return err
-	}
-	slog.Info("DONE MIGRATING")
 
 	tel, err := telemetry.New(
 		ctx,
