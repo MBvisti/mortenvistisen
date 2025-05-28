@@ -121,7 +121,7 @@ func Home(result models.PaginationResult) templ.Component {
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					var templ_7745c5c3_Var6 templ.SafeURL = templ.URL("/articles/" + article.Slug)
+					var templ_7745c5c3_Var6 templ.SafeURL = templ.URL("/posts/" + article.Slug)
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var6)))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err

@@ -132,20 +132,20 @@ func EditArticle(formData EditArticleFormData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" name=\"excerpt\" placeholder=\"Brief description of the article\" rows=\"3\" maxlength=\"255\" required>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" name=\"excerpt\" placeholder=\"Brief description of the article\" rows=\"3\" maxlength=\"255\" data-bind-excerpt required>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(formData.Excerpt)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/edit_article.templ`, Line: 73, Col: 27}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/edit_article.templ`, Line: 74, Col: 27}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</textarea> ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</textarea><div data-show=\"$excerpt.length != 0\" style=\"display: flex; color: white; border: 1px solid white;\"><p>Excerpt length: </p><p data-text=\"$excerpt.length\"></p><p>/130 </p></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -162,7 +162,7 @@ func EditArticle(formData EditArticleFormData) templ.Component {
 					var templ_7745c5c3_Var7 string
 					templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(components.UppercaseFirstWord(errMsg))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/edit_article.templ`, Line: 77, Col: 79}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/edit_article.templ`, Line: 83, Col: 79}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 					if templ_7745c5c3_Err != nil {
@@ -243,7 +243,7 @@ func EditArticle(formData EditArticleFormData) templ.Component {
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(formData.MetaDescription)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/edit_article.templ`, Line: 126, Col: 35}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/edit_article.templ`, Line: 132, Col: 35}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
@@ -266,7 +266,7 @@ func EditArticle(formData EditArticleFormData) templ.Component {
 					var templ_7745c5c3_Var11 string
 					templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(components.UppercaseFirstWord(errMsg))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/edit_article.templ`, Line: 130, Col: 79}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/edit_article.templ`, Line: 136, Col: 79}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 					if templ_7745c5c3_Err != nil {
@@ -289,7 +289,7 @@ func EditArticle(formData EditArticleFormData) templ.Component {
 			var templ_7745c5c3_Var12 string
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(formData.Content)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/edit_article.templ`, Line: 141, Col: 67}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/edit_article.templ`, Line: 147, Col: 67}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {

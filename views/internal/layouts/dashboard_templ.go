@@ -8,12 +8,14 @@ package layouts
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "github.com/mbvisti/mortenvistisen/router/routes"
-import "time"
-import "fmt"
-import "github.com/mbvisti/mortenvistisen/config"
-import "github.com/mbvisti/mortenvistisen/router/contexts"
-import "github.com/mbvisti/mortenvistisen/views/internal/components"
+import (
+	"fmt"
+	"github.com/mbvisti/mortenvistisen/config"
+	"github.com/mbvisti/mortenvistisen/router/contexts"
+	"github.com/mbvisti/mortenvistisen/router/routes"
+	"github.com/mbvisti/mortenvistisen/views/internal/components"
+	"time"
+)
 
 func Dashboard() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -43,7 +45,7 @@ func Dashboard() templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s/%v?%v", config.Cfg.GetFullDomain(), routes.CssEntrypoint.Path, time.Now().Unix()))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/layouts/dashboard.templ`, Line: 17, Col: 113}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/layouts/dashboard.templ`, Line: 19, Col: 113}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -56,7 +58,7 @@ func Dashboard() templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s/%v?%v", config.Cfg.GetFullDomain(), routes.JsEntrypoint.Path, time.Now().Unix()))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/layouts/dashboard.templ`, Line: 20, Col: 113}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/layouts/dashboard.templ`, Line: 22, Col: 113}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -70,7 +72,7 @@ func Dashboard() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</main><div class=\"toast toast-end\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</main><div class=\"toast-container\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -80,7 +82,7 @@ func Dashboard() templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div></div><script>\n\t\t\t\tfunction toggleMobileNav() {\n\t\t\t\t\tconst sidebar = document.getElementById('sidebar');\n\t\t\t\t\tconst overlay = document.querySelector('.sidebar-overlay');\n\t\t\t\t\t\n\t\t\t\t\tsidebar.classList.toggle('open');\n\t\t\t\t\toverlay.classList.toggle('open');\n\t\t\t\t}\n\n\t\t\t\tfunction closeMobileNav() {\n\t\t\t\t\tconst sidebar = document.getElementById('sidebar');\n\t\t\t\t\tconst overlay = document.querySelector('.sidebar-overlay');\n\t\t\t\t\t\n\t\t\t\t\tsidebar.classList.remove('open');\n\t\t\t\t\toverlay.classList.remove('open');\n\t\t\t\t}\n\n\t\t\t\t// Close sidebar when clicking on nav links on mobile\n\t\t\t\tdocument.querySelectorAll('.nav-link').forEach(link => {\n\t\t\t\t\tlink.addEventListener('click', () => {\n\t\t\t\t\t\tif (window.innerWidth <= 768) {\n\t\t\t\t\t\t\tcloseMobileNav();\n\t\t\t\t\t\t}\n\t\t\t\t\t});\n\t\t\t\t});\n\t\t\t</script></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div></div><script type=\"text/javascript\" src=\"/assets/js/nav.js\">\n\t\t\t</script></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

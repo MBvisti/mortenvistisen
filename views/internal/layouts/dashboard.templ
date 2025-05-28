@@ -1,11 +1,13 @@
 package layouts
 
-import "github.com/mbvisti/mortenvistisen/router/routes"
-import "time"
-import "fmt"
-import "github.com/mbvisti/mortenvistisen/config"
-import "github.com/mbvisti/mortenvistisen/router/contexts"
-import "github.com/mbvisti/mortenvistisen/views/internal/components"
+import (
+	"github.com/mbvisti/mortenvistisen/router/routes"
+	"time"
+	"fmt"
+	"github.com/mbvisti/mortenvistisen/config"
+	"github.com/mbvisti/mortenvistisen/router/contexts"
+	"github.com/mbvisti/mortenvistisen/views/internal/components"
+)
 
 templ Dashboard() {
 	<!DOCTYPE html>
@@ -63,37 +65,13 @@ templ Dashboard() {
 				<main class="dashboard-main">
 					{ children... }
 				</main>
-				<div class="toast toast-end">
+				<div class="toast-container">
 					for _, flash := range contexts.ExtractFlashMessages(ctx) {
 						@components.ToastMessage(flash)
 					}
 				</div>
 			</div>
-			<script>
-				function toggleMobileNav() {
-					const sidebar = document.getElementById('sidebar');
-					const overlay = document.querySelector('.sidebar-overlay');
-					
-					sidebar.classList.toggle('open');
-					overlay.classList.toggle('open');
-				}
-
-				function closeMobileNav() {
-					const sidebar = document.getElementById('sidebar');
-					const overlay = document.querySelector('.sidebar-overlay');
-					
-					sidebar.classList.remove('open');
-					overlay.classList.remove('open');
-				}
-
-				// Close sidebar when clicking on nav links on mobile
-				document.querySelectorAll('.nav-link').forEach(link => {
-					link.addEventListener('click', () => {
-						if (window.innerWidth <= 768) {
-							closeMobileNav();
-						}
-					});
-				});
+			<script type="text/javascript" src="/assets/js/nav.js">
 			</script>
 		</body>
 	</html>

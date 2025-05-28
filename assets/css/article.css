@@ -53,7 +53,12 @@
 
 .article-grid>.article-img {
 	grid-column: full-width !important;
-	height: 25rem;
+
+	@media (min-width: 1400px) {
+		grid-column: breakout !important;
+	}
+
+	height: 35rem;
 	width: 100%;
 }
 

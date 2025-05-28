@@ -69,8 +69,14 @@ templ EditArticle(formData EditArticleFormData) {
 									placeholder="Brief description of the article"
 									rows="3"
 									maxlength="255"
+									data-bind-excerpt
 									required
 								>{ formData.Excerpt }</textarea>
+								<div data-show="$excerpt.length != 0" style="display: flex; color: white; border: 1px solid white;">
+									<p>Excerpt length: </p>
+									<p data-text="$excerpt.length"></p>
+									<p>/130 </p>
+								</div>
 								if formData.Errors["excerpt"] != nil {
 									<div class="label">
 										for _, errMsg := range formData.Errors["excerpt"] {

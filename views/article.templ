@@ -1,8 +1,10 @@
 package views
 
-import "github.com/mbvisti/mortenvistisen/views/internal/layouts"
-import "context"
-import "io"
+import (
+	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
+	"context"
+	"io"
+)
 
 templ ArticleCallToAction() {
 	<section class="article-cta full-width article-grid">
@@ -17,20 +19,30 @@ func unsafe(html string) templ.Component {
 	})
 }
 
-templ Article(content string) {
+templ Article(img, content string) {
 	<main class="main">
 		<article class="article-grid">
+			if img != "" {
+				<img class="article-img" src={ img }/>
+			}
 			@unsafe(content)
 		</article>
 	</main>
 }
 
-templ ArticlePage(title, slug, desc string, content templ.Component) {
+type ArticlePageProps struct {
+	Slug      string
+	MetaTitle string
+	MetaDesc  string
+	Content   templ.Component
+}
+
+templ ArticlePage(props ArticlePageProps) {
 	@layouts.Base(
-		WithSlug(slug),
-		WithTitle(title),
-		WithDescription(desc),
+		WithSlug(props.Slug),
+		WithTitle(props.MetaTitle),
+		WithDescription(props.MetaDesc),
 	) {
-		@content
+		@props.Content
 	}
 }

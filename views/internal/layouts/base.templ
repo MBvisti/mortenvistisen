@@ -14,7 +14,7 @@ templ Base(headOpts ...components.HeadDataOption) {
 			{ children... }
 			@components.Footer()
 		</body>
-		<div class="toast toast-end">
+		<div class="toast-container">
 			for _, flash := range contexts.ExtractFlashMessages(ctx) {
 				@components.ToastMessage(flash)
 			}

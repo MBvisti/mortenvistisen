@@ -24,12 +24,13 @@ import (
 
 const (
 	landingPageCacheKey = "landingPage"
-	articlePageCacheKey = "articlePage"
+	articlePageCacheKey = "articlePage--"
 )
 
 type App struct {
-	db    psql.Postgres
-	cache otter.Cache[string, templ.Component]
+	db           psql.Postgres
+	cache        otter.Cache[string, templ.Component]
+	articleCache otter.Cache[string, views.ArticlePageProps]
 }
 
 func newApp(
@@ -45,7 +46,19 @@ func newApp(
 		panic(err)
 	}
 
-	return App{db, pageCacher}
+	articleCacheBuilder, err := otter.NewBuilder[string, views.ArticlePageProps](
+		100,
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	articleCache, err := articleCacheBuilder.WithTTL(48 * time.Hour).Build()
+	if err != nil {
+		panic(err)
+	}
+
+	return App{db, pageCacher, articleCache}
 }
 
 func (a App) LandingPage(c echo.Context) error {
@@ -63,6 +76,11 @@ func (a App) AboutPage(c echo.Context) error {
 func (a App) ArticlePage(c echo.Context) error {
 	slug := c.Param("articleSlug")
 
+	if value, ok := a.articleCache.Get(articlePageCacheKey + slug); ok {
+		return views.ArticlePage(value).
+			Render(renderArgs(c))
+	}
+
 	article, err := models.GetArticleBySlug(
 		c.Request().Context(),
 		a.db.Pool,
@@ -72,26 +90,20 @@ func (a App) ArticlePage(c echo.Context) error {
 		return err
 	}
 
-	slog.Info(
-		"$$$$$$$$$$$$$$$$$$$$$$$$",
-		"article",
-		article.Content,
-		"id",
-		article.ID,
-	)
-
 	manager := NewManager()
 	ar, e := manager.ParseContent(article.Content)
 	if e != nil {
 		return err
 	}
 
-	// if value, ok := a.cache.Get(articlePageCacheKey); ok {
-	// 	return views.ArticlePage("A love letter to Go", slug, "desc", value).
-	// 		Render(renderArgs(c))
-	// }
+	props := views.ArticlePageProps{
+		Slug:      slug,
+		MetaTitle: article.MetaTitle,
+		MetaDesc:  article.MetaDescription,
+		Content:   views.Article(article.ImageLink, ar),
+	}
 
-	return views.ArticlePage("A love letter to Go", slug, "desc", views.Article(ar)).
+	return views.ArticlePage(props).
 		Render(renderArgs(c))
 }
 
