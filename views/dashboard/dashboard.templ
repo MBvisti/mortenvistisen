@@ -4,6 +4,7 @@ import (
 	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
 	"github.com/mbvisti/mortenvistisen/views/fragments"
 	"github.com/mbvisti/mortenvistisen/models"
+	"github.com/mbvisti/mortenvistisen/router/routes"
 	"fmt"
 )
 
@@ -42,7 +43,7 @@ templ Home(result models.PaginationResult) {
 		<div class="articles-section">
 			<div class="section-header">
 				<h2 class="section-title">Recent Articles</h2>
-				<a href="/dashboard/articles/new" class="btn-primary">New Article</a>
+				<a href={ templ.SafeURL(routes.DashboardNewArticle.Path) } class="btn-primary">New Article</a>
 			</div>
 			<table class="articles-table">
 				<thead>

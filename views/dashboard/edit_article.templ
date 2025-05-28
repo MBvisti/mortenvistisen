@@ -2,6 +2,10 @@ package dashboard
 
 import "github.com/mbvisti/mortenvistisen/views/internal/layouts"
 import "github.com/mbvisti/mortenvistisen/views/internal/components"
+import "github.com/mbvisti/mortenvistisen/router/routes"
+import "github.com/mbvisti/mortenvistisen/config"
+
+//import "github.com/mbvisti/mortenvistisen/config"
 
 type EditArticleFormData struct {
 	ID              string
@@ -22,7 +26,7 @@ templ EditArticle(formData EditArticleFormData) {
 			<div class="header-content">
 				<h1 class="dashboard-title">Edit Article</h1>
 				<div class="header-actions">
-					<a href="/dashboard" class="btn-secondary">← Back to Dashboard</a>
+					<a href={ templ.SafeURL(routes.DashboardHome.Path) } class="btn-secondary">← Back to Dashboard</a>
 				</div>
 			</div>
 		</div>
@@ -158,7 +162,7 @@ templ EditArticle(formData EditArticleFormData) {
 					</div>
 				</div>
 			</form>
-			<script type="module" src="/assets/js/easymde.js"></script>
+			<script type="module" src={ config.Cfg.GetFullDomain() + "/" + routes.JsEasyMDE.Path }></script>
 		</div>
 	}
 }

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 	"github.com/maypok86/otter"
@@ -195,6 +196,21 @@ func (a Assets) AllCss(c echo.Context) error {
 	c = a.enableCaching(c, stylesheet)
 
 	return c.Blob(http.StatusOK, "text/css", stylesheet)
+}
+
+func (a Assets) IndividualScript(c echo.Context) error {
+	filename := strings.Split(c.Path(), routes.AssetsRoutePrefix)[1]
+
+	script, err := assets.Files.ReadFile(
+		strings.TrimPrefix(filename, "/"),
+	)
+	if err != nil {
+		return err
+	}
+
+	c = a.enableCaching(c, script)
+
+	return c.Blob(http.StatusOK, "text/javascript", script)
 }
 
 func (a Assets) Scripts(c echo.Context) error {

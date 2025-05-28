@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	assetsRoutePrefix = "/assets"
+	AssetsRoutePrefix = "/assets"
 	assetsNamePrefix  = "assets"
 )
 
@@ -15,6 +15,8 @@ var Assets = []Route{
 	CssEntrypoint,
 	AllCss,
 	JsEntrypoint,
+	JsEasyMDE,
+	JsNav,
 	AllJs,
 	Favicon16,
 	Favicon32,
@@ -53,6 +55,20 @@ var JsEntrypoint = Route{
 	Path:        assetsNamePrefix + "/js/script.js",
 	Method:      http.MethodGet,
 	HandlerName: "Scripts",
+}
+
+var JsEasyMDE = Route{
+	Name:        assetsNamePrefix + "js.easymde",
+	Path:        assetsNamePrefix + "/js/easymde.js",
+	Method:      http.MethodGet,
+	HandlerName: "IndividualScript",
+}
+
+var JsNav = Route{
+	Name:        assetsNamePrefix + "js.nav",
+	Path:        assetsNamePrefix + "/js/nav.js",
+	Method:      http.MethodGet,
+	HandlerName: "IndividualScript",
 }
 
 var AllJs = Route{

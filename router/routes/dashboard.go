@@ -11,6 +11,9 @@ const (
 
 var Dashboard = []Route{
 	DashboardHome,
+	// DashboardArticles,
+	// DashboardAnalytics,
+	// DashboardSettings,
 	DashboardNewArticle,
 	DashboardStoreArticle,
 	DashboardEditArticle,
@@ -27,6 +30,36 @@ var DashboardHome = Route{
 		"AuthOnly",
 	},
 }
+
+// var DashboardArticles = Route{
+// 	Name:        dashboardNamePrefix + ".articles",
+// 	Path:        dashboardRoutePrefix + "/articles",
+// 	Method:      http.MethodGet,
+// 	HandlerName: "Articles",
+// 	Middleware: []string{
+// 		"AuthOnly",
+// 	},
+// }
+//
+// var DashboardAnalytics = Route{
+// 	Name:        dashboardNamePrefix + ".analytics",
+// 	Path:        dashboardRoutePrefix + "/analytics",
+// 	Method:      http.MethodGet,
+// 	HandlerName: "Analytics",
+// 	Middleware: []string{
+// 		"AuthOnly",
+// 	},
+// }
+//
+// var DashboardSettings = Route{
+// 	Name:        dashboardNamePrefix + ".settings",
+// 	Path:        dashboardRoutePrefix + "/settings",
+// 	Method:      http.MethodGet,
+// 	HandlerName: "Settings",
+// 	Middleware: []string{
+// 		"AuthOnly",
+// 	},
+// }
 
 var DashboardNewArticle = Route{
 	Name:        dashboardNamePrefix + ".articles.new",

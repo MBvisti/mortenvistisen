@@ -64,7 +64,16 @@ func Dashboard() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" type=\"module\"></script></head><body><!-- Mobile Navigation Toggle --><button class=\"mobile-nav-toggle\" onclick=\"toggleMobileNav()\">☰</button><!-- Sidebar Overlay for Mobile --><div class=\"sidebar-overlay\" onclick=\"closeMobileNav()\"></div><div class=\"dashboard-layout\"><!-- Sidebar --><aside class=\"dashboard-sidebar\" id=\"sidebar\"><div class=\"sidebar-header\"><h2 class=\"sidebar-title\">Grafto</h2></div><nav><ul class=\"sidebar-nav\"><li class=\"nav-item\"><a href=\"/dashboard\" class=\"nav-link active\"><span class=\"nav-icon\">📊</span> Dashboard</a></li><li class=\"nav-item\"><a href=\"/dashboard/articles\" class=\"nav-link\"><span class=\"nav-icon\">📝</span> Articles</a></li><li class=\"nav-item\"><a href=\"/dashboard/analytics\" class=\"nav-link\"><span class=\"nav-icon\">📈</span> Analytics</a></li><li class=\"nav-item\"><a href=\"/dashboard/settings\" class=\"nav-link\"><span class=\"nav-icon\">⚙️</span> Settings</a></li></ul></nav></aside><!-- Main Content --><main class=\"dashboard-main\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" type=\"module\"></script></head><body><!-- Mobile Navigation Toggle --><button class=\"mobile-nav-toggle\" onclick=\"toggleMobileNav()\">☰</button><!-- Sidebar Overlay for Mobile --><div class=\"sidebar-overlay\" onclick=\"closeMobileNav()\"></div><div class=\"dashboard-layout\"><!-- Sidebar --><aside class=\"dashboard-sidebar\" id=\"sidebar\"><div class=\"sidebar-header\"><h2 class=\"sidebar-title\">Grafto</h2></div><nav><ul class=\"sidebar-nav\"><li class=\"nav-item\"><a href=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var4 templ.SafeURL = templ.SafeURL(routes.DashboardHome.Path)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var4)))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" class=\"nav-link active\"><span class=\"nav-icon\">📊</span> Dashboard</a></li></ul></nav></aside><!-- Main Content --><main class=\"dashboard-main\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -72,7 +81,7 @@ func Dashboard() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</main><div class=\"toast-container\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</main><div class=\"toast-container\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -82,7 +91,20 @@ func Dashboard() templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div></div><script type=\"text/javascript\" src=\"/assets/js/nav.js\">\n\t\t\t</script></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div></div><script type=\"text/javascript\" src=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var5 string
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(config.Cfg.GetFullDomain() + "/" + routes.JsNav.Path)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/layouts/dashboard.templ`, Line: 56, Col: 92}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\">\n\t\t\t</script></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -90,4 +112,28 @@ func Dashboard() templ.Component {
 	})
 }
 
+// <li class="nav-item">
+//
+//	<a href={ templ.SafeURL(routes.DashboardArticles.Path) } class="nav-link">
+//		<span class="nav-icon">📝</span>
+//		Articles
+//	</a>
+//
+// </li>
+// <li class="nav-item">
+//
+//	<a href={ templ.SafeURL(routes.DashboardAnalytics.Path) } class="nav-link">
+//		<span class="nav-icon">📈</span>
+//		Analytics
+//	</a>
+//
+// </li>
+// <li class="nav-item">
+//
+//	<a href={ templ.SafeURL(routes.DashboardSettings.Path) } class="nav-link">
+//		<span class="nav-icon">⚙️</span>
+//		Settings
+//	</a>
+//
+// </li>
 var _ = templruntime.GeneratedTemplate

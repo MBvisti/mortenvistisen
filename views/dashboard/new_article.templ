@@ -1,7 +1,11 @@
 package dashboard
 
-import "github.com/mbvisti/mortenvistisen/views/internal/layouts"
-import "github.com/mbvisti/mortenvistisen/views/internal/components"
+import (
+	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
+	"github.com/mbvisti/mortenvistisen/views/internal/components"
+	"github.com/mbvisti/mortenvistisen/router/routes"
+	"github.com/mbvisti/mortenvistisen/config"
+)
 
 type NewArticleFormData struct {
 	Title           string
@@ -21,12 +25,12 @@ templ NewArticle(formData NewArticleFormData) {
 			<div class="header-content">
 				<h1 class="dashboard-title">Create New Article</h1>
 				<div class="header-actions">
-					<a href="/dashboard" class="btn-secondary">← Back to Dashboard</a>
+					<a href={ templ.SafeURL(routes.DashboardHome.Path) } class="btn-secondary">← Back to Dashboard</a>
 				</div>
 			</div>
 		</div>
 		<div class="article-form-container">
-			<form method="POST" action="/dashboard/articles/new" class="article-form">
+			<form method="POST" action={ templ.SafeURL(routes.DashboardStoreArticle.Path) } class="article-form">
 				@components.CsrfField(formData.CsrfToken)
 				<div class="form-section">
 					<h2 class="section-title">Article Information</h2>
@@ -149,7 +153,7 @@ templ NewArticle(formData NewArticleFormData) {
 					</div>
 				</div>
 			</form>
-			<script type="module" src="/assets/js/easymde.js"></script>
+			<script type="module" src={ config.Cfg.GetFullDomain() + "/" + routes.JsEasyMDE.Path }></script>
 		</div>
 	}
 }
