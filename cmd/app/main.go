@@ -138,10 +138,13 @@ func run(ctx context.Context) error {
 
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
-
-	slog.Info("STARTING TO MIGRATE")
+	migs, err := psql.Migrations.ReadDir("migrations")
+	if err != nil {
+		return err
+	}
+	slog.Info("STARTING TO MIGRATE", "migs", migs)
 	if err := migrate(ctx); err != nil {
-		panic(err)
+		return err
 	}
 	slog.Info("DONE MIGRATING")
 
