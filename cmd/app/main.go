@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"flag"
 	"fmt"
 	"io/fs"
@@ -10,7 +9,6 @@ import (
 	"os"
 	"os/signal"
 	"strconv"
-	"time"
 
 	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/mbvisti/mortenvistisen/clients"
@@ -31,12 +29,7 @@ import (
 var appVersion string
 
 func migrate(ctx context.Context) error {
-	ctx, cancel := context.WithTimeoutCause(
-		ctx,
-		5*time.Minute,
-		errors.New("migration timeout of 5 minutes reached"),
-	)
-	defer cancel()
+	slog.Info("STARTING TO MIGRATE")
 
 	cfg := config.NewConfig()
 
@@ -146,11 +139,11 @@ func run(ctx context.Context) error {
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
 
-	if cfg.Environment == config.PROD_ENVIRONMENT {
-		if err := migrate(ctx); err != nil {
-			panic(err)
-		}
+	slog.Info("STARTING TO MIGRATE")
+	if err := migrate(ctx); err != nil {
+		panic(err)
 	}
+	slog.Info("DONE MIGRATING")
 
 	tel, err := telemetry.New(
 		ctx,
