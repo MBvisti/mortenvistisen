@@ -319,7 +319,7 @@ func head(data headData) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<!-- Cloudflare Web Analytics --><script defer src=\"/js/cloudflare_beacon.min.js\" data-cf-beacon=\"{&#34;token&#34;: &#34;423a2fdc6f104a90ac9d9b4d35774148&#34;}\"></script><!-- End Cloudflare Web Analytics --></head>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "<!-- Cloudflare Web Analytics --><script defer src=\"/js/beacon.min.js\" data-cf-beacon=\"{&#34;token&#34;: &#34;423a2fdc6f104a90ac9d9b4d35774148&#34;}\"></script><!-- End Cloudflare Web Analytics --></head>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
