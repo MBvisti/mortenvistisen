@@ -7,6 +7,8 @@
 	display: grid;
 	grid-template-columns:
 		[full-width-start] minmax(var(--padding-inline), 1fr) [breakout-start] minmax(0, var(--breakout-size)) [content-start] min(100% - (var(--padding-inline) * 2), var(--content-max-width)) [content-end] minmax(0, var(--breakout-size)) [breakout-end] minmax(var(--padding-inline), 1fr) [full-width-end];
+
+	width: 100%;
 }
 
 .article-grid> :not(.breakout, .full-width),
@@ -19,6 +21,9 @@
 
 	margin-top: var(--size-1);
 	margin-bottom: var(--size-1);
+
+	min-width: 0;
+	word-wrap: break-word;
 
 	@media (min-width: 768px) {
 		grid-column: content;
