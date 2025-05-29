@@ -27,6 +27,7 @@ p {
 body {
 	min-height: 100vh;
 	min-height: 100dvh;
+	max-width: 100vw;
 	display: grid;
 	grid-template-rows: 10ch 1fr 10ch;
 }
