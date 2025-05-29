@@ -59,6 +59,27 @@ func resourceRoutes(router *echo.Echo, handlers handlers.Resource) {
 		return c.Blob(http.StatusOK, "text/javascript", stylesheet)
 	})
 
+	router.GET("/js/beacon.min.js", func(c echo.Context) error {
+		stylesheet, err := static.Files.ReadFile(
+			"js/cloudflare_beacon.min.js",
+		)
+		if err != nil {
+			return err
+		}
+
+		if config.Cfg.Environment == config.PROD_ENVIRONMENT {
+			c.Response().
+				Header().
+				Set("Cache-Control", "public, max-age=31536000, immutable")
+			c.Response().
+				Header().
+				Set("Vary", "Accept-Encoding")
+			c.Response()
+		}
+
+		return c.Blob(http.StatusOK, "text/javascript", stylesheet)
+	})
+
 	router.GET("/css/bootstrap.css", func(c echo.Context) error {
 		stylesheet, err := static.Files.ReadFile(
 			"css/bootstrap-v5_3_0.css",
