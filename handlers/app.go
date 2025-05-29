@@ -122,7 +122,13 @@ func (a App) ArticlePage(c echo.Context) error {
 		Slug:      slug,
 		MetaTitle: article.MetaTitle,
 		MetaDesc:  article.MetaDescription,
-		Content:   views.Article(article.ImageLink, ar),
+		Content: views.Article(
+			article.ImageLink,
+			ar,
+			article.Title,
+			article.PublishedAt,
+			article.UpdatedAt,
+		),
 	}
 
 	return views.ArticlePage(props).

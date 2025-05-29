@@ -35,9 +35,9 @@ func (q *Queries) DeleteArticle(ctx context.Context, db DBTX, id uuid.UUID) erro
 
 const insertArticle = `-- name: InsertArticle :one
 insert into
-    articles (id, created_at, updated_at, published_at, title, excerpt, meta_title, meta_description, slug, image_link, content)
+    articles (id, created_at, updated_at, published_at, title, excerpt, meta_title, meta_description, slug, image_link, content, read_time)
 values
-    ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+    ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
 returning id, created_at, updated_at, published_at, title, excerpt, meta_title, meta_description, slug, image_link, content, read_time
 `
 
@@ -53,6 +53,7 @@ type InsertArticleParams struct {
 	Slug            string
 	ImageLink       sql.NullString
 	Content         sql.NullString
+	ReadTime        sql.NullInt32
 }
 
 func (q *Queries) InsertArticle(ctx context.Context, db DBTX, arg InsertArticleParams) (Article, error) {
@@ -68,6 +69,7 @@ func (q *Queries) InsertArticle(ctx context.Context, db DBTX, arg InsertArticleP
 		arg.Slug,
 		arg.ImageLink,
 		arg.Content,
+		arg.ReadTime,
 	)
 	var i Article
 	err := row.Scan(
@@ -381,7 +383,7 @@ func (q *Queries) UnpublishArticle(ctx context.Context, db DBTX, arg UnpublishAr
 
 const updateArticle = `-- name: UpdateArticle :one
 update articles
-    set updated_at=$2, published_at=$3, title=$4, excerpt=$5, meta_title=$6, meta_description=$7, slug=$8, image_link=$9, content=$10
+    set updated_at=$2, published_at=$3, title=$4, excerpt=$5, meta_title=$6, meta_description=$7, slug=$8, image_link=$9, content=$10, read_time=$11
 where id = $1
 returning id, created_at, updated_at, published_at, title, excerpt, meta_title, meta_description, slug, image_link, content, read_time
 `
@@ -397,6 +399,7 @@ type UpdateArticleParams struct {
 	Slug            string
 	ImageLink       sql.NullString
 	Content         sql.NullString
+	ReadTime        sql.NullInt32
 }
 
 func (q *Queries) UpdateArticle(ctx context.Context, db DBTX, arg UpdateArticleParams) (Article, error) {
@@ -411,6 +414,7 @@ func (q *Queries) UpdateArticle(ctx context.Context, db DBTX, arg UpdateArticleP
 		arg.Slug,
 		arg.ImageLink,
 		arg.Content,
+		arg.ReadTime,
 	)
 	var i Article
 	err := row.Scan(

@@ -4,13 +4,8 @@ import (
 	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
 	"context"
 	"io"
+	"time"
 )
-
-templ ArticleCallToAction() {
-	<section class="article-cta full-width article-grid">
-		<p class="content">SPEEEND</p>
-	</section>
-}
 
 func unsafe(html string) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
@@ -19,12 +14,20 @@ func unsafe(html string) templ.Component {
 	})
 }
 
-templ Article(img, content string) {
+templ Article(img, content, title string, publishedAt, updatedAt time.Time) {
 	<main class="main">
 		<article class="article-grid">
 			if img != "" {
 				<img class="article-img" src={ img }/>
 			}
+			<h1>{ title }</h1>
+			<div style="display:flex">
+				<p>Publised: { publishedAt.Format("2006-06-06") }</p>
+				if updatedAt.After(publishedAt) {
+					<p>Updated: { updatedAt.Format("2006-06-06") }</p>
+				}
+				<p>by MBV</p>
+			</div>
 			@unsafe(content)
 		</article>
 	</main>

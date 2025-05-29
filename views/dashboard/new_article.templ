@@ -15,6 +15,9 @@ type NewArticleFormData struct {
 	Slug            string
 	ImageLink       string
 	Content         string
+	ReadTime        string
+	SelectedTagIDs  []string
+	AvailableTags   []ArticleTagOption
 	CsrfToken       string
 	Errors          map[string][]string
 }
@@ -95,6 +98,48 @@ templ NewArticle(formData NewArticleFormData) {
 									ErrorMsgs: formData.Errors["image_link"],
 								},
 							)
+						</div>
+						<div class="form-row">
+							@components.InputField(
+								"Read Time (minutes)",
+								"number",
+								"read_time",
+								"5",
+								templ.Attributes{"min": "1", "max": "999"},
+								components.InputFieldProps{
+									Value:     formData.ReadTime,
+									ErrorMsgs: formData.Errors["read_time"],
+								},
+							)
+						</div>
+						<div class="form-row">
+							<label class="form-control w-full">
+								<div class="label">
+									<span class="label-text md:text-lg">Tags</span>
+								</div>
+								<div class="tags-selection">
+									for _, tag := range formData.AvailableTags {
+										<label class="tag-checkbox">
+											<input
+												type="checkbox"
+												name="tag_ids"
+												value={ tag.ID }
+												if containsString(formData.SelectedTagIDs, tag.ID) {
+													checked
+												}
+											/>
+											<span class="tag-label">{ tag.Title }</span>
+										</label>
+									}
+								</div>
+								if formData.Errors["tag_ids"] != nil {
+									<div class="label">
+										for _, errMsg := range formData.Errors["tag_ids"] {
+											<span class="label-text-alt">{ components.UppercaseFirstWord(errMsg) }</span>
+										}
+									</div>
+								}
+							</label>
 						</div>
 					</div>
 				</div>

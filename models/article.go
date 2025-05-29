@@ -341,6 +341,8 @@ type NewArticlePayload struct {
 	Slug            string `validate:"required,max=255"`
 	ImageLink       string `validate:"omitempty,max=255"`
 	Content         string
+	ReadTime        int32 `validate:"min=1,max=999"`
+	TagIDs          []string
 }
 
 func NewArticle(
@@ -371,7 +373,7 @@ func NewArticle(
 		Slug:            data.Slug,
 		ImageLink:       data.ImageLink,
 		Content:         data.Content,
-		ReadTime:        0,
+		ReadTime:        data.ReadTime,
 	}
 
 	_, err := db.Stmts.InsertArticle(ctx, dbtx, db.InsertArticleParams{
@@ -398,13 +400,29 @@ func NewArticle(
 			String: article.Content,
 			Valid:  article.Content != "",
 		},
+		ReadTime: sql.NullInt32{
+			Int32: article.ReadTime,
+			Valid: article.ReadTime > 0,
+		},
 	})
 	if err != nil {
 		return Article{}, err
 	}
 
-	article.Tags = []ArticleTag{}
-	return article, nil
+	// Create tag connections
+	for _, tagIDStr := range data.TagIDs {
+		tagID, err := uuid.Parse(tagIDStr)
+		if err != nil {
+			continue // Skip invalid UUIDs
+		}
+		_, err = NewArticleTagConnection(ctx, dbtx, article.ID, tagID)
+		if err != nil {
+			return Article{}, err
+		}
+	}
+
+	// Fetch the created article with tags
+	return GetArticleByID(ctx, dbtx, article.ID)
 }
 
 type UpdateArticlePayload struct {
@@ -418,6 +436,8 @@ type UpdateArticlePayload struct {
 	Slug            string `validate:"required,max=255"`
 	ImageLink       string `validate:"omitempty,max=255"`
 	Content         string
+	ReadTime        int32 `validate:"min=1,max=999"`
+	TagIDs          []string
 }
 
 func UpdateArticle(
@@ -429,7 +449,7 @@ func UpdateArticle(
 		return Article{}, errors.Join(ErrDomainValidation, err)
 	}
 
-	row, err := db.Stmts.UpdateArticle(ctx, dbtx, db.UpdateArticleParams{
+	_, err := db.Stmts.UpdateArticle(ctx, dbtx, db.UpdateArticleParams{
 		ID:        data.ID,
 		UpdatedAt: pgtype.Timestamptz{Time: data.UpdatedAt, Valid: true},
 		PublishedAt: pgtype.Timestamptz{
@@ -449,31 +469,32 @@ func UpdateArticle(
 			String: data.Content,
 			Valid:  data.Content != "",
 		},
+		ReadTime: sql.NullInt32{
+			Int32: data.ReadTime,
+			Valid: data.ReadTime > 0,
+		},
 	})
 	if err != nil {
 		return Article{}, err
 	}
 
-	tags, err := GetArticleTagsByArticleID(ctx, dbtx, row.ID)
+	err = DeleteArticleTagConnectionsByArticleID(ctx, dbtx, data.ID)
 	if err != nil {
 		return Article{}, err
 	}
 
-	return Article{
-		ID:              row.ID,
-		CreatedAt:       row.CreatedAt.Time,
-		UpdatedAt:       row.UpdatedAt.Time,
-		PublishedAt:     row.PublishedAt.Time,
-		Title:           row.Title,
-		Excerpt:         row.Excerpt,
-		MetaTitle:       row.MetaTitle,
-		MetaDescription: row.MetaDescription,
-		Slug:            row.Slug,
-		ImageLink:       row.ImageLink.String,
-		Content:         row.Content.String,
-		ReadTime:        row.ReadTime.Int32,
-		Tags:            tags,
-	}, nil
+	for _, tagIDStr := range data.TagIDs {
+		tagID, err := uuid.Parse(tagIDStr)
+		if err != nil {
+			continue // Skip invalid UUIDs
+		}
+		_, err = NewArticleTagConnection(ctx, dbtx, data.ID, tagID)
+		if err != nil {
+			return Article{}, err
+		}
+	}
+
+	return GetArticleByID(ctx, dbtx, data.ID)
 }
 
 type UpdateArticleContentPayload struct {

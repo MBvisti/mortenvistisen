@@ -64,9 +64,24 @@ func (d Dashboard) Index(c echo.Context) error {
 }
 
 func (d Dashboard) NewArticle(c echo.Context) error {
+	// Get available tags
+	availableTags, err := models.GetArticleTags(extractCtx(c), d.db.Pool)
+	if err != nil {
+		return err
+	}
+
+	tagOptions := make([]dashboard.ArticleTagOption, len(availableTags))
+	for i, tag := range availableTags {
+		tagOptions[i] = dashboard.ArticleTagOption{
+			ID:    tag.ID.String(),
+			Title: tag.Title,
+		}
+	}
+
 	formData := dashboard.NewArticleFormData{
-		CsrfToken: csrf.Token(c.Request()),
-		Errors:    make(map[string][]string),
+		AvailableTags: tagOptions,
+		CsrfToken:     csrf.Token(c.Request()),
+		Errors:        make(map[string][]string),
 	}
 
 	return dashboard.NewArticle(formData).Render(renderArgs(c))
@@ -74,19 +89,29 @@ func (d Dashboard) NewArticle(c echo.Context) error {
 
 func (d Dashboard) StoreArticle(c echo.Context) error {
 	type payload struct {
-		Title           string `form:"title"`
-		Excerpt         string `form:"excerpt"`
-		MetaTitle       string `form:"meta_title"`
-		MetaDescription string `form:"meta_description"`
-		Slug            string `form:"slug"`
-		ImageLink       string `form:"image_link"`
-		Content         string `form:"content"`
-		Action          string `form:"action"`
+		Title           string   `form:"title"`
+		Excerpt         string   `form:"excerpt"`
+		MetaTitle       string   `form:"meta_title"`
+		MetaDescription string   `form:"meta_description"`
+		Slug            string   `form:"slug"`
+		ImageLink       string   `form:"image_link"`
+		Content         string   `form:"content"`
+		ReadTime        string   `form:"read_time"`
+		TagIDs          []string `form:"tag_ids"`
+		Action          string   `form:"action"`
 	}
 
 	var articlePayload payload
 	if err := c.Bind(&articlePayload); err != nil {
 		return err
+	}
+
+	// Parse read time
+	var readTime int32
+	if articlePayload.ReadTime != "" {
+		if parsedTime, err := strconv.ParseInt(articlePayload.ReadTime, 10, 32); err == nil {
+			readTime = int32(parsedTime)
+		}
 	}
 
 	slog.Info(
@@ -106,6 +131,8 @@ func (d Dashboard) StoreArticle(c echo.Context) error {
 			Slug:            articlePayload.Slug,
 			ImageLink:       articlePayload.ImageLink,
 			Content:         articlePayload.Content,
+			ReadTime:        readTime,
+			TagIDs:          articlePayload.TagIDs,
 		},
 	)
 	if err != nil {
@@ -205,6 +232,26 @@ func (d Dashboard) EditArticle(c echo.Context) error {
 		return c.Redirect(302, "/dashboard")
 	}
 
+	// Get available tags
+	availableTags, err := models.GetArticleTags(extractCtx(c), d.db.Pool)
+	if err != nil {
+		return err
+	}
+
+	tagOptions := make([]dashboard.ArticleTagOption, len(availableTags))
+	for i, tag := range availableTags {
+		tagOptions[i] = dashboard.ArticleTagOption{
+			ID:    tag.ID.String(),
+			Title: tag.Title,
+		}
+	}
+
+	// Get current tag IDs
+	selectedTagIDs := make([]string, len(article.Tags))
+	for i, tag := range article.Tags {
+		selectedTagIDs[i] = tag.ID.String()
+	}
+
 	formData := dashboard.EditArticleFormData{
 		ID:              article.ID.String(),
 		Title:           article.Title,
@@ -214,6 +261,9 @@ func (d Dashboard) EditArticle(c echo.Context) error {
 		Slug:            article.Slug,
 		ImageLink:       article.ImageLink,
 		Content:         article.Content,
+		ReadTime:        strconv.FormatInt(int64(article.ReadTime), 10),
+		SelectedTagIDs:  selectedTagIDs,
+		AvailableTags:   tagOptions,
 		CsrfToken:       csrf.Token(c.Request()),
 		Errors:          make(map[string][]string),
 	}
@@ -236,19 +286,29 @@ func (d Dashboard) UpdateArticle(c echo.Context) error {
 	}
 
 	type payload struct {
-		Title           string `form:"title"`
-		Excerpt         string `form:"excerpt"`
-		MetaTitle       string `form:"meta_title"`
-		MetaDescription string `form:"meta_description"`
-		Slug            string `form:"slug"`
-		ImageLink       string `form:"image_link"`
-		Content         string `form:"content"`
-		Action          string `form:"action"`
+		Title           string   `form:"title"`
+		Excerpt         string   `form:"excerpt"`
+		MetaTitle       string   `form:"meta_title"`
+		MetaDescription string   `form:"meta_description"`
+		Slug            string   `form:"slug"`
+		ImageLink       string   `form:"image_link"`
+		Content         string   `form:"content"`
+		ReadTime        string   `form:"read_time"`
+		TagIDs          []string `form:"tag_ids"`
+		Action          string   `form:"action"`
 	}
 
 	var articlePayload payload
 	if err := c.Bind(&articlePayload); err != nil {
 		return err
+	}
+
+	// Parse read time
+	var readTime int32
+	if articlePayload.ReadTime != "" {
+		if parsedTime, err := strconv.ParseInt(articlePayload.ReadTime, 10, 32); err == nil {
+			readTime = int32(parsedTime)
+		}
 	}
 
 	updatePayload := models.UpdateArticlePayload{
@@ -261,6 +321,8 @@ func (d Dashboard) UpdateArticle(c echo.Context) error {
 		Slug:            articlePayload.Slug,
 		ImageLink:       articlePayload.ImageLink,
 		Content:         articlePayload.Content,
+		ReadTime:        readTime,
+		TagIDs:          articlePayload.TagIDs,
 	}
 
 	if articlePayload.Action == "publish" {
@@ -383,4 +445,160 @@ func (d Dashboard) DeleteArticle(c echo.Context) error {
 
 	// Redirect to dashboard
 	return c.Redirect(302, "/dashboard")
+}
+
+// Tag management handlers
+func (d Dashboard) Tags(c echo.Context) error {
+	tags, err := models.GetArticleTags(extractCtx(c), d.db.Pool)
+	if err != nil {
+		return err
+	}
+
+	data := dashboard.TagsPageData{
+		Tags:      tags,
+		CsrfToken: csrf.Token(c.Request()),
+		Errors:    make(map[string][]string),
+	}
+
+	return dashboard.Tags(data).Render(renderArgs(c))
+}
+
+func (d Dashboard) CreateTag(c echo.Context) error {
+	type payload struct {
+		Title string `form:"title"`
+	}
+
+	var tagPayload payload
+	if err := c.Bind(&tagPayload); err != nil {
+		return err
+	}
+
+	_, err := models.NewArticleTag(
+		extractCtx(c),
+		d.db.Pool,
+		models.NewArticleTagPayload{
+			Title: tagPayload.Title,
+		},
+	)
+	if err != nil {
+		if validationErrors := extractValidationErrors(err); validationErrors != nil {
+			tags, _ := models.GetArticleTags(extractCtx(c), d.db.Pool)
+			data := dashboard.TagsPageData{
+				Tags:      tags,
+				CsrfToken: csrf.Token(c.Request()),
+				Errors:    validationErrors,
+			}
+			return dashboard.Tags(data).Render(renderArgs(c))
+		}
+
+		if err := addFlash(
+			c,
+			contexts.FlashError,
+			"Failed to create tag. Please try again.",
+		); err != nil {
+			return err
+		}
+		return c.Redirect(302, "/dashboard/tags")
+	}
+
+	if err := addFlash(
+		c,
+		contexts.FlashSuccess,
+		"Tag created successfully!",
+	); err != nil {
+		return err
+	}
+
+	return c.Redirect(302, "/dashboard/tags")
+}
+
+func (d Dashboard) UpdateTag(c echo.Context) error {
+	tagID := c.Param("id")
+	parsedID, err := uuid.Parse(tagID)
+	if err != nil {
+		return echo.NewHTTPError(404, "Tag not found")
+	}
+
+	type payload struct {
+		Title string `form:"title"`
+	}
+
+	var tagPayload payload
+	if err := c.Bind(&tagPayload); err != nil {
+		return err
+	}
+
+	_, err = models.UpdateArticleTag(
+		extractCtx(c),
+		d.db.Pool,
+		models.UpdateArticleTagPayload{
+			ID:        parsedID,
+			UpdatedAt: time.Now(),
+			Title:     tagPayload.Title,
+		},
+	)
+	if err != nil {
+		if err := addFlash(
+			c,
+			contexts.FlashError,
+			"Failed to update tag. Please try again.",
+		); err != nil {
+			return err
+		}
+		return c.Redirect(302, "/dashboard/tags")
+	}
+
+	if err := addFlash(
+		c,
+		contexts.FlashSuccess,
+		"Tag updated successfully!",
+	); err != nil {
+		return err
+	}
+
+	return c.Redirect(302, "/dashboard/tags")
+}
+
+func (d Dashboard) DeleteTag(c echo.Context) error {
+	tagID := c.Param("id")
+	parsedID, err := uuid.Parse(tagID)
+	if err != nil {
+		return echo.NewHTTPError(404, "Tag not found")
+	}
+
+	// First delete all connections with this tag
+	err = models.DeleteArticleTagConnectionsByTagID(extractCtx(c), d.db.Pool, parsedID)
+	if err != nil {
+		if err := addFlash(
+			c,
+			contexts.FlashError,
+			"Failed to delete tag. Please try again.",
+		); err != nil {
+			return err
+		}
+		return c.Redirect(302, "/dashboard/tags")
+	}
+
+	// Then delete the tag itself
+	err = models.DeleteArticleTag(extractCtx(c), d.db.Pool, parsedID)
+	if err != nil {
+		if err := addFlash(
+			c,
+			contexts.FlashError,
+			"Failed to delete tag. Please try again.",
+		); err != nil {
+			return err
+		}
+		return c.Redirect(302, "/dashboard/tags")
+	}
+
+	if err := addFlash(
+		c,
+		contexts.FlashSuccess,
+		"Tag deleted successfully!",
+	); err != nil {
+		return err
+	}
+
+	return c.Redirect(302, "/dashboard/tags")
 }

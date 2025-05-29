@@ -26,14 +26,14 @@ select count(*) from articles;
 
 -- name: InsertArticle :one
 insert into
-    articles (id, created_at, updated_at, published_at, title, excerpt, meta_title, meta_description, slug, image_link, content)
+    articles (id, created_at, updated_at, published_at, title, excerpt, meta_title, meta_description, slug, image_link, content, read_time)
 values
-    ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+    ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
 returning *;
 
 -- name: UpdateArticle :one
 update articles
-    set updated_at=$2, published_at=$3, title=$4, excerpt=$5, meta_title=$6, meta_description=$7, slug=$8, image_link=$9, content=$10
+    set updated_at=$2, published_at=$3, title=$4, excerpt=$5, meta_title=$6, meta_description=$7, slug=$8, image_link=$9, content=$10, read_time=$11
 where id = $1
 returning *;
 
