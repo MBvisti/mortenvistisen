@@ -24,6 +24,10 @@ p {
 	color: var(--color-base-content)
 }
 
+* {
+	outline: 1px solid red !important;
+}
+
 body {
 	min-height: 100vh;
 	min-height: 100dvh;
