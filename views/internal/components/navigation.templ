@@ -26,13 +26,14 @@ templ Nav() {
 						@NavItem("Home", routes.LandingPage.Name, routes.LandingPage.Path, nil)
 					</li>
 					<li>
-						@NavItem("About", routes.AboutPage.Name, routes.AboutPage.Path, nil)
+						@NavItem("Newsletters", routes.AboutPage.Name, routes.AboutPage.Path, nil)
+					</li>
+					<li>
+						@NavItem("Projects", routes.AboutPage.Name, routes.AboutPage.Path, nil)
 					</li>
 					<li>
 						if contexts.ExtractApp(ctx).IsAuthenticated {
 							@NavItem("Logout", routes.DestroyAuthSession.Name, routes.DestroyAuthSession.Path, nil)
-						} else {
-							@NavItem("Login", routes.LoginPage.Name, routes.LoginPage.Path, nil)
 						}
 					</li>
 				</ul>

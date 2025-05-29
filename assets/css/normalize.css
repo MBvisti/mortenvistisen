@@ -214,7 +214,6 @@
 }
 
 :where(p) {
-	/* max-inline-size: var(--size-content-3); */
 	text-wrap: pretty;
 }
 
