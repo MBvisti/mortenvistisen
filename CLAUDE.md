@@ -9,24 +9,12 @@ Grafto is a starter template for full-stack Go web applications using server-sid
 - Server-side HTML rendering with templ
 - Session-based authentication
 - Email verification and password reset flows
+- Vanilla CSS for styling
+- Never use inline styles for views, ONLY for emails
 
 The target audience is solo developers building side-projects or bootstrapping new businesses.
 
 ## Development Commands
-
-### Application
-- `just run` - Run the application with live reload watching for file changes
-- `just run-app` - Run the application without live reload
-- `just run-worker` - Run the background worker process
-- `just run-email` - Run the email service with auto-reload
-
-### Database
-- `just create-migration name` - Create a new migration file
-- `just migration-status` - Show the migration status
-- `just up-migrations` - Run all pending migrations
-- `just down-migrations` - Down all migrations
-- `just reset-db` - Reset the database
-- `just generate-db-functions` - Generate database functions with sqlc
 
 ### Templates and Assets
 - `just compile-templates` - Compile templ templates
@@ -35,12 +23,6 @@ The target audience is solo developers building side-projects or bootstrapping n
 ### Code Quality
 - `just golangci` (alias: `just ci`) - Run golangci-lint
 - `just vet` - Run go vet
-
-### Testing
-- `just test-units` (alias: `just tu`) - Run unit tests
-- `just test-integrations` (alias: `just ti`) - Run integration tests
-- `just test-e2e` - Run end-to-end tests
-- `just test-all` - Run all tests
 
 ## Architecture
 
