@@ -7,6 +7,7 @@ toolchain go1.24.2
 require (
 	github.com/PuerkitoBio/goquery v1.10.3
 	github.com/a-h/templ v0.3.857
+	github.com/alecthomas/chroma/v2 v2.2.0
 	github.com/dromara/carbon/v2 v2.5.4
 	github.com/exaring/otelpgx v0.9.3
 	github.com/fergusstrange/embedded-postgres v1.30.0
@@ -36,7 +37,6 @@ require (
 )
 
 require (
-	github.com/alecthomas/chroma/v2 v2.2.0 // indirect
 	github.com/andybalholm/cascadia v1.3.3 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.2 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
@@ -51,6 +51,7 @@ require (
 	github.com/gorilla/context v1.1.2 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/gorilla/securecookie v1.1.2 // indirect
+	github.com/gosimple/unidecode v1.0.1 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.26.3 // indirect
 	github.com/jackc/pgerrcode v0.0.0-20240316143900-6e2875d9b438 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
@@ -101,6 +102,7 @@ require (
 	github.com/go-faker/faker/v4 v4.5.0
 	github.com/go-playground/validator/v10 v10.26.0
 	github.com/gorilla/csrf v1.7.3
+	github.com/gosimple/slug v1.15.0
 	github.com/jackc/pgx/v5 v5.7.4
 	github.com/jordan-wright/email v4.0.1-0.20210109023952-943e75fe5223+incompatible
 	github.com/labstack/echo-contrib v0.17.1

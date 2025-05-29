@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 	"math/rand/v2"
-	"strings"
 	"time"
 
 	"github.com/go-faker/faker/v4"
 	"github.com/google/uuid"
+	"github.com/gosimple/slug"
 	"github.com/mbvisti/mortenvistisen/models"
 )
 
@@ -24,6 +24,7 @@ type articleSeedData struct {
 	Slug            string
 	ImageLink       string
 	Content         string
+	Tags            []models.ArticleTag
 }
 
 type articleSeedOption func(*articleSeedData)
@@ -57,7 +58,7 @@ func WithArticleTitle(title string) articleSeedOption {
 		asd.Title = title
 		// Auto-generate slug from title if not set
 		if asd.Slug == "" {
-			asd.Slug = generateSlug(title)
+			asd.Slug = slug.Make(title)
 		}
 		// Auto-generate meta title if not set
 		if asd.MetaTitle == "" {
@@ -105,7 +106,9 @@ func WithArticleContent(content string) articleSeedOption {
 func WithPublishedArticle() articleSeedOption {
 	return func(asd *articleSeedData) {
 		publishedAt := asd.CreatedAt.Add(
-			time.Duration(rand.IntN(24)) * time.Hour,
+			time.Duration(
+				rand.IntN(24),
+			) * time.Hour, //nolint:gosec // G404: Weak random for test data is acceptable
 		)
 		asd.PublishedAt = publishedAt
 	}
@@ -114,6 +117,12 @@ func WithPublishedArticle() articleSeedOption {
 func WithDraftArticle() articleSeedOption {
 	return func(asd *articleSeedData) {
 		asd.PublishedAt = time.Time{}
+	}
+}
+
+func WithArticleTags(tags []models.ArticleTag) articleSeedOption {
+	return func(asd *articleSeedData) {
+		asd.Tags = tags
 	}
 }
 
@@ -126,20 +135,23 @@ func (s Seeder) PlantArticle(
 		ID: uuid.New(),
 		CreatedAt: time.Now().
 			Add(-time.Duration(rand.IntN(365)) * 24 * time.Hour),
+		//nolint:gosec // G404: Weak random for test data is acceptable
 		// Random date in past year
 		UpdatedAt:       time.Now(),
 		Title:           title,
 		Excerpt:         generateExcerpt(),
 		MetaTitle:       title,
 		MetaDescription: generateMetaDescription(),
-		Slug:            generateSlug(title),
+		Slug:            slug.Make(title),
 		Content:         generateContent(),
 	}
 
 	// 70% chance of being published
-	if rand.Float32() < 0.7 {
+	if rand.Float32() < 0.7 { //nolint:gosec // G404: Weak random for test data is acceptable
 		publishedAt := data.CreatedAt.Add(
-			time.Duration(rand.IntN(24)) * time.Hour,
+			time.Duration(
+				rand.IntN(24),
+			) * time.Hour, //nolint:gosec // G404: Weak random for test data is acceptable
 		)
 		data.PublishedAt = publishedAt
 	}
@@ -186,6 +198,18 @@ func (s Seeder) PlantArticle(
 		}
 	}
 
+	// Assign tags if provided
+	if len(data.Tags) > 0 {
+		tagIDs := make([]uuid.UUID, len(data.Tags))
+		for i, tag := range data.Tags {
+			tagIDs[i] = tag.ID
+		}
+		_, err = s.PlantArticleTagConnections(ctx, article.ID, tagIDs)
+		if err != nil {
+			return models.Article{}, err
+		}
+	}
+
 	return article, nil
 }
 
@@ -199,6 +223,40 @@ func (s Seeder) PlantArticles(
 		article, err := s.PlantArticle(ctx)
 		if err != nil {
 			return nil, err
+		}
+
+		articles[i] = article
+	}
+
+	return articles, nil
+}
+
+func (s Seeder) PlantArticlesWithRandomTags(
+	ctx context.Context,
+	amount int,
+	availableTags []models.ArticleTag,
+	minTags, maxTags int,
+) ([]models.Article, error) {
+	articles := make([]models.Article, amount)
+
+	for i := range amount {
+		article, err := s.PlantArticle(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		// Assign random tags
+		if len(availableTags) > 0 {
+			_, err = s.PlantRandomArticleTagConnections(
+				ctx,
+				article.ID,
+				availableTags,
+				minTags,
+				maxTags,
+			)
+			if err != nil {
+				return nil, err
+			}
 		}
 
 		articles[i] = article
@@ -264,9 +322,9 @@ func generateTechTitle() string {
 		"the Right Way",
 	}
 
-	prefix := prefixes[rand.IntN(len(prefixes))]
-	topic := topics[rand.IntN(len(topics))]
-	suffix := suffixes[rand.IntN(len(suffixes))]
+	prefix := prefixes[rand.IntN(len(prefixes))] //nolint:gosec // G404: Weak random for test data is acceptable
+	topic := topics[rand.IntN(len(topics))]      //nolint:gosec // G404: Weak random for test data is acceptable
+	suffix := suffixes[rand.IntN(len(suffixes))] //nolint:gosec // G404: Weak random for test data is acceptable
 
 	if suffix != "" {
 		return fmt.Sprintf("%s %s %s", prefix, topic, suffix)
@@ -276,8 +334,8 @@ func generateTechTitle() string {
 
 func generateExcerpt() string {
 	excerpts := []string{
-		"Learn how to build scalable applications with modern development practices and industry-standard tools.",
-		"A comprehensive guide covering everything you need to know to get started with professional development.",
+		"Learn how to build scalable applications with modern development practices and industry-standard.",
+		"A comprehensive guide covering everything you need to know to get started with professional.",
 		"Discover best practices and common pitfalls to avoid when building production-ready systems.",
 		"Step-by-step tutorial with practical examples and real-world use cases.",
 		"Master the fundamentals and advanced concepts with hands-on examples and detailed explanations.",
@@ -287,14 +345,14 @@ func generateExcerpt() string {
 		"Practical guide with code examples and detailed explanations of key concepts.",
 		"Everything you need to know to build robust, maintainable, and scalable solutions.",
 	}
-	return excerpts[rand.IntN(len(excerpts))]
+	return excerpts[rand.IntN(len(excerpts))] //nolint:gosec // G404: Weak random for test data is acceptable
 }
 
 func generateMetaDescription() string {
 	descriptions := []string{
 		"Learn essential development skills with practical examples and best practices.",
 		"Comprehensive tutorial covering modern development techniques and industry standards.",
-		"Step-by-step guide with real-world examples. Master the tools and techniques used by professional developers.",
+		"Step-by-step guide with real-world examples. Master the tools and techniques used by professional.",
 		"Practical development guide with code examples and detailed explanations.",
 		"Complete tutorial covering everything from basics to advanced concepts.",
 		"Learn modern development practices with hands-on examples.",
@@ -303,34 +361,7 @@ func generateMetaDescription() string {
 		"Comprehensive guide to building robust applications.",
 		"Master essential development concepts with practical examples and real-world use cases.",
 	}
-	return descriptions[rand.IntN(len(descriptions))]
-}
-
-func generateSlug(title string) string {
-	// Convert to lowercase
-	slug := strings.ToLower(title)
-
-	// Replace spaces and special characters with hyphens
-	slug = strings.ReplaceAll(slug, " ", "-")
-	slug = strings.ReplaceAll(slug, ":", "")
-	slug = strings.ReplaceAll(slug, "?", "")
-	slug = strings.ReplaceAll(slug, "!", "")
-	slug = strings.ReplaceAll(slug, ".", "")
-	slug = strings.ReplaceAll(slug, ",", "")
-	slug = strings.ReplaceAll(slug, "'", "")
-	slug = strings.ReplaceAll(slug, "\"", "")
-	slug = strings.ReplaceAll(slug, "(", "")
-	slug = strings.ReplaceAll(slug, ")", "")
-
-	// Remove multiple consecutive hyphens
-	for strings.Contains(slug, "--") {
-		slug = strings.ReplaceAll(slug, "--", "-")
-	}
-
-	// Trim hyphens from start and end
-	slug = strings.Trim(slug, "-")
-
-	return slug
+	return descriptions[rand.IntN(len(descriptions))] //nolint:gosec // G404: Weak random for test data is acceptable
 }
 
 func generateContent() string {
@@ -400,8 +431,4 @@ Happy coding!`,
 
 func generateCodeBlock(language, code string) string {
 	return fmt.Sprintf("```%s\n%s\n```", language, code)
-}
-
-func stringPtr(s string) *string {
-	return &s
 }

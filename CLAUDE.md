@@ -14,15 +14,26 @@ Grafto is a starter template for full-stack Go web applications using server-sid
 
 The target audience is solo developers building side-projects or bootstrapping new businesses.
 
+## Workflow
+Always start by reading the task file (usually task.md if not specified) and create a plan of action to implement/complete the task. This must be presented to the user and accepted before you start to implement it, so the user can make changes to the plan if necessary.
+
+Always run `just vet` and `just ci` after you have completed the task to verify there are no linting issues.
+
+If there are any formatting issues, run: `go fmt ./...`
+
 ## Development Commands
 
 ### Templates and Assets
 - `just compile-templates` - Compile templ templates
 - `just fmt-templates` - Format templ templates
 
+### Database
+- `just gdf` to generate Go code after adding/update/delete queries in psql/queries
+
 ### Code Quality
 - `just golangci` (alias: `just ci`) - Run golangci-lint
 - `just vet` - Run go vet
+- `go fmt ./...` - Format go code
 
 ## Architecture
 

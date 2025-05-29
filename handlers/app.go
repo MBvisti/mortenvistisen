@@ -73,11 +73,18 @@ func (a App) LandingPage(c echo.Context) error {
 
 	var payload []views.HomeArticle
 	for _, ar := range articles {
+		tags := make([]string, len(ar.Tags))
+
+		for i, t := range ar.Tags {
+			tags[i] = t.Title
+		}
+
 		payload = append(payload, views.HomeArticle{
 			Title:       ar.Title,
 			Description: ar.Excerpt,
 			Slug:        ar.Slug,
 			PublishedAt: ar.PublishedAt,
+			Tags:        tags,
 		})
 	}
 
@@ -108,7 +115,7 @@ func (a App) ArticlePage(c echo.Context) error {
 	manager := NewManager()
 	ar, e := manager.ParseContent(article.Content)
 	if e != nil {
-		return err
+		return e
 	}
 
 	props := views.ArticlePageProps{

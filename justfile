@@ -85,7 +85,7 @@ fmt-templates:
 explore:
     @go run ./cmd/explore/main.go
 
-seed:
+seed: reset-db
 	@go run ./cmd/seed/main.go
 
 # code quality

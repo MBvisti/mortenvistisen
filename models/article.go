@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"log/slog"
 	"time"
 
 	"github.com/google/uuid"
@@ -23,6 +24,8 @@ type Article struct {
 	Slug            string
 	ImageLink       string
 	Content         string
+	ReadTime        int32
+	Tags            []ArticleTag
 }
 
 func (a Article) IsPublished() bool {
@@ -33,12 +36,32 @@ func (a Article) IsDraft() bool {
 	return !a.IsPublished()
 }
 
+func populateArticleTags(
+	ctx context.Context,
+	dbtx db.DBTX,
+	articles []Article,
+) error {
+	for i := range articles {
+		tags, err := GetArticleTagsByArticleID(ctx, dbtx, articles[i].ID)
+		if err != nil {
+			return err
+		}
+		articles[i].Tags = tags
+	}
+	return nil
+}
+
 func GetArticleByID(
 	ctx context.Context,
 	dbtx db.DBTX,
 	id uuid.UUID,
 ) (Article, error) {
 	row, err := db.Stmts.QueryArticleByID(ctx, dbtx, id)
+	if err != nil {
+		return Article{}, err
+	}
+
+	tags, err := GetArticleTagsByArticleID(ctx, dbtx, id)
 	if err != nil {
 		return Article{}, err
 	}
@@ -55,6 +78,8 @@ func GetArticleByID(
 		Slug:            row.Slug,
 		ImageLink:       row.ImageLink.String,
 		Content:         row.Content.String,
+		ReadTime:        row.ReadTime.Int32,
+		Tags:            tags,
 	}, nil
 }
 
@@ -68,27 +93,7 @@ func GetArticleByTitle(
 		return Article{}, err
 	}
 
-	return Article{
-		ID:              row.ID,
-		CreatedAt:       row.CreatedAt.Time,
-		UpdatedAt:       row.UpdatedAt.Time,
-		PublishedAt:     row.PublishedAt.Time,
-		Title:           row.Title,
-		Excerpt:         row.Excerpt,
-		MetaTitle:       row.MetaTitle,
-		MetaDescription: row.MetaDescription,
-		Slug:            row.Slug,
-		ImageLink:       row.ImageLink.String,
-		Content:         row.Content.String,
-	}, nil
-}
-
-func GetArticleBySlug(
-	ctx context.Context,
-	dbtx db.DBTX,
-	slug string,
-) (Article, error) {
-	row, err := db.Stmts.QueryArticleBySlug(ctx, dbtx, slug)
+	tags, err := GetArticleTagsByArticleID(ctx, dbtx, row.ID)
 	if err != nil {
 		return Article{}, err
 	}
@@ -105,6 +110,40 @@ func GetArticleBySlug(
 		Slug:            row.Slug,
 		ImageLink:       row.ImageLink.String,
 		Content:         row.Content.String,
+		ReadTime:        row.ReadTime.Int32,
+		Tags:            tags,
+	}, nil
+}
+
+func GetArticleBySlug(
+	ctx context.Context,
+	dbtx db.DBTX,
+	slug string,
+) (Article, error) {
+	row, err := db.Stmts.QueryArticleBySlug(ctx, dbtx, slug)
+	if err != nil {
+		return Article{}, err
+	}
+
+	tags, err := GetArticleTagsByArticleID(ctx, dbtx, row.ID)
+	if err != nil {
+		return Article{}, err
+	}
+
+	return Article{
+		ID:              row.ID,
+		CreatedAt:       row.CreatedAt.Time,
+		UpdatedAt:       row.UpdatedAt.Time,
+		PublishedAt:     row.PublishedAt.Time,
+		Title:           row.Title,
+		Excerpt:         row.Excerpt,
+		MetaTitle:       row.MetaTitle,
+		MetaDescription: row.MetaDescription,
+		Slug:            row.Slug,
+		ImageLink:       row.ImageLink.String,
+		Content:         row.Content.String,
+		ReadTime:        row.ReadTime.Int32,
+		Tags:            tags,
 	}, nil
 }
 
@@ -131,7 +170,12 @@ func GetArticles(
 			Slug:            row.Slug,
 			ImageLink:       row.ImageLink.String,
 			Content:         row.Content.String,
+			ReadTime:        row.ReadTime.Int32,
 		}
+	}
+
+	if err := populateArticleTags(ctx, dbtx, articles); err != nil {
+		return nil, err
 	}
 
 	return articles, nil
@@ -160,7 +204,12 @@ func GetPublishedArticles(
 			Slug:            row.Slug,
 			ImageLink:       row.ImageLink.String,
 			Content:         row.Content.String,
+			ReadTime:        row.ReadTime.Int32,
 		}
+	}
+
+	if err := populateArticleTags(ctx, dbtx, articles); err != nil {
+		return nil, err
 	}
 
 	return articles, nil
@@ -189,7 +238,12 @@ func GetDraftArticles(
 			Slug:            row.Slug,
 			ImageLink:       row.ImageLink.String,
 			Content:         row.Content.String,
+			ReadTime:        row.ReadTime.Int32,
 		}
+	}
+
+	if err := populateArticleTags(ctx, dbtx, articles); err != nil {
+		return nil, err
 	}
 
 	return articles, nil
@@ -237,7 +291,7 @@ func GetArticlesPaginated(
 			Limit: int32(pageSize), //nolint:gosec // pageSize is bounded above
 			Offset: int32(
 				offset,
-			), //nolint:gosec // offset is calculated from bounded values
+			), //nolint:gosec,G115 // offset is calculated from bounded values
 		},
 	)
 	if err != nil {
@@ -258,7 +312,12 @@ func GetArticlesPaginated(
 			Slug:            row.Slug,
 			ImageLink:       row.ImageLink.String,
 			Content:         row.Content.String,
+			ReadTime:        row.ReadTime.Int32,
 		}
+	}
+
+	if err := populateArticleTags(ctx, dbtx, articles); err != nil {
+		return PaginationResult{}, err
 	}
 
 	totalPages := int((totalCount + int64(pageSize) - 1) / int64(pageSize))
@@ -290,6 +349,14 @@ func NewArticle(
 	data NewArticlePayload,
 ) (Article, error) {
 	if err := validate.Struct(data); err != nil {
+		slog.ErrorContext(
+			ctx,
+			"could not validate new article payload",
+			"error",
+			err,
+			"data",
+			data,
+		)
 		return Article{}, errors.Join(ErrDomainValidation, err)
 	}
 
@@ -304,6 +371,7 @@ func NewArticle(
 		Slug:            data.Slug,
 		ImageLink:       data.ImageLink,
 		Content:         data.Content,
+		ReadTime:        0,
 	}
 
 	_, err := db.Stmts.InsertArticle(ctx, dbtx, db.InsertArticleParams{
@@ -335,6 +403,7 @@ func NewArticle(
 		return Article{}, err
 	}
 
+	article.Tags = []ArticleTag{}
 	return article, nil
 }
 
@@ -385,6 +454,11 @@ func UpdateArticle(
 		return Article{}, err
 	}
 
+	tags, err := GetArticleTagsByArticleID(ctx, dbtx, row.ID)
+	if err != nil {
+		return Article{}, err
+	}
+
 	return Article{
 		ID:              row.ID,
 		CreatedAt:       row.CreatedAt.Time,
@@ -397,6 +471,8 @@ func UpdateArticle(
 		Slug:            row.Slug,
 		ImageLink:       row.ImageLink.String,
 		Content:         row.Content.String,
+		ReadTime:        row.ReadTime.Int32,
+		Tags:            tags,
 	}, nil
 }
 
@@ -431,6 +507,11 @@ func UpdateArticleContent(
 		return Article{}, err
 	}
 
+	tags, err := GetArticleTagsByArticleID(ctx, dbtx, row.ID)
+	if err != nil {
+		return Article{}, err
+	}
+
 	return Article{
 		ID:              row.ID,
 		CreatedAt:       row.CreatedAt.Time,
@@ -443,6 +524,8 @@ func UpdateArticleContent(
 		Slug:            row.Slug,
 		ImageLink:       row.ImageLink.String,
 		Content:         row.Content.String,
+		ReadTime:        row.ReadTime.Int32,
+		Tags:            tags,
 	}, nil
 }
 
@@ -490,6 +573,11 @@ func UpdateArticleMetadata(
 		return Article{}, err
 	}
 
+	tags, err := GetArticleTagsByArticleID(ctx, dbtx, row.ID)
+	if err != nil {
+		return Article{}, err
+	}
+
 	return Article{
 		ID:              row.ID,
 		CreatedAt:       row.CreatedAt.Time,
@@ -502,6 +590,8 @@ func UpdateArticleMetadata(
 		Slug:            row.Slug,
 		ImageLink:       row.ImageLink.String,
 		Content:         row.Content.String,
+		ReadTime:        row.ReadTime.Int32,
+		Tags:            tags,
 	}, nil
 }
 
@@ -529,6 +619,11 @@ func PublishArticle(
 		return Article{}, err
 	}
 
+	tags, err := GetArticleTagsByArticleID(ctx, dbtx, row.ID)
+	if err != nil {
+		return Article{}, err
+	}
+
 	return Article{
 		ID:              row.ID,
 		CreatedAt:       row.CreatedAt.Time,
@@ -541,6 +636,8 @@ func PublishArticle(
 		Slug:            row.Slug,
 		ImageLink:       row.ImageLink.String,
 		Content:         row.Content.String,
+		ReadTime:        row.ReadTime.Int32,
+		Tags:            tags,
 	}, nil
 }
 
@@ -566,6 +663,11 @@ func UnpublishArticle(
 		return Article{}, err
 	}
 
+	tags, err := GetArticleTagsByArticleID(ctx, dbtx, row.ID)
+	if err != nil {
+		return Article{}, err
+	}
+
 	return Article{
 		ID:              row.ID,
 		CreatedAt:       row.CreatedAt.Time,
@@ -578,6 +680,8 @@ func UnpublishArticle(
 		Slug:            row.Slug,
 		ImageLink:       row.ImageLink.String,
 		Content:         row.Content.String,
+		ReadTime:        row.ReadTime.Int32,
+		Tags:            tags,
 	}, nil
 }
 

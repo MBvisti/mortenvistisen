@@ -10,7 +10,7 @@ templ Link(title string) {
 	<a href="">{ title }</a>
 }
 
-templ ArticleCard(title, description, slug string, publishedAt time.Time) {
+templ ArticleCard(title, description, slug string, tags []string, publishedAt time.Time) {
 	<div class="article-card">
 		<h3>{ title }</h3>
 		<p>{ publishedAt.Format("2006-06-06") }</p>
@@ -19,8 +19,9 @@ templ ArticleCard(title, description, slug string, publishedAt time.Time) {
 		</p>
 		<span>
 			tags: 
-			<p>#golang</p>
-			<p>#indiehacking</p>
+			for _, t := range tags {
+				<p>#{ t }</p>
+			}
 		</span>
 		<a href={ templ.SafeURL("/posts/" + slug) }>Read article</a>
 	</div>
@@ -31,6 +32,7 @@ type HomeArticle struct {
 	Description string
 	Slug        string
 	PublishedAt time.Time
+	Tags        []string
 }
 
 templ Home(articles []HomeArticle) {
@@ -49,7 +51,7 @@ templ Home(articles []HomeArticle) {
 		<section class="latest-articles">
 			<h2>Latest Articles</h2>
 			for _, article := range articles {
-				@ArticleCard(article.Title, article.Description, article.Slug, article.PublishedAt)
+				@ArticleCard(article.Title, article.Description, article.Slug, article.Tags, article.PublishedAt)
 			}
 		</section>
 	</main>
