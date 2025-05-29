@@ -3,7 +3,6 @@ package components
 import (
 	"github.com/mbvisti/mortenvistisen/router/contexts"
 	"github.com/mbvisti/mortenvistisen/router/routes"
-	"github.com/mbvisti/mortenvistisen/config"
 )
 
 templ NavItem(name, pathName, path string, attrs templ.Attributes) {
@@ -18,9 +17,6 @@ templ NavItem(name, pathName, path string, attrs templ.Attributes) {
 templ Nav() {
 	<nav id="navigation" class="container nav">
 		<div class="nav-content">
-			<div class="nav-logo">
-				<a class="logo" href={ templ.SafeURL(routes.LandingPage.Path) }>{ config.Cfg.ProjectName }</a>
-			</div>
 			<button class="nav-toggle" aria-label="toggle navigation">
 				<span class="hamburger"></span>
 			</button>
