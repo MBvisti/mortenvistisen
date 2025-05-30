@@ -6,10 +6,10 @@ import "./easymde-2_26_0.min.js";
 		maxHeight: '500px',
 		toolbar: [
 			"bold", "italic", "strikethrough", "|",
-			"heading-1", "heading-2", "|",
+			"heading-2", "heading-3", "|",
 			"quote", "unordered-list", "ordered-list", "|",
 			"link", "image", "code", "|",
-			"preview",
+			"preview", "fullscreen",
 		],
 		indentWithTabs: true,
 		lineNumbers: true,

@@ -30,7 +30,6 @@ func extractCtx(c echo.Context) context.Context {
 }
 
 func (d Dashboard) Index(c echo.Context) error {
-	// Get page parameter from query string, default to 1
 	pageStr := c.QueryParam("page")
 	page := 1
 	if pageStr != "" {
@@ -39,7 +38,6 @@ func (d Dashboard) Index(c echo.Context) error {
 		}
 	}
 
-	// Get articles with pagination
 	pageSize := 10
 	result, err := models.GetArticlesPaginated(
 		extractCtx(c),
@@ -48,7 +46,6 @@ func (d Dashboard) Index(c echo.Context) error {
 		pageSize,
 	)
 	if err != nil {
-		// Log error and show empty state
 		result = models.PaginationResult{
 			Articles:    []models.Article{},
 			TotalCount:  0,
@@ -64,7 +61,6 @@ func (d Dashboard) Index(c echo.Context) error {
 }
 
 func (d Dashboard) NewArticle(c echo.Context) error {
-	// Get available tags
 	availableTags, err := models.GetArticleTags(extractCtx(c), d.db.Pool)
 	if err != nil {
 		return err
@@ -93,12 +89,12 @@ func (d Dashboard) StoreArticle(c echo.Context) error {
 		Excerpt         string   `form:"excerpt"`
 		MetaTitle       string   `form:"meta_title"`
 		MetaDescription string   `form:"meta_description"`
+		Publish         string   `form:"published"`
 		Slug            string   `form:"slug"`
 		ImageLink       string   `form:"image_link"`
 		Content         string   `form:"content"`
 		ReadTime        string   `form:"read_time"`
 		TagIDs          []string `form:"tag_ids"`
-		Action          string   `form:"action"`
 	}
 
 	var articlePayload payload
@@ -106,19 +102,12 @@ func (d Dashboard) StoreArticle(c echo.Context) error {
 		return err
 	}
 
-	// Parse read time
 	var readTime int32
 	if articlePayload.ReadTime != "" {
 		if parsedTime, err := strconv.ParseInt(articlePayload.ReadTime, 10, 32); err == nil {
 			readTime = int32(parsedTime)
 		}
 	}
-
-	slog.Info(
-		"################### CONTENT ###################",
-		"content",
-		articlePayload.Content,
-	)
 
 	article, err := models.NewArticle(
 		extractCtx(c),
@@ -137,8 +126,6 @@ func (d Dashboard) StoreArticle(c echo.Context) error {
 	)
 	if err != nil {
 		if validationErrors := extractValidationErrors(err); validationErrors != nil {
-			// formData.Errors = validationErrors
-			// return dashboard.NewArticle(formData).Render(renderArgs(c))
 			slog.ErrorContext(
 				extractCtx(c),
 				"could not validate article payload",
@@ -159,19 +146,16 @@ func (d Dashboard) StoreArticle(c echo.Context) error {
 			Render(renderArgs(c))
 	}
 
-	if articlePayload.Action == "on" {
-		now := time.Now()
+	if articlePayload.Publish == "on" {
 		_, err = models.PublishArticle(
 			extractCtx(c),
 			d.db.Pool,
 			models.PublishArticlePayload{
-				ID:          article.ID,
-				UpdatedAt:   now,
-				PublishedAt: now,
+				ID:  article.ID,
+				Now: time.Now(),
 			},
 		)
 		if err != nil {
-			// Article was created but publishing failed
 			if err := addFlash(
 				c,
 				contexts.FlashError,
@@ -232,7 +216,6 @@ func (d Dashboard) EditArticle(c echo.Context) error {
 		return c.Redirect(302, "/dashboard")
 	}
 
-	// Get available tags
 	availableTags, err := models.GetArticleTags(extractCtx(c), d.db.Pool)
 	if err != nil {
 		return err
@@ -246,7 +229,6 @@ func (d Dashboard) EditArticle(c echo.Context) error {
 		}
 	}
 
-	// Get current tag IDs
 	selectedTagIDs := make([]string, len(article.Tags))
 	for i, tag := range article.Tags {
 		selectedTagIDs[i] = tag.ID.String()
@@ -258,6 +240,7 @@ func (d Dashboard) EditArticle(c echo.Context) error {
 		Excerpt:         article.Excerpt,
 		MetaTitle:       article.MetaTitle,
 		MetaDescription: article.MetaDescription,
+		IsPublished:     article.IsPublished,
 		Slug:            article.Slug,
 		ImageLink:       article.ImageLink,
 		Content:         article.Content,
@@ -296,6 +279,7 @@ func (d Dashboard) UpdateArticle(c echo.Context) error {
 		ReadTime        string   `form:"read_time"`
 		TagIDs          []string `form:"tag_ids"`
 		Action          string   `form:"action"`
+		Published       string   `form:"published"`
 	}
 
 	var articlePayload payload
@@ -303,13 +287,16 @@ func (d Dashboard) UpdateArticle(c echo.Context) error {
 		return err
 	}
 
-	// Parse read time
+	slog.Info("IS IT PUBLISHED OR NOT", "p", articlePayload.Published)
+
 	var readTime int32
 	if articlePayload.ReadTime != "" {
 		if parsedTime, err := strconv.ParseInt(articlePayload.ReadTime, 10, 32); err == nil {
 			readTime = int32(parsedTime)
 		}
 	}
+
+	published := articlePayload.Published == "on"
 
 	updatePayload := models.UpdateArticlePayload{
 		ID:              articleID,
@@ -323,10 +310,7 @@ func (d Dashboard) UpdateArticle(c echo.Context) error {
 		Content:         articlePayload.Content,
 		ReadTime:        readTime,
 		TagIDs:          articlePayload.TagIDs,
-	}
-
-	if articlePayload.Action == "publish" {
-		updatePayload.PublishedAt = time.Now()
+		IsPublished:     published,
 	}
 
 	article, err := models.UpdateArticle(
@@ -368,22 +352,41 @@ func (d Dashboard) UpdateArticle(c echo.Context) error {
 		return dashboard.EditArticle(formData).Render(renderArgs(c))
 	}
 
-	var successMsg string
-	if article.IsPublished() {
-		successMsg = "Article updated and published successfully!"
-	} else {
-		successMsg = "Article updated as draft successfully!"
+	if published && article.FirstPublishedAt.IsZero() {
+		_, err := models.PublishArticle(
+			c.Request().Context(),
+			d.db.Pool,
+			models.PublishArticlePayload{ID: article.ID, Now: time.Now()},
+		)
+		if err != nil {
+			if err := addFlash(
+				c,
+				contexts.FlashError,
+				"Failed to update article. Please try again.",
+			); err != nil {
+				return err
+			}
+			return err
+		}
+		if err := addFlash(
+			c,
+			contexts.FlashSuccess,
+			"Article published successfully!",
+		); err != nil {
+			return err
+		}
+
+		return c.Redirect(302, "/dashboard")
 	}
 
 	if err := addFlash(
 		c,
 		contexts.FlashSuccess,
-		successMsg,
+		"Article updated successfully!",
 	); err != nil {
 		return err
 	}
 
-	// Redirect to dashboard
 	return c.Redirect(302, "/dashboard")
 }
 
@@ -567,7 +570,11 @@ func (d Dashboard) DeleteTag(c echo.Context) error {
 	}
 
 	// First delete all connections with this tag
-	err = models.DeleteArticleTagConnectionsByTagID(extractCtx(c), d.db.Pool, parsedID)
+	err = models.DeleteArticleTagConnectionsByTagID(
+		extractCtx(c),
+		d.db.Pool,
+		parsedID,
+	)
 	if err != nil {
 		if err := addFlash(
 			c,

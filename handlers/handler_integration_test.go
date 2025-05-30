@@ -9,11 +9,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/a-h/templ"
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo/v4"
 	echomw "github.com/labstack/echo/v4/middleware"
-	"github.com/maypok86/otter"
 	"github.com/mbvisti/mortenvistisen/clients"
 	"github.com/mbvisti/mortenvistisen/handlers"
 	"github.com/mbvisti/mortenvistisen/handlers/middleware"
@@ -60,13 +58,13 @@ func setupTestHandlers(
 	t *testing.T,
 	postgres psql.Postgres,
 ) handlers.Handlers {
-	cacheBuilder, err := otter.NewBuilder[string, templ.Component](20)
-	require.NoError(t, err)
+	// cacheBuilder, err := otter.NewBuilder[string, templ.Component](20)
+	// require.NoError(t, err)
 
-	pageCacher, err := cacheBuilder.WithVariableTTL().Build()
-	require.NoError(t, err)
+	// pageCacher, err := cacheBuilder.WithVariableTTL().Build()
+	// require.NoError(t, err)
 
-	return handlers.NewHandlers(postgres, pageCacher, emailSvc)
+	return handlers.NewHandlers(postgres, emailSvc)
 }
 
 func setupTestMiddleware(

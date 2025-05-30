@@ -12,6 +12,7 @@ import "github.com/mbvisti/mortenvistisen/views/internal/layouts"
 import "github.com/mbvisti/mortenvistisen/views/internal/components"
 import "github.com/mbvisti/mortenvistisen/router/routes"
 import "github.com/mbvisti/mortenvistisen/config"
+import "time"
 
 //import "github.com/mbvisti/mortenvistisen/config"
 
@@ -31,7 +32,9 @@ type EditArticleFormData struct {
 	MetaTitle       string
 	MetaDescription string
 	Slug            string
+	IsPublished     bool
 	ImageLink       string
+	PublishedAt     time.Time
 	Content         string
 	ReadTime        string
 	SelectedTagIDs  []string
@@ -169,7 +172,7 @@ func EditArticle(formData EditArticleFormData) templ.Component {
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(formData.Excerpt)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/edit_article.templ`, Line: 95, Col: 27}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/edit_article.templ`, Line: 98, Col: 27}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -192,7 +195,7 @@ func EditArticle(formData EditArticleFormData) templ.Component {
 					var templ_7745c5c3_Var8 string
 					templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(components.UppercaseFirstWord(errMsg))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/edit_article.templ`, Line: 104, Col: 79}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/edit_article.templ`, Line: 107, Col: 79}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 					if templ_7745c5c3_Err != nil {
@@ -256,7 +259,7 @@ func EditArticle(formData EditArticleFormData) templ.Component {
 				var templ_7745c5c3_Var9 string
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(tag.ID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/edit_article.templ`, Line: 147, Col: 26}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/edit_article.templ`, Line: 150, Col: 26}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
@@ -279,7 +282,7 @@ func EditArticle(formData EditArticleFormData) templ.Component {
 				var templ_7745c5c3_Var10 string
 				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(tag.Title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/edit_article.templ`, Line: 152, Col: 46}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/edit_article.templ`, Line: 155, Col: 46}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 				if templ_7745c5c3_Err != nil {
@@ -307,7 +310,7 @@ func EditArticle(formData EditArticleFormData) templ.Component {
 					var templ_7745c5c3_Var11 string
 					templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(components.UppercaseFirstWord(errMsg))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/edit_article.templ`, Line: 159, Col: 79}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/edit_article.templ`, Line: 162, Col: 79}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 					if templ_7745c5c3_Err != nil {
@@ -370,7 +373,7 @@ func EditArticle(formData EditArticleFormData) templ.Component {
 			var templ_7745c5c3_Var14 string
 			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(formData.MetaDescription)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/edit_article.templ`, Line: 195, Col: 35}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/edit_article.templ`, Line: 198, Col: 35}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
@@ -393,7 +396,7 @@ func EditArticle(formData EditArticleFormData) templ.Component {
 					var templ_7745c5c3_Var15 string
 					templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(components.UppercaseFirstWord(errMsg))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/edit_article.templ`, Line: 199, Col: 79}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/edit_article.templ`, Line: 202, Col: 79}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 					if templ_7745c5c3_Err != nil {
@@ -416,26 +419,36 @@ func EditArticle(formData EditArticleFormData) templ.Component {
 			var templ_7745c5c3_Var16 string
 			templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(formData.Content)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/edit_article.templ`, Line: 210, Col: 67}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/edit_article.templ`, Line: 213, Col: 67}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "</textarea></div></div><div class=\"form-actions\"><div class=\"action-buttons\"><button type=\"submit\" name=\"action\" value=\"save_draft\" class=\"btn-secondary\">Save as Draft</button> <button type=\"submit\" name=\"action\" value=\"publish\" class=\"btn-primary\">Publish Article</button></div></div></form><script type=\"module\" src=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "</textarea></div></div><div class=\"form-actions\"><input name=\"published\" type=\"checkbox\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if formData.IsPublished {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, " checked=\"checked\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "></div><div class=\"form-actions\"><button type=\"submit\" class=\"btn-secondary\">Update</button></div></form><script type=\"module\" src=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var17 string
 			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(config.Cfg.GetFullDomain() + "/" + routes.JsEasyMDE.Path)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/edit_article.templ`, Line: 224, Col: 87}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/edit_article.templ`, Line: 231, Col: 87}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "\"></script></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "\"></script></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -449,4 +462,14 @@ func EditArticle(formData EditArticleFormData) templ.Component {
 	})
 }
 
+// <button type="submit" name="action" value="save_draft" class="btn-secondary">
+//
+//	Save as Draft
+//
+// </button>
+// <button type="submit" name="action" value="publish" class="btn-primary">
+//
+//	Publish Article
+//
+// </button>
 var _ = templruntime.GeneratedTemplate

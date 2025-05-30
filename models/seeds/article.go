@@ -13,18 +13,20 @@ import (
 )
 
 type articleSeedData struct {
-	ID              uuid.UUID
-	CreatedAt       time.Time
-	UpdatedAt       time.Time
-	PublishedAt     time.Time
-	Title           string
-	Excerpt         string
-	MetaTitle       string
-	MetaDescription string
-	Slug            string
-	ImageLink       string
-	Content         string
-	Tags            []models.ArticleTag
+	ID               uuid.UUID
+	CreatedAt        time.Time
+	UpdatedAt        time.Time
+	FirstPublishedAt time.Time
+	IsPublised       bool
+	Title            string
+	Excerpt          string
+	MetaTitle        string
+	MetaDescription  string
+	Slug             string
+	ImageLink        string
+	Content          string
+	ReadTime         int32
+	Tags             []models.ArticleTag
 }
 
 type articleSeedOption func(*articleSeedData)
@@ -49,7 +51,7 @@ func WithArticleUpdatedAt(updatedAt time.Time) articleSeedOption {
 
 func WithArticlePublishedAt(publishedAt time.Time) articleSeedOption {
 	return func(asd *articleSeedData) {
-		asd.PublishedAt = publishedAt
+		asd.FirstPublishedAt = publishedAt
 	}
 }
 
@@ -110,13 +112,14 @@ func WithPublishedArticle() articleSeedOption {
 				rand.IntN(24),
 			) * time.Hour, //nolint:gosec // G404: Weak random for test data is acceptable
 		)
-		asd.PublishedAt = publishedAt
+		asd.FirstPublishedAt = publishedAt
+		asd.IsPublised = true
 	}
 }
 
 func WithDraftArticle() articleSeedOption {
 	return func(asd *articleSeedData) {
-		asd.PublishedAt = time.Time{}
+		asd.FirstPublishedAt = time.Time{}
 	}
 }
 
@@ -144,6 +147,7 @@ func (s Seeder) PlantArticle(
 		MetaDescription: generateMetaDescription(),
 		Slug:            slug.Make(title),
 		Content:         generateContent(),
+		ReadTime:        1,
 	}
 
 	// 70% chance of being published
@@ -153,7 +157,8 @@ func (s Seeder) PlantArticle(
 				rand.IntN(24),
 			) * time.Hour, //nolint:gosec // G404: Weak random for test data is acceptable
 		)
-		data.PublishedAt = publishedAt
+		data.FirstPublishedAt = publishedAt
+		data.IsPublised = true
 	}
 
 	for _, opt := range opts {
@@ -168,29 +173,19 @@ func (s Seeder) PlantArticle(
 		Slug:            data.Slug,
 		ImageLink:       data.ImageLink,
 		Content:         data.Content,
+		ReadTime:        1,
 	})
 	if err != nil {
 		return models.Article{}, err
 	}
 
-	// Update timestamps and published status if needed
-	if !data.CreatedAt.Equal(article.CreatedAt) ||
-		!data.UpdatedAt.Equal(article.UpdatedAt) ||
-		!data.PublishedAt.IsZero() {
-		article, err = models.UpdateArticle(
+	if !data.FirstPublishedAt.IsZero() && data.IsPublised {
+		article, err = models.PublishArticle(
 			ctx,
 			s.dbtx,
-			models.UpdateArticlePayload{
-				ID:              article.ID,
-				UpdatedAt:       data.UpdatedAt,
-				PublishedAt:     data.PublishedAt,
-				Title:           data.Title,
-				Excerpt:         data.Excerpt,
-				MetaTitle:       data.MetaTitle,
-				MetaDescription: data.MetaDescription,
-				Slug:            data.Slug,
-				ImageLink:       data.ImageLink,
-				Content:         data.Content,
+			models.PublishArticlePayload{
+				ID:  article.ID,
+				Now: data.FirstPublishedAt,
 			},
 		)
 		if err != nil {

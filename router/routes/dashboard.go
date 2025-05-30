@@ -19,6 +19,10 @@ var Dashboard = []Route{
 	DashboardEditArticle,
 	DashboardUpdateArticle,
 	DashboardDeleteArticle,
+	DashboardTags,
+	DashboardCreateTag,
+	DashboardUpdateTag,
+	DashboardDeleteTag,
 }
 
 var DashboardHome = Route{
@@ -106,6 +110,46 @@ var DashboardDeleteArticle = Route{
 	Path:        dashboardRoutePrefix + "/articles/:id/delete",
 	Method:      http.MethodPost,
 	HandlerName: "DeleteArticle",
+	Middleware: []string{
+		"AuthOnly",
+	},
+}
+
+var DashboardTags = Route{
+	Name:        dashboardNamePrefix + ".tags",
+	Path:        dashboardRoutePrefix + "/tags",
+	Method:      http.MethodGet,
+	HandlerName: "Tags",
+	Middleware: []string{
+		"AuthOnly",
+	},
+}
+
+var DashboardCreateTag = Route{
+	Name:        dashboardNamePrefix + ".tags.create",
+	Path:        dashboardRoutePrefix + "/tags",
+	Method:      http.MethodPost,
+	HandlerName: "CreateTag",
+	Middleware: []string{
+		"AuthOnly",
+	},
+}
+
+var DashboardUpdateTag = Route{
+	Name:        dashboardNamePrefix + ".tags.update",
+	Path:        dashboardRoutePrefix + "/tags/:id/edit",
+	Method:      http.MethodPost,
+	HandlerName: "UpdateTag",
+	Middleware: []string{
+		"AuthOnly",
+	},
+}
+
+var DashboardDeleteTag = Route{
+	Name:        dashboardNamePrefix + ".tags.delete",
+	Path:        dashboardRoutePrefix + "/tags/:id/delete",
+	Method:      http.MethodPost,
+	HandlerName: "DeleteTag",
 	Middleware: []string{
 		"AuthOnly",
 	},

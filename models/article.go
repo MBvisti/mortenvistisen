@@ -13,27 +13,20 @@ import (
 )
 
 type Article struct {
-	ID              uuid.UUID
-	CreatedAt       time.Time
-	UpdatedAt       time.Time
-	PublishedAt     time.Time
-	Title           string
-	Excerpt         string
-	MetaTitle       string
-	MetaDescription string
-	Slug            string
-	ImageLink       string
-	Content         string
-	ReadTime        int32
-	Tags            []ArticleTag
-}
-
-func (a Article) IsPublished() bool {
-	return !a.PublishedAt.IsZero()
-}
-
-func (a Article) IsDraft() bool {
-	return !a.IsPublished()
+	ID               uuid.UUID
+	CreatedAt        time.Time
+	UpdatedAt        time.Time
+	FirstPublishedAt time.Time
+	IsPublished      bool
+	Title            string
+	Excerpt          string
+	MetaTitle        string
+	MetaDescription  string
+	Slug             string
+	ImageLink        string
+	Content          string
+	ReadTime         int32
+	Tags             []ArticleTag
 }
 
 func populateArticleTags(
@@ -67,19 +60,20 @@ func GetArticleByID(
 	}
 
 	return Article{
-		ID:              row.ID,
-		CreatedAt:       row.CreatedAt.Time,
-		UpdatedAt:       row.UpdatedAt.Time,
-		PublishedAt:     row.PublishedAt.Time,
-		Title:           row.Title,
-		Excerpt:         row.Excerpt,
-		MetaTitle:       row.MetaTitle,
-		MetaDescription: row.MetaDescription,
-		Slug:            row.Slug,
-		ImageLink:       row.ImageLink.String,
-		Content:         row.Content.String,
-		ReadTime:        row.ReadTime.Int32,
-		Tags:            tags,
+		ID:               row.ID,
+		CreatedAt:        row.CreatedAt.Time,
+		UpdatedAt:        row.UpdatedAt.Time,
+		FirstPublishedAt: row.FirstPublishedAt.Time,
+		IsPublished:      row.IsPublished.Bool,
+		Title:            row.Title,
+		Excerpt:          row.Excerpt,
+		MetaTitle:        row.MetaTitle,
+		MetaDescription:  row.MetaDescription,
+		Slug:             row.Slug,
+		ImageLink:        row.ImageLink.String,
+		Content:          row.Content.String,
+		ReadTime:         row.ReadTime.Int32,
+		Tags:             tags,
 	}, nil
 }
 
@@ -99,19 +93,20 @@ func GetArticleByTitle(
 	}
 
 	return Article{
-		ID:              row.ID,
-		CreatedAt:       row.CreatedAt.Time,
-		UpdatedAt:       row.UpdatedAt.Time,
-		PublishedAt:     row.PublishedAt.Time,
-		Title:           row.Title,
-		Excerpt:         row.Excerpt,
-		MetaTitle:       row.MetaTitle,
-		MetaDescription: row.MetaDescription,
-		Slug:            row.Slug,
-		ImageLink:       row.ImageLink.String,
-		Content:         row.Content.String,
-		ReadTime:        row.ReadTime.Int32,
-		Tags:            tags,
+		ID:               row.ID,
+		CreatedAt:        row.CreatedAt.Time,
+		UpdatedAt:        row.UpdatedAt.Time,
+		FirstPublishedAt: row.FirstPublishedAt.Time,
+		IsPublished:      row.IsPublished.Bool,
+		Title:            row.Title,
+		Excerpt:          row.Excerpt,
+		MetaTitle:        row.MetaTitle,
+		MetaDescription:  row.MetaDescription,
+		Slug:             row.Slug,
+		ImageLink:        row.ImageLink.String,
+		Content:          row.Content.String,
+		ReadTime:         row.ReadTime.Int32,
+		Tags:             tags,
 	}, nil
 }
 
@@ -131,19 +126,20 @@ func GetArticleBySlug(
 	}
 
 	return Article{
-		ID:              row.ID,
-		CreatedAt:       row.CreatedAt.Time,
-		UpdatedAt:       row.UpdatedAt.Time,
-		PublishedAt:     row.PublishedAt.Time,
-		Title:           row.Title,
-		Excerpt:         row.Excerpt,
-		MetaTitle:       row.MetaTitle,
-		MetaDescription: row.MetaDescription,
-		Slug:            row.Slug,
-		ImageLink:       row.ImageLink.String,
-		Content:         row.Content.String,
-		ReadTime:        row.ReadTime.Int32,
-		Tags:            tags,
+		ID:               row.ID,
+		CreatedAt:        row.CreatedAt.Time,
+		UpdatedAt:        row.UpdatedAt.Time,
+		FirstPublishedAt: row.FirstPublishedAt.Time,
+		IsPublished:      row.IsPublished.Bool,
+		Title:            row.Title,
+		Excerpt:          row.Excerpt,
+		MetaTitle:        row.MetaTitle,
+		MetaDescription:  row.MetaDescription,
+		Slug:             row.Slug,
+		ImageLink:        row.ImageLink.String,
+		Content:          row.Content.String,
+		ReadTime:         row.ReadTime.Int32,
+		Tags:             tags,
 	}, nil
 }
 
@@ -159,18 +155,19 @@ func GetArticles(
 	articles := make([]Article, len(rows))
 	for i, row := range rows {
 		articles[i] = Article{
-			ID:              row.ID,
-			CreatedAt:       row.CreatedAt.Time,
-			UpdatedAt:       row.UpdatedAt.Time,
-			PublishedAt:     row.PublishedAt.Time,
-			Title:           row.Title,
-			Excerpt:         row.Excerpt,
-			MetaTitle:       row.MetaTitle,
-			MetaDescription: row.MetaDescription,
-			Slug:            row.Slug,
-			ImageLink:       row.ImageLink.String,
-			Content:         row.Content.String,
-			ReadTime:        row.ReadTime.Int32,
+			ID:               row.ID,
+			CreatedAt:        row.CreatedAt.Time,
+			UpdatedAt:        row.UpdatedAt.Time,
+			FirstPublishedAt: row.FirstPublishedAt.Time,
+			IsPublished:      row.IsPublished.Bool,
+			Title:            row.Title,
+			Excerpt:          row.Excerpt,
+			MetaTitle:        row.MetaTitle,
+			MetaDescription:  row.MetaDescription,
+			Slug:             row.Slug,
+			ImageLink:        row.ImageLink.String,
+			Content:          row.Content.String,
+			ReadTime:         row.ReadTime.Int32,
 		}
 	}
 
@@ -193,18 +190,19 @@ func GetPublishedArticles(
 	articles := make([]Article, len(rows))
 	for i, row := range rows {
 		articles[i] = Article{
-			ID:              row.ID,
-			CreatedAt:       row.CreatedAt.Time,
-			UpdatedAt:       row.UpdatedAt.Time,
-			PublishedAt:     row.PublishedAt.Time,
-			Title:           row.Title,
-			Excerpt:         row.Excerpt,
-			MetaTitle:       row.MetaTitle,
-			MetaDescription: row.MetaDescription,
-			Slug:            row.Slug,
-			ImageLink:       row.ImageLink.String,
-			Content:         row.Content.String,
-			ReadTime:        row.ReadTime.Int32,
+			ID:               row.ID,
+			CreatedAt:        row.CreatedAt.Time,
+			UpdatedAt:        row.UpdatedAt.Time,
+			FirstPublishedAt: row.FirstPublishedAt.Time,
+			IsPublished:      row.IsPublished.Bool,
+			Title:            row.Title,
+			Excerpt:          row.Excerpt,
+			MetaTitle:        row.MetaTitle,
+			MetaDescription:  row.MetaDescription,
+			Slug:             row.Slug,
+			ImageLink:        row.ImageLink.String,
+			Content:          row.Content.String,
+			ReadTime:         row.ReadTime.Int32,
 		}
 	}
 
@@ -227,18 +225,19 @@ func GetDraftArticles(
 	articles := make([]Article, len(rows))
 	for i, row := range rows {
 		articles[i] = Article{
-			ID:              row.ID,
-			CreatedAt:       row.CreatedAt.Time,
-			UpdatedAt:       row.UpdatedAt.Time,
-			PublishedAt:     row.PublishedAt.Time,
-			Title:           row.Title,
-			Excerpt:         row.Excerpt,
-			MetaTitle:       row.MetaTitle,
-			MetaDescription: row.MetaDescription,
-			Slug:            row.Slug,
-			ImageLink:       row.ImageLink.String,
-			Content:         row.Content.String,
-			ReadTime:        row.ReadTime.Int32,
+			ID:               row.ID,
+			CreatedAt:        row.CreatedAt.Time,
+			UpdatedAt:        row.UpdatedAt.Time,
+			FirstPublishedAt: row.FirstPublishedAt.Time,
+			IsPublished:      row.IsPublished.Bool,
+			Title:            row.Title,
+			Excerpt:          row.Excerpt,
+			MetaTitle:        row.MetaTitle,
+			MetaDescription:  row.MetaDescription,
+			Slug:             row.Slug,
+			ImageLink:        row.ImageLink.String,
+			Content:          row.Content.String,
+			ReadTime:         row.ReadTime.Int32,
 		}
 	}
 
@@ -301,18 +300,19 @@ func GetArticlesPaginated(
 	articles := make([]Article, len(rows))
 	for i, row := range rows {
 		articles[i] = Article{
-			ID:              row.ID,
-			CreatedAt:       row.CreatedAt.Time,
-			UpdatedAt:       row.UpdatedAt.Time,
-			PublishedAt:     row.PublishedAt.Time,
-			Title:           row.Title,
-			Excerpt:         row.Excerpt,
-			MetaTitle:       row.MetaTitle,
-			MetaDescription: row.MetaDescription,
-			Slug:            row.Slug,
-			ImageLink:       row.ImageLink.String,
-			Content:         row.Content.String,
-			ReadTime:        row.ReadTime.Int32,
+			ID:               row.ID,
+			CreatedAt:        row.CreatedAt.Time,
+			UpdatedAt:        row.UpdatedAt.Time,
+			FirstPublishedAt: row.FirstPublishedAt.Time,
+			IsPublished:      row.IsPublished.Bool,
+			Title:            row.Title,
+			Excerpt:          row.Excerpt,
+			MetaTitle:        row.MetaTitle,
+			MetaDescription:  row.MetaDescription,
+			Slug:             row.Slug,
+			ImageLink:        row.ImageLink.String,
+			Content:          row.Content.String,
+			ReadTime:         row.ReadTime.Int32,
 		}
 	}
 
@@ -341,7 +341,7 @@ type NewArticlePayload struct {
 	Slug            string `validate:"required,max=255"`
 	ImageLink       string `validate:"omitempty,max=255"`
 	Content         string
-	ReadTime        int32 `validate:"min=1,max=999"`
+	ReadTime        int32
 	TagIDs          []string
 }
 
@@ -386,7 +386,6 @@ func NewArticle(
 			Time:  article.UpdatedAt,
 			Valid: true,
 		},
-		PublishedAt:     pgtype.Timestamptz{Valid: false},
 		Title:           article.Title,
 		Excerpt:         article.Excerpt,
 		MetaTitle:       article.MetaTitle,
@@ -428,7 +427,7 @@ func NewArticle(
 type UpdateArticlePayload struct {
 	ID              uuid.UUID `validate:"required,uuid"`
 	UpdatedAt       time.Time `validate:"required"`
-	PublishedAt     time.Time
+	IsPublished     bool
 	Title           string `validate:"required,max=100"`
 	Excerpt         string `validate:"required,max=255"`
 	MetaTitle       string `validate:"required,max=100"`
@@ -450,14 +449,11 @@ func UpdateArticle(
 	}
 
 	_, err := db.Stmts.UpdateArticle(ctx, dbtx, db.UpdateArticleParams{
-		ID:        data.ID,
-		UpdatedAt: pgtype.Timestamptz{Time: data.UpdatedAt, Valid: true},
-		PublishedAt: pgtype.Timestamptz{
-			Time:  data.PublishedAt,
-			Valid: !data.PublishedAt.IsZero(),
-		},
+		ID:              data.ID,
+		UpdatedAt:       pgtype.Timestamptz{Time: data.UpdatedAt, Valid: true},
 		Title:           data.Title,
 		Excerpt:         data.Excerpt,
+		IsPublished:     sql.NullBool{Bool: data.IsPublished, Valid: true},
 		MetaTitle:       data.MetaTitle,
 		MetaDescription: data.MetaDescription,
 		Slug:            data.Slug,
@@ -534,19 +530,20 @@ func UpdateArticleContent(
 	}
 
 	return Article{
-		ID:              row.ID,
-		CreatedAt:       row.CreatedAt.Time,
-		UpdatedAt:       row.UpdatedAt.Time,
-		PublishedAt:     row.PublishedAt.Time,
-		Title:           row.Title,
-		Excerpt:         row.Excerpt,
-		MetaTitle:       row.MetaTitle,
-		MetaDescription: row.MetaDescription,
-		Slug:            row.Slug,
-		ImageLink:       row.ImageLink.String,
-		Content:         row.Content.String,
-		ReadTime:        row.ReadTime.Int32,
-		Tags:            tags,
+		ID:               row.ID,
+		CreatedAt:        row.CreatedAt.Time,
+		UpdatedAt:        row.UpdatedAt.Time,
+		FirstPublishedAt: row.FirstPublishedAt.Time,
+		IsPublished:      row.IsPublished.Bool,
+		Title:            row.Title,
+		Excerpt:          row.Excerpt,
+		MetaTitle:        row.MetaTitle,
+		MetaDescription:  row.MetaDescription,
+		Slug:             row.Slug,
+		ImageLink:        row.ImageLink.String,
+		Content:          row.Content.String,
+		ReadTime:         row.ReadTime.Int32,
+		Tags:             tags,
 	}, nil
 }
 
@@ -600,26 +597,26 @@ func UpdateArticleMetadata(
 	}
 
 	return Article{
-		ID:              row.ID,
-		CreatedAt:       row.CreatedAt.Time,
-		UpdatedAt:       row.UpdatedAt.Time,
-		PublishedAt:     row.PublishedAt.Time,
-		Title:           row.Title,
-		Excerpt:         row.Excerpt,
-		MetaTitle:       row.MetaTitle,
-		MetaDescription: row.MetaDescription,
-		Slug:            row.Slug,
-		ImageLink:       row.ImageLink.String,
-		Content:         row.Content.String,
-		ReadTime:        row.ReadTime.Int32,
-		Tags:            tags,
+		ID:               row.ID,
+		CreatedAt:        row.CreatedAt.Time,
+		UpdatedAt:        row.UpdatedAt.Time,
+		FirstPublishedAt: row.FirstPublishedAt.Time,
+		IsPublished:      row.IsPublished.Bool,
+		Title:            row.Title,
+		Excerpt:          row.Excerpt,
+		MetaTitle:        row.MetaTitle,
+		MetaDescription:  row.MetaDescription,
+		Slug:             row.Slug,
+		ImageLink:        row.ImageLink.String,
+		Content:          row.Content.String,
+		ReadTime:         row.ReadTime.Int32,
+		Tags:             tags,
 	}, nil
 }
 
 type PublishArticlePayload struct {
-	ID          uuid.UUID `validate:"required,uuid"`
-	UpdatedAt   time.Time `validate:"required"`
-	PublishedAt time.Time `validate:"required"`
+	ID  uuid.UUID `validate:"required,uuid"`
+	Now time.Time // TODO: validate
 }
 
 func PublishArticle(
@@ -632,53 +629,13 @@ func PublishArticle(
 	}
 
 	row, err := db.Stmts.PublishArticle(ctx, dbtx, db.PublishArticleParams{
-		ID:          data.ID,
-		UpdatedAt:   pgtype.Timestamptz{Time: data.UpdatedAt, Valid: true},
-		PublishedAt: pgtype.Timestamptz{Time: data.PublishedAt, Valid: true},
-	})
-	if err != nil {
-		return Article{}, err
-	}
-
-	tags, err := GetArticleTagsByArticleID(ctx, dbtx, row.ID)
-	if err != nil {
-		return Article{}, err
-	}
-
-	return Article{
-		ID:              row.ID,
-		CreatedAt:       row.CreatedAt.Time,
-		UpdatedAt:       row.UpdatedAt.Time,
-		PublishedAt:     row.PublishedAt.Time,
-		Title:           row.Title,
-		Excerpt:         row.Excerpt,
-		MetaTitle:       row.MetaTitle,
-		MetaDescription: row.MetaDescription,
-		Slug:            row.Slug,
-		ImageLink:       row.ImageLink.String,
-		Content:         row.Content.String,
-		ReadTime:        row.ReadTime.Int32,
-		Tags:            tags,
-	}, nil
-}
-
-type UnpublishArticlePayload struct {
-	ID        uuid.UUID `validate:"required,uuid"`
-	UpdatedAt time.Time `validate:"required"`
-}
-
-func UnpublishArticle(
-	ctx context.Context,
-	dbtx db.DBTX,
-	data UnpublishArticlePayload,
-) (Article, error) {
-	if err := validate.Struct(data); err != nil {
-		return Article{}, errors.Join(ErrDomainValidation, err)
-	}
-
-	row, err := db.Stmts.UnpublishArticle(ctx, dbtx, db.UnpublishArticleParams{
 		ID:        data.ID,
-		UpdatedAt: pgtype.Timestamptz{Time: data.UpdatedAt, Valid: true},
+		UpdatedAt: pgtype.Timestamptz{Time: data.Now, Valid: true},
+		FirstPublishedAt: pgtype.Timestamptz{
+			Time:  data.Now,
+			Valid: true,
+		},
+		IsPublished: sql.NullBool{Bool: true, Valid: true},
 	})
 	if err != nil {
 		return Article{}, err
@@ -690,21 +647,66 @@ func UnpublishArticle(
 	}
 
 	return Article{
-		ID:              row.ID,
-		CreatedAt:       row.CreatedAt.Time,
-		UpdatedAt:       row.UpdatedAt.Time,
-		PublishedAt:     row.PublishedAt.Time,
-		Title:           row.Title,
-		Excerpt:         row.Excerpt,
-		MetaTitle:       row.MetaTitle,
-		MetaDescription: row.MetaDescription,
-		Slug:            row.Slug,
-		ImageLink:       row.ImageLink.String,
-		Content:         row.Content.String,
-		ReadTime:        row.ReadTime.Int32,
-		Tags:            tags,
+		ID:               row.ID,
+		CreatedAt:        row.CreatedAt.Time,
+		UpdatedAt:        row.UpdatedAt.Time,
+		FirstPublishedAt: row.FirstPublishedAt.Time,
+		IsPublished:      row.IsPublished.Bool,
+		Title:            row.Title,
+		Excerpt:          row.Excerpt,
+		MetaTitle:        row.MetaTitle,
+		MetaDescription:  row.MetaDescription,
+		Slug:             row.Slug,
+		ImageLink:        row.ImageLink.String,
+		Content:          row.Content.String,
+		ReadTime:         row.ReadTime.Int32,
+		Tags:             tags,
 	}, nil
 }
+
+// type UnpublishArticlePayload struct {
+// 	ID        uuid.UUID `validate:"required,uuid"`
+// 	UpdatedAt time.Time `validate:"required"`
+// }
+//
+// func UnpublishArticle(
+// 	ctx context.Context,
+// 	dbtx db.DBTX,
+// 	data UnpublishArticlePayload,
+// ) (Article, error) {
+// 	if err := validate.Struct(data); err != nil {
+// 		return Article{}, errors.Join(ErrDomainValidation, err)
+// 	}
+//
+// 	row, err := db.Stmts.UnpublishArticle(ctx, dbtx, db.UnpublishArticleParams{
+// 		ID:        data.ID,
+// 		UpdatedAt: pgtype.Timestamptz{Time: data.UpdatedAt, Valid: true},
+// 	})
+// 	if err != nil {
+// 		return Article{}, err
+// 	}
+//
+// 	tags, err := GetArticleTagsByArticleID(ctx, dbtx, row.ID)
+// 	if err != nil {
+// 		return Article{}, err
+// 	}
+//
+// 	return Article{
+// 		ID:               row.ID,
+// 		CreatedAt:        row.CreatedAt.Time,
+// 		UpdatedAt:        row.UpdatedAt.Time,
+// 		FirstPublishedAt: row.PublishedAt.Time,
+// 		Title:            row.Title,
+// 		Excerpt:          row.Excerpt,
+// 		MetaTitle:        row.MetaTitle,
+// 		MetaDescription:  row.MetaDescription,
+// 		Slug:             row.Slug,
+// 		ImageLink:        row.ImageLink.String,
+// 		Content:          row.Content.String,
+// 		ReadTime:         row.ReadTime.Int32,
+// 		Tags:             tags,
+// 	}, nil
+// }
 
 func DeleteArticle(
 	ctx context.Context,

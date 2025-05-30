@@ -83,7 +83,7 @@ func (a App) LandingPage(c echo.Context) error {
 			Title:       ar.Title,
 			Description: ar.Excerpt,
 			Slug:        ar.Slug,
-			PublishedAt: ar.PublishedAt,
+			PublishedAt: ar.FirstPublishedAt,
 			Tags:        tags,
 		})
 	}
@@ -126,7 +126,7 @@ func (a App) ArticlePage(c echo.Context) error {
 			article.ImageLink,
 			ar,
 			article.Title,
-			article.PublishedAt,
+			article.FirstPublishedAt,
 			article.UpdatedAt,
 		),
 	}
