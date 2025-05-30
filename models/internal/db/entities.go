@@ -151,6 +151,16 @@ type RiverQueue struct {
 	UpdatedAt pgtype.Timestamptz
 }
 
+type Subscriber struct {
+	ID           uuid.UUID
+	CreatedAt    pgtype.Timestamptz
+	UpdatedAt    pgtype.Timestamptz
+	Email        sql.NullString
+	SubscribedAt pgtype.Timestamptz
+	Referer      sql.NullString
+	IsVerified   pgtype.Bool
+}
+
 type Token struct {
 	ID              uuid.UUID
 	CreatedAt       pgtype.Timestamptz
