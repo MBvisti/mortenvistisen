@@ -57,8 +57,15 @@ func main() {
 	}
 	slog.Info("Created sample articles with tags", "count", len(articles))
 
+	subscribers, err := seeder.PlantSubscribers(ctx, 10)
+	if err != nil {
+		panic(err)
+	}
+	slog.Info("Created sample articles with tags", "count", len(subscribers))
+
 	if err := tx.Commit(ctx); err != nil {
 		panic(err)
 	}
+
 	slog.Info("Seed script finished")
 }

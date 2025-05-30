@@ -6,8 +6,6 @@ import "github.com/mbvisti/mortenvistisen/router/routes"
 import "github.com/mbvisti/mortenvistisen/config"
 import "time"
 
-//import "github.com/mbvisti/mortenvistisen/config"
-
 func containsString(slice []string, item string) bool {
 	for _, s := range slice {
 		if s == item {
@@ -31,7 +29,6 @@ type EditArticleFormData struct {
 	ReadTime        string
 	SelectedTagIDs  []string
 	AvailableTags   []ArticleTagOption
-	CsrfToken       string
 	Errors          map[string][]string
 }
 
@@ -52,7 +49,6 @@ templ EditArticle(formData EditArticleFormData) {
 		</div>
 		<div class="article-form-container">
 			<form method="POST" action={ templ.URL("/dashboard/articles/" + formData.ID + "/edit") } class="article-form">
-				@components.CsrfField(formData.CsrfToken)
 				<div class="form-section">
 					<h2 class="section-title">Article Information</h2>
 					<div class="form-grid">

@@ -69,6 +69,9 @@ templ Home(result models.PaginationResult) {
 				Title: "New article",
 				Route: routes.DashboardNewArticle,
 			},
+			components.TableConfig{
+				EditURLPattern: "/dashboard/articles/%s/edit",
+			},
 		)
 		@fragments.DeleteConfirmationModal("", "")
 	}

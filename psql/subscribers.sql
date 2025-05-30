@@ -34,3 +34,8 @@ select count(*) from subscribers;
 
 -- name: CountVerifiedSubscribers :one
 select count(*) from subscribers where is_verified = true;
+
+-- name: CountMonthlySubscribers :one
+select count(*) from subscribers 
+where subscribed_at >= date_trunc('month', current_date)
+and subscribed_at < date_trunc('month', current_date) + interval '1 month';

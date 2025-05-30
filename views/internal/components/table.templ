@@ -35,13 +35,17 @@ type ActionBtn struct {
 	Route routes.Route
 }
 
+type TableConfig struct {
+	EditURLPattern string // e.g., "/dashboard/articles/%s/edit" or "/dashboard/subscribers/%s/edit"
+}
+
 templ Table(
 	title string,
 	headers []string,
 	tableRowElements TableRowElements,
 	pagination Pagination,
 	actionBtn ActionBtn,
-
+	config TableConfig,
 ) {
 	<div class="articles-section">
 		<div class="section-header">
@@ -77,7 +81,9 @@ templ Table(
 						}
 						<td>
 							<div class="action-buttons">
-								<a href={ templ.URL("/dashboard/articles/" + id.String() + "/edit") } class="btn-sm btn-secondary">Edit</a>
+								if config.EditURLPattern != "" {
+									<a href={ templ.URL(fmt.Sprintf(config.EditURLPattern, id.String())) } class="btn-sm btn-secondary">Edit</a>
+								}
 							</div>
 						</td>
 					</tr>

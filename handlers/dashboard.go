@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/gorilla/csrf"
 	"github.com/labstack/echo/v4"
 	"github.com/mbvisti/mortenvistisen/models"
 	"github.com/mbvisti/mortenvistisen/psql"
@@ -76,7 +75,6 @@ func (d Dashboard) NewArticle(c echo.Context) error {
 
 	formData := dashboard.NewArticleFormData{
 		AvailableTags: tagOptions,
-		CsrfToken:     csrf.Token(c.Request()),
 		Errors:        make(map[string][]string),
 	}
 
@@ -248,7 +246,6 @@ func (d Dashboard) EditArticle(c echo.Context) error {
 		ReadTime:        strconv.FormatInt(int64(article.ReadTime), 10),
 		SelectedTagIDs:  selectedTagIDs,
 		AvailableTags:   tagOptions,
-		CsrfToken:       csrf.Token(c.Request()),
 		Errors:          make(map[string][]string),
 	}
 
@@ -346,7 +343,6 @@ func (d Dashboard) UpdateArticle(c echo.Context) error {
 			Slug:            articlePayload.Slug,
 			ImageLink:       articlePayload.ImageLink,
 			Content:         articlePayload.Content,
-			CsrfToken:       csrf.Token(c.Request()),
 			Errors:          make(map[string][]string),
 		}
 
@@ -459,9 +455,8 @@ func (d Dashboard) Tags(c echo.Context) error {
 	}
 
 	data := dashboard.TagsPageData{
-		Tags:      tags,
-		CsrfToken: csrf.Token(c.Request()),
-		Errors:    make(map[string][]string),
+		Tags:   tags,
+		Errors: make(map[string][]string),
 	}
 
 	return dashboard.Tags(data).Render(renderArgs(c))
@@ -488,9 +483,8 @@ func (d Dashboard) CreateTag(c echo.Context) error {
 		if validationErrors := extractValidationErrors(err); validationErrors != nil {
 			tags, _ := models.GetArticleTags(extractCtx(c), d.db.Pool)
 			data := dashboard.TagsPageData{
-				Tags:      tags,
-				CsrfToken: csrf.Token(c.Request()),
-				Errors:    validationErrors,
+				Tags:   tags,
+				Errors: validationErrors,
 			}
 			return dashboard.Tags(data).Render(renderArgs(c))
 		}
@@ -609,4 +603,241 @@ func (d Dashboard) DeleteTag(c echo.Context) error {
 	}
 
 	return c.Redirect(302, "/dashboard/tags")
+}
+
+func (d Dashboard) Subscribers(c echo.Context) error {
+	pageStr := c.QueryParam("page")
+	page := 1
+	if pageStr != "" {
+		if p, err := strconv.Atoi(pageStr); err == nil && p > 0 {
+			page = p
+		}
+	}
+
+	pageSize := 10
+	offset := (page - 1) * pageSize
+
+	subscribers, err := models.GetAllSubscribers(extractCtx(c), d.db.Pool)
+	if err != nil {
+		subscribers = []models.Subscriber{}
+	}
+
+	totalCount := int64(len(subscribers))
+	totalPages := int((totalCount + int64(pageSize) - 1) / int64(pageSize))
+
+	start := offset
+	end := min(offset+pageSize, len(subscribers))
+	if start > len(subscribers) {
+		start = len(subscribers)
+	}
+
+	paginatedSubscribers := subscribers[start:end]
+
+	monthlyCount, _ := models.CountMonthlySubscribers(extractCtx(c), d.db.Pool)
+	verifiedCount, _ := models.CountVerifiedSubscribers(
+		extractCtx(c),
+		d.db.Pool,
+	)
+	unverifiedCount := totalCount - verifiedCount
+
+	result := dashboard.SubscribersPaginationResult{
+		Subscribers:     paginatedSubscribers,
+		TotalCount:      totalCount,
+		Page:            page,
+		PageSize:        pageSize,
+		TotalPages:      totalPages,
+		HasNext:         page < totalPages,
+		HasPrevious:     page > 1,
+		MonthlyCount:    monthlyCount,
+		VerifiedCount:   verifiedCount,
+		UnverifiedCount: unverifiedCount,
+	}
+
+	return dashboard.Subscribers(result).Render(renderArgs(c))
+}
+
+func (d Dashboard) EditSubscriber(c echo.Context) error {
+	idParam := c.Param("id")
+	subscriberID, err := uuid.Parse(idParam)
+	if err != nil {
+		if err := addFlash(
+			c,
+			contexts.FlashError,
+			"Invalid subscriber ID.",
+		); err != nil {
+			return err
+		}
+		return c.Redirect(302, "/dashboard/subscribers")
+	}
+
+	subscriber, err := models.GetSubscriber(
+		extractCtx(c),
+		d.db.Pool,
+		subscriberID,
+	)
+	if err != nil {
+		if err := addFlash(
+			c,
+			contexts.FlashError,
+			"Subscriber not found.",
+		); err != nil {
+			return err
+		}
+		return c.Redirect(302, "/dashboard/subscribers")
+	}
+
+	formData := dashboard.EditSubscriberFormData{
+		ID:         subscriber.ID.String(),
+		Email:      subscriber.Email,
+		Referer:    subscriber.Referer,
+		IsVerified: subscriber.IsVerified,
+		Errors:     make(map[string][]string),
+	}
+
+	return dashboard.EditSubscriber(formData).Render(renderArgs(c))
+}
+
+func (d Dashboard) UpdateSubscriber(c echo.Context) error {
+	idParam := c.Param("id")
+	subscriberID, err := uuid.Parse(idParam)
+	if err != nil {
+		if err := addFlash(
+			c,
+			contexts.FlashError,
+			"Invalid subscriber ID.",
+		); err != nil {
+			return err
+		}
+		return c.Redirect(302, "/dashboard/subscribers")
+	}
+
+	type payload struct {
+		Email      string `form:"email"`
+		Referer    string `form:"referer"`
+		IsVerified string `form:"is_verified"`
+	}
+
+	var subscriberPayload payload
+	if err := c.Bind(&subscriberPayload); err != nil {
+		return err
+	}
+
+	isVerified := subscriberPayload.IsVerified == "on"
+
+	_, err = models.UpdateSubscriber(
+		extractCtx(c),
+		d.db.Pool,
+		models.UpdateSubscriberPayload{
+			ID:        subscriberID,
+			UpdatedAt: time.Now(),
+			Email:     subscriberPayload.Email,
+			Referer:   subscriberPayload.Referer,
+		},
+	)
+	if err != nil {
+		if validationErrors := extractValidationErrors(err); validationErrors != nil {
+			formData := dashboard.EditSubscriberFormData{
+				ID:      subscriberID.String(),
+				Email:   subscriberPayload.Email,
+				Referer: subscriberPayload.Referer,
+				Errors:  validationErrors,
+			}
+			return dashboard.EditSubscriber(formData).Render(renderArgs(c))
+		}
+
+		if err := addFlash(
+			c,
+			contexts.FlashError,
+			"Failed to update subscriber. Please try again.",
+		); err != nil {
+			return err
+		}
+		return c.Redirect(302, "/dashboard/subscribers")
+	}
+
+	err = models.VerifySubscriber(
+		extractCtx(c),
+		d.db.Pool,
+		models.VerifySubscriberPayload{
+			ID:         subscriberID,
+			UpdatedAt:  time.Now(),
+			IsVerified: isVerified,
+		},
+	)
+	if err != nil {
+		if err := addFlash(
+			c,
+			contexts.FlashError,
+			"Failed to update verification status. Please try again.",
+		); err != nil {
+			return err
+		}
+	}
+
+	if err := addFlash(
+		c,
+		contexts.FlashSuccess,
+		"Subscriber updated successfully!",
+	); err != nil {
+		return err
+	}
+
+	return c.Redirect(302, "/dashboard/subscribers")
+}
+
+func (d Dashboard) DeleteSubscriber(c echo.Context) error {
+	idParam := c.Param("id")
+	subscriberID, err := uuid.Parse(idParam)
+	if err != nil {
+		if err := addFlash(
+			c,
+			contexts.FlashError,
+			"Invalid subscriber ID.",
+		); err != nil {
+			return err
+		}
+		return c.Redirect(302, "/dashboard/subscribers")
+	}
+
+	_, err = models.GetSubscriber(
+		extractCtx(c),
+		d.db.Pool,
+		subscriberID,
+	)
+	if err != nil {
+		if err := addFlash(
+			c,
+			contexts.FlashError,
+			"Subscriber not found.",
+		); err != nil {
+			return err
+		}
+		return c.Redirect(302, "/dashboard/subscribers")
+	}
+
+	err = models.DeleteSubscriber(
+		extractCtx(c),
+		d.db.Pool,
+		subscriberID,
+	)
+	if err != nil {
+		if err := addFlash(
+			c,
+			contexts.FlashError,
+			"Failed to delete subscriber. Please try again.",
+		); err != nil {
+			return err
+		}
+		return c.Redirect(302, "/dashboard/subscribers")
+	}
+
+	if err := addFlash(
+		c,
+		contexts.FlashSuccess,
+		"Subscriber deleted successfully!",
+	); err != nil {
+		return err
+	}
+
+	return c.Redirect(302, "/dashboard/subscribers")
 }

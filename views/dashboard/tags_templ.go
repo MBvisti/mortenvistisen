@@ -16,9 +16,8 @@ import (
 )
 
 type TagsPageData struct {
-	Tags      []models.ArticleTag
-	CsrfToken string
-	Errors    map[string][]string
+	Tags   []models.ArticleTag
+	Errors map[string][]string
 }
 
 func Tags(data TagsPageData) templ.Component {
@@ -63,15 +62,7 @@ func Tags(data TagsPageData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" class=\"btn-secondary\">← Back to Dashboard</a></div></div></div><div class=\"tags-management-container\"><div class=\"tags-section\"><h2 class=\"section-title\">Add New Tag</h2><form method=\"POST\" action=\"/dashboard/tags\" class=\"tag-form\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = components.CsrfField(data.CsrfToken).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<div class=\"form-row\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" class=\"btn-secondary\">← Back to Dashboard</a></div></div></div><div class=\"tags-management-container\"><div class=\"tags-section\"><h2 class=\"section-title\">Add New Tag</h2><form method=\"POST\" action=\"/dashboard/tags\" class=\"tag-form\"><div class=\"form-row\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -88,74 +79,74 @@ func Tags(data TagsPageData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</div><div class=\"form-actions\"><button type=\"submit\" class=\"btn-primary\">Add Tag</button></div></form></div><div class=\"tags-list-section\"><h2 class=\"section-title\">Existing Tags</h2>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div><div class=\"form-actions\"><button type=\"submit\" class=\"btn-primary\">Add Tag</button></div></form></div><div class=\"tags-list-section\"><h2 class=\"section-title\">Existing Tags</h2>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if len(data.Tags) == 0 {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<p class=\"no-tags-message\">No tags created yet.</p>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<p class=\"no-tags-message\">No tags created yet.</p>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			} else {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div class=\"tags-list\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"tags-list\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				for _, tag := range data.Tags {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<div class=\"tag-item\"><div class=\"tag-info\"><span class=\"tag-title\">")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div class=\"tag-item\"><div class=\"tag-info\"><span class=\"tag-title\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var4 string
 					templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(tag.Title)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/tags.templ`, Line: 57, Col: 44}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/tags.templ`, Line: 55, Col: 44}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</span> <span class=\"tag-date\">Created: ")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</span> <span class=\"tag-date\">Created: ")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var5 string
 					templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(tag.CreatedAt.Format("Jan 2, 2006"))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/tags.templ`, Line: 58, Col: 78}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/tags.templ`, Line: 56, Col: 78}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</span></div><div class=\"tag-actions\"><button class=\"btn-secondary btn-edit-tag\" data-tag-id=\"")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</span></div><div class=\"tag-actions\"><button class=\"btn-secondary btn-edit-tag\" data-tag-id=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var6 string
 					templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(tag.ID.String())
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/tags.templ`, Line: 63, Col: 39}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/tags.templ`, Line: 61, Col: 39}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\" data-tag-title=\"")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\" data-tag-title=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var7 string
 					templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(tag.Title)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/tags.templ`, Line: 64, Col: 36}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/tags.templ`, Line: 62, Col: 36}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\">Edit</button><form method=\"POST\" action=\"")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\">Edit</button><form method=\"POST\" action=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -164,33 +155,17 @@ func Tags(data TagsPageData) templ.Component {
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\" class=\"inline-form\">")
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					templ_7745c5c3_Err = components.CsrfField(data.CsrfToken).Render(ctx, templ_7745c5c3_Buffer)
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<button type=\"submit\" class=\"btn-danger\" onclick=\"return confirm(&#39;Are you sure you want to delete this tag?&#39;)\">Delete</button></form></div></div>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" class=\"inline-form\"><button type=\"submit\" class=\"btn-danger\" onclick=\"return confirm(&#39;Are you sure you want to delete this tag?&#39;)\">Delete</button></form></div></div>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</div></div><div id=\"edit-tag-modal\" class=\"modal\" style=\"display: none;\"><div class=\"modal-content\"><h3>Edit Tag</h3><form id=\"edit-tag-form\" method=\"POST\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = components.CsrfField(data.CsrfToken).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<div class=\"form-row\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</div></div><div id=\"edit-tag-modal\" class=\"modal\" style=\"display: none;\"><div class=\"modal-content\"><h3>Edit Tag</h3><form id=\"edit-tag-form\" method=\"POST\"><div class=\"form-row\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -205,7 +180,7 @@ func Tags(data TagsPageData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</div><div class=\"modal-actions\"><button type=\"button\" class=\"btn-secondary\" onclick=\"closeEditModal()\">Cancel</button> <button type=\"submit\" class=\"btn-primary\">Update Tag</button></div></form></div></div><script>\n\t\t\tfunction openEditModal(tagId, tagTitle) {\n\t\t\t\tdocument.getElementById('edit-tag-modal').style.display = 'block';\n\t\t\t\tdocument.getElementById('edit-tag-form').action = `/dashboard/tags/${tagId}/edit`;\n\t\t\t\tdocument.getElementById('edit-tag-title').value = tagTitle;\n\t\t\t}\n\n\t\t\tfunction closeEditModal() {\n\t\t\t\tdocument.getElementById('edit-tag-modal').style.display = 'none';\n\t\t\t}\n\n\t\t\tdocument.addEventListener('DOMContentLoaded', function() {\n\t\t\t\tdocument.querySelectorAll('.btn-edit-tag').forEach(button => {\n\t\t\t\t\tbutton.addEventListener('click', function() {\n\t\t\t\t\t\tconst tagId = this.dataset.tagId;\n\t\t\t\t\t\tconst tagTitle = this.dataset.tagTitle;\n\t\t\t\t\t\topenEditModal(tagId, tagTitle);\n\t\t\t\t\t});\n\t\t\t\t});\n\t\t\t});\n\t\t</script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</div><div class=\"modal-actions\"><button type=\"button\" class=\"btn-secondary\" onclick=\"closeEditModal()\">Cancel</button> <button type=\"submit\" class=\"btn-primary\">Update Tag</button></div></form></div></div><script>\n\t\t\tfunction openEditModal(tagId, tagTitle) {\n\t\t\t\tdocument.getElementById('edit-tag-modal').style.display = 'block';\n\t\t\t\tdocument.getElementById('edit-tag-form').action = `/dashboard/tags/${tagId}/edit`;\n\t\t\t\tdocument.getElementById('edit-tag-title').value = tagTitle;\n\t\t\t}\n\n\t\t\tfunction closeEditModal() {\n\t\t\t\tdocument.getElementById('edit-tag-modal').style.display = 'none';\n\t\t\t}\n\n\t\t\tdocument.addEventListener('DOMContentLoaded', function() {\n\t\t\t\tdocument.querySelectorAll('.btn-edit-tag').forEach(button => {\n\t\t\t\t\tbutton.addEventListener('click', function() {\n\t\t\t\t\t\tconst tagId = this.dataset.tagId;\n\t\t\t\t\t\tconst tagTitle = this.dataset.tagTitle;\n\t\t\t\t\t\topenEditModal(tagId, tagTitle);\n\t\t\t\t\t});\n\t\t\t\t});\n\t\t\t});\n\t\t</script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

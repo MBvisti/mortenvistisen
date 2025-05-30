@@ -13,6 +13,19 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const countMonthlySubscribers = `-- name: CountMonthlySubscribers :one
+select count(*) from subscribers 
+where subscribed_at >= date_trunc('month', current_date)
+and subscribed_at < date_trunc('month', current_date) + interval '1 month'
+`
+
+func (q *Queries) CountMonthlySubscribers(ctx context.Context, db DBTX) (int64, error) {
+	row := db.QueryRow(ctx, countMonthlySubscribers)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const countSubscribers = `-- name: CountSubscribers :one
 select count(*) from subscribers
 `

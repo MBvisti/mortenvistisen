@@ -23,6 +23,10 @@ var Dashboard = []Route{
 	DashboardCreateTag,
 	DashboardUpdateTag,
 	DashboardDeleteTag,
+	DashboardSubscribers,
+	DashboardEditSubscriber,
+	DashboardUpdateSubscriber,
+	DashboardDeleteSubscriber,
 }
 
 var DashboardHome = Route{
@@ -150,6 +154,46 @@ var DashboardDeleteTag = Route{
 	Path:        dashboardRoutePrefix + "/tags/:id/delete",
 	Method:      http.MethodPost,
 	HandlerName: "DeleteTag",
+	Middleware: []string{
+		"AuthOnly",
+	},
+}
+
+var DashboardSubscribers = Route{
+	Name:        dashboardNamePrefix + ".subscribers",
+	Path:        dashboardRoutePrefix + "/subscribers",
+	Method:      http.MethodGet,
+	HandlerName: "Subscribers",
+	Middleware: []string{
+		"AuthOnly",
+	},
+}
+
+var DashboardEditSubscriber = Route{
+	Name:        dashboardNamePrefix + ".subscribers.edit",
+	Path:        dashboardRoutePrefix + "/subscribers/:id/edit",
+	Method:      http.MethodGet,
+	HandlerName: "EditSubscriber",
+	Middleware: []string{
+		"AuthOnly",
+	},
+}
+
+var DashboardUpdateSubscriber = Route{
+	Name:        dashboardNamePrefix + ".subscribers.update",
+	Path:        dashboardRoutePrefix + "/subscribers/:id/edit",
+	Method:      http.MethodPost,
+	HandlerName: "UpdateSubscriber",
+	Middleware: []string{
+		"AuthOnly",
+	},
+}
+
+var DashboardDeleteSubscriber = Route{
+	Name:        dashboardNamePrefix + ".subscribers.delete",
+	Path:        dashboardRoutePrefix + "/subscribers/:id/delete",
+	Method:      http.MethodPost,
+	HandlerName: "DeleteSubscriber",
 	Middleware: []string{
 		"AuthOnly",
 	},

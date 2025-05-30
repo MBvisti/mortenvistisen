@@ -1,0 +1,94 @@
+package dashboard
+
+import (
+	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
+)
+
+type EditSubscriberFormData struct {
+	ID         string
+	Email      string
+	Referer    string
+	IsVerified bool
+	Errors     map[string][]string
+}
+
+templ EditSubscriber(data EditSubscriberFormData) {
+	@layouts.Dashboard() {
+		<div class="dashboard-header">
+			<h1 class="dashboard-title">Edit Subscriber</h1>
+			<div class="user-info">
+				<a href="/dashboard/subscribers" class="btn-secondary">← Back to Subscribers</a>
+			</div>
+		</div>
+		<div class="form-container">
+			<form method="POST" class="article-form">
+				<div class="form-row">
+					<div class="form-group">
+						<label for="email" class="form-label">Email Address</label>
+						<input
+							type="email"
+							id="email"
+							name="email"
+							value={ data.Email }
+							class="form-input"
+							required
+						/>
+						if errors, exists := data.Errors["email"]; exists {
+							<div class="form-error">
+								for _, error := range errors {
+									<span>{ error }</span>
+								}
+							</div>
+						}
+					</div>
+				</div>
+				<div class="form-row">
+					<div class="form-group">
+						<label for="referer" class="form-label">Referer</label>
+						<input
+							type="text"
+							id="referer"
+							name="referer"
+							value={ data.Referer }
+							class="form-input"
+							placeholder="Where did this subscriber come from?"
+						/>
+						if errors, exists := data.Errors["referer"]; exists {
+							<div class="form-error">
+								for _, error := range errors {
+									<span>{ error }</span>
+								}
+							</div>
+						}
+					</div>
+				</div>
+				<div class="form-row">
+					<div class="form-group">
+						<label class="checkbox-label">
+							<input
+								type="checkbox"
+								name="is_verified"
+								if data.IsVerified {
+									checked
+								}
+							/>
+							<span class="checkbox-text">Verified Subscriber</span>
+						</label>
+						if errors, exists := data.Errors["is_verified"]; exists {
+							<div class="form-error">
+								for _, error := range errors {
+									<span>{ error }</span>
+								}
+							</div>
+						}
+					</div>
+				</div>
+				<div class="form-actions">
+					<button type="submit" class="btn-primary">Update Subscriber</button>
+					<a href="/dashboard/subscribers" class="btn-secondary">Cancel</a>
+				</div>
+			</form>
+		</div>
+	}
+}
+

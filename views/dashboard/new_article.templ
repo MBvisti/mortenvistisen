@@ -18,7 +18,6 @@ type NewArticleFormData struct {
 	ReadTime        string
 	SelectedTagIDs  []string
 	AvailableTags   []ArticleTagOption
-	CsrfToken       string
 	Errors          map[string][]string
 }
 
@@ -34,7 +33,6 @@ templ NewArticle(formData NewArticleFormData) {
 		</div>
 		<div class="article-form-container">
 			<form method="POST" action={ templ.SafeURL(routes.DashboardStoreArticle.Path) } class="article-form">
-				@components.CsrfField(formData.CsrfToken)
 				<div class="form-section">
 					<h2 class="section-title">Article Information</h2>
 					<div class="form-grid">

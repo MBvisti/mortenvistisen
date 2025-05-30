@@ -260,3 +260,10 @@ func CountVerifiedSubscribers(
 ) (int64, error) {
 	return db.Stmts.CountVerifiedSubscribers(ctx, dbtx)
 }
+
+func CountMonthlySubscribers(
+	ctx context.Context,
+	dbtx db.DBTX,
+) (int64, error) {
+	return db.Stmts.CountMonthlySubscribers(ctx, dbtx)
+}

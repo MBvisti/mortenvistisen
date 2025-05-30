@@ -92,6 +92,9 @@ func Home(result models.PaginationResult) templ.Component {
 					Title: "New article",
 					Route: routes.DashboardNewArticle,
 				},
+				components.TableConfig{
+					EditURLPattern: "/dashboard/articles/%s/edit",
+				},
 			).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
