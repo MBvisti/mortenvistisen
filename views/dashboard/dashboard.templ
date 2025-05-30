@@ -4,20 +4,35 @@ import (
 	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
 	"github.com/mbvisti/mortenvistisen/views/fragments"
 	"github.com/mbvisti/mortenvistisen/models"
-	"github.com/mbvisti/mortenvistisen/router/routes"
+	"github.com/mbvisti/mortenvistisen/views/internal/components"
 	"fmt"
+	"github.com/mbvisti/mortenvistisen/router/routes"
 )
 
-func min(a, b int) int {
-	if a < b {
-		return a
+func articlesToTableRowElements(articles []models.Article) components.TableRowElements {
+	tableRowElements := make(components.TableRowElements, len(articles))
+	for _, article := range articles {
+		publishStatus := "Draft"
+		hightlight := "status-draft"
+
+		if article.IsPublished {
+			publishStatus = "Published"
+			hightlight = "status-published"
+		}
+
+		tableRowElements[article.ID] = []components.TableRowElement{
+			{Title: article.Title},
+			{Title: publishStatus, Hightlight: hightlight},
+			{Title: article.CreatedAt.Format("2006-06-06")},
+			{Title: fmt.Sprintf("%v min", article.ReadTime)},
+		}
 	}
-	return b
+
+	return tableRowElements
 }
 
 templ Home(result models.PaginationResult) {
 	@layouts.Dashboard() {
-		<!-- Dashboard Header -->
 		<div class="dashboard-header">
 			<h1 class="dashboard-title">Dashboard</h1>
 			<div class="user-info">
@@ -27,7 +42,6 @@ templ Home(result models.PaginationResult) {
 		<!-- Statistics Cards -->
 		<div class="stats-grid">
 			<div class="stat-card">
-				<h3 class="stat-number">{ fmt.Sprintf("%d", result.TotalCount) }</h3>
 				<p class="stat-label">Total Articles</p>
 			</div>
 			<div class="stat-card">
@@ -39,82 +53,23 @@ templ Home(result models.PaginationResult) {
 				<p class="stat-label">Drafts</p>
 			</div>
 		</div>
-		<!-- Articles Section -->
-		<div class="articles-section">
-			<div class="section-header">
-				<h2 class="section-title">Recent Articles</h2>
-				<div class="header-actions">
-					<a href="/dashboard/tags" class="btn-secondary">Manage Tags</a>
-					<a href={ templ.SafeURL(routes.DashboardNewArticle.Path) } class="btn-primary">New Article</a>
-				</div>
-			</div>
-			<table class="articles-table">
-				<thead>
-					<tr>
-						<th>Title</th>
-						<th>Status</th>
-						<th>Created</th>
-						<th>Read Time</th>
-						<th>Actions</th>
-					</tr>
-				</thead>
-				<tbody>
-					if len(result.Articles) == 0 {
-						<tr>
-							<td colspan="5" class="text-center">No articles found</td>
-						</tr>
-					} else {
-						for _, article := range result.Articles {
-							<tr>
-								<td>{ article.Title }</td>
-								<td>
-									if article.IsPublished {
-										<span class="status-badge status-published">Published</span>
-									} else {
-										<span class="status-badge status-draft">Draft</span>
-									}
-								</td>
-								<td>{ article.CreatedAt.Format("2006-01-02") }</td>
-								<td>5 min</td>
-								<td>
-									<div class="action-buttons">
-										<a href={ templ.URL("/posts/" + article.Slug) } class="btn-sm btn-secondary">View</a>
-										<a href={ templ.URL("/dashboard/articles/" + article.ID.String() + "/edit") } class="btn-sm btn-secondary">Edit</a>
-										<button
-											class="btn-sm btn-danger"
-											onClick={ showDeleteModal(article.ID.String(), article.Title) }
-										>Delete</button>
-									</div>
-								</td>
-							</tr>
-						}
-					}
-				</tbody>
-			</table>
-			<!-- Pagination Controls -->
-			if result.TotalPages > 1 {
-				<div class="pagination-container">
-					<div class="pagination">
-						if result.HasPrevious {
-							<a href={ templ.URL("?page=" + fmt.Sprintf("%d", result.Page-1)) } class="pagination-btn">← Previous</a>
-						}
-						for i := 1; i <= result.TotalPages; i++ {
-							if i == result.Page {
-								<span class="pagination-btn pagination-current">{ fmt.Sprintf("%d", i) }</span>
-							} else {
-								<a href={ templ.URL("?page=" + fmt.Sprintf("%d", i)) } class="pagination-btn">{ fmt.Sprintf("%d", i) }</a>
-							}
-						}
-						if result.HasNext {
-							<a href={ templ.URL("?page=" + fmt.Sprintf("%d", result.Page+1)) } class="pagination-btn">Next →</a>
-						}
-					</div>
-					<div class="pagination-info">
-						Showing { fmt.Sprintf("%d", (result.Page-1)*result.PageSize+1) } to { fmt.Sprintf("%d", min(result.Page*result.PageSize, int(result.TotalCount))) } of { fmt.Sprintf("%d", result.TotalCount) } articles
-					</div>
-				</div>
-			}
-		</div>
+		@components.Table(
+			"Recent articles",
+			[]string{"Title", "Status", "Created", "Read time", "Action"},
+			articlesToTableRowElements(result.Articles),
+			components.Pagination{
+				TotalCount:  result.TotalCount,
+				Page:        result.Page,
+				PageSize:    result.PageSize,
+				TotalPages:  result.TotalPages,
+				HasNext:     result.HasNext,
+				HasPrevious: result.HasPrevious,
+			},
+			components.ActionBtn{
+				Title: "New article",
+				Route: routes.DashboardNewArticle,
+			},
+		)
 		@fragments.DeleteConfirmationModal("", "")
 	}
 }

@@ -39,14 +39,14 @@ func (d Dashboard) Index(c echo.Context) error {
 	}
 
 	pageSize := 10
-	result, err := models.GetArticlesPaginated(
+	articles, err := models.GetArticlesPaginated(
 		extractCtx(c),
 		d.db.Pool,
 		page,
 		pageSize,
 	)
 	if err != nil {
-		result = models.PaginationResult{
+		articles = models.PaginationResult{
 			Articles:    []models.Article{},
 			TotalCount:  0,
 			Page:        1,
@@ -57,7 +57,7 @@ func (d Dashboard) Index(c echo.Context) error {
 		}
 	}
 
-	return dashboard.Home(result).Render(renderArgs(c))
+	return dashboard.Home(articles).Render(renderArgs(c))
 }
 
 func (d Dashboard) NewArticle(c echo.Context) error {
@@ -95,6 +95,7 @@ func (d Dashboard) StoreArticle(c echo.Context) error {
 		Content         string   `form:"content"`
 		ReadTime        string   `form:"read_time"`
 		TagIDs          []string `form:"tag_ids"`
+		Action          string   `form:"action"`
 	}
 
 	var articlePayload payload
@@ -146,7 +147,7 @@ func (d Dashboard) StoreArticle(c echo.Context) error {
 			Render(renderArgs(c))
 	}
 
-	if articlePayload.Publish == "on" {
+	if articlePayload.Action == "publish" {
 		_, err = models.PublishArticle(
 			extractCtx(c),
 			d.db.Pool,
