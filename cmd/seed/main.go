@@ -57,7 +57,7 @@ func main() {
 	}
 	slog.Info("Created sample articles with tags", "count", len(articles))
 
-	subscribers, err := seeder.PlantSubscribers(ctx, 10)
+	subscribers, err := seeder.PlantSubscribers(ctx, 30)
 	if err != nil {
 		panic(err)
 	}

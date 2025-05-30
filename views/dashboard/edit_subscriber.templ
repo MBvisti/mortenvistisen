@@ -2,6 +2,7 @@ package dashboard
 
 import (
 	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
+	"github.com/mbvisti/mortenvistisen/views/fragments"
 )
 
 type EditSubscriberFormData struct {
@@ -86,9 +87,29 @@ templ EditSubscriber(data EditSubscriberFormData) {
 				<div class="form-actions">
 					<button type="submit" class="btn-primary">Update Subscriber</button>
 					<a href="/dashboard/subscribers" class="btn-secondary">Cancel</a>
+					<button type="button" onclick={ showDeleteModal(data.ID, data.Email) } class="btn-danger">Delete Subscriber</button>
 				</div>
 			</form>
 		</div>
+		@fragments.DeleteConfirmationModal("", "")
 	}
+}
+
+script showDeleteModal(subscriberID string, subscriberEmail string) {
+	const modal = document.getElementById('delete-modal');
+	const modalBody = modal.querySelector('.modal-body p');
+	const form = modal.querySelector('form');
+	
+	modalBody.innerHTML = `Are you sure you want to delete the subscriber "<strong>${subscriberEmail}</strong>"?<br><span class="text-warning">This action cannot be undone.</span>`;
+	form.action = `/dashboard/subscribers/${subscriberID}/delete`;
+	
+	modal.style.display = 'flex';
+	
+	// Close modal when clicking outside
+	document.getElementById('delete-modal').addEventListener('click', function(e) {
+		if (e.target === this) {
+			document.getElementById('delete-modal').style.display = 'none';
+		}
+	});
 }
 

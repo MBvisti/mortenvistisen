@@ -117,39 +117,4 @@ func Home(result models.PaginationResult) templ.Component {
 	})
 }
 
-func showDeleteModal(articleID string, articleTitle string) templ.ComponentScript {
-	return templ.ComponentScript{
-		Name: `__templ_showDeleteModal_c5d1`,
-		Function: `function __templ_showDeleteModal_c5d1(articleID, articleTitle){console.log("yoyuo");
-		let currentArticleId = '';
-		let currentArticleTitle = '';
-		
-		currentArticleId = articleID;
-		currentArticleTitle = articleTitle;
-		
-		const modal = document.getElementById('delete-modal');
-		const modalBody = modal.querySelector('.modal-body p');
-		const form = modal.querySelector('form');
-		
-		modalBody.innerHTML = ` + "`" + `Are you sure you want to delete the article "<strong>${articleTitle}</strong>"?<br><span class="text-warning">This action cannot be undone.</span>` + "`" + `;
-		form.action = ` + "`" + `/dashboard/articles/${articleID}/delete` + "`" + `;
-		
-		modal.style.display = 'flex';
-		
-		function hideDeleteModal() {
-			document.getElementById('delete-modal').style.display = 'none';
-		}
-		
-		// Close modal when clicking outside
-		document.getElementById('delete-modal').addEventListener('click', function(e) {
-			if (e.target === this) {
-				hideDeleteModal();
-			}
-		});
-}`,
-		Call:       templ.SafeScript(`__templ_showDeleteModal_c5d1`, articleID, articleTitle),
-		CallInline: templ.SafeScriptInline(`__templ_showDeleteModal_c5d1`, articleID, articleTitle),
-	}
-}
-
 var _ = templruntime.GeneratedTemplate

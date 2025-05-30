@@ -76,32 +76,3 @@ templ Home(result models.PaginationResult) {
 		@fragments.DeleteConfirmationModal("", "")
 	}
 }
-
-script showDeleteModal(articleID string, articleTitle string) {
-console.log("yoyuo");
-		let currentArticleId = '';
-		let currentArticleTitle = '';
-		
-		currentArticleId = articleID;
-		currentArticleTitle = articleTitle;
-		
-		const modal = document.getElementById('delete-modal');
-		const modalBody = modal.querySelector('.modal-body p');
-		const form = modal.querySelector('form');
-		
-		modalBody.innerHTML = `Are you sure you want to delete the article "<strong>${articleTitle}</strong>"?<br><span class="text-warning">This action cannot be undone.</span>`;
-		form.action = `/dashboard/articles/${articleID}/delete`;
-		
-		modal.style.display = 'flex';
-		
-		function hideDeleteModal() {
-			document.getElementById('delete-modal').style.display = 'none';
-		}
-		
-		// Close modal when clicking outside
-		document.getElementById('delete-modal').addEventListener('click', function(e) {
-			if (e.target === this) {
-				hideDeleteModal();
-			}
-		});
-}

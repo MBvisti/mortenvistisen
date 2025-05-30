@@ -9,6 +9,7 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
+	"github.com/mbvisti/mortenvistisen/views/fragments"
 	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
 )
 
@@ -60,7 +61,7 @@ func EditSubscriber(data EditSubscriberFormData) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(data.Email)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/edit_subscriber.templ`, Line: 32, Col: 25}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/edit_subscriber.templ`, Line: 33, Col: 25}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -83,7 +84,7 @@ func EditSubscriber(data EditSubscriberFormData) templ.Component {
 					var templ_7745c5c3_Var4 string
 					templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(error)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/edit_subscriber.templ`, Line: 39, Col: 22}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/edit_subscriber.templ`, Line: 40, Col: 22}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 					if templ_7745c5c3_Err != nil {
@@ -106,7 +107,7 @@ func EditSubscriber(data EditSubscriberFormData) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(data.Referer)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/edit_subscriber.templ`, Line: 52, Col: 27}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/edit_subscriber.templ`, Line: 53, Col: 27}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -129,7 +130,7 @@ func EditSubscriber(data EditSubscriberFormData) templ.Component {
 					var templ_7745c5c3_Var6 string
 					templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(error)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/edit_subscriber.templ`, Line: 59, Col: 22}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/edit_subscriber.templ`, Line: 60, Col: 22}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 					if templ_7745c5c3_Err != nil {
@@ -172,7 +173,7 @@ func EditSubscriber(data EditSubscriberFormData) templ.Component {
 					var templ_7745c5c3_Var7 string
 					templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(error)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/edit_subscriber.templ`, Line: 80, Col: 22}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/edit_subscriber.templ`, Line: 81, Col: 22}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 					if templ_7745c5c3_Err != nil {
@@ -188,7 +189,28 @@ func EditSubscriber(data EditSubscriberFormData) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</div></div><div class=\"form-actions\"><button type=\"submit\" class=\"btn-primary\">Update Subscriber</button> <a href=\"/dashboard/subscribers\" class=\"btn-secondary\">Cancel</a></div></form></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "</div></div><div class=\"form-actions\"><button type=\"submit\" class=\"btn-primary\">Update Subscriber</button> <a href=\"/dashboard/subscribers\" class=\"btn-secondary\">Cancel</a> ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templ.RenderScriptItems(ctx, templ_7745c5c3_Buffer, showDeleteModal(data.ID, data.Email))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "<button type=\"button\" onclick=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var8 templ.ComponentScript = showDeleteModal(data.ID, data.Email)
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var8.Call)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\" class=\"btn-danger\">Delete Subscriber</button></div></form></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = fragments.DeleteConfirmationModal("", "").Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -200,6 +222,30 @@ func EditSubscriber(data EditSubscriberFormData) templ.Component {
 		}
 		return nil
 	})
+}
+
+func showDeleteModal(subscriberID string, subscriberEmail string) templ.ComponentScript {
+	return templ.ComponentScript{
+		Name: `__templ_showDeleteModal_56d2`,
+		Function: `function __templ_showDeleteModal_56d2(subscriberID, subscriberEmail){const modal = document.getElementById('delete-modal');
+	const modalBody = modal.querySelector('.modal-body p');
+	const form = modal.querySelector('form');
+	
+	modalBody.innerHTML = ` + "`" + `Are you sure you want to delete the subscriber "<strong>${subscriberEmail}</strong>"?<br><span class="text-warning">This action cannot be undone.</span>` + "`" + `;
+	form.action = ` + "`" + `/dashboard/subscribers/${subscriberID}/delete` + "`" + `;
+	
+	modal.style.display = 'flex';
+	
+	// Close modal when clicking outside
+	document.getElementById('delete-modal').addEventListener('click', function(e) {
+		if (e.target === this) {
+			document.getElementById('delete-modal').style.display = 'none';
+		}
+	});
+}`,
+		Call:       templ.SafeScript(`__templ_showDeleteModal_56d2`, subscriberID, subscriberEmail),
+		CallInline: templ.SafeScriptInline(`__templ_showDeleteModal_56d2`, subscriberID, subscriberEmail),
+	}
 }
 
 var _ = templruntime.GeneratedTemplate

@@ -2,7 +2,6 @@ package dashboard
 
 import (
 	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
-	"github.com/mbvisti/mortenvistisen/views/fragments"
 	"github.com/mbvisti/mortenvistisen/models"
 	"github.com/mbvisti/mortenvistisen/views/internal/components"
 	"fmt"
@@ -87,7 +86,5 @@ templ Subscribers(result SubscribersPaginationResult) {
 				EditURLPattern: "/dashboard/subscribers/%s/edit",
 			},
 		)
-		@fragments.DeleteConfirmationModal("", "")
 	}
 }
-
