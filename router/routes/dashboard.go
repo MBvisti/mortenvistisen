@@ -27,6 +27,12 @@ var Dashboard = []Route{
 	DashboardEditSubscriber,
 	DashboardUpdateSubscriber,
 	DashboardDeleteSubscriber,
+	DashboardNewsletters,
+	DashboardNewNewsletter,
+	DashboardStoreNewsletter,
+	DashboardEditNewsletter,
+	DashboardUpdateNewsletter,
+	DashboardDeleteNewsletter,
 }
 
 var DashboardHome = Route{
@@ -194,6 +200,66 @@ var DashboardDeleteSubscriber = Route{
 	Path:        dashboardRoutePrefix + "/subscribers/:id/delete",
 	Method:      http.MethodPost,
 	HandlerName: "DeleteSubscriber",
+	Middleware: []string{
+		"AuthOnly",
+	},
+}
+
+var DashboardNewsletters = Route{
+	Name:        dashboardNamePrefix + ".newsletters",
+	Path:        dashboardRoutePrefix + "/newsletters",
+	Method:      http.MethodGet,
+	HandlerName: "Newsletters",
+	Middleware: []string{
+		"AuthOnly",
+	},
+}
+
+var DashboardNewNewsletter = Route{
+	Name:        dashboardNamePrefix + ".newsletters.new",
+	Path:        dashboardRoutePrefix + "/newsletters/new",
+	Method:      http.MethodGet,
+	HandlerName: "NewNewsletter",
+	Middleware: []string{
+		"AuthOnly",
+	},
+}
+
+var DashboardStoreNewsletter = Route{
+	Name:        dashboardNamePrefix + ".newsletters.create",
+	Path:        dashboardRoutePrefix + "/newsletters/new",
+	Method:      http.MethodPost,
+	HandlerName: "StoreNewsletter",
+	Middleware: []string{
+		"AuthOnly",
+	},
+}
+
+var DashboardEditNewsletter = Route{
+	Name:        dashboardNamePrefix + ".newsletters.edit",
+	Path:        dashboardRoutePrefix + "/newsletters/:id/edit",
+	Method:      http.MethodGet,
+	HandlerName: "EditNewsletter",
+	Middleware: []string{
+		"AuthOnly",
+	},
+}
+
+var DashboardUpdateNewsletter = Route{
+	Name:        dashboardNamePrefix + ".newsletters.update",
+	Path:        dashboardRoutePrefix + "/newsletters/:id/edit",
+	Method:      http.MethodPost,
+	HandlerName: "UpdateNewsletter",
+	Middleware: []string{
+		"AuthOnly",
+	},
+}
+
+var DashboardDeleteNewsletter = Route{
+	Name:        dashboardNamePrefix + ".newsletters.delete",
+	Path:        dashboardRoutePrefix + "/newsletters/:id/delete",
+	Method:      http.MethodPost,
+	HandlerName: "DeleteNewsletter",
 	Middleware: []string{
 		"AuthOnly",
 	},

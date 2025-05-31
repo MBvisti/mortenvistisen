@@ -1,0 +1,78 @@
+package dashboard
+
+import (
+	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
+	"github.com/mbvisti/mortenvistisen/views/internal/components"
+	"github.com/mbvisti/mortenvistisen/router/routes"
+	"github.com/mbvisti/mortenvistisen/config"
+)
+
+type NewNewsletterFormData struct {
+	Title   string
+	Slug    string
+	Content string
+	Errors  map[string][]string
+}
+
+templ NewNewsletter(formData NewNewsletterFormData) {
+	@layouts.Dashboard() {
+		<div class="dashboard-header">
+			<div class="header-content">
+				<h1 class="dashboard-title">Create New Newsletter</h1>
+				<div class="header-actions">
+					<a href={ templ.SafeURL(routes.DashboardNewsletters.Path) } class="btn-secondary">← Back to Newsletters</a>
+				</div>
+			</div>
+		</div>
+		<div class="article-form-container">
+			<form method="POST" action={ templ.SafeURL(routes.DashboardStoreNewsletter.Path) } class="article-form">
+				<div class="form-section">
+					<h2 class="section-title">Newsletter Information</h2>
+					<div class="form-grid">
+						<div class="form-row">
+							@components.InputField(
+								"Title",
+								"text",
+								"title",
+								"Enter newsletter title",
+								templ.Attributes{"required": true, "maxlength": "100"},
+								components.InputFieldProps{
+									Value:     formData.Title,
+									ErrorMsgs: formData.Errors["title"],
+								},
+							)
+						</div>
+						<div class="form-row">
+							@components.InputField(
+								"Slug",
+								"text",
+								"slug",
+								"newsletter-slug-url",
+								templ.Attributes{"required": true, "maxlength": "255"},
+								components.InputFieldProps{
+									Value:     formData.Slug,
+									ErrorMsgs: formData.Errors["slug"],
+								},
+							)
+						</div>
+					</div>
+				</div>
+				<div class="form-section">
+					<h2 class="section-title">Newsletter Content</h2>
+					<textarea id="editorTarget" name="content">{ formData.Content }</textarea>
+				</div>
+				<div class="form-actions">
+					<div class="action-buttons">
+						<button type="submit" name="action" value="save_draft" class="btn-secondary">
+							Save as Draft
+						</button>
+						<button type="submit" name="action" value="publish" class="btn-primary">
+							Publish Newsletter
+						</button>
+					</div>
+				</div>
+			</form>
+			<script type="module" src={ config.Cfg.GetFullDomain() + "/" + routes.JsEasyMDE.Path }></script>
+		</div>
+	}
+}

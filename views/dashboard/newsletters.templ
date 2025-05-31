@@ -1,0 +1,98 @@
+package dashboard
+
+import (
+	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
+	"github.com/mbvisti/mortenvistisen/views/fragments"
+	"github.com/mbvisti/mortenvistisen/models"
+	"github.com/mbvisti/mortenvistisen/views/internal/components"
+	"fmt"
+	"github.com/mbvisti/mortenvistisen/router/routes"
+)
+
+func newslettersToTableRowElements(newsletters []models.Newsletter) components.TableRowElements {
+	tableRowElements := make(components.TableRowElements, len(newsletters))
+	for _, newsletter := range newsletters {
+		publishStatus := "Draft"
+		hightlight := "status-draft"
+
+		if newsletter.IsPublished {
+			publishStatus = "Published"
+			hightlight = "status-published"
+		}
+
+		tableRowElements[newsletter.ID] = []components.TableRowElement{
+			{Title: newsletter.Title},
+			{Title: publishStatus, Hightlight: hightlight},
+			{Title: newsletter.CreatedAt.Format("2006-01-02")},
+		}
+	}
+
+	return tableRowElements
+}
+
+templ Newsletters(result models.NewsletterPaginationResult) {
+	@layouts.Dashboard() {
+		<div class="dashboard-header">
+			<h1 class="dashboard-title">Newsletters</h1>
+			<div class="user-info">
+				Manage your newsletters
+			</div>
+		</div>
+		<!-- Statistics Cards -->
+		<div class="stats-grid">
+			<div class="stat-card">
+				<h3 class="stat-number">{ fmt.Sprintf("%d", result.TotalCount) }</h3>
+				<p class="stat-label">Total Newsletters</p>
+			</div>
+			<div class="stat-card">
+				<h3 class="stat-number">{ fmt.Sprintf("%d", countPublishedNewsletters(result.Newsletters)) }</h3>
+				<p class="stat-label">Published</p>
+			</div>
+			<div class="stat-card">
+				<h3 class="stat-number">{ fmt.Sprintf("%d", countDraftNewsletters(result.Newsletters)) }</h3>
+				<p class="stat-label">Drafts</p>
+			</div>
+		</div>
+		@components.Table(
+			"Recent newsletters",
+			[]string{"Title", "Status", "Created", "Action"},
+			newslettersToTableRowElements(result.Newsletters),
+			components.Pagination{
+				TotalCount:  result.TotalCount,
+				Page:        result.Page,
+				PageSize:    result.PageSize,
+				TotalPages:  result.TotalPages,
+				HasNext:     result.HasNext,
+				HasPrevious: result.HasPrevious,
+			},
+			components.ActionBtn{
+				Title: "New newsletter",
+				Route: routes.DashboardNewNewsletter,
+			},
+			components.TableConfig{
+				EditURLPattern: "/dashboard/newsletters/%s/edit",
+			},
+		)
+		@fragments.DeleteConfirmationModal("", "")
+	}
+}
+
+func countPublishedNewsletters(newsletters []models.Newsletter) int {
+	count := 0
+	for _, newsletter := range newsletters {
+		if newsletter.IsPublished {
+			count++
+		}
+	}
+	return count
+}
+
+func countDraftNewsletters(newsletters []models.Newsletter) int {
+	count := 0
+	for _, newsletter := range newsletters {
+		if !newsletter.IsPublished {
+			count++
+		}
+	}
+	return count
+}

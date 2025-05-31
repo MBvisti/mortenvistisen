@@ -90,6 +90,17 @@ type ArticleTagConnection struct {
 	TagID     uuid.UUID
 }
 
+type Newsletter struct {
+	ID          uuid.UUID
+	CreatedAt   pgtype.Timestamptz
+	UpdatedAt   pgtype.Timestamptz
+	Title       string
+	IsPublished pgtype.Bool
+	ReleasedAt  pgtype.Timestamptz
+	Slug        sql.NullString
+	Content     string
+}
+
 type RiverClient struct {
 	ID        string
 	CreatedAt pgtype.Timestamptz

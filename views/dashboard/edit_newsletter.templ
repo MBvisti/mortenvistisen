@@ -1,0 +1,102 @@
+package dashboard
+
+import (
+	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
+	"github.com/mbvisti/mortenvistisen/views/internal/components"
+	"github.com/mbvisti/mortenvistisen/router/routes"
+	"github.com/mbvisti/mortenvistisen/config"
+	"fmt"
+)
+
+type EditNewsletterFormData struct {
+	ID          string
+	Title       string
+	IsPublished bool
+	Slug        string
+	Content     string
+	Errors      map[string][]string
+}
+
+templ EditNewsletter(formData EditNewsletterFormData) {
+	@layouts.Dashboard() {
+		<div class="dashboard-header">
+			<div class="header-content">
+				<h1 class="dashboard-title">Edit Newsletter</h1>
+				<div class="header-actions">
+					<a href={ templ.SafeURL(routes.DashboardNewsletters.Path) } class="btn-secondary">← Back to Newsletters</a>
+				</div>
+			</div>
+		</div>
+		<div class="article-form-container">
+			<form method="POST" action={ templ.SafeURL(fmt.Sprintf("/dashboard/newsletters/%s/edit", formData.ID)) } class="article-form">
+				<div class="form-section">
+					<h2 class="section-title">Newsletter Information</h2>
+					<div class="form-grid">
+						<div class="form-row">
+							@components.InputField(
+								"Title",
+								"text",
+								"title",
+								"Enter newsletter title",
+								templ.Attributes{"required": true, "maxlength": "100"},
+								components.InputFieldProps{
+									Value:     formData.Title,
+									ErrorMsgs: formData.Errors["title"],
+								},
+							)
+						</div>
+						<div class="form-row">
+							@components.InputField(
+								"Slug",
+								"text",
+								"slug",
+								"newsletter-slug-url",
+								templ.Attributes{"required": true, "maxlength": "255"},
+								components.InputFieldProps{
+									Value:     formData.Slug,
+									ErrorMsgs: formData.Errors["slug"],
+								},
+							)
+						</div>
+						<div class="form-row">
+							<label class="form-control w-full">
+								<div class="label">
+									<span class="label-text md:text-lg">Publish Status</span>
+								</div>
+								<label class="checkbox-wrapper">
+									<input
+										type="checkbox"
+										name="published"
+										if formData.IsPublished {
+											checked
+										}
+									/>
+									<span class="checkbox-label">Published</span>
+								</label>
+								if formData.Errors["published"] != nil {
+									<div class="label">
+										for _, errMsg := range formData.Errors["published"] {
+											<span class="label-text-alt">{ components.UppercaseFirstWord(errMsg) }</span>
+										}
+									</div>
+								}
+							</label>
+						</div>
+					</div>
+				</div>
+				<div class="form-section">
+					<h2 class="section-title">Newsletter Content</h2>
+					<textarea id="editorTarget" name="content">{ formData.Content }</textarea>
+				</div>
+				<div class="form-actions">
+					<div class="action-buttons">
+						<button type="submit" class="btn-primary">
+							Update Newsletter
+						</button>
+					</div>
+				</div>
+			</form>
+			<script type="module" src={ config.Cfg.GetFullDomain() + "/" + routes.JsEasyMDE.Path }></script>
+		</div>
+	}
+}

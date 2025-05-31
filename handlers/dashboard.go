@@ -841,3 +841,338 @@ func (d Dashboard) DeleteSubscriber(c echo.Context) error {
 
 	return c.Redirect(302, "/dashboard/subscribers")
 }
+
+// Newsletter management handlers
+func (d Dashboard) Newsletters(c echo.Context) error {
+	pageStr := c.QueryParam("page")
+	page := 1
+	if pageStr != "" {
+		if p, err := strconv.Atoi(pageStr); err == nil && p > 0 {
+			page = p
+		}
+	}
+
+	pageSize := 10
+	newsletters, err := models.GetNewslettersPaginated(
+		extractCtx(c),
+		d.db.Pool,
+		page,
+		pageSize,
+	)
+	if err != nil {
+		newsletters = models.NewsletterPaginationResult{
+			Newsletters: []models.Newsletter{},
+			TotalCount:  0,
+			Page:        1,
+			PageSize:    pageSize,
+			TotalPages:  0,
+			HasNext:     false,
+			HasPrevious: false,
+		}
+	}
+
+	return dashboard.Newsletters(newsletters).Render(renderArgs(c))
+}
+
+func (d Dashboard) NewNewsletter(c echo.Context) error {
+	formData := dashboard.NewNewsletterFormData{
+		Errors: make(map[string][]string),
+	}
+
+	return dashboard.NewNewsletter(formData).Render(renderArgs(c))
+}
+
+func (d Dashboard) StoreNewsletter(c echo.Context) error {
+	type payload struct {
+		Title   string `form:"title"`
+		Slug    string `form:"slug"`
+		Content string `form:"content"`
+		Action  string `form:"action"`
+	}
+
+	var newsletterPayload payload
+	if err := c.Bind(&newsletterPayload); err != nil {
+		return err
+	}
+
+	newsletter, err := models.NewNewsletter(
+		extractCtx(c),
+		d.db.Pool,
+		models.NewNewsletterPayload{
+			Title:   newsletterPayload.Title,
+			Slug:    newsletterPayload.Slug,
+			Content: newsletterPayload.Content,
+		},
+	)
+	if err != nil {
+		if validationErrors := extractValidationErrors(err); validationErrors != nil {
+			slog.ErrorContext(
+				extractCtx(c),
+				"could not validate newsletter payload",
+				"error",
+				err,
+			)
+		}
+
+		if err := addFlash(
+			c,
+			contexts.FlashError,
+			"Failed to create newsletter. Please try again.",
+		); err != nil {
+			return err
+		}
+
+		return dashboard.NewNewsletter(dashboard.NewNewsletterFormData{}).
+			Render(renderArgs(c))
+	}
+
+	if newsletterPayload.Action == "publish" {
+		_, err = models.PublishNewsletter(
+			extractCtx(c),
+			d.db.Pool,
+			models.PublishNewsletterPayload{
+				ID:  newsletter.ID,
+				Now: time.Now(),
+			},
+		)
+		if err != nil {
+			if err := addFlash(
+				c,
+				contexts.FlashError,
+				"Newsletter created as draft. Publishing failed.",
+			); err != nil {
+				return err
+			}
+		}
+
+		if err := addFlash(
+			c,
+			contexts.FlashSuccess,
+			"Newsletter published successfully!",
+		); err != nil {
+			return err
+		}
+	}
+
+	if err := addFlash(
+		c,
+		contexts.FlashSuccess,
+		"Newsletter saved as draft successfully!",
+	); err != nil {
+		return err
+	}
+
+	return c.Redirect(302, "/dashboard/newsletters")
+}
+
+func (d Dashboard) EditNewsletter(c echo.Context) error {
+	idParam := c.Param("id")
+	newsletterID, err := uuid.Parse(idParam)
+	if err != nil {
+		if err := addFlash(
+			c,
+			contexts.FlashError,
+			"Invalid newsletter ID.",
+		); err != nil {
+			return err
+		}
+		return c.Redirect(302, "/dashboard/newsletters")
+	}
+
+	newsletter, err := models.GetNewsletterByID(
+		extractCtx(c),
+		d.db.Pool,
+		newsletterID,
+	)
+	if err != nil {
+		if err := addFlash(
+			c,
+			contexts.FlashError,
+			"Newsletter not found.",
+		); err != nil {
+			return err
+		}
+		return c.Redirect(302, "/dashboard/newsletters")
+	}
+
+	formData := dashboard.EditNewsletterFormData{
+		ID:          newsletter.ID.String(),
+		Title:       newsletter.Title,
+		IsPublished: newsletter.IsPublished,
+		Slug:        newsletter.Slug,
+		Content:     newsletter.Content,
+		Errors:      make(map[string][]string),
+	}
+
+	return dashboard.EditNewsletter(formData).Render(renderArgs(c))
+}
+
+func (d Dashboard) UpdateNewsletter(c echo.Context) error {
+	idParam := c.Param("id")
+	newsletterID, err := uuid.Parse(idParam)
+	if err != nil {
+		if err := addFlash(
+			c,
+			contexts.FlashError,
+			"Invalid newsletter ID.",
+		); err != nil {
+			return err
+		}
+		return c.Redirect(302, "/dashboard/newsletters")
+	}
+
+	type payload struct {
+		Title     string `form:"title"`
+		Slug      string `form:"slug"`
+		Content   string `form:"content"`
+		Action    string `form:"action"`
+		Published string `form:"published"`
+	}
+
+	var newsletterPayload payload
+	if err := c.Bind(&newsletterPayload); err != nil {
+		return err
+	}
+
+	published := newsletterPayload.Published == "on"
+
+	updatePayload := models.UpdateNewsletterPayload{
+		ID:          newsletterID,
+		UpdatedAt:   time.Now(),
+		Title:       newsletterPayload.Title,
+		Slug:        newsletterPayload.Slug,
+		Content:     newsletterPayload.Content,
+		IsPublished: published,
+	}
+
+	newsletter, err := models.UpdateNewsletter(
+		extractCtx(c),
+		d.db.Pool,
+		updatePayload,
+	)
+	if err != nil {
+		if validationErrors := extractValidationErrors(err); validationErrors != nil {
+			slog.ErrorContext(
+				extractCtx(c),
+				"could not validate newsletter payload",
+				"error",
+				err,
+			)
+		}
+
+		if err := addFlash(
+			c,
+			contexts.FlashError,
+			"Failed to update newsletter. Please try again.",
+		); err != nil {
+			return err
+		}
+
+		formData := dashboard.EditNewsletterFormData{
+			ID:      newsletterID.String(),
+			Title:   newsletterPayload.Title,
+			Slug:    newsletterPayload.Slug,
+			Content: newsletterPayload.Content,
+			Errors:  make(map[string][]string),
+		}
+
+		return dashboard.EditNewsletter(formData).Render(renderArgs(c))
+	}
+
+	if published && newsletter.ReleasedAt.IsZero() {
+		_, err := models.PublishNewsletter(
+			c.Request().Context(),
+			d.db.Pool,
+			models.PublishNewsletterPayload{ID: newsletter.ID, Now: time.Now()},
+		)
+		if err != nil {
+			if err := addFlash(
+				c,
+				contexts.FlashError,
+				"Failed to update newsletter. Please try again.",
+			); err != nil {
+				return err
+			}
+			return err
+		}
+		if err := addFlash(
+			c,
+			contexts.FlashSuccess,
+			"Newsletter published successfully!",
+		); err != nil {
+			return err
+		}
+
+		return c.Redirect(302, "/dashboard/newsletters")
+	}
+
+	if err := addFlash(
+		c,
+		contexts.FlashSuccess,
+		"Newsletter updated successfully!",
+	); err != nil {
+		return err
+	}
+
+	return c.Redirect(302, "/dashboard/newsletters")
+}
+
+func (d Dashboard) DeleteNewsletter(c echo.Context) error {
+	idParam := c.Param("id")
+	newsletterID, err := uuid.Parse(idParam)
+	if err != nil {
+		if err := addFlash(
+			c,
+			contexts.FlashError,
+			"Invalid newsletter ID.",
+		); err != nil {
+			return err
+		}
+		return c.Redirect(302, "/dashboard/newsletters")
+	}
+
+	// Check if newsletter exists before deleting
+	_, err = models.GetNewsletterByID(
+		extractCtx(c),
+		d.db.Pool,
+		newsletterID,
+	)
+	if err != nil {
+		if err := addFlash(
+			c,
+			contexts.FlashError,
+			"Newsletter not found.",
+		); err != nil {
+			return err
+		}
+		return c.Redirect(302, "/dashboard/newsletters")
+	}
+
+	// Delete the newsletter
+	err = models.DeleteNewsletter(
+		extractCtx(c),
+		d.db.Pool,
+		newsletterID,
+	)
+	if err != nil {
+		if err := addFlash(
+			c,
+			contexts.FlashError,
+			"Failed to delete newsletter. Please try again.",
+		); err != nil {
+			return err
+		}
+		return c.Redirect(302, "/dashboard/newsletters")
+	}
+
+	if err := addFlash(
+		c,
+		contexts.FlashSuccess,
+		"Newsletter deleted successfully!",
+	); err != nil {
+		return err
+	}
+
+	// Redirect to newsletters
+	return c.Redirect(302, "/dashboard/newsletters")
+}
