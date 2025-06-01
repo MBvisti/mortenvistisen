@@ -60,9 +60,14 @@ func (a Assets) enableCaching(c echo.Context, content []byte) echo.Context {
 		hash := md5.Sum(content)
 		etag := fmt.Sprintf(`W/"%x-%x"`, hash, len(content))
 
+		c.Response().Header().Del("Set-Cookie")
+
 		c.Response().
 			Header().
-			Set("Cache-Control", fmt.Sprintf("public, max-age=%s", threeMonthsCache))
+			Set(
+				"Cache-Control",
+				fmt.Sprintf("public, max-age=%s, immutable", threeMonthsCache),
+			)
 		c.Response().
 			Header().
 			Set("Vary", "Accept-Encoding")
@@ -210,7 +215,7 @@ func (a Assets) IndividualScript(c echo.Context) error {
 
 	c = a.enableCaching(c, script)
 
-	return c.Blob(http.StatusOK, "text/javascript", script)
+	return c.Blob(http.StatusOK, "application/javascript", script)
 }
 
 func (a Assets) Scripts(c echo.Context) error {
@@ -223,7 +228,7 @@ func (a Assets) Scripts(c echo.Context) error {
 
 	c = a.enableCaching(c, script)
 
-	return c.Blob(http.StatusOK, "text/javascript", script)
+	return c.Blob(http.StatusOK, "application/javascript", script)
 }
 
 func (a Assets) AllJs(c echo.Context) error {
@@ -237,7 +242,7 @@ func (a Assets) AllJs(c echo.Context) error {
 
 	c = a.enableCaching(c, script)
 
-	return c.Blob(http.StatusOK, "text/javascript", script)
+	return c.Blob(http.StatusOK, "application/javascript", script)
 }
 
 func (a Assets) Favicon16(c echo.Context) error {
