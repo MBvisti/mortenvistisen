@@ -310,7 +310,7 @@ func head(data HeadData) templ.Component {
 	})
 }
 
-var startTime = time.Now()
+var startTime = time.Now().Unix()
 
 func SetupHead(ctx context.Context, opts ...HeadDataOption) templ.Component {
 	data := &HeadData{
@@ -318,8 +318,8 @@ func SetupHead(ctx context.Context, opts ...HeadDataOption) templ.Component {
 		Description:    "A starter template for building one-man businesses using Golang.",
 		Slug:           "/",
 		MetaType:       "website",
-		StylesheetHref: fmt.Sprintf("%s/%s?%v", config.Cfg.GetFullDomain(), routes.CssEntrypoint.Path, startTime.Unix()),
-		ScriptSrc:      fmt.Sprintf("%s/%s?%v", config.Cfg.GetFullDomain(), routes.JsEntrypoint.Path, startTime.Unix()),
+		StylesheetHref: fmt.Sprintf("%s/%s?%v", config.Cfg.GetFullDomain(), routes.CssEntrypoint.Path, startTime),
+		ScriptSrc:      fmt.Sprintf("%s/%s?%v", config.Cfg.GetFullDomain(), routes.JsEntrypoint.Path, "1748775540"),
 	}
 
 	for _, opt := range opts {
