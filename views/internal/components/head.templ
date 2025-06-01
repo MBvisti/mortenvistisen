@@ -1,10 +1,12 @@
 package components
 
-import "context"
-import "github.com/mbvisti/mortenvistisen/config"
-import "github.com/mbvisti/mortenvistisen/router/routes"
-import "time"
-import "fmt"
+import (
+	"context"
+	"github.com/mbvisti/mortenvistisen/config"
+	"github.com/mbvisti/mortenvistisen/router/routes"
+	"time"
+	"fmt"
+)
 
 type HeadDataOption func(*HeadData)
 
@@ -67,14 +69,16 @@ templ head(data HeadData) {
 	</head>
 }
 
+var startTime = time.Now()
+
 func SetupHead(ctx context.Context, opts ...HeadDataOption) templ.Component {
 	data := &HeadData{
 		Title:          config.Cfg.ProjectName,
 		Description:    "A starter template for building one-man businesses using Golang.",
 		Slug:           "/",
 		MetaType:       "website",
-		StylesheetHref: fmt.Sprintf("%s/%s?%v", config.Cfg.GetFullDomain(), routes.CssEntrypoint.Path, time.Now().Unix()),
-		ScriptSrc:      fmt.Sprintf("%s/%s?%v", config.Cfg.GetFullDomain(), routes.JsEntrypoint.Path, time.Now().Unix()),
+		StylesheetHref: fmt.Sprintf("%s/%s?%v", config.Cfg.GetFullDomain(), routes.CssEntrypoint.Path, startTime.Unix()),
+		ScriptSrc:      fmt.Sprintf("%s/%s?%v", config.Cfg.GetFullDomain(), routes.JsEntrypoint.Path, startTime.Unix()),
 	}
 
 	for _, opt := range opts {
