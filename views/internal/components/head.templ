@@ -78,7 +78,7 @@ func SetupHead(ctx context.Context, opts ...HeadDataOption) templ.Component {
 		Slug:           "/",
 		MetaType:       "website",
 		StylesheetHref: fmt.Sprintf("%s/%s?%v", config.Cfg.GetFullDomain(), routes.CssEntrypoint.Path, startTime),
-		ScriptSrc:      fmt.Sprintf("%s/%s?%v", config.Cfg.GetFullDomain(), routes.JsEntrypoint.Path, "1748775540"),
+		ScriptSrc:      fmt.Sprintf("%s/%s?%v", config.Cfg.GetFullDomain(), routes.JsEntrypoint.Path, startTime),
 	}
 
 	for _, opt := range opts {

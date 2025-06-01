@@ -17,6 +17,8 @@ import (
 	"time"
 )
 
+var startTime = time.Now().Unix()
+
 func Dashboard() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -43,22 +45,22 @@ func Dashboard() templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s/%v?%v", config.Cfg.GetFullDomain(), routes.CssEntrypoint.Path, time.Now().Unix()))
+		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s/%v?%v", config.Cfg.GetFullDomain(), routes.CssEntrypoint.Path, startTime))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/layouts/dashboard.templ`, Line: 19, Col: 113}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/layouts/dashboard.templ`, Line: 21, Col: 105}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" rel=\"stylesheet\"><!-- <link rel=\"icon\" type=\"image/png\" sizes=\"16x16\" href={ routes.Favicon16.Path }/> --><!-- <link rel=\"icon\" type=\"image/png\" sizes=\"32x32\" href={ routes.Favicon32.Path }/> --><script src=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" rel=\"stylesheet\"><script src=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
-		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s/%v?%v", config.Cfg.GetFullDomain(), routes.JsEntrypoint.Path, time.Now().Unix()))
+		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s/%v?%v", config.Cfg.GetFullDomain(), routes.JsEntrypoint.Path, startTime))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/layouts/dashboard.templ`, Line: 22, Col: 113}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/layouts/dashboard.templ`, Line: 22, Col: 105}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
