@@ -4,7 +4,6 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/MBvisti/mortenvistisen/config"
 	"github.com/MBvisti/mortenvistisen/http/handlers"
 	"github.com/MBvisti/mortenvistisen/static"
 	"github.com/labstack/echo/v4"
@@ -23,17 +22,17 @@ func resourceRoutes(router *echo.Echo, handlers handlers.Resource) {
 			return err
 		}
 
-		if config.Cfg.Environment == config.PROD_ENVIRONMENT {
-			c.Response().
-				Header().
-				Set("Cache-Control", "public, max-age=31536000, immutable")
-			c.Response().
-				Header().
-				Set("Vary", "Accept-Encoding")
-			c.Response().
-				Header().
-				Set("ETag", "\"bootstrap-v5_3_0\"")
-		}
+		// if config.Cfg.Environment == config.PROD_ENVIRONMENT {
+		c.Response().
+			Header().
+			Set("Cache-Control", "public, max-age=31536000, immutable")
+		c.Response().
+			Header().
+			Set("Vary", "Accept-Encoding")
+		c.Response().
+			Header().
+			Set("ETag", "\"bootstrap-v5_3_0\"")
+		// }
 
 		return c.Blob(http.StatusOK, "text/css", stylesheet)
 	})
@@ -46,17 +45,17 @@ func resourceRoutes(router *echo.Echo, handlers handlers.Resource) {
 			return err
 		}
 
-		if config.Cfg.Environment == config.PROD_ENVIRONMENT {
-			c.Response().
-				Header().
-				Set("Cache-Control", "public, max-age=31536000, immutable")
-			c.Response().
-				Header().
-				Set("Vary", "Accept-Encoding")
-			c.Response()
-		}
+		// if config.Cfg.Environment == config.PROD_ENVIRONMENT {
+		c.Response().
+			Header().
+			Set("Cache-Control", "public, max-age=31536000, immutable")
+		c.Response().
+			Header().
+			Set("Vary", "Accept-Encoding")
+		c.Response()
+		// }
 
-		return c.Blob(http.StatusOK, "text/javascript", stylesheet)
+		return c.Blob(http.StatusOK, "application/javascript", stylesheet)
 	})
 
 	router.GET("/js/beacon.min.js", func(c echo.Context) error {
@@ -67,17 +66,17 @@ func resourceRoutes(router *echo.Echo, handlers handlers.Resource) {
 			return err
 		}
 
-		if config.Cfg.Environment == config.PROD_ENVIRONMENT {
-			c.Response().
-				Header().
-				Set("Cache-Control", "public, max-age=31536000, immutable")
-			c.Response().
-				Header().
-				Set("Vary", "Accept-Encoding")
-			c.Response()
-		}
+		// if config.Cfg.Environment == config.PROD_ENVIRONMENT {
+		c.Response().
+			Header().
+			Set("Cache-Control", "public, max-age=31536000, immutable")
+		c.Response().
+			Header().
+			Set("Vary", "Accept-Encoding")
+		c.Response()
+		// }
 
-		return c.Blob(http.StatusOK, "text/javascript", stylesheet)
+		return c.Blob(http.StatusOK, "application/javascript", stylesheet)
 	})
 
 	router.GET("/css/bootstrap.css", func(c echo.Context) error {
@@ -88,17 +87,17 @@ func resourceRoutes(router *echo.Echo, handlers handlers.Resource) {
 			return err
 		}
 
-		if config.Cfg.Environment == config.PROD_ENVIRONMENT {
-			c.Response().
-				Header().
-				Set("Cache-Control", "public, max-age=31536000, immutable")
-			c.Response().
-				Header().
-				Set("Vary", "Accept-Encoding")
-			c.Response().
-				Header().
-				Set("ETag", "\"bootstrap-v5_3_0\"")
-		}
+		// if config.Cfg.Environment == config.PROD_ENVIRONMENT {
+		c.Response().
+			Header().
+			Set("Cache-Control", "public, max-age=31536000, immutable")
+		c.Response().
+			Header().
+			Set("Vary", "Accept-Encoding")
+		c.Response().
+			Header().
+			Set("ETag", "\"bootstrap-v5_3_0\"")
+		// }
 
 		return c.Blob(http.StatusOK, "text/css", stylesheet)
 	})
@@ -110,14 +109,14 @@ func resourceRoutes(router *echo.Echo, handlers handlers.Resource) {
 			return err
 		}
 
-		if config.Cfg.Environment == config.PROD_ENVIRONMENT {
-			c.Response().
-				Header().
-				Set("Cache-Control", "public, max-age=2592000, immutable")
-			c.Response().
-				Header().
-				Set("Vary", "Accept-Encoding")
-		}
+		// if config.Cfg.Environment == config.PROD_ENVIRONMENT {
+		c.Response().
+			Header().
+			Set("Cache-Control", "public, max-age=2592000, immutable")
+		c.Response().
+			Header().
+			Set("Vary", "Accept-Encoding")
+		// }
 
 		return c.Blob(http.StatusOK, "text/css", stylesheet)
 	})
@@ -130,17 +129,17 @@ func resourceRoutes(router *echo.Echo, handlers handlers.Resource) {
 			return err
 		}
 
-		if config.Cfg.Environment == config.PROD_ENVIRONMENT {
-			c.Response().
-				Header().
-				Set("Cache-Control", "public, max-age=31536000, immutable")
-			c.Response().
-				Header().
-				Set("Vary", "Accept-Encoding")
-			c.Response()
-		}
+		// if config.Cfg.Environment == config.PROD_ENVIRONMENT {
+		c.Response().
+			Header().
+			Set("Cache-Control", "public, max-age=31536000, immutable")
+		c.Response().
+			Header().
+			Set("Vary", "Accept-Encoding")
+		c.Response()
+		// }
 
-		return c.Blob(http.StatusOK, "text/javascript", stylesheet)
+		return c.Blob(http.StatusOK, "application/javascript", stylesheet)
 	})
 	router.GET("/js/analytics.js", func(c echo.Context) error {
 		stylesheet, err := static.Files.ReadFile(
@@ -150,17 +149,17 @@ func resourceRoutes(router *echo.Echo, handlers handlers.Resource) {
 			return err
 		}
 
-		if config.Cfg.Environment == config.PROD_ENVIRONMENT {
-			c.Response().
-				Header().
-				Set("Cache-Control", "public, max-age=31536000, immutable")
-			c.Response().
-				Header().
-				Set("Vary", "Accept-Encoding")
-			c.Response()
-		}
+		// if config.Cfg.Environment == config.PROD_ENVIRONMENT {
+		c.Response().
+			Header().
+			Set("Cache-Control", "public, max-age=31536000, immutable")
+		c.Response().
+			Header().
+			Set("Vary", "Accept-Encoding")
+		c.Response()
+		// }
 
-		return c.Blob(http.StatusOK, "text/javascript", stylesheet)
+		return c.Blob(http.StatusOK, "application/javascript", stylesheet)
 	})
 	router.GET("/js/htmx.js", func(c echo.Context) error {
 		stylesheet, err := static.Files.ReadFile(
@@ -170,17 +169,17 @@ func resourceRoutes(router *echo.Echo, handlers handlers.Resource) {
 			return err
 		}
 
-		if config.Cfg.Environment == config.PROD_ENVIRONMENT {
-			c.Response().
-				Header().
-				Set("Cache-Control", "public, max-age=31536000, immutable")
-			c.Response().
-				Header().
-				Set("Vary", "Accept-Encoding")
-			c.Response()
-		}
+		// if config.Cfg.Environment == config.PROD_ENVIRONMENT {
+		c.Response().
+			Header().
+			Set("Cache-Control", "public, max-age=31536000, immutable")
+		c.Response().
+			Header().
+			Set("Vary", "Accept-Encoding")
+		c.Response()
+		// }
 
-		return c.Blob(http.StatusOK, "text/javascript", stylesheet)
+		return c.Blob(http.StatusOK, "application/javascript", stylesheet)
 	})
 	router.GET("/js/trix.js", func(c echo.Context) error {
 		stylesheet, err := static.Files.ReadFile(
@@ -190,17 +189,17 @@ func resourceRoutes(router *echo.Echo, handlers handlers.Resource) {
 			return err
 		}
 
-		if config.Cfg.Environment == config.PROD_ENVIRONMENT {
-			c.Response().
-				Header().
-				Set("Cache-Control", "public, max-age=31536000, immutable")
-			c.Response().
-				Header().
-				Set("Vary", "Accept-Encoding")
-			c.Response()
-		}
+		// if config.Cfg.Environment == config.PROD_ENVIRONMENT {
+		c.Response().
+			Header().
+			Set("Cache-Control", "public, max-age=31536000, immutable")
+		c.Response().
+			Header().
+			Set("Vary", "Accept-Encoding")
+		c.Response()
+		// }
 
-		return c.Blob(http.StatusOK, "text/javascript", stylesheet)
+		return c.Blob(http.StatusOK, "application/javascript", stylesheet)
 	})
 	router.GET("/js/popper.js", func(c echo.Context) error {
 		stylesheet, err := static.Files.ReadFile(
@@ -210,17 +209,17 @@ func resourceRoutes(router *echo.Echo, handlers handlers.Resource) {
 			return err
 		}
 
-		if config.Cfg.Environment == config.PROD_ENVIRONMENT {
-			c.Response().
-				Header().
-				Set("Cache-Control", "public, max-age=31536000, immutable")
-			c.Response().
-				Header().
-				Set("Vary", "Accept-Encoding")
-			c.Response()
-		}
+		// if config.Cfg.Environment == config.PROD_ENVIRONMENT {
+		c.Response().
+			Header().
+			Set("Cache-Control", "public, max-age=31536000, immutable")
+		c.Response().
+			Header().
+			Set("Vary", "Accept-Encoding")
+		c.Response()
+		// }
 
-		return c.Blob(http.StatusOK, "text/javascript", stylesheet)
+		return c.Blob(http.StatusOK, "application/javascript", stylesheet)
 	})
 	router.GET("/js/bootstrap.js", func(c echo.Context) error {
 		stylesheet, err := static.Files.ReadFile(
@@ -230,17 +229,17 @@ func resourceRoutes(router *echo.Echo, handlers handlers.Resource) {
 			return err
 		}
 
-		if config.Cfg.Environment == config.PROD_ENVIRONMENT {
-			c.Response().
-				Header().
-				Set("Cache-Control", "public, max-age=31536000, immutable")
-			c.Response().
-				Header().
-				Set("Vary", "Accept-Encoding")
-			c.Response()
-		}
+		// if config.Cfg.Environment == config.PROD_ENVIRONMENT {
+		c.Response().
+			Header().
+			Set("Cache-Control", "public, max-age=31536000, immutable")
+		c.Response().
+			Header().
+			Set("Vary", "Accept-Encoding")
+		c.Response()
+		// }
 
-		return c.Blob(http.StatusOK, "text/javascript", stylesheet)
+		return c.Blob(http.StatusOK, "application/javascript", stylesheet)
 	})
 
 	router.GET(
@@ -271,14 +270,14 @@ func resourceRoutes(router *echo.Echo, handlers handlers.Resource) {
 			return err
 		}
 
-		if config.Cfg.Environment == config.PROD_ENVIRONMENT {
-			c.Response().
-				Header().
-				Set("Cache-Control", "public, max-age=2592000, immutable")
-			c.Response().
-				Header().
-				Set("Vary", "Accept-Encoding")
-		}
+		// if config.Cfg.Environment == config.PROD_ENVIRONMENT {
+		c.Response().
+			Header().
+			Set("Cache-Control", "public, max-age=2592000, immutable")
+		c.Response().
+			Header().
+			Set("Vary", "Accept-Encoding")
+		// }
 
 		return c.Blob(200, "application/javascript", bytes)
 	})
