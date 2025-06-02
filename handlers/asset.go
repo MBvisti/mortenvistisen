@@ -13,6 +13,8 @@ import (
 	"github.com/maypok86/otter"
 	"github.com/mbvisti/mortenvistisen/assets"
 	"github.com/mbvisti/mortenvistisen/config"
+	"github.com/mbvisti/mortenvistisen/models"
+	"github.com/mbvisti/mortenvistisen/psql"
 	"github.com/mbvisti/mortenvistisen/router/routes"
 	"gopkg.in/yaml.v2"
 )
@@ -28,9 +30,12 @@ const (
 type Assets struct {
 	sitemapCache otter.Cache[string, Sitemap]
 	assetsCache  otter.Cache[string, string]
+	db           psql.Postgres
 }
 
-func newAssets() Assets {
+func newAssets(
+	db psql.Postgres,
+) Assets {
 	sitemapCacheBuilder, err := otter.NewBuilder[string, Sitemap](1)
 	if err != nil {
 		panic(err)
@@ -51,7 +56,7 @@ func newAssets() Assets {
 		panic(err)
 	}
 
-	return Assets{sitemapCache, robotsCache}
+	return Assets{sitemapCache, robotsCache, db}
 }
 
 func (a Assets) enableCaching(c echo.Context, content []byte) echo.Context {
@@ -111,7 +116,12 @@ func (a Assets) Sitemap(c echo.Context) error {
 		return c.XML(http.StatusOK, value)
 	}
 
-	sitemap, err := createSitemap(c)
+	articles, err := models.GetArticles(c.Request().Context(), a.db.Pool)
+	if err != nil {
+		return err
+	}
+
+	sitemap, err := createSitemap(articles)
 	if err != nil {
 		return err
 	}
@@ -142,21 +152,13 @@ type Sitemap struct {
 	URL     []URL    `xml:"url"`
 }
 
-func createSitemap(c echo.Context) (Sitemap, error) {
+func createSitemap(articles []models.Article) (Sitemap, error) {
 	baseUrl := config.Cfg.GetFullDomain()
 
 	var urls []URL
 
-	urls = append(urls, URL{
-		Loc:        baseUrl,
-		ChangeFreq: "monthly",
-		LastMod:    "2024-10-22T09:43:09+00:00",
-		Priority:   "1",
-	})
-
-	for _, r := range c.Echo().Routes() {
-		switch r.Name {
-		case routes.AboutPage.Name:
+	for _, r := range routes.App {
+		if r.Path != "/redirect" && r.Path != "/posts/:articleSlug" {
 			urls = append(urls, URL{
 				Loc: fmt.Sprintf(
 					"%s%s",
@@ -166,6 +168,24 @@ func createSitemap(c echo.Context) (Sitemap, error) {
 				ChangeFreq: "monthly",
 			})
 		}
+	}
+
+	for _, article := range articles {
+		path := strings.Replace(
+			routes.ArticlePage.Path,
+			":articleSlug",
+			article.Slug,
+			1,
+		)
+		urls = append(urls, URL{
+			Loc: fmt.Sprintf(
+				"%s%s",
+				baseUrl,
+				path,
+			),
+			ChangeFreq: "monthly",
+			LastMod:    article.UpdatedAt.String(),
+		})
 	}
 
 	sitemap := Sitemap{

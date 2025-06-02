@@ -37,12 +37,12 @@ func Footer() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var2 templ.SafeURL = templ.SafeURL(routes.LandingPage.Name)
+		var templ_7745c5c3_Var2 templ.SafeURL = templ.SafeURL(routes.NewslettersPage.Path)
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var2)))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\">Newsletters</a> <a target=\"_blank\" href=\"https://mbvisti.com\">YouTube</a></div><p>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\">Newsletters</a> <a target=\"_blank\" href=\"https://www.youtube.com/@mbvlabs\">YouTube</a></div><p>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -62,9 +62,9 @@ func newApp(
 }
 
 func (a App) LandingPage(c echo.Context) error {
-	// if value, ok := a.cache.Get(landingPageCacheKey); ok {
-	// 	return views.HomePage(value).Render(renderArgs(c))
-	// }
+	if value, ok := a.cache.Get(landingPageCacheKey); ok {
+		return views.HomePage(value).Render(renderArgs(c))
+	}
 
 	articles, err := models.GetPublishedArticles(extractCtx(c), a.db.Pool)
 	if err != nil {
@@ -89,6 +89,14 @@ func (a App) LandingPage(c echo.Context) error {
 	}
 
 	return views.HomePage(views.Home(payload)).Render(renderArgs(c))
+}
+
+func (a App) NewslettersPage(c echo.Context) error {
+	if value, ok := a.cache.Get(landingPageCacheKey); ok {
+		return views.HomePage(value).Render(renderArgs(c))
+	}
+
+	return views.NewslettersPage(views.Newsletters()).Render(renderArgs(c))
 }
 
 func (a App) AboutPage(c echo.Context) error {

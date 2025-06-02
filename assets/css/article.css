@@ -39,6 +39,21 @@
 	color: var(--color-base-content);
 }
 
+.article-meta {
+	display: flex;
+
+	p {
+		margin-right: var(--size-2);
+		color: var(--color-base-content);
+		font-size: var(--font-size-0);
+	}
+}
+
+.article-grid>h1 {
+	line-height: var(--font-lineheight-2);
+	grid-column: breakout;
+}
+
 @media (max-width: 768px) {
 	.article-grid>h1 {
 		font-size: var(--font-size-6);

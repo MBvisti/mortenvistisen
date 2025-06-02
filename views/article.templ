@@ -21,7 +21,7 @@ templ Article(img, content, title string, publishedAt, updatedAt time.Time) {
 				<img class="article-img" src={ img }/>
 			}
 			<h1>{ title }</h1>
-			<div style="display:flex">
+			<div class="article-meta">
 				<p>Publised: { publishedAt.Format("2006-06-06") }</p>
 				if updatedAt.After(publishedAt) {
 					<p>Updated: { updatedAt.Format("2006-06-06") }</p>

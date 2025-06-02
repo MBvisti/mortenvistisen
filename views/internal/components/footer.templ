@@ -8,8 +8,8 @@ templ Footer() {
 	<footer class="footer">
 		<div>
 			<a target="_blank" href="https://golangblogcourse.com">Golang Course</a>
-			<a href={ templ.SafeURL(routes.LandingPage.Name) }>Newsletters</a>
-			<a target="_blank" href="https://mbvisti.com">YouTube</a>
+			<a href={ templ.SafeURL(routes.NewslettersPage.Path) }>Newsletters</a>
+			<a target="_blank" href="https://www.youtube.com/@mbvlabs">YouTube</a>
 		</div>
 		<p>
 			{ fmt.Sprintf("© %v", time.Now().Year()) } <a href="https://mbvlabs.com">mbvlabs</a>. All rights reserved.

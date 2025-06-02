@@ -19,7 +19,7 @@
 	}
 }
 
-.hero>h1 {
+.standard-h1 {
 	font-size: var(--font-size-5);
 	text-align: center;
 	margin-bottom: var(--size-3);
@@ -73,6 +73,7 @@
 }
 
 .latest-articles>h2 {
+	margin-top: var(--size-9);
 	margin-bottom: var(--size-5);
 }
 

@@ -79,7 +79,7 @@ func Article(img, content, title string, publishedAt, updatedAt time.Time) templ
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</h1><div style=\"display:flex\"><p>Publised: ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</h1><div class=\"article-meta\"><p>Publised: ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -1,0 +1,23 @@
+package views
+
+import (
+	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
+	"github.com/mbvisti/mortenvistisen/router/routes"
+)
+
+templ Newsletters() {
+	<main class="container main main--grow">
+		<h1 class="standard-h1">Newsletters, however infrequent</h1>
+		<section class="latest-articles"></section>
+	</main>
+}
+
+templ NewslettersPage(content templ.Component) {
+	@layouts.Base(
+		WithSlug(routes.LandingPage.Path),
+		WithTitle("Newsletters"),
+		WithDescription("Newsletters released by Morten"),
+	) {
+		@content
+	}
+}

@@ -24,7 +24,7 @@ import (
 	"riverqueue.com/riverui"
 )
 
-var appVersion string
+var AppVersion string
 
 func migrate(ctx context.Context) error {
 	slog.Info("STARTING TO MIGRATE")
@@ -81,7 +81,7 @@ func run(ctx context.Context) error {
 
 	tel, err := telemetry.New(
 		ctx,
-		appVersion,
+		AppVersion,
 		&telemetry.StdoutExporter{
 			LogLevel:   slog.LevelDebug,
 			WithTraces: true,

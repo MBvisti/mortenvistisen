@@ -11,6 +11,7 @@ var App = []Route{
 	LandingPage,
 	AboutPage,
 	ArticlePage,
+	NewslettersPage,
 	Redirect.Route,
 }
 
@@ -26,6 +27,13 @@ var AboutPage = Route{
 	Path:        "/about",
 	Method:      http.MethodGet,
 	HandlerName: "AboutPage",
+}
+
+var NewslettersPage = Route{
+	Name:        appNamePrefix + ".newsletters_page",
+	Path:        "/newsletters",
+	Method:      http.MethodGet,
+	HandlerName: "NewslettersPage",
 }
 
 var ArticlePage = Route{

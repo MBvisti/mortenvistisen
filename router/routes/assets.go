@@ -23,15 +23,15 @@ var Assets = []Route{
 }
 
 var Robots = Route{
-	Name:        assetsNamePrefix + ".robots",
-	Path:        assetsNamePrefix + "/robots.txt",
+	Name:        ".robots",
+	Path:        "/robots.txt",
 	Method:      http.MethodGet,
 	HandlerName: "Robots",
 }
 
 var Sitemap = Route{
-	Name:        assetsNamePrefix + ".sitemap",
-	Path:        assetsNamePrefix + "/sitemap.xml",
+	Name:        ".sitemap",
+	Path:        "/sitemap.xml",
 	Method:      http.MethodGet,
 	HandlerName: "Sitemap",
 }
