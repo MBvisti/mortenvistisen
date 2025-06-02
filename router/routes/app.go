@@ -12,6 +12,7 @@ var App = []Route{
 	AboutPage,
 	ArticlePage,
 	NewslettersPage,
+	NewsletterPage,
 	Redirect.Route,
 }
 
@@ -41,6 +42,13 @@ var ArticlePage = Route{
 	Path:        "/posts/:articleSlug",
 	Method:      http.MethodGet,
 	HandlerName: "ArticlePage",
+}
+
+var NewsletterPage = Route{
+	Name:        appNamePrefix + ".newsletter_page",
+	Path:        "/newsletters/:newsletterSlug",
+	Method:      http.MethodGet,
+	HandlerName: "NewsletterPage",
 }
 
 var Redirect = redirect{

@@ -23,14 +23,16 @@ import (
 )
 
 const (
-	landingPageCacheKey = "landingPage"
-	articlePageCacheKey = "articlePage--"
+	landingPageCacheKey    = "landingPage"
+	articlePageCacheKey    = "articlePage--"
+	newsletterPageCacheKey = "newsletterPage--"
 )
 
 type App struct {
-	db           psql.Postgres
-	cache        otter.Cache[string, templ.Component]
-	articleCache otter.Cache[string, views.ArticlePageProps]
+	db              psql.Postgres
+	cache           otter.Cache[string, templ.Component]
+	articleCache    otter.Cache[string, views.ArticlePageProps]
+	newsletterCache otter.Cache[string, views.NewsletterPageProps]
 }
 
 func newApp(
@@ -58,7 +60,20 @@ func newApp(
 		panic(err)
 	}
 
-	return App{db, pageCacher, articleCache}
+	newsletterCacheBuilder, err := otter.NewBuilder[string, views.NewsletterPageProps](
+		100,
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	newsletterCache, err := newsletterCacheBuilder.WithTTL(48 * time.Hour).
+		Build()
+	if err != nil {
+		panic(err)
+	}
+
+	return App{db, pageCacher, articleCache, newsletterCache}
 }
 
 func (a App) LandingPage(c echo.Context) error {
@@ -101,15 +116,19 @@ func (a App) NewslettersPage(c echo.Context) error {
 	newslettersByYear := make(map[int][]views.HomeNewsletter)
 	for _, newsletter := range newsletters {
 		year := newsletter.ReleasedAt.Year()
-		newslettersByYear[year] = append(newslettersByYear[year], views.HomeNewsletter{
-			Title:      newsletter.Title,
-			Slug:       newsletter.Slug,
-			ReleasedAt: newsletter.ReleasedAt,
-			Excerpt:    "", // Placeholder for future excerpt field
-		})
+		newslettersByYear[year] = append(
+			newslettersByYear[year],
+			views.HomeNewsletter{
+				Title:      newsletter.Title,
+				Slug:       newsletter.Slug,
+				ReleasedAt: newsletter.ReleasedAt,
+				Excerpt:    "", // Placeholder for future excerpt field
+			},
+		)
 	}
 
-	return views.NewslettersPage(views.Newsletters(newslettersByYear)).Render(renderArgs(c))
+	return views.NewslettersPage(views.Newsletters(newslettersByYear)).
+		Render(renderArgs(c))
 }
 
 func (a App) AboutPage(c echo.Context) error {
@@ -153,6 +172,45 @@ func (a App) ArticlePage(c echo.Context) error {
 	}
 
 	return views.ArticlePage(props).
+		Render(renderArgs(c))
+}
+
+func (a App) NewsletterPage(c echo.Context) error {
+	slug := c.Param("newsletterSlug")
+
+	if value, ok := a.newsletterCache.Get(newsletterPageCacheKey + slug); ok {
+		return views.NewsletterPage(value).
+			Render(renderArgs(c))
+	}
+
+	newsletter, err := models.GetNewsletterBySlug(
+		c.Request().Context(),
+		a.db.Pool,
+		slug,
+	)
+	if err != nil {
+		return err
+	}
+
+	manager := NewManager()
+	content, e := manager.ParseContent(newsletter.Content)
+	if e != nil {
+		return e
+	}
+
+	props := views.NewsletterPageProps{
+		Slug:      slug,
+		MetaTitle: newsletter.Title,
+		MetaDesc:  newsletter.Title, // Using title as meta description since no specific description field
+		Content: views.Newsletter(
+			content,
+			newsletter.Title,
+			newsletter.ReleasedAt,
+			newsletter.UpdatedAt,
+		),
+	}
+
+	return views.NewsletterPage(props).
 		Render(renderArgs(c))
 }
 

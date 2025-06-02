@@ -1,0 +1,39 @@
+package views
+
+import (
+	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
+	"time"
+)
+
+templ Newsletter(content, title string, releasedAt, updatedAt time.Time) {
+	<main class="main">
+		<article class="article-grid">
+			<h1>{ title }</h1>
+			<div class="article-meta">
+				<p>Released: { releasedAt.Format("2006-06-06") }</p>
+				if updatedAt.After(releasedAt) {
+					<p>Updated: { updatedAt.Format("2006-06-06") }</p>
+				}
+				<p>by MBV</p>
+			</div>
+			@unsafe(content)
+		</article>
+	</main>
+}
+
+type NewsletterPageProps struct {
+	Slug      string
+	MetaTitle string
+	MetaDesc  string
+	Content   templ.Component
+}
+
+templ NewsletterPage(props NewsletterPageProps) {
+	@layouts.Base(
+		WithSlug(props.Slug),
+		WithTitle(props.MetaTitle),
+		WithDescription(props.MetaDesc),
+	) {
+		@props.Content
+	}
+}
