@@ -3,12 +3,43 @@ package views
 import (
 	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
 	"github.com/mbvisti/mortenvistisen/router/routes"
+	"time"
+	"fmt"
 )
 
-templ Newsletters() {
+templ NewsletterCard(title, slug, excerpt string, releasedAt time.Time) {
+	<div class="article-card">
+		<h3>{ title }</h3>
+		<p>{ releasedAt.Format("02-01-2006") }</p>
+		<p>
+			if excerpt != "" {
+				{ excerpt }
+			} else {
+				Excerpt coming soon...
+			}
+		</p>
+		<a href={ templ.SafeURL("/newsletters/" + slug) }>Read newsletter</a>
+	</div>
+}
+
+type HomeNewsletter struct {
+	Title      string
+	Slug       string
+	ReleasedAt time.Time
+	Excerpt    string
+}
+
+templ Newsletters(newslettersByYear map[int][]HomeNewsletter) {
 	<main class="container main main--grow">
 		<h1 class="standard-h1">Newsletters, however infrequent</h1>
-		<section class="latest-articles"></section>
+		<section class="latest-articles">
+			for year, newsletters := range newslettersByYear {
+				<h2>{ fmt.Sprintf("%d", year) }</h2>
+				for _, newsletter := range newsletters {
+					@NewsletterCard(newsletter.Title, newsletter.Slug, newsletter.Excerpt, newsletter.ReleasedAt)
+				}
+			}
+		</section>
 	</main>
 }
 

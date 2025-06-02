@@ -19,6 +19,8 @@ Always start by reading the task file (usually task.md if not specified) and cre
 
 Always run: `go fmt ./...`
 
+NEVER test the implementation, that is the responsibility of the user.
+
 ## Development Commands
 
 ### Templates and Assets

@@ -92,11 +92,24 @@ func (a App) LandingPage(c echo.Context) error {
 }
 
 func (a App) NewslettersPage(c echo.Context) error {
-	if value, ok := a.cache.Get(landingPageCacheKey); ok {
-		return views.HomePage(value).Render(renderArgs(c))
+	newsletters, err := models.GetPublishedNewsletters(extractCtx(c), a.db.Pool)
+	if err != nil {
+		return err
 	}
 
-	return views.NewslettersPage(views.Newsletters()).Render(renderArgs(c))
+	// Group newsletters by year
+	newslettersByYear := make(map[int][]views.HomeNewsletter)
+	for _, newsletter := range newsletters {
+		year := newsletter.ReleasedAt.Year()
+		newslettersByYear[year] = append(newslettersByYear[year], views.HomeNewsletter{
+			Title:      newsletter.Title,
+			Slug:       newsletter.Slug,
+			ReleasedAt: newsletter.ReleasedAt,
+			Excerpt:    "", // Placeholder for future excerpt field
+		})
+	}
+
+	return views.NewslettersPage(views.Newsletters(newslettersByYear)).Render(renderArgs(c))
 }
 
 func (a App) AboutPage(c echo.Context) error {
