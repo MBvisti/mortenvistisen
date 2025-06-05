@@ -7,12 +7,14 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
+	"time"
 
 	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/mbvisti/mortenvistisen/clients"
 	"github.com/mbvisti/mortenvistisen/config"
 	"github.com/mbvisti/mortenvistisen/handlers"
 	"github.com/mbvisti/mortenvistisen/handlers/middleware"
+	"github.com/mbvisti/mortenvistisen/models/seeds"
 	"github.com/mbvisti/mortenvistisen/psql"
 	"github.com/mbvisti/mortenvistisen/psql/queue"
 	"github.com/mbvisti/mortenvistisen/psql/queue/workers"
@@ -63,6 +65,20 @@ func migrate(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+
+	seeder := seeds.NewSeeder(pool)
+
+	// Create admin user
+	_, err = seeder.PlantUser(
+		ctx,
+		seeds.WithUserEmailVerifiedAt(time.Now()),
+		seeds.WithUserEmail("admin@mortenvistisen.com"),
+	)
+	if err != nil {
+		return err
+	}
+
+	slog.Info("Created admin user")
 
 	return nil
 }
