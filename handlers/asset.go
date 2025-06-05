@@ -36,12 +36,12 @@ type Assets struct {
 func newAssets(
 	db psql.Postgres,
 ) Assets {
-	sitemapCacheBuilder, err := otter.NewBuilder[string, Sitemap](1)
+	sitemapCacheBuilder, err := otter.NewBuilder[string, Sitemap](100)
 	if err != nil {
 		panic(err)
 	}
 
-	sitemapCache, err := sitemapCacheBuilder.WithTTL(threeInHours).Build()
+	sitemapCache, err := sitemapCacheBuilder.WithTTL(weekInHours).Build()
 	if err != nil {
 		panic(err)
 	}
