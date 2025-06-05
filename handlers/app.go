@@ -103,7 +103,17 @@ func (a App) LandingPage(c echo.Context) error {
 		})
 	}
 
-	return views.HomePage(views.Home(payload)).Render(renderArgs(c))
+	homeComponent := views.Home(payload)
+	if ok := a.cache.Set(landingPageCacheKey, homeComponent); !ok {
+		slog.ErrorContext(
+			c.Request().Context(),
+			"could not set landing page cache",
+			"error",
+			err,
+		)
+	}
+
+	return views.HomePage(homeComponent).Render(renderArgs(c))
 }
 
 func (a App) NewslettersPage(c echo.Context) error {
@@ -169,6 +179,15 @@ func (a App) ArticlePage(c echo.Context) error {
 			article.FirstPublishedAt,
 			article.UpdatedAt,
 		),
+	}
+
+	if ok := a.articleCache.Set(articlePageCacheKey+slug, props); !ok {
+		slog.ErrorContext(
+			c.Request().Context(),
+			"could not set article cache",
+			"error",
+			err,
+		)
 	}
 
 	return views.ArticlePage(props).
