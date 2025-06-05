@@ -37,12 +37,10 @@ templ head(data HeadData) {
 			{ data.Title }
 		</title>
 		<link href={ data.StylesheetHref } rel="stylesheet"/>
-		<link rel="icon" type="image/png" sizes="16x16" href={ routes.Favicon16.Path }/>
-		<link rel="icon" type="image/png" sizes="32x32" href={ routes.Favicon32.Path }/>
 		<meta property="og:type" content={ data.MetaType }/>
 		<meta property="og:title" content={ data.Title }/>
 		<meta property="og:description" content={ data.Description }/>
-		<meta property="og:url" content={ data.Slug }/>
+		<meta property="og:url" content={ fmt.Sprintf("%s/%s", config.Cfg.GetFullDomain(), data.Slug) }/>
 		<meta property="og:site_name" content={ data.Title }/>
 		if data.Image != "" {
 			<meta property="og:image" content={ data.Image }/>
@@ -87,3 +85,6 @@ func SetupHead(ctx context.Context, opts ...HeadDataOption) templ.Component {
 
 	return head(*data)
 }
+
+//<link rel="icon" type="image/png" sizes="16x16" href={ routes.Favicon16.Path }/>
+//<link rel="icon" type="image/png" sizes="32x32" href={ routes.Favicon32.Path }/>

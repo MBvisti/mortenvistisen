@@ -73,25 +73,65 @@ func run(ctx context.Context) error {
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
 
+	var tel *telemetry.Telemetry
 	if cfg.Environment == config.PROD_ENVIRONMENT {
 		if err := migrate(ctx); err != nil {
 			return err
 		}
+
+		t, err := telemetry.New(
+			ctx,
+			AppVersion,
+			&telemetry.StdoutExporter{
+				LogLevel:   slog.LevelDebug,
+				WithTraces: true,
+			},
+			telemetry.NewOtlpHttpTraceExporter(
+				cfg.OtlpEndpoint,
+				false,
+				map[string]string{
+					"Authorization": os.Getenv("TELEMETRY_ALLOY_AUTH"),
+				},
+			),
+			telemetry.NewOtlpHttpMetricExporter(
+				cfg.OtlpEndpoint,
+				false,
+				map[string]string{
+					"Authorization": os.Getenv("TELEMETRY_ALLOY_AUTH"),
+				},
+			),
+		)
+		if err != nil {
+			return fmt.Errorf("failed to initialize telemetry: %w", err)
+		}
+
+		defer func() {
+			if err := t.Shutdown(ctx); err != nil {
+				slog.Error("Failed to shutdown telemetry", "error", err)
+			}
+		}()
+
+		tel = t
 	}
 
-	tel, err := telemetry.New(
-		ctx,
-		AppVersion,
-		&telemetry.StdoutExporter{
-			LogLevel:   slog.LevelDebug,
-			WithTraces: true,
-		},
-		&telemetry.NoopTraceExporter{},
-		&telemetry.NoopMetricExporter{},
-	)
-	if err != nil {
-		return fmt.Errorf("failed to initialize telemetry: %w", err)
+	if cfg.Environment == config.DEV_ENVIRONMENT {
+		t, err := telemetry.New(
+			ctx,
+			AppVersion,
+			&telemetry.StdoutExporter{
+				LogLevel:   slog.LevelDebug,
+				WithTraces: true,
+			},
+			&telemetry.NoopTraceExporter{},
+			&telemetry.NoopMetricExporter{},
+		)
+		if err != nil {
+			return fmt.Errorf("failed to initialize telemetry: %w", err)
+		}
+
+		tel = t
 	}
+
 	if cfg.Environment == config.PROD_ENVIRONMENT {
 		defer func() {
 			if err := tel.Shutdown(ctx); err != nil {
