@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"context"
 	"log/slog"
 	"strings"
 	"time"
@@ -24,22 +23,17 @@ func (m MW) Logging() echo.MiddlewareFunc {
 				return next(c)
 			}
 
-			var ctx context.Context
-			var requestDuration time.Duration
+			ctx := c.Request().Context()
+			start := time.Now()
 
 			m.httpInFlight.Add(ctx, 1)
 
 			wrappedNext := func(c echo.Context) error {
-				ctx = c.Request().Context()
-
-				start := time.Now()
-				err := next(c)
-				requestDuration = time.Since(start)
-
-				return err
+				return next(c)
 			}
 
 			err := otelMiddleware(wrappedNext)(c)
+			requestDuration := time.Since(start)
 
 			m.httpInFlight.Add(ctx, -1)
 
