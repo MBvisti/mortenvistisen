@@ -12,6 +12,6 @@ func newApi() Api {
 	return Api{}
 }
 
-func (a *Api) AppHealth(ctx echo.Context) error {
+func (a Api) Health(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, "app is healthy and running")
 }

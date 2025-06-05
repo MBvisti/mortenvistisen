@@ -10,12 +10,14 @@ COPY . .
 
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w -X main.version=$APP_RELEASE" -mod=readonly -v -o app cmd/app/main.go
 
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -mod=readonly -v -o healthcheck cmd/healthcheck/main.go
+
 FROM scratch
 
 WORKDIR /
 
 COPY --from=build-go /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=build-go app app
-COPY --from=build-go psql psql
+COPY --from=build-go healthcheck healthcheck
 
 CMD ["./app"]

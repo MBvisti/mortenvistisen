@@ -7,11 +7,13 @@ const (
 	apiV1NamePrefix  = "api.v1"
 )
 
-var ApiV1 = []Route{}
+var ApiV1 = []Route{
+	Health,
+}
 
 var Health = Route{
 	Name:        apiV1NamePrefix + ".health",
 	Path:        apiV1RoutePrefix + "/health",
 	Method:      http.MethodGet,
-	HandlerName: "AppHealth",
+	HandlerName: "Health",
 }
