@@ -86,7 +86,7 @@ func run(ctx context.Context) error {
 				LogLevel:   slog.LevelInfo,
 				WithTraces: true,
 				URL:        "https://telemetry-loki-6d4b29c5-c688-4dac-96df-601537fada70.mbvlabs.com/loki/api/v1/push",
-				Labels:     map[string]string{"app": cfg.ServiceName},
+				Labels:     map[string]string{"service": cfg.ServiceName},
 			},
 			telemetry.NewOtlpHttpTraceExporter(
 				cfg.OtlpEndpoint,
