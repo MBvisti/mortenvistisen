@@ -194,12 +194,11 @@ func GetNewslettersPaginated(
 		pageSize = 10
 	}
 	if pageSize > 100 {
-		pageSize = 100 // Limit max page size
+		pageSize = 100
 	}
 
 	offset := (page - 1) * pageSize
 
-	// Get total count
 	totalCount, err := db.Stmts.CountNewsletters(ctx, dbtx)
 	if err != nil {
 		return NewsletterPaginationResult{}, err
@@ -210,10 +209,12 @@ func GetNewslettersPaginated(
 		ctx,
 		dbtx,
 		db.QueryNewslettersPaginatedParams{
-			Limit: int32(pageSize), //nolint:gosec // pageSize is bounded above
+			//nolint:gosec // pageSize is bounded above
+			Limit: int32(pageSize),
+			//nolint:gosec,G115 // offset is calculated from bounded values
 			Offset: int32(
 				offset,
-			), //nolint:gosec,G115 // offset is calculated from bounded values
+			),
 		},
 	)
 	if err != nil {

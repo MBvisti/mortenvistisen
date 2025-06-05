@@ -109,8 +109,9 @@ func WithPublishedArticle() articleSeedOption {
 	return func(asd *articleSeedData) {
 		publishedAt := asd.CreatedAt.Add(
 			time.Duration(
+				//nolint:gosec // G404: Weak random for test data is acceptable
 				rand.IntN(24),
-			) * time.Hour, //nolint:gosec // G404: Weak random for test data is acceptable
+			) * time.Hour,
 		)
 		asd.FirstPublishedAt = publishedAt
 		asd.IsPublised = true
@@ -137,9 +138,8 @@ func (s Seeder) PlantArticle(
 	data := &articleSeedData{
 		ID: uuid.New(),
 		CreatedAt: time.Now().
+			//nolint:gosec // G404: Weak random for test data is acceptable
 			Add(-time.Duration(rand.IntN(365)) * 24 * time.Hour),
-		//nolint:gosec // G404: Weak random for test data is acceptable
-		// Random date in past year
 		UpdatedAt:       time.Now(),
 		Title:           title,
 		Excerpt:         generateExcerpt(),
@@ -150,12 +150,13 @@ func (s Seeder) PlantArticle(
 		ReadTime:        1,
 	}
 
-	// 70% chance of being published
-	if rand.Float32() < 0.7 { //nolint:gosec // G404: Weak random for test data is acceptable
+	//nolint:gosec // G404: Weak random for test data is acceptable
+	if rand.Float32() < 0.7 {
 		publishedAt := data.CreatedAt.Add(
 			time.Duration(
+				//nolint:gosec // G404: Weak random for test data is acceptable
 				rand.IntN(24),
-			) * time.Hour, //nolint:gosec // G404: Weak random for test data is acceptable
+			) * time.Hour,
 		)
 		data.FirstPublishedAt = publishedAt
 		data.IsPublised = true

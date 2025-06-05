@@ -287,10 +287,12 @@ func GetArticlesPaginated(
 		ctx,
 		dbtx,
 		db.QueryArticlesPaginatedParams{
-			Limit: int32(pageSize), //nolint:gosec // pageSize is bounded above
+			//nolint:gosec // pageSize is bounded above
+			Limit: int32(pageSize),
+			//nolint:gosec,G115 // offset is calculated from bounded values
 			Offset: int32(
 				offset,
-			), //nolint:gosec,G115 // offset is calculated from bounded values
+			),
 		},
 	)
 	if err != nil {
