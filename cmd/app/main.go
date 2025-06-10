@@ -83,16 +83,21 @@ func run(ctx context.Context) error {
 			ctx,
 			// AppVersion,
 			"v0.0.0",
-			&telemetry.LokiExporter{
-				LogLevel:   slog.LevelInfo,
+			// &telemetry.LokiExporter{
+			// 	LogLevel:   slog.LevelInfo,
+			// 	WithTraces: true,
+			// 	// URL:        cfg.OtlpEndpoint,
+			// 	URL: "https://telemetry-loki.mbvlabs.com",
+			// 	Labels: map[string]string{
+			// 		"env":          "prod",
+			// 		"service_name": "blog",
+			// 	},
+			// },
+			&telemetry.StdoutExporter{
+				LogLevel:   slog.LevelDebug,
 				WithTraces: true,
-				// URL:        cfg.OtlpEndpoint,
-				URL: "https://telemetry-loki.mbvlabs.com",
-				Labels: map[string]string{
-					"env":          "prod",
-					"service_name": "blog",
-				},
 			},
+
 			&telemetry.NoopTraceExporter{},
 			&telemetry.NoopMetricExporter{},
 			// telemetry.NewOtlpHttpTraceExporter(
