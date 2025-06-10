@@ -93,21 +93,23 @@ func run(ctx context.Context) error {
 					"service_name": "blog",
 				},
 			},
-			telemetry.NewOtlpHttpTraceExporter(
-				// "https://telemetry-tempo.mbvlabs.com",
-				cfg.OtlpEndpoint,
-				false,
-				map[string]string{
-					"Authorization": "Basic Qm9iOmhpY2N1cA==",
-				},
-			),
-			telemetry.NewOtlpHttpMetricExporter(
-				cfg.OtlpEndpoint,
-				false,
-				map[string]string{
-					"Authorization": "Basic Qm9iOmhpY2N1cA==",
-				},
-			),
+			&telemetry.NoopTraceExporter{},
+			&telemetry.NoopMetricExporter{},
+			// telemetry.NewOtlpHttpTraceExporter(
+			// 	// "https://telemetry-tempo.mbvlabs.com",
+			// 	cfg.OtlpEndpoint,
+			// 	false,
+			// 	map[string]string{
+			// 		"Authorization": "Basic Qm9iOmhpY2N1cA==",
+			// 	},
+			// ),
+			// telemetry.NewOtlpHttpMetricExporter(
+			// 	cfg.OtlpEndpoint,
+			// 	false,
+			// 	map[string]string{
+			// 		"Authorization": "Basic Qm9iOmhpY2N1cA==",
+			// 	},
+			// ),
 		)
 		if err != nil {
 			return fmt.Errorf("failed to initialize telemetry: %w", err)
