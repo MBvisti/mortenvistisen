@@ -89,8 +89,8 @@ func run(ctx context.Context) error {
 				// URL:        cfg.OtlpEndpoint,
 				URL: "https://telemetry-loki.mbvlabs.com",
 				Labels: map[string]string{
-					"env":          "staging",
-					"service_name": "blog-staging",
+					"env":     "staging",
+					"service": "blog-staging",
 				},
 			},
 			// &telemetry.StdoutExporter{
@@ -155,6 +155,8 @@ func run(ctx context.Context) error {
 			}
 		}()
 	}
+
+	slog.Info("THIS IS SERVICE NAME", "name", cfg.ServiceName)
 
 	if err := telemetry.SetupRuntimeMetricsInCallback(telemetry.GetMeter()); err != nil {
 		return fmt.Errorf("failed to setup callback metrics: %w", err)
