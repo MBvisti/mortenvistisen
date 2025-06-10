@@ -38,6 +38,8 @@ func New(
 	router.Debug = true
 
 	router.Use(
+		//nolint:contextcheck // not needed here
+		mw.Logging(),
 		session.Middleware(
 			sessions.NewCookieStore([]byte(config.Cfg.SessionEncryptionKey)),
 		),
@@ -66,11 +68,6 @@ func New(
 			CookieHTTPOnly: true,
 			CookieSameSite: http.SameSiteStrictMode,
 		}),
-	)
-
-	router.Use(
-		//nolint:contextcheck // not needed here
-		mw.Logging(),
 		echomw.Recover(),
 	)
 

@@ -23,6 +23,9 @@ func (m MW) Logging() echo.MiddlewareFunc {
 			if strings.Contains(c.Request().URL.Path, "/assets/") {
 				return next(c)
 			}
+			if strings.Contains(c.Request().URL.Path, "/api/v1/health") {
+				return next(c)
+			}
 
 			var ctx context.Context
 			start := time.Now()
@@ -32,16 +35,12 @@ func (m MW) Logging() echo.MiddlewareFunc {
 			wrappedNext := func(c echo.Context) error {
 				ctx = c.Request().Context()
 
-				// start := time.Now()
 				err := next(c)
-				// requestDuration = time.Since(start)
 
 				return err
 			}
 
 			err := otelMiddleware(wrappedNext)(c)
-
-			requestDuration := time.Since(start)
 
 			m.httpInFlight.Add(ctx, -1)
 
@@ -59,6 +58,7 @@ func (m MW) Logging() echo.MiddlewareFunc {
 				metric.WithAttributes(attrs...),
 			)
 
+			requestDuration := time.Since(start)
 			m.httpDuration.Record(
 				ctx,
 				requestDuration.Seconds(),
