@@ -46,7 +46,7 @@ func (o *OtlpHttpMetricExporter) GetSdkMetricExporter(
 	opts := []otlpmetrichttp.Option{
 		otlpmetrichttp.WithEndpoint(endpoint),
 		otlpmetrichttp.WithURLPath(
-			"/v1/metrics",
+			"/ingestor/v1/metrics",
 		),
 	}
 	if len(o.headers) > 0 {

@@ -81,28 +81,31 @@ func run(ctx context.Context) error {
 
 		t, err := telemetry.New(
 			ctx,
-			AppVersion,
+			// AppVersion,
+			"v0.0.0",
 			&telemetry.LokiExporter{
 				LogLevel:   slog.LevelInfo,
 				WithTraces: true,
-				URL:        "https://telemetry-loki-6d4b29c5-c688-4dac-96df-601537fada70.mbvlabs.com/loki/api/v1/push",
+				// URL:        cfg.OtlpEndpoint,
+				URL: "https://telemetry-loki.mbvlabs.com",
 				Labels: map[string]string{
-					"service": cfg.ServiceName,
-					"version": AppVersion,
+					"env":          "prod",
+					"service_name": "blog",
 				},
 			},
 			telemetry.NewOtlpHttpTraceExporter(
+				// "https://telemetry-tempo.mbvlabs.com",
 				cfg.OtlpEndpoint,
 				false,
 				map[string]string{
-					"Authorization": os.Getenv("TELEMETRY_ALLOY_AUTH"),
+					"Authorization": "Basic Qm9iOmhpY2N1cA==",
 				},
 			),
 			telemetry.NewOtlpHttpMetricExporter(
 				cfg.OtlpEndpoint,
 				false,
 				map[string]string{
-					"Authorization": os.Getenv("TELEMETRY_ALLOY_AUTH"),
+					"Authorization": "Basic Qm9iOmhpY2N1cA==",
 				},
 			),
 		)

@@ -45,7 +45,7 @@ func (o *OtlpHttpTraceExporter) GetSpanExporter(
 	opts := []otlptracehttp.Option{
 		otlptracehttp.WithEndpoint(endpoint),
 		otlptracehttp.WithURLPath(
-			"/v1/traces",
+			"/ingestor/v1/traces",
 		),
 	}
 	if len(o.headers) > 0 {

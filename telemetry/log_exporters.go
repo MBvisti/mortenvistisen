@@ -77,7 +77,7 @@ func (l *LokiExporter) GetSlogHandler(
 	}
 
 	handler := &lokiHandler{
-		url:        l.URL,
+		url:        l.URL + "/loki/api/v1/push",
 		httpClient: l.httpClient,
 		logLevel:   l.LogLevel,
 		labels:     l.Labels,
@@ -179,6 +179,7 @@ func (h *lokiHandler) sendToLoki(
 	}
 
 	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("Authorization", "Basic Qm9iOmhpY2N1cA==")
 
 	resp, err := h.httpClient.Do(httpReq)
 	if err != nil {
