@@ -6,7 +6,6 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/mbvisti/mortenvistisen/config"
 	"go.opentelemetry.io/otel"
 	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
@@ -30,7 +29,7 @@ func New(
 ) (*Telemetry, error) {
 	res, err := resource.New(ctx,
 		resource.WithAttributes(
-			semconv.ServiceName(config.Cfg.ServiceName),
+			semconv.ServiceName("blog-staging"),
 			semconv.ServiceVersion(svcVersion),
 		),
 	)
