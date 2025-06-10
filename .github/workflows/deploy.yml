@@ -31,3 +31,10 @@ jobs:
             mbvofdocker/thelab:mbv-blog-latest
             mbvofdocker/thelab:mbv-blog-${{ github.sha }}
           platforms: linux/amd64
+
+      - name: Deploy with apps-manager
+        run: |
+          curl -X PUT https://apps-manager.mbvlabs.com/services/blog/deploy \
+            -u manager:password \
+            -H "Content-Type: application/json" \
+            -d '{"is_private": true}'

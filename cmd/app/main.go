@@ -83,38 +83,38 @@ func run(ctx context.Context) error {
 			ctx,
 			// AppVersion,
 			"v0.0.0",
-			// &telemetry.LokiExporter{
-			// 	LogLevel:   slog.LevelInfo,
-			// 	WithTraces: true,
-			// 	// URL:        cfg.OtlpEndpoint,
-			// 	URL: "https://telemetry-loki.mbvlabs.com",
-			// 	Labels: map[string]string{
-			// 		"env":          "prod",
-			// 		"service_name": "blog",
-			// 	},
-			// },
-			&telemetry.StdoutExporter{
-				LogLevel:   slog.LevelDebug,
+			&telemetry.LokiExporter{
+				LogLevel:   slog.LevelInfo,
 				WithTraces: true,
+				// URL:        cfg.OtlpEndpoint,
+				URL: "https://telemetry-loki.mbvlabs.com",
+				Labels: map[string]string{
+					"env":          "prod",
+					"service_name": "blog",
+				},
 			},
+			// &telemetry.StdoutExporter{
+			// 	LogLevel:   slog.LevelDebug,
+			// 	WithTraces: true,
+			// },
 
-			&telemetry.NoopTraceExporter{},
-			&telemetry.NoopMetricExporter{},
-			// telemetry.NewOtlpHttpTraceExporter(
-			// 	// "https://telemetry-tempo.mbvlabs.com",
-			// 	cfg.OtlpEndpoint,
-			// 	false,
-			// 	map[string]string{
-			// 		"Authorization": "Basic Qm9iOmhpY2N1cA==",
-			// 	},
-			// ),
-			// telemetry.NewOtlpHttpMetricExporter(
-			// 	cfg.OtlpEndpoint,
-			// 	false,
-			// 	map[string]string{
-			// 		"Authorization": "Basic Qm9iOmhpY2N1cA==",
-			// 	},
-			// ),
+			// &telemetry.NoopTraceExporter{},
+			// &telemetry.NoopMetricExporter{},
+			telemetry.NewOtlpHttpTraceExporter(
+				// "https://telemetry-tempo.mbvlabs.com",
+				cfg.OtlpEndpoint,
+				false,
+				map[string]string{
+					"Authorization": "Basic Qm9iOmhpY2N1cA==",
+				},
+			),
+			telemetry.NewOtlpHttpMetricExporter(
+				cfg.OtlpEndpoint,
+				false,
+				map[string]string{
+					"Authorization": "Basic Qm9iOmhpY2N1cA==",
+				},
+			),
 		)
 		if err != nil {
 			return fmt.Errorf("failed to initialize telemetry: %w", err)
