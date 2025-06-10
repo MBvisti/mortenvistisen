@@ -89,8 +89,8 @@ func run(ctx context.Context) error {
 				// URL:        cfg.OtlpEndpoint,
 				URL: "https://telemetry-loki.mbvlabs.com",
 				Labels: map[string]string{
-					"env":          "prod",
-					"service_name": "blog",
+					"env":          "staging",
+					"service_name": "blog-staging",
 				},
 			},
 			// &telemetry.StdoutExporter{
@@ -101,15 +101,16 @@ func run(ctx context.Context) error {
 			// &telemetry.NoopTraceExporter{},
 			// &telemetry.NoopMetricExporter{},
 			telemetry.NewOtlpHttpTraceExporter(
-				// "https://telemetry-tempo.mbvlabs.com",
-				cfg.OtlpEndpoint,
+				"telemetry-alloy.mbvlabs.com",
+				// cfg.OtlpEndpoint,
 				false,
 				map[string]string{
 					"Authorization": "Basic Qm9iOmhpY2N1cA==",
 				},
 			),
 			telemetry.NewOtlpHttpMetricExporter(
-				cfg.OtlpEndpoint,
+				"telemetry-alloy.mbvlabs.com",
+				// cfg.OtlpEndpoint,
 				false,
 				map[string]string{
 					"Authorization": "Basic Qm9iOmhpY2N1cA==",
