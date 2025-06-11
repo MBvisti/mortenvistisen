@@ -70,7 +70,7 @@ func InputField(title, fieldType, fieldName, placeholder string, attributes temp
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var3 = []any{"input input-bordered w-full", templ.KV("input-error", len(props.ErrorMsgs) > 0)}
+		var templ_7745c5c3_Var3 = []any{"border rounded w-full p-2 bg-base-200", templ.KV("input-error", len(props.ErrorMsgs) > 0)}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var3...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err

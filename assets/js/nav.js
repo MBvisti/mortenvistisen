@@ -1,17 +1,17 @@
 function toggleMobileNav() {
 	const sidebar = document.getElementById('sidebar');
-	const overlay = document.querySelector('.sidebar-overlay');
+	const overlay = document.getElementById('sidebar-overlay');
 
-	sidebar.classList.toggle('open');
-	overlay.classList.toggle('open');
+	sidebar.classList.toggle('-translate-x-full');
+	overlay.classList.toggle('hidden');
 }
 
 function closeMobileNav() {
 	const sidebar = document.getElementById('sidebar');
-	const overlay = document.querySelector('.sidebar-overlay');
+	const overlay = document.getElementById('sidebar-overlay');
 
-	sidebar.classList.remove('open');
-	overlay.classList.remove('open');
+	sidebar.classList.add('-translate-x-full');
+	overlay.classList.add('hidden');
 }
 
 document.addEventListener('DOMContentLoaded', function() {

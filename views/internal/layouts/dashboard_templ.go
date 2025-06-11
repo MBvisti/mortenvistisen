@@ -66,34 +66,15 @@ func Dashboard() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" type=\"module\"></script></head><body><!-- Mobile Navigation Toggle --><button class=\"mobile-nav-toggle\" onclick=\"toggleMobileNav()\">☰</button><!-- Sidebar Overlay for Mobile --><div class=\"sidebar-overlay\" onclick=\"closeMobileNav()\"></div><div class=\"dashboard-layout\"><!-- Sidebar --><aside class=\"dashboard-sidebar\" id=\"sidebar\"><div class=\"sidebar-header\"><h2 class=\"sidebar-title\">Grafto</h2></div><nav><ul class=\"sidebar-nav\"><li class=\"nav-item\"><a href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" type=\"module\"></script></head><body class=\"max-h-screen bg-base-100 text-base-content\"><!-- Mobile Navigation Toggle --><button class=\"lg:hidden fixed top-4 left-4 z-50 bg-primary text-primary-content border-0 rounded px-3 py-2 cursor-pointer text-lg hover:opacity-90\" onclick=\"toggleMobileNav()\">☰</button><!-- Sidebar Overlay for Mobile --><div class=\"fixed inset-0 bg-black/50 z-40 lg:hidden hidden\" id=\"sidebar-overlay\" onclick=\"closeMobileNav()\"></div><div class=\"h-screen bg-base-100 lg:grid lg:grid-cols-[280px_1fr]\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var4 templ.SafeURL = templ.SafeURL(routes.DashboardHome.Path)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var4)))
+		templ_7745c5c3_Err = components.SideBar().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" class=\"nav-link active\"><span class=\"nav-icon\">📊</span> Dashboard</a></li><li class=\"nav-item\"><a href=\"/dashboard/tags\" class=\"nav-link\"><span class=\"nav-icon\">🏷️</span> Tags</a></li><li class=\"nav-item\"><a href=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var5 templ.SafeURL = templ.SafeURL(routes.DashboardNewsletters.Path)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var5)))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" class=\"nav-link\"><span class=\"nav-icon\">📰</span> Newsletters</a></li><li class=\"nav-item\"><a href=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var6 templ.SafeURL = templ.SafeURL(routes.DashboardSubscribers.Path)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var6)))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" class=\"nav-link\"><span class=\"nav-icon\">📧</span> Subscribers</a></li></ul></nav></aside><!-- Main Content --><main class=\"dashboard-main\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<!-- Main Content --><main class=\"p-6 lg:p-8 overflow-y-auto lg:pt-6 pt-20 h-screen\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -101,7 +82,7 @@ func Dashboard() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</main><div class=\"toast-container\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</main><div class=\"fixed bottom-4 right-10 z-50 space-y-2\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -111,20 +92,20 @@ func Dashboard() templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div></div><script type=\"text/javascript\" src=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div></div><script type=\"text/javascript\" src=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var7 string
-		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(config.Cfg.GetFullDomain() + "/" + routes.JsNav.Path)
+		var templ_7745c5c3_Var4 string
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(config.Cfg.GetFullDomain() + "/" + routes.JsNav.Path)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/layouts/dashboard.templ`, Line: 74, Col: 92}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/layouts/dashboard.templ`, Line: 41, Col: 92}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\">\n\t\t\t</script></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\">\n\t\t\t</script></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -132,28 +113,4 @@ func Dashboard() templ.Component {
 	})
 }
 
-// <li class="nav-item">
-//
-//	<a href={ templ.SafeURL(routes.DashboardArticles.Path) } class="nav-link">
-//		<span class="nav-icon">📝</span>
-//		Articles
-//	</a>
-//
-// </li>
-// <li class="nav-item">
-//
-//	<a href={ templ.SafeURL(routes.DashboardAnalytics.Path) } class="nav-link">
-//		<span class="nav-icon">📈</span>
-//		Analytics
-//	</a>
-//
-// </li>
-// <li class="nav-item">
-//
-//	<a href={ templ.SafeURL(routes.DashboardSettings.Path) } class="nav-link">
-//		<span class="nav-icon">⚙️</span>
-//		Settings
-//	</a>
-//
-// </li>
 var _ = templruntime.GeneratedTemplate

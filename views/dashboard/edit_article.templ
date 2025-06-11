@@ -39,20 +39,18 @@ type ArticleTagOption struct {
 
 templ EditArticle(formData EditArticleFormData) {
 	@layouts.Dashboard() {
-		<div class="dashboard-header">
-			<div class="header-content">
-				<h1 class="dashboard-title">Edit Article</h1>
+		<div class="container mx-auto">
+			<div class="flex justify-between h-22">
+				<h1 class="text-base-content text-2xl font-bold">Create New Article</h1>
 				<div class="header-actions">
-					<a href={ templ.SafeURL(routes.DashboardHome.Path) } class="btn-secondary">← Back to Dashboard</a>
+					@components.Link("← Back to Dashboard", routes.DashboardHome.Path)
 				</div>
 			</div>
-		</div>
-		<div class="article-form-container">
-			<form method="POST" action={ templ.URL("/dashboard/articles/" + formData.ID + "/edit") } class="article-form">
-				<div class="form-section">
-					<h2 class="section-title">Article Information</h2>
-					<div class="form-grid">
-						<div class="form-row">
+			<div class="flex flex-col">
+				<form method="POST" action={ templ.URL("/dashboard/articles/" + formData.ID + "/edit") } class="article-form">
+					<div>
+						<h2 class="text-xl font-semibold mb-4">Article Information</h2>
+						<div class="grid grid-cols-2 gap-4">
 							@components.InputField(
 								"Title",
 								"text",
@@ -64,8 +62,6 @@ templ EditArticle(formData EditArticleFormData) {
 									ErrorMsgs: formData.Errors["title"],
 								},
 							)
-						</div>
-						<div class="form-row">
 							@components.InputField(
 								"Slug",
 								"text",
@@ -77,49 +73,6 @@ templ EditArticle(formData EditArticleFormData) {
 									ErrorMsgs: formData.Errors["slug"],
 								},
 							)
-						</div>
-						<div class="form-row">
-							<label class="form-control w-full">
-								<div class="label">
-									<span class="label-text md:text-lg">Excerpt</span>
-								</div>
-								<textarea
-									class={ "textarea textarea-bordered w-full", templ.KV("textarea-error", len(formData.Errors["excerpt"]) > 0) }
-									name="excerpt"
-									placeholder="Brief description of the article"
-									rows="3"
-									maxlength="255"
-									data-bind-excerpt
-									required
-								>{ formData.Excerpt }</textarea>
-								<div data-show="$excerpt.length != 0" style="display: flex; color: white; border: 1px solid white;">
-									<p>Excerpt length: </p>
-									<p data-text="$excerpt.length"></p>
-									<p>/130 </p>
-								</div>
-								if formData.Errors["excerpt"] != nil {
-									<div class="label">
-										for _, errMsg := range formData.Errors["excerpt"] {
-											<span class="label-text-alt">{ components.UppercaseFirstWord(errMsg) }</span>
-										}
-									</div>
-								}
-							</label>
-						</div>
-						<div class="form-row">
-							@components.InputField(
-								"Featured Image URL",
-								"url",
-								"image_link",
-								"https://example.com/image.jpg",
-								templ.Attributes{"maxlength": "255"},
-								components.InputFieldProps{
-									Value:     formData.ImageLink,
-									ErrorMsgs: formData.Errors["image_link"],
-								},
-							)
-						</div>
-						<div class="form-row">
 							@components.InputField(
 								"Read Time (minutes)",
 								"number",
@@ -131,13 +84,48 @@ templ EditArticle(formData EditArticleFormData) {
 									ErrorMsgs: formData.Errors["read_time"],
 								},
 							)
-						</div>
-						<div class="form-row">
-							<label class="form-control w-full">
+							@components.InputField(
+								"Featured Image URL",
+								"url",
+								"image_link",
+								"https://example.com/image.jpg",
+								templ.Attributes{"maxlength": "255"},
+								components.InputFieldProps{
+									Value:     formData.ImageLink,
+									ErrorMsgs: formData.Errors["image_link"],
+								},
+							)
+							<label class="col-span-2">
+								<div class="label">
+									<span class="label-text md:text-lg">Excerpt</span>
+								</div>
+								<textarea
+									class={ "border rounded w-full p-2 bg-base-200", templ.KV("textarea-error", len(formData.Errors["excerpt"]) > 0) }
+									name="excerpt"
+									placeholder="Brief description of the article"
+									rows="3"
+									maxlength="255"
+									data-bind-excerpt
+									required
+								>{ formData.Excerpt }</textarea>
+								<div data-show="$excerpt.length != 0" class="my-2 text-base-content flex">
+									<p class="font-bold mr-2">Excerpt length: </p>
+									<p data-text="$excerpt.length"></p>
+									<p>/130 </p>
+								</div>
+								if formData.Errors["excerpt"] != nil {
+									<div class="label">
+										for _, errMsg := range formData.Errors["excerpt"] {
+											<span class="label-text-alt">{ components.UppercaseFirstWord(errMsg) }</span>
+										}
+									</div>
+								}
+							</label>
+							<label class="col-span-2 mb-6">
 								<div class="label">
 									<span class="label-text md:text-lg">Tags</span>
 								</div>
-								<div class="tags-selection">
+								<div class="grid grid-cols-6 gap-4 border rounded p-4 bg-base-200">
 									for _, tag := range formData.AvailableTags {
 										<label class="tag-checkbox">
 											<input
@@ -162,76 +150,88 @@ templ EditArticle(formData EditArticleFormData) {
 							</label>
 						</div>
 					</div>
-				</div>
-				<div class="form-section">
-					<h2 class="section-title">SEO Metadata</h2>
-					<div class="form-grid">
-						<div class="form-row">
-							@components.InputField(
-								"Meta Title",
-								"text",
-								"meta_title",
-								"SEO title for search engines",
-								templ.Attributes{"required": true, "maxlength": "100"},
-								components.InputFieldProps{
-									Value:     formData.MetaTitle,
-									ErrorMsgs: formData.Errors["meta_title"],
-								},
-							)
-						</div>
-						<div class="form-row">
-							<label class="form-control w-full">
-								<div class="label">
-									<span class="label-text md:text-lg">Meta Description</span>
+					<div>
+						<h2 class="text-xl font-semibold mb-4">SEO Metadata</h2>
+						<div class="grid grid-cols-2 gap-4 mb-6">
+							<div class="col-span-2">
+								@components.InputField(
+									"Meta Title",
+									"text",
+									"meta_title",
+									"SEO title for search engines",
+									templ.Attributes{
+										"required":            true,
+										"maxlength":           "100",
+										"data-bind-metatitle": "",
+									},
+									components.InputFieldProps{
+										Value:     formData.MetaTitle,
+										ErrorMsgs: formData.Errors["meta_title"],
+									},
+								)
+								<div data-show="$metatitle.length != 0" class="my-2 text-base-content flex">
+									<p class="font-bold mr-2">Title length: </p>
+									<p data-text="$metatitle.length"></p>
+									<p>/130 </p>
 								</div>
-								<textarea
-									class={ "textarea textarea-bordered w-full", templ.KV("textarea-error", len(formData.Errors["meta_description"]) > 0) }
-									name="meta_description"
-									placeholder="SEO description for search engines"
-									rows="2"
-									maxlength="100"
-									required
-								>{ formData.MetaDescription }</textarea>
-								if formData.Errors["meta_description"] != nil {
+							</div>
+							<div class="col-span-2">
+								<label class="form-control w-full">
 									<div class="label">
-										for _, errMsg := range formData.Errors["meta_description"] {
-											<span class="label-text-alt">{ components.UppercaseFirstWord(errMsg) }</span>
-										}
+										<span class="label-text md:text-lg">Meta Description</span>
 									</div>
-								}
-							</label>
+									<textarea
+										class={ "border rounded w-full p-2 bg-base-200 h-20", templ.KV("textarea-error", len(formData.Errors["meta_description"]) > 0) }
+										name="meta_description"
+										placeholder="SEO description for search engines"
+										rows="2"
+										maxlength="100"
+										data-bind-metadesc
+										required
+									>{ formData.MetaDescription }</textarea>
+									if formData.Errors["meta_description"] != nil {
+										<div class="label">
+											for _, errMsg := range formData.Errors["meta_description"] {
+												<span class="label-text-alt">{ components.UppercaseFirstWord(errMsg) }</span>
+											}
+										</div>
+									}
+								</label>
+								<div data-show="$metadesc.length != 0" class="my-2 text-base-content flex">
+									<p class="font-bold mr-2">Desc length: </p>
+									<p data-text="$metadesc.length"></p>
+									<p>/130 </p>
+								</div>
+							</div>
 						</div>
 					</div>
-				</div>
-				<div class="form-section">
-					<h2 class="section-title">Article Content</h2>
-					<div class="easymde-editor-container">
-						<textarea id="editorTarget" name="content">{ formData.Content }</textarea>
+					<div class="mt-6">
+						<div class="mb-6">
+							<h2 class="text-xl font-semibold mb-4">Article Content</h2>
+							<textarea id="editorTarget" name="content">{ formData.Content }</textarea>
+						</div>
 					</div>
-				</div>
-				<div class="form-actions">
-					<input
-						name="published"
-						type="checkbox"
-						if formData.IsPublished {
-							checked="checked"
-						}
-					/>
-				</div>
-				<div class="form-actions">
-					<button type="submit" class="btn-secondary">
-						Update
-					</button>
-				</div>
-			</form>
-			<script type="module" src={ config.Cfg.GetFullDomain() + "/" + routes.JsEasyMDE.Path }></script>
+					<div class="flex justify-end">
+						<span class="flex items-center">
+							<p>
+								Publish: 
+							</p>
+							<input
+								name="published"
+								type="checkbox"
+								class="ml-4"
+								if formData.IsPublished {
+									checked="checked"
+								}
+							/>
+						</span>
+						<button type="submit" class="ml-6 px-4 py-2 border rounded bg-primary text-black">
+							Update
+						</button>
+					</div>
+				</form>
+				<script type="module" src={ config.Cfg.GetFullDomain() + "/" + routes.JsEasyMDE.Path }></script>
+			</div>
 		</div>
 	}
 }
-
-//<button type="submit" name="action" value="save_draft" class="btn-secondary">
-//	Save as Draft
-//</button>
-//<button type="submit" name="action" value="publish" class="btn-primary">
-//	Publish Article
-//</button>

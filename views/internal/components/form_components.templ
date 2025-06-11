@@ -31,7 +31,7 @@ templ InputField(title, fieldType, fieldName, placeholder string, attributes tem
 		</div>
 		<input
 			{ attributes... }
-			class={ "input input-bordered w-full", templ.KV("input-error", len(props.ErrorMsgs)> 0) }
+			class={ "border rounded w-full p-2 bg-base-200", templ.KV("input-error", len(props.ErrorMsgs)> 0) }
 			type={ fieldType }
 			placeholder={ placeholder }
 			value={ props.Value }

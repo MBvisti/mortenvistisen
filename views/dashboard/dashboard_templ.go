@@ -72,7 +72,46 @@ func Home(result models.PaginationResult) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"dashboard-header\"><h1 class=\"dashboard-title\">Dashboard</h1><div class=\"user-info\">Welcome back, Admin</div></div><!-- Statistics Cards --> <div class=\"stats-grid\"><div class=\"stat-card\"><p class=\"stat-label\">Total Articles</p></div><div class=\"stat-card\"><h3 class=\"stat-number\">18</h3><p class=\"stat-label\">Published</p></div><div class=\"stat-card\"><h3 class=\"stat-number\">6</h3><p class=\"stat-label\">Drafts</p></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"flex justify-between items-center mb-8 pb-4 border-b border-base-300\"><h1 class=\"text-base-content text-3xl font-semibold m-0\">Dashboard</h1><div class=\"text-base-content text-sm\">Welcome back, Admin</div></div><!-- Statistics Cards --> <div class=\"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8\"><div class=\"bg-base-200 border border-base-300 rounded-lg p-6 text-center shadow-sm hover:shadow-md transition-shadow\"><h3 class=\"text-4xl font-bold text-primary mb-2 m-0\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var3 string
+			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", result.TotalCount))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/dashboard.templ`, Line: 45, Col: 95}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</h3><p class=\"text-base-content text-sm font-medium m-0\">Total Articles</p></div><div class=\"bg-base-200 border border-base-300 rounded-lg p-6 text-center shadow-sm hover:shadow-md transition-shadow\"><h3 class=\"text-4xl font-bold text-primary mb-2 m-0\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var4 string
+			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", countPublishedArticles(result.Articles)))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/dashboard.templ`, Line: 49, Col: 117}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</h3><p class=\"text-base-content text-sm font-medium m-0\">Published</p></div><div class=\"bg-base-200 border border-base-300 rounded-lg p-6 text-center shadow-sm hover:shadow-md transition-shadow\"><h3 class=\"text-4xl font-bold text-primary mb-2 m-0\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var5 string
+			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", countDraftArticles(result.Articles)))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/dashboard.templ`, Line: 53, Col: 113}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</h3><p class=\"text-base-content text-sm font-medium m-0\">Drafts</p></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -99,7 +138,7 @@ func Home(result models.PaginationResult) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, " ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -115,6 +154,26 @@ func Home(result models.PaginationResult) templ.Component {
 		}
 		return nil
 	})
+}
+
+func countPublishedArticles(articles []models.Article) int {
+	count := 0
+	for _, article := range articles {
+		if article.IsPublished {
+			count++
+		}
+	}
+	return count
+}
+
+func countDraftArticles(articles []models.Article) int {
+	count := 0
+	for _, article := range articles {
+		if !article.IsPublished {
+			count++
+		}
+	}
+	return count
 }
 
 var _ = templruntime.GeneratedTemplate

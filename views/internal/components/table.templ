@@ -47,42 +47,46 @@ templ Table(
 	actionBtn ActionBtn,
 	config TableConfig,
 ) {
-	<div class="articles-section">
-		<div class="section-header">
-			<h2 class="section-title">{ title }</h2>
+	<div class="bg-base-200 border border-base-300 rounded-lg overflow-hidden shadow-sm">
+		<div class="px-6 py-4 border-b border-base-300 flex justify-between items-center">
+			<h2 class="text-base-content text-lg font-semibold m-0">{ title }</h2>
 			if actionBtn.Title != "" {
-				<div class="header-actions">
-					<a href={ templ.SafeURL(actionBtn.Route.Path) } class="btn-primary">{ actionBtn.Title }</a>
+				<div class="flex gap-4">
+					<a href={ templ.SafeURL(actionBtn.Route.Path) } class="bg-primary text-primary-content border-0 px-4 py-2 rounded text-sm font-medium cursor-pointer no-underline inline-block hover:opacity-90 transition-opacity">{ actionBtn.Title }</a>
 				</div>
 			}
 		</div>
-		<table class="articles-table">
+		<table class="w-full border-collapse">
 			<thead>
 				<tr>
 					for _, header := range headers {
-						<th>{ header }</th>
+						<th class="bg-base-300 text-base-content font-semibold text-sm px-6 py-4 text-left border-b border-base-300">{ header }</th>
 					}
 				</tr>
 			</thead>
 			<tbody>
 				if len(tableRowElements) == 0 {
 					<tr>
-						<td colspan="5" class="text-center">No elements found</td>
+						<td colspan="5" class="text-center text-base-content px-6 py-4 border-b border-base-300">No elements found</td>
 					</tr>
 				}
 				for id, rowElements := range tableRowElements {
 					<tr>
 						for _, element := range rowElements {
 							<td
-								if element.Hightlight != "" {
-									class={ element.Hightlight }
+								class="text-base-content px-6 py-4 border-b border-base-300"
+								if element.Hightlight == "status-published" {
+									class="text-success px-6 py-4 border-b border-base-300"
+								}
+								if element.Hightlight == "status-draft" {
+									class="text-warning px-6 py-4 border-b border-base-300"
 								}
 							>{ element.Title }</td>
 						}
-						<td>
-							<div class="action-buttons">
+						<td class="text-base-content px-6 py-4 border-b border-base-300">
+							<div class="flex gap-2">
 								if config.EditURLPattern != "" {
-									<a href={ templ.URL(fmt.Sprintf(config.EditURLPattern, id.String())) } class="btn-sm btn-secondary">Edit</a>
+									<a href={ templ.URL(fmt.Sprintf(config.EditURLPattern, id.String())) } class="bg-base-300 text-base-content border-0 px-3 py-1 text-xs rounded cursor-pointer no-underline inline-block hover:bg-base-300/80 transition-colors">Edit</a>
 								}
 							</div>
 						</td>
@@ -91,23 +95,23 @@ templ Table(
 			</tbody>
 		</table>
 		if pagination.TotalPages > 1 {
-			<div class="pagination-container">
-				<div class="pagination">
+			<div class="px-6 py-4 border-t border-base-300 flex justify-between items-center flex-wrap gap-4">
+				<div class="flex gap-2 items-center">
 					if pagination.HasPrevious {
-						<a href={ templ.URL("?page=" + fmt.Sprintf("%d", pagination.Page-1)) } class="pagination-btn">← Previous</a>
+						<a href={ templ.URL("?page=" + fmt.Sprintf("%d", pagination.Page-1)) } class="px-3 py-2 border border-base-300 bg-base-200 text-base-content no-underline rounded text-sm transition-all hover:bg-primary hover:text-primary-content hover:border-primary">← Previous</a>
 					}
 					for i := 1; i <= pagination.TotalPages; i++ {
 						if i == pagination.Page {
-							<span class="pagination-btn pagination-current">{ fmt.Sprintf("%d", i) }</span>
+							<span class="px-3 py-2 border border-primary bg-primary text-primary-content rounded text-sm">{ fmt.Sprintf("%d", i) }</span>
 						} else {
-							<a href={ templ.URL("?page=" + fmt.Sprintf("%d", i)) } class="pagination-btn">{ fmt.Sprintf("%d", i) }</a>
+							<a href={ templ.URL("?page=" + fmt.Sprintf("%d", i)) } class="px-3 py-2 border border-base-300 bg-base-200 text-base-content no-underline rounded text-sm transition-all hover:bg-primary hover:text-primary-content hover:border-primary">{ fmt.Sprintf("%d", i) }</a>
 						}
 					}
 					if pagination.HasNext {
-						<a href={ templ.URL("?page=" + fmt.Sprintf("%d", pagination.Page+1)) } class="pagination-btn">Next →</a>
+						<a href={ templ.URL("?page=" + fmt.Sprintf("%d", pagination.Page+1)) } class="px-3 py-2 border border-base-300 bg-base-200 text-base-content no-underline rounded text-sm transition-all hover:bg-primary hover:text-primary-content hover:border-primary">Next →</a>
 					}
 				</div>
-				<div class="pagination-info">
+				<div class="text-base-content text-sm">
 					Showing { fmt.Sprintf("%d", (pagination.Page-1)*pagination.PageSize+1) } to { fmt.Sprintf("%d", min(pagination.Page*pagination.PageSize, int(pagination.TotalCount))) } of { fmt.Sprintf("%d", pagination.TotalCount) } items
 				</div>
 			</div>
