@@ -2,17 +2,27 @@ package handlers
 
 import (
 	"bytes"
+	"context"
 	"embed"
+	"encoding/json"
+	"errors"
+	"fmt"
 	"log/slog"
+	"net/http"
+	"net/url"
+	"strings"
 	"time"
 
 	"github.com/a-h/templ"
 	chromahtml "github.com/alecthomas/chroma/v2/formatters/html"
 	"github.com/labstack/echo/v4"
 	"github.com/maypok86/otter"
+	"github.com/mbvisti/mortenvistisen/config"
 	"github.com/mbvisti/mortenvistisen/models"
 	"github.com/mbvisti/mortenvistisen/psql"
 	"github.com/mbvisti/mortenvistisen/router/routes"
+	"github.com/mbvisti/mortenvistisen/services"
+	"github.com/mbvisti/mortenvistisen/views/fragments"
 
 	"github.com/mbvisti/mortenvistisen/views"
 	"github.com/yuin/goldmark"
@@ -73,7 +83,12 @@ func newApp(
 		panic(err)
 	}
 
-	return App{db, pageCacher, articleCache, newsletterCache}
+	return App{
+		db:              db,
+		cache:           pageCacher,
+		articleCache:    articleCache,
+		newsletterCache: newsletterCache,
+	}
 }
 
 func (a App) LandingPage(c echo.Context) error {
@@ -323,4 +338,86 @@ func (pm *Manager) ParseContent(content string) (string, error) {
 	}
 
 	return htmlOutput.String(), nil
+}
+
+func (a App) SubscribeNewsletter(c echo.Context) error {
+	email := c.FormValue("email")
+	referer := c.FormValue("referer")
+	turnstileToken := c.FormValue("cf-turnstile-response")
+
+	// Validate Turnstile
+	isValid, err := verifyTurnstileToken(c.Request().Context(), turnstileToken, c.RealIP())
+	if err != nil {
+		slog.ErrorContext(c.Request().Context(), "turnstile verification error", "error", err)
+		return fragments.NewsletterSubscription("unknown", true).Render(renderArgs(c))
+	}
+	if !isValid {
+		return fragments.NewsletterSubscription("unknown", true).Render(renderArgs(c))
+	}
+
+	// Subscribe to newsletter
+	_, _, err = services.SubscribeToNewsletter(c.Request().Context(), a.db, email, referer)
+	if err != nil {
+		if errors.Is(err, services.ErrSubscriberExists) {
+			return fragments.NewsletterError("You're already subscribed to our newsletter!").Render(renderArgs(c))
+		}
+		slog.ErrorContext(c.Request().Context(), "error subscribing to newsletter", "error", err, "email", email)
+		return fragments.NewsletterError("").Render(renderArgs(c))
+	}
+
+	// TODO: Send verification email (will be implemented later)
+
+	return fragments.NewsletterSuccess().Render(renderArgs(c))
+}
+
+type turnstileResponse struct {
+	Success     bool     `json:"success"`
+	ChallengeTS string   `json:"challenge_ts"`
+	Hostname    string   `json:"hostname"`
+	ErrorCodes  []string `json:"error-codes"`
+	Action      string   `json:"action"`
+	CData       string   `json:"cdata"`
+}
+
+func verifyTurnstileToken(ctx context.Context, token string, remoteIP string) (bool, error) {
+	if token == "" {
+		return false, fmt.Errorf("turnstile token is required")
+	}
+
+	data := url.Values{}
+	data.Set("secret", config.Cfg.TurnstileSecretKey)
+	data.Set("response", token)
+	if remoteIP != "" {
+		data.Set("remoteip", remoteIP)
+	}
+
+	req, err := http.NewRequestWithContext(
+		ctx,
+		"POST",
+		"https://challenges.cloudflare.com/turnstile/v0/siteverify",
+		strings.NewReader(data.Encode()),
+	)
+	if err != nil {
+		return false, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		return false, fmt.Errorf("failed to verify turnstile token: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return false, fmt.Errorf("turnstile verification failed with status: %d", resp.StatusCode)
+	}
+
+	var turnstileResp turnstileResponse
+	if err := json.NewDecoder(resp.Body).Decode(&turnstileResp); err != nil {
+		return false, fmt.Errorf("failed to decode turnstile response: %w", err)
+	}
+
+	return turnstileResp.Success, nil
 }

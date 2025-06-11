@@ -14,6 +14,7 @@ var App = []Route{
 	ArticlePage,
 	NewslettersPage,
 	NewsletterPage,
+	SubscribeNewsletter,
 	Redirect.Route,
 }
 
@@ -57,6 +58,13 @@ var NewsletterPage = Route{
 	Path:        "/newsletters/:newsletterSlug",
 	Method:      http.MethodGet,
 	HandlerName: "NewsletterPage",
+}
+
+var SubscribeNewsletter = Route{
+	Name:        appNamePrefix + ".subscribe_newsletter",
+	Path:        "/subscribe",
+	Method:      http.MethodPost,
+	HandlerName: "SubscribeNewsletter",
 }
 
 var Redirect = redirect{
