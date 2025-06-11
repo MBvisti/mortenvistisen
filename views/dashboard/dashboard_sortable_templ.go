@@ -9,40 +9,13 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
-	"fmt"
 	"github.com/mbvisti/mortenvistisen/models"
 	"github.com/mbvisti/mortenvistisen/router/routes"
-	"github.com/mbvisti/mortenvistisen/views/fragments"
 	"github.com/mbvisti/mortenvistisen/views/internal/components"
 	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
 )
 
-func articlesToSortableTableRowsDashboard(articles []models.Article) components.SortableTableRows {
-	tableRows := make(components.SortableTableRows, len(articles))
-	for i, article := range articles {
-		publishStatus := "Draft"
-		hightlight := "status-draft"
-
-		if article.IsPublished {
-			publishStatus = "Published"
-			hightlight = "status-published"
-		}
-
-		tableRows[i] = components.SortableTableRow{
-			ID: article.ID,
-			Elements: []components.TableRowElement{
-				{Title: article.Title},
-				{Title: publishStatus, Hightlight: hightlight},
-				{Title: article.CreatedAt.Format("2006-01-02")},
-				{Title: fmt.Sprintf("%v min", article.ReadTime)},
-			},
-		}
-	}
-
-	return tableRows
-}
-
-type DashboardSortableResult struct {
+type ArticlesSortableResult struct {
 	Articles         []models.Article
 	TotalCount       int64
 	Page             int
@@ -52,11 +25,34 @@ type DashboardSortableResult struct {
 	HasPrevious      bool
 	CurrentSortField string
 	CurrentSortOrder string
-	PublishedCount   int64
-	DraftCount       int64
 }
 
-func Home(result DashboardSortableResult) templ.Component {
+func articlesToSortableTableRows(articles []models.Article) components.SortableTableRows {
+	tableRows := make(components.SortableTableRows, len(articles))
+	for i, article := range articles {
+		status := "Draft"
+		highlight := "status-draft"
+
+		if article.IsPublished {
+			status = "Published"
+			highlight = "status-published"
+		}
+
+		tableRows[i] = components.SortableTableRow{
+			ID: article.ID,
+			Elements: []components.TableRowElement{
+				{Title: article.Title},
+				{Title: status, Hightlight: highlight},
+				{Title: article.CreatedAt.Format("2006-01-02")},
+				{Title: "5 min"}, // Could be dynamic based on article.ReadTime
+			},
+		}
+	}
+
+	return tableRows
+}
+
+func DashboardSortable(result ArticlesSortableResult) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -89,7 +85,7 @@ func Home(result DashboardSortableResult) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = components.DashboardHeader("Dashboard", "Welcome back, Admin").Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = components.DashboardHeader("Articles", "manage your articles").Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -97,27 +93,15 @@ func Home(result DashboardSortableResult) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = components.Stats([]templ.Component{
-				components.StatNumberCard("Total Articles", result.TotalCount),
-				components.StatNumberCard("Published", result.PublishedCount),
-				components.StatNumberCard("Drafts", result.DraftCount),
-			}).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " ")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
 			templ_7745c5c3_Err = components.SortableTable(
-				"Recent articles",
+				"All articles",
 				[]components.SortableColumn{
-					{Field: "title", DisplayName: "Title", Sortable: false},
+					{Field: "title", DisplayName: "Title", Sortable: true},
 					{Field: "status", DisplayName: "Status", Sortable: true},
 					{Field: "created_at", DisplayName: "Created", Sortable: true},
-					{Field: "read_time", DisplayName: "Read time", Sortable: true},
+					{Field: "", DisplayName: "Read Time", Sortable: false},
 				},
-				articlesToSortableTableRowsDashboard(result.Articles),
+				articlesToSortableTableRows(result.Articles),
 				components.Pagination{
 					TotalCount:  result.TotalCount,
 					Page:        result.Page,
@@ -132,21 +116,13 @@ func Home(result DashboardSortableResult) templ.Component {
 					BaseURL:      "/dashboard",
 				},
 				components.ActionBtn{
-					Title: "New article",
-					Route: routes.DashboardNewArticle,
+					Title: "New Article",
+					Route: routes.Route{Path: "/dashboard/articles/new"},
 				},
 				components.TableConfig{
 					EditURLPattern: "/dashboard/articles/%s/edit",
 				},
 			).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, " ")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = fragments.DeleteConfirmationModal("", "").Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

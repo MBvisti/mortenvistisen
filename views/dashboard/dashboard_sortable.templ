@@ -1,0 +1,81 @@
+package dashboard
+
+import (
+	"github.com/mbvisti/mortenvistisen/models"
+	"github.com/mbvisti/mortenvistisen/router/routes"
+	"github.com/mbvisti/mortenvistisen/views/internal/components"
+	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
+)
+
+type ArticlesSortableResult struct {
+	Articles         []models.Article
+	TotalCount       int64
+	Page             int
+	PageSize         int
+	TotalPages       int
+	HasNext          bool
+	HasPrevious      bool
+	CurrentSortField string
+	CurrentSortOrder string
+}
+
+func articlesToSortableTableRows(articles []models.Article) components.SortableTableRows {
+	tableRows := make(components.SortableTableRows, len(articles))
+	for i, article := range articles {
+		status := "Draft"
+		highlight := "status-draft"
+
+		if article.IsPublished {
+			status = "Published"
+			highlight = "status-published"
+		}
+
+		tableRows[i] = components.SortableTableRow{
+			ID: article.ID,
+			Elements: []components.TableRowElement{
+				{Title: article.Title},
+				{Title: status, Hightlight: highlight},
+				{Title: article.CreatedAt.Format("2006-01-02")},
+				{Title: "5 min"}, // Could be dynamic based on article.ReadTime
+			},
+		}
+	}
+
+	return tableRows
+}
+
+templ DashboardSortable(result ArticlesSortableResult) {
+	@layouts.Dashboard() {
+		@components.DashboardHeader("Articles", "manage your articles")
+		@components.SortableTable(
+			"All articles",
+			[]components.SortableColumn{
+				{Field: "title", DisplayName: "Title", Sortable: true},
+				{Field: "status", DisplayName: "Status", Sortable: true},
+				{Field: "created_at", DisplayName: "Created", Sortable: true},
+				{Field: "", DisplayName: "Read Time", Sortable: false},
+			},
+			articlesToSortableTableRows(result.Articles),
+			components.Pagination{
+				TotalCount:  result.TotalCount,
+				Page:        result.Page,
+				PageSize:    result.PageSize,
+				TotalPages:  result.TotalPages,
+				HasNext:     result.HasNext,
+				HasPrevious: result.HasPrevious,
+			},
+			components.SortConfig{
+				CurrentField: result.CurrentSortField,
+				CurrentOrder: result.CurrentSortOrder,
+				BaseURL:      "/dashboard",
+			},
+			components.ActionBtn{
+				Title: "New Article",
+				Route: routes.Route{Path: "/dashboard/articles/new"},
+			},
+			components.TableConfig{
+				EditURLPattern: "/dashboard/articles/%s/edit",
+			},
+		)
+	}
+}

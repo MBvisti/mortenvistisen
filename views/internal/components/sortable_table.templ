@@ -1,0 +1,165 @@
+package components
+
+import (
+	"fmt"
+	"github.com/google/uuid"
+)
+
+type SortableColumn struct {
+	Field       string
+	DisplayName string
+	Sortable    bool
+}
+
+type SortConfig struct {
+	CurrentField string
+	CurrentOrder string
+	BaseURL      string
+}
+
+type SortableTableRow struct {
+	ID       uuid.UUID
+	Elements []TableRowElement
+}
+
+type SortableTableRows []SortableTableRow
+
+templ SortableTable(
+	title string,
+	columns []SortableColumn,
+	tableRows SortableTableRows,
+	pagination Pagination,
+	sortConfig SortConfig,
+	actionBtn ActionBtn,
+	config TableConfig,
+) {
+	<div class="table-container">
+		<div class="table-header">
+			<h2 class="table-title">
+				<span>📋</span>
+				{ title }
+			</h2>
+			if actionBtn.Title != "" {
+				<div class="flex gap-4">
+					<a href={ templ.SafeURL(actionBtn.Route.Path) } class="table-action-btn">{ actionBtn.Title }</a>
+				</div>
+			}
+		</div>
+		<table class="w-full border-collapse">
+			<thead>
+				<tr>
+					for _, column := range columns {
+						<th class="bg-base-300 text-base-content font-semibold text-sm px-6 py-4 text-left border-b border-base-300">
+							if column.Sortable {
+								@sortableHeader(column, sortConfig, pagination)
+							} else {
+								{ column.DisplayName }
+							}
+						</th>
+					}
+					<th class="bg-base-300 text-base-content font-semibold text-sm px-6 py-4 text-left border-b border-base-300">Action</th>
+				</tr>
+			</thead>
+			<tbody>
+				if len(tableRows) == 0 {
+					<tr>
+						<td colspan={ fmt.Sprintf("%d", len(columns)+1) } class="table-cell text-center">No elements found</td>
+					</tr>
+				}
+				for _, row := range tableRows {
+					<tr class="table-row">
+						for _, element := range row.Elements {
+							<td
+								class="table-cell"
+								if element.Hightlight == "status-published" {
+									class="table-cell status-published"
+								}
+								if element.Hightlight == "status-draft" {
+									class="table-cell status-draft"
+								}
+							>{ element.Title }</td>
+						}
+						<td class="table-cell">
+							<div class="flex gap-2">
+								if config.EditURLPattern != "" {
+									<a href={ templ.URL(fmt.Sprintf(config.EditURLPattern, row.ID.String())) } class="table-edit-btn">Edit</a>
+								}
+							</div>
+						</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+		if pagination.TotalPages > 1 {
+			@sortablePagination(pagination, sortConfig)
+		}
+	</div>
+}
+
+templ sortableHeader(column SortableColumn, sortConfig SortConfig, pagination Pagination) {
+	if column.Field == sortConfig.CurrentField {
+		if sortConfig.CurrentOrder == "asc" {
+			<a
+				href={ templ.URL(buildSortURL(sortConfig.BaseURL, column.Field, "desc", pagination.Page)) }
+				class="flex items-center gap-1 hover:text-primary"
+			>
+				{ column.DisplayName }
+				<span class="text-xs">↑</span>
+			</a>
+		} else {
+			<a
+				href={ templ.URL(buildSortURL(sortConfig.BaseURL, column.Field, "asc", pagination.Page)) }
+				class="flex items-center gap-1 hover:text-primary"
+			>
+				{ column.DisplayName }
+				<span class="text-xs">↓</span>
+			</a>
+		}
+	} else {
+		<a
+			href={ templ.URL(buildSortURL(sortConfig.BaseURL, column.Field, "asc", pagination.Page)) }
+			class="flex items-center gap-1 hover:text-primary"
+		>
+			{ column.DisplayName }
+			<span class="text-xs opacity-30">↕</span>
+		</a>
+	}
+}
+
+templ sortablePagination(pagination Pagination, sortConfig SortConfig) {
+	<div class="pagination-container">
+		<div class="flex gap-2 items-center">
+			if pagination.HasPrevious {
+				<a href={ templ.URL(buildPaginationURL(sortConfig, pagination.Page-1)) } class="pagination-btn">← Previous</a>
+			}
+			for i := 1; i <= pagination.TotalPages; i++ {
+				if i == pagination.Page {
+					<span class="pagination-btn active">{ fmt.Sprintf("%d", i) }</span>
+				} else {
+					<a href={ templ.URL(buildPaginationURL(sortConfig, i)) } class="pagination-btn">{ fmt.Sprintf("%d", i) }</a>
+				}
+			}
+			if pagination.HasNext {
+				<a href={ templ.URL(buildPaginationURL(sortConfig, pagination.Page+1)) } class="pagination-btn">Next →</a>
+			}
+		</div>
+		<div class="pagination-info">
+			Showing { fmt.Sprintf("%d", (pagination.Page-1)*pagination.PageSize+1) } to { fmt.Sprintf("%d", min(pagination.Page*pagination.PageSize, int(pagination.TotalCount))) } of { fmt.Sprintf("%d", pagination.TotalCount) } items
+		</div>
+	</div>
+}
+
+func buildSortURL(baseURL, field, order string, page int) string {
+	if page > 1 {
+		return fmt.Sprintf("%s?sort=%s&order=%s&page=%d", baseURL, field, order, page)
+	}
+	return fmt.Sprintf("%s?sort=%s&order=%s", baseURL, field, order)
+}
+
+func buildPaginationURL(sortConfig SortConfig, page int) string {
+	if sortConfig.CurrentField != "" && sortConfig.CurrentOrder != "" {
+		return fmt.Sprintf("%s?sort=%s&order=%s&page=%d",
+			sortConfig.BaseURL, sortConfig.CurrentField, sortConfig.CurrentOrder, page)
+	}
+	return fmt.Sprintf("%s?page=%d", sortConfig.BaseURL, page)
+}

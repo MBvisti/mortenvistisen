@@ -7,21 +7,23 @@ import (
 	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
 )
 
-type SubscribersPaginationResult struct {
-	Subscribers     []models.Subscriber
-	TotalCount      int64
-	Page            int
-	PageSize        int
-	TotalPages      int
-	HasNext         bool
-	HasPrevious     bool
-	MonthlyCount    int64
-	VerifiedCount   int64
-	UnverifiedCount int64
+type SubscribersSortableResult struct {
+	Subscribers      []models.Subscriber
+	TotalCount       int64
+	Page             int
+	PageSize         int
+	TotalPages       int
+	HasNext          bool
+	HasPrevious      bool
+	CurrentSortField string
+	CurrentSortOrder string
+	MonthlyCount     int64
+	VerifiedCount    int64
+	UnverifiedCount  int64
 }
 
-func subscribersToTableRowElements(subscribers []models.Subscriber) components.TableRowElements {
-	tableRowElements := make(components.TableRowElements, len(subscribers))
+func subscribersToSortableTableRows(subscribers []models.Subscriber) components.SortableTableRows {
+	tableRows := make(components.SortableTableRows, len(subscribers))
 	for i, subscriber := range subscribers {
 		verificationStatus := "Unverified"
 		highlight := "status-draft"
@@ -31,7 +33,7 @@ func subscribersToTableRowElements(subscribers []models.Subscriber) components.T
 			highlight = "status-published"
 		}
 
-		tableRowElements[i] = components.TableRow{
+		tableRows[i] = components.SortableTableRow{
 			ID: subscriber.ID,
 			Elements: []components.TableRowElement{
 				{Title: subscriber.Email},
@@ -42,10 +44,10 @@ func subscribersToTableRowElements(subscribers []models.Subscriber) components.T
 		}
 	}
 
-	return tableRowElements
+	return tableRows
 }
 
-templ Subscribers(result SubscribersPaginationResult) {
+templ SubscribersSortable(result SubscribersSortableResult) {
 	@layouts.Dashboard() {
 		@components.DashboardHeader("Subscribers", "manage your newsletter subscribers")
 		@components.Stats([]templ.Component{
@@ -53,10 +55,15 @@ templ Subscribers(result SubscribersPaginationResult) {
 			components.StatNumberCard("Verified", result.VerifiedCount),
 			components.StatNumberCard("Unverified", result.UnverifiedCount),
 		})
-		@components.Table(
+		@components.SortableTable(
 			"All subscribers",
-			[]string{"Email", "Status", "Subscribed", "Referer", "Action"},
-			subscribersToTableRowElements(result.Subscribers),
+			[]components.SortableColumn{
+				{Field: "email", DisplayName: "Email", Sortable: true},
+				{Field: "status", DisplayName: "Status", Sortable: true},
+				{Field: "created_at", DisplayName: "Subscribed", Sortable: true},
+				{Field: "referer", DisplayName: "Referer", Sortable: true},
+			},
+			subscribersToSortableTableRows(result.Subscribers),
 			components.Pagination{
 				TotalCount:  result.TotalCount,
 				Page:        result.Page,
@@ -64,6 +71,11 @@ templ Subscribers(result SubscribersPaginationResult) {
 				TotalPages:  result.TotalPages,
 				HasNext:     result.HasNext,
 				HasPrevious: result.HasPrevious,
+			},
+			components.SortConfig{
+				CurrentField: result.CurrentSortField,
+				CurrentOrder: result.CurrentSortOrder,
+				BaseURL:      "/dashboard/subscribers",
 			},
 			components.ActionBtn{
 				Title: "",

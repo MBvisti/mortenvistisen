@@ -24,6 +24,12 @@ limit $1 offset $2;
 -- name: CountArticles :one
 select count(*) from articles;
 
+-- name: CountPublishedArticles :one
+select count(*) from articles where is_published=true;
+
+-- name: CountDraftArticles :one
+select count(*) from articles where is_published=false;
+
 -- name: InsertArticle :one
 insert into
     articles (id, created_at, updated_at, title, excerpt, meta_title, meta_description, slug, image_link, content, read_time)

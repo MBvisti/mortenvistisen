@@ -1,16 +1,16 @@
 package dashboard
 
 import (
-	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
-	"github.com/mbvisti/mortenvistisen/views/fragments"
-	"github.com/mbvisti/mortenvistisen/models"
-	"github.com/mbvisti/mortenvistisen/views/internal/components"
 	"fmt"
+	"github.com/mbvisti/mortenvistisen/models"
 	"github.com/mbvisti/mortenvistisen/router/routes"
+	"github.com/mbvisti/mortenvistisen/views/fragments"
+	"github.com/mbvisti/mortenvistisen/views/internal/components"
+	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
 )
 
-func articlesToTableRowElements(articles []models.Article) components.TableRowElements {
-	tableRowElements := make(components.TableRowElements, len(articles))
+func articlesToSortableTableRowsDashboard(articles []models.Article) components.SortableTableRows {
+	tableRows := make(components.SortableTableRows, len(articles))
 	for i, article := range articles {
 		publishStatus := "Draft"
 		hightlight := "status-draft"
@@ -20,32 +20,51 @@ func articlesToTableRowElements(articles []models.Article) components.TableRowEl
 			hightlight = "status-published"
 		}
 
-		tableRowElements[i] = components.TableRow{
+		tableRows[i] = components.SortableTableRow{
 			ID: article.ID,
 			Elements: []components.TableRowElement{
 				{Title: article.Title},
 				{Title: publishStatus, Hightlight: hightlight},
-				{Title: article.CreatedAt.Format("2006-06-06")},
+				{Title: article.CreatedAt.Format("2006-01-02")},
 				{Title: fmt.Sprintf("%v min", article.ReadTime)},
 			},
 		}
 	}
 
-	return tableRowElements
+	return tableRows
 }
 
-templ Home(result models.PaginationResult) {
+type DashboardSortableResult struct {
+	Articles         []models.Article
+	TotalCount       int64
+	Page             int
+	PageSize         int
+	TotalPages       int
+	HasNext          bool
+	HasPrevious      bool
+	CurrentSortField string
+	CurrentSortOrder string
+	PublishedCount   int64
+	DraftCount       int64
+}
+
+templ Home(result DashboardSortableResult) {
 	@layouts.Dashboard() {
 		@components.DashboardHeader("Dashboard", "Welcome back, Admin")
 		@components.Stats([]templ.Component{
 			components.StatNumberCard("Total Articles", result.TotalCount),
-			components.StatNumberCard("Published", int64(countPublishedArticles(result.Articles))),
-			components.StatNumberCard("Drafts", int64(countDraftArticles(result.Articles))),
+			components.StatNumberCard("Published", result.PublishedCount),
+			components.StatNumberCard("Drafts", result.DraftCount),
 		})
-		@components.Table(
+		@components.SortableTable(
 			"Recent articles",
-			[]string{"Title", "Status", "Created", "Read time", "Action"},
-			articlesToTableRowElements(result.Articles),
+			[]components.SortableColumn{
+				{Field: "title", DisplayName: "Title", Sortable: false},
+				{Field: "status", DisplayName: "Status", Sortable: true},
+				{Field: "created_at", DisplayName: "Created", Sortable: true},
+				{Field: "read_time", DisplayName: "Read time", Sortable: true},
+			},
+			articlesToSortableTableRowsDashboard(result.Articles),
 			components.Pagination{
 				TotalCount:  result.TotalCount,
 				Page:        result.Page,
@@ -53,6 +72,11 @@ templ Home(result models.PaginationResult) {
 				TotalPages:  result.TotalPages,
 				HasNext:     result.HasNext,
 				HasPrevious: result.HasPrevious,
+			},
+			components.SortConfig{
+				CurrentField: result.CurrentSortField,
+				CurrentOrder: result.CurrentSortOrder,
+				BaseURL:      "/dashboard",
 			},
 			components.ActionBtn{
 				Title: "New article",
@@ -64,24 +88,4 @@ templ Home(result models.PaginationResult) {
 		)
 		@fragments.DeleteConfirmationModal("", "")
 	}
-}
-
-func countPublishedArticles(articles []models.Article) int {
-	count := 0
-	for _, article := range articles {
-		if article.IsPublished {
-			count++
-		}
-	}
-	return count
-}
-
-func countDraftArticles(articles []models.Article) int {
-	count := 0
-	for _, article := range articles {
-		if !article.IsPublished {
-			count++
-		}
-	}
-	return count
 }

@@ -1,11 +1,11 @@
 package dashboard
 
 import (
-	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
-	"github.com/mbvisti/mortenvistisen/views/fragments"
 	"github.com/mbvisti/mortenvistisen/models"
-	"github.com/mbvisti/mortenvistisen/views/internal/components"
 	"github.com/mbvisti/mortenvistisen/router/routes"
+	"github.com/mbvisti/mortenvistisen/views/fragments"
+	"github.com/mbvisti/mortenvistisen/views/internal/components"
+	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
 )
 
 func newslettersToTableRowElements(newsletters []models.Newsletter) components.TableRowElements {
@@ -83,4 +83,3 @@ func countDraftNewsletters(newsletters []models.Newsletter) int {
 	}
 	return count
 }
-

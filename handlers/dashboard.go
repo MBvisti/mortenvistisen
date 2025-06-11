@@ -37,12 +37,22 @@ func (d Dashboard) Index(c echo.Context) error {
 		}
 	}
 
+	sortField := c.QueryParam("sort")
+	sortOrder := c.QueryParam("order")
+	if sortOrder != "asc" && sortOrder != "desc" {
+		sortOrder = "desc" // default
+	}
+
 	pageSize := 10
-	articles, err := models.GetArticlesPaginated(
+	articles, err := models.GetArticlesSorted(
 		extractCtx(c),
 		d.db.Pool,
 		page,
 		pageSize,
+		models.SortConfig{
+			Field: sortField,
+			Order: sortOrder,
+		},
 	)
 	if err != nil {
 		articles = models.PaginationResult{
@@ -56,7 +66,32 @@ func (d Dashboard) Index(c echo.Context) error {
 		}
 	}
 
-	return dashboard.Home(articles).Render(renderArgs(c))
+	// Get complete statistics (not affected by pagination)
+	publishedCount, err := models.CountPublishedArticles(extractCtx(c), d.db.Pool)
+	if err != nil {
+		publishedCount = 0
+	}
+
+	draftCount, err := models.CountDraftArticles(extractCtx(c), d.db.Pool)
+	if err != nil {
+		draftCount = 0
+	}
+
+	result := dashboard.DashboardSortableResult{
+		Articles:         articles.Articles,
+		TotalCount:       articles.TotalCount,
+		Page:             articles.Page,
+		PageSize:         articles.PageSize,
+		TotalPages:       articles.TotalPages,
+		HasNext:          articles.HasNext,
+		HasPrevious:      articles.HasPrevious,
+		CurrentSortField: sortField,
+		CurrentSortOrder: sortOrder,
+		PublishedCount:   publishedCount,
+		DraftCount:       draftCount,
+	}
+
+	return dashboard.Home(result).Render(renderArgs(c))
 }
 
 func (d Dashboard) NewArticle(c echo.Context) error {
@@ -614,46 +649,55 @@ func (d Dashboard) Subscribers(c echo.Context) error {
 		}
 	}
 
+	sortField := c.QueryParam("sort")
+	sortOrder := c.QueryParam("order")
+	if sortOrder != "asc" && sortOrder != "desc" {
+		sortOrder = "desc" // default
+	}
+
 	pageSize := 10
-	offset := (page - 1) * pageSize
-
-	subscribers, err := models.GetAllSubscribers(extractCtx(c), d.db.Pool)
-	if err != nil {
-		subscribers = []models.Subscriber{}
-	}
-
-	totalCount := int64(len(subscribers))
-	totalPages := int((totalCount + int64(pageSize) - 1) / int64(pageSize))
-
-	start := offset
-	end := min(offset+pageSize, len(subscribers))
-	if start > len(subscribers) {
-		start = len(subscribers)
-	}
-
-	paginatedSubscribers := subscribers[start:end]
-
-	monthlyCount, _ := models.CountMonthlySubscribers(extractCtx(c), d.db.Pool)
-	verifiedCount, _ := models.CountVerifiedSubscribers(
+	subscribers, err := models.GetSubscribersSorted(
 		extractCtx(c),
 		d.db.Pool,
+		page,
+		pageSize,
+		models.SortConfig{
+			Field: sortField,
+			Order: sortOrder,
+		},
 	)
-	unverifiedCount := totalCount - verifiedCount
-
-	result := dashboard.SubscribersPaginationResult{
-		Subscribers:     paginatedSubscribers,
-		TotalCount:      totalCount,
-		Page:            page,
-		PageSize:        pageSize,
-		TotalPages:      totalPages,
-		HasNext:         page < totalPages,
-		HasPrevious:     page > 1,
-		MonthlyCount:    monthlyCount,
-		VerifiedCount:   verifiedCount,
-		UnverifiedCount: unverifiedCount,
+	if err != nil {
+		subscribers = models.SubscriberPaginationResult{
+			Subscribers: []models.Subscriber{},
+			TotalCount:  0,
+			Page:        1,
+			PageSize:    pageSize,
+			TotalPages:  0,
+			HasNext:     false,
+			HasPrevious: false,
+		}
 	}
 
-	return dashboard.Subscribers(result).Render(renderArgs(c))
+	monthlyCount, _ := models.CountMonthlySubscribers(extractCtx(c), d.db.Pool)
+	verifiedCount, _ := models.CountVerifiedSubscribers(extractCtx(c), d.db.Pool)
+	unverifiedCount := subscribers.TotalCount - verifiedCount
+
+	result := dashboard.SubscribersSortableResult{
+		Subscribers:      subscribers.Subscribers,
+		TotalCount:       subscribers.TotalCount,
+		Page:             subscribers.Page,
+		PageSize:         subscribers.PageSize,
+		TotalPages:       subscribers.TotalPages,
+		HasNext:          subscribers.HasNext,
+		HasPrevious:      subscribers.HasPrevious,
+		CurrentSortField: sortField,
+		CurrentSortOrder: sortOrder,
+		MonthlyCount:     monthlyCount,
+		VerifiedCount:    verifiedCount,
+		UnverifiedCount:  unverifiedCount,
+	}
+
+	return dashboard.SubscribersSortable(result).Render(renderArgs(c))
 }
 
 func (d Dashboard) EditSubscriber(c echo.Context) error {

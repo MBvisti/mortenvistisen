@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/Masterminds/squirrel"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/mbvisti/mortenvistisen/models/internal/db"
@@ -258,6 +259,20 @@ type PaginationResult struct {
 	HasPrevious bool
 }
 
+type SortConfig struct {
+	Field string
+	Order string
+}
+
+var allowedArticleSortFields = map[string]string{
+	"title":      "title",
+	"created_at": "created_at",
+	"updated_at": "updated_at",
+	"status":     "is_published",
+	"published":  "first_published_at",
+	"read_time":  "read_time",
+}
+
 func GetArticlesPaginated(
 	ctx context.Context,
 	dbtx db.DBTX,
@@ -318,6 +333,125 @@ func GetArticlesPaginated(
 		}
 	}
 
+	if err := populateArticleTags(ctx, dbtx, articles); err != nil {
+		return PaginationResult{}, err
+	}
+
+	totalPages := int((totalCount + int64(pageSize) - 1) / int64(pageSize))
+
+	return PaginationResult{
+		Articles:    articles,
+		TotalCount:  totalCount,
+		Page:        page,
+		PageSize:    pageSize,
+		TotalPages:  totalPages,
+		HasNext:     page < totalPages,
+		HasPrevious: page > 1,
+	}, nil
+}
+
+func GetArticlesSorted(
+	ctx context.Context,
+	dbtx db.DBTX,
+	page int,
+	pageSize int,
+	sort SortConfig,
+) (PaginationResult, error) {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 10
+	}
+	if pageSize > 100 {
+		pageSize = 100
+	}
+
+	offset := (page - 1) * pageSize
+
+	// Get total count first
+	totalCount, err := db.Stmts.CountArticles(ctx, dbtx)
+	if err != nil {
+		return PaginationResult{}, err
+	}
+
+	// Build the sortable query using Squirrel
+	psql := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
+	query := psql.Select(
+		"id", "created_at", "updated_at", "first_published_at",
+		"title", "excerpt", "meta_title", "meta_description",
+		"slug", "image_link", "content", "read_time", "is_published",
+	).From("articles")
+
+	// Add sorting if valid field provided
+	if sort.Field != "" && sort.Order != "" {
+		if field, ok := allowedArticleSortFields[sort.Field]; ok {
+			orderClause := field
+			if sort.Order == "desc" {
+				orderClause += " DESC"
+			} else {
+				orderClause += " ASC"
+			}
+			query = query.OrderBy(orderClause)
+		} else {
+			// Default sorting if invalid field
+			query = query.OrderBy("created_at DESC")
+		}
+	} else {
+		// Default sorting
+		query = query.OrderBy("created_at DESC")
+	}
+
+	// Add pagination
+	query = query.Limit(uint64(pageSize)).Offset(uint64(offset))
+
+	// Build SQL
+	sql, args, err := query.ToSql()
+	if err != nil {
+		return PaginationResult{}, err
+	}
+
+	// Execute query
+	rows, err := dbtx.Query(ctx, sql, args...)
+	if err != nil {
+		return PaginationResult{}, err
+	}
+	defer rows.Close()
+
+	var articles []Article
+	for rows.Next() {
+		var a Article
+		var createdAt, updatedAt, firstPublishedAt pgtype.Timestamptz
+		var imageLink, content pgtype.Text
+		var readTime pgtype.Int4
+		var isPublished pgtype.Bool
+
+		err := rows.Scan(
+			&a.ID, &createdAt, &updatedAt, &firstPublishedAt,
+			&a.Title, &a.Excerpt, &a.MetaTitle, &a.MetaDescription,
+			&a.Slug, &imageLink, &content, &readTime, &isPublished,
+		)
+		if err != nil {
+			return PaginationResult{}, err
+		}
+
+		// Convert pgtype values
+		a.CreatedAt = createdAt.Time
+		a.UpdatedAt = updatedAt.Time
+		a.FirstPublishedAt = firstPublishedAt.Time
+		a.ImageLink = imageLink.String
+		a.Content = content.String
+		a.ReadTime = readTime.Int32
+		a.IsPublished = isPublished.Bool
+
+		articles = append(articles, a)
+	}
+
+	if err = rows.Err(); err != nil {
+		return PaginationResult{}, err
+	}
+
+	// Populate tags for all articles
 	if err := populateArticleTags(ctx, dbtx, articles); err != nil {
 		return PaginationResult{}, err
 	}
@@ -716,4 +850,20 @@ func DeleteArticle(
 	id uuid.UUID,
 ) error {
 	return db.Stmts.DeleteArticle(ctx, dbtx, id)
+}
+
+// CountPublishedArticles returns the total count of published articles
+func CountPublishedArticles(
+	ctx context.Context,
+	dbtx db.DBTX,
+) (int64, error) {
+	return db.Stmts.CountPublishedArticles(ctx, dbtx)
+}
+
+// CountDraftArticles returns the total count of draft articles
+func CountDraftArticles(
+	ctx context.Context,
+	dbtx db.DBTX,
+) (int64, error) {
+	return db.Stmts.CountDraftArticles(ctx, dbtx)
 }

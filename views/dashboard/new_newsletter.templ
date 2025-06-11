@@ -1,10 +1,10 @@
 package dashboard
 
 import (
-	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
-	"github.com/mbvisti/mortenvistisen/views/internal/components"
-	"github.com/mbvisti/mortenvistisen/router/routes"
 	"github.com/mbvisti/mortenvistisen/config"
+	"github.com/mbvisti/mortenvistisen/router/routes"
+	"github.com/mbvisti/mortenvistisen/views/internal/components"
+	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
 )
 
 type NewNewsletterFormData struct {
@@ -22,50 +22,50 @@ templ NewNewsletter(formData NewNewsletterFormData) {
 				@components.Link("← Back to Newsletters", routes.DashboardNewsletters.Path)
 			</div>
 			<div class="flex flex-col">
-			<form method="POST" action={ templ.SafeURL(routes.DashboardStoreNewsletter.Path) } class="article-form">
-				<div>
-					<h2 class="text-xl font-semibold mb-4">Newsletter Information</h2>
-					<div class="grid grid-cols-2 gap-4">
-						<div>
-							@components.InputField(
-								"Title",
-								"text",
-								"title",
-								"Enter newsletter title",
-								templ.Attributes{"required": true, "maxlength": "100"},
-								components.InputFieldProps{
-									Value:     formData.Title,
-									ErrorMsgs: formData.Errors["title"],
-								},
-							)
-						</div>
-						<div>
-							@components.InputField(
-								"Slug",
-								"text",
-								"slug",
-								"newsletter-slug-url",
-								templ.Attributes{"required": true, "maxlength": "255"},
-								components.InputFieldProps{
-									Value:     formData.Slug,
-									ErrorMsgs: formData.Errors["slug"],
-								},
-							)
+				<form method="POST" action={ templ.SafeURL(routes.DashboardStoreNewsletter.Path) } class="article-form">
+					<div>
+						<h2 class="text-xl font-semibold mb-4">Newsletter Information</h2>
+						<div class="grid grid-cols-2 gap-4">
+							<div>
+								@components.InputField(
+									"Title",
+									"text",
+									"title",
+									"Enter newsletter title",
+									templ.Attributes{"required": true, "maxlength": "100"},
+									components.InputFieldProps{
+										Value:     formData.Title,
+										ErrorMsgs: formData.Errors["title"],
+									},
+								)
+							</div>
+							<div>
+								@components.InputField(
+									"Slug",
+									"text",
+									"slug",
+									"newsletter-slug-url",
+									templ.Attributes{"required": true, "maxlength": "255"},
+									components.InputFieldProps{
+										Value:     formData.Slug,
+										ErrorMsgs: formData.Errors["slug"],
+									},
+								)
+							</div>
 						</div>
 					</div>
-				</div>
-				<div>
-					<h2 class="text-xl font-semibold mb-4">Newsletter Content</h2>
-					<textarea id="editorTarget" name="content">{ formData.Content }</textarea>
-				</div>
-				<div class="flex justify-end gap-4 mt-6">
-					<button type="submit" name="action" value="save_draft" class="btn-secondary">
-						Save as Draft
-					</button>
-					<button type="submit" name="action" value="publish" class="btn-primary">
-						Publish Newsletter
-					</button>
-				</div>
+					<div>
+						<h2 class="text-xl font-semibold mb-4">Newsletter Content</h2>
+						<textarea id="editorTarget" name="content">{ formData.Content }</textarea>
+					</div>
+					<div class="flex justify-end gap-4 mt-6">
+						<button type="submit" name="action" value="save_draft" class="btn-secondary">
+							Save as Draft
+						</button>
+						<button type="submit" name="action" value="publish" class="btn-primary">
+							Publish Newsletter
+						</button>
+					</div>
 				</form>
 				<script type="module" src={ config.Cfg.GetFullDomain() + "/" + routes.JsEasyMDE.Path }></script>
 			</div>

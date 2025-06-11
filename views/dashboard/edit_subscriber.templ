@@ -1,10 +1,10 @@
 package dashboard
 
 import (
-	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
+	"github.com/mbvisti/mortenvistisen/router/routes"
 	"github.com/mbvisti/mortenvistisen/views/fragments"
 	"github.com/mbvisti/mortenvistisen/views/internal/components"
-	"github.com/mbvisti/mortenvistisen/router/routes"
+	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
 )
 
 type EditSubscriberFormData struct {
@@ -23,58 +23,58 @@ templ EditSubscriber(data EditSubscriberFormData) {
 				@components.Link("← Back to Subscribers", routes.DashboardSubscribers.Path)
 			</div>
 			<div class="flex flex-col">
-			<form method="POST" class="article-form">
-				<div class="grid grid-cols-1 gap-4">
-					@components.InputField(
-						"Email Address",
-						"email",
-						"email",
-						"Enter email address",
-						templ.Attributes{"required": true},
-						components.InputFieldProps{
-							Value:     data.Email,
-							ErrorMsgs: data.Errors["email"],
-						},
-					)
-					@components.InputField(
-						"Referer",
-						"text",
-						"referer",
-						"Where did this subscriber come from?",
-						templ.Attributes{},
-						components.InputFieldProps{
-							Value:     data.Referer,
-							ErrorMsgs: data.Errors["referer"],
-						},
-					)
-					<label class="flex items-center space-x-2 mb-4">
-						<input
-							type="checkbox"
-							name="is_verified"
-							class="w-4 h-4 text-primary bg-base-300 border-base-300 rounded focus:ring-primary focus:ring-2"
-							if data.IsVerified {
-								checked
-							}
-						/>
-						<span class="text-base-content font-medium">Verified Subscriber</span>
-					</label>
-					if errors, exists := data.Errors["is_verified"]; exists {
-						<div class="text-red-500 text-sm">
-							for _, error := range errors {
-								<span>{ error }</span>
-							}
+				<form method="POST" class="article-form">
+					<div class="grid grid-cols-1 gap-4">
+						@components.InputField(
+							"Email Address",
+							"email",
+							"email",
+							"Enter email address",
+							templ.Attributes{"required": true},
+							components.InputFieldProps{
+								Value:     data.Email,
+								ErrorMsgs: data.Errors["email"],
+							},
+						)
+						@components.InputField(
+							"Referer",
+							"text",
+							"referer",
+							"Where did this subscriber come from?",
+							templ.Attributes{},
+							components.InputFieldProps{
+								Value:     data.Referer,
+								ErrorMsgs: data.Errors["referer"],
+							},
+						)
+						<label class="flex items-center space-x-2 mb-4">
+							<input
+								type="checkbox"
+								name="is_verified"
+								class="w-4 h-4 text-primary bg-base-300 border-base-300 rounded focus:ring-primary focus:ring-2"
+								if data.IsVerified {
+									checked
+								}
+							/>
+							<span class="text-base-content font-medium">Verified Subscriber</span>
+						</label>
+						if errors, exists := data.Errors["is_verified"]; exists {
+							<div class="text-red-500 text-sm">
+								for _, error := range errors {
+									<span>{ error }</span>
+								}
+							</div>
+						}
+					</div>
+					<div class="flex justify-between items-center mt-6">
+						<div class="flex gap-4">
+							@components.Link("Cancel", routes.DashboardSubscribers.Path)
 						</div>
-					}
-				</div>
-				<div class="flex justify-between items-center mt-6">
-					<div class="flex gap-4">
-						@components.Link("Cancel", routes.DashboardSubscribers.Path)
+						<div class="flex gap-4">
+							<button type="button" onclick={ showDeleteModal(data.ID, data.Email) } class="btn-danger">Delete Subscriber</button>
+							<button type="submit" class="btn-primary">Update Subscriber</button>
+						</div>
 					</div>
-					<div class="flex gap-4">
-						<button type="button" onclick={ showDeleteModal(data.ID, data.Email) } class="btn-danger">Delete Subscriber</button>
-						<button type="submit" class="btn-primary">Update Subscriber</button>
-					</div>
-				</div>
 				</form>
 			</div>
 			@fragments.DeleteConfirmationModal("", "")
@@ -99,4 +99,3 @@ script showDeleteModal(subscriberID string, subscriberEmail string) {
 		}
 	});
 }
-
