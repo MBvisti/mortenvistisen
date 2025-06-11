@@ -1,0 +1,7 @@
+package components
+
+templ Link(title string, href string) {
+	<a href={ templ.SafeURL(href) } class="text-primary hover:text-primary-content font-medium transition-colors duration-200 flex items-center space-x-1">
+		<span>{ title }</span>
+	</a>
+}

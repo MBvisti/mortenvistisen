@@ -4,16 +4,8 @@ import (
 	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
 	"github.com/mbvisti/mortenvistisen/router/routes"
 	"time"
+	"github.com/mbvisti/mortenvistisen/views/internal/components"
 )
-
-templ Link(title string, href string) {
-	<a href={ templ.SafeURL(href) } class="text-primary hover:text-primary-content font-medium transition-colors duration-200 flex items-center space-x-1">
-		<span>{ title }</span>
-		<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-		</svg>
-	</a>
-}
 
 templ ArticleCard(title, description, slug string, tags []string, publishedAt time.Time) {
 	<article class="articleCard">
@@ -73,10 +65,10 @@ templ Home(articles []HomeArticle) {
 			</div>
 			<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
 				<div class="flex justify-center space-x-8 flex-wrap gap-4">
-					@Link("Twitter", "https://twitter.com/mbvisti")
-					@Link("GitHub", "https://github.com/mbvisti")
-					@Link("YouTube", "https://youtube.com/@mbvlabs")
-					@Link("LinkedIn", "https://linkedin.com/in/mortenvistisen")
+					@components.Link("Twitter", "https://twitter.com/mbvisti")
+					@components.Link("GitHub", "https://github.com/mbvisti")
+					@components.Link("YouTube", "https://youtube.com/@mbvlabs")
+					@components.Link("LinkedIn", "https://linkedin.com/in/mortenvistisen")
 				</div>
 			</div>
 		</section>

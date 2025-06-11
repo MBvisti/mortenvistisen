@@ -6,17 +6,21 @@ import (
 )
 
 templ Newsletter(content, title string, releasedAt, updatedAt time.Time) {
-	<main class="main">
-		<article class="article-grid">
-			<h1>{ title }</h1>
-			<div class="article-meta">
-				<p>Released: { releasedAt.Format("2006-06-06") }</p>
-				if updatedAt.After(releasedAt) {
-					<p>Updated: { updatedAt.Format("2006-06-06") }</p>
-				}
-				<p>by MBV</p>
+	<main class="min-h-screen bg-base-100 py-8">
+		<article class="article">
+			<header class="article-header">
+				<h1 class="article-title">{ title }</h1>
+				<div class="article-meta">
+					<span>Released: { releasedAt.Format("2006-01-02") }</span>
+					if updatedAt.After(releasedAt) {
+						<span>Updated: { updatedAt.Format("2006-01-02") }</span>
+					}
+					<span>by MBV</span>
+				</div>
+			</header>
+			<div class="article-content">
+				@unsafe(content)
 			</div>
-			@unsafe(content)
 		</article>
 	</main>
 }

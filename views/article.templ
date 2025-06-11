@@ -15,20 +15,24 @@ func unsafe(html string) templ.Component {
 }
 
 templ Article(img, content, title string, publishedAt, updatedAt time.Time) {
-	<main class="main">
-		<article class="article-grid">
-			if img != "" {
-				<img class="article-img" src={ img }/>
-			}
-			<h1>{ title }</h1>
-			<div class="article-meta">
-				<p>Publised: { publishedAt.Format("2006-06-06") }</p>
-				if updatedAt.After(publishedAt) {
-					<p>Updated: { updatedAt.Format("2006-06-06") }</p>
+	<main class="min-h-screen bg-base-100 py-8">
+		<article class="article">
+			<header class="article-header">
+				if img != "" {
+					<img class="article-image" src={ img } alt={ title }/>
 				}
-				<p>by MBV</p>
+				<h1 class="article-title">{ title }</h1>
+				<div class="article-meta">
+					<span>Published: { publishedAt.Format("2006-01-02") }</span>
+					if updatedAt.After(publishedAt) {
+						<span>Updated: { updatedAt.Format("2006-01-02") }</span>
+					}
+					<span>by MBV</span>
+				</div>
+			</header>
+			<div class="article-content">
+				@unsafe(content)
 			</div>
-			@unsafe(content)
 		</article>
 	</main>
 }

@@ -106,7 +106,7 @@ func Nav() templ.Component {
 			templ_7745c5c3_Var5 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<nav id=\"navigation\" class=\"nav\"><div class=\"max-w-6xl mx-auto px-4 sm:px-6 lg:px-8\"><div class=\"flex justify-between items-center h-16\"><div class=\"flex-shrink-0\"><a href=\"/\" class=\"text-xl font-bold text-base-content\">MBV</a></div><!-- Desktop Menu --><div class=\"hidden md:block\"><div class=\"ml-10 flex items-baseline space-x-8\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<nav id=\"navigation\" class=\"nav\"><div class=\"max-w-6xl mx-auto px-4 sm:px-6 lg:px-8\"><div class=\"flex justify-between items-center h-16\"><!-- Desktop Menu --><div class=\"hidden md:block\"><div class=\"ml-10 flex items-baseline space-x-8\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
