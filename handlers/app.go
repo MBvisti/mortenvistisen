@@ -145,6 +145,10 @@ func (a App) AboutPage(c echo.Context) error {
 	return views.AboutPage().Render(renderArgs(c))
 }
 
+func (a App) ProjectsPage(c echo.Context) error {
+	return views.ProjectsPage().Render(renderArgs(c))
+}
+
 func (a App) ArticlePage(c echo.Context) error {
 	slug := c.Param("articleSlug")
 

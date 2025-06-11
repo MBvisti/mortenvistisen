@@ -26,7 +26,8 @@ templ Nav() {
 					<div class="ml-10 flex items-baseline space-x-8">
 						@NavItem("Home", routes.LandingPage.Name, routes.LandingPage.Path, nil)
 						@NavItem("Newsletters", routes.NewslettersPage.Name, routes.NewslettersPage.Path, nil)
-						@NavItem("About", routes.AboutPage.Name, routes.AboutPage.Path, nil)
+						@NavItem("Projects", routes.ProjectsPage.Name, routes.ProjectsPage.Path, nil)
+							@NavItem("About", routes.AboutPage.Name, routes.AboutPage.Path, nil)
 						if contexts.ExtractApp(ctx).IsAuthenticated {
 							@NavItem("Logout", routes.DestroyAuthSession.Name, routes.DestroyAuthSession.Path, nil)
 						}
@@ -46,7 +47,8 @@ templ Nav() {
 				<div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-base-100 border-t border-base-300">
 					<a href={ templ.SafeURL(routes.LandingPage.Path) } class="block px-3 py-2 text-base font-medium text-base-content hover:text-primary hover:bg-base-200 rounded-md">Home</a>
 					<a href={ templ.SafeURL(routes.NewslettersPage.Path) } class="block px-3 py-2 text-base font-medium text-base-content hover:text-primary hover:bg-base-200 rounded-md">Newsletters</a>
-					<a href={ templ.SafeURL(routes.AboutPage.Path) } class="block px-3 py-2 text-base font-medium text-base-content hover:text-primary hover:bg-base-200 rounded-md">Projects</a>
+					<a href={ templ.SafeURL(routes.ProjectsPage.Path) } class="block px-3 py-2 text-base font-medium text-base-content hover:text-primary hover:bg-base-200 rounded-md">Projects</a>
+					<a href={ templ.SafeURL(routes.AboutPage.Path) } class="block px-3 py-2 text-base font-medium text-base-content hover:text-primary hover:bg-base-200 rounded-md">About</a>
 					if contexts.ExtractApp(ctx).IsAuthenticated {
 						<a href={ templ.SafeURL(routes.DestroyAuthSession.Path) } class="block px-3 py-2 text-base font-medium text-base-content hover:text-primary hover:bg-base-200 rounded-md">Logout</a>
 					}

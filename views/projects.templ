@@ -1,0 +1,90 @@
+package views
+
+import "github.com/mbvisti/mortenvistisen/views/internal/layouts"
+import "github.com/mbvisti/mortenvistisen/router/routes"
+
+templ ProjectsPage() {
+	@layouts.Base(WithSlug(routes.ProjectsPage.Path)) {
+		<main class="flex-1 bg-base-100 flex flex-col justify-center">
+			<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+				<h1 class="text-4xl md:text-5xl font-bold text-base-content mb-16 text-center leading-tight">
+					Projects
+				</h1>
+				<div class="max-w-2xl mx-auto space-y-12">
+					<div class="bg-base-200 p-8 rounded-lg shadow-sm border border-base-300">
+						<h2 class="text-2xl font-semibold text-base-content mb-4">Golang Course</h2>
+						<div class="space-y-4 text-base-content/80 text-lg leading-relaxed">
+							<p>
+								I want more people to write full-stack Go applications.
+							</p>
+							<p>
+								So, I've decided to create a course that teaches you how to build production-grade web applications using Golang.
+							</p>
+							<p>
+								It's a personal take on what goes into building modern, scalable and robust web application. No single-page applications and JSON RESTful APIs but traditinal multi-page applications with just enough interactivity to deliver a good user experience, but without the depedency and development overhead that comes with SPAs.
+							</p>
+						</div>
+						<a rel="nofollow" href="https://golangblogcourse.com" class="inline-block mt-6">
+							<button
+								class="bg-primary hover:bg-primary/80 text-black font-medium py-3 px-6 rounded-lg transition-colors duration-200"
+							>
+								Check it out
+							</button>
+						</a>
+					</div>
+					<div class="bg-base-200 p-8 rounded-lg shadow-sm border border-base-300">
+						<h2 class="text-2xl font-semibold text-base-content mb-4">YouTube</h2>
+						<div class="space-y-4 text-base-content/80 text-lg leading-relaxed">
+							<p>
+								I've long wanted to get into creating video tutorials and content.
+							</p>
+							<p>
+								mbv-labs is meant to be the start of that journey; the channel will contain tutorials, but also videos building features/fixing problems/etc for my other side projects, which can contain code but also higher level discussions on indiehacking and building software.
+							</p>
+						</div>
+						<a rel="nofollow" href="https://www.youtube.com/@mbvlabs" class="inline-block mt-6">
+							<button
+								class="bg-primary hover:bg-primary/80 text-black font-medium py-3 px-6 rounded-lg transition-colors duration-200"
+							>
+								Check it out
+							</button>
+						</a>
+					</div>
+					<div class="bg-base-200 p-8 rounded-lg shadow-sm border border-base-300">
+						<h2 class="text-2xl font-semibold text-base-content mb-4">Grafto</h2>
+						<div class="space-y-4 text-base-content/80 text-lg leading-relaxed">
+							<p>
+								After hating on php for a long time I finally took some time out to try 
+								it out, more specifically Laravel. Boy was I wrong about php.
+							</p>
+							<p>
+								Laravel is such a great framework with (almost) everything you need out of the box.
+								But I love writing Go, and I've spend too much time in statically typed 
+								languages that going back to dynamically typed languages is a no-go for me.
+							</p>
+							<p>
+								So, I decided to built my own Laravel inspired version in Go which I've called Grafto.
+								It's more of a boilerplate than a framework, but it's a great starting point for building
+								full-stack web applications.
+							</p>
+							<p>
+								Aimed at indiehackers wanting to ship products fully in Go.
+							</p>
+							<p>
+								Built with: Go, templ, TailwindCSS and HTMX.
+							</p>
+						</div>
+						<a rel="nofollow" href="https://www.github.com/mbvlabs/grafto" class="inline-block mt-6">
+							<button
+								class="bg-primary hover:bg-primary/80 text-black font-medium py-3 px-6 rounded-lg transition-colors duration-200"
+							>
+								Check it out
+							</button>
+						</a>
+					</div>
+				</div>
+			</div>
+		</main>
+	}
+}
+

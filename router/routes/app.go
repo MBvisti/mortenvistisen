@@ -10,6 +10,7 @@ const appNamePrefix = "app"
 var App = []Route{
 	LandingPage,
 	AboutPage,
+	ProjectsPage,
 	ArticlePage,
 	NewslettersPage,
 	NewsletterPage,
@@ -28,6 +29,13 @@ var AboutPage = Route{
 	Path:        "/about",
 	Method:      http.MethodGet,
 	HandlerName: "AboutPage",
+}
+
+var ProjectsPage = Route{
+	Name:        appNamePrefix + ".projects_page",
+	Path:        "/projects",
+	Method:      http.MethodGet,
+	HandlerName: "ProjectsPage",
 }
 
 var NewslettersPage = Route{
