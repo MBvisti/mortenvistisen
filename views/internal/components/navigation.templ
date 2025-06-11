@@ -7,36 +7,53 @@ import (
 
 templ NavItem(name, pathName, path string, attrs templ.Attributes) {
 	<a
-		class="navItem"
+		class="text-base-content hover:text-primary font-medium transition-colors duration-300 relative group"
 		{ attrs... }
 		data-navItemPath={ pathName }
 		href={ templ.SafeURL(path) }
-	>{ name }</a>
+	>
+		{ name }
+		<span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
+	</a>
 }
 
 templ Nav() {
-	<nav id="navigation" class="container nav">
-		<div class="nav-content">
-			<button class="nav-toggle" aria-label="toggle navigation">
-				<span class="hamburger"></span>
-			</button>
-			<div class="nav-menu">
-				<ul class="menu">
-					<li>
+	<nav id="navigation" class="nav">
+		<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+			<div class="flex justify-between items-center h-16">
+				<div class="flex-shrink-0">
+					<a href="/" class="text-xl font-bold text-base-content">MBV</a>
+				</div>
+				<!-- Desktop Menu -->
+				<div class="hidden md:block">
+					<div class="ml-10 flex items-baseline space-x-8">
 						@NavItem("Home", routes.LandingPage.Name, routes.LandingPage.Path, nil)
-					</li>
-					<li>
 						@NavItem("Newsletters", routes.NewslettersPage.Name, routes.NewslettersPage.Path, nil)
-					</li>
-					<li>
 						@NavItem("Projects", routes.AboutPage.Name, routes.AboutPage.Path, nil)
-					</li>
-					<li>
 						if contexts.ExtractApp(ctx).IsAuthenticated {
 							@NavItem("Logout", routes.DestroyAuthSession.Name, routes.DestroyAuthSession.Path, nil)
 						}
-					</li>
-				</ul>
+					</div>
+				</div>
+				<!-- Mobile menu button -->
+				<div class="md:hidden">
+					<button class="mobile-menu-button inline-flex items-center justify-center p-2 rounded-md text-base-content hover:text-primary hover:bg-base-200 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary" aria-label="toggle navigation">
+						<svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+							<path class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+						</svg>
+					</button>
+				</div>
+			</div>
+			<!-- Mobile Menu -->
+			<div class="mobile-menu hidden md:hidden">
+				<div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-base-100 border-t border-base-300">
+					<a href={ templ.SafeURL(routes.LandingPage.Path) } class="block px-3 py-2 text-base font-medium text-base-content hover:text-primary hover:bg-base-200 rounded-md">Home</a>
+					<a href={ templ.SafeURL(routes.NewslettersPage.Path) } class="block px-3 py-2 text-base font-medium text-base-content hover:text-primary hover:bg-base-200 rounded-md">Newsletters</a>
+					<a href={ templ.SafeURL(routes.AboutPage.Path) } class="block px-3 py-2 text-base font-medium text-base-content hover:text-primary hover:bg-base-200 rounded-md">Projects</a>
+					if contexts.ExtractApp(ctx).IsAuthenticated {
+						<a href={ templ.SafeURL(routes.DestroyAuthSession.Path) } class="block px-3 py-2 text-base font-medium text-base-content hover:text-primary hover:bg-base-200 rounded-md">Logout</a>
+					}
+				</div>
 			</div>
 		</div>
 	</nav>

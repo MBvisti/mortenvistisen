@@ -2,6 +2,7 @@ set dotenv-load
 
 # alias
 alias r := run
+alias rt := run-tw
 alias ra := run-app
 alias rw := run-worker
 alias re := run-email
@@ -60,6 +61,9 @@ generate-db-functions:
 	@sqlc compile && sqlc generate
 
 # application
+run-tw:
+    wgo -file=.go -file=.templ -xfile=_templ.go just compile-templates :: wgo -file=.templ -file=base.css -xfile=_templ.go npm run build-css :: just run-app
+
 run:
     wgo -xdir views/emails -file=.js -file=.css -file=.go -file=.templ -xfile=_templ.go just compile-templates :: just run-app
 
