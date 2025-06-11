@@ -12,6 +12,7 @@ const (
 var Assets = []Route{
 	Robots,
 	Sitemap,
+	LLM,
 	CssEntrypoint,
 	AllCss,
 	JsEntrypoint,
@@ -37,6 +38,13 @@ var Sitemap = Route{
 	Path:        "/sitemap.xml",
 	Method:      http.MethodGet,
 	HandlerName: "Sitemap",
+}
+
+var LLM = Route{
+	Name:        ".llm",
+	Path:        "/llm.txt",
+	Method:      http.MethodGet,
+	HandlerName: "LLM",
 }
 
 var CssEntrypoint = Route{

@@ -329,3 +329,16 @@ func (a Assets) FaviconSiteManifest(c echo.Context) error {
 
 	return c.Blob(http.StatusOK, "image/png", img)
 }
+
+func (a Assets) LLM(c echo.Context) error {
+	content, err := assets.Files.ReadFile(
+		"files/llm.txt",
+	)
+	if err != nil {
+		return err
+	}
+
+	c = a.enableCaching(c, content)
+
+	return c.String(http.StatusOK, string(content))
+}

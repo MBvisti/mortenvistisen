@@ -1,0 +1,154 @@
+# Morten Vistisen's Personal Website
+
+Last Updated: January 6, 2025
+LLM.txt Version: 1.0
+
+## Description
+Personal blog and portfolio website by Morten Vistisen, a self-taught software engineer specializing in Go programming, distributed systems, and web development. The site serves as a knowledge-sharing platform for developers interested in full-stack Go development, entrepreneurship insights, and building production-grade web applications. Features comprehensive content management, newsletter system, and showcases technical projects including courses and open-source tools.
+
+## Content Overview
+- **Technical Blog Posts**: In-depth articles about Go programming, web development, system design, and software engineering best practices
+- **Project Showcase**: Detailed presentations of personal projects including Golang Course, YouTube channel content, and the Grafto framework
+- **Newsletter Archive**: Curated content for developers interested in Go and web development
+- **Educational Resources**: Tutorials and practical guides for building production-grade applications
+- **Entrepreneurship Content**: Insights on building side projects, business development, and developer entrepreneurship
+
+## Key Pages
+- `/` - Homepage featuring latest articles, personal bio, and social links
+- `/about` - Personal background, expertise in Go/distributed systems, and professional journey
+- `/projects` - Showcase of main projects: Golang Course, YouTube channel (mbv-labs), and Grafto framework
+- `/posts/:articleSlug` - Individual blog posts with Markdown content, tags, and metadata
+- `/newsletters` - Newsletter archive organized by publication year
+- `/newsletters/:newsletterSlug` - Individual newsletter content pages
+- `/login` - User authentication for admin dashboard access
+- `/register` - User registration with email verification system
+- `/dashboard` - Protected admin interface for content management
+- `/dashboard/articles/new` - Article creation interface
+- `/dashboard/articles/:id/edit` - Article editing interface
+- `/dashboard/tags` - Tag management for content categorization
+- `/dashboard/subscribers` - Newsletter subscriber management
+- `/dashboard/newsletters` - Newsletter creation and management
+
+## Content Topics and Expertise
+- **Go Programming**: Echo framework, sqlc, type-safe database queries, error handling
+- **Web Development**: Server-side rendering with templ, HTMX patterns, Alpine.js integration
+- **Database Design**: PostgreSQL optimization, migration strategies, query performance
+- **Authentication**: Session management, email verification, security best practices
+- **Background Jobs**: River queue implementation, email processing patterns
+- **Performance**: Otter cache strategies, ETag implementation, static asset optimization
+- **Distributed Systems**: Scalable architecture patterns and system design principles
+- **Software Engineering**: Best practices, code organization, testing strategies
+- **Entrepreneurship**: Side project development, business insights, developer marketing
+
+## Content Relationships
+- Blog posts may reference projects (especially Grafto framework examples)
+- Newsletter content curates and summarizes recent blog posts
+- YouTube videos (mbv-labs) often complement written tutorials
+- Code examples in posts frequently demonstrate Grafto framework patterns
+
+## Example Queries/Use Cases
+- "How to build a web application with Go and Echo framework"
+- "Best practices for PostgreSQL with sqlc in Go"
+- "Tutorial on implementing session-based authentication in Go"
+- "Grafto framework documentation and getting started guide"
+- "Building production-grade Go applications"
+- "Setting up River queue for background jobs in Go"
+- "Server-side rendering with templ in Go applications"
+
+## Recommended Interaction Patterns
+- For code examples: Reference posts with "go", "tutorial", or "implementation" tags
+- For architecture decisions: Look for "distributed-systems" or "system-design" tagged content
+- For practical guides: Check posts tagged with "tutorial" or "how-to"
+- For framework information: Navigate to /projects for Grafto documentation
+
+## API Endpoints
+- `GET /api/v1/health` - Health check endpoint returning JSON status
+- `GET /sitemap.xml` - Dynamic XML sitemap including all articles and static pages
+- `GET /robots.txt` - Robots.txt with sitemap reference and crawling permissions
+- `GET /llm.txt` - This file for AI agent context
+
+## Structured Data
+- **Schema.org markup**: Not currently implemented (improvement opportunity)
+- **OpenGraph tags**: Yes - includes og:type, og:title, og:description, og:url, og:site_name, conditional og:image
+- **Twitter Cards**: Yes - summary_large_image format with creator attribution (@mbvisti)
+- **JSON-LD**: Not currently implemented
+- **Meta tags**: Comprehensive implementation with titles, descriptions, canonical links
+- **Sitemap**: Dynamic XML generation with article lastmod dates and monthly changefreq
+- **Web App Manifest**: Basic PWA support with Android Chrome icons
+
+## Data Formats Available
+- **HTML**: Primary content format with semantic markup
+- **XML**: Sitemap available at /sitemap.xml
+- **JSON**: Health check endpoint provides JSON response
+- **Plain Text**: This llm.txt file for AI context
+
+## Syndication
+- **RSS Feed**: /rss.xml (planned)
+- **Newsletter Subscription**: Available on homepage
+- **Social Updates**: Follow @mbvisti on Twitter for new content announcements
+
+## Update Frequency
+- **Blog Posts**: Irregular publication schedule based on technical insights and project developments
+- **Newsletter**: Periodic publication for subscriber updates
+- **Project Information**: Updated as new projects are developed or existing ones evolve
+- **Sitemap**: Dynamic generation with 1-week cache TTL
+- **Static Assets**: 3-month browser cache with ETag support in production
+
+## Contact Information
+- **Social Media**: 
+ - Twitter: https://twitter.com/mbvisti
+ - GitHub: https://github.com/mbvisti
+ - YouTube: https://youtube.com/@mbvlabs
+ - LinkedIn: https://linkedin.com/in/mortenvistisen
+- **Business Entity**: mbvisti inc
+- **Email**: Contact available through registration/authentication system
+
+## Technical Implementation
+- **Backend**: Go with Echo framework
+- **Database**: PostgreSQL with sqlc for type-safe queries
+- **Templates**: templ for server-side HTML rendering
+- **Styling**: Tailwind CSS with DaisyUI components
+- **Frontend Enhancement**: Alpine.js and HTMX for interactivity
+- **Authentication**: Session-based with email verification
+- **Background Jobs**: River queue system for email processing
+- **Caching**: Otter in-memory cache for performance optimization
+
+## Legal
+- **Cookie Policy**: Session cookies for authentication only
+- **Data Usage**: Standard web application data collection for functionality (sessions, user accounts, newsletter subscriptions)
+- **Data Retention**: User accounts and newsletter subscriptions maintained until deletion requested
+
+## AI Agent Guidelines
+- **Rate Limiting**: 5 login attempts per IP address per 10 minutes (authentication endpoints only)
+- **Preferred Crawl Times**: No specific restrictions
+- **Caching Strategy**: Respect ETag and Cache-Control headers for static assets
+- **Disallowed Actions**: 
+ - Do not attempt to access /dashboard/* routes without proper authentication
+ - Respect robots.txt guidelines
+ - Avoid overwhelming the newsletter subscription system
+
+## Semantic Context
+- **"Grafto"**: Refers to both the Laravel-inspired Go framework/boilerplate and this website template
+- **"mbv-labs"**: YouTube channel brand for technical content
+- **"Go"**: Refers to the Go programming language (Golang)
+- **"Distributed Systems"**: Focus area covering scalable architecture and system design
+- **Domain Expertise**: Full-stack web development, particularly Go-based applications, PostgreSQL databases, and modern web technologies
+
+## Known Improvement Areas
+- Schema.org markup implementation planned
+- JSON-LD structured data for articles
+- Terms of Service and Privacy Policy pages
+- RSS/Atom feed for blog posts
+- API endpoints for content retrieval
+
+## Content Accessibility
+- Public content accessible without authentication
+- Admin features require user registration and email verification
+- Newsletter subscription available with email verification system
+- Responsive design for multiple device types
+
+## Metadata
+- LLM.txt Version: 1.0
+- Last Major Update: January 6, 2025
+- Changelog:
+ - v1.0: Initial implementation with comprehensive site documentation
