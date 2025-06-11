@@ -19,7 +19,12 @@ type TableRowElement struct {
 	Hightlight string
 }
 
-type TableRowElements map[uuid.UUID][]TableRowElement
+type TableRow struct {
+	ID       uuid.UUID
+	Elements []TableRowElement
+}
+
+type TableRowElements []TableRow
 
 type Pagination struct {
 	TotalCount  int64
@@ -73,9 +78,9 @@ templ Table(
 						<td colspan="5" class="table-cell text-center">No elements found</td>
 					</tr>
 				}
-				for id, rowElements := range tableRowElements {
+				for _, row := range tableRowElements {
 					<tr class="table-row">
-						for _, element := range rowElements {
+						for _, element := range row.Elements {
 							<td
 								class="table-cell"
 								if element.Hightlight == "status-published" {
@@ -89,7 +94,7 @@ templ Table(
 						<td class="table-cell">
 							<div class="flex gap-2">
 								if config.EditURLPattern != "" {
-									<a href={ templ.URL(fmt.Sprintf(config.EditURLPattern, id.String())) } class="table-edit-btn">Edit</a>
+									<a href={ templ.URL(fmt.Sprintf(config.EditURLPattern, row.ID.String())) } class="table-edit-btn">Edit</a>
 								}
 							</div>
 						</td>

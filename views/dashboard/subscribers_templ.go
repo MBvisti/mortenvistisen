@@ -30,7 +30,7 @@ type SubscribersPaginationResult struct {
 
 func subscribersToTableRowElements(subscribers []models.Subscriber) components.TableRowElements {
 	tableRowElements := make(components.TableRowElements, len(subscribers))
-	for _, subscriber := range subscribers {
+	for i, subscriber := range subscribers {
 		verificationStatus := "Unverified"
 		highlight := "status-draft"
 
@@ -39,11 +39,14 @@ func subscribersToTableRowElements(subscribers []models.Subscriber) components.T
 			highlight = "status-published"
 		}
 
-		tableRowElements[subscriber.ID] = []components.TableRowElement{
-			{Title: subscriber.Email},
-			{Title: verificationStatus, Hightlight: highlight},
-			{Title: subscriber.CreatedAt.Format("2006-01-02")},
-			{Title: subscriber.Referer},
+		tableRowElements[i] = components.TableRow{
+			ID: subscriber.ID,
+			Elements: []components.TableRowElement{
+				{Title: subscriber.Email},
+				{Title: verificationStatus, Hightlight: highlight},
+				{Title: subscriber.CreatedAt.Format("2006-01-02")},
+				{Title: subscriber.Referer},
+			},
 		}
 	}
 

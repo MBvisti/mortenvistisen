@@ -18,7 +18,7 @@ import (
 
 func newslettersToTableRowElements(newsletters []models.Newsletter) components.TableRowElements {
 	tableRowElements := make(components.TableRowElements, len(newsletters))
-	for _, newsletter := range newsletters {
+	for i, newsletter := range newsletters {
 		publishStatus := "Draft"
 		hightlight := "status-draft"
 
@@ -27,10 +27,13 @@ func newslettersToTableRowElements(newsletters []models.Newsletter) components.T
 			hightlight = "status-published"
 		}
 
-		tableRowElements[newsletter.ID] = []components.TableRowElement{
-			{Title: newsletter.Title},
-			{Title: publishStatus, Hightlight: hightlight},
-			{Title: newsletter.CreatedAt.Format("2006-01-02")},
+		tableRowElements[i] = components.TableRow{
+			ID: newsletter.ID,
+			Elements: []components.TableRowElement{
+				{Title: newsletter.Title},
+				{Title: publishStatus, Hightlight: hightlight},
+				{Title: newsletter.CreatedAt.Format("2006-01-02")},
+			},
 		}
 	}
 

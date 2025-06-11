@@ -19,7 +19,7 @@ import (
 
 func articlesToTableRowElements(articles []models.Article) components.TableRowElements {
 	tableRowElements := make(components.TableRowElements, len(articles))
-	for _, article := range articles {
+	for i, article := range articles {
 		publishStatus := "Draft"
 		hightlight := "status-draft"
 
@@ -28,11 +28,14 @@ func articlesToTableRowElements(articles []models.Article) components.TableRowEl
 			hightlight = "status-published"
 		}
 
-		tableRowElements[article.ID] = []components.TableRowElement{
-			{Title: article.Title},
-			{Title: publishStatus, Hightlight: hightlight},
-			{Title: article.CreatedAt.Format("2006-06-06")},
-			{Title: fmt.Sprintf("%v min", article.ReadTime)},
+		tableRowElements[i] = components.TableRow{
+			ID: article.ID,
+			Elements: []components.TableRowElement{
+				{Title: article.Title},
+				{Title: publishStatus, Hightlight: hightlight},
+				{Title: article.CreatedAt.Format("2006-06-06")},
+				{Title: fmt.Sprintf("%v min", article.ReadTime)},
+			},
 		}
 	}
 
