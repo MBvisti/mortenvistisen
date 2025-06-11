@@ -26,7 +26,7 @@ templ Nav() {
 					<div class="ml-10 flex items-baseline space-x-8">
 						@NavItem("Home", routes.LandingPage.Name, routes.LandingPage.Path, nil)
 						@NavItem("Newsletters", routes.NewslettersPage.Name, routes.NewslettersPage.Path, nil)
-						@NavItem("Projects", routes.AboutPage.Name, routes.AboutPage.Path, nil)
+						@NavItem("About", routes.AboutPage.Name, routes.AboutPage.Path, nil)
 						if contexts.ExtractApp(ctx).IsAuthenticated {
 							@NavItem("Logout", routes.DestroyAuthSession.Name, routes.DestroyAuthSession.Path, nil)
 						}

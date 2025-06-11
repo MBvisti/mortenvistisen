@@ -5,6 +5,7 @@ import (
 	"github.com/mbvisti/mortenvistisen/router/routes"
 	"time"
 	"github.com/mbvisti/mortenvistisen/views/internal/components"
+	"fmt"
 )
 
 templ ArticleCard(title, description, slug string, tags []string, publishedAt time.Time) {
@@ -27,12 +28,7 @@ templ ArticleCard(title, description, slug string, tags []string, publishedAt ti
 		<p class="text-base-content/80 mb-4 leading-relaxed">
 			{ description }
 		</p>
-		<a href={ templ.SafeURL("/posts/" + slug) } class="inline-flex items-center text-primary hover:text-primary-content font-medium transition-colors duration-200">
-			Read article
-			<svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-			</svg>
-		</a>
+		@components.Link("Read article", fmt.Sprintf("/posts/%s", slug))
 	</article>
 }
 
@@ -45,7 +41,7 @@ type HomeArticle struct {
 }
 
 templ Home(articles []HomeArticle) {
-	<main class="min-h-screen bg-base-100">
+	<main class="flex-1 bg-base-100">
 		<!-- Hero Section -->
 		<section class="bg-base-200 py-20">
 			<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">

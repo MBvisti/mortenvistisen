@@ -5,6 +5,27 @@ import "github.com/mbvisti/mortenvistisen/router/routes"
 
 templ AboutPage() {
 	@layouts.Base(WithSlug(routes.AboutPage.Path)) {
-		<main class="container mx-auto my-auto">About</main>
+		<main class="flex-1 bg-base-100 flex flex-col justify-center">
+			<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+				<h1 class="text-4xl md:text-5xl font-bold text-base-content mb-8 leading-tight">
+					About
+				</h1>
+				<div class="max-w-3xl mx-auto space-y-6">
+					<p class="text-lg text-base-content/80 leading-relaxed">
+						I'm a self-taught developer, with a background in finance and international business and an interest in bootstrapped
+						business and technology. I spend most of my time tinkering with projects that try to combine the two.
+					</p>
+					<p class="text-lg text-base-content/80 leading-relaxed">
+						I specialize in Go, and after writing way too much React, actively advocate for building web apps using
+						traditional tools. I'm also very interested in distributed systems; this is where I spend most of my
+						professional time, helping companies build robust and scalable systems.
+					</p>
+					<p class="text-lg text-base-content/80 leading-relaxed">
+						With the rise of machine learning and AI I also started to dabble a bit in this field and mainly focus on NLP type projects.
+						With the huge amount of unstructured data available, and the development in new models, I think there are some very interesting opportunities.
+					</p>
+				</div>
+			</div>
+		</main>
 	}
 }

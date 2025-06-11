@@ -9,6 +9,7 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
+	"fmt"
 	"github.com/mbvisti/mortenvistisen/router/routes"
 	"github.com/mbvisti/mortenvistisen/views/internal/components"
 	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
@@ -43,7 +44,7 @@ func ArticleCard(title, description, slug string, tags []string, publishedAt tim
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(publishedAt.Format("January 2, 2006"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/home.templ`, Line: 13, Col: 97}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/home.templ`, Line: 14, Col: 97}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -66,7 +67,7 @@ func ArticleCard(title, description, slug string, tags []string, publishedAt tim
 				var templ_7745c5c3_Var3 string
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(t)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/home.templ`, Line: 18, Col: 11}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/home.templ`, Line: 19, Col: 11}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
@@ -98,7 +99,7 @@ func ArticleCard(title, description, slug string, tags []string, publishedAt tim
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/home.templ`, Line: 25, Col: 54}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/home.templ`, Line: 26, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -111,22 +112,21 @@ func ArticleCard(title, description, slug string, tags []string, publishedAt tim
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(description)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/home.templ`, Line: 28, Col: 16}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/home.templ`, Line: 29, Col: 16}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</p><a href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</p>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var7 templ.SafeURL = templ.SafeURL("/posts/" + slug)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var7)))
+		templ_7745c5c3_Err = components.Link("Read article", fmt.Sprintf("/posts/%s", slug)).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" class=\"inline-flex items-center text-primary hover:text-primary-content font-medium transition-colors duration-200\">Read article <svg class=\"ml-1 w-4 h-4\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M9 5l7 7-7 7\"></path></svg></a></article>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</article>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -158,12 +158,12 @@ func Home(articles []HomeArticle) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var8 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var8 == nil {
-			templ_7745c5c3_Var8 = templ.NopComponent
+		templ_7745c5c3_Var7 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var7 == nil {
+			templ_7745c5c3_Var7 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<main class=\"min-h-screen bg-base-100\"><!-- Hero Section --><section class=\"bg-base-200 py-20\"><div class=\"max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center\"><div class=\"mb-8\"><img alt=\"Picture of Morten Vistisen (author of the blog)\" src=\"https://media.mortenvistisen.com/mig_selv-removebg-preview.png\" class=\"w-32 h-32 mx-auto rounded shadow-lg border-4 border-base-300 bg-base-300 object-cover\"></div><h1 class=\"text-4xl md:text-5xl font-bold text-base-content mb-6 leading-tight\">Software Engineer, Freelancer, Bootstrapper</h1><p class=\"text-xl text-base-content/80 mb-8 max-w-2xl mx-auto leading-relaxed\">I'm Morten, a software engineer from Denmark living in Spain. I write a lot of Golang while trying to build online businesses. I share my learnings here.</p></div><div class=\"max-w-4xl mx-auto px-4 sm:px-6 lg:px-8\"><div class=\"flex justify-center space-x-8 flex-wrap gap-4\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "<main class=\"flex-1 bg-base-100\"><!-- Hero Section --><section class=\"bg-base-200 py-20\"><div class=\"max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center\"><div class=\"mb-8\"><img alt=\"Picture of Morten Vistisen (author of the blog)\" src=\"https://media.mortenvistisen.com/mig_selv-removebg-preview.png\" class=\"w-32 h-32 mx-auto rounded shadow-lg border-4 border-base-300 bg-base-300 object-cover\"></div><h1 class=\"text-4xl md:text-5xl font-bold text-base-content mb-6 leading-tight\">Software Engineer, Freelancer, Bootstrapper</h1><p class=\"text-xl text-base-content/80 mb-8 max-w-2xl mx-auto leading-relaxed\">I'm Morten, a software engineer from Denmark living in Spain. I write a lot of Golang while trying to build online businesses. I share my learnings here.</p></div><div class=\"max-w-4xl mx-auto px-4 sm:px-6 lg:px-8\"><div class=\"flex justify-center space-x-8 flex-wrap gap-4\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -217,12 +217,12 @@ func HomePage(content templ.Component) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var9 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var9 == nil {
-			templ_7745c5c3_Var9 = templ.NopComponent
+		templ_7745c5c3_Var8 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var8 == nil {
+			templ_7745c5c3_Var8 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Var10 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_Var9 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
 			if !templ_7745c5c3_IsBuffer {
@@ -244,7 +244,7 @@ func HomePage(content templ.Component) templ.Component {
 			WithSlug(routes.LandingPage.Path),
 			WithTitle("Home"),
 			WithDescription("Landing page of mortenvistisen.com"),
-		).Render(templ.WithChildren(ctx, templ_7745c5c3_Var10), templ_7745c5c3_Buffer)
+		).Render(templ.WithChildren(ctx, templ_7745c5c3_Var9), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

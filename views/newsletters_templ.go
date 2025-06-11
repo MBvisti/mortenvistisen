@@ -136,7 +136,7 @@ func Newsletters(newslettersByYear map[int][]HomeNewsletter) templ.Component {
 			templ_7745c5c3_Var7 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<main class=\"min-h-screen bg-base-100\"><section class=\"py-16 bg-base-100\"><div class=\"max-w-6xl mx-auto px-4 sm:px-6 lg:px-8\"><div class=\"text-center mb-12\"><h1 class=\"text-3xl font-bold text-base-content mb-4\">Newsletters, however infrequent</h1><p class=\"text-lg text-base-content/70\">Insights on software engineering, entrepreneurship, and building products</p></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<main class=\"flex-1 bg-base-100\"><section class=\"py-16 bg-base-100\"><div class=\"max-w-6xl mx-auto px-4 sm:px-6 lg:px-8\"><div class=\"text-center mb-12\"><h1 class=\"text-3xl font-bold text-base-content mb-4\">Newsletters, however infrequent</h1><p class=\"text-lg text-base-content/70\">Insights on software engineering, entrepreneurship, and building products</p></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
