@@ -9,26 +9,54 @@ import (
 )
 
 templ ArticleCard(title, description, slug string, tags []string, publishedAt time.Time) {
-	<article class="articleCard">
-		<div class="flex items-center justify-between mb-4">
-			<time class="text-sm text-base-content/70 font-medium">{ publishedAt.Format("January 2, 2006") }</time>
+	<article class="articleCard flex flex-col justify-between h-full">
+		<div>
+			<div class="flex items-center mb-4">
+				<time class="text-sm text-base-content/70 font-medium">{ publishedAt.Format("January 2, 2006") }</time>
+			</div>
+			<h3 class="text-xl font-bold text-base-content mb-3 hover:text-primary transition-colors duration-200">
+				<a href={ templ.SafeURL("/posts/" + slug) }>{ title }</a>
+			</h3>
+			<p class="text-base-content/80 mb-4 leading-relaxed">
+				{ description }
+			</p>
+		</div>
+		<div>
+			@components.Link("Read article", fmt.Sprintf("/posts/%s", slug))
 			if len(tags) > 0 {
-				<div class="flex flex-wrap gap-2">
-					for _, t := range tags {
-						<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-accent text-accent-content">
-							#{ t }
-						</span>
+				<div class="flex flex-wrap gap-2 mt-4" x-data="{ expanded: false }">
+					<!-- Always visible tags (first 3) -->
+					for i, t := range tags {
+						if i < 3 {
+							<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-accent text-accent-content">
+								#{ t }
+							</span>
+						}
+					}
+					<!-- Additional tags (hidden by default) -->
+					if len(tags) > 3 {
+						<div x-show="expanded" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="flex flex-wrap gap-2">
+							for i, t := range tags {
+								if i >= 3 {
+									<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-accent text-accent-content">
+										#{ t }
+									</span>
+								}
+							}
+						</div>
+						<!-- Toggle button -->
+						<button 
+							@click="expanded = !expanded" 
+							class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-base-300 text-base-content hover:bg-base-200 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1"
+							:aria-expanded="expanded"
+							aria-label="Toggle additional tags"
+						>
+							<span x-text={ fmt.Sprintf("expanded ? 'Show less' : '+%d more'", len(tags) - 3) }></span>
+						</button>
 					}
 				</div>
 			}
 		</div>
-		<h3 class="text-xl font-bold text-base-content mb-3 hover:text-primary transition-colors duration-200">
-			<a href={ templ.SafeURL("/posts/" + slug) }>{ title }</a>
-		</h3>
-		<p class="text-base-content/80 mb-4 leading-relaxed">
-			{ description }
-		</p>
-		@components.Link("Read article", fmt.Sprintf("/posts/%s", slug))
 	</article>
 }
 
