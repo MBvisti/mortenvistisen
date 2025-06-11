@@ -18,8 +18,11 @@ var Assets = []Route{
 	JsEasyMDE,
 	JsNav,
 	AllJs,
+	Favicon,
 	Favicon16,
 	Favicon32,
+	FaviconAppletouch,
+	FaviconSiteManifest,
 }
 
 var Robots = Route{
@@ -78,16 +81,37 @@ var AllJs = Route{
 	HandlerName: "AllJs",
 }
 
+var Favicon = Route{
+	Name:        assetsNamePrefix + ".favicon",
+	Path:        "/favicon.ico",
+	Method:      http.MethodGet,
+	HandlerName: "Favicon",
+}
+
 var Favicon16 = Route{
 	Name:        assetsNamePrefix + ".favicon_16",
-	Path:        assetsNamePrefix + "/favicon",
+	Path:        assetsNamePrefix + "/favicon-16x16.png",
 	Method:      http.MethodGet,
 	HandlerName: "Favicon16",
 }
 
 var Favicon32 = Route{
 	Name:        assetsNamePrefix + ".favicon_32",
-	Path:        assetsNamePrefix + "/favicon",
+	Path:        assetsNamePrefix + "/favicon-32x32.png",
 	Method:      http.MethodGet,
 	HandlerName: "Favicon32",
+}
+
+var FaviconAppletouch = Route{
+	Name:        assetsNamePrefix + ".favicon_appletouch",
+	Path:        assetsNamePrefix + "/apple-touch-icon.png",
+	Method:      http.MethodGet,
+	HandlerName: "FaviconAppleTouch",
+}
+
+var FaviconSiteManifest = Route{
+	Name:        assetsNamePrefix + ".favicon_site_manifest",
+	Path:        assetsNamePrefix + "/site.webmanifest",
+	Method:      http.MethodGet,
+	HandlerName: "FaviconSiteManifest",
 }

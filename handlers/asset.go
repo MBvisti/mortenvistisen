@@ -265,9 +265,22 @@ func (a Assets) AllJs(c echo.Context) error {
 	return c.Blob(http.StatusOK, "application/javascript", script)
 }
 
+func (a Assets) Favicon(c echo.Context) error {
+	img, err := assets.Files.ReadFile(
+		"images/favicon.ico",
+	)
+	if err != nil {
+		return err
+	}
+
+	c = a.enableCaching(c, img)
+
+	return c.Blob(http.StatusOK, "image/png", img)
+}
+
 func (a Assets) Favicon16(c echo.Context) error {
 	img, err := assets.Files.ReadFile(
-		"images/favicon-16x16.png",
+		"images/favicon-16.png",
 	)
 	if err != nil {
 		return err
@@ -280,7 +293,33 @@ func (a Assets) Favicon16(c echo.Context) error {
 
 func (a Assets) Favicon32(c echo.Context) error {
 	img, err := assets.Files.ReadFile(
-		"images/favicon-32x32.png",
+		"images/favicon-32.png",
+	)
+	if err != nil {
+		return err
+	}
+
+	c = a.enableCaching(c, img)
+
+	return c.Blob(http.StatusOK, "image/png", img)
+}
+
+func (a Assets) FaviconAppleTouch(c echo.Context) error {
+	img, err := assets.Files.ReadFile(
+		"images/apple-touch-icon.png",
+	)
+	if err != nil {
+		return err
+	}
+
+	c = a.enableCaching(c, img)
+
+	return c.Blob(http.StatusOK, "image/png", img)
+}
+
+func (a Assets) FaviconSiteManifest(c echo.Context) error {
+	img, err := assets.Files.ReadFile(
+		"images/site.webmanifest",
 	)
 	if err != nil {
 		return err
