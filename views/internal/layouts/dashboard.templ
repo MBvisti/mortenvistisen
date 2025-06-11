@@ -27,7 +27,7 @@ templ Dashboard() {
 			<!-- Sidebar Overlay for Mobile -->
 			<div class="fixed inset-0 bg-black/50 z-40 lg:hidden hidden" id="sidebar-overlay" onclick="closeMobileNav()"></div>
 			<div class="h-screen bg-base-100 lg:grid lg:grid-cols-[280px_1fr]">
-				@components.SideBar()
+				@components.SideBar(contexts.ExtractApp(ctx).CurrentPath)
 				<!-- Main Content -->
 				<main class="p-6 lg:p-8 overflow-y-auto lg:pt-6 pt-20 h-screen">
 					{ children... }
