@@ -40,11 +40,9 @@ type ArticleTagOption struct {
 templ EditArticle(formData EditArticleFormData) {
 	@layouts.Dashboard() {
 		<div class="container">
-			<div class="dashboard-header">
-				<h1 class="dashboard-title">Edit Article</h1>
-				<div class="header-actions">
-					@components.Link("← Back to Dashboard", routes.DashboardHome.Path)
-				</div>
+			@components.DashboardHeader("Edit Article", "")
+			<div class="mb-4">
+				@components.Link("← Back to Dashboard", routes.DashboardHome.Path)
 			</div>
 			<div class="flex flex-col">
 				<form method="POST" action={ templ.URL("/dashboard/articles/" + formData.ID + "/edit") } class="article-form">

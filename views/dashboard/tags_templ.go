@@ -60,7 +60,7 @@ func Tags(data TagsPageData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"tags-management-container\"><div class=\"tags-section\"><h2 class=\"section-title\">Add New Tag</h2><form method=\"POST\" action=\"/dashboard/tags\" class=\"tag-form\"><div class=\"form-row\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"tags-management-container\"><div class=\"mb-8\"><h2 class=\"text-xl font-semibold mb-4\">Add New Tag</h2><form method=\"POST\" action=\"/dashboard/tags\" class=\"space-y-4\"><div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -77,7 +77,7 @@ func Tags(data TagsPageData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div><div class=\"form-actions\"><button type=\"submit\" class=\"btn-primary\">Add Tag</button></div></form></div><div class=\"tags-list-section\"><h2 class=\"section-title\">Existing Tags</h2>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div><div class=\"flex justify-end\"><button type=\"submit\" class=\"btn-primary\">Add Tag</button></div></form></div><div><h2 class=\"text-xl font-semibold mb-4\">Existing Tags</h2>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

@@ -3,6 +3,8 @@ package dashboard
 import (
 	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
 	"github.com/mbvisti/mortenvistisen/views/fragments"
+	"github.com/mbvisti/mortenvistisen/views/internal/components"
+	"github.com/mbvisti/mortenvistisen/router/routes"
 )
 
 type EditSubscriberFormData struct {
@@ -15,83 +17,68 @@ type EditSubscriberFormData struct {
 
 templ EditSubscriber(data EditSubscriberFormData) {
 	@layouts.Dashboard() {
-		<div class="dashboard-header">
-			<h1 class="dashboard-title">Edit Subscriber</h1>
-			<div class="user-info">
-				<a href="/dashboard/subscribers" class="btn-secondary">← Back to Subscribers</a>
+		<div class="container">
+			@components.DashboardHeader("Edit Subscriber", "")
+			<div class="mb-4">
+				@components.Link("← Back to Subscribers", routes.DashboardSubscribers.Path)
 			</div>
-		</div>
-		<div class="form-container">
+			<div class="flex flex-col">
 			<form method="POST" class="article-form">
-				<div class="form-row">
-					<div class="form-group">
-						<label for="email" class="form-label">Email Address</label>
+				<div class="grid grid-cols-1 gap-4">
+					@components.InputField(
+						"Email Address",
+						"email",
+						"email",
+						"Enter email address",
+						templ.Attributes{"required": true},
+						components.InputFieldProps{
+							Value:     data.Email,
+							ErrorMsgs: data.Errors["email"],
+						},
+					)
+					@components.InputField(
+						"Referer",
+						"text",
+						"referer",
+						"Where did this subscriber come from?",
+						templ.Attributes{},
+						components.InputFieldProps{
+							Value:     data.Referer,
+							ErrorMsgs: data.Errors["referer"],
+						},
+					)
+					<label class="flex items-center space-x-2 mb-4">
 						<input
-							type="email"
-							id="email"
-							name="email"
-							value={ data.Email }
-							class="form-input"
-							required
+							type="checkbox"
+							name="is_verified"
+							class="w-4 h-4 text-primary bg-base-300 border-base-300 rounded focus:ring-primary focus:ring-2"
+							if data.IsVerified {
+								checked
+							}
 						/>
-						if errors, exists := data.Errors["email"]; exists {
-							<div class="form-error">
-								for _, error := range errors {
-									<span>{ error }</span>
-								}
-							</div>
-						}
+						<span class="text-base-content font-medium">Verified Subscriber</span>
+					</label>
+					if errors, exists := data.Errors["is_verified"]; exists {
+						<div class="text-red-500 text-sm">
+							for _, error := range errors {
+								<span>{ error }</span>
+							}
+						</div>
+					}
+				</div>
+				<div class="flex justify-between items-center mt-6">
+					<div class="flex gap-4">
+						@components.Link("Cancel", routes.DashboardSubscribers.Path)
+					</div>
+					<div class="flex gap-4">
+						<button type="button" onclick={ showDeleteModal(data.ID, data.Email) } class="btn-danger">Delete Subscriber</button>
+						<button type="submit" class="btn-primary">Update Subscriber</button>
 					</div>
 				</div>
-				<div class="form-row">
-					<div class="form-group">
-						<label for="referer" class="form-label">Referer</label>
-						<input
-							type="text"
-							id="referer"
-							name="referer"
-							value={ data.Referer }
-							class="form-input"
-							placeholder="Where did this subscriber come from?"
-						/>
-						if errors, exists := data.Errors["referer"]; exists {
-							<div class="form-error">
-								for _, error := range errors {
-									<span>{ error }</span>
-								}
-							</div>
-						}
-					</div>
-				</div>
-				<div class="form-row">
-					<div class="form-group">
-						<label class="checkbox-label">
-							<input
-								type="checkbox"
-								name="is_verified"
-								if data.IsVerified {
-									checked
-								}
-							/>
-							<span class="checkbox-text">Verified Subscriber</span>
-						</label>
-						if errors, exists := data.Errors["is_verified"]; exists {
-							<div class="form-error">
-								for _, error := range errors {
-									<span>{ error }</span>
-								}
-							</div>
-						}
-					</div>
-				</div>
-				<div class="form-actions">
-					<button type="submit" class="btn-primary">Update Subscriber</button>
-					<a href="/dashboard/subscribers" class="btn-secondary">Cancel</a>
-					<button type="button" onclick={ showDeleteModal(data.ID, data.Email) } class="btn-danger">Delete Subscriber</button>
-				</div>
-			</form>
+				</form>
+			</div>
+			@fragments.DeleteConfirmationModal("", "")
 		</div>
-		@fragments.DeleteConfirmationModal("", "")
 	}
 }
 

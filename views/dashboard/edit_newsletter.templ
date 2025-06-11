@@ -19,20 +19,17 @@ type EditNewsletterFormData struct {
 
 templ EditNewsletter(formData EditNewsletterFormData) {
 	@layouts.Dashboard() {
-		<div class="dashboard-header">
-			<div class="header-content">
-				<h1 class="dashboard-title">Edit Newsletter</h1>
-				<div class="header-actions">
-					<a href={ templ.SafeURL(routes.DashboardNewsletters.Path) } class="btn-secondary">← Back to Newsletters</a>
-				</div>
+		<div class="container">
+			@components.DashboardHeader("Edit Newsletter", "")
+			<div class="mb-4">
+				@components.Link("← Back to Newsletters", routes.DashboardNewsletters.Path)
 			</div>
-		</div>
-		<div class="article-form-container">
+			<div class="flex flex-col">
 			<form method="POST" action={ templ.SafeURL(fmt.Sprintf("/dashboard/newsletters/%s/edit", formData.ID)) } class="article-form">
-				<div class="form-section">
-					<h2 class="section-title">Newsletter Information</h2>
-					<div class="form-grid">
-						<div class="form-row">
+				<div>
+					<h2 class="text-xl font-semibold mb-4">Newsletter Information</h2>
+					<div class="grid grid-cols-2 gap-4">
+						<div>
 							@components.InputField(
 								"Title",
 								"text",
@@ -45,7 +42,7 @@ templ EditNewsletter(formData EditNewsletterFormData) {
 								},
 							)
 						</div>
-						<div class="form-row">
+						<div>
 							@components.InputField(
 								"Slug",
 								"text",
@@ -58,7 +55,7 @@ templ EditNewsletter(formData EditNewsletterFormData) {
 								},
 							)
 						</div>
-						<div class="form-row">
+						<div>
 							<label class="form-control w-full">
 								<div class="label">
 									<span class="label-text md:text-lg">Publish Status</span>
@@ -84,19 +81,18 @@ templ EditNewsletter(formData EditNewsletterFormData) {
 						</div>
 					</div>
 				</div>
-				<div class="form-section">
-					<h2 class="section-title">Newsletter Content</h2>
+				<div>
+					<h2 class="text-xl font-semibold mb-4">Newsletter Content</h2>
 					<textarea id="editorTarget" name="content">{ formData.Content }</textarea>
 				</div>
-				<div class="form-actions">
-					<div class="action-buttons">
-						<button type="submit" class="btn-primary">
-							Update Newsletter
-						</button>
-					</div>
+				<div class="flex justify-end mt-6">
+					<button type="submit" class="btn-primary">
+						Update Newsletter
+					</button>
 				</div>
-			</form>
-			<script type="module" src={ config.Cfg.GetFullDomain() + "/" + routes.JsEasyMDE.Path }></script>
+				</form>
+				<script type="module" src={ config.Cfg.GetFullDomain() + "/" + routes.JsEasyMDE.Path }></script>
+			</div>
 		</div>
 	}
 }

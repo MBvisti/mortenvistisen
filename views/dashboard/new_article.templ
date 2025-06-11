@@ -23,13 +23,12 @@ type NewArticleFormData struct {
 
 templ NewArticle(formData NewArticleFormData) {
 	@layouts.Dashboard() {
-		<div class="dashboard-header">
-			<h1 class="dashboard-title">Create New Article</h1>
-			<div class="header-actions">
+		<div class="container">
+			@components.DashboardHeader("Create New Article", "")
+			<div class="mb-4">
 				@components.Link("← Back to Dashboard", routes.DashboardHome.Path)
 			</div>
-		</div>
-		<div class="flex flex-col">
+			<div class="flex flex-col">
 			<form method="POST" action={ templ.SafeURL(routes.DashboardStoreArticle.Path) } class="article-form">
 				<div>
 					<h2 class="text-xl font-semibold mb-4">Article Information</h2>
@@ -181,8 +180,9 @@ templ NewArticle(formData NewArticleFormData) {
 						</button>
 					</div>
 				</div>
-			</form>
-			<script type="module" src={ config.Cfg.GetFullDomain() + "/" + routes.JsEasyMDE.Path }></script>
+				</form>
+				<script type="module" src={ config.Cfg.GetFullDomain() + "/" + routes.JsEasyMDE.Path }></script>
+			</div>
 		</div>
 	}
 }

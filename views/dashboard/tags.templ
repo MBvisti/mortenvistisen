@@ -16,10 +16,10 @@ templ Tags(data TagsPageData) {
 		<div class="container">
 			@components.DashboardHeader("Tags", "manage blog tags")
 			<div class="tags-management-container">
-				<div class="tags-section">
-					<h2 class="section-title">Add New Tag</h2>
-					<form method="POST" action="/dashboard/tags" class="tag-form">
-						<div class="form-row">
+				<div class="mb-8">
+					<h2 class="text-xl font-semibold mb-4">Add New Tag</h2>
+					<form method="POST" action="/dashboard/tags" class="space-y-4">
+						<div>
 							@components.InputField(
 								"Tag Name",
 								"text",
@@ -31,13 +31,13 @@ templ Tags(data TagsPageData) {
 								},
 							)
 						</div>
-						<div class="form-actions">
+						<div class="flex justify-end">
 							<button type="submit" class="btn-primary">Add Tag</button>
 						</div>
 					</form>
 				</div>
-				<div class="tags-list-section">
-					<h2 class="section-title">Existing Tags</h2>
+				<div>
+					<h2 class="text-xl font-semibold mb-4">Existing Tags</h2>
 					if len(data.Tags) == 0 {
 						<p class="no-tags-message">No tags created yet.</p>
 					} else {
