@@ -5,7 +5,6 @@ import (
 	"github.com/mbvisti/mortenvistisen/views/fragments"
 	"github.com/mbvisti/mortenvistisen/models"
 	"github.com/mbvisti/mortenvistisen/views/internal/components"
-	"fmt"
 	"github.com/mbvisti/mortenvistisen/router/routes"
 )
 
@@ -32,27 +31,12 @@ func newslettersToTableRowElements(newsletters []models.Newsletter) components.T
 
 templ Newsletters(result models.NewsletterPaginationResult) {
 	@layouts.Dashboard() {
-		<div class="dashboard-header">
-			<h1 class="dashboard-title">Newsletters</h1>
-			<div class="user-info">
-				Manage your newsletters
-			</div>
-		</div>
-		<!-- Statistics Cards -->
-		<div class="stats-grid">
-			<div class="stat-card">
-				<h3 class="stat-number">{ fmt.Sprintf("%d", result.TotalCount) }</h3>
-				<p class="stat-label">Total Newsletters</p>
-			</div>
-			<div class="stat-card">
-				<h3 class="stat-number">{ fmt.Sprintf("%d", countPublishedNewsletters(result.Newsletters)) }</h3>
-				<p class="stat-label">Published</p>
-			</div>
-			<div class="stat-card">
-				<h3 class="stat-number">{ fmt.Sprintf("%d", countDraftNewsletters(result.Newsletters)) }</h3>
-				<p class="stat-label">Drafts</p>
-			</div>
-		</div>
+		@components.DashboardHeader("Newsletters", "manage your newsletters")
+		@components.Stats([]templ.Component{
+			components.StatNumberCard("Total Newsletters", result.TotalCount),
+			components.StatNumberCard("Published", int64(countPublishedNewsletters(result.Newsletters))),
+			components.StatNumberCard("Drafts", int64(countDraftNewsletters(result.Newsletters))),
+		})
 		@components.Table(
 			"Recent newsletters",
 			[]string{"Title", "Status", "Created", "Action"},
@@ -96,3 +80,4 @@ func countDraftNewsletters(newsletters []models.Newsletter) int {
 	}
 	return count
 }
+

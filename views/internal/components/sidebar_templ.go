@@ -31,7 +31,7 @@ func SideBar() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- Sidebar --><aside class=\"bg-base-200 border-r border-base-300 transition-transform duration-300 lg:static fixed top-0 left-0 h-screen w-[280px] z-50 -translate-x-full lg:translate-x-0\" id=\"sidebar\"><div class=\"px-6 py-6 border-b border-base-300\"><h2 class=\"text-primary text-xl font-semibold m-0\">Grafto</h2></div><nav><ul class=\"list-none p-0 m-0 py-4\"><li class=\"mb-1\"><a href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- Sidebar --><aside class=\"sidebar lg:static fixed top-0 left-0 h-screen w-[280px] z-50 -translate-x-full lg:translate-x-0\" id=\"sidebar\"><div class=\"sidebar-header\"><h2 class=\"sidebar-brand\">Grafto</h2></div><nav><ul class=\"list-none p-0 m-0 py-4\"><li class=\"mb-1\"><a href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -44,7 +44,7 @@ func SideBar() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" class=\"flex items-center px-6 py-3 text-base-content no-underline transition-colors bg-primary text-primary-content\"><span class=\"mr-3 w-5 h-5\">📊</span> Dashboard</a></li><li class=\"mb-1\"><a href=\"/dashboard/tags\" class=\"flex items-center px-6 py-3 text-base-content no-underline transition-colors hover:bg-base-300 hover:text-primary\"><span class=\"mr-3 w-5 h-5\">🏷️</span> Tags</a></li><li class=\"mb-1\"><a href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" class=\"sidebar-nav-item active\"><span class=\"sidebar-nav-icon\">📊</span> Dashboard</a></li><li class=\"mb-1\"><a href=\"/dashboard/tags\" class=\"sidebar-nav-item\"><span class=\"sidebar-nav-icon\">🏷️</span> Tags</a></li><li class=\"mb-1\"><a href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -57,7 +57,7 @@ func SideBar() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" class=\"flex items-center px-6 py-3 text-base-content no-underline transition-colors hover:bg-base-300 hover:text-primary\"><span class=\"mr-3 w-5 h-5\">📰</span> Newsletters</a></li><li class=\"mb-1\"><a href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" class=\"sidebar-nav-item\"><span class=\"sidebar-nav-icon\">📰</span> Newsletters</a></li><li class=\"mb-1\"><a href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -70,7 +70,7 @@ func SideBar() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" class=\"flex items-center px-6 py-3 text-base-content no-underline transition-colors hover:bg-base-300 hover:text-primary\"><span class=\"mr-3 w-5 h-5\">📧</span> Subscribers</a></li></ul></nav></aside>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" class=\"sidebar-nav-item\"><span class=\"sidebar-nav-icon\">📧</span> Subscribers</a></li></ul></nav></aside>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

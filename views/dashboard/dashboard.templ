@@ -33,27 +33,12 @@ func articlesToTableRowElements(articles []models.Article) components.TableRowEl
 
 templ Home(result models.PaginationResult) {
 	@layouts.Dashboard() {
-		<div class="flex justify-between items-center mb-8 pb-4 border-b border-base-300">
-			<h1 class="text-base-content text-3xl font-semibold m-0">Dashboard</h1>
-			<div class="text-base-content text-sm">
-				Welcome back, Admin
-			</div>
-		</div>
-		<!-- Statistics Cards -->
-		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-			<div class="bg-base-200 border border-base-300 rounded-lg p-6 text-center shadow-sm hover:shadow-md transition-shadow">
-				<h3 class="text-4xl font-bold text-primary mb-2 m-0">{ fmt.Sprintf("%d", result.TotalCount) }</h3>
-				<p class="text-base-content text-sm font-medium m-0">Total Articles</p>
-			</div>
-			<div class="bg-base-200 border border-base-300 rounded-lg p-6 text-center shadow-sm hover:shadow-md transition-shadow">
-				<h3 class="text-4xl font-bold text-primary mb-2 m-0">{ fmt.Sprintf("%d", countPublishedArticles(result.Articles)) }</h3>
-				<p class="text-base-content text-sm font-medium m-0">Published</p>
-			</div>
-			<div class="bg-base-200 border border-base-300 rounded-lg p-6 text-center shadow-sm hover:shadow-md transition-shadow">
-				<h3 class="text-4xl font-bold text-primary mb-2 m-0">{ fmt.Sprintf("%d", countDraftArticles(result.Articles)) }</h3>
-				<p class="text-base-content text-sm font-medium m-0">Drafts</p>
-			</div>
-		</div>
+		@components.DashboardHeader("Dashboard", "Welcome back, Admin")
+		@components.Stats([]templ.Component{
+			components.StatNumberCard("Total Articles", result.TotalCount),
+			components.StatNumberCard("Published", int64(countPublishedArticles(result.Articles))),
+			components.StatNumberCard("Drafts", int64(countDraftArticles(result.Articles))),
+		})
 		@components.Table(
 			"Recent articles",
 			[]string{"Title", "Status", "Created", "Read time", "Action"},

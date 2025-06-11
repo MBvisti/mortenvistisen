@@ -235,4 +235,279 @@
 	.alert-error {
 		@apply bg-error/20 border-error/30 text-error-content;
 	}
+
+	.stat-grid {
+		@apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8;
+	}
+
+	.stat-card {
+		@apply bg-base-200 border border-base-300 rounded-xl p-6;
+		@apply shadow-lg hover:shadow-xl transition-all duration-300;
+		@apply hover:border-primary;
+	}
+
+	.stat-number {
+		@apply text-4xl font-bold text-primary mb-2 m-0;
+		@apply transition-all duration-300;
+	}
+
+	.stat-label {
+		@apply text-base-content/70 text-sm font-medium m-0;
+		@apply transition-colors duration-300;
+	}
+
+	.header {
+		@apply flex justify-between items-center mb-8 pb-4;
+		@apply border-b border-base-300;
+	}
+
+	.title {
+		@apply text-primary text-3xl font-bold m-0;
+	}
+
+	.welcome {
+		@apply text-base-content/70 text-sm;
+		@apply px-4 py-2 bg-base-200 rounded-lg border border-base-300;
+	}
+
+	/* Enhanced Table Components */
+	.table-container {
+		@apply bg-base-200 border border-base-300 rounded-xl overflow-hidden;
+		@apply shadow-lg hover:shadow-xl transition-shadow duration-300;
+	}
+
+	.table-header {
+		@apply px-6 py-4 border-b border-base-300;
+		@apply flex justify-between items-center;
+		@apply bg-base-300/20;
+	}
+
+	.table-title {
+		@apply text-base-content text-lg font-semibold m-0;
+		@apply flex items-center gap-2;
+	}
+
+	.table-action-btn {
+		@apply bg-primary text-primary-content border-0 px-4 py-2 rounded-lg;
+		@apply text-sm font-medium cursor-pointer no-underline inline-block;
+		@apply hover:bg-primary/90 transition-all duration-200;
+		@apply shadow-md hover:shadow-lg;
+	}
+
+	.table-cell {
+		@apply text-base-content px-6 py-4 border-b border-base-300;
+		@apply transition-colors duration-200;
+	}
+
+	.table-row {
+		@apply hover:bg-base-300/20 transition-colors duration-200;
+	}
+
+	.table-edit-btn {
+		@apply bg-base-300 text-base-content border-0 px-3 py-1 text-xs rounded-md;
+		@apply cursor-pointer no-underline inline-block;
+		@apply hover:bg-primary hover:text-primary-content transition-all duration-200;
+		@apply shadow-sm hover:shadow-md;
+	}
+
+	/* Enhanced Sidebar */
+	.sidebar {
+		@apply bg-base-200 border-r border-base-300;
+		@apply transition-transform duration-300;
+		@apply shadow-xl lg:shadow-none;
+	}
+
+	.sidebar-header {
+		@apply px-6 py-6 border-b border-base-300;
+		@apply bg-base-300/20;
+	}
+
+	.sidebar-brand {
+		@apply text-primary text-xl font-bold m-0;
+	}
+
+	.sidebar-nav-item {
+		@apply flex items-center px-6 py-3 text-base-content no-underline;
+		@apply transition-all duration-200 border-r-4 border-transparent;
+		@apply hover:bg-base-300 hover:text-primary hover:border-primary;
+	}
+
+	.sidebar-nav-item.active {
+		@apply bg-primary/20 text-primary border-primary;
+		@apply font-medium;
+	}
+
+	.sidebar-nav-icon {
+		@apply mr-3 w-5 h-5 transition-all duration-200;
+	}
+
+	/* Status badges */
+	.status-published {
+		@apply text-success font-medium;
+	}
+
+	.status-draft {
+		@apply text-warning font-medium;
+	}
+
+	/* Enhanced pagination */
+	.pagination-container {
+		@apply px-6 py-4 border-t border-base-300;
+		@apply flex justify-between items-center flex-wrap gap-4;
+		@apply bg-base-300/20;
+	}
+
+	.pagination-btn {
+		@apply px-3 py-2 border border-base-300 bg-base-200 text-base-content;
+		@apply no-underline rounded-md text-sm transition-all duration-200;
+		@apply hover:bg-primary hover:text-primary-content hover:border-primary;
+		@apply hover:shadow-md;
+	}
+
+	.pagination-btn.active {
+		@apply border-primary bg-primary text-primary-content shadow-md;
+	}
+
+	.pagination-info {
+		@apply text-base-content/70 text-sm;
+	}
+
+	/* Missing dashboard grid and legacy support */
+	.header-content {
+		@apply flex justify-between items-center w-full;
+	}
+
+	.header-actions {
+		@apply flex gap-2;
+	}
+
+	.btn-secondary {
+		@apply bg-base-300 text-base-content border-0 px-4 py-2 rounded-lg;
+		@apply text-sm font-medium cursor-pointer no-underline inline-block;
+		@apply hover:bg-base-300/80 transition-all duration-200;
+		@apply shadow-sm hover:shadow-md;
+	}
+
+	.btn-primary {
+		@apply bg-primary text-primary-content border-0 px-4 py-2 rounded-lg;
+		@apply text-sm font-medium cursor-pointer no-underline inline-block;
+		@apply hover:bg-primary/90 transition-all duration-200;
+		@apply shadow-md hover:shadow-lg;
+	}
+
+	.btn-danger {
+		@apply bg-error text-error-content border-0 px-4 py-2 rounded-lg;
+		@apply text-sm font-medium cursor-pointer no-underline inline-block;
+		@apply hover:bg-error/90 transition-all duration-200;
+		@apply shadow-sm hover:shadow-md;
+	}
+
+	/* Tags page specific */
+	.tags-management-container {
+		@apply grid grid-cols-1 lg:grid-cols-2 gap-8;
+	}
+
+	.tags-section {
+		@apply bg-base-200 border border-base-300 rounded-xl p-6 shadow-lg;
+	}
+
+	.tags-list-section {
+		@apply bg-base-200 border border-base-300 rounded-xl p-6 shadow-lg;
+	}
+
+	.section-title {
+		@apply text-xl font-semibold text-base-content mb-4 m-0;
+	}
+
+	.tag-form {
+		@apply space-y-4;
+	}
+
+	.form-row {
+		@apply space-y-2;
+	}
+
+	.form-actions {
+		@apply flex justify-end;
+	}
+
+	.tags-list {
+		@apply space-y-3;
+	}
+
+	.tag-item {
+		@apply flex justify-between items-center p-4 bg-base-100 border border-base-300 rounded-lg;
+		@apply hover:bg-base-300/20 transition-colors duration-200;
+	}
+
+	.tag-info {
+		@apply flex flex-col;
+	}
+
+	.tag-title {
+		@apply font-medium text-base-content;
+	}
+
+	.tag-date {
+		@apply text-sm text-base-content/70;
+	}
+
+	.tag-actions {
+		@apply flex gap-2;
+	}
+
+	.inline-form {
+		@apply inline;
+	}
+
+	.no-tags-message {
+		@apply text-center text-base-content/70 py-8;
+	}
+
+	/* Modal */
+	.modal {
+		@apply fixed inset-0 bg-black/50 flex items-center justify-center z-50;
+	}
+
+	.modal-content {
+		@apply bg-base-200 border border-base-300 rounded-xl p-6 max-w-md w-full mx-4 shadow-xl;
+	}
+
+	.modal-actions {
+		@apply flex justify-end gap-2 mt-4;
+	}
+
+	/* CRUD Form Components */
+	.container {
+		@apply max-w-6xl mx-auto px-4;
+	}
+
+	.article-form {
+		@apply bg-base-200 border border-base-300 rounded-xl p-6 shadow-lg space-y-8;
+	}
+
+	.tag-checkbox {
+		@apply flex items-center space-x-2 cursor-pointer;
+	}
+
+	.tag-checkbox input[type="checkbox"] {
+		@apply w-4 h-4 text-primary bg-base-300 border-base-300 rounded;
+		@apply focus:ring-primary focus:ring-2;
+	}
+
+	.tag-label {
+		@apply text-sm text-base-content;
+	}
+
+	.textarea-error {
+		@apply border-error focus:ring-error;
+	}
+
+	.form-control {
+		@apply space-y-1 w-full;
+	}
+
+	.h-22 {
+		@apply h-20;
+	}
 }

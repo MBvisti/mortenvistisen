@@ -62,7 +62,7 @@ func NewArticle(formData NewArticleFormData) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"container mx-auto\"><div class=\"flex justify-between h-22\"><h1 class=\"text-base-content text-2xl font-bold\">Create New Article</h1><div class=\"header-actions\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"dashboard-header\"><h1 class=\"dashboard-title\">Create New Article</h1><div class=\"header-actions\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -77,13 +77,13 @@ func NewArticle(formData NewArticleFormData) templ.Component {
 			var templ_7745c5c3_Var3 templ.SafeURL
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(routes.DashboardStoreArticle.Path))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/new_article.templ`, Line: 34, Col: 81}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/new_article.templ`, Line: 33, Col: 80}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\"><div><h2 class=\"text-xl font-semibold mb-4\">Article Information</h2><div class=\"grid grid-cols-2 gap-4\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" class=\"article-form\"><div><h2 class=\"text-xl font-semibold mb-4\">Article Information</h2><div class=\"grid grid-cols-2 gap-4\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -172,7 +172,7 @@ func NewArticle(formData NewArticleFormData) templ.Component {
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(formData.Excerpt)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/new_article.templ`, Line: 93, Col: 27}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/new_article.templ`, Line: 92, Col: 26}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -195,7 +195,7 @@ func NewArticle(formData NewArticleFormData) templ.Component {
 					var templ_7745c5c3_Var7 string
 					templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(components.UppercaseFirstWord(errMsg))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/new_article.templ`, Line: 97, Col: 79}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/new_article.templ`, Line: 96, Col: 78}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 					if templ_7745c5c3_Err != nil {
@@ -223,7 +223,7 @@ func NewArticle(formData NewArticleFormData) templ.Component {
 				var templ_7745c5c3_Var8 string
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(tag.ID)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/new_article.templ`, Line: 112, Col: 26}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/new_article.templ`, Line: 111, Col: 25}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
@@ -246,7 +246,7 @@ func NewArticle(formData NewArticleFormData) templ.Component {
 				var templ_7745c5c3_Var9 string
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(tag.Title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/new_article.templ`, Line: 117, Col: 46}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/new_article.templ`, Line: 116, Col: 45}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
@@ -274,7 +274,7 @@ func NewArticle(formData NewArticleFormData) templ.Component {
 					var templ_7745c5c3_Var10 string
 					templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(components.UppercaseFirstWord(errMsg))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/new_article.templ`, Line: 124, Col: 79}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/new_article.templ`, Line: 123, Col: 78}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 					if templ_7745c5c3_Err != nil {
@@ -337,7 +337,7 @@ func NewArticle(formData NewArticleFormData) templ.Component {
 			var templ_7745c5c3_Var13 string
 			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(formData.MetaDescription)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/new_article.templ`, Line: 159, Col: 36}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/new_article.templ`, Line: 158, Col: 35}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {
@@ -360,7 +360,7 @@ func NewArticle(formData NewArticleFormData) templ.Component {
 					var templ_7745c5c3_Var14 string
 					templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(components.UppercaseFirstWord(errMsg))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/new_article.templ`, Line: 163, Col: 80}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/new_article.templ`, Line: 162, Col: 79}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 					if templ_7745c5c3_Err != nil {
@@ -383,26 +383,26 @@ func NewArticle(formData NewArticleFormData) templ.Component {
 			var templ_7745c5c3_Var15 string
 			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(formData.Content)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/new_article.templ`, Line: 174, Col: 68}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/new_article.templ`, Line: 173, Col: 67}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "</textarea></div><div class=\"flex justify-end\"><button type=\"submit\" name=\"action\" value=\"save_draft\" class=\"px-4 py-2 border rounded bg-secondary text-black\">Save as Draft</button> <button type=\"submit\" name=\"action\" value=\"publish\" class=\"ml-6 px-4 py-2 border rounded bg-primary text-black\">Publish Article</button></div></div></form><script type=\"module\" src=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "</textarea></div><div class=\"flex justify-end gap-4\"><button type=\"submit\" name=\"action\" value=\"save_draft\" class=\"btn-secondary\">Save as Draft</button> <button type=\"submit\" name=\"action\" value=\"publish\" class=\"btn-primary\">Publish Article</button></div></div></form><script type=\"module\" src=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var16 string
 			templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(config.Cfg.GetFullDomain() + "/" + routes.JsEasyMDE.Path)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/new_article.templ`, Line: 186, Col: 88}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/new_article.templ`, Line: 185, Col: 87}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "\"></script></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "\"></script></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

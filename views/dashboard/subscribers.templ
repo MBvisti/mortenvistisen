@@ -4,7 +4,6 @@ import (
 	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
 	"github.com/mbvisti/mortenvistisen/models"
 	"github.com/mbvisti/mortenvistisen/views/internal/components"
-	"fmt"
 	"github.com/mbvisti/mortenvistisen/router/routes"
 )
 
@@ -45,27 +44,12 @@ func subscribersToTableRowElements(subscribers []models.Subscriber) components.T
 
 templ Subscribers(result SubscribersPaginationResult) {
 	@layouts.Dashboard() {
-		<div class="dashboard-header">
-			<h1 class="dashboard-title">Subscribers</h1>
-			<div class="user-info">
-				Manage your newsletter subscribers
-			</div>
-		</div>
-		<!-- Statistics Cards -->
-		<div class="stats-grid">
-			<div class="stat-card">
-				<h3 class="stat-number">{ fmt.Sprintf("%d", result.MonthlyCount) }</h3>
-				<p class="stat-label">Monthly Subscribers</p>
-			</div>
-			<div class="stat-card">
-				<h3 class="stat-number">{ fmt.Sprintf("%d", result.VerifiedCount) }</h3>
-				<p class="stat-label">Verified</p>
-			</div>
-			<div class="stat-card">
-				<h3 class="stat-number">{ fmt.Sprintf("%d", result.UnverifiedCount) }</h3>
-				<p class="stat-label">Unverified</p>
-			</div>
-		</div>
+		@components.DashboardHeader("Subscribers", "manage your newsletter subscribers")
+		@components.Stats([]templ.Component{
+			components.StatNumberCard("Monthly Subscribers", result.MonthlyCount),
+			components.StatNumberCard("Verified", result.VerifiedCount),
+			components.StatNumberCard("Unverified", result.UnverifiedCount),
+		})
 		@components.Table(
 			"All subscribers",
 			[]string{"Email", "Status", "Subscribed", "Referer", "Action"},

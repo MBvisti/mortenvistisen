@@ -78,7 +78,7 @@ func EditArticle(formData EditArticleFormData) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"container mx-auto\"><div class=\"flex justify-between h-22\"><h1 class=\"text-base-content text-2xl font-bold\">Create New Article</h1><div class=\"header-actions\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"container\"><div class=\"dashboard-header\"><h1 class=\"dashboard-title\">Edit Article</h1><div class=\"header-actions\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -409,7 +409,7 @@ func EditArticle(formData EditArticleFormData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "</textarea></div></div><div class=\"flex justify-end\"><span class=\"flex items-center\"><p>Publish: </p><input name=\"published\" type=\"checkbox\" class=\"ml-4\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "</textarea></div></div><div class=\"flex justify-between items-center\"><span class=\"flex items-center space-x-2\"><label class=\"text-base-content font-medium\">Publish:</label> <input name=\"published\" type=\"checkbox\" class=\"w-4 h-4 text-primary bg-base-300 border-base-300 rounded focus:ring-primary focus:ring-2\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -419,14 +419,14 @@ func EditArticle(formData EditArticleFormData) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "></span> <button type=\"submit\" class=\"ml-6 px-4 py-2 border rounded bg-primary text-black\">Update</button></div></form><script type=\"module\" src=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "></span> <button type=\"submit\" class=\"btn-primary\">Update Article</button></div></form><script type=\"module\" src=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var16 string
 			templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(config.Cfg.GetFullDomain() + "/" + routes.JsEasyMDE.Path)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/edit_article.templ`, Line: 233, Col: 88}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/edit_article.templ`, Line: 231, Col: 88}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 			if templ_7745c5c3_Err != nil {
