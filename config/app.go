@@ -20,6 +20,8 @@ type App struct {
 	ProjectName            string `env:"PROJECT_NAME"`
 	Environment            string `env:"ENVIRONMENT"`
 	DefaultSenderSignature string `env:"DEFAULT_SENDER_SIGNATURE"`
+	TurnstileSiteKey       string `env:"TURNSTILE_SITE_KEY"`
+	TurnstileSecretKey     string `env:"TURNSTILE_SECRET_KEY"`
 }
 
 func (a App) GetFullDomain() string {

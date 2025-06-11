@@ -9,6 +9,7 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
+	"github.com/mbvisti/mortenvistisen/views/fragments"
 	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
 	"time"
 )
@@ -41,7 +42,7 @@ func Newsletter(content, title string, releasedAt, updatedAt time.Time) templ.Co
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/newsletter.templ`, Line: 12, Col: 37}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/newsletter.templ`, Line: 13, Col: 37}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -54,7 +55,7 @@ func Newsletter(content, title string, releasedAt, updatedAt time.Time) templ.Co
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(releasedAt.Format("2006-01-02"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/newsletter.templ`, Line: 14, Col: 54}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/newsletter.templ`, Line: 15, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -72,7 +73,7 @@ func Newsletter(content, title string, releasedAt, updatedAt time.Time) templ.Co
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(updatedAt.Format("2006-01-02"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/newsletter.templ`, Line: 16, Col: 53}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/newsletter.templ`, Line: 17, Col: 53}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -91,7 +92,15 @@ func Newsletter(content, title string, releasedAt, updatedAt time.Time) templ.Co
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div></article></main>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div></article><!-- Newsletter Subscription Section --><section class=\"py-16 bg-base-200\"><div class=\"max-w-4xl mx-auto px-4 sm:px-6 lg:px-8\"><div class=\"flex justify-center\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = fragments.NewsletterSubscription("newsletter", false).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div></div></section></main>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

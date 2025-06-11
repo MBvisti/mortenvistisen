@@ -1,0 +1,131 @@
+package fragments
+
+import "fmt"
+
+script resetCaptcha() {
+	turnstile.implicitRender()
+}
+
+script initTurnstile() {
+	// Only load Turnstile when email input is focused
+	document.addEventListener('DOMContentLoaded', function() {
+		const emailInput = document.querySelector('#newsletter-email');
+		const captchaDiv = document.querySelector('.cf-turnstile');
+		let turnstileLoaded = false;
+
+		if (emailInput && captchaDiv) {
+			emailInput.addEventListener('focus', function() {
+				if (!turnstileLoaded) {
+					// Load Turnstile script
+					const script = document.createElement('script');
+					script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+					script.async = true;
+					script.defer = true;
+					document.head.appendChild(script);
+					turnstileLoaded = true;
+				}
+			});
+		}
+	});
+}
+
+templ NewsletterSubscription(context string, failedCaptcha bool) {
+	if failedCaptcha {
+		<div class="bg-error text-error-content p-4 rounded-lg mb-4 text-center">
+			<p class="font-medium">You didn't complete the captcha, please try again.</p>
+		</div>
+	}
+	<div class="newsletter-subscription" id="newsletter-subscription">
+		<form 
+			class="flex flex-col gap-6" 
+			hx-post="/subscribe" 
+			hx-target="#newsletter-subscription" 
+			hx-swap="outerHTML" 
+			method="POST"
+		>
+			<div class="text-center">
+				<h3 class="text-base-content text-2xl font-semibold mb-3 leading-tight">Stay up to date</h3>
+				<p class="text-base-content/80 text-base leading-relaxed">Get notified when I publish something new, and unsubscribe at any time.</p>
+			</div>
+			<div class="flex flex-col gap-4">
+				<input type="hidden" name="referer" value={ context }/>
+				<div class="flex flex-col sm:flex-row gap-3 sm:gap-2 sm:items-stretch">
+					<input
+						type="email"
+						id="newsletter-email"
+						name="email"
+						placeholder="Email address"
+						aria-label="Email address"
+						class="newsletter-email-input"
+						required
+					/>
+					<button
+						type="submit"
+						class="newsletter-submit-btn"
+						data-umami-event={ fmt.Sprintf("newsletter--%s", context) }
+					>
+						<span class="newsletter-btn-text">Join</span>
+						<span class="hidden" style="display: none;">
+							<svg class="w-4 h-4 animate-spin" viewBox="0 0 24 24">
+								<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none" opacity="0.25"/>
+								<path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" opacity="0.75"/>
+							</svg>
+						</span>
+					</button>
+				</div>
+			</div>
+			<div class="cf-turnstile flex justify-center items-center" data-sitekey="0x4AAAAAAAzdx8YPjdxurU_N"></div>
+		</form>
+	</div>
+	if failedCaptcha {
+		@resetCaptcha()
+	} else {
+		@initTurnstile()
+	}
+}
+
+templ NewsletterSuccess() {
+	<div class="newsletter-subscription text-center bg-gradient-to-br from-success to-success/80 border-success" id="newsletter-subscription">
+		<div class="flex flex-col items-center gap-4">
+			<div class="newsletter-success-icon">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-6 h-6 text-success-content">
+					<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+					<polyline points="22,4 12,14.01 9,11.01"/>
+				</svg>
+			</div>
+			<h3 class="text-success-content text-2xl font-semibold">Almost there!</h3>
+			<p class="text-success-content/90 text-base leading-relaxed">
+				Please check your email and click the verification link to complete your subscription.
+			</p>
+		</div>
+	</div>
+}
+
+templ NewsletterError(message string) {
+	<div class="newsletter-subscription text-center bg-gradient-to-br from-error to-error/80 border-error" id="newsletter-subscription">
+		<div class="flex flex-col items-center gap-4">
+			<div class="newsletter-error-icon">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-6 h-6 text-error-content">
+					<circle cx="12" cy="12" r="10"/>
+					<line x1="15" y1="9" x2="9" y2="15"/>
+					<line x1="9" y1="9" x2="15" y2="15"/>
+				</svg>
+			</div>
+			<h3 class="text-error-content text-2xl font-semibold">Oops! Something went wrong</h3>
+			<p class="text-error-content/90 text-base leading-relaxed">
+				if message != "" {
+					{ message }
+				} else {
+					There was an issue with your subscription. Please try again.
+				}
+			</p>
+			<button 
+				type="button" 
+				class="px-6 py-3 bg-error-content text-error border-0 rounded-lg text-sm font-medium cursor-pointer hover:bg-error-content/90 transition-all duration-200 hover:-translate-y-0.5"
+				onclick="location.reload()"
+			>
+				Try Again
+			</button>
+		</div>
+	</div>
+}

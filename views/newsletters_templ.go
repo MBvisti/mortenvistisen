@@ -11,6 +11,7 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"fmt"
 	"github.com/mbvisti/mortenvistisen/router/routes"
+	"github.com/mbvisti/mortenvistisen/views/fragments"
 	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
 	"time"
 )
@@ -43,7 +44,7 @@ func NewsletterCard(title, slug, excerpt string, releasedAt time.Time) templ.Com
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(releasedAt.Format("January 2, 2006"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/newsletters.templ`, Line: 13, Col: 96}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/newsletters.templ`, Line: 14, Col: 96}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -56,7 +57,7 @@ func NewsletterCard(title, slug, excerpt string, releasedAt time.Time) templ.Com
 		var templ_7745c5c3_Var3 templ.SafeURL
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL("/newsletters/" + slug))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/newsletters.templ`, Line: 16, Col: 50}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/newsletters.templ`, Line: 17, Col: 50}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -69,7 +70,7 @@ func NewsletterCard(title, slug, excerpt string, releasedAt time.Time) templ.Com
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/newsletters.templ`, Line: 16, Col: 60}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/newsletters.templ`, Line: 17, Col: 60}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -83,7 +84,7 @@ func NewsletterCard(title, slug, excerpt string, releasedAt time.Time) templ.Com
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(excerpt)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/newsletters.templ`, Line: 20, Col: 13}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/newsletters.templ`, Line: 21, Col: 13}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -102,7 +103,7 @@ func NewsletterCard(title, slug, excerpt string, releasedAt time.Time) templ.Com
 		var templ_7745c5c3_Var6 templ.SafeURL
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL("/newsletters/" + slug))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/newsletters.templ`, Line: 25, Col: 49}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/newsletters.templ`, Line: 26, Col: 49}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -156,7 +157,7 @@ func Newsletters(newslettersByYear map[int][]HomeNewsletter) templ.Component {
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", year))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/newsletters.templ`, Line: 51, Col: 97}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/newsletters.templ`, Line: 52, Col: 97}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
@@ -177,7 +178,15 @@ func Newsletters(newslettersByYear map[int][]HomeNewsletter) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</div></section></main>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</div></section><!-- Newsletter Subscription Section --><section class=\"py-16 bg-base-200\"><div class=\"max-w-4xl mx-auto px-4 sm:px-6 lg:px-8\"><div class=\"flex justify-center\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = fragments.NewsletterSubscription("newsletter page", false).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</div></div></section></main>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/mbvisti/mortenvistisen/router/routes"
 	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
+	"github.com/mbvisti/mortenvistisen/views/fragments"
 	"time"
 )
 
@@ -56,6 +57,14 @@ templ Newsletters(newslettersByYear map[int][]HomeNewsletter) {
 						</div>
 					</div>
 				}
+			</div>
+		</section>
+		<!-- Newsletter Subscription Section -->
+		<section class="py-16 bg-base-200">
+			<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+				<div class="flex justify-center">
+					@fragments.NewsletterSubscription("newsletter page", false)
+				</div>
 			</div>
 		</section>
 	</main>

@@ -468,4 +468,38 @@
 	.form-control {
 		@apply space-y-1 w-full;
 	}
+
+	/* Newsletter Subscription Component - Complex layouts only */
+	.newsletter-subscription {
+		@apply bg-gradient-to-br from-base-200 to-base-300;
+		@apply border border-base-300 rounded-xl p-8 my-8;
+		@apply w-full max-w-2xl mx-auto;
+	}
+
+	.newsletter-email-input {
+		@apply flex-1 px-4 py-3 border border-base-300 rounded-lg;
+		@apply bg-base-100 text-base-content text-base;
+		@apply transition-all duration-200;
+		@apply focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20;
+	}
+
+	.newsletter-submit-btn {
+		@apply px-6 py-3 bg-primary text-primary-content border-0 rounded-lg;
+		@apply text-base font-medium cursor-pointer;
+		@apply hover:bg-primary/90 transition-all duration-200;
+		@apply flex items-center justify-center gap-2 min-w-20;
+		@apply shadow-md hover:shadow-lg hover:-translate-y-0.5;
+	}
+
+	.newsletter-success-icon {
+		@apply w-12 h-12 text-success-content;
+		@apply bg-success-content/10 rounded-full;
+		@apply flex items-center justify-center;
+	}
+
+	.newsletter-error-icon {
+		@apply w-12 h-12 text-error-content;
+		@apply bg-error-content/10 rounded-full;
+		@apply flex items-center justify-center;
+	}
 }

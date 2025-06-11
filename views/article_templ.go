@@ -12,6 +12,8 @@ import (
 	"context"
 	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
 	"io"
+	"regexp"
+	"strings"
 	"time"
 )
 
@@ -20,6 +22,84 @@ func unsafe(html string) templ.Component {
 		_, err = io.WriteString(w, html)
 		return
 	})
+}
+
+// insertNewsletterSubscription inserts the newsletter subscription form before the 3rd h2 heading
+// or at the end of the content if there are fewer than 3 h2 headings
+func insertNewsletterSubscription(content, title string) templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) (err error) {
+		// Regex to match h2 headings specifically
+		h2Regex := regexp.MustCompile(`<h2[^>]*>`)
+
+		// Find all h2 heading positions
+		h2Matches := h2Regex.FindAllStringIndex(content, -1)
+
+		// If we have at least 3 h2 headings, insert before the 3rd one
+		if len(h2Matches) >= 3 {
+			thirdH2Pos := h2Matches[2][0]
+
+			// Split content at the 3rd h2 heading
+			beforeThirdH2 := content[:thirdH2Pos]
+			afterThirdH2 := content[thirdH2Pos:]
+
+			// Write content before 3rd h2 heading
+			if _, err = io.WriteString(w, beforeThirdH2); err != nil {
+				return
+			}
+
+			// Write newsletter subscription
+			if err = writeNewsletterSubscription(ctx, w, title); err != nil {
+				return
+			}
+
+			// Write remaining content
+			_, err = io.WriteString(w, afterThirdH2)
+			return
+		}
+
+		// Otherwise, append at the end
+		if _, err = io.WriteString(w, content); err != nil {
+			return
+		}
+
+		// Write newsletter subscription at the end
+		err = writeNewsletterSubscription(ctx, w, title)
+		return
+	})
+}
+
+// writeNewsletterSubscription renders the newsletter subscription fragment
+func writeNewsletterSubscription(ctx context.Context, w io.Writer, title string) error {
+	subscriptionHTML := `
+		<div class="my-12">
+			<div class="newsletter-subscription" id="newsletter-subscription">
+				<form class="flex flex-col gap-6" hx-post="/subscribe" hx-target="#newsletter-subscription" hx-swap="outerHTML" method="POST">
+					<div class="text-center">
+						<h3 class="text-base-content text-2xl font-semibold mb-3 leading-tight">Stay up to date</h3>
+						<p class="text-base-content/80 text-base leading-relaxed">Get notified when I publish something new, and unsubscribe at any time.</p>
+					</div>
+					<div class="flex flex-col gap-4">
+						<input type="hidden" name="referer" value="` + title + `"/>
+						<div class="flex flex-col sm:flex-row gap-3 sm:gap-2 sm:items-stretch">
+							<input type="email" id="newsletter-email" name="email" placeholder="Email address" aria-label="Email address" class="newsletter-email-input" required />
+							<button type="submit" class="newsletter-submit-btn" data-umami-event="newsletter--` + strings.ReplaceAll(strings.ToLower(title), " ", "-") + `">
+								<span class="newsletter-btn-text">Join</span>
+								<span class="hidden" style="display: none;">
+									<svg class="w-4 h-4 animate-spin" viewBox="0 0 24 24">
+										<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none" opacity="0.25"/>
+										<path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" opacity="0.75"/>
+									</svg>
+								</span>
+							</button>
+						</div>
+					</div>
+					<div class="cf-turnstile flex justify-center items-center" data-sitekey="0x4AAAAAAAzdx8YPjdxurU_N"></div>
+				</form>
+			</div>
+		</div>
+	`
+	_, err := io.WriteString(w, subscriptionHTML)
+	return err
 }
 
 func Article(img, content, title string, publishedAt, updatedAt time.Time) templ.Component {
@@ -55,7 +135,7 @@ func Article(img, content, title string, publishedAt, updatedAt time.Time) templ
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(img)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 22, Col: 41}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 102, Col: 41}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
@@ -68,7 +148,7 @@ func Article(img, content, title string, publishedAt, updatedAt time.Time) templ
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 22, Col: 55}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 102, Col: 55}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -86,7 +166,7 @@ func Article(img, content, title string, publishedAt, updatedAt time.Time) templ
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 24, Col: 37}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 104, Col: 37}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -99,7 +179,7 @@ func Article(img, content, title string, publishedAt, updatedAt time.Time) templ
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(publishedAt.Format("2006-01-02"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 26, Col: 56}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 106, Col: 56}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -117,7 +197,7 @@ func Article(img, content, title string, publishedAt, updatedAt time.Time) templ
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(updatedAt.Format("2006-01-02"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 28, Col: 53}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/article.templ`, Line: 108, Col: 53}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -132,7 +212,7 @@ func Article(img, content, title string, publishedAt, updatedAt time.Time) templ
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = unsafe(content).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = insertNewsletterSubscription(content, title).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

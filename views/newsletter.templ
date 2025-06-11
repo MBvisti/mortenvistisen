@@ -2,6 +2,7 @@ package views
 
 import (
 	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
+	"github.com/mbvisti/mortenvistisen/views/fragments"
 	"time"
 )
 
@@ -22,6 +23,14 @@ templ Newsletter(content, title string, releasedAt, updatedAt time.Time) {
 				@unsafe(content)
 			</div>
 		</article>
+		<!-- Newsletter Subscription Section -->
+		<section class="py-16 bg-base-200">
+			<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+				<div class="flex justify-center">
+					@fragments.NewsletterSubscription("newsletter", false)
+				</div>
+			</div>
+		</section>
 	</main>
 }
 
