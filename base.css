@@ -36,13 +36,6 @@
 }
 
 @layer components {
-	.nav {
-		@apply bg-base-100;
-		@apply border-b border-base-300;
-		@apply sticky top-0 z-50;
-		@apply h-20;
-		@apply flex items-center;
-	}
 
 	.footer {
 		@apply bg-base-200;
