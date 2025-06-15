@@ -77,7 +77,7 @@ func errorPage(data errorPageData) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"h-full flex-1 bg-base-100 container mx-auto flex justify-center items-center\"><div class=\"w-full md:w-2/5 flex flex-col\"><h1 class=\"text-2xl font-bold text-base-content mb-2\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"h-full flex-1 bg-base-100 max-w-6xl mx-auto px-4 flex justify-center items-center\"><div class=\"w-full md:w-2/5 flex flex-col\"><h1 class=\"text-2xl font-bold text-base-content mb-2\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

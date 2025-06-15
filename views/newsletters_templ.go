@@ -37,7 +37,7 @@ func NewsletterCard(title, slug, excerpt string, releasedAt time.Time) templ.Com
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<article class=\"articleCard\"><div class=\"flex items-center justify-between mb-4\"><time class=\"text-sm text-base-content/70 font-medium\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<article class=\"bg-base-200 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 p-6 border border-base-300\"><div class=\"flex items-center justify-between mb-4\"><time class=\"text-sm text-base-content/70 font-medium\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -43,11 +43,11 @@ func SideBar(currentPath string) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- Sidebar --><aside class=\"sidebar lg:static fixed top-0 left-0 h-screen w-[280px] z-50 -translate-x-full lg:translate-x-0\" id=\"sidebar\"><div class=\"sidebar-header\"><h2 class=\"sidebar-brand\">Grafto</h2></div><nav><ul class=\"list-none p-0 m-0 py-4\"><li class=\"mb-1\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!-- Sidebar --><aside class=\"bg-base-200 border-r border-base-300 transition-transform duration-300 shadow-xl lg:shadow-none lg:static fixed top-0 left-0 h-screen w-[280px] z-50 -translate-x-full lg:translate-x-0\" id=\"sidebar\"><div class=\"px-6 py-6 border-b border-base-300 bg-base-300/20\"><h2 class=\"text-primary text-xl font-bold m-0\">Grafto</h2></div><nav><ul class=\"list-none p-0 m-0 py-4\"><li class=\"mb-1\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var2 = []any{"sidebar-nav-item", templ.KV("active", isActive(currentPath, "/dashboard"))}
+		var templ_7745c5c3_Var2 = []any{"flex items-center px-6 py-3 text-base-content no-underline transition-all duration-200 border-r-4 border-transparent hover:bg-base-300 hover:text-primary hover:border-primary", templ.KV("bg-primary/20 text-primary border-primary font-medium", isActive(currentPath, "/dashboard"))}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -78,11 +78,11 @@ func SideBar(currentPath string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\"><span class=\"sidebar-nav-icon\">📊</span> Dashboard</a></li><li class=\"mb-1\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\"><span class=\"mr-3 w-5 h-5 transition-all duration-200\">📊</span> Dashboard</a></li><li class=\"mb-1\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var5 = []any{"sidebar-nav-item", templ.KV("active", isActive(currentPath, "/dashboard/tags"))}
+		var templ_7745c5c3_Var5 = []any{"flex items-center px-6 py-3 text-base-content no-underline transition-all duration-200 border-r-4 border-transparent hover:bg-base-300 hover:text-primary hover:border-primary", templ.KV("bg-primary/20 text-primary border-primary font-medium", isActive(currentPath, "/dashboard/tags"))}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var5...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -100,11 +100,11 @@ func SideBar(currentPath string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\"><span class=\"sidebar-nav-icon\">🏷️</span> Tags</a></li><li class=\"mb-1\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\"><span class=\"mr-3 w-5 h-5 transition-all duration-200\">🏷️</span> Tags</a></li><li class=\"mb-1\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var7 = []any{"sidebar-nav-item", templ.KV("active", isActive(currentPath, "/dashboard/newsletters"))}
+		var templ_7745c5c3_Var7 = []any{"flex items-center px-6 py-3 text-base-content no-underline transition-all duration-200 border-r-4 border-transparent hover:bg-base-300 hover:text-primary hover:border-primary", templ.KV("bg-primary/20 text-primary border-primary font-medium", isActive(currentPath, "/dashboard/newsletters"))}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var7...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -135,11 +135,11 @@ func SideBar(currentPath string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\"><span class=\"sidebar-nav-icon\">📰</span> Newsletters</a></li><li class=\"mb-1\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "\"><span class=\"mr-3 w-5 h-5 transition-all duration-200\">📰</span> Newsletters</a></li><li class=\"mb-1\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var10 = []any{"sidebar-nav-item", templ.KV("active", isActive(currentPath, "/dashboard/subscribers"))}
+		var templ_7745c5c3_Var10 = []any{"flex items-center px-6 py-3 text-base-content no-underline transition-all duration-200 border-r-4 border-transparent hover:bg-base-300 hover:text-primary hover:border-primary", templ.KV("bg-primary/20 text-primary border-primary font-medium", isActive(currentPath, "/dashboard/subscribers"))}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var10...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -170,7 +170,7 @@ func SideBar(currentPath string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\"><span class=\"sidebar-nav-icon\">📧</span> Subscribers</a></li></ul></nav></aside>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\"><span class=\"mr-3 w-5 h-5 transition-all duration-200\">📧</span> Subscribers</a></li></ul></nav></aside>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

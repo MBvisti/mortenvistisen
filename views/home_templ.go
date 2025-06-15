@@ -38,7 +38,7 @@ func ArticleCard(title, description, slug string, tags []string, publishedAt tim
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<article class=\"articleCard flex flex-col justify-between h-full\"><div><div class=\"flex items-center mb-4\"><time class=\"text-sm text-base-content/70 font-medium\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<article class=\"bg-base-200 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 p-6 border border-base-300 flex flex-col justify-between h-full\"><div><div class=\"flex items-center mb-4\"><time class=\"text-sm text-base-content/70 font-medium\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -161,7 +161,7 @@ func ArticleCard(title, description, slug string, tags []string, publishedAt tim
 				var templ_7745c5c3_Var8 string
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("expanded ? 'Show less' : '+%d more'", len(tags)-3))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/home.templ`, Line: 55, Col: 87}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/home.templ`, Line: 55, Col: 85}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {

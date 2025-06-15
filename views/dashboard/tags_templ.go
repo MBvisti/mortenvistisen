@@ -52,7 +52,7 @@ func Tags(data TagsPageData) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"container\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"max-w-6xl mx-auto px-4\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -60,7 +60,7 @@ func Tags(data TagsPageData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"tags-management-container\"><div class=\"mb-8\"><h2 class=\"text-xl font-semibold mb-4\">Add New Tag</h2><form method=\"POST\" action=\"/dashboard/tags\" class=\"space-y-4\"><div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"grid grid-cols-1 lg:grid-cols-2 gap-8\"><div class=\"mb-8\"><h2 class=\"text-xl font-semibold mb-4\">Add New Tag</h2><form method=\"POST\" action=\"/dashboard/tags\" class=\"space-y-4\"><div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -77,48 +77,48 @@ func Tags(data TagsPageData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div><div class=\"flex justify-end\"><button type=\"submit\" class=\"btn-primary\">Add Tag</button></div></form></div><div><h2 class=\"text-xl font-semibold mb-4\">Existing Tags</h2>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div><div class=\"flex justify-end\"><button type=\"submit\" class=\"inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-primary text-primary-content hover:bg-primary/90 focus:ring-primary focus:ring-offset-base-200 w-full py-3 text-base font-semibold\">Add Tag</button></div></form></div><div><h2 class=\"text-xl font-semibold mb-4\">Existing Tags</h2>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if len(data.Tags) == 0 {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<p class=\"no-tags-message\">No tags created yet.</p>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<p class=\"text-center text-base-content/70 py-8\">No tags created yet.</p>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			} else {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"tags-list\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"space-y-3\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				for _, tag := range data.Tags {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div class=\"tag-item\"><div class=\"tag-info\"><span class=\"tag-title\">")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div class=\"flex justify-between items-center p-4 bg-base-100 border border-base-300 rounded-lg hover:bg-base-300/20 transition-colors duration-200\"><div class=\"flex flex-col\"><span class=\"font-medium text-base-content\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var3 string
 					templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(tag.Title)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/tags.templ`, Line: 48, Col: 45}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/tags.templ`, Line: 48, Col: 65}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</span> <span class=\"tag-date\">Created: ")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</span> <span class=\"text-sm text-base-content/70\">Created: ")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var4 string
 					templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(tag.CreatedAt.Format("Jan 2, 2006"))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/tags.templ`, Line: 49, Col: 79}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/tags.templ`, Line: 49, Col: 99}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</span></div><div class=\"tag-actions\"><button class=\"btn-secondary btn-edit-tag\" data-tag-id=\"")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</span></div><div class=\"flex gap-2\"><button class=\"inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-base-300 text-base-content border-0 px-4 py-2 rounded-lg text-sm font-medium cursor-pointer no-underline inline-block hover:bg-base-300/80 transition-all duration-200 shadow-sm hover:shadow-md btn-edit-tag\" data-tag-id=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -157,7 +157,7 @@ func Tags(data TagsPageData) templ.Component {
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" class=\"inline-form\"><button type=\"submit\" class=\"btn-danger\" onclick=\"return confirm('Are you sure you want to delete this tag?')\">Delete</button></form></div></div>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" class=\"inline\"><button type=\"submit\" class=\"inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-error text-error-content border-0 px-4 py-2 rounded-lg text-sm font-medium cursor-pointer no-underline inline-block hover:bg-error/90 transition-all duration-200 shadow-sm hover:shadow-md\" onclick=\"return confirm('Are you sure you want to delete this tag?')\">Delete</button></form></div></div>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -167,7 +167,7 @@ func Tags(data TagsPageData) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</div></div><div id=\"edit-tag-modal\" class=\"modal\" style=\"display: none;\"><div class=\"modal-content\"><h3>Edit Tag</h3><form id=\"edit-tag-form\" method=\"POST\"><div class=\"form-row\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</div></div><div id=\"edit-tag-modal\" class=\"fixed inset-0 bg-black/50 flex items-center justify-center z-50\" style=\"display: none;\"><div class=\"bg-base-200 border border-base-300 rounded-xl p-6 max-w-md w-full mx-4 shadow-xl\"><h3>Edit Tag</h3><form id=\"edit-tag-form\" method=\"POST\"><div class=\"space-y-2\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -182,7 +182,7 @@ func Tags(data TagsPageData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</div><div class=\"modal-actions\"><button type=\"button\" class=\"btn-secondary\" onclick=\"closeEditModal()\">Cancel</button> <button type=\"submit\" class=\"btn-primary\">Update Tag</button></div></form></div></div></div><script>\n\t\t\tfunction openEditModal(tagId, tagTitle) {\n\t\t\t\tdocument.getElementById('edit-tag-modal').style.display = 'block';\n\t\t\t\tdocument.getElementById('edit-tag-form').action = `/dashboard/tags/${tagId}/edit`;\n\t\t\t\tdocument.getElementById('edit-tag-title').value = tagTitle;\n\t\t\t}\n\n\t\t\tfunction closeEditModal() {\n\t\t\t\tdocument.getElementById('edit-tag-modal').style.display = 'none';\n\t\t\t}\n\n\t\t\tdocument.addEventListener('DOMContentLoaded', function() {\n\t\t\t\tdocument.querySelectorAll('.btn-edit-tag').forEach(button => {\n\t\t\t\t\tbutton.addEventListener('click', function() {\n\t\t\t\t\t\tconst tagId = this.dataset.tagId;\n\t\t\t\t\t\tconst tagTitle = this.dataset.tagTitle;\n\t\t\t\t\t\topenEditModal(tagId, tagTitle);\n\t\t\t\t\t});\n\t\t\t\t});\n\t\t\t});\n\t\t</script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</div><div class=\"flex justify-end gap-2 mt-4\"><button type=\"button\" class=\"inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-base-300 text-base-content border-0 px-4 py-2 rounded-lg text-sm font-medium cursor-pointer no-underline inline-block hover:bg-base-300/80 transition-all duration-200 shadow-sm hover:shadow-md\" onclick=\"closeEditModal()\">Cancel</button> <button type=\"submit\" class=\"inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-primary text-primary-content hover:bg-primary/90 focus:ring-primary focus:ring-offset-base-200 w-full py-3 text-base font-semibold\">Update Tag</button></div></form></div></div></div><script>\n\t\t\tfunction openEditModal(tagId, tagTitle) {\n\t\t\t\tdocument.getElementById('edit-tag-modal').style.display = 'block';\n\t\t\t\tdocument.getElementById('edit-tag-form').action = `/dashboard/tags/${tagId}/edit`;\n\t\t\t\tdocument.getElementById('edit-tag-title').value = tagTitle;\n\t\t\t}\n\n\t\t\tfunction closeEditModal() {\n\t\t\t\tdocument.getElementById('edit-tag-modal').style.display = 'none';\n\t\t\t}\n\n\t\t\tdocument.addEventListener('DOMContentLoaded', function() {\n\t\t\t\tdocument.querySelectorAll('.btn-edit-tag').forEach(button => {\n\t\t\t\t\tbutton.addEventListener('click', function() {\n\t\t\t\t\t\tconst tagId = this.dataset.tagId;\n\t\t\t\t\t\tconst tagTitle = this.dataset.tagTitle;\n\t\t\t\t\t\topenEditModal(tagId, tagTitle);\n\t\t\t\t\t});\n\t\t\t\t});\n\t\t\t});\n\t\t</script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

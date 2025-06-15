@@ -3,14 +3,14 @@ package views
 import (
 	"fmt"
 	"github.com/mbvisti/mortenvistisen/router/routes"
+	"github.com/mbvisti/mortenvistisen/views/fragments"
 	"github.com/mbvisti/mortenvistisen/views/internal/components"
 	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
-	"github.com/mbvisti/mortenvistisen/views/fragments"
 	"time"
 )
 
 templ ArticleCard(title, description, slug string, tags []string, publishedAt time.Time) {
-	<article class="articleCard flex flex-col justify-between h-full">
+	<article class="bg-base-200 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 p-6 border border-base-300 flex flex-col justify-between h-full">
 		<div>
 			<div class="flex items-center mb-4">
 				<time class="text-sm text-base-content/70 font-medium">{ publishedAt.Format("January 2, 2006") }</time>
@@ -46,13 +46,13 @@ templ ArticleCard(title, description, slug string, tags []string, publishedAt ti
 							}
 						</div>
 						<!-- Toggle button -->
-						<button 
-							@click="expanded = !expanded" 
+						<button
+							@click="expanded = !expanded"
 							class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-base-300 text-base-content hover:bg-base-200 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1"
 							:aria-expanded="expanded"
 							aria-label="Toggle additional tags"
 						>
-							<span x-text={ fmt.Sprintf("expanded ? 'Show less' : '+%d more'", len(tags) - 3) }></span>
+							<span x-text={ fmt.Sprintf("expanded ? 'Show less' : '+%d more'", len(tags)-3) }></span>
 						</button>
 					}
 				</div>

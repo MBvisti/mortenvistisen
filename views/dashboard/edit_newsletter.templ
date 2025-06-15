@@ -19,13 +19,13 @@ type EditNewsletterFormData struct {
 
 templ EditNewsletter(formData EditNewsletterFormData) {
 	@layouts.Dashboard() {
-		<div class="container">
+		<div class="max-w-6xl mx-auto px-4">
 			@components.DashboardHeader("Edit Newsletter", "")
 			<div class="mb-4">
 				@components.Link("← Back to Newsletters", routes.DashboardNewsletters.Path)
 			</div>
 			<div class="flex flex-col">
-				<form method="POST" action={ templ.SafeURL(fmt.Sprintf("/dashboard/newsletters/%s/edit", formData.ID)) } class="article-form">
+				<form method="POST" action={ templ.SafeURL(fmt.Sprintf("/dashboard/newsletters/%s/edit", formData.ID)) } class="bg-base-200 border border-base-300 rounded-xl p-6 shadow-lg space-y-8">
 					<div>
 						<h2 class="text-xl font-semibold mb-4">Newsletter Information</h2>
 						<div class="grid grid-cols-2 gap-4">
@@ -56,9 +56,9 @@ templ EditNewsletter(formData EditNewsletterFormData) {
 								)
 							</div>
 							<div>
-								<label class="form-control w-full">
-									<div class="label">
-										<span class="label-text md:text-lg">Publish Status</span>
+								<label class="space-y-1 w-full">
+									<div class="flex justify-between items-center">
+										<span class="text-sm font-medium text-base-content md:text-lg">Publish Status</span>
 									</div>
 									<label class="checkbox-wrapper">
 										<input
@@ -71,9 +71,9 @@ templ EditNewsletter(formData EditNewsletterFormData) {
 										<span class="checkbox-label">Published</span>
 									</label>
 									if formData.Errors["published"] != nil {
-										<div class="label">
+										<div class="flex justify-between items-center">
 											for _, errMsg := range formData.Errors["published"] {
-												<span class="label-text-alt">{ components.UppercaseFirstWord(errMsg) }</span>
+												<span class="text-xs text-error">{ components.UppercaseFirstWord(errMsg) }</span>
 											}
 										</div>
 									}
@@ -86,7 +86,7 @@ templ EditNewsletter(formData EditNewsletterFormData) {
 						<textarea id="editorTarget" name="content">{ formData.Content }</textarea>
 					</div>
 					<div class="flex justify-end mt-6">
-						<button type="submit" class="btn-primary">
+						<button type="submit" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-primary text-primary-content hover:bg-primary/90 focus:ring-primary focus:ring-offset-base-200 w-full py-3 text-base font-semibold">
 							Update Newsletter
 						</button>
 					</div>

@@ -3,13 +3,13 @@ package views
 import (
 	"fmt"
 	"github.com/mbvisti/mortenvistisen/router/routes"
-	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
 	"github.com/mbvisti/mortenvistisen/views/fragments"
+	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
 	"time"
 )
 
 templ NewsletterCard(title, slug, excerpt string, releasedAt time.Time) {
-	<article class="articleCard">
+	<article class="bg-base-200 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 p-6 border border-base-300">
 		<div class="flex items-center justify-between mb-4">
 			<time class="text-sm text-base-content/70 font-medium">{ releasedAt.Format("January 2, 2006") }</time>
 		</div>

@@ -22,29 +22,29 @@ type RegisterFormProps struct {
 }
 
 templ RegisterForm(data RegisterFormProps) {
-	<div class="auth-card">
+	<div class="w-full max-w-md space-y-8 bg-base-200 p-8 rounded-xl shadow-xl border border-base-300">
 		if data.SuccessRegister {
 			<div class="mb-6">
 				@components.SuccessFlag("Your account has been created!", nil)
 			</div>
 		}
 		<div hx-target="this" hx-swap="outerHTML">
-			<div class="auth-header">
-				<h1 class="auth-title">Register User</h1>
-				<p class="auth-subtitle">
+			<div class="text-center space-y-2">
+				<h1 class="text-3xl font-bold text-base-content">Register User</h1>
+				<p class="text-sm text-base-content/70">
 					Already have an account?
 					<a
-						class="auth-link"
+						class="font-medium text-accent hover:text-accent/80 transition-colors no-underline hover:underline"
 						href={ templ.SafeURL(routes.LoginPage.Path) }
 					>
 						Sign in
 					</a>
 				</p>
 			</div>
-			<div class="auth-form">
+			<div class="mt-8 space-y-6">
 				<form hx-post={ routes.CreateUserPage.Path } method="post" class="space-y-6">
 					<input type="hidden" name="gorilla.csrf.Token" value={ data.CsrfToken }/>
-					<div class="auth-form-fields">
+					<div class="space-y-4">
 						<div>
 							@components.InputField("Email", "email", "email", "Enter your email", templ.Attributes{"required": true}, data.Fields[EmailField])
 						</div>
@@ -57,7 +57,7 @@ templ RegisterForm(data RegisterFormProps) {
 					</div>
 					<button
 						type="submit"
-						class="btn btn-primary"
+						class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-primary text-primary-content hover:bg-primary/90 focus:ring-primary focus:ring-offset-base-200 w-full py-3 text-base font-semibold"
 					>
 						Register
 					</button>
@@ -70,7 +70,7 @@ templ RegisterForm(data RegisterFormProps) {
 templ RegisterPage(data RegisterFormProps) {
 	@layouts.Base(
 		views.WithTitle("Registration")) {
-		<main class="auth-container">
+		<main class="flex-1 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-base-100">
 			@RegisterForm(data)
 		</main>
 	}
