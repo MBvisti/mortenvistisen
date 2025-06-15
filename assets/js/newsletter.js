@@ -5,6 +5,7 @@ class NewsletterSubscription {
     constructor() {
         this.turnstileLoaded = false;
         this.turnstileWidget = null;
+        this.scriptLoadInProgress = false;
         this.init();
     }
 
@@ -52,15 +53,29 @@ class NewsletterSubscription {
     }
 
     loadTurnstile() {
-        if (this.turnstileLoaded) return;
+        if (this.turnstileLoaded || this.scriptLoadInProgress) return;
+        
+        // Check if script is already in DOM to prevent duplicate loading
+        const existingScript = document.querySelector('script[src="https://challenges.cloudflare.com/turnstile/v0/api.js"]');
+        if (existingScript) {
+            this.turnstileLoaded = true;
+            this.initializeTurnstile();
+            return;
+        }
 
+        this.scriptLoadInProgress = true;
         const script = document.createElement('script');
-        script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+        script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
         script.async = true;
         script.defer = true;
         script.onload = () => {
             this.turnstileLoaded = true;
+            this.scriptLoadInProgress = false;
             this.initializeTurnstile();
+        };
+        script.onerror = () => {
+            this.scriptLoadInProgress = false;
+            console.error('Failed to load Turnstile script');
         };
         document.head.appendChild(script);
     }
@@ -69,26 +84,32 @@ class NewsletterSubscription {
         // Wait for Turnstile to be available
         const checkTurnstile = () => {
             if (typeof window.turnstile !== 'undefined') {
-                const captchaElements = document.querySelectorAll('.cf-turnstile');
+                const captchaElements = document.querySelectorAll('.cf-turnstile:not([data-turnstile-initialized])');
                 captchaElements.forEach(element => {
-                    if (!element.hasAttribute('data-turnstile-initialized')) {
-                        try {
-                            this.turnstileWidget = window.turnstile.render(element, {
-                                sitekey: element.getAttribute('data-sitekey'),
-                                callback: (token) => {
-                                    this.onTurnstileSuccess(token, element);
-                                },
-                                'error-callback': () => {
-                                    this.onTurnstileError(element);
-                                },
-                                'expired-callback': () => {
-                                    this.onTurnstileExpired(element);
-                                }
-                            });
-                            element.setAttribute('data-turnstile-initialized', 'true');
-                        } catch (error) {
-                            console.error('Failed to initialize Turnstile:', error);
-                        }
+                    try {
+                        // Mark as initialized immediately to prevent race conditions
+                        element.setAttribute('data-turnstile-initialized', 'true');
+                        
+                        const widgetId = window.turnstile.render(element, {
+                            sitekey: element.getAttribute('data-sitekey'),
+                            callback: (token) => {
+                                this.onTurnstileSuccess(token, element);
+                            },
+                            'error-callback': () => {
+                                this.onTurnstileError(element);
+                            },
+                            'expired-callback': () => {
+                                this.onTurnstileExpired(element);
+                            }
+                        });
+                        
+                        // Store widget ID on the element for future reference
+                        element.setAttribute('data-turnstile-widget-id', widgetId);
+                        
+                    } catch (error) {
+                        console.error('Failed to initialize Turnstile:', error);
+                        // Remove the initialized flag if initialization failed
+                        element.removeAttribute('data-turnstile-initialized');
                     }
                 });
             } else {
@@ -235,11 +256,15 @@ class NewsletterSubscription {
     }
 
     resetTurnstile(form) {
-        if (typeof window.turnstile !== 'undefined' && this.turnstileWidget) {
-            try {
-                window.turnstile.reset(this.turnstileWidget);
-            } catch (error) {
-                console.error('Failed to reset Turnstile:', error);
+        if (typeof window.turnstile !== 'undefined') {
+            const turnstileElement = form.querySelector('.cf-turnstile[data-turnstile-widget-id]');
+            if (turnstileElement) {
+                const widgetId = turnstileElement.getAttribute('data-turnstile-widget-id');
+                try {
+                    window.turnstile.reset(widgetId);
+                } catch (error) {
+                    console.error('Failed to reset Turnstile:', error);
+                }
             }
         }
     }
