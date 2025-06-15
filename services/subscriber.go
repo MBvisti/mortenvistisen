@@ -6,8 +6,13 @@ import (
 	"errors"
 	"time"
 
+	"github.com/mbvisti/mortenvistisen/config"
+	"github.com/mbvisti/mortenvistisen/emails"
 	"github.com/mbvisti/mortenvistisen/models"
 	"github.com/mbvisti/mortenvistisen/psql"
+	"github.com/mbvisti/mortenvistisen/psql/queue/jobs"
+	"github.com/jackc/pgx/v5"
+	"github.com/riverqueue/river"
 )
 
 var ErrSubscriberExists = errors.New("subscriber already exists")
@@ -15,6 +20,7 @@ var ErrSubscriberExists = errors.New("subscriber already exists")
 func SubscribeToNewsletter(
 	ctx context.Context,
 	db psql.Postgres,
+	riverClient *river.Client[pgx.Tx],
 	email string,
 	referer string,
 ) (models.Subscriber, models.Token, error) {
@@ -54,6 +60,28 @@ func SubscribeToNewsletter(
 			Scope:      models.ScopeEmailVerification,
 		},
 	})
+	if err != nil {
+		return models.Subscriber{}, models.Token{}, err
+	}
+
+	// Generate email content
+	html, text, err := emails.SubscriberWelcome{
+		Email: subscriber.Email,
+		Code:  token.Value,
+	}.Generate(ctx)
+	if err != nil {
+		return models.Subscriber{}, models.Token{}, err
+	}
+
+	// Queue the welcome email
+	_, err = riverClient.InsertTx(ctx, tx, jobs.EmailJobArgs{
+		Type:        "transaction",
+		To:          subscriber.Email,
+		From:        config.Cfg.DefaultSenderSignature,
+		Subject:     "Welcome! Please verify your email",
+		HtmlVersion: html.String(),
+		TextVersion: text.String(),
+	}, nil)
 	if err != nil {
 		return models.Subscriber{}, models.Token{}, err
 	}

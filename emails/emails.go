@@ -30,6 +30,25 @@ type TemplateHandler interface {
 	Generate(ctx context.Context) (Html, Text, error)
 }
 
+type SubscriberWelcome struct {
+	Email string
+	Code  string
+}
+
+var _ TemplateHandler = (*SubscriberWelcome)(nil)
+
+func (s SubscriberWelcome) Generate(ctx context.Context) (Html, Text, error) {
+	html, plainText, err := processEmail(ctx, subscriberWelcome(SubscriberWelcomeData{
+		Email: s.Email,
+		Code:  s.Code,
+	}))
+	if err != nil {
+		return Html(""), Text(""), err
+	}
+
+	return Html(html), Text(plainText), nil
+}
+
 func processEmail(ctx context.Context, tmpl templ.Component) (string, string, error) {
 	var html bytes.Buffer
 	if err := tmpl.Render(ctx, &html); err != nil {

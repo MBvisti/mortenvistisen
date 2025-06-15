@@ -356,7 +356,7 @@ func (a App) SubscribeNewsletter(c echo.Context) error {
 	}
 
 	// Subscribe to newsletter
-	_, _, err = services.SubscribeToNewsletter(c.Request().Context(), a.db, email, referer)
+	_, _, err = services.SubscribeToNewsletter(c.Request().Context(), a.db, a.db.Queue(), email, referer)
 	if err != nil {
 		if errors.Is(err, services.ErrSubscriberExists) {
 			return fragments.NewsletterError("You're already subscribed to our newsletter!").Render(renderArgs(c))
