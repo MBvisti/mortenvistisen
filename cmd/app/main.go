@@ -74,46 +74,35 @@ func run(ctx context.Context) error {
 	defer cancel()
 
 	var tel *telemetry.Telemetry
-	if cfg.Environment == config.PROD_ENVIRONMENT {
+	if cfg.Environment == config.STAGING_ENVIRONMENT {
 		if err := migrate(ctx); err != nil {
 			return err
 		}
 
 		t, err := telemetry.New(
 			ctx,
-			// AppVersion,
-			"v0.0.0",
+			AppVersion,
 			&telemetry.LokiExporter{
 				LogLevel:   slog.LevelInfo,
 				WithTraces: true,
-				// URL:        cfg.OtlpEndpoint,
-				URL: "https://telemetry-loki.mbvlabs.com",
+				URL:        "https://telemetry-loki.mbvlabs.com",
 				Labels: map[string]string{
 					"env":     "staging",
 					"service": "blog-staging",
 				},
 			},
-			// &telemetry.StdoutExporter{
-			// 	LogLevel:   slog.LevelDebug,
-			// 	WithTraces: true,
-			// },
-
-			// &telemetry.NoopTraceExporter{},
-			// &telemetry.NoopMetricExporter{},
 			telemetry.NewOtlpHttpTraceExporter(
 				"telemetry-alloy.mbvlabs.com",
-				// cfg.OtlpEndpoint,
 				false,
 				map[string]string{
-					"Authorization": "Basic Qm9iOmhpY2N1cA==",
+					"Authorization": "Basic YWRtaW46U2Ftc3VuZzIwNjE=",
 				},
 			),
 			telemetry.NewOtlpHttpMetricExporter(
 				"telemetry-alloy.mbvlabs.com",
-				// cfg.OtlpEndpoint,
 				false,
 				map[string]string{
-					"Authorization": "Basic Qm9iOmhpY2N1cA==",
+					"Authorization": "Basic YWRtaW46U2Ftc3VuZzIwNjE=",
 				},
 			),
 		)

@@ -7,9 +7,10 @@ import (
 )
 
 const (
-	DEV_ENVIRONMENT  = "development"
-	TEST_ENVIRONMENT = "testing"
-	PROD_ENVIRONMENT = "production"
+	DEV_ENVIRONMENT     = "development"
+	TEST_ENVIRONMENT    = "testing"
+	PROD_ENVIRONMENT    = "production"
+	STAGING_ENVIRONMENT = "staging"
 )
 
 type App struct {
