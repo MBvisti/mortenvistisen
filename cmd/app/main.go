@@ -137,7 +137,7 @@ func run(ctx context.Context) error {
 		tel = t
 	}
 
-	if cfg.Environment == config.PROD_ENVIRONMENT {
+	if cfg.Environment == config.STAGING_ENVIRONMENT {
 		defer func() {
 			if err := tel.Shutdown(ctx); err != nil {
 				slog.Error("Failed to shutdown telemetry", "error", err)
@@ -174,7 +174,7 @@ func run(ctx context.Context) error {
 			WithTraces: true,
 		},
 	)
-	if cfg.Environment == config.PROD_ENVIRONMENT {
+	if cfg.Environment == config.STAGING_ENVIRONMENT {
 		defer func() {
 			if err := queueLoggerShutdown(ctx); err != nil {
 				slog.Error("Failed to shutdown telemetry", "error", err)
