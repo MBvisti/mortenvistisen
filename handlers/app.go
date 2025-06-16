@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log/slog"
 	"net/http"
 	"net/url"
@@ -346,26 +347,49 @@ func (a App) SubscribeNewsletter(c echo.Context) error {
 	turnstileToken := c.FormValue("cf-turnstile-response")
 
 	// Validate Turnstile
-	isValid, err := verifyTurnstileToken(c.Request().Context(), turnstileToken, c.RealIP())
+	isValid, err := verifyTurnstileToken(
+		c.Request().Context(),
+		turnstileToken,
+		c.RealIP(),
+	)
 	if err != nil {
-		slog.ErrorContext(c.Request().Context(), "turnstile verification error", "error", err)
-		return fragments.NewsletterSubscription("unknown", true).Render(renderArgs(c))
+		slog.ErrorContext(
+			c.Request().Context(),
+			"turnstile verification error",
+			"error",
+			err,
+		)
+		return fragments.NewsletterSubscription("unknown", true).
+			Render(renderArgs(c))
 	}
 	if !isValid {
-		return fragments.NewsletterSubscription("unknown", true).Render(renderArgs(c))
+		return fragments.NewsletterSubscription("unknown", true).
+			Render(renderArgs(c))
 	}
 
 	// Subscribe to newsletter
-	_, _, err = services.SubscribeToNewsletter(c.Request().Context(), a.db, a.db.Queue(), email, referer)
+	_, _, err = services.SubscribeToNewsletter(
+		c.Request().Context(),
+		a.db,
+		a.db.Queue(),
+		email,
+		referer,
+	)
 	if err != nil {
 		if errors.Is(err, services.ErrSubscriberExists) {
-			return fragments.NewsletterError("You're already subscribed to our newsletter!").Render(renderArgs(c))
+			return fragments.NewsletterError("You're already subscribed to our newsletter!").
+				Render(renderArgs(c))
 		}
-		slog.ErrorContext(c.Request().Context(), "error subscribing to newsletter", "error", err, "email", email)
+		slog.ErrorContext(
+			c.Request().Context(),
+			"error subscribing to newsletter",
+			"error",
+			err,
+			"email",
+			email,
+		)
 		return fragments.NewsletterError("").Render(renderArgs(c))
 	}
-
-	// TODO: Send verification email (will be implemented later)
 
 	return fragments.NewsletterSuccess().Render(renderArgs(c))
 }
@@ -379,7 +403,11 @@ type turnstileResponse struct {
 	CData       string   `json:"cdata"`
 }
 
-func verifyTurnstileToken(ctx context.Context, token string, remoteIP string) (bool, error) {
+func verifyTurnstileToken(
+	ctx context.Context,
+	token string,
+	remoteIP string,
+) (bool, error) {
 	if token == "" {
 		return false, fmt.Errorf("turnstile token is required")
 	}
@@ -411,7 +439,12 @@ func verifyTurnstileToken(ctx context.Context, token string, remoteIP string) (b
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return false, fmt.Errorf("turnstile verification failed with status: %d", resp.StatusCode)
+		b, _ := io.ReadAll(resp.Body)
+		return false, fmt.Errorf(
+			"turnstile verification failed with status: %d with body: %v",
+			resp.StatusCode,
+			string(b),
+		)
 	}
 
 	var turnstileResp turnstileResponse
