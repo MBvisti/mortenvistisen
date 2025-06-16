@@ -81,6 +81,7 @@ templ head(data HeadData) {
 			href={ data.Slug }
 		/>
 		<script src={ data.ScriptSrc } type="module"></script>
+		<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback" defer></script>
 	</head>
 }
 

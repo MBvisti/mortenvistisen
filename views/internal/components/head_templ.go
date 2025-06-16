@@ -328,7 +328,7 @@ func head(data HeadData) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "\" type=\"module\"></script></head>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "\" type=\"module\"></script><script src=\"https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback\" defer></script></head>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

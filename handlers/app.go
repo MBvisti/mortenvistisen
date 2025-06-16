@@ -346,7 +346,7 @@ func (pm *Manager) ParseContent(content string) (string, error) {
 func (a App) SubscribeNewsletter(c echo.Context) error {
 	email := c.FormValue("email")
 	referer := c.FormValue("referer")
-	turnstileToken := c.FormValue("cf-turnstile-response")
+	turnstileToken := c.FormValue("turnstileToken")
 
 	span := trace.SpanFromContext(c.Request().Context())
 	span.SetAttributes(

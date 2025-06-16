@@ -31,35 +31,43 @@ func NewsletterSubscription(context string, failedCaptcha bool) templ.Component 
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		if failedCaptcha {
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"bg-gradient-to-br from-base-200 to-base-300 border border-base-300 rounded-xl p-8 my-8 w-full max-w-2xl mx-auto\" id=\"newsletter-subscription\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"bg-gradient-to-br from-base-200 to-base-300 border border-base-300 rounded-xl p-8 my-8 w-full max-w-2xl mx-auto\" id=\"newsletter-subscription\"><form class=\"flex flex-col gap-6\" hx-post=\"/subscribe\" hx-target=\"#newsletter-subscription\" hx-swap=\"outerHTML\" method=\"POST\"><div class=\"text-center\"><h3 class=\"text-base-content text-2xl font-semibold mb-3 leading-tight\">Stay up to date</h3><p class=\"text-base-content/80 text-base leading-relaxed\">Get notified when I publish something new, and unsubscribe at any time.</p></div><div class=\"flex flex-col gap-4\"><input type=\"hidden\" name=\"referer\" value=\"")
+		if failedCaptcha {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"alert alert-error mb-4\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"stroke-current shrink-0 h-6 w-6\" fill=\"none\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z\"></path></svg> <span>Security verification failed. Please try again.</span></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<form id=\"newsletterForm\" class=\"flex flex-col gap-6\" hx-post=\"/subscribe\" hx-target=\"#newsletter-subscription\" hx-swap=\"outerHTML\" method=\"POST\"><div class=\"text-center\"><h3 class=\"text-base-content text-2xl font-semibold mb-3 leading-tight\">Stay up to date</h3><p class=\"text-base-content/80 text-base leading-relaxed\">Get notified when I publish something new, and unsubscribe at any time.</p></div><div class=\"flex flex-col gap-4\"><input type=\"hidden\" name=\"referer\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(context)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/fragments/newsletter_subscription.templ`, Line: 21, Col: 55}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/fragments/newsletter_subscription.templ`, Line: 26, Col: 55}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\"><div class=\"flex flex-col sm:flex-row gap-3 sm:gap-2 sm:items-stretch\"><input type=\"email\" id=\"newsletter-email\" name=\"email\" placeholder=\"Email address\" aria-label=\"Email address\" class=\"flex-1 px-4 py-3 border border-base-300 rounded-lg bg-base-100 text-base-content text-base transition-all duration-200 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20\" required> <button type=\"submit\" class=\"px-6 py-3 bg-primary text-primary-content border-0 rounded-lg text-base font-medium cursor-pointer hover:bg-primary/90 transition-all duration-200 flex items-center justify-center gap-2 min-w-20 shadow-md hover:shadow-lg hover:-translate-y-0.5\" data-umami-event=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\"> <input type=\"hidden\" name=\"turnstileToken\" id=\"turnstile-token\" value=\"\"><div class=\"flex flex-col sm:flex-row gap-3 sm:gap-2 sm:items-stretch\"><input type=\"email\" id=\"newsletter-email\" name=\"email\" placeholder=\"Email address\" aria-label=\"Email address\" class=\"flex-1 px-4 py-3 border border-base-300 rounded-lg bg-base-100 text-base-content text-base transition-all duration-200 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20\" required> <button type=\"submit\" id=\"newsletter-submit-btn\" class=\"px-6 py-3 bg-primary text-primary-content border-0 rounded-lg text-base font-medium cursor-pointer hover:bg-primary/90 transition-all duration-200 flex items-center justify-center gap-2 min-w-20 shadow-md hover:shadow-lg hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none\" data-umami-event=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("newsletter--%s", context))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/fragments/newsletter_subscription.templ`, Line: 35, Col: 63}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/fragments/newsletter_subscription.templ`, Line: 42, Col: 63}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\"><span class=\"newsletter-btn-text\">Join</span> <span class=\"hidden\" style=\"display: none;\"><svg class=\"w-4 h-4 animate-spin\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"10\" stroke=\"currentColor\" stroke-width=\"4\" fill=\"none\" opacity=\"0.25\"></circle> <path fill=\"currentColor\" d=\"M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z\" opacity=\"0.75\"></path></svg></span></button></div></div><div class=\"cf-turnstile flex justify-center items-center\" data-sitekey=\"0x4AAAAAAAzdx8YPjdxurU_N\"></div></form></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\"><span class=\"newsletter-btn-text\">Join</span> <span class=\"newsletter-btn-spinner hidden\"><svg class=\"w-4 h-4 animate-spin\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"10\" stroke=\"currentColor\" stroke-width=\"4\" fill=\"none\" opacity=\"0.25\"></circle> <path fill=\"currentColor\" d=\"M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z\" opacity=\"0.75\"></path></svg></span></button></div><div id=\"turnstile-container\" class=\"hidden transition-all duration-300 ease-in-out\" data-sitekey=\"0x4AAAAAABhHZsla29c67R_x\"></div></div></form></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -88,7 +96,7 @@ func NewsletterSuccess() templ.Component {
 			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"bg-gradient-to-br from-base-200 to-base-300 border border-base-300 rounded-xl p-8 my-8 w-full max-w-2xl mx-auto text-center bg-gradient-to-br from-success to-success/80 border-success\" id=\"newsletter-subscription\"><div class=\"flex flex-col items-center gap-4\"><div class=\"w-12 h-12 text-success-content bg-success-content/10 rounded-full flex items-center justify-center\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" class=\"w-6 h-6 text-success-content\"><path d=\"M22 11.08V12a10 10 0 1 1-5.93-9.14\"></path> <polyline points=\"22,4 12,14.01 9,11.01\"></polyline></svg></div><h3 class=\"text-success-content text-2xl font-semibold\">Almost there!</h3><p class=\"text-success-content/90 text-base leading-relaxed\">Please check your email and click the verification link to complete your subscription.</p></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<div class=\"bg-gradient-to-br from-base-200 to-base-300 border border-base-300 rounded-xl p-8 my-8 w-full max-w-2xl mx-auto text-center bg-gradient-to-br from-success to-success/80 border-success\" id=\"newsletter-subscription\"><div class=\"flex flex-col items-center gap-4\"><div class=\"w-12 h-12 text-success-content bg-success-content/10 rounded-full flex items-center justify-center\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" class=\"w-6 h-6 text-success-content\"><path d=\"M22 11.08V12a10 10 0 1 1-5.93-9.14\"></path> <polyline points=\"22,4 12,14.01 9,11.01\"></polyline></svg></div><h3 class=\"text-success-content text-2xl font-semibold\">Almost there!</h3><p class=\"text-success-content/90 text-base leading-relaxed\">Please check your email and click the verification link to complete your subscription.</p></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -117,7 +125,7 @@ func NewsletterError(message string) templ.Component {
 			templ_7745c5c3_Var5 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"bg-gradient-to-br from-base-200 to-base-300 border border-base-300 rounded-xl p-8 my-8 w-full max-w-2xl mx-auto text-center bg-gradient-to-br from-error to-error/80 border-error\" id=\"newsletter-subscription\"><div class=\"flex flex-col items-center gap-4\"><div class=\"w-12 h-12 text-error-content bg-error-content/10 rounded-full flex items-center justify-center\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" class=\"w-6 h-6 text-error-content\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle> <line x1=\"15\" y1=\"9\" x2=\"9\" y2=\"15\"></line> <line x1=\"9\" y1=\"9\" x2=\"15\" y2=\"15\"></line></svg></div><h3 class=\"text-error-content text-2xl font-semibold\">Oops! Something went wrong</h3><p class=\"text-error-content/90 text-base leading-relaxed\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<div class=\"bg-gradient-to-br from-base-200 to-base-300 border border-base-300 rounded-xl p-8 my-8 w-full max-w-2xl mx-auto text-center bg-gradient-to-br from-error to-error/80 border-error\" id=\"newsletter-subscription\"><div class=\"flex flex-col items-center gap-4\"><div class=\"w-12 h-12 text-error-content bg-error-content/10 rounded-full flex items-center justify-center\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" class=\"w-6 h-6 text-error-content\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle> <line x1=\"15\" y1=\"9\" x2=\"9\" y2=\"15\"></line> <line x1=\"9\" y1=\"9\" x2=\"15\" y2=\"15\"></line></svg></div><h3 class=\"text-error-content text-2xl font-semibold\">Oops! Something went wrong</h3><p class=\"text-error-content/90 text-base leading-relaxed\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -125,19 +133,19 @@ func NewsletterError(message string) templ.Component {
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(message)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/fragments/newsletter_subscription.templ`, Line: 82, Col: 14}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/fragments/newsletter_subscription.templ`, Line: 89, Col: 14}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "There was an issue with your subscription. Please try again.")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "There was an issue with your subscription. Please try again.")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</p><button type=\"button\" class=\"px-6 py-3 bg-error-content text-error border-0 rounded-lg text-sm font-medium cursor-pointer hover:bg-error-content/90 transition-all duration-200 hover:-translate-y-0.5\" onclick=\"location.reload()\">Try Again</button></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</p><button type=\"button\" class=\"px-6 py-3 bg-error-content text-error border-0 rounded-lg text-sm font-medium cursor-pointer hover:bg-error-content/90 transition-all duration-200 hover:-translate-y-0.5\" onclick=\"location.reload()\">Try Again</button></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
