@@ -38,9 +38,22 @@ templ head(data HeadData) {
 		</title>
 		<link href={ data.StylesheetHref } rel="stylesheet"/>
 		<link rel="apple-touch-icon" sizes="180x180" href={ templ.SafeURL(routes.FaviconAppletouch.Path) }/>
-		<link rel="icon" type="image/png" sizes="32x32" href={ templ.SafeURL(routes.Favicon32.Path) }/>
-		<link rel="icon" type="image/png" sizes="16x16" href={ templ.SafeURL(routes.Favicon16.Path) }/>
-		<link rel="manifest" href={ templ.SafeURL(routes.FaviconSiteManifest.Path) }/>
+		<link
+			rel="icon"
+			type="image/png"
+			sizes="32x32"
+			href={ fmt.Sprintf("%s/%s", config.Cfg.GetFullDomain(), routes.Favicon32.Path) }
+		/>
+		<link
+			rel="icon"
+			type="image/png"
+			sizes="16x16"
+			href={ fmt.Sprintf("%s/%s", config.Cfg.GetFullDomain(), routes.Favicon16.Path) }
+		/>
+		<link
+			rel="manifest"
+			href={ fmt.Sprintf("%s/%s", config.Cfg.GetFullDomain(), routes.FaviconSiteManifest.Path) }
+		/>
 		<meta property="og:type" content={ data.MetaType }/>
 		<meta property="og:title" content={ data.Title }/>
 		<meta property="og:description" content={ data.Description }/>
