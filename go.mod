@@ -5,6 +5,7 @@ go 1.24.0
 toolchain go1.24.2
 
 require (
+	github.com/Masterminds/squirrel v1.5.4
 	github.com/PuerkitoBio/goquery v1.10.3
 	github.com/a-h/templ v0.3.898
 	github.com/alecthomas/chroma/v2 v2.2.0
@@ -15,8 +16,8 @@ require (
 	github.com/gorilla/sessions v1.2.2
 	github.com/jaytaylor/html2text v0.0.0-20180606194806-57d518f124b0
 	github.com/lmittmann/tint v1.0.1
-	github.com/riverqueue/river v0.22.0
-	github.com/riverqueue/river/riverdriver/riverpgxv5 v0.22.0
+	github.com/riverqueue/river v0.23.1
+	github.com/riverqueue/river/riverdriver/riverpgxv5 v0.23.1
 	github.com/stretchr/testify v1.10.0
 	github.com/vanng822/go-premailer v1.20.2
 	github.com/yuin/goldmark v1.4.15
@@ -37,7 +38,6 @@ require (
 )
 
 require (
-	github.com/Masterminds/squirrel v1.5.4 // indirect
 	github.com/andybalholm/cascadia v1.3.3 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.2 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
@@ -71,9 +71,9 @@ require (
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/riverqueue/apiframe v0.0.0-20250408034821-b206bbbd0fb4 // indirect
-	github.com/riverqueue/river/riverdriver v0.22.0 // indirect
-	github.com/riverqueue/river/rivershared v0.22.0 // indirect
-	github.com/riverqueue/river/rivertype v0.22.0 // indirect
+	github.com/riverqueue/river/riverdriver v0.23.1 // indirect
+	github.com/riverqueue/river/rivershared v0.23.1 // indirect
+	github.com/riverqueue/river/rivertype v0.23.1 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/sethvargo/go-retry v0.3.0 // indirect
 	github.com/ssor/bom v0.0.0-20170718123548-6386211fdfcf // indirect
@@ -106,7 +106,7 @@ require (
 	github.com/go-playground/validator/v10 v10.26.0
 	github.com/gorilla/csrf v1.7.3
 	github.com/gosimple/slug v1.15.0
-	github.com/jackc/pgx/v5 v5.7.4
+	github.com/jackc/pgx/v5 v5.7.5
 	github.com/jordan-wright/email v4.0.1-0.20210109023952-943e75fe5223+incompatible
 	github.com/labstack/echo-contrib v0.17.1
 	github.com/labstack/echo/v4 v4.13.4
