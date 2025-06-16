@@ -20,7 +20,7 @@ func NewConfig() Config {
 	var cfg Config
 
 	switch os.Getenv("ENVIRONMENT") {
-	case DEV_ENVIRONMENT, PROD_ENVIRONMENT:
+	case DEV_ENVIRONMENT, STAGING_ENVIRONMENT, PROD_ENVIRONMENT:
 		awsAccessKeyID := os.Getenv("AWS_ACCESS_KEY_ID")
 		if awsAccessKeyID == "" {
 			panic("missing 'AWS_ACCESS_KEY_ID'")
