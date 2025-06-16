@@ -179,7 +179,7 @@ func (h *lokiHandler) sendToLoki(
 	}
 
 	httpReq.Header.Set("Content-Type", "application/json")
-	httpReq.Header.Set("Authorization", "Basic Qm9iOmhpY2N1cA==")
+	httpReq.Header.Set("Authorization", "Basic YWRtaW46U2Ftc3VuZzIwNjE=")
 
 	resp, err := h.httpClient.Do(httpReq)
 	if err != nil {
