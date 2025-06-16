@@ -112,10 +112,15 @@ func NewHandlers(
 	gob.Register(uuid.UUID{})
 	gob.Register(contexts.FlashMessage{})
 
+	cacheManager, err := NewCacheManager()
+	if err != nil {
+		panic(err)
+	}
+
 	api := newApi()
-	app := newApp(db)
+	app := newApp(db, cacheManager)
 	auth := newAuthentication(db, emailSvc)
-	dashboard := newDashboard(db)
+	dashboard := newDashboard(db, cacheManager)
 	registration := newRegistration(db, emailSvc)
 	assets := newAssets(db)
 
