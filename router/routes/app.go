@@ -15,6 +15,8 @@ var App = []Route{
 	NewslettersPage,
 	NewsletterPage,
 	SubscribeNewsletter,
+	VerifyNewsletterSubscription,
+	VerifyNewsletterPage,
 	Redirect.Route,
 }
 
@@ -65,6 +67,20 @@ var SubscribeNewsletter = Route{
 	Path:        "/subscribe",
 	Method:      http.MethodPost,
 	HandlerName: "SubscribeNewsletter",
+}
+
+var VerifyNewsletterSubscription = Route{
+	Name:        appNamePrefix + ".verify_newsletter_subscription",
+	Path:        "/verify-subscription",
+	Method:      http.MethodPost,
+	HandlerName: "VerifyNewsletterSubscription",
+}
+
+var VerifyNewsletterPage = Route{
+	Name:        appNamePrefix + ".verify_newsletter_page",
+	Path:        "/verify-subscription",
+	Method:      http.MethodGet,
+	HandlerName: "VerifyNewsletterPage",
 }
 
 var Redirect = redirect{

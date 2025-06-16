@@ -56,6 +56,58 @@ templ NewsletterSubscription(context string, failedCaptcha bool) {
 	</div>
 }
 
+templ NewsletterVerificationForm(email string) {
+	<div class="bg-gradient-to-br from-base-200 to-base-300 border border-base-300 rounded-xl p-8 my-8 w-full max-w-2xl mx-auto" id="newsletter-subscription">
+		<div class="text-center mb-6">
+			<div class="w-12 h-12 text-primary bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-6 h-6 text-primary">
+					<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+					<polyline points="22,6 12,13 2,6"></polyline>
+				</svg>
+			</div>
+			<h3 class="text-base-content text-2xl font-semibold mb-3">Check your email!</h3>
+			<p class="text-base-content/80 text-base leading-relaxed mb-4">
+				We've sent a 6-digit verification code to <strong>{ email }</strong>. 
+				Enter the code below to complete your subscription.
+			</p>
+		</div>
+		<form
+			class="flex flex-col gap-4"
+			hx-post="/verify-subscription"
+			hx-target="#newsletter-subscription"
+			hx-swap="outerHTML"
+			method="POST"
+		>
+			<input type="hidden" name="email" value={ email }/>
+			<div class="flex flex-col gap-3">
+				<input
+					type="text"
+					name="code"
+					placeholder="Enter 6-digit code"
+					aria-label="Verification code"
+					class="px-4 py-3 border border-base-300 rounded-lg bg-base-100 text-base-content text-base text-center font-mono tracking-wider transition-all duration-200 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+					maxlength="6"
+					pattern="[A-Za-z0-9]{6}"
+					required
+					autocomplete="off"
+				/>
+				<button
+					type="submit"
+					class="px-6 py-3 bg-primary text-primary-content border-0 rounded-lg text-base font-medium cursor-pointer hover:bg-primary/90 transition-all duration-200 flex items-center justify-center gap-2 shadow-md hover:shadow-lg hover:-translate-y-0.5"
+				>
+					Verify Email
+				</button>
+			</div>
+		</form>
+		<div class="text-center mt-4">
+			<p class="text-base-content/60 text-sm">
+				Didn't receive the email? Check your spam folder or 
+				<a href="mailto:support@example.com" class="text-primary hover:underline">contact support</a>.
+			</p>
+		</div>
+	</div>
+}
+
 templ NewsletterSuccess() {
 	<div class="bg-gradient-to-br from-base-200 to-base-300 border border-base-300 rounded-xl p-8 my-8 w-full max-w-2xl mx-auto text-center bg-gradient-to-br from-success to-success/80 border-success" id="newsletter-subscription">
 		<div class="flex flex-col items-center gap-4">
@@ -65,9 +117,9 @@ templ NewsletterSuccess() {
 					<polyline points="22,4 12,14.01 9,11.01"></polyline>
 				</svg>
 			</div>
-			<h3 class="text-success-content text-2xl font-semibold">Almost there!</h3>
+			<h3 class="text-success-content text-2xl font-semibold">Email verified!</h3>
 			<p class="text-success-content/90 text-base leading-relaxed">
-				Please check your email and click the verification link to complete your subscription.
+				Your subscription is now confirmed. You'll receive our newsletter and can unsubscribe at any time.
 			</p>
 		</div>
 	</div>

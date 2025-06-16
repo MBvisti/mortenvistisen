@@ -86,3 +86,51 @@ func SubscribeToNewsletter(
 
 	return subscriber, token, nil
 }
+
+func VerifySubscriberEmail(
+	ctx context.Context,
+	db psql.Postgres,
+	email string,
+	code string,
+) error {
+	tx, err := db.BeginTx(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	subscriber, err := models.GetSubscriberByEmail(ctx, tx, email)
+	if err != nil {
+		return err
+	}
+
+	if subscriber.IsVerified {
+		return errors.New("subscriber already verified")
+	}
+
+	token, err := models.GetHashedToken(ctx, tx, code)
+	if err != nil {
+		return err
+	}
+
+	if !token.IsValid() ||
+		token.Meta.Scope != models.ScopeEmailVerification ||
+		token.Meta.Resource != models.ResourceSubscriber ||
+		token.Meta.ResourceID != subscriber.ID {
+		return errors.New("invalid verification code")
+	}
+
+	if err := models.VerifySubscriber(ctx, tx, models.VerifySubscriberPayload{
+		ID:         subscriber.ID,
+		UpdatedAt:  time.Now(),
+		IsVerified: true,
+	}); err != nil {
+		return err
+	}
+
+	if err := models.DeleteToken(ctx, tx, token.ID); err != nil {
+		return err
+	}
+
+	return tx.Commit(ctx)
+}

@@ -406,7 +406,60 @@ func (a App) SubscribeNewsletter(c echo.Context) error {
 		return fragments.NewsletterError("").Render(renderArgs(c))
 	}
 
+	return fragments.NewsletterVerificationForm(email).Render(renderArgs(c))
+}
+
+func (a App) VerifyNewsletterSubscription(c echo.Context) error {
+	email := c.FormValue("email")
+	code := c.FormValue("code")
+
+	span := trace.SpanFromContext(c.Request().Context())
+	span.SetAttributes(
+		attribute.String("email", email),
+		attribute.String("code", code),
+	)
+
+	if email == "" || code == "" {
+		return fragments.NewsletterError("Email and verification code are required.").
+			Render(renderArgs(c))
+	}
+
+	err := services.VerifySubscriberEmail(
+		c.Request().Context(),
+		a.db,
+		email,
+		code,
+	)
+	if err != nil {
+		slog.ErrorContext(
+			c.Request().Context(),
+			"error verifying newsletter subscription",
+			"error",
+			err,
+			"email",
+			email,
+		)
+
+		if err.Error() == "subscriber already verified" {
+			return fragments.NewsletterError("This email is already verified!").
+				Render(renderArgs(c))
+		}
+
+		return fragments.NewsletterError("Invalid verification code. Please check your email and try again.").
+			Render(renderArgs(c))
+	}
+
 	return fragments.NewsletterSuccess().Render(renderArgs(c))
+}
+
+func (a App) VerifyNewsletterPage(c echo.Context) error {
+	email := c.QueryParam("email")
+	if email == "" {
+		return fragments.NewsletterError("Invalid verification link. Please try again.").
+			Render(renderArgs(c))
+	}
+
+	return fragments.NewsletterVerificationForm(email).Render(renderArgs(c))
 }
 
 type turnstileResponse struct {

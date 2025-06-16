@@ -1,5 +1,7 @@
 package emails
 
+import "github.com/mbvisti/mortenvistisen/config"
+
 type SubscriberWelcomeData struct {
 	Email string
 	Code  string
@@ -30,6 +32,10 @@ templ subscriberWelcome(data SubscriberWelcomeData) {
 							To complete your subscription and start receiving our newsletter, please verify your email address by entering the code below:
 						}
 						@codeBlock(data.Code)
+						@paragraph() {
+							Or click this link to verify your email automatically:
+						}
+						@btn("Verify Email", config.Cfg.GetFullDomain() + "/verify-subscription?email=" + data.Email)
 						@paragraph() {
 							This verification code will expire in 24 hours. If you didn't subscribe to our newsletter, you can safely ignore this email.
 						}
