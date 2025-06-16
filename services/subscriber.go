@@ -20,7 +20,6 @@ var ErrSubscriberExists = errors.New("subscriber already exists")
 func SubscribeToNewsletter(
 	ctx context.Context,
 	db psql.Postgres,
-	riverClient *river.Client[pgx.Tx],
 	email string,
 	referer string,
 ) (models.Subscriber, models.Token, error) {
@@ -31,11 +30,7 @@ func SubscribeToNewsletter(
 	defer tx.Rollback(ctx)
 
 	_, err = models.GetSubscriberByEmail(ctx, tx, email)
-	if err != nil {
-		if !errors.Is(err, sql.ErrNoRows) {
-			return models.Subscriber{}, models.Token{}, ErrSubscriberExists
-		}
-
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return models.Subscriber{}, models.Token{}, err
 	}
 
@@ -64,7 +59,6 @@ func SubscribeToNewsletter(
 		return models.Subscriber{}, models.Token{}, err
 	}
 
-	// Generate email content
 	html, text, err := emails.SubscriberWelcome{
 		Email: subscriber.Email,
 		Code:  token.Value,
@@ -73,7 +67,11 @@ func SubscribeToNewsletter(
 		return models.Subscriber{}, models.Token{}, err
 	}
 
-	// Queue the welcome email
+	riverClient, err := river.ClientFromContextSafely[pgx.Tx](ctx)
+	if err != nil {
+		return models.Subscriber{}, models.Token{}, err
+	}
+
 	_, err = riverClient.InsertTx(ctx, tx, jobs.EmailJobArgs{
 		Type:        "transaction",
 		To:          subscriber.Email,

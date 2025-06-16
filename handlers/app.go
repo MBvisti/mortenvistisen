@@ -24,6 +24,8 @@ import (
 	"github.com/mbvisti/mortenvistisen/router/routes"
 	"github.com/mbvisti/mortenvistisen/services"
 	"github.com/mbvisti/mortenvistisen/views/fragments"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/mbvisti/mortenvistisen/views"
 	"github.com/yuin/goldmark"
@@ -346,6 +348,13 @@ func (a App) SubscribeNewsletter(c echo.Context) error {
 	referer := c.FormValue("referer")
 	turnstileToken := c.FormValue("cf-turnstile-response")
 
+	span := trace.SpanFromContext(c.Request().Context())
+	span.SetAttributes(
+		attribute.String("email", email),
+		attribute.String("referer", referer),
+		attribute.String("turnstileToken", turnstileToken),
+	)
+
 	// Validate Turnstile
 	isValid, err := verifyTurnstileToken(
 		c.Request().Context(),
@@ -359,6 +368,7 @@ func (a App) SubscribeNewsletter(c echo.Context) error {
 			"error",
 			err,
 		)
+
 		return fragments.NewsletterSubscription("unknown", true).
 			Render(renderArgs(c))
 	}
@@ -367,11 +377,9 @@ func (a App) SubscribeNewsletter(c echo.Context) error {
 			Render(renderArgs(c))
 	}
 
-	// Subscribe to newsletter
 	_, _, err = services.SubscribeToNewsletter(
 		c.Request().Context(),
 		a.db,
-		a.db.Queue(),
 		email,
 		referer,
 	)
@@ -380,6 +388,7 @@ func (a App) SubscribeNewsletter(c echo.Context) error {
 			return fragments.NewsletterError("You're already subscribed to our newsletter!").
 				Render(renderArgs(c))
 		}
+
 		slog.ErrorContext(
 			c.Request().Context(),
 			"error subscribing to newsletter",
