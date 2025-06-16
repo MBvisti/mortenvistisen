@@ -394,6 +394,7 @@ func (a App) SubscribeNewsletter(c echo.Context) error {
 	_, _, err = services.SubscribeToNewsletter(
 		c.Request().Context(),
 		a.db,
+		a.db.Queue(),
 		email,
 		referer,
 	)
