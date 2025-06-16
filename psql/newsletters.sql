@@ -1,56 +1,53 @@
--- name: QueryAllNewsletters :many
-SELECT 
-    id, created_at, updated_at, title,
-    content, released_at, released, slug
-FROM newsletters
-ORDER BY created_at DESC;
-;
+-- name: QueryNewsletterByID :one
+select * from newsletters where id=$1;
+
+-- name: QueryNewsletterByTitle :one
+select * from newsletters where title=$1;
 
 -- name: QueryNewsletterBySlug :one
-SELECT 
-    id, created_at, updated_at, title,
-    content, released_at, released, slug
-FROM newsletters
-WHERE slug=$1;
+select * from newsletters where slug=$1;
 
 -- name: QueryNewsletters :many
-SELECT 
-    id, created_at, updated_at, title,
-    content, released_at, released, slug
-FROM newsletters
-ORDER BY created_at DESC
-LIMIT $1 OFFSET $2;
+select * from newsletters order by created_at desc;
 
--- name: QueryNewslettersCount :one
-SELECT COUNT(*) FROM newsletters;
+-- name: QueryPublishedNewsletters :many
+select * from newsletters where is_published=true order by released_at desc;
 
--- name: QueryNewsletterByID :one
-SELECT 
-    id, created_at, updated_at, title,
-    content, released_at, released, slug
-FROM newsletters
-WHERE id = $1;
+-- name: QueryDraftNewsletters :many
+select * from newsletters where is_published=false order by created_at desc;
+
+-- name: QueryNewslettersPaginated :many
+select * from newsletters 
+order by created_at desc 
+limit $1 offset $2;
+
+-- name: CountNewsletters :one
+select count(*) from newsletters;
 
 -- name: InsertNewsletter :one
-INSERT INTO newsletters (
-    id, created_at, updated_at, title,
-    content, released_at, released, slug
-) VALUES (
-    $1, $2, $3, $4, $5, $6, $7, $8
-)
-RETURNING id;
+insert into
+    newsletters (id, created_at, updated_at, title, slug, content)
+values
+    ($1, $2, $3, $4, $5, $6)
+returning *;
 
--- name: UpdateNewsletter :exec
-UPDATE newsletters
-SET 
-    updated_at = $2,
-    title = $3,
-    content = $4,
-    released_at = $5,
-    released = $6,
-	slug = $7
-WHERE id = $1;
+-- name: UpdateNewsletter :one
+update newsletters
+    set updated_at=$2, title=$3, slug=$4, content=$5, is_published=$6
+where id = $1
+returning *;
+
+-- name: UpdateNewsletterContent :one
+update newsletters
+    set updated_at=$2, content=$3
+where id = $1
+returning *;
+
+-- name: PublishNewsletter :one
+update newsletters
+    set updated_at=$2, is_published=$3, released_at=$4
+where id = $1
+returning *;
 
 -- name: DeleteNewsletter :exec
-DELETE FROM newsletters 
-WHERE id = $1;
+delete from newsletters where id=$1;

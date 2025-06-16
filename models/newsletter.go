@@ -3,77 +3,24 @@ package models
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"log/slog"
 	"time"
 
-	"github.com/MBvisti/mortenvistisen/models/internal/db"
-	"github.com/gosimple/slug"
-	"github.com/jackc/pgx/v5/pgtype"
-
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/mbvisti/mortenvistisen/models/internal/db"
 )
 
 type Newsletter struct {
-	ID         uuid.UUID
-	CreatedAt  time.Time
-	UpdatedAt  time.Time
-	Title      string
-	Content    string
-	ReleasedAt time.Time
-	Released   bool
-	Slug       string
-}
-
-type NewNewsletterPayload struct {
-	Title      string
-	Content    string
-	ReleasedAt time.Time
-	Released   bool
-}
-
-func NewNewsletter(
-	ctx context.Context,
-	dbtx db.DBTX,
-	payload NewNewsletterPayload,
-) (Newsletter, error) {
-	now := pgtype.Timestamptz{
-		Time:  time.Now(),
-		Valid: true,
-	}
-	releasedAt := pgtype.Timestamptz{
-		Time:  payload.ReleasedAt,
-		Valid: true,
-	}
-	id := uuid.New()
-
-	dbID, err := db.Stmts.InsertNewsletter(ctx, dbtx, db.InsertNewsletterParams{
-		ID:        id,
-		CreatedAt: now,
-		UpdatedAt: now,
-		Title:     payload.Title,
-		Slug: sql.NullString{
-			String: slug.Make(payload.Title),
-			Valid:  true,
-		},
-		Content:    payload.Content,
-		ReleasedAt: releasedAt,
-		Released: pgtype.Bool{
-			Bool:  payload.Released,
-			Valid: true,
-		},
-	})
-	if err != nil {
-		return Newsletter{}, err
-	}
-
-	return Newsletter{
-		ID:         dbID,
-		CreatedAt:  now.Time,
-		UpdatedAt:  now.Time,
-		Title:      payload.Title,
-		Content:    payload.Content,
-		ReleasedAt: releasedAt.Time,
-		Released:   payload.Released,
-	}, nil
+	ID          uuid.UUID
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	ReleasedAt  time.Time
+	IsPublished bool
+	Title       string
+	Slug        string
+	Content     string
 }
 
 func GetNewsletterByID(
@@ -81,90 +28,274 @@ func GetNewsletterByID(
 	dbtx db.DBTX,
 	id uuid.UUID,
 ) (Newsletter, error) {
-	dbNewsletter, err := db.Stmts.QueryNewsletterByID(ctx, dbtx, id)
+	row, err := db.Stmts.QueryNewsletterByID(ctx, dbtx, id)
 	if err != nil {
 		return Newsletter{}, err
 	}
 
 	return Newsletter{
-		ID:         dbNewsletter.ID,
-		CreatedAt:  dbNewsletter.CreatedAt.Time,
-		UpdatedAt:  dbNewsletter.UpdatedAt.Time,
-		Title:      dbNewsletter.Title,
-		Content:    dbNewsletter.Content,
-		ReleasedAt: dbNewsletter.ReleasedAt.Time,
-		Released:   dbNewsletter.Released.Bool,
+		ID:          row.ID,
+		CreatedAt:   row.CreatedAt.Time,
+		UpdatedAt:   row.UpdatedAt.Time,
+		ReleasedAt:  row.ReleasedAt.Time,
+		IsPublished: row.IsPublished.Bool,
+		Title:       row.Title,
+		Slug:        row.Slug.String,
+		Content:     row.Content,
 	}, nil
 }
 
-type QueryNewslettersParams struct {
-	Limit  int32
-	Offset int32
-}
-
-func GetNewslettersPage(
+func GetNewsletterByTitle(
 	ctx context.Context,
 	dbtx db.DBTX,
-	params QueryNewslettersParams,
-) ([]Newsletter, error) {
-	dbNewsletters, err := db.Stmts.QueryNewsletters(
+	title string,
+) (Newsletter, error) {
+	row, err := db.Stmts.QueryNewsletterByTitle(ctx, dbtx, title)
+	if err != nil {
+		return Newsletter{}, err
+	}
+
+	return Newsletter{
+		ID:          row.ID,
+		CreatedAt:   row.CreatedAt.Time,
+		UpdatedAt:   row.UpdatedAt.Time,
+		ReleasedAt:  row.ReleasedAt.Time,
+		IsPublished: row.IsPublished.Bool,
+		Title:       row.Title,
+		Slug:        row.Slug.String,
+		Content:     row.Content,
+	}, nil
+}
+
+func GetNewsletterBySlug(
+	ctx context.Context,
+	dbtx db.DBTX,
+	slug string,
+) (Newsletter, error) {
+	row, err := db.Stmts.QueryNewsletterBySlug(
 		ctx,
 		dbtx,
-		db.QueryNewslettersParams{
-			Limit:  params.Limit,
-			Offset: params.Offset,
-		},
+		sql.NullString{String: slug, Valid: slug != ""},
 	)
+	if err != nil {
+		return Newsletter{}, err
+	}
+
+	return Newsletter{
+		ID:          row.ID,
+		CreatedAt:   row.CreatedAt.Time,
+		UpdatedAt:   row.UpdatedAt.Time,
+		ReleasedAt:  row.ReleasedAt.Time,
+		IsPublished: row.IsPublished.Bool,
+		Title:       row.Title,
+		Slug:        row.Slug.String,
+		Content:     row.Content,
+	}, nil
+}
+
+func GetNewsletters(
+	ctx context.Context,
+	dbtx db.DBTX,
+) ([]Newsletter, error) {
+	rows, err := db.Stmts.QueryNewsletters(ctx, dbtx)
 	if err != nil {
 		return nil, err
 	}
 
-	newsletters := make([]Newsletter, len(dbNewsletters))
-	for i, dbNewsletter := range dbNewsletters {
+	newsletters := make([]Newsletter, len(rows))
+	for i, row := range rows {
 		newsletters[i] = Newsletter{
-			ID:         dbNewsletter.ID,
-			CreatedAt:  dbNewsletter.CreatedAt.Time,
-			UpdatedAt:  dbNewsletter.UpdatedAt.Time,
-			Title:      dbNewsletter.Title,
-			Content:    dbNewsletter.Content,
-			ReleasedAt: dbNewsletter.ReleasedAt.Time,
-			Released:   dbNewsletter.Released.Bool,
+			ID:          row.ID,
+			CreatedAt:   row.CreatedAt.Time,
+			UpdatedAt:   row.UpdatedAt.Time,
+			ReleasedAt:  row.ReleasedAt.Time,
+			IsPublished: row.IsPublished.Bool,
+			Title:       row.Title,
+			Slug:        row.Slug.String,
+			Content:     row.Content,
 		}
 	}
 
 	return newsletters, nil
 }
 
-func GetNewslettersCount(
+func GetPublishedNewsletters(
 	ctx context.Context,
 	dbtx db.DBTX,
-) (int64, error) {
-	return db.Stmts.QueryNewslettersCount(ctx, dbtx)
+) ([]Newsletter, error) {
+	rows, err := db.Stmts.QueryPublishedNewsletters(ctx, dbtx)
+	if err != nil {
+		return nil, err
+	}
+
+	newsletters := make([]Newsletter, len(rows))
+	for i, row := range rows {
+		newsletters[i] = Newsletter{
+			ID:          row.ID,
+			CreatedAt:   row.CreatedAt.Time,
+			UpdatedAt:   row.UpdatedAt.Time,
+			ReleasedAt:  row.ReleasedAt.Time,
+			IsPublished: row.IsPublished.Bool,
+			Title:       row.Title,
+			Slug:        row.Slug.String,
+			Content:     row.Content,
+		}
+	}
+
+	return newsletters, nil
 }
 
-func UpdateNewsletter(
+func GetDraftNewsletters(
 	ctx context.Context,
 	dbtx db.DBTX,
-	newsletter Newsletter,
+) ([]Newsletter, error) {
+	rows, err := db.Stmts.QueryDraftNewsletters(ctx, dbtx)
+	if err != nil {
+		return nil, err
+	}
+
+	newsletters := make([]Newsletter, len(rows))
+	for i, row := range rows {
+		newsletters[i] = Newsletter{
+			ID:          row.ID,
+			CreatedAt:   row.CreatedAt.Time,
+			UpdatedAt:   row.UpdatedAt.Time,
+			ReleasedAt:  row.ReleasedAt.Time,
+			IsPublished: row.IsPublished.Bool,
+			Title:       row.Title,
+			Slug:        row.Slug.String,
+			Content:     row.Content,
+		}
+	}
+
+	return newsletters, nil
+}
+
+type NewsletterPaginationResult struct {
+	Newsletters []Newsletter
+	TotalCount  int64
+	Page        int
+	PageSize    int
+	TotalPages  int
+	HasNext     bool
+	HasPrevious bool
+}
+
+func GetNewslettersPaginated(
+	ctx context.Context,
+	dbtx db.DBTX,
+	page int,
+	pageSize int,
+) (NewsletterPaginationResult, error) {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 10
+	}
+	if pageSize > 100 {
+		pageSize = 100
+	}
+
+	offset := (page - 1) * pageSize
+
+	totalCount, err := db.Stmts.CountNewsletters(ctx, dbtx)
+	if err != nil {
+		return NewsletterPaginationResult{}, err
+	}
+
+	// Get paginated newsletters
+	rows, err := db.Stmts.QueryNewslettersPaginated(
+		ctx,
+		dbtx,
+		db.QueryNewslettersPaginatedParams{
+			//nolint:gosec // pageSize is bounded above
+			Limit: int32(pageSize),
+			//nolint:gosec // offset is calculated from bounded values
+			Offset: int32(
+				offset,
+			),
+		},
+	)
+	if err != nil {
+		return NewsletterPaginationResult{}, err
+	}
+
+	newsletters := make([]Newsletter, len(rows))
+	for i, row := range rows {
+		newsletters[i] = Newsletter{
+			ID:          row.ID,
+			CreatedAt:   row.CreatedAt.Time,
+			UpdatedAt:   row.UpdatedAt.Time,
+			ReleasedAt:  row.ReleasedAt.Time,
+			IsPublished: row.IsPublished.Bool,
+			Title:       row.Title,
+			Slug:        row.Slug.String,
+			Content:     row.Content,
+		}
+	}
+
+	totalPages := int((totalCount + int64(pageSize) - 1) / int64(pageSize))
+
+	return NewsletterPaginationResult{
+		Newsletters: newsletters,
+		TotalCount:  totalCount,
+		Page:        page,
+		PageSize:    pageSize,
+		TotalPages:  totalPages,
+		HasNext:     page < totalPages,
+		HasPrevious: page > 1,
+	}, nil
+}
+
+type NewNewsletterPayload struct {
+	Title   string `validate:"required,max=100"`
+	Slug    string `validate:"required,max=255"`
+	Content string
+}
+
+func NewNewsletter(
+	ctx context.Context,
+	dbtx db.DBTX,
+	data NewNewsletterPayload,
 ) (Newsletter, error) {
-	updatedAt := pgtype.Timestamptz{
-		Time:  time.Now(),
-		Valid: true,
+	if err := validate.Struct(data); err != nil {
+		slog.ErrorContext(
+			ctx,
+			"could not validate new newsletter payload",
+			"error",
+			err,
+			"data",
+			data,
+		)
+		return Newsletter{}, errors.Join(ErrDomainValidation, err)
 	}
-	releasedAt := pgtype.Timestamptz{
-		Time:  newsletter.ReleasedAt,
-		Valid: true,
+
+	newsletter := Newsletter{
+		ID:        uuid.New(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		Title:     data.Title,
+		Slug:      data.Slug,
+		Content:   data.Content,
 	}
-	err := db.Stmts.UpdateNewsletter(ctx, dbtx, db.UpdateNewsletterParams{
-		ID:         newsletter.ID,
-		UpdatedAt:  updatedAt,
-		Title:      newsletter.Title,
-		Content:    newsletter.Content,
-		ReleasedAt: releasedAt,
-		Released: pgtype.Bool{
-			Bool:  newsletter.Released,
+
+	_, err := db.Stmts.InsertNewsletter(ctx, dbtx, db.InsertNewsletterParams{
+		ID: newsletter.ID,
+		CreatedAt: pgtype.Timestamptz{
+			Time:  newsletter.CreatedAt,
 			Valid: true,
 		},
+		UpdatedAt: pgtype.Timestamptz{
+			Time:  newsletter.UpdatedAt,
+			Valid: true,
+		},
+		Title: newsletter.Title,
+		Slug: sql.NullString{
+			String: newsletter.Slug,
+			Valid:  newsletter.Slug != "",
+		},
+		Content: newsletter.Content,
 	})
 	if err != nil {
 		return Newsletter{}, err
@@ -173,33 +304,123 @@ func UpdateNewsletter(
 	return GetNewsletterByID(ctx, dbtx, newsletter.ID)
 }
 
-func GetAllNewsletters(
+type UpdateNewsletterPayload struct {
+	ID          uuid.UUID `validate:"required,uuid"`
+	UpdatedAt   time.Time `validate:"required"`
+	IsPublished bool
+	Title       string `validate:"required,max=100"`
+	Slug        string `validate:"required,max=255"`
+	Content     string
+}
+
+func UpdateNewsletter(
 	ctx context.Context,
 	dbtx db.DBTX,
-) ([]Newsletter, error) {
-	newsletterRows, err := db.Stmts.QueryAllNewsletters(
+	data UpdateNewsletterPayload,
+) (Newsletter, error) {
+	if err := validate.Struct(data); err != nil {
+		return Newsletter{}, errors.Join(ErrDomainValidation, err)
+	}
+
+	_, err := db.Stmts.UpdateNewsletter(ctx, dbtx, db.UpdateNewsletterParams{
+		ID:        data.ID,
+		UpdatedAt: pgtype.Timestamptz{Time: data.UpdatedAt, Valid: true},
+		Title:     data.Title,
+		Slug: sql.NullString{
+			String: data.Slug,
+			Valid:  data.Slug != "",
+		},
+		Content:     data.Content,
+		IsPublished: pgtype.Bool{Bool: data.IsPublished, Valid: true},
+	})
+	if err != nil {
+		return Newsletter{}, err
+	}
+
+	return GetNewsletterByID(ctx, dbtx, data.ID)
+}
+
+type UpdateNewsletterContentPayload struct {
+	ID        uuid.UUID `validate:"required,uuid"`
+	UpdatedAt time.Time `validate:"required"`
+	Content   string
+}
+
+func UpdateNewsletterContent(
+	ctx context.Context,
+	dbtx db.DBTX,
+	data UpdateNewsletterContentPayload,
+) (Newsletter, error) {
+	if err := validate.Struct(data); err != nil {
+		return Newsletter{}, errors.Join(ErrDomainValidation, err)
+	}
+
+	row, err := db.Stmts.UpdateNewsletterContent(
 		ctx,
 		dbtx,
+		db.UpdateNewsletterContentParams{
+			ID:        data.ID,
+			UpdatedAt: pgtype.Timestamptz{Time: data.UpdatedAt, Valid: true},
+			Content:   data.Content,
+		},
 	)
 	if err != nil {
-		return nil, err
+		return Newsletter{}, err
 	}
 
-	newsletters := make([]Newsletter, len(newsletterRows))
-	for i, row := range newsletterRows {
-		newsletters[i] = Newsletter{
-			ID:         row.ID,
-			CreatedAt:  row.CreatedAt.Time,
-			UpdatedAt:  row.UpdatedAt.Time,
-			Title:      row.Title,
-			Content:    row.Content,
-			ReleasedAt: row.ReleasedAt.Time,
-			Released:   row.Released.Bool,
-			Slug:       row.Slug.String,
-		}
+	return Newsletter{
+		ID:          row.ID,
+		CreatedAt:   row.CreatedAt.Time,
+		UpdatedAt:   row.UpdatedAt.Time,
+		ReleasedAt:  row.ReleasedAt.Time,
+		IsPublished: row.IsPublished.Bool,
+		Title:       row.Title,
+		Slug:        row.Slug.String,
+		Content:     row.Content,
+	}, nil
+}
+
+type PublishNewsletterPayload struct {
+	ID  uuid.UUID `validate:"required,uuid"`
+	Now time.Time
+}
+
+func PublishNewsletter(
+	ctx context.Context,
+	dbtx db.DBTX,
+	data PublishNewsletterPayload,
+) (Newsletter, error) {
+	if err := validate.Struct(data); err != nil {
+		return Newsletter{}, errors.Join(ErrDomainValidation, err)
 	}
 
-	return newsletters, nil
+	row, err := db.Stmts.PublishNewsletter(
+		ctx,
+		dbtx,
+		db.PublishNewsletterParams{
+			ID:        data.ID,
+			UpdatedAt: pgtype.Timestamptz{Time: data.Now, Valid: true},
+			ReleasedAt: pgtype.Timestamptz{
+				Time:  data.Now,
+				Valid: true,
+			},
+			IsPublished: pgtype.Bool{Bool: true, Valid: true},
+		},
+	)
+	if err != nil {
+		return Newsletter{}, err
+	}
+
+	return Newsletter{
+		ID:          row.ID,
+		CreatedAt:   row.CreatedAt.Time,
+		UpdatedAt:   row.UpdatedAt.Time,
+		ReleasedAt:  row.ReleasedAt.Time,
+		IsPublished: row.IsPublished.Bool,
+		Title:       row.Title,
+		Slug:        row.Slug.String,
+		Content:     row.Content,
+	}, nil
 }
 
 func DeleteNewsletter(
@@ -208,33 +429,4 @@ func DeleteNewsletter(
 	id uuid.UUID,
 ) error {
 	return db.Stmts.DeleteNewsletter(ctx, dbtx, id)
-}
-
-func GetNewsletterBySlug(
-	ctx context.Context,
-	dbtx db.DBTX,
-	slug string,
-) (Newsletter, error) {
-	newsletterRow, err := db.Stmts.QueryNewsletterBySlug(
-		ctx,
-		dbtx,
-		sql.NullString{
-			String: slug,
-			Valid:  true,
-		},
-	)
-	if err != nil {
-		return Newsletter{}, err
-	}
-
-	return Newsletter{
-		ID:         newsletterRow.ID,
-		CreatedAt:  newsletterRow.CreatedAt.Time,
-		UpdatedAt:  newsletterRow.UpdatedAt.Time,
-		Title:      newsletterRow.Title,
-		Content:    newsletterRow.Content,
-		ReleasedAt: newsletterRow.ReleasedAt.Time,
-		Released:   newsletterRow.Released.Bool,
-		Slug:       newsletterRow.Slug.String,
-	}, nil
 }

@@ -2,12 +2,15 @@ package models
 
 import (
 	"context"
+	"crypto/subtle"
 	"errors"
 	"time"
 
-	"github.com/MBvisti/mortenvistisen/models/internal/db"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/mbvisti/mortenvistisen/config"
+	"github.com/mbvisti/mortenvistisen/models/internal/db"
+	"golang.org/x/crypto/argon2"
 )
 
 type User struct {
@@ -17,18 +20,43 @@ type User struct {
 	Email           string
 	EmailVerifiedAt time.Time
 	IsAdmin         bool
+	HashedPassword  string
 }
 
 func (ue User) IsVerified() bool {
 	return !ue.EmailVerifiedAt.IsZero()
 }
 
+func (ue User) ValidatePassword(providedPassword string) error {
+	if t := subtle.ConstantTimeCompare(HashPassword(providedPassword), []byte(ue.HashedPassword)); t == 1 {
+		return nil
+	}
+
+	return errors.New("invalid password")
+}
+
+type PasswordPair struct {
+	Password        string `validate:"required,gte=6"`
+	ConfirmPassword string `validate:"required,gte=6"`
+}
+
+func HashPassword(password string) []byte {
+	return argon2.IDKey(
+		[]byte(password),
+		[]byte(config.Cfg.PasswordSalt),
+		2,
+		19*1024,
+		1,
+		32,
+	)
+}
+
 func GetUserByEmail(
 	ctx context.Context,
-	email string,
 	dbtx db.DBTX,
+	email string,
 ) (User, error) {
-	user, err := db.Stmts.QueryUserByMail(ctx, dbtx, email)
+	user, err := db.Stmts.QueryUserByEmail(ctx, dbtx, email)
 	if err != nil {
 		return User{}, err
 	}
@@ -37,43 +65,43 @@ func GetUserByEmail(
 		ID:              user.ID,
 		CreatedAt:       user.CreatedAt.Time,
 		UpdatedAt:       user.UpdatedAt.Time,
-		Email:           user.Mail,
-		EmailVerifiedAt: user.MailVerifiedAt.Time,
-		IsAdmin:         false, // TODO: FIX
+		Email:           user.Email,
+		HashedPassword:  string(user.Password),
+		EmailVerifiedAt: user.EmailVerifiedAt.Time,
+		IsAdmin:         user.IsAdmin,
 	}, nil
-}
-
-type NewUserPayload struct {
-	Email           string `validate:"required,email"`
-	Password        string `validate:"required,gte=6"`
-	ConfirmPassword string `validate:"required,gte=6"`
 }
 
 func GetUser(
 	ctx context.Context,
-	id uuid.UUID,
 	dbtx db.DBTX,
+	id uuid.UUID,
 ) (User, error) {
-	usr, err := db.Stmts.QueryUserByID(ctx, dbtx, id)
+	row, err := db.Stmts.QueryUserByID(ctx, dbtx, id)
 	if err != nil {
 		return User{}, err
 	}
 
 	return User{
 		ID:              id,
-		CreatedAt:       usr.CreatedAt.Time,
-		UpdatedAt:       usr.UpdatedAt.Time,
-		Email:           usr.Mail,
-		EmailVerifiedAt: usr.MailVerifiedAt.Time,
+		CreatedAt:       row.CreatedAt.Time,
+		UpdatedAt:       row.UpdatedAt.Time,
+		Email:           row.Email,
+		EmailVerifiedAt: row.EmailVerifiedAt.Time,
+		HashedPassword:  string(row.Password),
 		IsAdmin:         false,
 	}, nil
 }
 
+type NewUserPayload struct {
+	Email    string `validate:"required,email"`
+	Password PasswordPair
+}
+
 func NewUser(
 	ctx context.Context,
-	data NewUserPayload,
 	dbtx db.DBTX,
-	hash func(password string) (string, error),
+	data NewUserPayload,
 ) (User, error) {
 	if err := validate.Struct(data); err != nil {
 		return User{}, errors.Join(ErrDomainValidation, err)
@@ -85,18 +113,15 @@ func NewUser(
 		UpdatedAt: time.Now(),
 		Email:     data.Email,
 	}
+	hp := HashPassword(data.Password.Password)
+	usr.HashedPassword = string(hp)
 
-	hashedPassword, err := hash(data.Password)
-	if err != nil {
-		return User{}, err
-	}
-
-	_, err = db.Stmts.InsertUser(ctx, dbtx, db.InsertUserParams{
+	_, err := db.Stmts.InsertUser(ctx, dbtx, db.InsertUserParams{
 		ID:        usr.ID,
 		CreatedAt: pgtype.Timestamptz{Time: usr.CreatedAt, Valid: true},
 		UpdatedAt: pgtype.Timestamptz{Time: usr.UpdatedAt, Valid: true},
-		Mail:      usr.Email,
-		Password:  hashedPassword,
+		Email:     usr.Email,
+		Password:  hp,
 	})
 	if err != nil {
 		return User{}, err
@@ -106,41 +131,38 @@ func NewUser(
 }
 
 type UpdateUserPayload struct {
-	ID             uuid.UUID `validate:"required,uuid"`
-	UpdatedAt      time.Time `validate:"required"`
-	Name           string    `validate:"required,gte=2,lte=25"`
-	Email          string    `validate:"required,email"`
-	EmailUpdatedAt time.Time
+	ID        uuid.UUID `validate:"required,uuid"`
+	UpdatedAt time.Time `validate:"required"`
+	Email     string    `validate:"required,email"`
 }
 
 func UpdateUser(
 	ctx context.Context,
-	data UpdateUserPayload,
 	dbtx db.DBTX,
+	data UpdateUserPayload,
 ) (User, error) {
-	// validate payload
 	if err := validate.Struct(data); err != nil {
 		return User{}, errors.Join(ErrDomainValidation, err)
 	}
 
-	updatedUsr, err := db.Stmts.UpdateUser(ctx, dbtx, db.UpdateUserParams{
+	row, err := db.Stmts.UpdateUser(ctx, dbtx, db.UpdateUserParams{
 		ID: data.ID,
 		UpdatedAt: pgtype.Timestamptz{
 			Time:  data.UpdatedAt,
 			Valid: true,
 		},
-		Mail: data.Email,
+		Email: data.Email,
 	})
 	if err != nil {
 		return User{}, err
 	}
 
 	return User{
-		ID:              updatedUsr.ID,
-		CreatedAt:       updatedUsr.CreatedAt.Time,
-		UpdatedAt:       updatedUsr.UpdatedAt.Time,
-		Email:           updatedUsr.Mail,
-		EmailVerifiedAt: updatedUsr.MailVerifiedAt.Time,
+		ID:              row.ID,
+		CreatedAt:       row.CreatedAt.Time,
+		UpdatedAt:       row.UpdatedAt.Time,
+		Email:           row.Email,
+		EmailVerifiedAt: row.EmailVerifiedAt.Time,
 		IsAdmin:         false,
 	}, nil
 }
@@ -148,25 +170,53 @@ func UpdateUser(
 type UpdateUserPasswordPayload struct {
 	ID        uuid.UUID `validate:"required,uuid"`
 	UpdatedAt time.Time `validate:"required"`
-	Password  string    `validate:"required"`
+	Password  PasswordPair
 }
 
 func UpdateUserPassword(
 	ctx context.Context,
+	dbtx db.DBTX,
 	data UpdateUserPasswordPayload,
-	q func(
-		ctx context.Context,
-		userID uuid.UUID,
-		newPassword string,
-		updatedAt time.Time,
-	) error,
 ) error {
-	// validate payload
 	if err := validate.Struct(data); err != nil {
 		return errors.Join(ErrDomainValidation, err)
 	}
 
-	return q(ctx, data.ID, data.Password, data.UpdatedAt)
+	return db.Stmts.ChangeUserPassword(ctx, dbtx, db.ChangeUserPasswordParams{
+		ID: data.ID,
+		UpdatedAt: pgtype.Timestamptz{
+			Time:  data.UpdatedAt,
+			Valid: true,
+		},
+		Password: HashPassword(data.Password.Password),
+	})
+}
+
+type UpdateUserEmailToVerifiedPayload struct {
+	ID         uuid.UUID `validate:"required,uuid"`
+	Email      string    `validate:"required,email"`
+	VerifiedAt time.Time `validate:"required"`
+}
+
+func UpdateUserEmailToVerified(
+	ctx context.Context,
+	dbtx db.DBTX,
+	data UpdateUserEmailToVerifiedPayload,
+) error {
+	if err := validate.Struct(data); err != nil {
+		return errors.Join(ErrDomainValidation, err)
+	}
+
+	time := pgtype.Timestamptz{
+		Time:  data.VerifiedAt,
+		Valid: true,
+	}
+
+	return db.Stmts.VerifyUserEmail(ctx, dbtx, db.VerifyUserEmailParams{
+		Email:           data.Email,
+		UpdatedAt:       time,
+		EmailVerifiedAt: time,
+	})
 }
 
 type MakeUserAdminPayload struct {
@@ -177,14 +227,14 @@ type MakeUserAdminPayload struct {
 
 func MakeUserAdmin(
 	ctx context.Context,
-	data MakeUserAdminPayload,
 	dbtx db.DBTX,
+	data MakeUserAdminPayload,
 ) (User, error) {
 	if err := validate.Struct(data); err != nil {
 		return User{}, errors.Join(ErrDomainValidation, err)
 	}
 
-	actor, err := GetUser(ctx, data.ActorID, dbtx)
+	actor, err := GetUser(ctx, dbtx, data.ActorID)
 	if err != nil {
 		return User{}, err
 	}
@@ -192,12 +242,12 @@ func MakeUserAdmin(
 		return User{}, ErrMustBeAdmin
 	}
 
-	user, err := db.Stmts.UpdateUserIsAdmin(
+	row, err := db.Stmts.UpdateUserIsAdmin(
 		ctx,
 		dbtx,
 		db.UpdateUserIsAdminParams{
-			ID: data.UserID,
-			// IsAdmin:   true,
+			ID:        data.UserID,
+			IsAdmin:   true,
 			UpdatedAt: pgtype.Timestamptz{Time: data.UpdatedAt, Valid: true},
 		},
 	)
@@ -206,11 +256,11 @@ func MakeUserAdmin(
 	}
 
 	return User{
-		ID:              user.ID,
-		CreatedAt:       user.CreatedAt.Time,
-		UpdatedAt:       user.UpdatedAt.Time,
-		Email:           user.Mail,
-		EmailVerifiedAt: user.MailVerifiedAt.Time,
+		ID:              row.ID,
+		CreatedAt:       row.CreatedAt.Time,
+		UpdatedAt:       row.UpdatedAt.Time,
+		Email:           row.Email,
+		EmailVerifiedAt: row.EmailVerifiedAt.Time,
 		IsAdmin:         true,
 	}, nil
 }

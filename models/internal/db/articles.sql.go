@@ -13,308 +13,298 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const deleteArticle = `-- name: DeleteArticle :exec
-DELETE FROM posts WHERE id = $1
+const countArticles = `-- name: CountArticles :one
+select count(*) from articles
 `
 
-func (q *Queries) DeleteArticle(ctx context.Context, db DBTX, id uuid.UUID) error {
-	_, err := db.Exec(ctx, deleteArticle, id)
-	return err
-}
-
-const deleteArticleTags = `-- name: DeleteArticleTags :exec
-DELETE FROM posts_tags WHERE post_id = $1
-`
-
-func (q *Queries) DeleteArticleTags(ctx context.Context, db DBTX, postID uuid.UUID) error {
-	_, err := db.Exec(ctx, deleteArticleTags, postID)
-	return err
-}
-
-const insertArticle = `-- name: InsertArticle :one
-INSERT INTO posts (
-    id, created_at, updated_at, title, filename,
-    slug, excerpt, draft, released_at, read_time,
-	header_title
-) VALUES (
-    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
-)
-RETURNING id
-`
-
-type InsertArticleParams struct {
-	ID          uuid.UUID
-	CreatedAt   pgtype.Timestamp
-	UpdatedAt   pgtype.Timestamp
-	Title       string
-	Filename    string
-	Slug        string
-	Excerpt     string
-	Draft       bool
-	ReleasedAt  pgtype.Timestamp
-	ReadTime    sql.NullInt32
-	HeaderTitle sql.NullString
-}
-
-func (q *Queries) InsertArticle(ctx context.Context, db DBTX, arg InsertArticleParams) (uuid.UUID, error) {
-	row := db.QueryRow(ctx, insertArticle,
-		arg.ID,
-		arg.CreatedAt,
-		arg.UpdatedAt,
-		arg.Title,
-		arg.Filename,
-		arg.Slug,
-		arg.Excerpt,
-		arg.Draft,
-		arg.ReleasedAt,
-		arg.ReadTime,
-		arg.HeaderTitle,
-	)
-	var id uuid.UUID
-	err := row.Scan(&id)
-	return id, err
-}
-
-const insertArticleTag = `-- name: InsertArticleTag :exec
-INSERT INTO posts_tags (
-    id, post_id, tag_id
-) VALUES (
-    $1, $2, $3
-)
-`
-
-type InsertArticleTagParams struct {
-	ID     uuid.UUID
-	PostID uuid.UUID
-	TagID  uuid.UUID
-}
-
-func (q *Queries) InsertArticleTag(ctx context.Context, db DBTX, arg InsertArticleTagParams) error {
-	_, err := db.Exec(ctx, insertArticleTag, arg.ID, arg.PostID, arg.TagID)
-	return err
-}
-
-const queryArticleByID = `-- name: QueryArticleByID :one
-SELECT 
-    p.id, p.created_at, p.updated_at, p.title, p.filename, 
-    p.slug, p.excerpt, p.draft, p.released_at as release_date, 
-    p.read_time
-FROM posts p
-WHERE p.id = $1
-`
-
-type QueryArticleByIDRow struct {
-	ID          uuid.UUID
-	CreatedAt   pgtype.Timestamp
-	UpdatedAt   pgtype.Timestamp
-	Title       string
-	Filename    string
-	Slug        string
-	Excerpt     string
-	Draft       bool
-	ReleaseDate pgtype.Timestamp
-	ReadTime    sql.NullInt32
-}
-
-func (q *Queries) QueryArticleByID(ctx context.Context, db DBTX, id uuid.UUID) (QueryArticleByIDRow, error) {
-	row := db.QueryRow(ctx, queryArticleByID, id)
-	var i QueryArticleByIDRow
-	err := row.Scan(
-		&i.ID,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.Title,
-		&i.Filename,
-		&i.Slug,
-		&i.Excerpt,
-		&i.Draft,
-		&i.ReleaseDate,
-		&i.ReadTime,
-	)
-	return i, err
-}
-
-const queryArticleBySlug = `-- name: QueryArticleBySlug :one
-SELECT 
-    p.id, p.created_at, p.updated_at, p.title, p.filename, 
-    p.slug, p.excerpt, p.draft, p.released_at as release_date, 
-    p.read_time, p.header_title
-FROM posts p
-WHERE p.slug = $1
-`
-
-type QueryArticleBySlugRow struct {
-	ID          uuid.UUID
-	CreatedAt   pgtype.Timestamp
-	UpdatedAt   pgtype.Timestamp
-	Title       string
-	Filename    string
-	Slug        string
-	Excerpt     string
-	Draft       bool
-	ReleaseDate pgtype.Timestamp
-	ReadTime    sql.NullInt32
-	HeaderTitle sql.NullString
-}
-
-func (q *Queries) QueryArticleBySlug(ctx context.Context, db DBTX, slug string) (QueryArticleBySlugRow, error) {
-	row := db.QueryRow(ctx, queryArticleBySlug, slug)
-	var i QueryArticleBySlugRow
-	err := row.Scan(
-		&i.ID,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.Title,
-		&i.Filename,
-		&i.Slug,
-		&i.Excerpt,
-		&i.Draft,
-		&i.ReleaseDate,
-		&i.ReadTime,
-		&i.HeaderTitle,
-	)
-	return i, err
-}
-
-const queryArticleTags = `-- name: QueryArticleTags :many
-SELECT t.id, t.name
-FROM tags t
-JOIN posts_tags pt ON pt.tag_id = t.id
-WHERE pt.post_id = $1
-`
-
-func (q *Queries) QueryArticleTags(ctx context.Context, db DBTX, postID uuid.UUID) ([]Tag, error) {
-	rows, err := db.Query(ctx, queryArticleTags, postID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Tag
-	for rows.Next() {
-		var i Tag
-		if err := rows.Scan(&i.ID, &i.Name); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const queryArticles = `-- name: QueryArticles :many
-SELECT 
-    p.id, p.created_at, p.updated_at, p.title, p.filename, 
-    p.slug, p.excerpt, p.draft, p.released_at as release_date, 
-    p.read_time
-FROM posts p
-ORDER BY p.created_at DESC
-`
-
-type QueryArticlesRow struct {
-	ID          uuid.UUID
-	CreatedAt   pgtype.Timestamp
-	UpdatedAt   pgtype.Timestamp
-	Title       string
-	Filename    string
-	Slug        string
-	Excerpt     string
-	Draft       bool
-	ReleaseDate pgtype.Timestamp
-	ReadTime    sql.NullInt32
-}
-
-func (q *Queries) QueryArticles(ctx context.Context, db DBTX) ([]QueryArticlesRow, error) {
-	rows, err := db.Query(ctx, queryArticles)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []QueryArticlesRow
-	for rows.Next() {
-		var i QueryArticlesRow
-		if err := rows.Scan(
-			&i.ID,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-			&i.Title,
-			&i.Filename,
-			&i.Slug,
-			&i.Excerpt,
-			&i.Draft,
-			&i.ReleaseDate,
-			&i.ReadTime,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const queryArticlesCount = `-- name: QueryArticlesCount :one
-SELECT COUNT(*) FROM posts
-`
-
-func (q *Queries) QueryArticlesCount(ctx context.Context, db DBTX) (int64, error) {
-	row := db.QueryRow(ctx, queryArticlesCount)
+func (q *Queries) CountArticles(ctx context.Context, db DBTX) (int64, error) {
+	row := db.QueryRow(ctx, countArticles)
 	var count int64
 	err := row.Scan(&count)
 	return count, err
 }
 
-const queryArticlesPage = `-- name: QueryArticlesPage :many
-SELECT 
-    p.id, p.created_at, p.updated_at, p.title, p.filename, 
-    p.slug, p.excerpt, p.draft, p.released_at as release_date, 
-    p.read_time
-FROM posts p
-ORDER BY p.created_at DESC
-LIMIT $1 OFFSET $2
+const countDraftArticles = `-- name: CountDraftArticles :one
+select count(*) from articles where is_published=false
 `
 
-type QueryArticlesPageParams struct {
+func (q *Queries) CountDraftArticles(ctx context.Context, db DBTX) (int64, error) {
+	row := db.QueryRow(ctx, countDraftArticles)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const countPublishedArticles = `-- name: CountPublishedArticles :one
+select count(*) from articles where is_published=true
+`
+
+func (q *Queries) CountPublishedArticles(ctx context.Context, db DBTX) (int64, error) {
+	row := db.QueryRow(ctx, countPublishedArticles)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const deleteArticle = `-- name: DeleteArticle :exec
+
+delete from articles where id=$1
+`
+
+// -- name: UnpublishArticle :one
+// update articles
+//
+//	set updated_at=$2, is_published=false
+//
+// where id = $1
+// returning *;
+func (q *Queries) DeleteArticle(ctx context.Context, db DBTX, id uuid.UUID) error {
+	_, err := db.Exec(ctx, deleteArticle, id)
+	return err
+}
+
+const insertArticle = `-- name: InsertArticle :one
+insert into
+    articles (id, created_at, updated_at, title, excerpt, meta_title, meta_description, slug, image_link, content, read_time)
+values
+    ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+returning id, created_at, updated_at, first_published_at, title, excerpt, meta_title, meta_description, slug, image_link, content, read_time, is_published
+`
+
+type InsertArticleParams struct {
+	ID              uuid.UUID
+	CreatedAt       pgtype.Timestamptz
+	UpdatedAt       pgtype.Timestamptz
+	Title           string
+	Excerpt         string
+	MetaTitle       string
+	MetaDescription string
+	Slug            string
+	ImageLink       sql.NullString
+	Content         sql.NullString
+	ReadTime        sql.NullInt32
+}
+
+func (q *Queries) InsertArticle(ctx context.Context, db DBTX, arg InsertArticleParams) (Article, error) {
+	row := db.QueryRow(ctx, insertArticle,
+		arg.ID,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+		arg.Title,
+		arg.Excerpt,
+		arg.MetaTitle,
+		arg.MetaDescription,
+		arg.Slug,
+		arg.ImageLink,
+		arg.Content,
+		arg.ReadTime,
+	)
+	var i Article
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.FirstPublishedAt,
+		&i.Title,
+		&i.Excerpt,
+		&i.MetaTitle,
+		&i.MetaDescription,
+		&i.Slug,
+		&i.ImageLink,
+		&i.Content,
+		&i.ReadTime,
+		&i.IsPublished,
+	)
+	return i, err
+}
+
+const publishArticle = `-- name: PublishArticle :one
+update articles
+    set updated_at=$2, is_published=$3, first_published_at=$4
+where id = $1
+returning id, created_at, updated_at, first_published_at, title, excerpt, meta_title, meta_description, slug, image_link, content, read_time, is_published
+`
+
+type PublishArticleParams struct {
+	ID               uuid.UUID
+	UpdatedAt        pgtype.Timestamptz
+	IsPublished      sql.NullBool
+	FirstPublishedAt pgtype.Timestamptz
+}
+
+func (q *Queries) PublishArticle(ctx context.Context, db DBTX, arg PublishArticleParams) (Article, error) {
+	row := db.QueryRow(ctx, publishArticle,
+		arg.ID,
+		arg.UpdatedAt,
+		arg.IsPublished,
+		arg.FirstPublishedAt,
+	)
+	var i Article
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.FirstPublishedAt,
+		&i.Title,
+		&i.Excerpt,
+		&i.MetaTitle,
+		&i.MetaDescription,
+		&i.Slug,
+		&i.ImageLink,
+		&i.Content,
+		&i.ReadTime,
+		&i.IsPublished,
+	)
+	return i, err
+}
+
+const queryArticleByID = `-- name: QueryArticleByID :one
+select id, created_at, updated_at, first_published_at, title, excerpt, meta_title, meta_description, slug, image_link, content, read_time, is_published from articles where id=$1
+`
+
+func (q *Queries) QueryArticleByID(ctx context.Context, db DBTX, id uuid.UUID) (Article, error) {
+	row := db.QueryRow(ctx, queryArticleByID, id)
+	var i Article
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.FirstPublishedAt,
+		&i.Title,
+		&i.Excerpt,
+		&i.MetaTitle,
+		&i.MetaDescription,
+		&i.Slug,
+		&i.ImageLink,
+		&i.Content,
+		&i.ReadTime,
+		&i.IsPublished,
+	)
+	return i, err
+}
+
+const queryArticleBySlug = `-- name: QueryArticleBySlug :one
+select id, created_at, updated_at, first_published_at, title, excerpt, meta_title, meta_description, slug, image_link, content, read_time, is_published from articles where slug=$1
+`
+
+func (q *Queries) QueryArticleBySlug(ctx context.Context, db DBTX, slug string) (Article, error) {
+	row := db.QueryRow(ctx, queryArticleBySlug, slug)
+	var i Article
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.FirstPublishedAt,
+		&i.Title,
+		&i.Excerpt,
+		&i.MetaTitle,
+		&i.MetaDescription,
+		&i.Slug,
+		&i.ImageLink,
+		&i.Content,
+		&i.ReadTime,
+		&i.IsPublished,
+	)
+	return i, err
+}
+
+const queryArticleByTitle = `-- name: QueryArticleByTitle :one
+select id, created_at, updated_at, first_published_at, title, excerpt, meta_title, meta_description, slug, image_link, content, read_time, is_published from articles where title=$1
+`
+
+func (q *Queries) QueryArticleByTitle(ctx context.Context, db DBTX, title string) (Article, error) {
+	row := db.QueryRow(ctx, queryArticleByTitle, title)
+	var i Article
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.FirstPublishedAt,
+		&i.Title,
+		&i.Excerpt,
+		&i.MetaTitle,
+		&i.MetaDescription,
+		&i.Slug,
+		&i.ImageLink,
+		&i.Content,
+		&i.ReadTime,
+		&i.IsPublished,
+	)
+	return i, err
+}
+
+const queryArticles = `-- name: QueryArticles :many
+select id, created_at, updated_at, first_published_at, title, excerpt, meta_title, meta_description, slug, image_link, content, read_time, is_published from articles order by created_at desc
+`
+
+func (q *Queries) QueryArticles(ctx context.Context, db DBTX) ([]Article, error) {
+	rows, err := db.Query(ctx, queryArticles)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Article
+	for rows.Next() {
+		var i Article
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.FirstPublishedAt,
+			&i.Title,
+			&i.Excerpt,
+			&i.MetaTitle,
+			&i.MetaDescription,
+			&i.Slug,
+			&i.ImageLink,
+			&i.Content,
+			&i.ReadTime,
+			&i.IsPublished,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const queryArticlesPaginated = `-- name: QueryArticlesPaginated :many
+select id, created_at, updated_at, first_published_at, title, excerpt, meta_title, meta_description, slug, image_link, content, read_time, is_published from articles 
+order by created_at desc 
+limit $1 offset $2
+`
+
+type QueryArticlesPaginatedParams struct {
 	Limit  int32
 	Offset int32
 }
 
-type QueryArticlesPageRow struct {
-	ID          uuid.UUID
-	CreatedAt   pgtype.Timestamp
-	UpdatedAt   pgtype.Timestamp
-	Title       string
-	Filename    string
-	Slug        string
-	Excerpt     string
-	Draft       bool
-	ReleaseDate pgtype.Timestamp
-	ReadTime    sql.NullInt32
-}
-
-func (q *Queries) QueryArticlesPage(ctx context.Context, db DBTX, arg QueryArticlesPageParams) ([]QueryArticlesPageRow, error) {
-	rows, err := db.Query(ctx, queryArticlesPage, arg.Limit, arg.Offset)
+func (q *Queries) QueryArticlesPaginated(ctx context.Context, db DBTX, arg QueryArticlesPaginatedParams) ([]Article, error) {
+	rows, err := db.Query(ctx, queryArticlesPaginated, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []QueryArticlesPageRow
+	var items []Article
 	for rows.Next() {
-		var i QueryArticlesPageRow
+		var i Article
 		if err := rows.Scan(
 			&i.ID,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.FirstPublishedAt,
 			&i.Title,
-			&i.Filename,
-			&i.Slug,
 			&i.Excerpt,
-			&i.Draft,
-			&i.ReleaseDate,
+			&i.MetaTitle,
+			&i.MetaDescription,
+			&i.Slug,
+			&i.ImageLink,
+			&i.Content,
 			&i.ReadTime,
+			&i.IsPublished,
 		); err != nil {
 			return nil, err
 		}
@@ -326,54 +316,33 @@ func (q *Queries) QueryArticlesPage(ctx context.Context, db DBTX, arg QueryArtic
 	return items, nil
 }
 
-const queryRandomArticles = `-- name: QueryRandomArticles :many
-SELECT 
-    p.id, p.created_at, p.updated_at, p.title, p.filename, 
-    p.slug, p.excerpt, p.draft, p.released_at as release_date, 
-    p.read_time, p.header_title
-FROM posts p
-WHERE p.slug != $1 
-    AND p.draft = false 
-    AND p.released_at <= CURRENT_TIMESTAMP
-ORDER BY RANDOM()
-LIMIT 5
+const queryDraftArticles = `-- name: QueryDraftArticles :many
+select id, created_at, updated_at, first_published_at, title, excerpt, meta_title, meta_description, slug, image_link, content, read_time, is_published from articles where is_published=false order by created_at desc
 `
 
-type QueryRandomArticlesRow struct {
-	ID          uuid.UUID
-	CreatedAt   pgtype.Timestamp
-	UpdatedAt   pgtype.Timestamp
-	Title       string
-	Filename    string
-	Slug        string
-	Excerpt     string
-	Draft       bool
-	ReleaseDate pgtype.Timestamp
-	ReadTime    sql.NullInt32
-	HeaderTitle sql.NullString
-}
-
-func (q *Queries) QueryRandomArticles(ctx context.Context, db DBTX, slug string) ([]QueryRandomArticlesRow, error) {
-	rows, err := db.Query(ctx, queryRandomArticles, slug)
+func (q *Queries) QueryDraftArticles(ctx context.Context, db DBTX) ([]Article, error) {
+	rows, err := db.Query(ctx, queryDraftArticles)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []QueryRandomArticlesRow
+	var items []Article
 	for rows.Next() {
-		var i QueryRandomArticlesRow
+		var i Article
 		if err := rows.Scan(
 			&i.ID,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.FirstPublishedAt,
 			&i.Title,
-			&i.Filename,
-			&i.Slug,
 			&i.Excerpt,
-			&i.Draft,
-			&i.ReleaseDate,
+			&i.MetaTitle,
+			&i.MetaDescription,
+			&i.Slug,
+			&i.ImageLink,
+			&i.Content,
 			&i.ReadTime,
-			&i.HeaderTitle,
+			&i.IsPublished,
 		); err != nil {
 			return nil, err
 		}
@@ -385,43 +354,176 @@ func (q *Queries) QueryRandomArticles(ctx context.Context, db DBTX, slug string)
 	return items, nil
 }
 
-const updateArticle = `-- name: UpdateArticle :exec
-UPDATE posts
-SET 
-    updated_at = $2,
-    title = $3,
-    filename = $4,
-    slug = $5,
-    excerpt = $6,
-    draft = $7,
-    released_at = $8,
-    read_time = $9
-WHERE id = $1
+const queryPublishedArticles = `-- name: QueryPublishedArticles :many
+select id, created_at, updated_at, first_published_at, title, excerpt, meta_title, meta_description, slug, image_link, content, read_time, is_published from articles where is_published=true order by first_published_at desc
+`
+
+func (q *Queries) QueryPublishedArticles(ctx context.Context, db DBTX) ([]Article, error) {
+	rows, err := db.Query(ctx, queryPublishedArticles)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Article
+	for rows.Next() {
+		var i Article
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.FirstPublishedAt,
+			&i.Title,
+			&i.Excerpt,
+			&i.MetaTitle,
+			&i.MetaDescription,
+			&i.Slug,
+			&i.ImageLink,
+			&i.Content,
+			&i.ReadTime,
+			&i.IsPublished,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updateArticle = `-- name: UpdateArticle :one
+update articles
+    set updated_at=$2, title=$3, excerpt=$4, meta_title=$5, meta_description=$6, slug=$7, image_link=$8, content=$9, read_time=$10, is_published=$11
+where id = $1
+returning id, created_at, updated_at, first_published_at, title, excerpt, meta_title, meta_description, slug, image_link, content, read_time, is_published
 `
 
 type UpdateArticleParams struct {
-	ID         uuid.UUID
-	UpdatedAt  pgtype.Timestamp
-	Title      string
-	Filename   string
-	Slug       string
-	Excerpt    string
-	Draft      bool
-	ReleasedAt pgtype.Timestamp
-	ReadTime   sql.NullInt32
+	ID              uuid.UUID
+	UpdatedAt       pgtype.Timestamptz
+	Title           string
+	Excerpt         string
+	MetaTitle       string
+	MetaDescription string
+	Slug            string
+	ImageLink       sql.NullString
+	Content         sql.NullString
+	ReadTime        sql.NullInt32
+	IsPublished     sql.NullBool
 }
 
-func (q *Queries) UpdateArticle(ctx context.Context, db DBTX, arg UpdateArticleParams) error {
-	_, err := db.Exec(ctx, updateArticle,
+func (q *Queries) UpdateArticle(ctx context.Context, db DBTX, arg UpdateArticleParams) (Article, error) {
+	row := db.QueryRow(ctx, updateArticle,
 		arg.ID,
 		arg.UpdatedAt,
 		arg.Title,
-		arg.Filename,
-		arg.Slug,
 		arg.Excerpt,
-		arg.Draft,
-		arg.ReleasedAt,
+		arg.MetaTitle,
+		arg.MetaDescription,
+		arg.Slug,
+		arg.ImageLink,
+		arg.Content,
 		arg.ReadTime,
+		arg.IsPublished,
 	)
-	return err
+	var i Article
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.FirstPublishedAt,
+		&i.Title,
+		&i.Excerpt,
+		&i.MetaTitle,
+		&i.MetaDescription,
+		&i.Slug,
+		&i.ImageLink,
+		&i.Content,
+		&i.ReadTime,
+		&i.IsPublished,
+	)
+	return i, err
+}
+
+const updateArticleContent = `-- name: UpdateArticleContent :one
+update articles
+    set updated_at=$2, content=$3
+where id = $1
+returning id, created_at, updated_at, first_published_at, title, excerpt, meta_title, meta_description, slug, image_link, content, read_time, is_published
+`
+
+type UpdateArticleContentParams struct {
+	ID        uuid.UUID
+	UpdatedAt pgtype.Timestamptz
+	Content   sql.NullString
+}
+
+func (q *Queries) UpdateArticleContent(ctx context.Context, db DBTX, arg UpdateArticleContentParams) (Article, error) {
+	row := db.QueryRow(ctx, updateArticleContent, arg.ID, arg.UpdatedAt, arg.Content)
+	var i Article
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.FirstPublishedAt,
+		&i.Title,
+		&i.Excerpt,
+		&i.MetaTitle,
+		&i.MetaDescription,
+		&i.Slug,
+		&i.ImageLink,
+		&i.Content,
+		&i.ReadTime,
+		&i.IsPublished,
+	)
+	return i, err
+}
+
+const updateArticleMetadata = `-- name: UpdateArticleMetadata :one
+update articles
+    set updated_at=$2, title=$3, excerpt=$4, meta_title=$5, meta_description=$6, slug=$7, image_link=$8
+where id = $1
+returning id, created_at, updated_at, first_published_at, title, excerpt, meta_title, meta_description, slug, image_link, content, read_time, is_published
+`
+
+type UpdateArticleMetadataParams struct {
+	ID              uuid.UUID
+	UpdatedAt       pgtype.Timestamptz
+	Title           string
+	Excerpt         string
+	MetaTitle       string
+	MetaDescription string
+	Slug            string
+	ImageLink       sql.NullString
+}
+
+func (q *Queries) UpdateArticleMetadata(ctx context.Context, db DBTX, arg UpdateArticleMetadataParams) (Article, error) {
+	row := db.QueryRow(ctx, updateArticleMetadata,
+		arg.ID,
+		arg.UpdatedAt,
+		arg.Title,
+		arg.Excerpt,
+		arg.MetaTitle,
+		arg.MetaDescription,
+		arg.Slug,
+		arg.ImageLink,
+	)
+	var i Article
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.FirstPublishedAt,
+		&i.Title,
+		&i.Excerpt,
+		&i.MetaTitle,
+		&i.MetaDescription,
+		&i.Slug,
+		&i.ImageLink,
+		&i.Content,
+		&i.ReadTime,
+		&i.IsPublished,
+	)
+	return i, err
 }

@@ -1,84 +1,81 @@
 package views
 
 import (
-	"github.com/MBvisti/mortenvistisen/views/layouts"
-	"github.com/MBvisti/mortenvistisen/models"
-	"github.com/gosimple/slug"
-	"github.com/dromara/carbon/v2"
+	"fmt"
+	"github.com/mbvisti/mortenvistisen/router/routes"
+	"github.com/mbvisti/mortenvistisen/views/fragments"
+	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
+	"time"
 )
 
-type YearlyNewsletters struct {
-	Year        string
-	Newsletters []models.Newsletter
-}
-
-templ newsletterSignup() {
-	<div class="text-white p-4 bg-body">
-		<h2 class="fw-semibold fs-3">Monthly technical deep dives.</h2>
-		<p>
-			I work with everything from backend dev, systems designs to devops and machine learning. I share my learnings twice a month in tutorial form, so you can pick up new concept faster and expand your technical tool belt. 
-		</p>
-		<p>
-			There is always an option to opt-out of receiving these updates, included in each mail. One click of a button and you are out.
-		</p>
-		<form class="w-full" hx-post="/subscribe" hx-target="this" hx-swap="outerHTML" method="POST" action="/subscribe">
-			<div class="input-group">
-				<input type="hidden" name="article-title" value="newsletter-page"/>
-				<input
-					required
-					type="email"
-					id="hero-input"
-					name="hero-input"
-					class="form-control"
-					placeholder="your-mail@here.com"
-				/>
-				<button
-					data-umami-event="newsletter--newsletter-page"
-					type="submit"
-					class="btn bg-primary"
-				>
-					Receive Updates
-				</button>
-			</div>
-		</form>
-	</div>
-}
-
-templ Newsletters(newletters []YearlyNewsletters) {
-	<div class="row mt-5 flex-grow-1 d-flex flex-column">
-		<div class="text-white text-center mb-5">
-			<h2 class="fw-semibold">Newsletters</h2>
+templ NewsletterCard(title, slug, excerpt string, releasedAt time.Time) {
+	<article class="bg-base-200 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 p-6 border border-base-300">
+		<div class="flex items-center justify-between mb-4">
+			<time class="text-sm text-base-content/70 font-medium">{ releasedAt.Format("January 2, 2006") }</time>
 		</div>
-		<div class="text-white col col-md-8 mx-auto mb-3">
-			for _, yearlyNewsletter := range newletters {
-				<h3 class="fw-semibold">{ yearlyNewsletter.Year }</h3>
-				for _, newsletter := range yearlyNewsletter.Newsletters {
-					<a class="link-underline link-underline-opacity-0" href={ templ.SafeURL("/newsletters/" + slug.Make(newsletter.Title)) }>
-						<div class="cursor-pointer rounded border bg-body p-4 mb-4">
-							<p class="mb-3 fs-6 text-white">
-								{ carbon.CreateFromStdTime(newsletter.ReleasedAt).ToDateString() }
-							</p>
-							<p class="fs-semibold fs-5 text-white">{ newsletter.Title }</p>
-							<div aria-hidden="true" class="">
-								Read
-								<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right-short" viewBox="0 0 16 16">
-									<path fill-rule="evenodd" d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8"></path>
-								</svg>
-							</div>
-						</div>
-					</a>
-				}
+		<h3 class="text-xl font-bold text-base-content mb-3 hover:text-primary transition-colors duration-200">
+			<a href={ templ.SafeURL("/newsletters/" + slug) }>{ title }</a>
+		</h3>
+		<p class="text-base-content/80 mb-4 leading-relaxed">
+			if excerpt != "" {
+				{ excerpt }
+			} else {
+				Excerpt coming soon...
 			}
-		</div>
-		<div class="col col-md-8 mx-auto">
-			<hr class="mb-4"/>
-			@newsletterSignup()
-		</div>
-	</div>
+		</p>
+		<a href={ templ.SafeURL("/newsletters/" + slug) } class="inline-flex items-center text-primary hover:text-primary-content font-medium transition-colors duration-200">
+			Read newsletter
+			<svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+			</svg>
+		</a>
+	</article>
+}
+
+type HomeNewsletter struct {
+	Title      string
+	Slug       string
+	ReleasedAt time.Time
+	Excerpt    string
+}
+
+templ Newsletters(newslettersByYear map[int][]HomeNewsletter) {
+	<main class="flex-1 bg-base-100">
+		<section class="py-16 bg-base-100">
+			<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+				<div class="text-center mb-12">
+					<h1 class="text-3xl font-bold text-base-content mb-4">Newsletters, however infrequent</h1>
+					<p class="text-lg text-base-content/70">Insights on software engineering, entrepreneurship, and building products</p>
+				</div>
+				for year, newsletters := range newslettersByYear {
+					<div class="mb-12">
+						<h2 class="text-2xl font-bold text-base-content mb-8 text-center">{ fmt.Sprintf("%d", year) }</h2>
+						<div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+							for _, newsletter := range newsletters {
+								@NewsletterCard(newsletter.Title, newsletter.Slug, newsletter.Excerpt, newsletter.ReleasedAt)
+							}
+						</div>
+					</div>
+				}
+			</div>
+		</section>
+		<!-- Newsletter Subscription Section -->
+		<section class="py-16 bg-base-200">
+			<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+				<div class="flex justify-center">
+					@fragments.NewsletterSubscription("newsletter page", false)
+				</div>
+			</div>
+		</section>
+	</main>
 }
 
 templ NewslettersPage(content templ.Component) {
-	@layouts.Base(Head(ctx, WithTitle("Newsletters | mortenvistisen"))) {
+	@layouts.Base(
+		WithSlug(routes.LandingPage.Path),
+		WithTitle("Newsletters"),
+		WithDescription("Newsletters released by Morten"),
+	) {
 		@content
 	}
 }

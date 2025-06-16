@@ -8,8 +8,8 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/MBvisti/mortenvistisen/config"
-	"github.com/MBvisti/mortenvistisen/emails"
+	"github.com/mbvisti/mortenvistisen/config"
+	"github.com/mbvisti/mortenvistisen/emails"
 )
 
 func main() {
@@ -17,12 +17,17 @@ func main() {
 	e := echo.New()
 
 	passwordReset := emails.PasswordReset{
-		ResetLink: fmt.Sprintf("%s/%s?token=%s", config.Cfg.GetFullDomain(), "reset-password", "wvSwI8Yq02o9cmJ6zVSTkP44lXGJZjmMF8v10vxAhrrV6UyzRr59ogUzdo3VKP7y"),
+		ResetLink: fmt.Sprintf(
+			"%s/%s?token=%s",
+			config.Cfg.GetFullDomain(),
+			"reset-password",
+			"wvSwI8Yq02o9cmJ6zVSTkP44lXGJZjmMF8v10vxAhrrV6UyzRr59ogUzdo3VKP7y",
+		),
 	}
 	passwordResetHtml, passwordResetText, _ := passwordReset.Generate(ctx)
 
 	signupWelcome := emails.SignupWelcome{
-		ConfirmationLink: fmt.Sprintf("%s/%s?token=%s", config.Cfg.GetFullDomain(), "reset-password", "wvSwI8Yq02o9cmJ6zVSTkP44lXGJZjmMF8v10vxAhrrV6UyzRr59ogUzdo3VKP7y"),
+		VerificationCode: "43dd1w",
 	}
 	signupWelcomeHtml, signupWelcomeText, _ := signupWelcome.Generate(ctx)
 

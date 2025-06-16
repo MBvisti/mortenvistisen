@@ -1,0 +1,165 @@
+package components
+
+import (
+	"fmt"
+	"github.com/google/uuid"
+)
+
+type SortableColumn struct {
+	Field       string
+	DisplayName string
+	Sortable    bool
+}
+
+type SortConfig struct {
+	CurrentField string
+	CurrentOrder string
+	BaseURL      string
+}
+
+type SortableTableRow struct {
+	ID       uuid.UUID
+	Elements []TableRowElement
+}
+
+type SortableTableRows []SortableTableRow
+
+templ SortableTable(
+	title string,
+	columns []SortableColumn,
+	tableRows SortableTableRows,
+	pagination Pagination,
+	sortConfig SortConfig,
+	actionBtn ActionBtn,
+	config TableConfig,
+) {
+	<div class="bg-base-200 border border-base-300 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+		<div class="px-6 py-4 border-b border-base-300 flex justify-between items-center bg-base-300/20">
+			<h2 class="text-base-content text-lg font-semibold m-0 flex items-center gap-2">
+				<span>📋</span>
+				{ title }
+			</h2>
+			if actionBtn.Title != "" {
+				<div class="flex gap-4">
+					<a href={ templ.SafeURL(actionBtn.Route.Path) } class="bg-primary text-primary-content border-0 px-4 py-2 rounded-lg text-sm font-medium cursor-pointer no-underline inline-block hover:bg-primary/90 transition-all duration-200 shadow-md hover:shadow-lg">{ actionBtn.Title }</a>
+				</div>
+			}
+		</div>
+		<table class="w-full border-collapse">
+			<thead>
+				<tr>
+					for _, column := range columns {
+						<th class="bg-base-300 text-base-content font-semibold text-sm px-6 py-4 text-left border-b border-base-300">
+							if column.Sortable {
+								@sortableHeader(column, sortConfig, pagination)
+							} else {
+								{ column.DisplayName }
+							}
+						</th>
+					}
+					<th class="bg-base-300 text-base-content font-semibold text-sm px-6 py-4 text-left border-b border-base-300">Action</th>
+				</tr>
+			</thead>
+			<tbody>
+				if len(tableRows) == 0 {
+					<tr>
+						<td colspan={ fmt.Sprintf("%d", len(columns)+1) } class="text-base-content px-6 py-4 border-b border-base-300 transition-colors duration-200 text-center">No elements found</td>
+					</tr>
+				}
+				for _, row := range tableRows {
+					<tr class="hover:bg-base-300/20 transition-colors duration-200">
+						for _, element := range row.Elements {
+							<td
+								class="text-base-content px-6 py-4 border-b border-base-300 transition-colors duration-200"
+								if element.Hightlight == "status-published" {
+									class="text-base-content px-6 py-4 border-b border-base-300 transition-colors duration-200 text-success font-medium"
+								}
+								if element.Hightlight == "status-draft" {
+									class="text-base-content px-6 py-4 border-b border-base-300 transition-colors duration-200 text-warning font-medium"
+								}
+							>{ element.Title }</td>
+						}
+						<td class="text-base-content px-6 py-4 border-b border-base-300 transition-colors duration-200">
+							<div class="flex gap-2">
+								if config.EditURLPattern != "" {
+									<a href={ templ.URL(fmt.Sprintf(config.EditURLPattern, row.ID.String())) } class="bg-base-300 text-base-content border-0 px-3 py-1 text-xs rounded-md cursor-pointer no-underline inline-block hover:bg-primary hover:text-primary-content transition-all duration-200 shadow-sm hover:shadow-md">Edit</a>
+								}
+							</div>
+						</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+		if pagination.TotalPages > 1 {
+			@sortablePagination(pagination, sortConfig)
+		}
+	</div>
+}
+
+templ sortableHeader(column SortableColumn, sortConfig SortConfig, pagination Pagination) {
+	if column.Field == sortConfig.CurrentField {
+		if sortConfig.CurrentOrder == "asc" {
+			<a
+				href={ templ.URL(buildSortURL(sortConfig.BaseURL, column.Field, "desc", pagination.Page)) }
+				class="flex items-center gap-1 hover:text-primary"
+			>
+				{ column.DisplayName }
+				<span class="text-xs">↑</span>
+			</a>
+		} else {
+			<a
+				href={ templ.URL(buildSortURL(sortConfig.BaseURL, column.Field, "asc", pagination.Page)) }
+				class="flex items-center gap-1 hover:text-primary"
+			>
+				{ column.DisplayName }
+				<span class="text-xs">↓</span>
+			</a>
+		}
+	} else {
+		<a
+			href={ templ.URL(buildSortURL(sortConfig.BaseURL, column.Field, "asc", pagination.Page)) }
+			class="flex items-center gap-1 hover:text-primary"
+		>
+			{ column.DisplayName }
+			<span class="text-xs opacity-30">↕</span>
+		</a>
+	}
+}
+
+templ sortablePagination(pagination Pagination, sortConfig SortConfig) {
+	<div class="px-6 py-4 border-t border-base-300 flex justify-between items-center flex-wrap gap-4 bg-base-300/20">
+		<div class="flex gap-2 items-center">
+			if pagination.HasPrevious {
+				<a href={ templ.URL(buildPaginationURL(sortConfig, pagination.Page-1)) } class="px-3 py-2 border border-base-300 bg-base-200 text-base-content no-underline rounded-md text-sm transition-all duration-200 hover:bg-primary hover:text-primary-content hover:border-primary hover:shadow-md">← Previous</a>
+			}
+			for i := 1; i <= pagination.TotalPages; i++ {
+				if i == pagination.Page {
+					<span class="px-3 py-2 border border-base-300 bg-base-200 text-base-content no-underline rounded-md text-sm transition-all duration-200 hover:bg-primary hover:text-primary-content hover:border-primary hover:shadow-md border-primary bg-primary text-primary-content shadow-md">{ fmt.Sprintf("%d", i) }</span>
+				} else {
+					<a href={ templ.URL(buildPaginationURL(sortConfig, i)) } class="px-3 py-2 border border-base-300 bg-base-200 text-base-content no-underline rounded-md text-sm transition-all duration-200 hover:bg-primary hover:text-primary-content hover:border-primary hover:shadow-md">{ fmt.Sprintf("%d", i) }</a>
+				}
+			}
+			if pagination.HasNext {
+				<a href={ templ.URL(buildPaginationURL(sortConfig, pagination.Page+1)) } class="px-3 py-2 border border-base-300 bg-base-200 text-base-content no-underline rounded-md text-sm transition-all duration-200 hover:bg-primary hover:text-primary-content hover:border-primary hover:shadow-md">Next →</a>
+			}
+		</div>
+		<div class="text-base-content/70 text-sm">
+			Showing { fmt.Sprintf("%d", (pagination.Page-1)*pagination.PageSize+1) } to { fmt.Sprintf("%d", min(pagination.Page*pagination.PageSize, int(pagination.TotalCount))) } of { fmt.Sprintf("%d", pagination.TotalCount) } items
+		</div>
+	</div>
+}
+
+func buildSortURL(baseURL, field, order string, page int) string {
+	if page > 1 {
+		return fmt.Sprintf("%s?sort=%s&order=%s&page=%d", baseURL, field, order, page)
+	}
+	return fmt.Sprintf("%s?sort=%s&order=%s", baseURL, field, order)
+}
+
+func buildPaginationURL(sortConfig SortConfig, page int) string {
+	if sortConfig.CurrentField != "" && sortConfig.CurrentOrder != "" {
+		return fmt.Sprintf("%s?sort=%s&order=%s&page=%d",
+			sortConfig.BaseURL, sortConfig.CurrentField, sortConfig.CurrentOrder, page)
+	}
+	return fmt.Sprintf("%s?page=%d", sortConfig.BaseURL, page)
+}

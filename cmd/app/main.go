@@ -3,64 +3,150 @@ package main
 import (
 	"context"
 	"fmt"
+	"io/fs"
 	"log/slog"
 	"os"
 	"os/signal"
-	"time"
 
-	"github.com/MBvisti/mortenvistisen/config"
-	"github.com/MBvisti/mortenvistisen/http"
-	"github.com/MBvisti/mortenvistisen/http/handlers"
-	"github.com/MBvisti/mortenvistisen/posts"
-	"github.com/MBvisti/mortenvistisen/psql"
-	"github.com/MBvisti/mortenvistisen/queue"
-	"github.com/MBvisti/mortenvistisen/queue/jobs"
-	"github.com/MBvisti/mortenvistisen/queue/workers"
-	"github.com/MBvisti/mortenvistisen/routes"
-	"github.com/MBvisti/mortenvistisen/services"
-	"github.com/MBvisti/mortenvistisen/telemetry"
-	"github.com/dromara/carbon/v2"
-	"github.com/riverqueue/river"
+	"github.com/jackc/pgx/v5/stdlib"
+	"github.com/mbvisti/mortenvistisen/clients"
+	"github.com/mbvisti/mortenvistisen/config"
+	"github.com/mbvisti/mortenvistisen/handlers"
+	"github.com/mbvisti/mortenvistisen/handlers/middleware"
+	"github.com/mbvisti/mortenvistisen/psql"
+	"github.com/mbvisti/mortenvistisen/psql/queue"
+	"github.com/mbvisti/mortenvistisen/psql/queue/workers"
+	"github.com/mbvisti/mortenvistisen/router"
+	"github.com/mbvisti/mortenvistisen/server"
+	"github.com/mbvisti/mortenvistisen/telemetry"
+	"github.com/pressly/goose/v3"
+	"github.com/pressly/goose/v3/lock"
 	"riverqueue.com/riverui"
 )
 
-var appRelease string
+var AppVersion string
+
+func migrate(ctx context.Context) error {
+	slog.Info("STARTING TO MIGRATE")
+
+	cfg := config.NewConfig()
+
+	gooseLock, err := lock.NewPostgresSessionLocker()
+	if err != nil {
+		return err
+	}
+
+	fsys, err := fs.Sub(psql.Migrations, "migrations")
+	if err != nil {
+		return err
+	}
+
+	pool, err := psql.CreatePooledConnection(ctx, cfg.GetDatabaseURL())
+	if err != nil {
+		return err
+	}
+	defer pool.Close()
+
+	db := stdlib.OpenDBFromPool(pool)
+
+	gooseProvider, err := goose.NewProvider(
+		goose.DialectPostgres,
+		db,
+		fsys,
+		goose.WithVerbose(true),
+		goose.WithSessionLocker(gooseLock),
+	)
+	if err != nil {
+		return err
+	}
+	_, err = gooseProvider.Up(ctx)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
 
 func run(ctx context.Context) error {
 	cfg := config.NewConfig()
-	carbon.SetDefault(carbon.Default{
-		Layout:       carbon.DateTimeLayout,
-		Timezone:     carbon.UTC,
-		WeekStartsAt: carbon.Monday,
-		Locale:       "en",
-	})
 
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
 
-	// otel := telemetry.NewOtel()
-	// defer func() {
-	// 	if err := otel.Shutdown(); err != nil {
-	// 		panic(err)
-	// 	}
-	// }()
+	var tel *telemetry.Telemetry
+	if cfg.Environment == config.STAGING_ENVIRONMENT {
+		if err := migrate(ctx); err != nil {
+			return err
+		}
 
-	// appTracer := otel.NewTracer("app/tracer")
+		t, err := telemetry.New(
+			ctx,
+			AppVersion,
+			&telemetry.LokiExporter{
+				LogLevel:   slog.LevelInfo,
+				WithTraces: true,
+				URL:        "https://telemetry-loki.mbvlabs.com",
+				Labels: map[string]string{
+					"env":     "staging",
+					"service": "blog-staging",
+				},
+			},
+			telemetry.NewOtlpHttpTraceExporter(
+				"telemetry-alloy.mbvlabs.com",
+				false,
+				map[string]string{
+					"Authorization": "Basic YWRtaW46U2Ftc3VuZzIwNjE=",
+				},
+			),
+			telemetry.NewOtlpHttpMetricExporter(
+				"telemetry-alloy.mbvlabs.com",
+				false,
+				map[string]string{
+					"Authorization": "Basic YWRtaW46U2Ftc3VuZzIwNjE=",
+				},
+			),
+		)
+		if err != nil {
+			return fmt.Errorf("failed to initialize telemetry: %w", err)
+		}
 
-	// client := telemetry.NewTelemetry(
-	// 	cfg,
-	// 	appRelease,
-	// 	strings.ToLower(cfg.ProjectName),
-	// )
-	// if client != nil {
-	// 	defer client.Stop()
-	// }
+		defer func() {
+			if err := t.Shutdown(ctx); err != nil {
+				slog.Error("Failed to shutdown telemetry", "error", err)
+			}
+		}()
+
+		tel = t
+	}
 
 	if cfg.Environment == config.DEV_ENVIRONMENT {
-		slog.SetDefault(telemetry.DevelopmentLogger())
+		t, err := telemetry.New(
+			ctx,
+			AppVersion,
+			&telemetry.StdoutExporter{
+				LogLevel:   slog.LevelDebug,
+				WithTraces: true,
+			},
+			&telemetry.NoopTraceExporter{},
+			&telemetry.NoopMetricExporter{},
+		)
+		if err != nil {
+			return fmt.Errorf("failed to initialize telemetry: %w", err)
+		}
+
+		tel = t
 	}
-	if cfg.Environment == config.PROD_ENVIRONMENT {
-		slog.SetDefault(telemetry.ProductionLogger())
+
+	if cfg.Environment == config.STAGING_ENVIRONMENT {
+		defer func() {
+			if err := tel.Shutdown(ctx); err != nil {
+				slog.Error("Failed to shutdown telemetry", "error", err)
+			}
+		}()
+	}
+
+	if err := telemetry.SetupRuntimeMetricsInCallback(telemetry.GetMeter()); err != nil {
+		return fmt.Errorf("failed to setup callback metrics: %w", err)
 	}
 
 	conn, err := psql.CreatePooledConnection(
@@ -71,36 +157,39 @@ func run(ctx context.Context) error {
 		return err
 	}
 
-	emailSvc := services.NewMail()
+	emailClient := clients.NewEmail()
 
 	queueWorkers, err := workers.SetupWorkers(workers.WorkerDependencies{
-		Emailer: emailSvc,
-		Conn:    conn,
+		DB:          conn,
+		EmailClient: emailClient,
 	})
 	if err != nil {
 		return err
 	}
 
-	periodicJobs := []*river.PeriodicJob{
-		river.NewPeriodicJob(
-			river.PeriodicInterval(24*time.Hour),
-			func() (river.JobArgs, *river.InsertOpts) {
-				return jobs.SubscriberCleanupJobArgs{}, nil
-			},
-			&river.PeriodicJobOpts{RunOnStart: true},
-		),
+	queueLogger, queueLoggerShutdown := telemetry.NewLogger(
+		ctx,
+		&telemetry.StdoutExporter{
+			LogLevel:   slog.LevelError,
+			WithTraces: true,
+		},
+	)
+	if cfg.Environment == config.STAGING_ENVIRONMENT {
+		defer func() {
+			if err := queueLoggerShutdown(ctx); err != nil {
+				slog.Error("Failed to shutdown telemetry", "error", err)
+			}
+		}()
 	}
 
-	riverClient := queue.NewClient(
-		conn,
+	psql := psql.NewPostgres(conn, nil)
+	psql.NewQueue(
+		queue.WithLogger(queueLogger),
 		queue.WithWorkers(queueWorkers),
-		queue.WithPeriodicJobs(periodicJobs),
-		queue.WithLogger(telemetry.ProductionLogger()),
 	)
-	psql := psql.NewPostgres(conn, riverClient)
 
 	opts := &riverui.ServerOpts{
-		Client: riverClient,
+		Client: psql.Queue(),
 		DB:     conn,
 		Logger: slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
 			Level: slog.SetLogLoggerLevel(slog.LevelError),
@@ -112,32 +201,33 @@ func run(ctx context.Context) error {
 		return err
 	}
 
-	// Start the server to initialize background processes for caching and periodic queries:
 	if err := riverUI.Start(ctx); err != nil {
 		return err
 	}
 
-	authSvc := services.NewAuth(psql)
-
-	postManager := posts.NewManager()
-
 	handlers := handlers.NewHandlers(
 		psql,
-		authSvc,
-		emailSvc,
-		postManager,
+		emailClient,
 	)
 
-	routes := routes.NewRoutes(
+	mw, err := middleware.New(tel.AppTracerProvider)
+	if err != nil {
+		return err
+	}
+
+	routes := router.New(
+		ctx,
 		handlers,
+		mw,
 		riverUI,
+		tel.AppTracerProvider,
 	)
 
 	router, c := routes.SetupRoutes(ctx)
 
-	server := http.NewServer(c, router)
+	server := server.NewHttp(c, router)
 
-	if err := riverClient.Start(c); err != nil {
+	if err := psql.Queue().Start(ctx); err != nil {
 		return err
 	}
 

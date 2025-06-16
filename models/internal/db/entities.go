@@ -61,90 +61,44 @@ func (ns NullRiverJobState) Value() (driver.Value, error) {
 	return string(ns.RiverJobState), nil
 }
 
-type SiteEvent string
-
-const (
-	SiteEventPageView  SiteEvent = "page_view"
-	SiteEventPageLeave SiteEvent = "page_leave"
-	SiteEventClick     SiteEvent = "click"
-)
-
-func (e *SiteEvent) Scan(src interface{}) error {
-	switch s := src.(type) {
-	case []byte:
-		*e = SiteEvent(s)
-	case string:
-		*e = SiteEvent(s)
-	default:
-		return fmt.Errorf("unsupported scan type for SiteEvent: %T", src)
-	}
-	return nil
+type Article struct {
+	ID               uuid.UUID
+	CreatedAt        pgtype.Timestamptz
+	UpdatedAt        pgtype.Timestamptz
+	FirstPublishedAt pgtype.Timestamptz
+	Title            string
+	Excerpt          string
+	MetaTitle        string
+	MetaDescription  string
+	Slug             string
+	ImageLink        sql.NullString
+	Content          sql.NullString
+	ReadTime         sql.NullInt32
+	IsPublished      sql.NullBool
 }
 
-type NullSiteEvent struct {
-	SiteEvent SiteEvent
-	Valid     bool // Valid is true if SiteEvent is not NULL
+type ArticleTag struct {
+	ID        uuid.UUID
+	CreatedAt pgtype.Timestamptz
+	UpdatedAt pgtype.Timestamptz
+	Title     string
 }
 
-// Scan implements the Scanner interface.
-func (ns *NullSiteEvent) Scan(value interface{}) error {
-	if value == nil {
-		ns.SiteEvent, ns.Valid = "", false
-		return nil
-	}
-	ns.Valid = true
-	return ns.SiteEvent.Scan(value)
-}
-
-// Value implements the driver Valuer interface.
-func (ns NullSiteEvent) Value() (driver.Value, error) {
-	if !ns.Valid {
-		return nil, nil
-	}
-	return string(ns.SiteEvent), nil
-}
-
-type Job struct {
-	ID             uuid.UUID
-	CreatedAt      pgtype.Timestamptz
-	UpdatedAt      pgtype.Timestamptz
-	ScheduledFor   pgtype.Timestamptz
-	FailedAttempts int32
-	State          int32
-	Instructions   []byte
-	Executor       string
-	RepeatableID   sql.NullString
+type ArticleTagConnection struct {
+	ID        uuid.UUID
+	ArticleID uuid.UUID
+	TagID     uuid.UUID
 }
 
 type Newsletter struct {
-	ID         uuid.UUID
-	CreatedAt  pgtype.Timestamptz
-	UpdatedAt  pgtype.Timestamptz
-	Title      string
-	Released   pgtype.Bool
-	ReleasedAt pgtype.Timestamptz
-	Content    string
-	Slug       sql.NullString
-}
-
-type Post struct {
 	ID          uuid.UUID
-	CreatedAt   pgtype.Timestamp
-	UpdatedAt   pgtype.Timestamp
+	CreatedAt   pgtype.Timestamptz
+	UpdatedAt   pgtype.Timestamptz
 	Title       string
-	Filename    string
-	Slug        string
-	Excerpt     string
-	Draft       bool
-	ReleasedAt  pgtype.Timestamp
-	ReadTime    sql.NullInt32
-	HeaderTitle sql.NullString
-}
-
-type PostsTag struct {
-	ID     uuid.UUID
-	PostID uuid.UUID
-	TagID  uuid.UUID
+	IsPublished pgtype.Bool
+	ReleasedAt  pgtype.Timestamptz
+	Slug        sql.NullString
+	Content     string
 }
 
 type RiverClient struct {
@@ -194,43 +148,18 @@ type RiverLeader struct {
 	Name      string
 }
 
+type RiverMigration struct {
+	ID        int64
+	CreatedAt pgtype.Timestamptz
+	Version   int64
+}
+
 type RiverQueue struct {
 	Name      string
 	CreatedAt pgtype.Timestamptz
 	Metadata  []byte
 	PausedAt  pgtype.Timestamptz
 	UpdatedAt pgtype.Timestamptz
-}
-
-type SiteSession struct {
-	ID           uuid.UUID
-	CreatedAt    pgtype.Timestamptz
-	Hostname     sql.NullString
-	Browser      sql.NullString
-	Os           sql.NullString
-	Device       sql.NullString
-	Screen       sql.NullString
-	Lang         sql.NullString
-	Country      sql.NullString
-	Subdivision1 sql.NullString
-	Subdivision2 sql.NullString
-	City         sql.NullString
-	Finger       sql.NullString
-}
-
-type SiteView struct {
-	ID             int64
-	SessionID      pgtype.UUID
-	VisitorID      pgtype.UUID
-	CreatedAt      pgtype.Timestamptz
-	UrlPath        sql.NullString
-	UrlQuery       sql.NullString
-	ReferrerPath   sql.NullString
-	ReferrerQuery  sql.NullString
-	ReferrerDomain sql.NullString
-	PageTitle      sql.NullString
-	EventType      NullSiteEvent
-	EventName      sql.NullString
 }
 
 type Subscriber struct {
@@ -243,11 +172,6 @@ type Subscriber struct {
 	IsVerified   pgtype.Bool
 }
 
-type Tag struct {
-	ID   uuid.UUID
-	Name string
-}
-
 type Token struct {
 	ID              uuid.UUID
 	CreatedAt       pgtype.Timestamptz
@@ -257,10 +181,11 @@ type Token struct {
 }
 
 type User struct {
-	ID             uuid.UUID
-	CreatedAt      pgtype.Timestamptz
-	UpdatedAt      pgtype.Timestamptz
-	Mail           string
-	MailVerifiedAt pgtype.Timestamptz
-	Password       string
+	ID              uuid.UUID
+	CreatedAt       pgtype.Timestamptz
+	UpdatedAt       pgtype.Timestamptz
+	Email           string
+	EmailVerifiedAt pgtype.Timestamptz
+	Password        []byte
+	IsAdmin         bool
 }

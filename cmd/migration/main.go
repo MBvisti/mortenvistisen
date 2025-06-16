@@ -10,15 +10,19 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/stdlib"
-	"github.com/MBvisti/mortenvistisen/config"
-	"github.com/MBvisti/mortenvistisen/psql"
+	"github.com/mbvisti/mortenvistisen/config"
+	"github.com/mbvisti/mortenvistisen/psql"
 	"github.com/pressly/goose/v3"
 	"github.com/pressly/goose/v3/lock"
 )
 
 func main() {
 	ctx := context.Background()
-	ctx, cancel := context.WithTimeoutCause(ctx, 5*time.Minute, errors.New("migration timeout of 5 minutes reached"))
+	ctx, cancel := context.WithTimeoutCause(
+		ctx,
+		5*time.Minute,
+		errors.New("migration timeout of 5 minutes reached"),
+	)
 	defer cancel()
 
 	cfg := config.NewConfig()
@@ -37,6 +41,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	defer pool.Close()
 
 	db := stdlib.OpenDBFromPool(pool)
 
@@ -97,6 +102,10 @@ func main() {
 			if err != nil {
 				panic(err)
 			}
+			_, err = gooseProvider.Up(ctx)
+			if err != nil {
+				panic(err)
+			}
 		case "status":
 			statuses, err := gooseProvider.Status(ctx)
 			if err != nil {
@@ -104,7 +113,17 @@ func main() {
 			}
 
 			for _, status := range statuses {
-				slog.Info("database status", "version", status.Source.Version, "file_name", status.Source.Path, "state", status.State, "applied_at", status.AppliedAt)
+				slog.Info(
+					"database status",
+					"version",
+					status.Source.Version,
+					"file_name",
+					status.Source.Path,
+					"state",
+					status.State,
+					"applied_at",
+					status.AppliedAt,
+				)
 			}
 		}
 	}

@@ -1,0 +1,39 @@
+name: Build Docker images
+ 
+on:
+  push:
+    branches: ["master"]
+ 
+jobs:
+  build-and-push-dockerfile-image:
+    runs-on: ubuntu-latest
+ 
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+ 
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+ 
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          build-args: |
+            appRelease=${{ github.sha }}
+          tags: |
+            mbvofdocker/thelab:mbv-blog-latest
+            mbvofdocker/thelab:mbv-blog-${{ github.sha }}
+          platforms: linux/amd64
+
+      - name: Deploy with apps-manager
+        run: |
+          curl -X PUT https://apps-manager.mbvlabs.com/services/blog/deploy \
+            -u manager:password \
+            -H "Content-Type: application/json" \
+            -d '{"is_private": true}'

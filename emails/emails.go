@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"embed"
-	"io"
 
 	"github.com/a-h/templ"
 	"github.com/jaytaylor/html2text"
@@ -29,6 +28,24 @@ var HtmlTemplates embed.FS
 
 type TemplateHandler interface {
 	Generate(ctx context.Context) (Html, Text, error)
+}
+
+type SubscriberWelcome struct {
+	Email string
+	Code  string
+}
+
+var _ TemplateHandler = (*SubscriberWelcome)(nil)
+
+func (s SubscriberWelcome) Generate(ctx context.Context) (Html, Text, error) {
+	data := SubscriberWelcomeData(s)
+	//nolint:contextcheck // not needed
+	html, plainText, err := processEmail(ctx, data.template())
+	if err != nil {
+		return Html(""), Text(""), err
+	}
+
+	return Html(html), Text(plainText), nil
 }
 
 func processEmail(
@@ -62,13 +79,4 @@ func processEmail(
 	}
 
 	return inlineHtml, plainText, nil
-}
-
-func unsafe(html string) templ.Component {
-	return templ.ComponentFunc(
-		func(ctx context.Context, w io.Writer) (err error) {
-			_, err = io.WriteString(w, html)
-			return
-		},
-	)
 }

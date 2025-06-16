@@ -7,8 +7,10 @@ import (
 )
 
 const (
-	DEV_ENVIRONMENT  = "development"
-	PROD_ENVIRONMENT = "production"
+	DEV_ENVIRONMENT     = "development"
+	TEST_ENVIRONMENT    = "testing"
+	PROD_ENVIRONMENT    = "production"
+	STAGING_ENVIRONMENT = "staging"
 )
 
 type App struct {
@@ -19,6 +21,7 @@ type App struct {
 	ProjectName            string `env:"PROJECT_NAME"`
 	Environment            string `env:"ENVIRONMENT"`
 	DefaultSenderSignature string `env:"DEFAULT_SENDER_SIGNATURE"`
+	TurnstileSiteKey       string `env:"TURNSTILE_SITE_KEY"`
 	TurnstileSecretKey     string `env:"TURNSTILE_SECRET_KEY"`
 }
 

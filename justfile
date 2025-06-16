@@ -1,18 +1,20 @@
 set dotenv-load
 
 # alias
-alias r := run-app
+alias r := run
+alias rt := run-tw
+alias ra := run-app
 alias rw := run-worker
 alias re := run-email
 
-alias wc := watch-css
+alias ci := golangci
 
 alias cm := create-migration
 alias ms := migration-status
-alias fm := fix-migrations
 alias um := up-migrations
 alias dm := down-migrations
 alias dmt := down-migrations-to
+alias fm := fix-migrations
 alias rdb := reset-db
 
 alias s := seed
@@ -24,16 +26,15 @@ alias ft := fmt-templates
 
 alias ex := explore
 
+alias ti := test-integrations
+alias tu := test-units
+
 default:
     @just --list
 
-# CSS
-watch-css:
-    npm run dev
-
-# Database 
+# database 
 create-migration name:
-	@goose -dir psql/migrations postgres $DB_KIND://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME create {{name}} sql
+	@goose -dir psql/migrations postgres $DB_KIND://$DB_USER:$DB_PASSWORD@localhost:5432/$DB_NAME create {{name}} sql
 
 migration-status:
 	go run cmd/migration/main.go --cmd "status"
@@ -59,19 +60,25 @@ reset-db:
 generate-db-functions:
 	@sqlc compile && sqlc generate
 
-# Application
-run-app:
-    wgo -xdir ./views/emails -file=.go -file=.templ -xfile=_templ.go templ generate :: go run cmd/app/main.go
+# application
+run-tw:
+    wgo -file=.go -file=.templ -xfile=_templ.go just compile-templates :: wgo -file=.templ -file=base.css -xfile=_templ.go npm run build-css :: just run-app
 
-# Worker
+run:
+    wgo -xdir views/emails -file=.js -file=.css -file=.go -file=.templ -xfile=_templ.go just compile-templates :: just run-app
+
+run-app:
+    go run cmd/app/main.go
+
+# worker
 run-worker:
     @go run ./cmd/worker/main.go
 
-# Emails
+# emails
 run-email:
-    wgo -dir ./emails -file=.txt -file=.go -file=.templ -xfile=_templ.go templ generate :: go run cmd/email/*.go
+    wgo -dir ./emails  -file=.go -file=.templ -xfile=_templ.go templ generate :: go run cmd/email/main.go
 
-# templates
+# assets
 compile-templates:
     templ generate
 
@@ -82,11 +89,25 @@ fmt-templates:
 explore:
     @go run ./cmd/explore/main.go
 
-seed:
+seed: reset-db
 	@go run ./cmd/seed/main.go
 
-lint:
+# code quality
+golangci:
 	golangci-lint run
 
-deploy:
-	fly deploy --build-arg COMMIT_SHA=$(git rev-parse --short HEAD)
+vet:
+	@go vet ./...
+
+# testing
+test-units:
+	@go test -tags=unit ./...
+
+test-integrations:
+	@go test -tags=integration ./...
+
+test-e2e:
+	@go test -tags=e2e -v ./...
+
+test-all:
+	@go test ./...

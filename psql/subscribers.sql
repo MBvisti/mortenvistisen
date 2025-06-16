@@ -1,106 +1,41 @@
 -- name: QuerySubscriberByID :one
-SELECT 
-    id, created_at, updated_at, email, 
-    subscribed_at, referer, is_verified
-FROM subscribers
-WHERE id = $1;
+select * from subscribers where id=$1;
 
 -- name: QuerySubscriberByEmail :one
-SELECT 
-    id, created_at, updated_at, email, 
-    subscribed_at, referer, is_verified
-FROM subscribers
-WHERE email = $1;
+select * from subscribers where email=$1;
 
 -- name: QuerySubscribers :many
-SELECT 
-    id, created_at, updated_at, email, 
-    subscribed_at, referer, is_verified
-FROM subscribers
-ORDER BY created_at DESC;
-
--- name: QueryRecentSubscribers :many
-SELECT 
-    id, created_at, updated_at, email, 
-    subscribed_at, referer, is_verified
-FROM subscribers
-ORDER BY created_at DESC
-LIMIT 10;
-
--- name: QuerySubscribersPage :many
-SELECT 
-    id, created_at, updated_at, email, 
-    subscribed_at, referer, is_verified
-FROM subscribers
-ORDER BY created_at DESC
-LIMIT $1 OFFSET $2;
-
--- name: QuerySubscribersCount :one
-SELECT COUNT(*) FROM subscribers;
+select * from subscribers order by created_at desc;
 
 -- name: QueryVerifiedSubscribers :many
-SELECT 
-    id, created_at, updated_at, email, 
-    subscribed_at, referer, is_verified
-FROM subscribers
-WHERE is_verified = true
-ORDER BY created_at DESC;
-
--- name: QueryUnverifiedSubscribers :many
-SELECT 
-    id, created_at, updated_at, email, 
-    subscribed_at, referer, is_verified
-FROM subscribers
-WHERE is_verified = false
-ORDER BY created_at DESC;
-
--- name: QueryVerifiedSubscriberCountByMonth :one
-SELECT 
-    count(id)
-FROM subscribers
-WHERE is_verified = true AND created_at > sqlc.arg(start_month)::timestamp AND created_at < sqlc.arg(end_month)::timestamp
-GROUP BY created_at
-ORDER BY created_at DESC;
+select * from subscribers where is_verified = true order by created_at desc;
 
 -- name: InsertSubscriber :one
-INSERT INTO subscribers (
-    id, created_at, updated_at, email,
-    subscribed_at, referer, is_verified
-) VALUES (
-    $1, $2, $3, $4, $5, $6, $7
-)
-RETURNING *;
+insert into
+    subscribers (id, created_at, updated_at, email, subscribed_at, referer, is_verified)
+values
+    ($1, $2, $3, $4, $5, $6, $7)
+returning *;
 
 -- name: UpdateSubscriber :one
-UPDATE subscribers
-SET 
-    updated_at = $2,
-    email = $3,
-    subscribed_at = $4,
-    referer = $5,
-    is_verified = $6
-WHERE id = $1
-RETURNING *;
-
-
--- name: UpdateSubscriberVerification :one
-UPDATE subscribers
-SET 
-    updated_at = $2,
-    is_verified = $3
-WHERE id = $1
-RETURNING *;
+update subscribers
+    set updated_at=$2, email=$3, referer=$4
+where id = $1
+returning *;
 
 -- name: DeleteSubscriber :exec
-DELETE FROM subscribers 
-WHERE id = $1;
+delete from subscribers where id=$1;
 
--- name: DeleteSubscriberByEmail :exec
-DELETE FROM subscribers 
-WHERE email = $1;
+-- name: VerifySubscriber :exec
+update subscribers set updated_at=$2, is_verified=$3 where id=$1;
 
+-- name: CountSubscribers :one
+select count(*) from subscribers;
 
--- name: DeleteSubsOlderThanMonth :exec
-DELETE FROM subscribers
-WHERE is_verified = false 
-AND subscribed_at < sqlc.arg(older_than)::timestamp;
+-- name: CountVerifiedSubscribers :one
+select count(*) from subscribers where is_verified = true;
+
+-- name: CountMonthlySubscribers :one
+select count(*) from subscribers 
+where subscribed_at >= date_trunc('month', current_date)
+and subscribed_at < date_trunc('month', current_date) + interval '1 month';

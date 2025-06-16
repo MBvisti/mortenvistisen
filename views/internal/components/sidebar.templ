@@ -1,0 +1,52 @@
+package components
+
+import (
+	"github.com/mbvisti/mortenvistisen/router/routes"
+	"strings"
+)
+
+func isActive(currentPath, sectionPath string) bool {
+	// For dashboard: exact match only
+	if sectionPath == "/dashboard" {
+		return currentPath == "/dashboard"
+	}
+	// For other sections: path starts with section
+	return strings.HasPrefix(currentPath, sectionPath)
+}
+
+templ SideBar(currentPath string) {
+	<!-- Sidebar -->
+	<aside class="bg-base-200 border-r border-base-300 transition-transform duration-300 shadow-xl lg:shadow-none lg:static fixed top-0 left-0 h-screen w-[280px] z-50 -translate-x-full lg:translate-x-0" id="sidebar">
+		<div class="px-6 py-6 border-b border-base-300 bg-base-300/20">
+			<h2 class="text-primary text-xl font-bold m-0">Grafto</h2>
+		</div>
+		<nav>
+			<ul class="list-none p-0 m-0 py-4">
+				<li class="mb-1">
+					<a href={ templ.SafeURL(routes.DashboardHome.Path) } class={ "flex items-center px-6 py-3 text-base-content no-underline transition-all duration-200 border-r-4 border-transparent hover:bg-base-300 hover:text-primary hover:border-primary", templ.KV("bg-primary/20 text-primary border-primary font-medium", isActive(currentPath, "/dashboard")) }>
+						<span class="mr-3 w-5 h-5 transition-all duration-200">📊</span>
+						Dashboard
+					</a>
+				</li>
+				<li class="mb-1">
+					<a href="/dashboard/tags" class={ "flex items-center px-6 py-3 text-base-content no-underline transition-all duration-200 border-r-4 border-transparent hover:bg-base-300 hover:text-primary hover:border-primary", templ.KV("bg-primary/20 text-primary border-primary font-medium", isActive(currentPath, "/dashboard/tags")) }>
+						<span class="mr-3 w-5 h-5 transition-all duration-200">🏷️</span>
+						Tags
+					</a>
+				</li>
+				<li class="mb-1">
+					<a href={ templ.SafeURL(routes.DashboardNewsletters.Path) } class={ "flex items-center px-6 py-3 text-base-content no-underline transition-all duration-200 border-r-4 border-transparent hover:bg-base-300 hover:text-primary hover:border-primary", templ.KV("bg-primary/20 text-primary border-primary font-medium", isActive(currentPath, "/dashboard/newsletters")) }>
+						<span class="mr-3 w-5 h-5 transition-all duration-200">📰</span>
+						Newsletters
+					</a>
+				</li>
+				<li class="mb-1">
+					<a href={ templ.SafeURL(routes.DashboardSubscribers.Path) } class={ "flex items-center px-6 py-3 text-base-content no-underline transition-all duration-200 border-r-4 border-transparent hover:bg-base-300 hover:text-primary hover:border-primary", templ.KV("bg-primary/20 text-primary border-primary font-medium", isActive(currentPath, "/dashboard/subscribers")) }>
+						<span class="mr-3 w-5 h-5 transition-all duration-200">📧</span>
+						Subscribers
+					</a>
+				</li>
+			</ul>
+		</nav>
+	</aside>
+}

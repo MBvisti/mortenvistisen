@@ -1,0 +1,188 @@
+package dashboard
+
+import (
+	"github.com/mbvisti/mortenvistisen/config"
+	"github.com/mbvisti/mortenvistisen/router/routes"
+	"github.com/mbvisti/mortenvistisen/views/internal/components"
+	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
+)
+
+type NewArticleFormData struct {
+	Title           string
+	Excerpt         string
+	MetaTitle       string
+	MetaDescription string
+	Slug            string
+	ImageLink       string
+	Content         string
+	ReadTime        string
+	SelectedTagIDs  []string
+	AvailableTags   []ArticleTagOption
+	Errors          map[string][]string
+}
+
+templ NewArticle(formData NewArticleFormData) {
+	@layouts.Dashboard() {
+		<div class="max-w-6xl mx-auto px-4">
+			@components.DashboardHeader("Create New Article", "")
+			<div class="mb-4">
+				@components.Link("← Back to Dashboard", routes.DashboardHome.Path)
+			</div>
+			<div class="flex flex-col">
+				<form method="POST" action={ templ.SafeURL(routes.DashboardStoreArticle.Path) } class="bg-base-200 border border-base-300 rounded-xl p-6 shadow-lg space-y-8">
+					<div>
+						<h2 class="text-xl font-semibold mb-4">Article Information</h2>
+						<div class="grid grid-cols-2 gap-4">
+							@components.InputField(
+								"Title",
+								"text",
+								"title",
+								"Enter article title",
+								templ.Attributes{"required": true, "maxlength": "100"},
+								components.InputFieldProps{
+									Value:     formData.Title,
+									ErrorMsgs: formData.Errors["title"],
+								},
+							)
+							@components.InputField(
+								"Slug",
+								"text",
+								"slug",
+								"article-slug-url",
+								templ.Attributes{"required": true, "maxlength": "255"},
+								components.InputFieldProps{
+									Value:     formData.Slug,
+									ErrorMsgs: formData.Errors["slug"],
+								},
+							)
+							@components.InputField(
+								"Read Time (minutes)",
+								"number",
+								"read_time",
+								"5",
+								templ.Attributes{"min": "1", "max": "999"},
+								components.InputFieldProps{
+									Value:     formData.ReadTime,
+									ErrorMsgs: formData.Errors["read_time"],
+								},
+							)
+							@components.InputField(
+								"Featured Image URL",
+								"url",
+								"image_link",
+								"https://example.com/image.jpg",
+								templ.Attributes{"maxlength": "255"},
+								components.InputFieldProps{
+									Value:     formData.ImageLink,
+									ErrorMsgs: formData.Errors["image_link"],
+								},
+							)
+							<label class="col-span-2">
+								<div class="flex justify-between items-center mb-2">
+									<span class="text-sm font-medium text-base-content md:text-lg">Excerpt</span>
+								</div>
+								<textarea
+									class={ "border rounded w-full p-2 bg-base-200", templ.KV("border-error focus:ring-error", len(formData.Errors["excerpt"]) > 0) }
+									name="excerpt"
+									placeholder="Brief description of the article"
+									rows="3"
+									maxlength="255"
+									required
+								>{ formData.Excerpt }</textarea>
+								if formData.Errors["excerpt"] != nil {
+									<div class="flex justify-between items-center">
+										for _, errMsg := range formData.Errors["excerpt"] {
+											<span class="text-xs text-error">{ components.UppercaseFirstWord(errMsg) }</span>
+										}
+									</div>
+								}
+							</label>
+							<label class="col-span-2 mb-6">
+								<div class="flex justify-between items-center mb-4">
+									<span class="text-sm font-medium text-base-content md:text-lg">Tags</span>
+								</div>
+								<div class="grid grid-cols-6 gap-4 border rounded p-4 bg-base-200">
+									for _, tag := range formData.AvailableTags {
+										<label class="flex items-center space-x-2 cursor-pointer">
+											<input
+												type="checkbox"
+												name="tag_ids"
+												value={ tag.ID }
+												if containsString(formData.SelectedTagIDs, tag.ID) {
+													checked
+												}
+											/>
+											<span class="text-sm text-base-content">{ tag.Title }</span>
+										</label>
+									}
+								</div>
+								if formData.Errors["tag_ids"] != nil {
+									<div class="flex justify-between items-center">
+										for _, errMsg := range formData.Errors["tag_ids"] {
+											<span class="text-xs text-error">{ components.UppercaseFirstWord(errMsg) }</span>
+										}
+									</div>
+								}
+							</label>
+						</div>
+					</div>
+					<div>
+						<h2 class="text-xl font-semibold mb-4">SEO Metadata</h2>
+						<div class="grid grid-cols-2 gap-4 mb-6">
+							<div class="col-span-2">
+								@components.InputField(
+									"Meta Title",
+									"text",
+									"meta_title",
+									"SEO title for search engines",
+									templ.Attributes{"required": true, "maxlength": "100"},
+									components.InputFieldProps{
+										Value:     formData.MetaTitle,
+										ErrorMsgs: formData.Errors["meta_title"],
+									},
+								)
+							</div>
+							<div class="col-span-2">
+								<label class="">
+									<div class="flex justify-between items-center">
+										<span class="text-sm font-medium text-base-content md:text-lg">Meta Description</span>
+									</div>
+									<textarea
+										class={ "border rounded w-full p-2 bg-base-200 h-20", templ.KV("border-error focus:ring-error", len(formData.Errors["meta_description"]) > 0) }
+										name="meta_description"
+										placeholder="SEO description for search engines"
+										rows="2"
+										maxlength="100"
+										required
+									>{ formData.MetaDescription }</textarea>
+									if formData.Errors["meta_description"] != nil {
+										<div class="flex justify-between items-center">
+											for _, errMsg := range formData.Errors["meta_description"] {
+												<span class="text-xs text-error">{ components.UppercaseFirstWord(errMsg) }</span>
+											}
+										</div>
+									}
+								</label>
+							</div>
+						</div>
+					</div>
+					<div class="mt-6">
+						<div class="mb-6">
+							<h2 class="text-xl font-semibold mb-4">Article Content</h2>
+							<textarea id="editorTarget" name="content">{ formData.Content }</textarea>
+						</div>
+						<div class="flex justify-end gap-4">
+							<button type="submit" name="action" value="save_draft" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-base-300 text-base-content border-0 px-4 py-2 rounded-lg text-sm font-medium cursor-pointer no-underline inline-block hover:bg-base-300/80 transition-all duration-200 shadow-sm hover:shadow-md">
+								Save as Draft
+							</button>
+							<button type="submit" name="action" value="publish" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-primary text-primary-content hover:bg-primary/90 focus:ring-primary focus:ring-offset-base-200 w-full py-3 text-base font-semibold">
+								Publish Article
+							</button>
+						</div>
+					</div>
+				</form>
+				<script type="module" src={ config.Cfg.GetFullDomain() + "/" + routes.JsEasyMDE.Path }></script>
+			</div>
+		</div>
+	}
+}

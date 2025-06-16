@@ -1,25 +1,23 @@
 package seeds
 
 import (
-	"math/rand"
 	"time"
 
-	"github.com/MBvisti/mortenvistisen/models"
-	"github.com/MBvisti/mortenvistisen/models/internal/db"
-	"github.com/MBvisti/mortenvistisen/services"
 	"github.com/go-faker/faker/v4"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/mbvisti/mortenvistisen/models"
+	"github.com/mbvisti/mortenvistisen/models/internal/db"
 	"golang.org/x/net/context"
 )
 
 type userSeedData struct {
-	ID             uuid.UUID
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
-	Mail           string
-	MailVerifiedAt time.Time
-	IsAdmin        bool
+	ID              uuid.UUID
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
+	Email           string
+	EmailVerifiedAt time.Time
+	IsAdmin         bool
 }
 
 type userSeedOption func(*userSeedData)
@@ -44,13 +42,13 @@ func WithUserUpdatedAt(updatedAt time.Time) userSeedOption {
 
 func WithUserEmail(email string) userSeedOption {
 	return func(usd *userSeedData) {
-		usd.Mail = email
+		usd.Email = email
 	}
 }
 
 func WithUserEmailVerifiedAt(emailVerifiedAt time.Time) userSeedOption {
 	return func(usd *userSeedData) {
-		usd.MailVerifiedAt = emailVerifiedAt
+		usd.EmailVerifiedAt = emailVerifiedAt
 	}
 }
 
@@ -64,43 +62,37 @@ func (s Seeder) PlantUser(
 	ctx context.Context,
 	opts ...userSeedOption,
 ) (models.User, error) {
-	trueOrFalse := rand.Float32() < 0.5
-	var emailVerifiedAt time.Time
-	if trueOrFalse {
-		emailVerifiedAt = time.Now()
-	}
-
 	data := &userSeedData{
-		ID:             uuid.New(),
-		CreatedAt:      time.Now(),
-		UpdatedAt:      time.Now(),
-		Mail:           faker.Email(),
-		MailVerifiedAt: emailVerifiedAt,
-		IsAdmin:        trueOrFalse,
+		ID:        uuid.New(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		Email:     faker.Email(),
 	}
 
 	for _, opt := range opts {
 		opt(data)
 	}
 
-	user, err := models.NewUser(ctx, models.NewUserPayload{
-		Email:           data.Mail,
-		Password:        "password",
-		ConfirmPassword: "password",
-	}, s.dbtx, services.HashAndPepperPassword)
+	user, err := models.NewUser(ctx, s.dbtx, models.NewUserPayload{
+		Email: data.Email,
+		Password: models.PasswordPair{
+			Password:        "password",
+			ConfirmPassword: "password",
+		},
+	})
 	if err != nil {
 		return models.User{}, err
 	}
 
-	if !data.MailVerifiedAt.IsZero() {
-		if err := db.Stmts.VerifyUserMail(ctx, s.dbtx, db.VerifyUserMailParams{
-			Mail: data.Mail,
+	if !data.EmailVerifiedAt.IsZero() {
+		if err := db.Stmts.VerifyUserEmail(ctx, s.dbtx, db.VerifyUserEmailParams{
+			Email: data.Email,
 			UpdatedAt: pgtype.Timestamptz{
 				Time:  data.UpdatedAt,
 				Valid: true,
 			},
-			MailVerifiedAt: pgtype.Timestamptz{
-				Time:  data.MailVerifiedAt,
+			EmailVerifiedAt: pgtype.Timestamptz{
+				Time:  data.EmailVerifiedAt,
 				Valid: true,
 			},
 		}); err != nil {
@@ -110,8 +102,8 @@ func (s Seeder) PlantUser(
 
 	if data.IsAdmin {
 		if _, err := db.Stmts.UpdateUserIsAdmin(ctx, s.dbtx, db.UpdateUserIsAdminParams{
-			ID: user.ID,
-			// IsAdmin: data.IsAdmin,
+			ID:      user.ID,
+			IsAdmin: data.IsAdmin,
 			UpdatedAt: pgtype.Timestamptz{
 				Time:  data.UpdatedAt,
 				Valid: true,

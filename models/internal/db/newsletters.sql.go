@@ -13,9 +13,19 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const countNewsletters = `-- name: CountNewsletters :one
+select count(*) from newsletters
+`
+
+func (q *Queries) CountNewsletters(ctx context.Context, db DBTX) (int64, error) {
+	row := db.QueryRow(ctx, countNewsletters)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const deleteNewsletter = `-- name: DeleteNewsletter :exec
-DELETE FROM newsletters 
-WHERE id = $1
+delete from newsletters where id=$1
 `
 
 func (q *Queries) DeleteNewsletter(ctx context.Context, db DBTX, id uuid.UUID) error {
@@ -24,79 +34,102 @@ func (q *Queries) DeleteNewsletter(ctx context.Context, db DBTX, id uuid.UUID) e
 }
 
 const insertNewsletter = `-- name: InsertNewsletter :one
-INSERT INTO newsletters (
-    id, created_at, updated_at, title,
-    content, released_at, released, slug
-) VALUES (
-    $1, $2, $3, $4, $5, $6, $7, $8
-)
-RETURNING id
+insert into
+    newsletters (id, created_at, updated_at, title, slug, content)
+values
+    ($1, $2, $3, $4, $5, $6)
+returning id, created_at, updated_at, title, is_published, released_at, slug, content
 `
 
 type InsertNewsletterParams struct {
-	ID         uuid.UUID
-	CreatedAt  pgtype.Timestamptz
-	UpdatedAt  pgtype.Timestamptz
-	Title      string
-	Content    string
-	ReleasedAt pgtype.Timestamptz
-	Released   pgtype.Bool
-	Slug       sql.NullString
+	ID        uuid.UUID
+	CreatedAt pgtype.Timestamptz
+	UpdatedAt pgtype.Timestamptz
+	Title     string
+	Slug      sql.NullString
+	Content   string
 }
 
-func (q *Queries) InsertNewsletter(ctx context.Context, db DBTX, arg InsertNewsletterParams) (uuid.UUID, error) {
+func (q *Queries) InsertNewsletter(ctx context.Context, db DBTX, arg InsertNewsletterParams) (Newsletter, error) {
 	row := db.QueryRow(ctx, insertNewsletter,
 		arg.ID,
 		arg.CreatedAt,
 		arg.UpdatedAt,
 		arg.Title,
-		arg.Content,
-		arg.ReleasedAt,
-		arg.Released,
 		arg.Slug,
+		arg.Content,
 	)
-	var id uuid.UUID
-	err := row.Scan(&id)
-	return id, err
+	var i Newsletter
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Title,
+		&i.IsPublished,
+		&i.ReleasedAt,
+		&i.Slug,
+		&i.Content,
+	)
+	return i, err
 }
 
-const queryAllNewsletters = `-- name: QueryAllNewsletters :many
-SELECT 
-    id, created_at, updated_at, title,
-    content, released_at, released, slug
-FROM newsletters
-ORDER BY created_at DESC
+const publishNewsletter = `-- name: PublishNewsletter :one
+update newsletters
+    set updated_at=$2, is_published=$3, released_at=$4
+where id = $1
+returning id, created_at, updated_at, title, is_published, released_at, slug, content
 `
 
-type QueryAllNewslettersRow struct {
-	ID         uuid.UUID
-	CreatedAt  pgtype.Timestamptz
-	UpdatedAt  pgtype.Timestamptz
-	Title      string
-	Content    string
-	ReleasedAt pgtype.Timestamptz
-	Released   pgtype.Bool
-	Slug       sql.NullString
+type PublishNewsletterParams struct {
+	ID          uuid.UUID
+	UpdatedAt   pgtype.Timestamptz
+	IsPublished pgtype.Bool
+	ReleasedAt  pgtype.Timestamptz
 }
 
-func (q *Queries) QueryAllNewsletters(ctx context.Context, db DBTX) ([]QueryAllNewslettersRow, error) {
-	rows, err := db.Query(ctx, queryAllNewsletters)
+func (q *Queries) PublishNewsletter(ctx context.Context, db DBTX, arg PublishNewsletterParams) (Newsletter, error) {
+	row := db.QueryRow(ctx, publishNewsletter,
+		arg.ID,
+		arg.UpdatedAt,
+		arg.IsPublished,
+		arg.ReleasedAt,
+	)
+	var i Newsletter
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Title,
+		&i.IsPublished,
+		&i.ReleasedAt,
+		&i.Slug,
+		&i.Content,
+	)
+	return i, err
+}
+
+const queryDraftNewsletters = `-- name: QueryDraftNewsletters :many
+select id, created_at, updated_at, title, is_published, released_at, slug, content from newsletters where is_published=false order by created_at desc
+`
+
+func (q *Queries) QueryDraftNewsletters(ctx context.Context, db DBTX) ([]Newsletter, error) {
+	rows, err := db.Query(ctx, queryDraftNewsletters)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []QueryAllNewslettersRow
+	var items []Newsletter
 	for rows.Next() {
-		var i QueryAllNewslettersRow
+		var i Newsletter
 		if err := rows.Scan(
 			&i.ID,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.Title,
-			&i.Content,
+			&i.IsPublished,
 			&i.ReleasedAt,
-			&i.Released,
 			&i.Slug,
+			&i.Content,
 		); err != nil {
 			return nil, err
 		}
@@ -109,118 +142,87 @@ func (q *Queries) QueryAllNewsletters(ctx context.Context, db DBTX) ([]QueryAllN
 }
 
 const queryNewsletterByID = `-- name: QueryNewsletterByID :one
-SELECT 
-    id, created_at, updated_at, title,
-    content, released_at, released, slug
-FROM newsletters
-WHERE id = $1
+select id, created_at, updated_at, title, is_published, released_at, slug, content from newsletters where id=$1
 `
 
-type QueryNewsletterByIDRow struct {
-	ID         uuid.UUID
-	CreatedAt  pgtype.Timestamptz
-	UpdatedAt  pgtype.Timestamptz
-	Title      string
-	Content    string
-	ReleasedAt pgtype.Timestamptz
-	Released   pgtype.Bool
-	Slug       sql.NullString
-}
-
-func (q *Queries) QueryNewsletterByID(ctx context.Context, db DBTX, id uuid.UUID) (QueryNewsletterByIDRow, error) {
+func (q *Queries) QueryNewsletterByID(ctx context.Context, db DBTX, id uuid.UUID) (Newsletter, error) {
 	row := db.QueryRow(ctx, queryNewsletterByID, id)
-	var i QueryNewsletterByIDRow
+	var i Newsletter
 	err := row.Scan(
 		&i.ID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Title,
-		&i.Content,
+		&i.IsPublished,
 		&i.ReleasedAt,
-		&i.Released,
 		&i.Slug,
+		&i.Content,
 	)
 	return i, err
 }
 
 const queryNewsletterBySlug = `-- name: QueryNewsletterBySlug :one
-SELECT 
-    id, created_at, updated_at, title,
-    content, released_at, released, slug
-FROM newsletters
-WHERE slug=$1
+select id, created_at, updated_at, title, is_published, released_at, slug, content from newsletters where slug=$1
 `
 
-type QueryNewsletterBySlugRow struct {
-	ID         uuid.UUID
-	CreatedAt  pgtype.Timestamptz
-	UpdatedAt  pgtype.Timestamptz
-	Title      string
-	Content    string
-	ReleasedAt pgtype.Timestamptz
-	Released   pgtype.Bool
-	Slug       sql.NullString
-}
-
-func (q *Queries) QueryNewsletterBySlug(ctx context.Context, db DBTX, slug sql.NullString) (QueryNewsletterBySlugRow, error) {
+func (q *Queries) QueryNewsletterBySlug(ctx context.Context, db DBTX, slug sql.NullString) (Newsletter, error) {
 	row := db.QueryRow(ctx, queryNewsletterBySlug, slug)
-	var i QueryNewsletterBySlugRow
+	var i Newsletter
 	err := row.Scan(
 		&i.ID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Title,
-		&i.Content,
+		&i.IsPublished,
 		&i.ReleasedAt,
-		&i.Released,
 		&i.Slug,
+		&i.Content,
+	)
+	return i, err
+}
+
+const queryNewsletterByTitle = `-- name: QueryNewsletterByTitle :one
+select id, created_at, updated_at, title, is_published, released_at, slug, content from newsletters where title=$1
+`
+
+func (q *Queries) QueryNewsletterByTitle(ctx context.Context, db DBTX, title string) (Newsletter, error) {
+	row := db.QueryRow(ctx, queryNewsletterByTitle, title)
+	var i Newsletter
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Title,
+		&i.IsPublished,
+		&i.ReleasedAt,
+		&i.Slug,
+		&i.Content,
 	)
 	return i, err
 }
 
 const queryNewsletters = `-- name: QueryNewsletters :many
-SELECT 
-    id, created_at, updated_at, title,
-    content, released_at, released, slug
-FROM newsletters
-ORDER BY created_at DESC
-LIMIT $1 OFFSET $2
+select id, created_at, updated_at, title, is_published, released_at, slug, content from newsletters order by created_at desc
 `
 
-type QueryNewslettersParams struct {
-	Limit  int32
-	Offset int32
-}
-
-type QueryNewslettersRow struct {
-	ID         uuid.UUID
-	CreatedAt  pgtype.Timestamptz
-	UpdatedAt  pgtype.Timestamptz
-	Title      string
-	Content    string
-	ReleasedAt pgtype.Timestamptz
-	Released   pgtype.Bool
-	Slug       sql.NullString
-}
-
-func (q *Queries) QueryNewsletters(ctx context.Context, db DBTX, arg QueryNewslettersParams) ([]QueryNewslettersRow, error) {
-	rows, err := db.Query(ctx, queryNewsletters, arg.Limit, arg.Offset)
+func (q *Queries) QueryNewsletters(ctx context.Context, db DBTX) ([]Newsletter, error) {
+	rows, err := db.Query(ctx, queryNewsletters)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []QueryNewslettersRow
+	var items []Newsletter
 	for rows.Next() {
-		var i QueryNewslettersRow
+		var i Newsletter
 		if err := rows.Scan(
 			&i.ID,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.Title,
-			&i.Content,
+			&i.IsPublished,
 			&i.ReleasedAt,
-			&i.Released,
 			&i.Slug,
+			&i.Content,
 		); err != nil {
 			return nil, err
 		}
@@ -232,48 +234,143 @@ func (q *Queries) QueryNewsletters(ctx context.Context, db DBTX, arg QueryNewsle
 	return items, nil
 }
 
-const queryNewslettersCount = `-- name: QueryNewslettersCount :one
-SELECT COUNT(*) FROM newsletters
+const queryNewslettersPaginated = `-- name: QueryNewslettersPaginated :many
+select id, created_at, updated_at, title, is_published, released_at, slug, content from newsletters 
+order by created_at desc 
+limit $1 offset $2
 `
 
-func (q *Queries) QueryNewslettersCount(ctx context.Context, db DBTX) (int64, error) {
-	row := db.QueryRow(ctx, queryNewslettersCount)
-	var count int64
-	err := row.Scan(&count)
-	return count, err
+type QueryNewslettersPaginatedParams struct {
+	Limit  int32
+	Offset int32
 }
 
-const updateNewsletter = `-- name: UpdateNewsletter :exec
-UPDATE newsletters
-SET 
-    updated_at = $2,
-    title = $3,
-    content = $4,
-    released_at = $5,
-    released = $6,
-	slug = $7
-WHERE id = $1
+func (q *Queries) QueryNewslettersPaginated(ctx context.Context, db DBTX, arg QueryNewslettersPaginatedParams) ([]Newsletter, error) {
+	rows, err := db.Query(ctx, queryNewslettersPaginated, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Newsletter
+	for rows.Next() {
+		var i Newsletter
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Title,
+			&i.IsPublished,
+			&i.ReleasedAt,
+			&i.Slug,
+			&i.Content,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const queryPublishedNewsletters = `-- name: QueryPublishedNewsletters :many
+select id, created_at, updated_at, title, is_published, released_at, slug, content from newsletters where is_published=true order by released_at desc
+`
+
+func (q *Queries) QueryPublishedNewsletters(ctx context.Context, db DBTX) ([]Newsletter, error) {
+	rows, err := db.Query(ctx, queryPublishedNewsletters)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Newsletter
+	for rows.Next() {
+		var i Newsletter
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Title,
+			&i.IsPublished,
+			&i.ReleasedAt,
+			&i.Slug,
+			&i.Content,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updateNewsletter = `-- name: UpdateNewsletter :one
+update newsletters
+    set updated_at=$2, title=$3, slug=$4, content=$5, is_published=$6
+where id = $1
+returning id, created_at, updated_at, title, is_published, released_at, slug, content
 `
 
 type UpdateNewsletterParams struct {
-	ID         uuid.UUID
-	UpdatedAt  pgtype.Timestamptz
-	Title      string
-	Content    string
-	ReleasedAt pgtype.Timestamptz
-	Released   pgtype.Bool
-	Slug       sql.NullString
+	ID          uuid.UUID
+	UpdatedAt   pgtype.Timestamptz
+	Title       string
+	Slug        sql.NullString
+	Content     string
+	IsPublished pgtype.Bool
 }
 
-func (q *Queries) UpdateNewsletter(ctx context.Context, db DBTX, arg UpdateNewsletterParams) error {
-	_, err := db.Exec(ctx, updateNewsletter,
+func (q *Queries) UpdateNewsletter(ctx context.Context, db DBTX, arg UpdateNewsletterParams) (Newsletter, error) {
+	row := db.QueryRow(ctx, updateNewsletter,
 		arg.ID,
 		arg.UpdatedAt,
 		arg.Title,
-		arg.Content,
-		arg.ReleasedAt,
-		arg.Released,
 		arg.Slug,
+		arg.Content,
+		arg.IsPublished,
 	)
-	return err
+	var i Newsletter
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Title,
+		&i.IsPublished,
+		&i.ReleasedAt,
+		&i.Slug,
+		&i.Content,
+	)
+	return i, err
+}
+
+const updateNewsletterContent = `-- name: UpdateNewsletterContent :one
+update newsletters
+    set updated_at=$2, content=$3
+where id = $1
+returning id, created_at, updated_at, title, is_published, released_at, slug, content
+`
+
+type UpdateNewsletterContentParams struct {
+	ID        uuid.UUID
+	UpdatedAt pgtype.Timestamptz
+	Content   string
+}
+
+func (q *Queries) UpdateNewsletterContent(ctx context.Context, db DBTX, arg UpdateNewsletterContentParams) (Newsletter, error) {
+	row := db.QueryRow(ctx, updateNewsletterContent, arg.ID, arg.UpdatedAt, arg.Content)
+	var i Newsletter
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Title,
+		&i.IsPublished,
+		&i.ReleasedAt,
+		&i.Slug,
+		&i.Content,
+	)
+	return i, err
 }

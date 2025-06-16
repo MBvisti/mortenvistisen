@@ -1,0 +1,91 @@
+package dashboard
+
+import (
+	"fmt"
+	"github.com/mbvisti/mortenvistisen/models"
+	"github.com/mbvisti/mortenvistisen/router/routes"
+	"github.com/mbvisti/mortenvistisen/views/fragments"
+	"github.com/mbvisti/mortenvistisen/views/internal/components"
+	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
+)
+
+func articlesToSortableTableRowsDashboard(articles []models.Article) components.SortableTableRows {
+	tableRows := make(components.SortableTableRows, len(articles))
+	for i, article := range articles {
+		publishStatus := "Draft"
+		hightlight := "status-draft"
+
+		if article.IsPublished {
+			publishStatus = "Published"
+			hightlight = "status-published"
+		}
+
+		tableRows[i] = components.SortableTableRow{
+			ID: article.ID,
+			Elements: []components.TableRowElement{
+				{Title: article.Title},
+				{Title: publishStatus, Hightlight: hightlight},
+				{Title: article.CreatedAt.Format("2006-01-02")},
+				{Title: fmt.Sprintf("%v min", article.ReadTime)},
+			},
+		}
+	}
+
+	return tableRows
+}
+
+type DashboardSortableResult struct {
+	Articles         []models.Article
+	TotalCount       int64
+	Page             int
+	PageSize         int
+	TotalPages       int
+	HasNext          bool
+	HasPrevious      bool
+	CurrentSortField string
+	CurrentSortOrder string
+	PublishedCount   int64
+	DraftCount       int64
+}
+
+templ Home(result DashboardSortableResult) {
+	@layouts.Dashboard() {
+		@components.DashboardHeader("Dashboard", "Welcome back, Admin")
+		@components.Stats([]templ.Component{
+			components.StatNumberCard("Total Articles", result.TotalCount),
+			components.StatNumberCard("Published", result.PublishedCount),
+			components.StatNumberCard("Drafts", result.DraftCount),
+		})
+		@components.SortableTable(
+			"Recent articles",
+			[]components.SortableColumn{
+				{Field: "title", DisplayName: "Title", Sortable: false},
+				{Field: "status", DisplayName: "Status", Sortable: true},
+				{Field: "created_at", DisplayName: "Created", Sortable: true},
+				{Field: "read_time", DisplayName: "Read time", Sortable: true},
+			},
+			articlesToSortableTableRowsDashboard(result.Articles),
+			components.Pagination{
+				TotalCount:  result.TotalCount,
+				Page:        result.Page,
+				PageSize:    result.PageSize,
+				TotalPages:  result.TotalPages,
+				HasNext:     result.HasNext,
+				HasPrevious: result.HasPrevious,
+			},
+			components.SortConfig{
+				CurrentField: result.CurrentSortField,
+				CurrentOrder: result.CurrentSortOrder,
+				BaseURL:      "/dashboard",
+			},
+			components.ActionBtn{
+				Title: "New article",
+				Route: routes.DashboardNewArticle,
+			},
+			components.TableConfig{
+				EditURLPattern: "/dashboard/articles/%s/edit",
+			},
+		)
+		@fragments.DeleteConfirmationModal("", "")
+	}
+}

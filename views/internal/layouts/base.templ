@@ -1,0 +1,23 @@
+package layouts
+
+import (
+	"github.com/mbvisti/mortenvistisen/router/contexts"
+	"github.com/mbvisti/mortenvistisen/views/internal/components"
+)
+
+templ Base(headOpts ...components.HeadDataOption) {
+	<!DOCTYPE html>
+	<html lang="en">
+		@components.SetupHead(ctx, headOpts...)
+		<body class="min-h-screen flex flex-col">
+			@components.Nav()
+			{ children... }
+			@components.Footer()
+		</body>
+		<div class="toast-container">
+			for _, flash := range contexts.ExtractFlashMessages(ctx) {
+				@components.ToastMessage(flash)
+			}
+		</div>
+	</html>
+}

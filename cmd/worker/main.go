@@ -10,47 +10,34 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/MBvisti/mortenvistisen/config"
-	"github.com/MBvisti/mortenvistisen/psql"
-	"github.com/MBvisti/mortenvistisen/queue"
-	"github.com/MBvisti/mortenvistisen/queue/workers"
+	"github.com/mbvisti/mortenvistisen/clients"
+	"github.com/mbvisti/mortenvistisen/config"
+	"github.com/mbvisti/mortenvistisen/psql"
+	"github.com/mbvisti/mortenvistisen/psql/queue"
+	"github.com/mbvisti/mortenvistisen/psql/queue/workers"
 	"github.com/riverqueue/river"
 )
-
-var appRelease string
 
 func main() {
 	ctx := context.Background()
 	cfg := config.NewConfig()
 
-	// otel := telemetry.NewOtel(cfg)
-	// defer func() {
-	// 	if err := otel.Shutdown(); err != nil {
-	// 		panic(err)
-	// 	}
-	// }()
-	//
-	// workerTracer := otel.NewTracer("worker/tracer")
-
-	// client := telemetry.NewTelemetry(cfg, appRelease, "mortenvistisen-worker")
-	// if client != nil {
-	// 	defer client.Stop()
-	// }
+	emailClient := clients.NewEmail()
 
 	conn, err := psql.CreatePooledConnection(
-		context.Background(),
+		ctx,
 		cfg.GetDatabaseURL(),
 	)
 	if err != nil {
 		panic(err)
 	}
-	// db := psql.New(conn)
+	db := psql.NewPostgres(conn, nil)
 
 	jobStarted := make(chan struct{})
 
 	workers, err := workers.SetupWorkers(workers.WorkerDependencies{
-		// DB:      db,
-		// Tracer:  nil,
+		DB:          db.Pool,
+		EmailClient: emailClient,
 	})
 	if err != nil {
 		panic(err)
@@ -60,14 +47,13 @@ func main() {
 		river.QueueDefault: {MaxWorkers: 5},
 		"high":             {MaxWorkers: 100},
 	}
-	riverClient := queue.NewClient(
-		conn,
+	db.NewQueue(
 		queue.WithQueues(q),
 		queue.WithWorkers(workers),
 		queue.WithLogger(slog.Default()),
 	)
 
-	if err := riverClient.Start(ctx); err != nil {
+	if err := db.Queue().Start(ctx); err != nil {
 		panic(err)
 	}
 
@@ -107,7 +93,7 @@ func main() {
 			}
 		}()
 
-		err := riverClient.Stop(softStopCtx)
+		err := db.Queue().Stop(softStopCtx)
 		if err != nil && !errors.Is(err, context.DeadlineExceeded) &&
 			!errors.Is(err, context.Canceled) {
 			panic(err)
@@ -127,7 +113,7 @@ func main() {
 		// always work. However, in the case of a bug where a job blocks despite
 		// being cancelled, it may be necessary to either ignore River's stop
 		// result (what's shown here) or have a supervisor kill the process.
-		err = riverClient.StopAndCancel(hardStopCtx)
+		err = db.Queue().StopAndCancel(hardStopCtx)
 		if err != nil && errors.Is(err, context.DeadlineExceeded) {
 			fmt.Printf(
 				"Hard stop timeout; ignoring stop procedure and exiting unsafely\n",
@@ -152,13 +138,13 @@ func main() {
 	// respects context cancellation, but wait a short amount of time to give it
 	// a chance. After it elapses, send another SIGTERM to initiate a hard stop.
 	select {
-	case <-riverClient.Stopped():
+	case <-db.Queue().Stopped():
 		// Will never be reached in this example because our job will only ever
 		// finish on context cancellation.
 		fmt.Printf("Soft stop succeeded\n")
 
 	case <-time.After(100 * time.Millisecond):
 		sigintOrTerm <- syscall.SIGTERM
-		<-riverClient.Stopped()
+		<-db.Queue().Stopped()
 	}
 }

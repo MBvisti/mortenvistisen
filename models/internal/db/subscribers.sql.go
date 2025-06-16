@@ -13,20 +13,43 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const deleteSubsOlderThanMonth = `-- name: DeleteSubsOlderThanMonth :exec
-DELETE FROM subscribers
-WHERE is_verified = false 
-AND subscribed_at < $1::timestamp
+const countMonthlySubscribers = `-- name: CountMonthlySubscribers :one
+select count(*) from subscribers 
+where subscribed_at >= date_trunc('month', current_date)
+and subscribed_at < date_trunc('month', current_date) + interval '1 month'
 `
 
-func (q *Queries) DeleteSubsOlderThanMonth(ctx context.Context, db DBTX, olderThan pgtype.Timestamp) error {
-	_, err := db.Exec(ctx, deleteSubsOlderThanMonth, olderThan)
-	return err
+func (q *Queries) CountMonthlySubscribers(ctx context.Context, db DBTX) (int64, error) {
+	row := db.QueryRow(ctx, countMonthlySubscribers)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const countSubscribers = `-- name: CountSubscribers :one
+select count(*) from subscribers
+`
+
+func (q *Queries) CountSubscribers(ctx context.Context, db DBTX) (int64, error) {
+	row := db.QueryRow(ctx, countSubscribers)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const countVerifiedSubscribers = `-- name: CountVerifiedSubscribers :one
+select count(*) from subscribers where is_verified = true
+`
+
+func (q *Queries) CountVerifiedSubscribers(ctx context.Context, db DBTX) (int64, error) {
+	row := db.QueryRow(ctx, countVerifiedSubscribers)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
 }
 
 const deleteSubscriber = `-- name: DeleteSubscriber :exec
-DELETE FROM subscribers 
-WHERE id = $1
+delete from subscribers where id=$1
 `
 
 func (q *Queries) DeleteSubscriber(ctx context.Context, db DBTX, id uuid.UUID) error {
@@ -34,24 +57,12 @@ func (q *Queries) DeleteSubscriber(ctx context.Context, db DBTX, id uuid.UUID) e
 	return err
 }
 
-const deleteSubscriberByEmail = `-- name: DeleteSubscriberByEmail :exec
-DELETE FROM subscribers 
-WHERE email = $1
-`
-
-func (q *Queries) DeleteSubscriberByEmail(ctx context.Context, db DBTX, email sql.NullString) error {
-	_, err := db.Exec(ctx, deleteSubscriberByEmail, email)
-	return err
-}
-
 const insertSubscriber = `-- name: InsertSubscriber :one
-INSERT INTO subscribers (
-    id, created_at, updated_at, email,
-    subscribed_at, referer, is_verified
-) VALUES (
-    $1, $2, $3, $4, $5, $6, $7
-)
-RETURNING id, created_at, updated_at, email, subscribed_at, referer, is_verified
+insert into
+    subscribers (id, created_at, updated_at, email, subscribed_at, referer, is_verified)
+values
+    ($1, $2, $3, $4, $5, $6, $7)
+returning id, created_at, updated_at, email, subscribed_at, referer, is_verified
 `
 
 type InsertSubscriberParams struct {
@@ -87,49 +98,8 @@ func (q *Queries) InsertSubscriber(ctx context.Context, db DBTX, arg InsertSubsc
 	return i, err
 }
 
-const queryRecentSubscribers = `-- name: QueryRecentSubscribers :many
-SELECT 
-    id, created_at, updated_at, email, 
-    subscribed_at, referer, is_verified
-FROM subscribers
-ORDER BY created_at DESC
-LIMIT 10
-`
-
-func (q *Queries) QueryRecentSubscribers(ctx context.Context, db DBTX) ([]Subscriber, error) {
-	rows, err := db.Query(ctx, queryRecentSubscribers)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Subscriber
-	for rows.Next() {
-		var i Subscriber
-		if err := rows.Scan(
-			&i.ID,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-			&i.Email,
-			&i.SubscribedAt,
-			&i.Referer,
-			&i.IsVerified,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const querySubscriberByEmail = `-- name: QuerySubscriberByEmail :one
-SELECT 
-    id, created_at, updated_at, email, 
-    subscribed_at, referer, is_verified
-FROM subscribers
-WHERE email = $1
+select id, created_at, updated_at, email, subscribed_at, referer, is_verified from subscribers where email=$1
 `
 
 func (q *Queries) QuerySubscriberByEmail(ctx context.Context, db DBTX, email sql.NullString) (Subscriber, error) {
@@ -148,11 +118,7 @@ func (q *Queries) QuerySubscriberByEmail(ctx context.Context, db DBTX, email sql
 }
 
 const querySubscriberByID = `-- name: QuerySubscriberByID :one
-SELECT 
-    id, created_at, updated_at, email, 
-    subscribed_at, referer, is_verified
-FROM subscribers
-WHERE id = $1
+select id, created_at, updated_at, email, subscribed_at, referer, is_verified from subscribers where id=$1
 `
 
 func (q *Queries) QuerySubscriberByID(ctx context.Context, db DBTX, id uuid.UUID) (Subscriber, error) {
@@ -171,11 +137,7 @@ func (q *Queries) QuerySubscriberByID(ctx context.Context, db DBTX, id uuid.UUID
 }
 
 const querySubscribers = `-- name: QuerySubscribers :many
-SELECT 
-    id, created_at, updated_at, email, 
-    subscribed_at, referer, is_verified
-FROM subscribers
-ORDER BY created_at DESC
+select id, created_at, updated_at, email, subscribed_at, referer, is_verified from subscribers order by created_at desc
 `
 
 func (q *Queries) QuerySubscribers(ctx context.Context, db DBTX) ([]Subscriber, error) {
@@ -206,124 +168,8 @@ func (q *Queries) QuerySubscribers(ctx context.Context, db DBTX) ([]Subscriber, 
 	return items, nil
 }
 
-const querySubscribersCount = `-- name: QuerySubscribersCount :one
-SELECT COUNT(*) FROM subscribers
-`
-
-func (q *Queries) QuerySubscribersCount(ctx context.Context, db DBTX) (int64, error) {
-	row := db.QueryRow(ctx, querySubscribersCount)
-	var count int64
-	err := row.Scan(&count)
-	return count, err
-}
-
-const querySubscribersPage = `-- name: QuerySubscribersPage :many
-SELECT 
-    id, created_at, updated_at, email, 
-    subscribed_at, referer, is_verified
-FROM subscribers
-ORDER BY created_at DESC
-LIMIT $1 OFFSET $2
-`
-
-type QuerySubscribersPageParams struct {
-	Limit  int32
-	Offset int32
-}
-
-func (q *Queries) QuerySubscribersPage(ctx context.Context, db DBTX, arg QuerySubscribersPageParams) ([]Subscriber, error) {
-	rows, err := db.Query(ctx, querySubscribersPage, arg.Limit, arg.Offset)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Subscriber
-	for rows.Next() {
-		var i Subscriber
-		if err := rows.Scan(
-			&i.ID,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-			&i.Email,
-			&i.SubscribedAt,
-			&i.Referer,
-			&i.IsVerified,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const queryUnverifiedSubscribers = `-- name: QueryUnverifiedSubscribers :many
-SELECT 
-    id, created_at, updated_at, email, 
-    subscribed_at, referer, is_verified
-FROM subscribers
-WHERE is_verified = false
-ORDER BY created_at DESC
-`
-
-func (q *Queries) QueryUnverifiedSubscribers(ctx context.Context, db DBTX) ([]Subscriber, error) {
-	rows, err := db.Query(ctx, queryUnverifiedSubscribers)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Subscriber
-	for rows.Next() {
-		var i Subscriber
-		if err := rows.Scan(
-			&i.ID,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-			&i.Email,
-			&i.SubscribedAt,
-			&i.Referer,
-			&i.IsVerified,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const queryVerifiedSubscriberCountByMonth = `-- name: QueryVerifiedSubscriberCountByMonth :one
-SELECT 
-    count(id)
-FROM subscribers
-WHERE is_verified = true AND created_at > $1::timestamp AND created_at < $2::timestamp
-GROUP BY created_at
-ORDER BY created_at DESC
-`
-
-type QueryVerifiedSubscriberCountByMonthParams struct {
-	StartMonth pgtype.Timestamp
-	EndMonth   pgtype.Timestamp
-}
-
-func (q *Queries) QueryVerifiedSubscriberCountByMonth(ctx context.Context, db DBTX, arg QueryVerifiedSubscriberCountByMonthParams) (int64, error) {
-	row := db.QueryRow(ctx, queryVerifiedSubscriberCountByMonth, arg.StartMonth, arg.EndMonth)
-	var count int64
-	err := row.Scan(&count)
-	return count, err
-}
-
 const queryVerifiedSubscribers = `-- name: QueryVerifiedSubscribers :many
-SELECT 
-    id, created_at, updated_at, email, 
-    subscribed_at, referer, is_verified
-FROM subscribers
-WHERE is_verified = true
-ORDER BY created_at DESC
+select id, created_at, updated_at, email, subscribed_at, referer, is_verified from subscribers where is_verified = true order by created_at desc
 `
 
 func (q *Queries) QueryVerifiedSubscribers(ctx context.Context, db DBTX) ([]Subscriber, error) {
@@ -355,24 +201,17 @@ func (q *Queries) QueryVerifiedSubscribers(ctx context.Context, db DBTX) ([]Subs
 }
 
 const updateSubscriber = `-- name: UpdateSubscriber :one
-UPDATE subscribers
-SET 
-    updated_at = $2,
-    email = $3,
-    subscribed_at = $4,
-    referer = $5,
-    is_verified = $6
-WHERE id = $1
-RETURNING id, created_at, updated_at, email, subscribed_at, referer, is_verified
+update subscribers
+    set updated_at=$2, email=$3, referer=$4
+where id = $1
+returning id, created_at, updated_at, email, subscribed_at, referer, is_verified
 `
 
 type UpdateSubscriberParams struct {
-	ID           uuid.UUID
-	UpdatedAt    pgtype.Timestamptz
-	Email        sql.NullString
-	SubscribedAt pgtype.Timestamptz
-	Referer      sql.NullString
-	IsVerified   pgtype.Bool
+	ID        uuid.UUID
+	UpdatedAt pgtype.Timestamptz
+	Email     sql.NullString
+	Referer   sql.NullString
 }
 
 func (q *Queries) UpdateSubscriber(ctx context.Context, db DBTX, arg UpdateSubscriberParams) (Subscriber, error) {
@@ -380,9 +219,7 @@ func (q *Queries) UpdateSubscriber(ctx context.Context, db DBTX, arg UpdateSubsc
 		arg.ID,
 		arg.UpdatedAt,
 		arg.Email,
-		arg.SubscribedAt,
 		arg.Referer,
-		arg.IsVerified,
 	)
 	var i Subscriber
 	err := row.Scan(
@@ -397,32 +234,17 @@ func (q *Queries) UpdateSubscriber(ctx context.Context, db DBTX, arg UpdateSubsc
 	return i, err
 }
 
-const updateSubscriberVerification = `-- name: UpdateSubscriberVerification :one
-UPDATE subscribers
-SET 
-    updated_at = $2,
-    is_verified = $3
-WHERE id = $1
-RETURNING id, created_at, updated_at, email, subscribed_at, referer, is_verified
+const verifySubscriber = `-- name: VerifySubscriber :exec
+update subscribers set updated_at=$2, is_verified=$3 where id=$1
 `
 
-type UpdateSubscriberVerificationParams struct {
+type VerifySubscriberParams struct {
 	ID         uuid.UUID
 	UpdatedAt  pgtype.Timestamptz
 	IsVerified pgtype.Bool
 }
 
-func (q *Queries) UpdateSubscriberVerification(ctx context.Context, db DBTX, arg UpdateSubscriberVerificationParams) (Subscriber, error) {
-	row := db.QueryRow(ctx, updateSubscriberVerification, arg.ID, arg.UpdatedAt, arg.IsVerified)
-	var i Subscriber
-	err := row.Scan(
-		&i.ID,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.Email,
-		&i.SubscribedAt,
-		&i.Referer,
-		&i.IsVerified,
-	)
-	return i, err
+func (q *Queries) VerifySubscriber(ctx context.Context, db DBTX, arg VerifySubscriberParams) error {
+	_, err := db.Exec(ctx, verifySubscriber, arg.ID, arg.UpdatedAt, arg.IsVerified)
+	return err
 }
