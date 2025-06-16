@@ -167,7 +167,13 @@ func run(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	queueWorkers, err := workers.SetupWorkers(workers.WorkerDependencies{})
+
+	emailClient := clients.NewEmail()
+
+	queueWorkers, err := workers.SetupWorkers(workers.WorkerDependencies{
+		DB:          conn,
+		EmailClient: emailClient,
+	})
 	if err != nil {
 		return err
 	}
@@ -209,8 +215,6 @@ func run(ctx context.Context) error {
 	if err := riverUI.Start(ctx); err != nil {
 		return err
 	}
-
-	emailClient := clients.NewEmail()
 
 	handlers := handlers.NewHandlers(
 		psql,
