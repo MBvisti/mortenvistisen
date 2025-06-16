@@ -15,12 +15,14 @@ import (
 )
 
 type Dashboard struct {
-	db psql.Postgres
+	db           psql.Postgres
+	cacheManager *CacheManager
 }
 
-func newDashboard(db psql.Postgres) Dashboard {
+func newDashboard(db psql.Postgres, cacheManager *CacheManager) Dashboard {
 	return Dashboard{
-		db: db,
+		db:           db,
+		cacheManager: cacheManager,
 	}
 }
 
@@ -216,6 +218,9 @@ func (d Dashboard) StoreArticle(c echo.Context) error {
 		return err
 	}
 
+	// Invalidate caches when article is created
+	d.cacheManager.InvalidateLandingPage()
+
 	// Redirect to dashboard
 	return c.Redirect(302, "/dashboard")
 }
@@ -408,6 +413,10 @@ func (d Dashboard) UpdateArticle(c echo.Context) error {
 			return err
 		}
 
+		// Invalidate caches when article is updated/published
+		d.cacheManager.InvalidateLandingPage()
+		d.cacheManager.InvalidateArticle(updatePayload.Slug)
+
 		return c.Redirect(302, "/dashboard")
 	}
 
@@ -418,6 +427,10 @@ func (d Dashboard) UpdateArticle(c echo.Context) error {
 	); err != nil {
 		return err
 	}
+
+	// Invalidate caches when article is updated
+	d.cacheManager.InvalidateLandingPage()
+	d.cacheManager.InvalidateArticle(updatePayload.Slug)
 
 	return c.Redirect(302, "/dashboard")
 }
@@ -436,8 +449,8 @@ func (d Dashboard) DeleteArticle(c echo.Context) error {
 		return c.Redirect(302, "/dashboard")
 	}
 
-	// Check if article exists before deleting
-	_, err = models.GetArticleByID(
+	// Check if article exists before deleting and get slug for cache invalidation
+	article, err := models.GetArticleByID(
 		extractCtx(c),
 		d.db.Pool,
 		articleID,
@@ -477,6 +490,10 @@ func (d Dashboard) DeleteArticle(c echo.Context) error {
 	); err != nil {
 		return err
 	}
+
+	// Invalidate caches when article is deleted
+	d.cacheManager.InvalidateLandingPage()
+	d.cacheManager.InvalidateArticle(article.Slug)
 
 	// Redirect to dashboard
 	return c.Redirect(302, "/dashboard")

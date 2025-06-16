@@ -14,10 +14,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/a-h/templ"
 	chromahtml "github.com/alecthomas/chroma/v2/formatters/html"
 	"github.com/labstack/echo/v4"
-	"github.com/maypok86/otter"
 	"github.com/mbvisti/mortenvistisen/config"
 	"github.com/mbvisti/mortenvistisen/models"
 	"github.com/mbvisti/mortenvistisen/psql"
@@ -35,67 +33,23 @@ import (
 	"github.com/yuin/goldmark/renderer/html"
 )
 
-const (
-	landingPageCacheKey    = "landingPage"
-	articlePageCacheKey    = "articlePage--"
-	newsletterPageCacheKey = "newsletterPage--"
-)
-
 type App struct {
-	db              psql.Postgres
-	cache           otter.Cache[string, templ.Component]
-	articleCache    otter.Cache[string, views.ArticlePageProps]
-	newsletterCache otter.Cache[string, views.NewsletterPageProps]
+	db           psql.Postgres
+	cacheManager *CacheManager
 }
 
 func newApp(
 	db psql.Postgres,
+	cacheManager *CacheManager,
 ) App {
-	cacheBuilder, err := otter.NewBuilder[string, templ.Component](20)
-	if err != nil {
-		panic(err)
-	}
-
-	pageCacher, err := cacheBuilder.WithTTL(48 * time.Hour).Build()
-	if err != nil {
-		panic(err)
-	}
-
-	articleCacheBuilder, err := otter.NewBuilder[string, views.ArticlePageProps](
-		100,
-	)
-	if err != nil {
-		panic(err)
-	}
-
-	articleCache, err := articleCacheBuilder.WithTTL(48 * time.Hour).Build()
-	if err != nil {
-		panic(err)
-	}
-
-	newsletterCacheBuilder, err := otter.NewBuilder[string, views.NewsletterPageProps](
-		100,
-	)
-	if err != nil {
-		panic(err)
-	}
-
-	newsletterCache, err := newsletterCacheBuilder.WithTTL(48 * time.Hour).
-		Build()
-	if err != nil {
-		panic(err)
-	}
-
 	return App{
-		db:              db,
-		cache:           pageCacher,
-		articleCache:    articleCache,
-		newsletterCache: newsletterCache,
+		db:           db,
+		cacheManager: cacheManager,
 	}
 }
 
 func (a App) LandingPage(c echo.Context) error {
-	if value, ok := a.cache.Get(landingPageCacheKey); ok {
+	if value, ok := a.cacheManager.GetPageCache().Get(landingPageCacheKey); ok {
 		return views.HomePage(value).Render(renderArgs(c))
 	}
 
@@ -122,7 +76,7 @@ func (a App) LandingPage(c echo.Context) error {
 	}
 
 	homeComponent := views.Home(payload)
-	if ok := a.cache.Set(landingPageCacheKey, homeComponent); !ok {
+	if ok := a.cacheManager.GetPageCache().Set(landingPageCacheKey, homeComponent); !ok {
 		slog.ErrorContext(
 			c.Request().Context(),
 			"could not set landing page cache",
@@ -170,7 +124,7 @@ func (a App) ProjectsPage(c echo.Context) error {
 func (a App) ArticlePage(c echo.Context) error {
 	slug := c.Param("articleSlug")
 
-	if value, ok := a.articleCache.Get(articlePageCacheKey + slug); ok {
+	if value, ok := a.cacheManager.GetArticleCache().Get(articlePageCacheKey + slug); ok {
 		return views.ArticlePage(value).
 			Render(renderArgs(c))
 	}
@@ -203,7 +157,7 @@ func (a App) ArticlePage(c echo.Context) error {
 		),
 	}
 
-	if ok := a.articleCache.Set(articlePageCacheKey+slug, props); !ok {
+	if ok := a.cacheManager.GetArticleCache().Set(articlePageCacheKey+slug, props); !ok {
 		slog.ErrorContext(
 			c.Request().Context(),
 			"could not set article cache",
@@ -219,7 +173,7 @@ func (a App) ArticlePage(c echo.Context) error {
 func (a App) NewsletterPage(c echo.Context) error {
 	slug := c.Param("newsletterSlug")
 
-	if value, ok := a.newsletterCache.Get(newsletterPageCacheKey + slug); ok {
+	if value, ok := a.cacheManager.GetNewsletterCache().Get(newsletterPageCacheKey + slug); ok {
 		return views.NewsletterPage(value).
 			Render(renderArgs(c))
 	}
@@ -249,6 +203,15 @@ func (a App) NewsletterPage(c echo.Context) error {
 			newsletter.ReleasedAt,
 			newsletter.UpdatedAt,
 		),
+	}
+
+	if ok := a.cacheManager.GetNewsletterCache().Set(newsletterPageCacheKey+slug, props); !ok {
+		slog.ErrorContext(
+			c.Request().Context(),
+			"could not set newsletter cache",
+			"error",
+			err,
+		)
 	}
 
 	return views.NewsletterPage(props).
