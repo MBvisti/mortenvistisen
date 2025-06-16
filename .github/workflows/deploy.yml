@@ -2,8 +2,7 @@ name: Build Docker images
  
 on:
   push:
-    # branches: ["master"]
-    branches: ["feat/rewrite-with-latest-grafto"]
+    branches: ["master"]
  
 jobs:
   build-and-push-dockerfile-image:
