@@ -13,7 +13,6 @@ import (
 	"github.com/mbvisti/mortenvistisen/config"
 	"github.com/mbvisti/mortenvistisen/handlers"
 	"github.com/mbvisti/mortenvistisen/handlers/middleware"
-	"github.com/mbvisti/mortenvistisen/models/seeds"
 	"github.com/mbvisti/mortenvistisen/psql"
 	"github.com/mbvisti/mortenvistisen/psql/queue"
 	"github.com/mbvisti/mortenvistisen/psql/queue/workers"
@@ -62,15 +61,6 @@ func migrate(ctx context.Context) error {
 	}
 	_, err = gooseProvider.Up(ctx)
 	if err != nil {
-		return err
-	}
-
-	seeder := seeds.NewSeeder(pool)
-	if _, err := seeder.PlantUser(
-		ctx,
-		seeds.WithUserEmail("admin@mortenvistisen.com"),
-		seeds.WithUserIsAdmin(true),
-	); err != nil {
 		return err
 	}
 
