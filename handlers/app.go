@@ -372,15 +372,25 @@ func (a App) SubscribeNewsletter(c echo.Context) error {
 		return fragments.NewsletterSubscription("unknown", true).
 			Render(renderArgs(c))
 	}
-	if !isValid {
-		slog.ErrorContext(
-			c.Request().Context(),
-			"turnstile invalid",
-		)
-		return fragments.NewsletterSubscription("unknown", true).
-			Render(renderArgs(c))
-	}
 
+	slog.InfoContext(
+		c.Request().Context(),
+		"turnstile status",
+		"is_valid",
+		isValid,
+		"err",
+		err,
+	)
+
+	// if !isValid {
+	// 	slog.ErrorContext(
+	// 		c.Request().Context(),
+	// 		"turnstile invalid",
+	// 	)
+	// 	return fragments.NewsletterSubscription("unknown", true).
+	// 		Render(renderArgs(c))
+	// }
+	//
 	_, _, err = services.SubscribeToNewsletter(
 		c.Request().Context(),
 		a.db,
