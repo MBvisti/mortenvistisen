@@ -211,7 +211,7 @@ func GetNewslettersPaginated(
 		db.QueryNewslettersPaginatedParams{
 			//nolint:gosec // pageSize is bounded above
 			Limit: int32(pageSize),
-			//nolint:gosec,G115 // offset is calculated from bounded values
+			//nolint:gosec // offset is calculated from bounded values
 			Offset: int32(
 				offset,
 			),

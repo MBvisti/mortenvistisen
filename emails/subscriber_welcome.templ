@@ -7,7 +7,7 @@ type SubscriberWelcomeData struct {
 	Code  string
 }
 
-templ subscriberWelcome(data SubscriberWelcomeData) {
+templ (data SubscriberWelcomeData) template() {
 	@base("Welcome to our Newsletter") {
 		@preHeader("Welcome to the newsletter! Please verify your email address.")
 		<center style="width: 100%; background-color: #f6f9fc;">

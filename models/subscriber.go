@@ -339,7 +339,9 @@ func GetSubscribersSorted(
 	}
 
 	// Add pagination
-	query = query.Limit(uint64(pageSize)).Offset(uint64(offset))
+	if pageSize >= 0 && offset >= 0 {
+		query = query.Limit(uint64(pageSize)).Offset(uint64(offset)) // #nosec G115 - pageSize and offset are validated to be non-negative
+	}
 
 	// Build SQL
 	sql, args, err := query.ToSql()

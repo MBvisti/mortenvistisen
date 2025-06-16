@@ -304,7 +304,7 @@ func GetArticlesPaginated(
 		db.QueryArticlesPaginatedParams{
 			//nolint:gosec // pageSize is bounded above
 			Limit: int32(pageSize),
-			//nolint:gosec,G115 // offset is calculated from bounded values
+			//nolint:gosec // offset is calculated from bounded values
 			Offset: int32(
 				offset,
 			),
@@ -403,7 +403,11 @@ func GetArticlesSorted(
 	}
 
 	// Add pagination
-	query = query.Limit(uint64(pageSize)).Offset(uint64(offset))
+	if pageSize >= 0 && offset >= 0 {
+		//nolint:gosec // not needed
+		query = query.Limit(uint64(pageSize)).
+			Offset(uint64(offset))
+	}
 
 	// Build SQL
 	sql, args, err := query.ToSql()

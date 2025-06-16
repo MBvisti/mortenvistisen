@@ -38,10 +38,9 @@ type SubscriberWelcome struct {
 var _ TemplateHandler = (*SubscriberWelcome)(nil)
 
 func (s SubscriberWelcome) Generate(ctx context.Context) (Html, Text, error) {
-	html, plainText, err := processEmail(ctx, subscriberWelcome(SubscriberWelcomeData{
-		Email: s.Email,
-		Code:  s.Code,
-	}))
+	data := SubscriberWelcomeData(s)
+	//nolint:contextcheck // not needed
+	html, plainText, err := processEmail(ctx, data.template())
 	if err != nil {
 		return Html(""), Text(""), err
 	}
@@ -49,13 +48,19 @@ func (s SubscriberWelcome) Generate(ctx context.Context) (Html, Text, error) {
 	return Html(html), Text(plainText), nil
 }
 
-func processEmail(ctx context.Context, tmpl templ.Component) (string, string, error) {
+func processEmail(
+	ctx context.Context,
+	tmpl templ.Component,
+) (string, string, error) {
 	var html bytes.Buffer
 	if err := tmpl.Render(ctx, &html); err != nil {
 		return "", "", err
 	}
 
-	premailer, err := premailer.NewPremailerFromString(html.String(), premailer.NewOptions())
+	premailer, err := premailer.NewPremailerFromString(
+		html.String(),
+		premailer.NewOptions(),
+	)
 	if err != nil {
 		return "", "", err
 	}
@@ -65,7 +70,10 @@ func processEmail(ctx context.Context, tmpl templ.Component) (string, string, er
 		return "", "", err
 	}
 
-	plainText, err := html2text.FromString(inlineHtml, html2text.Options{PrettyTables: false})
+	plainText, err := html2text.FromString(
+		inlineHtml,
+		html2text.Options{PrettyTables: false},
+	)
 	if err != nil {
 		return "", "", err
 	}

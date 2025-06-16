@@ -28,7 +28,9 @@ func SubscribeToNewsletter(
 	if err != nil {
 		return models.Subscriber{}, models.Token{}, err
 	}
-	defer tx.Rollback(ctx)
+	defer func() {
+		_ = tx.Rollback(ctx) // Rollback error is ignored as it's likely due to successful commit
+	}()
 
 	_, err = models.GetSubscriberByEmail(ctx, tx, email)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
@@ -97,7 +99,9 @@ func VerifySubscriberEmail(
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(ctx)
+	defer func() {
+		_ = tx.Rollback(ctx) // Rollback error is ignored as it's likely due to successful commit
+	}()
 
 	subscriber, err := models.GetSubscriberByEmail(ctx, tx, email)
 	if err != nil {
