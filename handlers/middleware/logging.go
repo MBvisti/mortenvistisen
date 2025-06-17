@@ -19,9 +19,8 @@ func (m MW) Logging() echo.MiddlewareFunc {
 	)
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			// Skip logging for assets and health
-			if strings.Contains(c.Request().URL.Path, "/assets/") ||
-				strings.Contains(c.Request().URL.Path, "/api/v1/health") {
+			// Only skip health checks, but measure everything else including assets
+			if strings.Contains(c.Request().URL.Path, "/api/v1/health") {
 				return next(c)
 			}
 
@@ -61,15 +60,17 @@ func (m MW) Logging() echo.MiddlewareFunc {
 				metric.WithAttributes(attrs...),
 			)
 
-			// Log the request
-			slog.InfoContext(ctx, "HTTP request completed",
-				"method", c.Request().Method,
-				"path", c.Request().URL.Path,
-				"status", statusCode,
-				"duration", duration.Seconds(),
-				"remote_addr", c.RealIP(),
-				"user_agent", c.Request().UserAgent(),
-			)
+			// Only log non-asset requests to avoid log spam
+			if !strings.Contains(c.Request().URL.Path, "/assets/") {
+				slog.InfoContext(ctx, "HTTP request completed",
+					"method", c.Request().Method,
+					"path", c.Request().URL.Path,
+					"status", statusCode,
+					"duration", duration.Seconds(),
+					"remote_addr", c.RealIP(),
+					"user_agent", c.Request().UserAgent(),
+				)
+			}
 
 			return err
 		}
