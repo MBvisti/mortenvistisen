@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
+	"github.com/mbvisti/mortenvistisen/config"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
@@ -14,7 +15,7 @@ import (
 
 func (m MW) Logging() echo.MiddlewareFunc {
 	otelMiddleware := otelecho.Middleware(
-		"mortenvistisen",
+		config.Cfg.ServiceName,
 		otelecho.WithTracerProvider(m.tp),
 	)
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
