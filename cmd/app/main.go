@@ -74,6 +74,50 @@ func run(ctx context.Context) error {
 	defer cancel()
 
 	var tel *telemetry.Telemetry
+	if cfg.Environment == config.PROD_ENVIRONMENT {
+		if err := migrate(ctx); err != nil {
+			return err
+		}
+
+		t, err := telemetry.New(
+			ctx,
+			AppVersion,
+			&telemetry.LokiExporter{
+				LogLevel:   slog.LevelInfo,
+				WithTraces: true,
+				URL:        "https://telemetry-loki.mbvlabs.com",
+				Labels: map[string]string{
+					"env":     "production",
+					"service": "blog-prod",
+				},
+			},
+			telemetry.NewOtlpHttpTraceExporter(
+				"telemetry-alloy.mbvlabs.com",
+				false,
+				map[string]string{
+					"Authorization": "Basic YWRtaW46U2Ftc3VuZzIwNjE=",
+				},
+			),
+			telemetry.NewOtlpHttpMetricExporter(
+				"telemetry-alloy.mbvlabs.com",
+				false,
+				map[string]string{
+					"Authorization": "Basic YWRtaW46U2Ftc3VuZzIwNjE=",
+				},
+			),
+		)
+		if err != nil {
+			return fmt.Errorf("failed to initialize telemetry: %w", err)
+		}
+
+		defer func() {
+			if err := t.Shutdown(ctx); err != nil {
+				slog.Error("Failed to shutdown telemetry", "error", err)
+			}
+		}()
+
+		tel = t
+	}
 	if cfg.Environment == config.STAGING_ENVIRONMENT {
 		if err := migrate(ctx); err != nil {
 			return err
@@ -137,7 +181,8 @@ func run(ctx context.Context) error {
 		tel = t
 	}
 
-	if cfg.Environment == config.STAGING_ENVIRONMENT {
+	if cfg.Environment == config.STAGING_ENVIRONMENT ||
+		cfg.Environment == config.PROD_ENVIRONMENT {
 		defer func() {
 			if err := tel.Shutdown(ctx); err != nil {
 				slog.Error("Failed to shutdown telemetry", "error", err)
@@ -174,7 +219,8 @@ func run(ctx context.Context) error {
 			WithTraces: true,
 		},
 	)
-	if cfg.Environment == config.STAGING_ENVIRONMENT {
+	if cfg.Environment == config.STAGING_ENVIRONMENT ||
+		cfg.Environment == config.PROD_ENVIRONMENT {
 		defer func() {
 			if err := queueLoggerShutdown(ctx); err != nil {
 				slog.Error("Failed to shutdown telemetry", "error", err)

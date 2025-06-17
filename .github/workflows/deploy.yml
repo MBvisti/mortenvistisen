@@ -33,7 +33,7 @@ jobs:
 
       - name: Deploy with apps-manager
         run: |
-          curl -X PUT https://apps-manager.mbvlabs.com/services/blog/deploy \
-            -u manager:password \
+          curl -X PUT https://apps-manager.mbvlabs.com/services/blog-prod/deploy \
+            -u manager:Samsung2061 \
             -H "Content-Type: application/json" \
             -d '{"is_private": true}'
