@@ -339,9 +339,9 @@ func head(data HeadData) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var20 string
-			templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s/%s", config.Cfg.GetFullDomain(), "js/beacon.min.js"))
+			templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s/%s", config.Cfg.GetFullDomain(), "assets/js/beacon.min.js"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/head.templ`, Line: 87, Col: 91}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/head.templ`, Line: 87, Col: 98}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 			if templ_7745c5c3_Err != nil {
