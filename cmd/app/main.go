@@ -127,6 +127,7 @@ func run(ctx context.Context) error {
 		t, err := telemetry.New(
 			ctx,
 			AppVersion,
+			cfg.ServiceName,
 			&telemetry.LokiExporter{
 				LogLevel:   slog.LevelInfo,
 				WithTraces: true,
@@ -168,6 +169,7 @@ func run(ctx context.Context) error {
 		t, err := telemetry.New(
 			ctx,
 			AppVersion,
+			"dev",
 			&telemetry.StdoutExporter{
 				LogLevel:   slog.LevelDebug,
 				WithTraces: true,
