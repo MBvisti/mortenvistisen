@@ -342,3 +342,16 @@ func (a Assets) LLM(c echo.Context) error {
 
 	return c.String(http.StatusOK, string(content))
 }
+
+func (a Assets) IndexNow(c echo.Context) error {
+	content, err := assets.Files.ReadFile(
+		"files/index_now.txt",
+	)
+	if err != nil {
+		return err
+	}
+
+	c = a.enableCaching(c, content)
+
+	return c.String(http.StatusOK, string(content))
+}

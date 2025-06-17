@@ -6,6 +6,7 @@ import (
 	"github.com/mbvisti/mortenvistisen/config"
 	"github.com/mbvisti/mortenvistisen/router/routes"
 	"time"
+	"os"
 )
 
 type HeadDataOption func(*HeadData)
@@ -82,6 +83,9 @@ templ head(data HeadData) {
 		/>
 		<script src={ data.ScriptSrc } type="module"></script>
 		<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback" defer></script>
+		if os.Getenv("ENVIRONMENT") == config.PROD_ENVIRONMENT {
+			<script defer src={ fmt.Sprintf("%s/%s", config.Cfg.GetFullDomain(), "js/beacon.min.js") } data-cf-beacon='{"token": "423a2fdc6f104a90ac9d9b4d35774148"}'></script>
+		}
 	</head>
 }
 

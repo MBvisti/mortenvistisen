@@ -47,6 +47,13 @@ var LLM = Route{
 	HandlerName: "LLM",
 }
 
+var IndexNow = Route{
+	Name:        ".index_now",
+	Path:        "/4zd8j69sf3ju2hnfxmebr3czub8uu63m.txt",
+	Method:      http.MethodGet,
+	HandlerName: "IndexNow",
+}
+
 var CssEntrypoint = Route{
 	Name:        assetsNamePrefix + "css.entry",
 	Path:        assetsNamePrefix + "/css/styles.css",
