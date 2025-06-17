@@ -23,13 +23,14 @@ type Telemetry struct {
 func New(
 	ctx context.Context,
 	svcVersion string,
+	svcName string,
 	appLogExporter LogExporter,
 	appTraceExporter TraceExporter,
 	appMetricExporter MetricExporter,
 ) (*Telemetry, error) {
 	res, err := resource.New(ctx,
 		resource.WithAttributes(
-			semconv.ServiceName("blog-production"),
+			semconv.ServiceName(svcName),
 			semconv.ServiceVersion(svcVersion),
 		),
 	)

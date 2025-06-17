@@ -82,13 +82,14 @@ func run(ctx context.Context) error {
 		t, err := telemetry.New(
 			ctx,
 			AppVersion,
+			cfg.ServiceName,
 			&telemetry.LokiExporter{
 				LogLevel:   slog.LevelInfo,
 				WithTraces: true,
 				URL:        "https://telemetry-loki.mbvlabs.com",
 				Labels: map[string]string{
-					"env":     "production",
-					"service": "blog-prod",
+					"env":     cfg.Environment,
+					"service": cfg.ServiceName,
 				},
 			},
 			telemetry.NewOtlpHttpTraceExporter(
