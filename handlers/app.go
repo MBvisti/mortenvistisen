@@ -117,6 +117,10 @@ func (a App) AboutPage(c echo.Context) error {
 	return views.AboutPage().Render(renderArgs(c))
 }
 
+func (a App) NotFoundPage(c echo.Context) error {
+	return views.NotFoundPage().Render(renderArgs(c))
+}
+
 func (a App) ProjectsPage(c echo.Context) error {
 	return views.ProjectsPage().Render(renderArgs(c))
 }
