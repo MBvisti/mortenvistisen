@@ -29,7 +29,7 @@ func New(
 ) (*Telemetry, error) {
 	res, err := resource.New(ctx,
 		resource.WithAttributes(
-			semconv.ServiceName("blog-staging"),
+			semconv.ServiceName("blog-production"),
 			semconv.ServiceVersion(svcVersion),
 		),
 	)
