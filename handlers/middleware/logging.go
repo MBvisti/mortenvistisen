@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"context"
 	"log/slog"
 	"strings"
 	"time"
@@ -20,52 +19,54 @@ func (m MW) Logging() echo.MiddlewareFunc {
 	)
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
+			// Skip logging for assets and health
 			if strings.Contains(c.Request().URL.Path, "/assets/") ||
 				strings.Contains(c.Request().URL.Path, "/api/v1/health") {
 				return next(c)
 			}
 
+			// Start timing HERE, before anything else
 			start := time.Now()
-			var ctx context.Context
+
+			// Track in-flight requests
+			ctx := c.Request().Context()
+			m.httpInFlight.Add(ctx, 1)
+			defer m.httpInFlight.Add(ctx, -1)
+
+			// Create wrapped handler that captures the response status
 			var statusCode int
-
-			m.httpInFlight.Add(c.Request().Context(), 1)
-			defer m.httpInFlight.Add(c.Request().Context(), -1)
-
 			wrappedNext := func(c echo.Context) error {
-				ctx = c.Request().Context()
 				err := next(c)
 				statusCode = c.Response().Status
 				return err
 			}
 
+			// Execute the request through OpenTelemetry middleware
 			err := otelMiddleware(wrappedNext)(c)
 
-			// Record metrics AFTER everything completes
-			requestDuration := time.Since(start)
+			// Calculate duration AFTER everything completes
+			duration := time.Since(start)
+
+			// Record metrics
 			attrs := []attribute.KeyValue{
 				attribute.String("method", c.Request().Method),
 				attribute.String("route", c.Path()),
 				attribute.Int("status_code", statusCode),
 			}
 
-			m.httpRequestsTotal.Add(
-				ctx,
-				1,
-				metric.WithAttributes(attrs...),
-			)
-
+			m.httpRequestsTotal.Add(ctx, 1, metric.WithAttributes(attrs...))
 			m.httpDuration.Record(
 				ctx,
-				requestDuration.Seconds(),
+				duration.Seconds(),
 				metric.WithAttributes(attrs...),
 			)
 
+			// Log the request
 			slog.InfoContext(ctx, "HTTP request completed",
 				"method", c.Request().Method,
 				"path", c.Request().URL.Path,
 				"status", statusCode,
-				"duration", requestDuration.Seconds(),
+				"duration", duration.Seconds(),
 				"remote_addr", c.RealIP(),
 				"user_agent", c.Request().UserAgent(),
 			)
