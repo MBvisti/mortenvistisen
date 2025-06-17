@@ -71,6 +71,17 @@ func New(
 		echomw.Recover(),
 	)
 
+	if config.Cfg.Environment == config.PROD_ENVIRONMENT {
+		router.Use(
+			echomw.CORSWithConfig(echomw.CORSConfig{
+				AllowOrigins: []string{
+					"mortenvistisen.com",
+					"cloudflareinsights.com",
+				},
+			}),
+		)
+	}
+
 	router.Any("/river*", echo.WrapHandler(riverUI), mw.AuthOnly)
 
 	return &Routes{
