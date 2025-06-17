@@ -300,7 +300,6 @@ func HomePage(content templ.Component) templ.Component {
 			return nil
 		})
 		templ_7745c5c3_Err = layouts.Base(
-			WithSlug(routes.LandingPage.Path),
 			WithTitle("Home"),
 			WithDescription("Landing page of mortenvistisen.com"),
 		).Render(templ.WithChildren(ctx, templ_7745c5c3_Var11), templ_7745c5c3_Buffer)

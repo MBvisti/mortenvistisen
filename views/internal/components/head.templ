@@ -91,7 +91,7 @@ func SetupHead(ctx context.Context, opts ...HeadDataOption) templ.Component {
 	data := &HeadData{
 		Title:          config.Cfg.ProjectName,
 		Description:    "A starter template for building one-man businesses using Golang.",
-		Slug:           "/",
+		Slug:           config.Cfg.GetFullDomain(),
 		MetaType:       "website",
 		StylesheetHref: fmt.Sprintf("%s/%s?%v", config.Cfg.GetFullDomain(), routes.CssEntrypoint.Path, startTime),
 		ScriptSrc:      fmt.Sprintf("%s/%s?%v", config.Cfg.GetFullDomain(), routes.JsEntrypoint.Path, startTime),

@@ -123,7 +123,6 @@ templ Home(articles []HomeArticle) {
 
 templ HomePage(content templ.Component) {
 	@layouts.Base(
-		WithSlug(routes.LandingPage.Path),
 		WithTitle("Home"),
 		WithDescription("Landing page of mortenvistisen.com"),
 	) {

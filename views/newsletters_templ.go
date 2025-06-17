@@ -234,7 +234,7 @@ func NewslettersPage(content templ.Component) templ.Component {
 			return nil
 		})
 		templ_7745c5c3_Err = layouts.Base(
-			WithSlug(routes.LandingPage.Path),
+			WithSlug(routes.NewslettersPage.Path),
 			WithTitle("Newsletters"),
 			WithDescription("Newsletters released by Morten"),
 		).Render(templ.WithChildren(ctx, templ_7745c5c3_Var10), templ_7745c5c3_Buffer)

@@ -72,7 +72,7 @@ templ Newsletters(newslettersByYear map[int][]HomeNewsletter) {
 
 templ NewslettersPage(content templ.Component) {
 	@layouts.Base(
-		WithSlug(routes.LandingPage.Path),
+		WithSlug(routes.NewslettersPage.Path),
 		WithTitle("Newsletters"),
 		WithDescription("Newsletters released by Morten"),
 	) {
