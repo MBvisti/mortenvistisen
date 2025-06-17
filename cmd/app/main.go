@@ -272,7 +272,7 @@ func run(ctx context.Context) error {
 		tel.AppTracerProvider,
 	)
 
-	router, c := routes.SetupRoutes(ctx)
+	router, c := routes.SetupRoutes(ctx, handlers.App.NotFoundPage)
 
 	server := server.NewHttp(c, router)
 

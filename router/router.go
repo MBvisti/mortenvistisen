@@ -82,6 +82,7 @@ func New(
 
 func (r *Routes) SetupRoutes(
 	ctx context.Context,
+	notFound func(c echo.Context) error,
 ) (*echo.Echo, context.Context) {
 	setupRoutes(r.router, routes.Assets, r.handlers.Assets, r.mw)
 	setupRoutes(
@@ -99,6 +100,10 @@ func (r *Routes) SetupRoutes(
 		r.mw,
 	)
 	setupRoutes(r.router, routes.ApiV1, r.handlers.Api, r.mw)
+
+	r.router.GET("*", func(c echo.Context) error {
+		return notFound(c)
+	})
 
 	return r.router, ctx
 }
