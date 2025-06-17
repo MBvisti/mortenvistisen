@@ -245,7 +245,7 @@ func ArticlePage(props ArticlePageProps) templ.Component {
 			return nil
 		})
 		templ_7745c5c3_Err = layouts.Base(
-			WithSlug(props.Slug),
+			WithSlug("/posts/"+props.Slug),
 			WithTitle(props.MetaTitle),
 			WithDescription(props.MetaDesc),
 		).Render(templ.WithChildren(ctx, templ_7745c5c3_Var8), templ_7745c5c3_Buffer)

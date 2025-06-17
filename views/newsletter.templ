@@ -43,7 +43,7 @@ type NewsletterPageProps struct {
 
 templ NewsletterPage(props NewsletterPageProps) {
 	@layouts.Base(
-		WithSlug(props.Slug),
+		WithSlug("/newsletters/"+props.Slug),
 		WithTitle(props.MetaTitle),
 		WithDescription(props.MetaDesc),
 	) {

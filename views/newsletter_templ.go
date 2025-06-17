@@ -155,7 +155,7 @@ func NewsletterPage(props NewsletterPageProps) templ.Component {
 			return nil
 		})
 		templ_7745c5c3_Err = layouts.Base(
-			WithSlug(props.Slug),
+			WithSlug("/newsletters/"+props.Slug),
 			WithTitle(props.MetaTitle),
 			WithDescription(props.MetaDesc),
 		).Render(templ.WithChildren(ctx, templ_7745c5c3_Var6), templ_7745c5c3_Buffer)

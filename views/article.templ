@@ -100,7 +100,7 @@ type ArticlePageProps struct {
 
 templ ArticlePage(props ArticlePageProps) {
 	@layouts.Base(
-		WithSlug(props.Slug),
+		WithSlug("/posts/"+props.Slug),
 		WithTitle(props.MetaTitle),
 		WithDescription(props.MetaDesc),
 	) {
