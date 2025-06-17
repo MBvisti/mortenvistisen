@@ -59,7 +59,7 @@ func New(
 			CookiePath:  "/",
 			CookieDomain: func() string {
 				if config.Cfg.Environment == config.PROD_ENVIRONMENT {
-					return config.Cfg.GetFullDomain()
+					return config.Cfg.AppDomain
 				}
 
 				return ""
