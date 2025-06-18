@@ -9,7 +9,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/mbvisti/mortenvistisen/config"
 	"github.com/mbvisti/mortenvistisen/emails"
 	"github.com/mbvisti/mortenvistisen/models"
@@ -142,20 +141,22 @@ func VerifySubscriberEmail(
 	return tx.Commit(ctx)
 }
 
-type DBExecutor interface {
-	Exec(ctx context.Context, sql string, arguments ...interface{}) (pgconn.CommandTag, error)
-	Query(ctx context.Context, sql string, args ...interface{}) (pgx.Rows, error)
-	QueryRow(ctx context.Context, sql string, args ...interface{}) pgx.Row
-}
-
 func GenerateUnsubscribeLink(
 	ctx context.Context,
-	dbtx DBExecutor,
+	db psql.Postgres,
 	subscriberID uuid.UUID,
 ) (string, error) {
+	tx, err := db.BeginTx(ctx)
+	if err != nil {
+		return "", err
+	}
+	defer func() {
+		_ = tx.Rollback(ctx)
+	}()
+
 	expiration := time.Now().Add(30 * 24 * time.Hour)
 
-	token, err := models.NewHashedToken(ctx, dbtx, models.NewTokenPayload{
+	token, err := models.NewHashedToken(ctx, tx, models.NewTokenPayload{
 		Expiration: expiration,
 		Meta: models.MetaInformation{
 			Resource:   models.ResourceSubscriber,
@@ -164,6 +165,10 @@ func GenerateUnsubscribeLink(
 		},
 	})
 	if err != nil {
+		return "", err
+	}
+
+	if err := tx.Commit(ctx); err != nil {
 		return "", err
 	}
 
