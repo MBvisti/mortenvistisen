@@ -398,4 +398,3 @@ func GetSubscribersSorted(
 		HasPrevious: page > 1,
 	}, nil
 }
-
