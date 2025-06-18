@@ -7,6 +7,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/mbvisti/mortenvistisen/config"
+	"github.com/mbvisti/mortenvistisen/telemetry"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
@@ -32,6 +33,9 @@ func (m MW) Logging() echo.MiddlewareFunc {
 			m.httpInFlight.Add(ctx, 1)
 			defer m.httpInFlight.Add(ctx, -1)
 
+			// Calculate request size before processing
+			reqSize := telemetry.ComputeApproximateRequestSize(c.Request())
+
 			// Create wrapped handler that captures the response status
 			var statusCode int
 			wrappedNext := func(c echo.Context) error {
@@ -46,10 +50,17 @@ func (m MW) Logging() echo.MiddlewareFunc {
 			// Calculate duration AFTER everything completes
 			duration := time.Since(start)
 
-			// Record metrics
+			// Record metrics with enhanced labels following Echo's pattern
+			url := c.Path() // route pattern like /users/:id
+			if url == "" {
+				// For 404 cases, use actual path to have distinction
+				url = c.Request().URL.Path
+			}
+
 			attrs := []attribute.KeyValue{
 				attribute.String("method", c.Request().Method),
-				attribute.String("route", c.Path()),
+				attribute.String("route", url),
+				attribute.String("host", c.Request().Host),
 				attribute.Int("status_code", statusCode),
 			}
 
@@ -57,6 +68,16 @@ func (m MW) Logging() echo.MiddlewareFunc {
 			m.httpDuration.Record(
 				ctx,
 				duration.Seconds(),
+				metric.WithAttributes(attrs...),
+			)
+			m.httpRequestSize.Record(
+				ctx,
+				float64(reqSize),
+				metric.WithAttributes(attrs...),
+			)
+			m.httpResponseSize.Record(
+				ctx,
+				float64(c.Response().Size),
 				metric.WithAttributes(attrs...),
 			)
 

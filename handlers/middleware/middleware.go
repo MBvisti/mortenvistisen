@@ -33,6 +33,8 @@ type MW struct {
 	httpRequestsTotal metric.Int64Counter
 	httpDuration      metric.Float64Histogram
 	httpInFlight      metric.Int64UpDownCounter
+	httpRequestSize   metric.Float64Histogram
+	httpResponseSize  metric.Float64Histogram
 }
 
 func New(tp trace.TracerProvider) (MW, error) {
@@ -62,11 +64,23 @@ func New(tp trace.TracerProvider) (MW, error) {
 		return MW{}, err
 	}
 
+	httpRequestSize, err := telemetry.HTTPRequestSize()
+	if err != nil {
+		return MW{}, err
+	}
+
+	httpResponseSize, err := telemetry.HTTPResponseSize()
+	if err != nil {
+		return MW{}, err
+	}
+
 	return MW{
 		rateLimit,
 		tp,
 		httpRequestsTotal,
 		httpDuration,
 		httpInFlight,
+		httpRequestSize,
+		httpResponseSize,
 	}, nil
 }
