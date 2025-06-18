@@ -5,8 +5,11 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/mbvisti/mortenvistisen/clients"
 	"github.com/mbvisti/mortenvistisen/config"
+	"github.com/mbvisti/mortenvistisen/models"
+	"github.com/mbvisti/mortenvistisen/psql"
 	"github.com/mbvisti/mortenvistisen/psql/queue/jobs"
 	"github.com/riverqueue/river"
 	"go.opentelemetry.io/otel"
@@ -16,6 +19,7 @@ import (
 
 type EmailJobWorker struct {
 	emailClient clients.Email
+	db          psql.Postgres
 	river.WorkerDefaults[jobs.EmailJobArgs]
 }
 
@@ -55,6 +59,34 @@ func (w *EmailJobWorker) Work(
 
 	if job.Args.Type != "transaction" {
 		span.SetAttributes(attribute.String("email.category", "marketing"))
+
+		// Generate unsubscribe link if subscriber ID is provided
+		var unsubscribe clients.Unsubscribe
+		if job.Args.SubscriberID != "" {
+			subscriberID, err := uuid.Parse(job.Args.SubscriberID)
+			if err != nil {
+				slog.ErrorContext(ctx, "Invalid subscriber ID format",
+					"job_id", job.ID,
+					"subscriber_id", job.Args.SubscriberID,
+					"error", err,
+				)
+			} else {
+				unsubscribeLink, err := models.GenerateUnsubscribeLink(ctx, w.db.Pool, subscriberID)
+				if err != nil {
+					slog.ErrorContext(ctx, "Failed to generate unsubscribe link",
+						"job_id", job.ID,
+						"subscriber_id", job.Args.SubscriberID,
+						"error", err,
+					)
+				} else {
+					unsubscribe = clients.Unsubscribe{
+						Email: job.Args.To,
+						Link:  unsubscribeLink,
+					}
+				}
+			}
+		}
+
 		err = w.emailClient.SendMarketing(
 			ctx,
 			clients.EmailPayload{
@@ -64,8 +96,7 @@ func (w *EmailJobWorker) Work(
 				HtmlBody: job.Args.HtmlVersion,
 				TextBody: job.Args.TextVersion,
 			},
-			// TODO set this up
-			clients.Unsubscribe{},
+			unsubscribe,
 		)
 	}
 

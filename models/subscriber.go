@@ -4,11 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/mbvisti/mortenvistisen/config"
 	"github.com/mbvisti/mortenvistisen/models/internal/db"
 )
 
@@ -397,4 +399,30 @@ func GetSubscribersSorted(
 		HasNext:     page < totalPages,
 		HasPrevious: page > 1,
 	}, nil
+}
+
+func GenerateUnsubscribeLink(
+	ctx context.Context,
+	dbtx db.DBTX,
+	subscriberID uuid.UUID,
+) (string, error) {
+	expiration := time.Now().Add(30 * 24 * time.Hour) // 30 days
+
+	token, err := NewHashedToken(ctx, dbtx, NewTokenPayload{
+		Expiration: expiration,
+		Meta: MetaInformation{
+			Resource:   ResourceSubscriber,
+			ResourceID: subscriberID,
+			Scope:      ScopeUnsubscribe,
+		},
+	})
+	if err != nil {
+		return "", err
+	}
+
+	unsubscribeURL := fmt.Sprintf("%s/unsubscribe/%s",
+		config.Cfg.App.GetFullDomain(),
+		token.Value)
+
+	return unsubscribeURL, nil
 }

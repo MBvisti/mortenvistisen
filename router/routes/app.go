@@ -17,6 +17,7 @@ var App = []Route{
 	SubscribeNewsletter,
 	VerifyNewsletterSubscription,
 	VerifyNewsletterPage,
+	UnsubscribeNewsletter,
 	Redirect.Route,
 }
 
@@ -81,6 +82,13 @@ var VerifyNewsletterPage = Route{
 	Path:        "/verify-subscription",
 	Method:      http.MethodGet,
 	HandlerName: "VerifyNewsletterPage",
+}
+
+var UnsubscribeNewsletter = Route{
+	Name:        appNamePrefix + ".unsubscribe_newsletter",
+	Path:        "/unsubscribe/:token",
+	Method:      http.MethodGet,
+	HandlerName: "HandleUnsubscribe",
 }
 
 var Redirect = redirect{

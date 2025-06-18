@@ -36,7 +36,7 @@ func main() {
 	jobStarted := make(chan struct{})
 
 	workers, err := workers.SetupWorkers(workers.WorkerDependencies{
-		DB:          db.Pool,
+		DB:          db,
 		EmailClient: emailClient,
 	})
 	if err != nil {

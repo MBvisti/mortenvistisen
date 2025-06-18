@@ -207,8 +207,10 @@ func run(ctx context.Context) error {
 
 	emailClient := clients.NewEmail()
 
+	db := psql.NewPostgres(conn, nil)
+
 	queueWorkers, err := workers.SetupWorkers(workers.WorkerDependencies{
-		DB:          conn,
+		DB:          db,
 		EmailClient: emailClient,
 	})
 	if err != nil {
@@ -231,14 +233,13 @@ func run(ctx context.Context) error {
 		}()
 	}
 
-	psql := psql.NewPostgres(conn, nil)
-	psql.NewQueue(
+	db.NewQueue(
 		queue.WithLogger(queueLogger),
 		queue.WithWorkers(queueWorkers),
 	)
 
 	opts := &riverui.ServerOpts{
-		Client: psql.Queue(),
+		Client: db.Queue(),
 		DB:     conn,
 		Logger: slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
 			Level: slog.SetLogLoggerLevel(slog.LevelError),
@@ -255,7 +256,7 @@ func run(ctx context.Context) error {
 	}
 
 	handlers := handlers.NewHandlers(
-		psql,
+		db,
 		emailClient,
 	)
 
@@ -276,7 +277,7 @@ func run(ctx context.Context) error {
 
 	server := server.NewHttp(c, router)
 
-	if err := psql.Queue().Start(ctx); err != nil {
+	if err := db.Queue().Start(ctx); err != nil {
 		return err
 	}
 
