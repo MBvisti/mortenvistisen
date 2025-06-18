@@ -3,6 +3,7 @@ package telemetry
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"runtime"
 	"time"
 
@@ -74,6 +75,24 @@ func HTTPRequestDuration() (metric.Float64Histogram, error) {
 		metric.WithDescription("HTTP request duration in seconds"),
 		metric.WithUnit("s"),
 		metric.WithExplicitBucketBoundaries(0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10),
+	)
+}
+
+func HTTPRequestSize() (metric.Float64Histogram, error) {
+	return GetMeter().Float64Histogram(
+		"http_request_size_bytes",
+		metric.WithDescription("HTTP request size in bytes"),
+		metric.WithUnit("By"),
+		metric.WithExplicitBucketBoundaries(1024, 2048, 5120, 10240, 102400, 512000, 1048576, 2621440, 5242880, 10485760),
+	)
+}
+
+func HTTPResponseSize() (metric.Float64Histogram, error) {
+	return GetMeter().Float64Histogram(
+		"http_response_size_bytes",
+		metric.WithDescription("HTTP response size in bytes"),
+		metric.WithUnit("By"),
+		metric.WithExplicitBucketBoundaries(1024, 2048, 5120, 10240, 102400, 512000, 1048576, 2621440, 5242880, 10485760),
 	)
 }
 
@@ -497,4 +516,26 @@ func SetupRuntimeMetricsInCallback(meter metric.Meter) error {
 	}
 
 	return nil
+}
+
+func ComputeApproximateRequestSize(r *http.Request) int {
+	s := 0
+	if r.URL != nil {
+		s = len(r.URL.Path)
+	}
+
+	s += len(r.Method)
+	s += len(r.Proto)
+	for name, values := range r.Header {
+		s += len(name)
+		for _, value := range values {
+			s += len(value)
+		}
+	}
+	s += len(r.Host)
+
+	if r.ContentLength != -1 {
+		s += int(r.ContentLength)
+	}
+	return s
 }
