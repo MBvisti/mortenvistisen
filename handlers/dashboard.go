@@ -10,6 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/mbvisti/mortenvistisen/models"
 	"github.com/mbvisti/mortenvistisen/psql"
+	"github.com/mbvisti/mortenvistisen/psql/queue/jobs"
 	"github.com/mbvisti/mortenvistisen/router/contexts"
 	"github.com/mbvisti/mortenvistisen/services"
 	"github.com/mbvisti/mortenvistisen/views/dashboard"
@@ -1143,7 +1144,7 @@ func (d Dashboard) UpdateNewsletter(c echo.Context) error {
 	}
 
 	if published && newsletter.ReleasedAt.IsZero() {
-		_, err := models.PublishNewsletter(
+		publishedNewsletter, err := models.PublishNewsletter(
 			c.Request().Context(),
 			d.db.Pool,
 			models.PublishNewsletterPayload{ID: newsletter.ID, Now: time.Now()},
@@ -1158,12 +1159,41 @@ func (d Dashboard) UpdateNewsletter(c echo.Context) error {
 			}
 			return err
 		}
-		if err := addFlash(
-			c,
-			contexts.FlashSuccess,
-			"Newsletter published successfully!",
-		); err != nil {
-			return err
+
+		if publishedNewsletter.SendStatus == "draft" {
+			newsletterService := services.NewNewsletterSendingService(d.db, d.db.Queue())
+			err = newsletterService.MarkNewsletterReadyToSend(extractCtx(c), publishedNewsletter.ID)
+			if err != nil {
+				if err := addFlash(
+					c,
+					contexts.FlashError,
+					"Newsletter published but failed to queue for sending. Please try sending manually.",
+				); err != nil {
+					return err
+				}
+				return c.Redirect(302, "/dashboard/newsletters")
+			}
+
+			_, err = d.db.Queue().Insert(extractCtx(c), jobs.NewsletterProcessingJobArgs{}, nil)
+			if err != nil {
+				slog.ErrorContext(extractCtx(c), "failed to queue newsletter processing job", "error", err, "newsletter_id", publishedNewsletter.ID)
+			}
+
+			if err := addFlash(
+				c,
+				contexts.FlashSuccess,
+				"Newsletter published and queued for sending!",
+			); err != nil {
+				return err
+			}
+		} else {
+			if err := addFlash(
+				c,
+				contexts.FlashSuccess,
+				"Newsletter published successfully!",
+			); err != nil {
+				return err
+			}
 		}
 
 		return c.Redirect(302, "/dashboard/newsletters")
@@ -1326,6 +1356,11 @@ func (d Dashboard) SendNewsletter(c echo.Context) error {
 			return err
 		}
 		return c.Redirect(302, "/dashboard/newsletters")
+	}
+
+	_, err = d.db.Queue().Insert(extractCtx(c), jobs.NewsletterProcessingJobArgs{}, nil)
+	if err != nil {
+		slog.ErrorContext(extractCtx(c), "failed to queue newsletter processing job", "error", err, "newsletter_id", newsletterID)
 	}
 
 	if err := addFlash(
