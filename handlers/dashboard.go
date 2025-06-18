@@ -11,6 +11,7 @@ import (
 	"github.com/mbvisti/mortenvistisen/models"
 	"github.com/mbvisti/mortenvistisen/psql"
 	"github.com/mbvisti/mortenvistisen/router/contexts"
+	"github.com/mbvisti/mortenvistisen/services"
 	"github.com/mbvisti/mortenvistisen/views/dashboard"
 )
 
@@ -1062,6 +1063,7 @@ func (d Dashboard) EditNewsletter(c echo.Context) error {
 		IsPublished: newsletter.IsPublished,
 		Slug:        newsletter.Slug,
 		Content:     newsletter.Content,
+		SendStatus:  newsletter.SendStatus,
 		Errors:      make(map[string][]string),
 	}
 
@@ -1235,5 +1237,104 @@ func (d Dashboard) DeleteNewsletter(c echo.Context) error {
 	}
 
 	// Redirect to newsletters
+	return c.Redirect(302, "/dashboard/newsletters")
+}
+
+func (d Dashboard) SendNewsletter(c echo.Context) error {
+	idParam := c.Param("id")
+	newsletterID, err := uuid.Parse(idParam)
+	if err != nil {
+		if err := addFlash(
+			c,
+			contexts.FlashError,
+			"Invalid newsletter ID.",
+		); err != nil {
+			return err
+		}
+		return c.Redirect(302, "/dashboard/newsletters")
+	}
+
+	newsletter, err := models.GetNewsletterByID(
+		extractCtx(c),
+		d.db.Pool,
+		newsletterID,
+	)
+	if err != nil {
+		if err := addFlash(
+			c,
+			contexts.FlashError,
+			"Newsletter not found.",
+		); err != nil {
+			return err
+		}
+		return c.Redirect(302, "/dashboard/newsletters")
+	}
+
+	if !newsletter.IsPublished {
+		if err := addFlash(
+			c,
+			contexts.FlashError,
+			"Newsletter must be published before sending.",
+		); err != nil {
+			return err
+		}
+		return c.Redirect(302, "/dashboard/newsletters")
+	}
+
+	if newsletter.SendStatus == "sent" {
+		if err := addFlash(
+			c,
+			contexts.FlashError,
+			"Newsletter has already been sent.",
+		); err != nil {
+			return err
+		}
+		return c.Redirect(302, "/dashboard/newsletters")
+	}
+
+	if newsletter.SendStatus == "ready_to_send" {
+		if err := addFlash(
+			c,
+			contexts.FlashError,
+			"Newsletter is already queued for sending.",
+		); err != nil {
+			return err
+		}
+		return c.Redirect(302, "/dashboard/newsletters")
+	}
+
+	if newsletter.SendStatus == "sending" {
+		if err := addFlash(
+			c,
+			contexts.FlashError,
+			"Newsletter is currently being sent.",
+		); err != nil {
+			return err
+		}
+		return c.Redirect(302, "/dashboard/newsletters")
+	}
+
+	newsletterService := services.NewNewsletterSendingService(d.db, d.db.Queue())
+	err = newsletterService.MarkNewsletterReadyToSend(extractCtx(c), newsletterID)
+	if err != nil {
+		slog.ErrorContext(extractCtx(c), "failed to mark newsletter for sending", "error", err, "newsletter_id", newsletterID)
+		if err := addFlash(
+			c,
+			contexts.FlashError,
+			"Failed to queue newsletter for sending. Please try again.",
+		); err != nil {
+			return err
+		}
+		return c.Redirect(302, "/dashboard/newsletters")
+	}
+
+	if err := addFlash(
+		c,
+		contexts.FlashSuccess,
+		"Newsletter has been queued for sending and will be delivered to subscribers soon!",
+	); err != nil {
+		return err
+	}
+
 	return c.Redirect(302, "/dashboard/newsletters")
 }

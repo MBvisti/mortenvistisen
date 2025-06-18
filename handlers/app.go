@@ -538,7 +538,11 @@ func (a App) HandleUnsubscribe(c echo.Context) error {
 			"error": "Failed to process unsubscribe",
 		})
 	}
-	defer a.db.RollBackTx(ctx, tx)
+	defer func() {
+		if rollbackErr := a.db.RollBackTx(ctx, tx); rollbackErr != nil {
+			slog.ErrorContext(ctx, "failed to rollback transaction", "error", rollbackErr)
+		}
+	}()
 
 	if err := models.DeleteSubscriber(ctx, tx, subscriber.ID); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{

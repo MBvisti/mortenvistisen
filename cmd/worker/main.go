@@ -14,6 +14,7 @@ import (
 	"github.com/mbvisti/mortenvistisen/config"
 	"github.com/mbvisti/mortenvistisen/psql"
 	"github.com/mbvisti/mortenvistisen/psql/queue"
+	"github.com/mbvisti/mortenvistisen/psql/queue/jobs"
 	"github.com/mbvisti/mortenvistisen/psql/queue/workers"
 	"github.com/riverqueue/river"
 )
@@ -47,9 +48,23 @@ func main() {
 		river.QueueDefault: {MaxWorkers: 5},
 		"high":             {MaxWorkers: 100},
 	}
+
+	periodicJobs := []*river.PeriodicJob{
+		river.NewPeriodicJob(
+			river.PeriodicInterval(24*time.Hour),
+			func() (river.JobArgs, *river.InsertOpts) {
+				return jobs.NewsletterProcessingJobArgs{}, nil
+			},
+			&river.PeriodicJobOpts{
+				RunOnStart: false,
+			},
+		),
+	}
+
 	db.NewQueue(
 		queue.WithQueues(q),
 		queue.WithWorkers(workers),
+		queue.WithPeriodicJobs(periodicJobs),
 		queue.WithLogger(slog.Default()),
 	)
 

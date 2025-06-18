@@ -13,14 +13,19 @@ import (
 )
 
 type Newsletter struct {
-	ID          uuid.UUID
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	ReleasedAt  time.Time
-	IsPublished bool
-	Title       string
-	Slug        string
-	Content     string
+	ID                 uuid.UUID
+	CreatedAt          time.Time
+	UpdatedAt          time.Time
+	ReleasedAt         time.Time
+	IsPublished        bool
+	Title              string
+	Slug               string
+	Content            string
+	SendStatus         string
+	TotalRecipients    int
+	EmailsSent         int
+	SendingStartedAt   time.Time
+	SendingCompletedAt time.Time
 }
 
 func GetNewsletterByID(
@@ -34,14 +39,19 @@ func GetNewsletterByID(
 	}
 
 	return Newsletter{
-		ID:          row.ID,
-		CreatedAt:   row.CreatedAt.Time,
-		UpdatedAt:   row.UpdatedAt.Time,
-		ReleasedAt:  row.ReleasedAt.Time,
-		IsPublished: row.IsPublished.Bool,
-		Title:       row.Title,
-		Slug:        row.Slug.String,
-		Content:     row.Content,
+		ID:                 row.ID,
+		CreatedAt:          row.CreatedAt.Time,
+		UpdatedAt:          row.UpdatedAt.Time,
+		ReleasedAt:         row.ReleasedAt.Time,
+		IsPublished:        row.IsPublished.Bool,
+		Title:              row.Title,
+		Slug:               row.Slug.String,
+		Content:            row.Content,
+		SendStatus:         row.SendStatus,
+		TotalRecipients:    int(row.TotalRecipients),
+		EmailsSent:         int(row.EmailsSent),
+		SendingStartedAt:   row.SendingStartedAt.Time,
+		SendingCompletedAt: row.SendingCompletedAt.Time,
 	}, nil
 }
 
@@ -56,14 +66,19 @@ func GetNewsletterByTitle(
 	}
 
 	return Newsletter{
-		ID:          row.ID,
-		CreatedAt:   row.CreatedAt.Time,
-		UpdatedAt:   row.UpdatedAt.Time,
-		ReleasedAt:  row.ReleasedAt.Time,
-		IsPublished: row.IsPublished.Bool,
-		Title:       row.Title,
-		Slug:        row.Slug.String,
-		Content:     row.Content,
+		ID:                 row.ID,
+		CreatedAt:          row.CreatedAt.Time,
+		UpdatedAt:          row.UpdatedAt.Time,
+		ReleasedAt:         row.ReleasedAt.Time,
+		IsPublished:        row.IsPublished.Bool,
+		Title:              row.Title,
+		Slug:               row.Slug.String,
+		Content:            row.Content,
+		SendStatus:         row.SendStatus,
+		TotalRecipients:    int(row.TotalRecipients),
+		EmailsSent:         int(row.EmailsSent),
+		SendingStartedAt:   row.SendingStartedAt.Time,
+		SendingCompletedAt: row.SendingCompletedAt.Time,
 	}, nil
 }
 
@@ -82,14 +97,19 @@ func GetNewsletterBySlug(
 	}
 
 	return Newsletter{
-		ID:          row.ID,
-		CreatedAt:   row.CreatedAt.Time,
-		UpdatedAt:   row.UpdatedAt.Time,
-		ReleasedAt:  row.ReleasedAt.Time,
-		IsPublished: row.IsPublished.Bool,
-		Title:       row.Title,
-		Slug:        row.Slug.String,
-		Content:     row.Content,
+		ID:                 row.ID,
+		CreatedAt:          row.CreatedAt.Time,
+		UpdatedAt:          row.UpdatedAt.Time,
+		ReleasedAt:         row.ReleasedAt.Time,
+		IsPublished:        row.IsPublished.Bool,
+		Title:              row.Title,
+		Slug:               row.Slug.String,
+		Content:            row.Content,
+		SendStatus:         row.SendStatus,
+		TotalRecipients:    int(row.TotalRecipients),
+		EmailsSent:         int(row.EmailsSent),
+		SendingStartedAt:   row.SendingStartedAt.Time,
+		SendingCompletedAt: row.SendingCompletedAt.Time,
 	}, nil
 }
 
@@ -105,14 +125,19 @@ func GetNewsletters(
 	newsletters := make([]Newsletter, len(rows))
 	for i, row := range rows {
 		newsletters[i] = Newsletter{
-			ID:          row.ID,
-			CreatedAt:   row.CreatedAt.Time,
-			UpdatedAt:   row.UpdatedAt.Time,
-			ReleasedAt:  row.ReleasedAt.Time,
-			IsPublished: row.IsPublished.Bool,
-			Title:       row.Title,
-			Slug:        row.Slug.String,
-			Content:     row.Content,
+			ID:                 row.ID,
+			CreatedAt:          row.CreatedAt.Time,
+			UpdatedAt:          row.UpdatedAt.Time,
+			ReleasedAt:         row.ReleasedAt.Time,
+			IsPublished:        row.IsPublished.Bool,
+			Title:              row.Title,
+			Slug:               row.Slug.String,
+			Content:            row.Content,
+			SendStatus:         row.SendStatus,
+			TotalRecipients:    int(row.TotalRecipients),
+			EmailsSent:         int(row.EmailsSent),
+			SendingStartedAt:   row.SendingStartedAt.Time,
+			SendingCompletedAt: row.SendingCompletedAt.Time,
 		}
 	}
 
@@ -131,14 +156,19 @@ func GetPublishedNewsletters(
 	newsletters := make([]Newsletter, len(rows))
 	for i, row := range rows {
 		newsletters[i] = Newsletter{
-			ID:          row.ID,
-			CreatedAt:   row.CreatedAt.Time,
-			UpdatedAt:   row.UpdatedAt.Time,
-			ReleasedAt:  row.ReleasedAt.Time,
-			IsPublished: row.IsPublished.Bool,
-			Title:       row.Title,
-			Slug:        row.Slug.String,
-			Content:     row.Content,
+			ID:                 row.ID,
+			CreatedAt:          row.CreatedAt.Time,
+			UpdatedAt:          row.UpdatedAt.Time,
+			ReleasedAt:         row.ReleasedAt.Time,
+			IsPublished:        row.IsPublished.Bool,
+			Title:              row.Title,
+			Slug:               row.Slug.String,
+			Content:            row.Content,
+			SendStatus:         row.SendStatus,
+			TotalRecipients:    int(row.TotalRecipients),
+			EmailsSent:         int(row.EmailsSent),
+			SendingStartedAt:   row.SendingStartedAt.Time,
+			SendingCompletedAt: row.SendingCompletedAt.Time,
 		}
 	}
 
@@ -157,14 +187,19 @@ func GetDraftNewsletters(
 	newsletters := make([]Newsletter, len(rows))
 	for i, row := range rows {
 		newsletters[i] = Newsletter{
-			ID:          row.ID,
-			CreatedAt:   row.CreatedAt.Time,
-			UpdatedAt:   row.UpdatedAt.Time,
-			ReleasedAt:  row.ReleasedAt.Time,
-			IsPublished: row.IsPublished.Bool,
-			Title:       row.Title,
-			Slug:        row.Slug.String,
-			Content:     row.Content,
+			ID:                 row.ID,
+			CreatedAt:          row.CreatedAt.Time,
+			UpdatedAt:          row.UpdatedAt.Time,
+			ReleasedAt:         row.ReleasedAt.Time,
+			IsPublished:        row.IsPublished.Bool,
+			Title:              row.Title,
+			Slug:               row.Slug.String,
+			Content:            row.Content,
+			SendStatus:         row.SendStatus,
+			TotalRecipients:    int(row.TotalRecipients),
+			EmailsSent:         int(row.EmailsSent),
+			SendingStartedAt:   row.SendingStartedAt.Time,
+			SendingCompletedAt: row.SendingCompletedAt.Time,
 		}
 	}
 
@@ -224,14 +259,19 @@ func GetNewslettersPaginated(
 	newsletters := make([]Newsletter, len(rows))
 	for i, row := range rows {
 		newsletters[i] = Newsletter{
-			ID:          row.ID,
-			CreatedAt:   row.CreatedAt.Time,
-			UpdatedAt:   row.UpdatedAt.Time,
-			ReleasedAt:  row.ReleasedAt.Time,
-			IsPublished: row.IsPublished.Bool,
-			Title:       row.Title,
-			Slug:        row.Slug.String,
-			Content:     row.Content,
+			ID:                 row.ID,
+			CreatedAt:          row.CreatedAt.Time,
+			UpdatedAt:          row.UpdatedAt.Time,
+			ReleasedAt:         row.ReleasedAt.Time,
+			IsPublished:        row.IsPublished.Bool,
+			Title:              row.Title,
+			Slug:               row.Slug.String,
+			Content:            row.Content,
+			SendStatus:         row.SendStatus,
+			TotalRecipients:    int(row.TotalRecipients),
+			EmailsSent:         int(row.EmailsSent),
+			SendingStartedAt:   row.SendingStartedAt.Time,
+			SendingCompletedAt: row.SendingCompletedAt.Time,
 		}
 	}
 
@@ -369,14 +409,19 @@ func UpdateNewsletterContent(
 	}
 
 	return Newsletter{
-		ID:          row.ID,
-		CreatedAt:   row.CreatedAt.Time,
-		UpdatedAt:   row.UpdatedAt.Time,
-		ReleasedAt:  row.ReleasedAt.Time,
-		IsPublished: row.IsPublished.Bool,
-		Title:       row.Title,
-		Slug:        row.Slug.String,
-		Content:     row.Content,
+		ID:                 row.ID,
+		CreatedAt:          row.CreatedAt.Time,
+		UpdatedAt:          row.UpdatedAt.Time,
+		ReleasedAt:         row.ReleasedAt.Time,
+		IsPublished:        row.IsPublished.Bool,
+		Title:              row.Title,
+		Slug:               row.Slug.String,
+		Content:            row.Content,
+		SendStatus:         row.SendStatus,
+		TotalRecipients:    int(row.TotalRecipients),
+		EmailsSent:         int(row.EmailsSent),
+		SendingStartedAt:   row.SendingStartedAt.Time,
+		SendingCompletedAt: row.SendingCompletedAt.Time,
 	}, nil
 }
 
@@ -412,14 +457,19 @@ func PublishNewsletter(
 	}
 
 	return Newsletter{
-		ID:          row.ID,
-		CreatedAt:   row.CreatedAt.Time,
-		UpdatedAt:   row.UpdatedAt.Time,
-		ReleasedAt:  row.ReleasedAt.Time,
-		IsPublished: row.IsPublished.Bool,
-		Title:       row.Title,
-		Slug:        row.Slug.String,
-		Content:     row.Content,
+		ID:                 row.ID,
+		CreatedAt:          row.CreatedAt.Time,
+		UpdatedAt:          row.UpdatedAt.Time,
+		ReleasedAt:         row.ReleasedAt.Time,
+		IsPublished:        row.IsPublished.Bool,
+		Title:              row.Title,
+		Slug:               row.Slug.String,
+		Content:            row.Content,
+		SendStatus:         row.SendStatus,
+		TotalRecipients:    int(row.TotalRecipients),
+		EmailsSent:         int(row.EmailsSent),
+		SendingStartedAt:   row.SendingStartedAt.Time,
+		SendingCompletedAt: row.SendingCompletedAt.Time,
 	}, nil
 }
 
@@ -429,4 +479,145 @@ func DeleteNewsletter(
 	id uuid.UUID,
 ) error {
 	return db.Stmts.DeleteNewsletter(ctx, dbtx, id)
+}
+
+func GetNewslettersReadyToSend(
+	ctx context.Context,
+	dbtx db.DBTX,
+) ([]Newsletter, error) {
+	rows, err := db.Stmts.QueryNewslettersReadyToSend(ctx, dbtx)
+	if err != nil {
+		return nil, err
+	}
+
+	newsletters := make([]Newsletter, len(rows))
+	for i, row := range rows {
+		newsletters[i] = Newsletter{
+			ID:                 row.ID,
+			CreatedAt:          row.CreatedAt.Time,
+			UpdatedAt:          row.UpdatedAt.Time,
+			ReleasedAt:         row.ReleasedAt.Time,
+			IsPublished:        row.IsPublished.Bool,
+			Title:              row.Title,
+			Slug:               row.Slug.String,
+			Content:            row.Content,
+			SendStatus:         row.SendStatus,
+			TotalRecipients:    int(row.TotalRecipients),
+			EmailsSent:         int(row.EmailsSent),
+			SendingStartedAt:   row.SendingStartedAt.Time,
+			SendingCompletedAt: row.SendingCompletedAt.Time,
+		}
+	}
+
+	return newsletters, nil
+}
+
+type MarkNewsletterReadyToSendPayload struct {
+	ID              uuid.UUID `validate:"required,uuid"`
+	Now             time.Time
+	TotalRecipients int
+}
+
+func MarkNewsletterReadyToSend(
+	ctx context.Context,
+	dbtx db.DBTX,
+	data MarkNewsletterReadyToSendPayload,
+) (Newsletter, error) {
+	if err := validate.Struct(data); err != nil {
+		return Newsletter{}, errors.Join(ErrDomainValidation, err)
+	}
+
+	// Safe conversion for TotalRecipients
+	if data.TotalRecipients > 2147483647 { // max int32
+		return Newsletter{}, errors.New("total recipients exceeds maximum allowed value")
+	}
+
+	row, err := db.Stmts.MarkNewsletterReadyToSend(
+		ctx,
+		dbtx,
+		db.MarkNewsletterReadyToSendParams{
+			ID:              data.ID,
+			UpdatedAt:       pgtype.Timestamptz{Time: data.Now, Valid: true},
+			TotalRecipients: int32(data.TotalRecipients),
+		},
+	)
+	if err != nil {
+		return Newsletter{}, err
+	}
+
+	return Newsletter{
+		ID:                 row.ID,
+		CreatedAt:          row.CreatedAt.Time,
+		UpdatedAt:          row.UpdatedAt.Time,
+		ReleasedAt:         row.ReleasedAt.Time,
+		IsPublished:        row.IsPublished.Bool,
+		Title:              row.Title,
+		Slug:               row.Slug.String,
+		Content:            row.Content,
+		SendStatus:         row.SendStatus,
+		TotalRecipients:    int(row.TotalRecipients),
+		EmailsSent:         int(row.EmailsSent),
+		SendingStartedAt:   row.SendingStartedAt.Time,
+		SendingCompletedAt: row.SendingCompletedAt.Time,
+	}, nil
+}
+
+type UpdateNewsletterSendStatusPayload struct {
+	ID                 uuid.UUID `validate:"required,uuid"`
+	Now                time.Time
+	SendStatus         string `validate:"required,oneof=draft ready_to_send sending sent"`
+	SendingStartedAt   *time.Time
+	SendingCompletedAt *time.Time
+	EmailsSent         int
+}
+
+func UpdateNewsletterSendStatus(
+	ctx context.Context,
+	dbtx db.DBTX,
+	data UpdateNewsletterSendStatusPayload,
+) (Newsletter, error) {
+	if err := validate.Struct(data); err != nil {
+		return Newsletter{}, errors.Join(ErrDomainValidation, err)
+	}
+
+	// Safe conversion for EmailsSent
+	if data.EmailsSent > 2147483647 { // max int32
+		return Newsletter{}, errors.New("emails sent exceeds maximum allowed value")
+	}
+
+	params := db.UpdateNewsletterSendStatusParams{
+		ID:         data.ID,
+		UpdatedAt:  pgtype.Timestamptz{Time: data.Now, Valid: true},
+		SendStatus: data.SendStatus,
+		EmailsSent: int32(data.EmailsSent),
+	}
+
+	if data.SendingStartedAt != nil {
+		params.SendingStartedAt = pgtype.Timestamptz{Time: *data.SendingStartedAt, Valid: true}
+	}
+
+	if data.SendingCompletedAt != nil {
+		params.SendingCompletedAt = pgtype.Timestamptz{Time: *data.SendingCompletedAt, Valid: true}
+	}
+
+	row, err := db.Stmts.UpdateNewsletterSendStatus(ctx, dbtx, params)
+	if err != nil {
+		return Newsletter{}, err
+	}
+
+	return Newsletter{
+		ID:                 row.ID,
+		CreatedAt:          row.CreatedAt.Time,
+		UpdatedAt:          row.UpdatedAt.Time,
+		ReleasedAt:         row.ReleasedAt.Time,
+		IsPublished:        row.IsPublished.Bool,
+		Title:              row.Title,
+		Slug:               row.Slug.String,
+		Content:            row.Content,
+		SendStatus:         row.SendStatus,
+		TotalRecipients:    int(row.TotalRecipients),
+		EmailsSent:         int(row.EmailsSent),
+		SendingStartedAt:   row.SendingStartedAt.Time,
+		SendingCompletedAt: row.SendingCompletedAt.Time,
+	}, nil
 }

@@ -14,6 +14,7 @@ type EditNewsletterFormData struct {
 	IsPublished bool
 	Slug        string
 	Content     string
+	SendStatus  string
 	Errors      map[string][]string
 }
 
@@ -91,6 +92,17 @@ templ EditNewsletter(formData EditNewsletterFormData) {
 						</button>
 					</div>
 				</form>
+				if formData.IsPublished && formData.SendStatus == "draft" {
+					<div class="mt-6">
+						<form method="POST" action={ templ.URL(fmt.Sprintf("/dashboard/newsletters/%s/send", formData.ID)) }>
+							<button type="submit" 
+								class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
+								onclick="return confirm('Are you sure you want to send this newsletter to all subscribers?')">
+								Send Newsletter to All Subscribers
+							</button>
+						</form>
+					</div>
+				}
 				<script type="module" src={ config.Cfg.GetFullDomain() + "/" + routes.JsEasyMDE.Path }></script>
 			</div>
 		</div>

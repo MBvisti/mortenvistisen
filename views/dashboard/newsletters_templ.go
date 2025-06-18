@@ -20,24 +20,58 @@ func newslettersToTableRowElements(newsletters []models.Newsletter) components.T
 	tableRowElements := make(components.TableRowElements, len(newsletters))
 	for i, newsletter := range newsletters {
 		publishStatus := "Draft"
-		hightlight := "status-draft"
+		publishHighlight := "status-draft"
 
 		if newsletter.IsPublished {
 			publishStatus = "Published"
-			hightlight = "status-published"
+			publishHighlight = "status-published"
 		}
+
+		sendStatus := formatSendStatus(newsletter.SendStatus)
+		sendHighlight := getSendStatusHighlight(newsletter.SendStatus)
 
 		tableRowElements[i] = components.TableRow{
 			ID: newsletter.ID,
 			Elements: []components.TableRowElement{
 				{Title: newsletter.Title},
-				{Title: publishStatus, Hightlight: hightlight},
+				{Title: publishStatus, Hightlight: publishHighlight},
+				{Title: sendStatus, Hightlight: sendHighlight},
 				{Title: newsletter.CreatedAt.Format("2006-01-02")},
 			},
 		}
 	}
 
 	return tableRowElements
+}
+
+func formatSendStatus(status string) string {
+	switch status {
+	case "draft":
+		return "Not Sent"
+	case "ready_to_send":
+		return "Queued"
+	case "sending":
+		return "Sending"
+	case "sent":
+		return "Sent"
+	default:
+		return "Unknown"
+	}
+}
+
+func getSendStatusHighlight(status string) string {
+	switch status {
+	case "draft":
+		return "status-draft"
+	case "ready_to_send":
+		return "status-queued"
+	case "sending":
+		return "status-sending"
+	case "sent":
+		return "status-sent"
+	default:
+		return "status-draft"
+	}
 }
 
 func Newsletters(result models.NewsletterPaginationResult) templ.Component {
@@ -95,7 +129,7 @@ func Newsletters(result models.NewsletterPaginationResult) templ.Component {
 			}
 			templ_7745c5c3_Err = components.Table(
 				"Recent newsletters",
-				[]string{"Title", "Status", "Created", "Action"},
+				[]string{"Title", "Publish Status", "Send Status", "Created", "Action"},
 				newslettersToTableRowElements(result.Newsletters),
 				components.Pagination{
 					TotalCount:  result.TotalCount,

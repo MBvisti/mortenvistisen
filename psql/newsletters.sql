@@ -51,3 +51,18 @@ returning *;
 
 -- name: DeleteNewsletter :exec
 delete from newsletters where id=$1;
+
+-- name: QueryNewslettersReadyToSend :many
+select * from newsletters where send_status='ready_to_send' order by created_at asc;
+
+-- name: MarkNewsletterReadyToSend :one
+update newsletters
+    set updated_at=$2, send_status='ready_to_send', total_recipients=$3
+where id = $1
+returning *;
+
+-- name: UpdateNewsletterSendStatus :one
+update newsletters
+    set updated_at=$2, send_status=$3, sending_started_at=$4, sending_completed_at=$5, emails_sent=$6
+where id = $1
+returning *;

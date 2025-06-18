@@ -173,7 +173,7 @@ func GenerateUnsubscribeLink(
 	}
 
 	unsubscribeURL := fmt.Sprintf("%s/unsubscribe/%s",
-		config.Cfg.App.GetFullDomain(),
+		config.Cfg.GetFullDomain(),
 		token.Value)
 
 	return unsubscribeURL, nil

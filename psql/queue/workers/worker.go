@@ -3,6 +3,7 @@ package workers
 import (
 	"github.com/mbvisti/mortenvistisen/clients"
 	"github.com/mbvisti/mortenvistisen/psql"
+	"github.com/mbvisti/mortenvistisen/psql/queue/jobs"
 	"github.com/riverqueue/river"
 )
 
@@ -25,6 +26,10 @@ func SetupWorkers(deps WorkerDependencies) (*river.Workers, error) {
 		emailClient: deps.EmailClient,
 		db:          deps.DB,
 	}); err != nil {
+		return nil, err
+	}
+
+	if err := river.AddWorkerSafely(workers, jobs.NewNewsletterProcessingJobWorker(deps.DB, deps.DB.Queue())); err != nil {
 		return nil, err
 	}
 
