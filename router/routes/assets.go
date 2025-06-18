@@ -24,6 +24,7 @@ var Assets = []Route{
 	Favicon32,
 	FaviconAppletouch,
 	FaviconSiteManifest,
+	IndexNow,
 }
 
 var Robots = Route{
