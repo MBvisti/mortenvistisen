@@ -4,9 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/mbvisti/mortenvistisen/config"
 	"github.com/mbvisti/mortenvistisen/emails"
 	"github.com/mbvisti/mortenvistisen/models"
@@ -137,4 +140,36 @@ func VerifySubscriberEmail(
 	}
 
 	return tx.Commit(ctx)
+}
+
+type DBExecutor interface {
+	Exec(ctx context.Context, sql string, arguments ...interface{}) (pgconn.CommandTag, error)
+	Query(ctx context.Context, sql string, args ...interface{}) (pgx.Rows, error)
+	QueryRow(ctx context.Context, sql string, args ...interface{}) pgx.Row
+}
+
+func GenerateUnsubscribeLink(
+	ctx context.Context,
+	dbtx DBExecutor,
+	subscriberID uuid.UUID,
+) (string, error) {
+	expiration := time.Now().Add(30 * 24 * time.Hour)
+
+	token, err := models.NewHashedToken(ctx, dbtx, models.NewTokenPayload{
+		Expiration: expiration,
+		Meta: models.MetaInformation{
+			Resource:   models.ResourceSubscriber,
+			ResourceID: subscriberID,
+			Scope:      models.ScopeUnsubscribe,
+		},
+	})
+	if err != nil {
+		return "", err
+	}
+
+	unsubscribeURL := fmt.Sprintf("%s/unsubscribe/%s",
+		config.Cfg.App.GetFullDomain(),
+		token.Value)
+
+	return unsubscribeURL, nil
 }

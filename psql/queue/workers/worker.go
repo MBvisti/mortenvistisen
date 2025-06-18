@@ -21,5 +21,12 @@ func SetupWorkers(deps WorkerDependencies) (*river.Workers, error) {
 		return nil, err
 	}
 
+	if err := river.AddWorkerSafely(workers, &MarketingEmailJobWorker{
+		emailClient: deps.EmailClient,
+		db:          deps.DB,
+	}); err != nil {
+		return nil, err
+	}
+
 	return workers, nil
 }

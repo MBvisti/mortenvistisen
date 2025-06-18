@@ -2,36 +2,48 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Project Overview
+## Guidelines
 
-Grafto is a starter template for full-stack Go web applications using server-side rendering. It follows an opinionated approach:
-- No ORM, using SQL directly with sqlc
-- Server-side HTML rendering with templ
-- Session-based authentication
-- Email verification and password reset flows
-- Vanilla CSS for styling
-- Never use inline styles for views, ONLY for emails
+### DOs:
+- Always use the code quality commands for testing your work
+- Always use database commands for interacting with the database (migrations, queries)
+- When need to use if statements, add an if for each condition
 
-The target audience is solo developers building side-projects or bootstrapping new businesses.
-
-## Workflow
-Always start by reading the task file (usually task.md if not specified) and create a plan of action to implement/complete the task. This must be presented to the user and accepted before you start to implement it, so the user can make changes to the plan if necessary.
-
-Always run: `go fmt ./...`
-
-NEVER test the implementation, that is the responsibility of the user.
+### DON'Ts:
+- Do not build the application for testing purposes (go build)
+- Do not add comments to the code as this is very bad practice
+- Do not use if/else statements
+- Do not use nested if/else statements
 
 ## Development Commands
+
+### Application
+- `just run` - Run the application with live reload watching for file changes
+- `just run-app` - Run the application without live reload
+- `just run-worker` - Run the background worker process
+- `just run-email` - Run the email service with auto-reload
+
+### Database
+- `just create-migration name` - Create a new migration file
+- `just migration-status` - Show the migration status
+- `just up-migrations` - Run all pending migrations
+- `just down-migrations` - Down all migrations
+- `just reset-db` - Reset the database
+- `just generate-db-functions` - Generate database functions with sqlc
 
 ### Templates and Assets
 - `just compile-templates` - Compile templ templates
 - `just fmt-templates` - Format templ templates
 
-### Database
-- `just gdf` to generate Go code after adding/update/delete queries in psql/queries
-
 ### Code Quality
-- `go fmt ./...` - Format go code
+- `just golangci` (alias: `just ci`) - Run golangci-lint
+- `just vet` - Run go vet
+
+### Testing
+- `just test-units` (alias: `just tu`) - Run unit tests
+- `just test-integrations` (alias: `just ti`) - Run integration tests
+- `just test-e2e` - Run end-to-end tests
+- `just test-all` - Run all tests
 
 ## Architecture
 
@@ -50,7 +62,6 @@ NEVER test the implementation, that is the responsibility of the user.
 
 3. **Handlers**
    - Located in `handlers/`
-   - Organized by feature domains (authentication, dashboard, etc.)
    - Handle HTTP requests and map to service operations
    - Use templ for HTML rendering
 
@@ -94,13 +105,6 @@ NEVER test the implementation, that is the responsibility of the user.
 5. Database operations
 6. HTML rendering with templ
 7. HTTP response
-
-### Authentication Flow
-
-1. Registration with email/password
-2. Email verification using tokens/code
-3. Login creates authenticated session
-4. Protected routes check session via middleware
 
 ## Key Dependencies
 

@@ -500,7 +500,6 @@ func (a App) HandleUnsubscribe(c echo.Context) error {
 
 	ctx := c.Request().Context()
 
-	// Get and validate the token
 	token, err := models.GetHashedToken(ctx, a.db.Pool, tokenValue)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, map[string]string{
@@ -508,28 +507,24 @@ func (a App) HandleUnsubscribe(c echo.Context) error {
 		})
 	}
 
-	// Validate token is for unsubscribe scope
 	if token.Meta.Scope != models.ScopeUnsubscribe {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error": "Invalid token scope",
 		})
 	}
 
-	// Validate token is for subscriber resource
 	if token.Meta.Resource != models.ResourceSubscriber {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error": "Invalid token resource",
 		})
 	}
 
-	// Check if token is still valid
 	if !token.IsValid() {
 		return c.JSON(http.StatusGone, map[string]string{
 			"error": "Unsubscribe link has expired",
 		})
 	}
 
-	// Get the subscriber to ensure they exist
 	subscriber, err := models.GetSubscriber(ctx, a.db.Pool, token.Meta.ResourceID)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, map[string]string{
@@ -537,7 +532,6 @@ func (a App) HandleUnsubscribe(c echo.Context) error {
 		})
 	}
 
-	// Start database transaction
 	tx, err := a.db.BeginTx(ctx)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
@@ -546,21 +540,18 @@ func (a App) HandleUnsubscribe(c echo.Context) error {
 	}
 	defer a.db.RollBackTx(ctx, tx)
 
-	// Delete the subscriber
 	if err := models.DeleteSubscriber(ctx, tx, subscriber.ID); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"error": "Failed to unsubscribe",
 		})
 	}
 
-	// Delete the token to prevent reuse
 	if err := models.DeleteToken(ctx, tx, token.ID); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"error": "Failed to process unsubscribe",
 		})
 	}
 
-	// Commit the transaction
 	if err := a.db.CommitTx(ctx, tx); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"error": "Failed to complete unsubscribe",
