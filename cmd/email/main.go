@@ -31,12 +31,23 @@ func main() {
 	}
 	signupWelcomeHtml, signupWelcomeText, _ := signupWelcome.Generate(ctx)
 
+	newsletterHtml, newsletterTxt, _ := emails.Newsletter{
+		Subject:         "YoYo",
+		Content:         "<h1>BUY</h1><p>Hello</p>",
+		UnsubscribeLink: "https://mbvlabs.com",
+	}.Generate(
+		ctx,
+	)
+
 	textGroup := e.Group("/text")
 	textGroup.GET("/password-reset", func(c echo.Context) error {
 		return c.String(http.StatusOK, passwordResetText.String())
 	})
 	textGroup.GET("/signup-welcome", func(c echo.Context) error {
 		return c.String(http.StatusOK, signupWelcomeText.String())
+	})
+	textGroup.GET("/newsletter", func(c echo.Context) error {
+		return c.String(http.StatusOK, newsletterTxt.String())
 	})
 
 	htmlGroup := e.Group("/html")
@@ -45,6 +56,9 @@ func main() {
 	})
 	htmlGroup.GET("/signup-welcome", func(c echo.Context) error {
 		return c.HTML(http.StatusOK, signupWelcomeHtml.String())
+	})
+	htmlGroup.GET("/newsletter", func(c echo.Context) error {
+		return c.HTML(http.StatusOK, newsletterHtml.String())
 	})
 
 	slog.Info("starting the password server on port: 4444")

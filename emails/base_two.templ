@@ -1,0 +1,166 @@
+package emails
+
+// Data structures for components
+type HeaderData struct {
+	Logo        string
+	CompanyName string
+	Title       string
+	Subtitle    string
+}
+
+type ButtonData struct {
+	URL   string
+	Text  string
+	Color string
+}
+
+type FooterData struct {
+	CompanyName    string
+	Address        string
+	UnsubscribeURL string
+}
+
+type TextData struct {
+	Content string
+}
+
+type SpacerData struct {
+	Height string
+}
+
+type EmailData struct {
+	Title       string
+	PreviewText string
+}
+
+templ Header(data HeaderData) {
+	<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+		<tr>
+			<td style="padding: 40px 30px 20px 30px; text-align: center; border-bottom: 1px solid gray;">
+				if data.Logo != "" {
+					<img src={ data.Logo } alt={ data.CompanyName } style="display: block; margin: 0 auto 20px auto; max-width: 200px; height: auto;"/>
+				}
+				if data.Title != "" {
+					<h1 style="margin: 0; font-size: 28px; font-weight: bold; color: #333333; line-height: 1.2;">{ data.Title }</h1>
+				}
+				if data.Subtitle != "" {
+					<p style="margin: 10px 0 0 0; font-size: 16px; color: #666666; line-height: 1.4;">{ data.Subtitle }</p>
+				}
+			</td>
+		</tr>
+	</table>
+}
+
+templ Section() {
+	<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+		<tr>
+			<td style="padding: 30px;">
+				<div style="font-size: 16px; color: #444444; line-height: 1.6;">
+					{ children... }
+				</div>
+			</td>
+		</tr>
+	</table>
+}
+
+templ Button(data ButtonData) {
+	<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+		<tr>
+			<td style="padding: 20px 30px; text-align: center;">
+				<table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin: 0 auto;">
+					<tr>
+						<td style={ "border-radius: 6px; background-color: black;" }>
+							<a href={ templ.URL(data.URL) } target="_blank" style="display: inline-block; padding: 14px 28px; font-size: 16px; font-weight: bold; color: #ffffff; text-decoration: none; border-radius: 6px;">
+								{ data.Text }
+							</a>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
+}
+
+templ Footer(data FooterData) {
+	<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+		<tr>
+			<td style="padding: 30px; text-align: center; border-top: 1px solid #eeeeee; background-color: #f9f9f9;">
+				if data.CompanyName != "" {
+					<p style="margin: 0 0 10px 0; font-size: 14px; color: #666666;">{ data.CompanyName }</p>
+				}
+				if data.Address != "" {
+					<p style="margin: 0 0 10px 0; font-size: 14px; color: #666666;">{ data.Address }</p>
+				}
+				if data.UnsubscribeURL != "" {
+					<p style="margin: 10px 0 0 0; font-size: 12px; color: #999999;">
+						<a href={ templ.URL(data.UnsubscribeURL) } style="color: #999999; text-decoration: underline;">Unsubscribe</a>
+					</p>
+				}
+			</td>
+		</tr>
+	</table>
+}
+
+templ TextBlock(data TextData) {
+	<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+		<tr>
+			<td style="padding: 0 30px 20px 30px;">
+				<p style="margin: 0; font-size: 16px; color: #444444; line-height: 1.6;">{ data.Content }</p>
+			</td>
+		</tr>
+	</table>
+}
+
+templ Spacer(data SpacerData) {
+	<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+		<tr>
+			<td style={ "height: 20px; line-height: 20px;" }>&nbsp;</td>
+		</tr>
+	</table>
+}
+
+templ List(items []string) {
+	<ul style="margin: 0; padding-left: 20px;">
+		for _, item := range items {
+			<li style="margin-bottom: 10px;">{ item }</li>
+		}
+	</ul>
+}
+
+templ BaseLayout(data EmailData) {
+	<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+	<html xmlns="http://www.w3.org/1999/xhtml">
+		<head>
+			<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>{ data.Title }</title>
+			<!--[if mso]>
+			<style type="text/css">
+				table { border-collapse: collapse; }
+				.fallback-text { font-family: Arial, sans-serif !important; }
+			</style>
+			<![endif]-->
+		</head>
+		<body style="margin: 0; padding: 0; background-color: #f4f4f4; font-family: Arial, Helvetica, sans-serif;">
+			<!-- Preview text (hidden) -->
+			<div style="display: none; max-height: 0; overflow: hidden; mso-hide: all;">
+				{ data.PreviewText }
+			</div>
+			<!-- Main container table -->
+			<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f4f4f4;">
+				<tr>
+					<td align="center" style="padding: 20px 0;">
+						<!-- Email content table -->
+						<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+							<tr>
+								<td style="padding: 0;">
+									{ children... }
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+		</body>
+	</html>
+}

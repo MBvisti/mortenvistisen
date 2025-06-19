@@ -20,36 +20,17 @@ func (n Newsletter) Generate(ctx context.Context) (Html, Text, error) {
 
 var _ TemplateHandler = (*Newsletter)(nil)
 
-templ (data Newsletter) template() {
-	@base(data.Subject) {
-		@preHeader(data.Subject)
-		<center style="width: 100%; background-color: #f6f9fc;">
-			<table
-				align="center"
-				border="0"
-				cellpadding="0"
-				cellspacing="0"
-				role="presentation"
-				style="max-width: 640px; width: 100%; margin: 0 auto;"
-			>
-				<tbody>
-					@brandBanner()
-					@mainContent() {
-						@header() {
-							{ data.Subject }
-						}
-						<tr>
-							<td style="padding: 0 20px;">
-								<div style="color: #374151; font-size: 16px; line-height: 1.6;">
-									@templ.Raw(data.Content)
-								</div>
-							</td>
-						</tr>
-					}
-					@footerWithUnsubscribe(data.UnsubscribeLink)
-				</tbody>
-			</table>
-		</center>
+templ (n Newsletter) template() {
+	@BaseLayout(EmailData{
+		Title: n.Subject, PreviewText: n.Subject}) {
+		@Header(HeaderData{
+			Title: n.Subject,
+		},
+		)
+		@Section() {
+			@templ.Raw(n.Content)
+		}
+		@Spacer(SpacerData{Height: "40"})
+		@Footer(FooterData{CompanyName: "mbvlabs", UnsubscribeURL: n.UnsubscribeLink})
 	}
 }
-

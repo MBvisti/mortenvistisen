@@ -8,8 +8,7 @@ type SubscriberWelcomeData struct {
 }
 
 templ (data SubscriberWelcomeData) template() {
-	@base("Welcome to our Newsletter") {
-		@preHeader("Welcome to the newsletter! Please verify your email address.")
+	@base("Welcome to our Newsletter", "Welcome to the newsletter! Please verify your email address.") {
 		<center style="width: 100%; background-color: #f6f9fc;">
 			<table
 				align="center"
@@ -18,30 +17,19 @@ templ (data SubscriberWelcomeData) template() {
 				cellspacing="0"
 				role="presentation"
 				style="max-width: 640px; width: 100%; margin: 0 auto;"
+				aria-label="Newsletter subscription email"
 			>
 				<tbody>
 					@brandBanner()
+					@hero("Welcome to our newsletter!", "Thank you for subscribing - we're excited to share our insights with you", primaryColor, false)
 					@mainContent() {
-						@header() {
-							Welcome to our newsletter! 
-						}
-						@paragraph() {
-							Thank you for subscribing to our newsletter. We're excited to share our latest articles, updates, and insights with you.
-						}
-						@paragraph() {
-							To complete your subscription and start receiving our newsletter, please verify your email address by entering the code below:
-						}
-						@codeBlock(data.Code)
-						@paragraph() {
-							Or click this link to verify your email automatically:
-						}
-						@btn("Verify Email", config.Cfg.GetFullDomain() + "/verify-subscription?email=" + data.Email)
-						@paragraph() {
-							This verification code will expire in 24 hours. If you didn't subscribe to our newsletter, you can safely ignore this email.
-						}
-						@paragraph() {
-							Once verified, you'll receive our newsletters with the latest content and updates. You can unsubscribe at any time using the link at the bottom of any newsletter.
-						}
+						@card("Newsletter Subscription", "Thank you for subscribing to our newsletter. We're excited to share our latest articles, updates, and insights with you.", false, "")
+						@alert("Verification Required", "To complete your subscription and start receiving our newsletter, please verify your email address using the code below.", "info")
+						@verificationCodeBlock(data.Code)
+						@divider()
+						@enhancedBtn("Verify Email Automatically", config.Cfg.GetFullDomain() + "/verify-subscription?email=" + data.Email, "primary", "large")
+						@alert("Important", "This verification code will expire in 24 hours. If you didn't subscribe to our newsletter, you can safely ignore this email.", "warning")
+						@card("What to Expect", "Once verified, you'll receive our newsletters with the latest content and updates. You can unsubscribe at any time using the link at the bottom of any newsletter.", false, "")
 					}
 					@footerWithUnsubscribe("")
 				</tbody>
