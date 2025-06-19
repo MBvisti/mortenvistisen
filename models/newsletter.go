@@ -258,7 +258,6 @@ func NewNewsletter(
 type UpdateNewsletterPayload struct {
 	ID          uuid.UUID `validate:"required,uuid"`
 	UpdatedAt   time.Time `validate:"required"`
-	ReleasedAt  time.Time
 	IsPublished bool
 	Title       string `validate:"required,max=100"`
 	Slug        string `validate:"required,max=255"`
@@ -288,8 +287,8 @@ func UpdateNewsletter(
 			Content:     data.Content,
 			IsPublished: pgtype.Bool{Bool: data.IsPublished, Valid: true},
 			ReleasedAt: pgtype.Timestamptz{
-				Time:  data.ReleasedAt,
-				Valid: data.ReleasedAt.IsZero(),
+				Time:  data.UpdatedAt,
+				Valid: data.IsPublished,
 			},
 		},
 	)

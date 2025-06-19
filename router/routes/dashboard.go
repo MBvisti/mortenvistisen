@@ -11,9 +11,6 @@ const (
 
 var Dashboard = []Route{
 	DashboardHome,
-	// DashboardArticles,
-	// DashboardAnalytics,
-	// DashboardSettings,
 	DashboardNewArticle,
 	DashboardStoreArticle,
 	DashboardEditArticle,
@@ -33,7 +30,6 @@ var Dashboard = []Route{
 	DashboardEditNewsletter,
 	DashboardUpdateNewsletter,
 	DashboardDeleteNewsletter,
-	DashboardSendNewsletter,
 }
 
 var DashboardHome = Route{

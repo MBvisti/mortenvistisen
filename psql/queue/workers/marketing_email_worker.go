@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/mbvisti/mortenvistisen/clients"
+	"github.com/mbvisti/mortenvistisen/config"
 	"github.com/mbvisti/mortenvistisen/psql"
 	"github.com/mbvisti/mortenvistisen/psql/queue/jobs"
 	"github.com/riverqueue/river"
@@ -20,16 +21,22 @@ type MarketingEmailJobWorker struct {
 	db          psql.Postgres
 }
 
-func NewMarketingEmailWorker(emailClient clients.Email, db psql.Postgres) *MarketingEmailJobWorker {
+func NewMarketingEmailWorker(
+	emailClient clients.Email,
+	db psql.Postgres,
+) *MarketingEmailJobWorker {
 	return &MarketingEmailJobWorker{
 		emailClient: emailClient,
 		db:          db,
 	}
 }
 
-func (w *MarketingEmailJobWorker) Work(ctx context.Context, job *river.Job[jobs.MarketingEmailJobArgs]) error {
-	tracer := otel.Tracer("")
-	ctx, span := tracer.Start(ctx, "MarketingEmailJobWorker.Work",
+func (w *MarketingEmailJobWorker) Work(
+	ctx context.Context,
+	job *river.Job[jobs.MarketingEmailJobArgs],
+) error {
+	tracer := otel.Tracer(config.Cfg.ServiceName)
+	ctx, span := tracer.Start(ctx, "marketing_email_job_worker",
 		trace.WithAttributes(
 			attribute.Int64("job.id", job.ID),
 			attribute.String("email.to", job.Args.To),
@@ -63,7 +70,6 @@ func (w *MarketingEmailJobWorker) Work(ctx context.Context, job *river.Job[jobs.
 		},
 		unsubscribe,
 	)
-
 	if err != nil {
 		slog.ErrorContext(ctx, "Failed to send marketing email",
 			"job_id", job.ID,

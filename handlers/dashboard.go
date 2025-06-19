@@ -10,7 +10,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/mbvisti/mortenvistisen/models"
 	"github.com/mbvisti/mortenvistisen/psql"
-	"github.com/mbvisti/mortenvistisen/psql/queue/jobs"
 	"github.com/mbvisti/mortenvistisen/router/contexts"
 	"github.com/mbvisti/mortenvistisen/services"
 	"github.com/mbvisti/mortenvistisen/views/dashboard"
@@ -71,7 +70,10 @@ func (d Dashboard) Index(c echo.Context) error {
 	}
 
 	// Get complete statistics (not affected by pagination)
-	publishedCount, err := models.CountPublishedArticles(extractCtx(c), d.db.Pool)
+	publishedCount, err := models.CountPublishedArticles(
+		extractCtx(c),
+		d.db.Pool,
+	)
 	if err != nil {
 		publishedCount = 0
 	}
@@ -327,8 +329,6 @@ func (d Dashboard) UpdateArticle(c echo.Context) error {
 		return err
 	}
 
-	slog.Info("IS IT PUBLISHED OR NOT", "p", articlePayload.Published)
-
 	var readTime int32
 	if articlePayload.ReadTime != "" {
 		if parsedTime, err := strconv.ParseInt(articlePayload.ReadTime, 10, 32); err == nil {
@@ -415,7 +415,6 @@ func (d Dashboard) UpdateArticle(c echo.Context) error {
 			return err
 		}
 
-		// Invalidate caches when article is updated/published
 		d.cacheManager.InvalidateLandingPage()
 		d.cacheManager.InvalidateArticle(updatePayload.Slug)
 
@@ -430,7 +429,6 @@ func (d Dashboard) UpdateArticle(c echo.Context) error {
 		return err
 	}
 
-	// Invalidate caches when article is updated
 	d.cacheManager.InvalidateLandingPage()
 	d.cacheManager.InvalidateArticle(updatePayload.Slug)
 
@@ -451,7 +449,6 @@ func (d Dashboard) DeleteArticle(c echo.Context) error {
 		return c.Redirect(302, "/dashboard")
 	}
 
-	// Check if article exists before deleting and get slug for cache invalidation
 	article, err := models.GetArticleByID(
 		extractCtx(c),
 		d.db.Pool,
@@ -468,7 +465,6 @@ func (d Dashboard) DeleteArticle(c echo.Context) error {
 		return c.Redirect(302, "/dashboard")
 	}
 
-	// Delete the article
 	err = models.DeleteArticle(
 		extractCtx(c),
 		d.db.Pool,
@@ -493,15 +489,12 @@ func (d Dashboard) DeleteArticle(c echo.Context) error {
 		return err
 	}
 
-	// Invalidate caches when article is deleted
 	d.cacheManager.InvalidateLandingPage()
 	d.cacheManager.InvalidateArticle(article.Slug)
 
-	// Redirect to dashboard
 	return c.Redirect(302, "/dashboard")
 }
 
-// Tag management handlers
 func (d Dashboard) Tags(c echo.Context) error {
 	tags, err := models.GetArticleTags(extractCtx(c), d.db.Pool)
 	if err != nil {
@@ -698,7 +691,10 @@ func (d Dashboard) Subscribers(c echo.Context) error {
 	}
 
 	monthlyCount, _ := models.CountMonthlySubscribers(extractCtx(c), d.db.Pool)
-	verifiedCount, _ := models.CountVerifiedSubscribers(extractCtx(c), d.db.Pool)
+	verifiedCount, _ := models.CountVerifiedSubscribers(
+		extractCtx(c),
+		d.db.Pool,
+	)
 	unverifiedCount := subscribers.TotalCount - verifiedCount
 
 	result := dashboard.SubscribersSortableResult{
@@ -905,7 +901,6 @@ func (d Dashboard) DeleteSubscriber(c echo.Context) error {
 	return c.Redirect(302, "/dashboard/subscribers")
 }
 
-// Newsletter management handlers
 func (d Dashboard) Newsletters(c echo.Context) error {
 	pageStr := c.QueryParam("page")
 	page := 1
@@ -990,30 +985,14 @@ func (d Dashboard) StoreNewsletter(c echo.Context) error {
 	}
 
 	if newsletterPayload.Action == "publish" {
-		_, err = models.PublishNewsletter(
-			extractCtx(c),
-			d.db.Pool,
-			models.PublishNewsletterPayload{
-				ID:  newsletter.ID,
-				Now: time.Now(),
-			},
-		)
-		if err != nil {
+		if err := services.ScheduleNewsletterRelease(extractCtx(c), d.db, newsletter.ID); err != nil {
 			if err := addFlash(
 				c,
 				contexts.FlashError,
-				"Newsletter created as draft. Publishing failed.",
+				"Failed to schedule newsletter. Please try again.",
 			); err != nil {
 				return err
 			}
-		}
-
-		if err := addFlash(
-			c,
-			contexts.FlashSuccess,
-			"Newsletter published successfully!",
-		); err != nil {
-			return err
 		}
 	}
 
@@ -1064,7 +1043,6 @@ func (d Dashboard) EditNewsletter(c echo.Context) error {
 		IsPublished: newsletter.IsPublished,
 		Slug:        newsletter.Slug,
 		Content:     newsletter.Content,
-		SendStatus:  newsletter.SendStatus,
 		Errors:      make(map[string][]string),
 	}
 
@@ -1108,7 +1086,6 @@ func (d Dashboard) UpdateNewsletter(c echo.Context) error {
 		Content:     newsletterPayload.Content,
 		IsPublished: published,
 	}
-
 	newsletter, err := models.UpdateNewsletter(
 		extractCtx(c),
 		d.db.Pool,
@@ -1143,60 +1120,28 @@ func (d Dashboard) UpdateNewsletter(c echo.Context) error {
 		return dashboard.EditNewsletter(formData).Render(renderArgs(c))
 	}
 
-	if published && newsletter.ReleasedAt.IsZero() {
-		publishedNewsletter, err := models.PublishNewsletter(
-			c.Request().Context(),
-			d.db.Pool,
-			models.PublishNewsletterPayload{ID: newsletter.ID, Now: time.Now()},
-		)
-		if err != nil {
+	if published {
+		if err := services.ScheduleNewsletterRelease(extractCtx(c), d.db, newsletter.ID); err != nil {
 			if err := addFlash(
 				c,
 				contexts.FlashError,
-				"Failed to update newsletter. Please try again.",
+				"Failed to schedule newsletter. Please try again.",
 			); err != nil {
 				return err
 			}
+		}
+		if err := addFlash(
+			c,
+			contexts.FlashSuccess,
+			"Newsletter published successfully!",
+		); err != nil {
 			return err
 		}
 
-		if publishedNewsletter.SendStatus == "draft" {
-			newsletterService := services.NewNewsletterSendingService(d.db, d.db.Queue())
-			err = newsletterService.MarkNewsletterReadyToSend(extractCtx(c), publishedNewsletter.ID)
-			if err != nil {
-				if err := addFlash(
-					c,
-					contexts.FlashError,
-					"Newsletter published but failed to queue for sending. Please try sending manually.",
-				); err != nil {
-					return err
-				}
-				return c.Redirect(302, "/dashboard/newsletters")
-			}
-
-			_, err = d.db.Queue().Insert(extractCtx(c), jobs.NewsletterProcessingJobArgs{}, nil)
-			if err != nil {
-				slog.ErrorContext(extractCtx(c), "failed to queue newsletter processing job", "error", err, "newsletter_id", publishedNewsletter.ID)
-			}
-
-			if err := addFlash(
-				c,
-				contexts.FlashSuccess,
-				"Newsletter published and queued for sending!",
-			); err != nil {
-				return err
-			}
-		} else {
-			if err := addFlash(
-				c,
-				contexts.FlashSuccess,
-				"Newsletter published successfully!",
-			); err != nil {
-				return err
-			}
-		}
-
-		return c.Redirect(302, "/dashboard/newsletters")
+		return c.Redirect(
+			302,
+			"/dashboard/newsletters",
+		)
 	}
 
 	if err := addFlash(
@@ -1267,109 +1212,5 @@ func (d Dashboard) DeleteNewsletter(c echo.Context) error {
 	}
 
 	// Redirect to newsletters
-	return c.Redirect(302, "/dashboard/newsletters")
-}
-
-func (d Dashboard) SendNewsletter(c echo.Context) error {
-	idParam := c.Param("id")
-	newsletterID, err := uuid.Parse(idParam)
-	if err != nil {
-		if err := addFlash(
-			c,
-			contexts.FlashError,
-			"Invalid newsletter ID.",
-		); err != nil {
-			return err
-		}
-		return c.Redirect(302, "/dashboard/newsletters")
-	}
-
-	newsletter, err := models.GetNewsletterByID(
-		extractCtx(c),
-		d.db.Pool,
-		newsletterID,
-	)
-	if err != nil {
-		if err := addFlash(
-			c,
-			contexts.FlashError,
-			"Newsletter not found.",
-		); err != nil {
-			return err
-		}
-		return c.Redirect(302, "/dashboard/newsletters")
-	}
-
-	if !newsletter.IsPublished {
-		if err := addFlash(
-			c,
-			contexts.FlashError,
-			"Newsletter must be published before sending.",
-		); err != nil {
-			return err
-		}
-		return c.Redirect(302, "/dashboard/newsletters")
-	}
-
-	if newsletter.SendStatus == "sent" {
-		if err := addFlash(
-			c,
-			contexts.FlashError,
-			"Newsletter has already been sent.",
-		); err != nil {
-			return err
-		}
-		return c.Redirect(302, "/dashboard/newsletters")
-	}
-
-	if newsletter.SendStatus == "ready_to_send" {
-		if err := addFlash(
-			c,
-			contexts.FlashError,
-			"Newsletter is already queued for sending.",
-		); err != nil {
-			return err
-		}
-		return c.Redirect(302, "/dashboard/newsletters")
-	}
-
-	if newsletter.SendStatus == "sending" {
-		if err := addFlash(
-			c,
-			contexts.FlashError,
-			"Newsletter is currently being sent.",
-		); err != nil {
-			return err
-		}
-		return c.Redirect(302, "/dashboard/newsletters")
-	}
-
-	newsletterService := services.NewNewsletterSendingService(d.db, d.db.Queue())
-	err = newsletterService.MarkNewsletterReadyToSend(extractCtx(c), newsletterID)
-	if err != nil {
-		slog.ErrorContext(extractCtx(c), "failed to mark newsletter for sending", "error", err, "newsletter_id", newsletterID)
-		if err := addFlash(
-			c,
-			contexts.FlashError,
-			"Failed to queue newsletter for sending. Please try again.",
-		); err != nil {
-			return err
-		}
-		return c.Redirect(302, "/dashboard/newsletters")
-	}
-
-	_, err = d.db.Queue().Insert(extractCtx(c), jobs.NewsletterProcessingJobArgs{}, nil)
-	if err != nil {
-		slog.ErrorContext(extractCtx(c), "failed to queue newsletter processing job", "error", err, "newsletter_id", newsletterID)
-	}
-
-	if err := addFlash(
-		c,
-		contexts.FlashSuccess,
-		"Newsletter has been queued for sending and will be delivered to subscribers soon!",
-	); err != nil {
-		return err
-	}
-
 	return c.Redirect(302, "/dashboard/newsletters")
 }

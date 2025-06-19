@@ -27,15 +27,11 @@ func newslettersToTableRowElements(newsletters []models.Newsletter) components.T
 			publishHighlight = "status-published"
 		}
 
-		sendStatus := formatSendStatus(newsletter.SendStatus)
-		sendHighlight := getSendStatusHighlight(newsletter.SendStatus)
-
 		tableRowElements[i] = components.TableRow{
 			ID: newsletter.ID,
 			Elements: []components.TableRowElement{
 				{Title: newsletter.Title},
 				{Title: publishStatus, Hightlight: publishHighlight},
-				{Title: sendStatus, Hightlight: sendHighlight},
 				{Title: newsletter.CreatedAt.Format("2006-01-02")},
 			},
 		}

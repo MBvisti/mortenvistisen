@@ -61,7 +61,7 @@ func ScheduleNewsletterRelease(
 	baseTime := getNextSendTime()
 	emailJobs := make([]river.InsertManyParams, 0, len(verifiedSubscribers))
 
-	html, txt, err := emails.SubscriberWelcome{}.Generate(ctx)
+	content, err := ParseMarkdownToHtml(newsletter.Content)
 	if err != nil {
 		return err
 	}
@@ -89,6 +89,15 @@ func ScheduleNewsletterRelease(
 		scheduledAt := baseTime.Add(
 			time.Duration(calculateEmailDelay(i)) * time.Minute,
 		)
+
+		html, txt, err := emails.Newsletter{
+			Subject:         newsletter.Title,
+			Content:         content,
+			UnsubscribeLink: unsubscribeURL,
+		}.Generate(ctx)
+		if err != nil {
+			return err
+		}
 
 		jobArgs := jobs.MarketingEmailJobArgs{
 			To:              subscriber.Email,
@@ -123,7 +132,7 @@ func ScheduleNewsletterRelease(
 		return fmt.Errorf("failed to insert email jobs: %w", err)
 	}
 
-	return nil
+	return tx.Commit(ctx)
 }
 
 func getNextSendTime() time.Time {

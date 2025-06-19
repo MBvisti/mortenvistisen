@@ -142,8 +142,7 @@ func (a App) ArticlePage(c echo.Context) error {
 		return err
 	}
 
-	manager := NewManager()
-	ar, e := manager.ParseContent(article.Content)
+	ar, e := services.ParseMarkdownToHtml(article.Content)
 	if e != nil {
 		return e
 	}
@@ -525,7 +524,11 @@ func (a App) HandleUnsubscribe(c echo.Context) error {
 		})
 	}
 
-	subscriber, err := models.GetSubscriber(ctx, a.db.Pool, token.Meta.ResourceID)
+	subscriber, err := models.GetSubscriber(
+		ctx,
+		a.db.Pool,
+		token.Meta.ResourceID,
+	)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, map[string]string{
 			"error": "Subscriber not found",
@@ -540,7 +543,12 @@ func (a App) HandleUnsubscribe(c echo.Context) error {
 	}
 	defer func() {
 		if rollbackErr := a.db.RollBackTx(ctx, tx); rollbackErr != nil {
-			slog.ErrorContext(ctx, "failed to rollback transaction", "error", rollbackErr)
+			slog.ErrorContext(
+				ctx,
+				"failed to rollback transaction",
+				"error",
+				rollbackErr,
+			)
 		}
 	}()
 
