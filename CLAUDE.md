@@ -2,16 +2,19 @@
 
 This is a collection of workflows. When the user tells you to use one of these workflows YOU MUST FOLLOW ALL STEPS in the outlined order.
 
+An example of the user specifying what workflow to use:
+use workflow: standard. <task description comes afterwards>
+
 ## Standard
 
 This is the most commonly used workflow and should be your default if in doubt.
 
+Do not start implementing the task without explicitly being told by the user to do so.
+
 1.  Think hard about the task given (collect context and get deep understanding)
 2.  Ask the user questions if you have any doubts
-3.  Provide the user with a 2-3 lines summary of how you understand the task
-3a. The user must approve or agree that your summar is correct before continuing to step 4
-4.  Generate a plan for how to implement the task
-5.  Once satisfied with the plan, save it to task.md in the root of the project
+3.  Provide the user with a 2-3 lines summary of your understading of the task. To continue to step 4 the user MUST APPROVE this understanding as correct.
+4.  Generate a plan for how to implement the task and save it to task.md
 
 ## Prepared Task
 
