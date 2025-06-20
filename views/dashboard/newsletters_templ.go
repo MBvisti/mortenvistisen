@@ -40,36 +40,6 @@ func newslettersToTableRowElements(newsletters []models.Newsletter) components.T
 	return tableRowElements
 }
 
-func formatSendStatus(status string) string {
-	switch status {
-	case "draft":
-		return "Not Sent"
-	case "ready_to_send":
-		return "Queued"
-	case "sending":
-		return "Sending"
-	case "sent":
-		return "Sent"
-	default:
-		return "Unknown"
-	}
-}
-
-func getSendStatusHighlight(status string) string {
-	switch status {
-	case "draft":
-		return "status-draft"
-	case "ready_to_send":
-		return "status-queued"
-	case "sending":
-		return "status-sending"
-	case "sent":
-		return "status-sent"
-	default:
-		return "status-draft"
-	}
-}
-
 func Newsletters(result models.NewsletterPaginationResult) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -125,7 +95,7 @@ func Newsletters(result models.NewsletterPaginationResult) templ.Component {
 			}
 			templ_7745c5c3_Err = components.Table(
 				"Recent newsletters",
-				[]string{"Title", "Publish Status", "Send Status", "Created", "Action"},
+				[]string{"Title", "Publish Status", "Created", "Action"},
 				newslettersToTableRowElements(result.Newsletters),
 				components.Pagination{
 					TotalCount:  result.TotalCount,

@@ -32,36 +32,6 @@ func newslettersToTableRowElements(newsletters []models.Newsletter) components.T
 	return tableRowElements
 }
 
-func formatSendStatus(status string) string {
-	switch status {
-	case "draft":
-		return "Not Sent"
-	case "ready_to_send":
-		return "Queued"
-	case "sending":
-		return "Sending"
-	case "sent":
-		return "Sent"
-	default:
-		return "Unknown"
-	}
-}
-
-func getSendStatusHighlight(status string) string {
-	switch status {
-	case "draft":
-		return "status-draft"
-	case "ready_to_send":
-		return "status-queued"
-	case "sending":
-		return "status-sending"
-	case "sent":
-		return "status-sent"
-	default:
-		return "status-draft"
-	}
-}
-
 templ Newsletters(result models.NewsletterPaginationResult) {
 	@layouts.Dashboard() {
 		@components.DashboardHeader("Newsletters", "manage your newsletters")
@@ -72,7 +42,7 @@ templ Newsletters(result models.NewsletterPaginationResult) {
 		})
 		@components.Table(
 			"Recent newsletters",
-			[]string{"Title", "Publish Status", "Send Status", "Created", "Action"},
+			[]string{"Title", "Publish Status", "Created", "Action"},
 			newslettersToTableRowElements(result.Newsletters),
 			components.Pagination{
 				TotalCount:  result.TotalCount,

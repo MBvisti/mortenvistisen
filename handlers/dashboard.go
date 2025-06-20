@@ -942,10 +942,10 @@ func (d Dashboard) NewNewsletter(c echo.Context) error {
 
 func (d Dashboard) StoreNewsletter(c echo.Context) error {
 	type payload struct {
-		Title   string `form:"title"`
-		Slug    string `form:"slug"`
-		Content string `form:"content"`
-		Action  string `form:"action"`
+		Title      string `form:"title"`
+		Slug       string `form:"slug"`
+		Content    string `form:"content"`
+		PublishNow string `form:"publish_now"`
 	}
 
 	var newsletterPayload payload
@@ -953,13 +953,16 @@ func (d Dashboard) StoreNewsletter(c echo.Context) error {
 		return err
 	}
 
+	publishNow := newsletterPayload.PublishNow == "on"
+
 	newsletter, err := models.NewNewsletter(
 		extractCtx(c),
 		d.db.Pool,
 		models.NewNewsletterPayload{
-			Title:   newsletterPayload.Title,
-			Slug:    newsletterPayload.Slug,
-			Content: newsletterPayload.Content,
+			Title:       newsletterPayload.Title,
+			Slug:        newsletterPayload.Slug,
+			Content:     newsletterPayload.Content,
+			IsPublished: publishNow,
 		},
 	)
 	if err != nil {
@@ -984,7 +987,7 @@ func (d Dashboard) StoreNewsletter(c echo.Context) error {
 			Render(renderArgs(c))
 	}
 
-	if newsletterPayload.Action == "publish" {
+	if publishNow {
 		if err := services.ScheduleNewsletterRelease(extractCtx(c), d.db, newsletter.ID); err != nil {
 			if err := addFlash(
 				c,
@@ -993,15 +996,23 @@ func (d Dashboard) StoreNewsletter(c echo.Context) error {
 			); err != nil {
 				return err
 			}
+		} else {
+			if err := addFlash(
+				c,
+				contexts.FlashSuccess,
+				"Newsletter published successfully!",
+			); err != nil {
+				return err
+			}
 		}
-	}
-
-	if err := addFlash(
-		c,
-		contexts.FlashSuccess,
-		"Newsletter saved as draft successfully!",
-	); err != nil {
-		return err
+	} else {
+		if err := addFlash(
+			c,
+			contexts.FlashSuccess,
+			"Newsletter saved as draft successfully!",
+		); err != nil {
+			return err
+		}
 	}
 
 	return c.Redirect(302, "/dashboard/newsletters")
@@ -1078,6 +1089,22 @@ func (d Dashboard) UpdateNewsletter(c echo.Context) error {
 
 	published := newsletterPayload.Published == "on"
 
+	originalNewsletter, err := models.GetNewsletterByID(
+		extractCtx(c),
+		d.db.Pool,
+		newsletterID,
+	)
+	if err != nil {
+		if err := addFlash(
+			c,
+			contexts.FlashError,
+			"Newsletter not found.",
+		); err != nil {
+			return err
+		}
+		return c.Redirect(302, "/dashboard/newsletters")
+	}
+
 	updatePayload := models.UpdateNewsletterPayload{
 		ID:          newsletterID,
 		UpdatedAt:   time.Now(),
@@ -1120,7 +1147,7 @@ func (d Dashboard) UpdateNewsletter(c echo.Context) error {
 		return dashboard.EditNewsletter(formData).Render(renderArgs(c))
 	}
 
-	if published {
+	if published && !originalNewsletter.IsPublished {
 		if err := services.ScheduleNewsletterRelease(extractCtx(c), d.db, newsletter.ID); err != nil {
 			if err := addFlash(
 				c,
@@ -1129,13 +1156,14 @@ func (d Dashboard) UpdateNewsletter(c echo.Context) error {
 			); err != nil {
 				return err
 			}
-		}
-		if err := addFlash(
-			c,
-			contexts.FlashSuccess,
-			"Newsletter published successfully!",
-		); err != nil {
-			return err
+		} else {
+			if err := addFlash(
+				c,
+				contexts.FlashSuccess,
+				"Newsletter published successfully!",
+			); err != nil {
+				return err
+			}
 		}
 
 		return c.Redirect(

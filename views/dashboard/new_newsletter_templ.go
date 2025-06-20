@@ -16,10 +16,11 @@ import (
 )
 
 type NewNewsletterFormData struct {
-	Title   string
-	Slug    string
-	Content string
-	Errors  map[string][]string
+	Title      string
+	Slug       string
+	Content    string
+	PublishNow bool
+	Errors     map[string][]string
 }
 
 func NewNewsletter(formData NewNewsletterFormData) templ.Component {
@@ -78,13 +79,13 @@ func NewNewsletter(formData NewNewsletterFormData) templ.Component {
 			var templ_7745c5c3_Var3 templ.SafeURL
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(routes.DashboardStoreNewsletter.Path))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/new_newsletter.templ`, Line: 25, Col: 84}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/new_newsletter.templ`, Line: 26, Col: 84}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" class=\"bg-base-200 border border-base-300 rounded-lg p-4 shadow-sm space-y-4\"><div><h2 class=\"text-lg font-semibold mb-3\">Newsletter Information</h2><div class=\"grid grid-cols-2 gap-3\"><div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" class=\"bg-base-200 border border-base-300 rounded-lg p-4 shadow-sm space-y-4\" x-data=\"{ publishNow: false }\"><div><h2 class=\"text-lg font-semibold mb-3\">Newsletter Information</h2><div class=\"grid grid-cols-2 gap-3\"><div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -127,26 +128,69 @@ func NewNewsletter(formData NewNewsletterFormData) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(formData.Content)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/new_newsletter.templ`, Line: 59, Col: 67}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/new_newsletter.templ`, Line: 60, Col: 67}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</textarea></div><div class=\"flex justify-end gap-3 mt-4\"><button type=\"submit\" name=\"action\" value=\"save_draft\" class=\"inline-flex items-center justify-center px-3 py-1.5 text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-base-300 text-base-content hover:bg-base-300/80 transition-all duration-200 shadow-sm hover:shadow-md\">Save as Draft</button> <button type=\"submit\" name=\"action\" value=\"publish\" class=\"inline-flex items-center justify-center px-3 py-1.5 text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-primary text-primary-content hover:bg-primary/90 focus:ring-primary focus:ring-offset-base-200\">Publish Newsletter</button></div></form><script type=\"module\" src=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</textarea></div><div class=\"space-y-4\"><div><label class=\"space-y-1 w-full\"><div class=\"flex justify-between items-center\"><span class=\"text-sm font-medium text-base-content\">Publish Options</span></div><label class=\"checkbox-wrapper\"><input type=\"checkbox\" name=\"publish_now\" id=\"publish_now\" x-model=\"publishNow\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var5 string
-			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(config.Cfg.GetFullDomain() + "/" + routes.JsEasyMDE.Path)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/new_newsletter.templ`, Line: 70, Col: 88}
+			if formData.PublishNow {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, " checked x-init=\"publishNow = true\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "> <span class=\"checkbox-label\">Publish Now</span></label> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\"></script></div></div>")
+			if formData.Errors["publish_now"] != nil {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<div class=\"flex justify-between items-center\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				for _, errMsg := range formData.Errors["publish_now"] {
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "<span class=\"text-xs text-error\">")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					var templ_7745c5c3_Var5 string
+					templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(components.UppercaseFirstWord(errMsg))
+					if templ_7745c5c3_Err != nil {
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/new_newsletter.templ`, Line: 84, Col: 83}
+					}
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</span>")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</label></div><div class=\"flex justify-end mt-4\"><button type=\"submit\" class=\"inline-flex items-center justify-center px-3 py-1.5 text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-primary text-primary-content hover:bg-primary/90 focus:ring-primary focus:ring-offset-base-200\" x-text=\"publishNow ? 'Publish Newsletter' : 'Create Newsletter'\" @click=\"if (publishNow && !confirm('Are you sure you want to publish this newsletter? It will be sent to all subscribers.')) $event.preventDefault()\">Create Newsletter</button></div></div></form><script type=\"module\" src=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var6 string
+			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(config.Cfg.GetFullDomain() + "/" + routes.JsEasyMDE.Path)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/dashboard/new_newsletter.templ`, Line: 102, Col: 88}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\"></script></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
