@@ -33,15 +33,14 @@ templ SortableTable(
 	actionBtn ActionBtn,
 	config TableConfig,
 ) {
-	<div class="bg-base-200 border border-base-300 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-		<div class="px-6 py-4 border-b border-base-300 flex justify-between items-center bg-base-300/20">
-			<h2 class="text-base-content text-lg font-semibold m-0 flex items-center gap-2">
-				<span>📋</span>
+	<div class="bg-base-200 border border-base-300 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
+		<div class="px-4 py-3 border-b border-base-300 flex justify-between items-center bg-base-300/20">
+			<h2 class="text-base-content text-base font-semibold m-0 flex items-center gap-2">
 				{ title }
 			</h2>
 			if actionBtn.Title != "" {
 				<div class="flex gap-4">
-					<a href={ templ.SafeURL(actionBtn.Route.Path) } class="bg-primary text-primary-content border-0 px-4 py-2 rounded-lg text-sm font-medium cursor-pointer no-underline inline-block hover:bg-primary/90 transition-all duration-200 shadow-md hover:shadow-lg">{ actionBtn.Title }</a>
+					<a href={ templ.SafeURL(actionBtn.Route.Path) } class="bg-primary text-primary-content border-0 px-3 py-1.5 rounded-md text-sm font-medium cursor-pointer no-underline inline-block hover:bg-primary/90 transition-all duration-200 shadow-sm hover:shadow-md">{ actionBtn.Title }</a>
 				</div>
 			}
 		</div>
@@ -49,7 +48,7 @@ templ SortableTable(
 			<thead>
 				<tr>
 					for _, column := range columns {
-						<th class="bg-base-300 text-base-content font-semibold text-sm px-6 py-4 text-left border-b border-base-300">
+						<th class="bg-base-300 text-base-content font-medium text-xs px-4 py-2 text-left border-b border-base-300">
 							if column.Sortable {
 								@sortableHeader(column, sortConfig, pagination)
 							} else {
@@ -57,32 +56,32 @@ templ SortableTable(
 							}
 						</th>
 					}
-					<th class="bg-base-300 text-base-content font-semibold text-sm px-6 py-4 text-left border-b border-base-300">Action</th>
+					<th class="bg-base-300 text-base-content font-medium text-xs px-4 py-2 text-left border-b border-base-300">Action</th>
 				</tr>
 			</thead>
 			<tbody>
 				if len(tableRows) == 0 {
 					<tr>
-						<td colspan={ fmt.Sprintf("%d", len(columns)+1) } class="text-base-content px-6 py-4 border-b border-base-300 transition-colors duration-200 text-center">No elements found</td>
+						<td colspan={ fmt.Sprintf("%d", len(columns)+1) } class="text-base-content px-4 py-3 border-b border-base-300 transition-colors duration-200 text-center text-sm">No elements found</td>
 					</tr>
 				}
 				for _, row := range tableRows {
 					<tr class="hover:bg-base-300/20 transition-colors duration-200">
 						for _, element := range row.Elements {
 							<td
-								class="text-base-content px-6 py-4 border-b border-base-300 transition-colors duration-200"
+								class="text-base-content px-4 py-3 border-b border-base-300 transition-colors duration-200 text-sm"
 								if element.Hightlight == "status-published" {
-									class="text-base-content px-6 py-4 border-b border-base-300 transition-colors duration-200 text-success font-medium"
+									class="text-base-content px-4 py-3 border-b border-base-300 transition-colors duration-200 text-success font-medium text-sm"
 								}
 								if element.Hightlight == "status-draft" {
-									class="text-base-content px-6 py-4 border-b border-base-300 transition-colors duration-200 text-warning font-medium"
+									class="text-base-content px-4 py-3 border-b border-base-300 transition-colors duration-200 text-warning font-medium text-sm"
 								}
 							>{ element.Title }</td>
 						}
-						<td class="text-base-content px-6 py-4 border-b border-base-300 transition-colors duration-200">
+						<td class="text-base-content px-4 py-3 border-b border-base-300 transition-colors duration-200">
 							<div class="flex gap-2">
 								if config.EditURLPattern != "" {
-									<a href={ templ.URL(fmt.Sprintf(config.EditURLPattern, row.ID.String())) } class="bg-base-300 text-base-content border-0 px-3 py-1 text-xs rounded-md cursor-pointer no-underline inline-block hover:bg-primary hover:text-primary-content transition-all duration-200 shadow-sm hover:shadow-md">Edit</a>
+									<a href={ templ.URL(fmt.Sprintf(config.EditURLPattern, row.ID.String())) } class="bg-base-300 text-base-content border-0 px-2 py-1 text-xs rounded cursor-pointer no-underline inline-block hover:bg-primary hover:text-primary-content transition-all duration-200">Edit</a>
 								}
 							</div>
 						</td>

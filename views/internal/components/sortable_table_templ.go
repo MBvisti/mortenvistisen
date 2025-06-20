@@ -61,14 +61,14 @@ func SortableTable(
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"bg-base-200 border border-base-300 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300\"><div class=\"px-6 py-4 border-b border-base-300 flex justify-between items-center bg-base-300/20\"><h2 class=\"text-base-content text-lg font-semibold m-0 flex items-center gap-2\"><span>📋</span> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"bg-base-200 border border-base-300 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200\"><div class=\"px-4 py-3 border-b border-base-300 flex justify-between items-center bg-base-300/20\"><h2 class=\"text-base-content text-base font-semibold m-0 flex items-center gap-2\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/sortable_table.templ`, Line: 40, Col: 11}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/sortable_table.templ`, Line: 39, Col: 11}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -86,20 +86,20 @@ func SortableTable(
 			var templ_7745c5c3_Var3 templ.SafeURL
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(actionBtn.Route.Path))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/sortable_table.templ`, Line: 44, Col: 50}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/sortable_table.templ`, Line: 43, Col: 50}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" class=\"bg-primary text-primary-content border-0 px-4 py-2 rounded-lg text-sm font-medium cursor-pointer no-underline inline-block hover:bg-primary/90 transition-all duration-200 shadow-md hover:shadow-lg\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" class=\"bg-primary text-primary-content border-0 px-3 py-1.5 rounded-md text-sm font-medium cursor-pointer no-underline inline-block hover:bg-primary/90 transition-all duration-200 shadow-sm hover:shadow-md\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(actionBtn.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/sortable_table.templ`, Line: 44, Col: 275}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/sortable_table.templ`, Line: 43, Col: 277}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -115,7 +115,7 @@ func SortableTable(
 			return templ_7745c5c3_Err
 		}
 		for _, column := range columns {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<th class=\"bg-base-300 text-base-content font-semibold text-sm px-6 py-4 text-left border-b border-base-300\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<th class=\"bg-base-300 text-base-content font-medium text-xs px-4 py-2 text-left border-b border-base-300\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -128,7 +128,7 @@ func SortableTable(
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(column.DisplayName)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/sortable_table.templ`, Line: 56, Col: 28}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/sortable_table.templ`, Line: 55, Col: 28}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -140,7 +140,7 @@ func SortableTable(
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<th class=\"bg-base-300 text-base-content font-semibold text-sm px-6 py-4 text-left border-b border-base-300\">Action</th></tr></thead> <tbody>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<th class=\"bg-base-300 text-base-content font-medium text-xs px-4 py-2 text-left border-b border-base-300\">Action</th></tr></thead> <tbody>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -152,13 +152,13 @@ func SortableTable(
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", len(columns)+1))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/sortable_table.templ`, Line: 66, Col: 53}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/sortable_table.templ`, Line: 65, Col: 53}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" class=\"text-base-content px-6 py-4 border-b border-base-300 transition-colors duration-200 text-center\">No elements found</td></tr>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" class=\"text-base-content px-4 py-3 border-b border-base-300 transition-colors duration-200 text-center text-sm\">No elements found</td></tr>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -169,18 +169,18 @@ func SortableTable(
 				return templ_7745c5c3_Err
 			}
 			for _, element := range row.Elements {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<td class=\"text-base-content px-6 py-4 border-b border-base-300 transition-colors duration-200\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "<td class=\"text-base-content px-4 py-3 border-b border-base-300 transition-colors duration-200 text-sm\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				if element.Hightlight == "status-published" {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, " class=\"text-base-content px-6 py-4 border-b border-base-300 transition-colors duration-200 text-success font-medium\"")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, " class=\"text-base-content px-4 py-3 border-b border-base-300 transition-colors duration-200 text-success font-medium text-sm\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				}
 				if element.Hightlight == "status-draft" {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, " class=\"text-base-content px-6 py-4 border-b border-base-300 transition-colors duration-200 text-warning font-medium\"")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, " class=\"text-base-content px-4 py-3 border-b border-base-300 transition-colors duration-200 text-warning font-medium text-sm\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -192,7 +192,7 @@ func SortableTable(
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(element.Title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/sortable_table.templ`, Line: 80, Col: 23}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/sortable_table.templ`, Line: 79, Col: 23}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -203,7 +203,7 @@ func SortableTable(
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<td class=\"text-base-content px-6 py-4 border-b border-base-300 transition-colors duration-200\"><div class=\"flex gap-2\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<td class=\"text-base-content px-4 py-3 border-b border-base-300 transition-colors duration-200\"><div class=\"flex gap-2\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -215,13 +215,13 @@ func SortableTable(
 				var templ_7745c5c3_Var8 templ.SafeURL
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(fmt.Sprintf(config.EditURLPattern, row.ID.String())))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/sortable_table.templ`, Line: 85, Col: 81}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/sortable_table.templ`, Line: 84, Col: 81}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "\" class=\"bg-base-300 text-base-content border-0 px-3 py-1 text-xs rounded-md cursor-pointer no-underline inline-block hover:bg-primary hover:text-primary-content transition-all duration-200 shadow-sm hover:shadow-md\">Edit</a>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "\" class=\"bg-base-300 text-base-content border-0 px-2 py-1 text-xs rounded cursor-pointer no-underline inline-block hover:bg-primary hover:text-primary-content transition-all duration-200\">Edit</a>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -279,7 +279,7 @@ func sortableHeader(column SortableColumn, sortConfig SortConfig, pagination Pag
 				var templ_7745c5c3_Var10 templ.SafeURL
 				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(buildSortURL(sortConfig.BaseURL, column.Field, "desc", pagination.Page)))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/sortable_table.templ`, Line: 103, Col: 93}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/sortable_table.templ`, Line: 102, Col: 93}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 				if templ_7745c5c3_Err != nil {
@@ -292,7 +292,7 @@ func sortableHeader(column SortableColumn, sortConfig SortConfig, pagination Pag
 				var templ_7745c5c3_Var11 string
 				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(column.DisplayName)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/sortable_table.templ`, Line: 106, Col: 24}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/sortable_table.templ`, Line: 105, Col: 24}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 				if templ_7745c5c3_Err != nil {
@@ -310,7 +310,7 @@ func sortableHeader(column SortableColumn, sortConfig SortConfig, pagination Pag
 				var templ_7745c5c3_Var12 templ.SafeURL
 				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(buildSortURL(sortConfig.BaseURL, column.Field, "asc", pagination.Page)))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/sortable_table.templ`, Line: 111, Col: 92}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/sortable_table.templ`, Line: 110, Col: 92}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 				if templ_7745c5c3_Err != nil {
@@ -323,7 +323,7 @@ func sortableHeader(column SortableColumn, sortConfig SortConfig, pagination Pag
 				var templ_7745c5c3_Var13 string
 				templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(column.DisplayName)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/sortable_table.templ`, Line: 114, Col: 24}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/sortable_table.templ`, Line: 113, Col: 24}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 				if templ_7745c5c3_Err != nil {
@@ -342,7 +342,7 @@ func sortableHeader(column SortableColumn, sortConfig SortConfig, pagination Pag
 			var templ_7745c5c3_Var14 templ.SafeURL
 			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(buildSortURL(sortConfig.BaseURL, column.Field, "asc", pagination.Page)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/sortable_table.templ`, Line: 120, Col: 91}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/sortable_table.templ`, Line: 119, Col: 91}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
@@ -355,7 +355,7 @@ func sortableHeader(column SortableColumn, sortConfig SortConfig, pagination Pag
 			var templ_7745c5c3_Var15 string
 			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(column.DisplayName)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/sortable_table.templ`, Line: 123, Col: 23}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/sortable_table.templ`, Line: 122, Col: 23}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {
@@ -403,7 +403,7 @@ func sortablePagination(pagination Pagination, sortConfig SortConfig) templ.Comp
 			var templ_7745c5c3_Var17 templ.SafeURL
 			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(buildPaginationURL(sortConfig, pagination.Page-1)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/sortable_table.templ`, Line: 133, Col: 74}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/sortable_table.templ`, Line: 132, Col: 74}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 			if templ_7745c5c3_Err != nil {
@@ -423,7 +423,7 @@ func sortablePagination(pagination Pagination, sortConfig SortConfig) templ.Comp
 				var templ_7745c5c3_Var18 string
 				templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", i))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/sortable_table.templ`, Line: 137, Col: 302}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/sortable_table.templ`, Line: 136, Col: 302}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 				if templ_7745c5c3_Err != nil {
@@ -441,7 +441,7 @@ func sortablePagination(pagination Pagination, sortConfig SortConfig) templ.Comp
 				var templ_7745c5c3_Var19 templ.SafeURL
 				templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(buildPaginationURL(sortConfig, i)))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/sortable_table.templ`, Line: 139, Col: 59}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/sortable_table.templ`, Line: 138, Col: 59}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 				if templ_7745c5c3_Err != nil {
@@ -454,7 +454,7 @@ func sortablePagination(pagination Pagination, sortConfig SortConfig) templ.Comp
 				var templ_7745c5c3_Var20 string
 				templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", i))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/sortable_table.templ`, Line: 139, Col: 296}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/sortable_table.templ`, Line: 138, Col: 296}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 				if templ_7745c5c3_Err != nil {
@@ -474,7 +474,7 @@ func sortablePagination(pagination Pagination, sortConfig SortConfig) templ.Comp
 			var templ_7745c5c3_Var21 templ.SafeURL
 			templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(buildPaginationURL(sortConfig, pagination.Page+1)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/sortable_table.templ`, Line: 143, Col: 74}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/sortable_table.templ`, Line: 142, Col: 74}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 			if templ_7745c5c3_Err != nil {
@@ -492,7 +492,7 @@ func sortablePagination(pagination Pagination, sortConfig SortConfig) templ.Comp
 		var templ_7745c5c3_Var22 string
 		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", (pagination.Page-1)*pagination.PageSize+1))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/sortable_table.templ`, Line: 147, Col: 73}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/sortable_table.templ`, Line: 146, Col: 73}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 		if templ_7745c5c3_Err != nil {
@@ -505,7 +505,7 @@ func sortablePagination(pagination Pagination, sortConfig SortConfig) templ.Comp
 		var templ_7745c5c3_Var23 string
 		templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", min(pagination.Page*pagination.PageSize, int(pagination.TotalCount))))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/sortable_table.templ`, Line: 147, Col: 168}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/sortable_table.templ`, Line: 146, Col: 168}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 		if templ_7745c5c3_Err != nil {
@@ -518,7 +518,7 @@ func sortablePagination(pagination Pagination, sortConfig SortConfig) templ.Comp
 		var templ_7745c5c3_Var24 string
 		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", pagination.TotalCount))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/sortable_table.templ`, Line: 147, Col: 216}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/sortable_table.templ`, Line: 146, Col: 216}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 		if templ_7745c5c3_Err != nil {
