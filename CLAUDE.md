@@ -18,9 +18,9 @@ Do not start implementing the task without explicitly being told by the user to 
 
 ## Prepared Task
 
-This is used when there is a complete task outline in a task.md file.
+This is used when there is a complete task outline in a task file the user will point you to.
 
-1. Examine the content of the task.md file
+1. Examine the content of the task file
 2. Think hard about it and investigate files to gather context
 3. Ask any questions you might have
 4. Provide the user with a short summary of your understanding for approval BEFORE begining
