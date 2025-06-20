@@ -29,7 +29,7 @@ func DeleteConfirmationModal(articleID, articleTitle string) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"delete-modal\" class=\"fixed inset-0 bg-black/50 flex items-center justify-center z-50\" style=\"display: none;\"><div class=\"bg-base-200 border border-base-300 rounded-xl p-6 max-w-md w-full mx-4 shadow-xl\"><div class=\"modal-header\"><h3>Delete Article</h3><button class=\"modal-close\" onclick=\"hideDeleteModal()\">&times;</button></div><div class=\"modal-body\"><p>Are you sure you want to delete the article \"<strong>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"delete-modal\" class=\"fixed inset-0 bg-black/50 flex items-center justify-center z-50\" style=\"display: none;\"><div class=\"bg-base-200 border border-base-300 rounded-lg p-4 max-w-md w-full mx-4 shadow-sm\"><div class=\"modal-header\"><h3>Delete Article</h3><button class=\"modal-close\" onclick=\"hideDeleteModal()\">&times;</button></div><div class=\"modal-body\"><p>Are you sure you want to delete the article \"<strong>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -42,7 +42,7 @@ func DeleteConfirmationModal(articleID, articleTitle string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</strong>\"?</p><p class=\"text-warning\">This action cannot be undone.</p></div><div class=\"modal-footer\"><button class=\"inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-base-300 text-base-content border-0 px-4 py-2 rounded-lg text-sm font-medium cursor-pointer no-underline inline-block hover:bg-base-300/80 transition-all duration-200 shadow-sm hover:shadow-md\" onclick=\"hideDeleteModal()\">Cancel</button><form style=\"display: inline;\" method=\"POST\" action=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</strong>\"?</p><p class=\"text-warning\">This action cannot be undone.</p></div><div class=\"modal-footer\"><button class=\"inline-flex items-center justify-center px-3 py-1.5 text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-base-300 text-base-content hover:bg-base-300/80 transition-all duration-200 shadow-sm hover:shadow-md\" onclick=\"hideDeleteModal()\">Cancel</button><form style=\"display: inline;\" method=\"POST\" action=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -55,7 +55,7 @@ func DeleteConfirmationModal(articleID, articleTitle string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\"><button type=\"submit\" class=\"inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-error text-error-content border-0 px-4 py-2 rounded-lg text-sm font-medium cursor-pointer no-underline inline-block hover:bg-error/90 transition-all duration-200 shadow-sm hover:shadow-md\">Delete</button></form></div></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\"><button type=\"submit\" class=\"inline-flex items-center justify-center px-3 py-1.5 text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-error text-error-content hover:bg-error/90 transition-all duration-200 shadow-sm hover:shadow-md\">Delete</button></form></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

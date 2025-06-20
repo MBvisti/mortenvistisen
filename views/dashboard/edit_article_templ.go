@@ -86,7 +86,7 @@ func EditArticle(formData EditArticleFormData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"mb-4\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"mb-3\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -107,7 +107,7 @@ func EditArticle(formData EditArticleFormData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" class=\"bg-base-200 border border-base-300 rounded-xl p-6 shadow-lg space-y-8\"><div><h2 class=\"text-xl font-semibold mb-4\">Article Information</h2><div class=\"grid grid-cols-2 gap-4\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" class=\"bg-base-200 border border-base-300 rounded-lg p-4 shadow-sm space-y-4\"><div><h2 class=\"text-lg font-semibold mb-3\">Article Information</h2><div class=\"grid grid-cols-2 gap-4\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -167,11 +167,11 @@ func EditArticle(formData EditArticleFormData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<label class=\"col-span-2\"><div class=\"flex justify-between items-center\"><span class=\"text-sm font-medium text-base-content md:text-lg\">Excerpt</span></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<label class=\"col-span-2\"><div class=\"flex justify-between items-center\"><span class=\"text-sm font-medium text-base-content\">Excerpt</span></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var4 = []any{"border rounded w-full p-2 bg-base-200", templ.KV("border-error focus:ring-error", len(formData.Errors["excerpt"]) > 0)}
+			var templ_7745c5c3_Var4 = []any{"border rounded w-full p-1.5 bg-base-200 text-sm", templ.KV("border-error focus:ring-error", len(formData.Errors["excerpt"]) > 0)}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var4...)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -235,7 +235,7 @@ func EditArticle(formData EditArticleFormData) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</label> <label class=\"col-span-2 mb-6\"><div class=\"flex justify-between items-center\"><span class=\"text-sm font-medium text-base-content md:text-lg\">Tags</span></div><div class=\"grid grid-cols-6 gap-4 border rounded p-4 bg-base-200\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</label> <label class=\"col-span-2 mb-3\"><div class=\"flex justify-between items-center\"><span class=\"text-sm font-medium text-base-content\">Tags</span></div><div class=\"grid grid-cols-6 gap-3 border rounded p-3 bg-base-200\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -263,7 +263,7 @@ func EditArticle(formData EditArticleFormData) templ.Component {
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "> <span class=\"text-sm text-base-content\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "> <span class=\"text-xs text-base-content\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -314,7 +314,7 @@ func EditArticle(formData EditArticleFormData) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "</label></div></div><div><h2 class=\"text-xl font-semibold mb-4\">SEO Metadata</h2><div class=\"grid grid-cols-2 gap-4 mb-6\"><div class=\"col-span-2\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "</label></div></div><div><h2 class=\"text-lg font-semibold mb-3\">SEO Metadata</h2><div class=\"grid grid-cols-2 gap-3 mb-3\"><div class=\"col-span-2\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -336,11 +336,11 @@ func EditArticle(formData EditArticleFormData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<div data-show=\"$metatitle.length != 0\" class=\"my-2 text-base-content flex\"><p class=\"font-bold mr-2\">Title length: </p><p data-text=\"$metatitle.length\"></p><p>/130 </p></div></div><div class=\"col-span-2\"><label class=\"space-y-1 w-full\"><div class=\"flex justify-between items-center\"><span class=\"text-sm font-medium text-base-content md:text-lg\">Meta Description</span></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<div data-show=\"$metatitle.length != 0\" class=\"my-2 text-base-content flex\"><p class=\"font-bold mr-2\">Title length: </p><p data-text=\"$metatitle.length\"></p><p>/130 </p></div></div><div class=\"col-span-2\"><label class=\"space-y-1 w-full\"><div class=\"flex justify-between items-center\"><span class=\"text-sm font-medium text-base-content\">Meta Description</span></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var11 = []any{"border rounded w-full p-2 bg-base-200 h-20", templ.KV("border-error focus:ring-error", len(formData.Errors["meta_description"]) > 0)}
+			var templ_7745c5c3_Var11 = []any{"border rounded w-full p-1.5 bg-base-200 text-sm h-20", templ.KV("border-error focus:ring-error", len(formData.Errors["meta_description"]) > 0)}
 			templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var11...)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -404,7 +404,7 @@ func EditArticle(formData EditArticleFormData) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "</label><div data-show=\"$metadesc.length != 0\" class=\"my-2 text-base-content flex\"><p class=\"font-bold mr-2\">Desc length: </p><p data-text=\"$metadesc.length\"></p><p>/130 </p></div></div></div></div><div class=\"mt-6\"><div class=\"mb-6\"><h2 class=\"text-xl font-semibold mb-4\">Article Content</h2><textarea id=\"editorTarget\" name=\"content\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "</label><div data-show=\"$metadesc.length != 0\" class=\"my-2 text-base-content flex\"><p class=\"font-bold mr-2\">Desc length: </p><p data-text=\"$metadesc.length\"></p><p>/130 </p></div></div></div></div><div class=\"mt-4\"><div class=\"mb-3\"><h2 class=\"text-lg font-semibold mb-3\">Article Content</h2><textarea id=\"editorTarget\" name=\"content\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -427,7 +427,7 @@ func EditArticle(formData EditArticleFormData) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "></span> <button type=\"submit\" class=\"inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-primary text-primary-content hover:bg-primary/90 focus:ring-primary focus:ring-offset-base-200 w-full py-3 text-base font-semibold\">Update Article</button></div></form><script type=\"module\" src=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "></span> <button type=\"submit\" class=\"inline-flex items-center justify-center px-3 py-1.5 text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-primary text-primary-content hover:bg-primary/90 focus:ring-primary focus:ring-offset-base-200\">Update Article</button></div></form><script type=\"module\" src=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
