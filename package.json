@@ -19,8 +19,5 @@
 		"html-to-text": "^9.0.5",
 		"tailwindcss": "^4.1.8",
 		"trix": "^2.1.15"
-	},
-	"dependencies": {
-		"basecoat-css": "^0.2.4"
 	}
 }
