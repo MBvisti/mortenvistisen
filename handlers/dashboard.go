@@ -911,15 +911,15 @@ func (d Dashboard) Newsletters(c echo.Context) error {
 	}
 
 	pageSize := 10
-	newsletters, err := models.GetNewslettersPaginated(
+	newsletters, err := models.GetNewslettersPaginatedWithStats(
 		extractCtx(c),
 		d.db.Pool,
 		page,
 		pageSize,
 	)
 	if err != nil {
-		newsletters = models.NewsletterPaginationResult{
-			Newsletters: []models.Newsletter{},
+		newsletters = models.NewsletterPaginationResultWithStats{
+			Newsletters: []models.NewsletterWithStats{},
 			TotalCount:  0,
 			Page:        1,
 			PageSize:    pageSize,
@@ -929,7 +929,7 @@ func (d Dashboard) Newsletters(c echo.Context) error {
 		}
 	}
 
-	return dashboard.Newsletters(newsletters).Render(renderArgs(c))
+	return dashboard.NewslettersWithStats(newsletters).Render(renderArgs(c))
 }
 
 func (d Dashboard) NewNewsletter(c echo.Context) error {

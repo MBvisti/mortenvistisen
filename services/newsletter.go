@@ -106,6 +106,7 @@ func ScheduleNewsletterRelease(
 			HtmlVersion:     html.String(),
 			TextVersion:     txt.String(),
 			SubscriberID:    subscriber.ID.String(),
+			NewsletterID:    newsletter.ID.String(),
 			UnsubscribeLink: unsubscribeURL,
 		}
 
@@ -119,7 +120,7 @@ func ScheduleNewsletterRelease(
 		})
 	}
 
-	_, err = psql.Queue().InsertManyTx(ctx, tx, emailJobs)
+	results, err := psql.Queue().InsertManyTx(ctx, tx, emailJobs)
 	if err != nil {
 		slog.ErrorContext(
 			ctx,
@@ -130,6 +131,30 @@ func ScheduleNewsletterRelease(
 			newsletter.ID,
 		)
 		return fmt.Errorf("failed to insert email jobs: %w", err)
+	}
+
+	for i, subscriber := range verifiedSubscribers {
+		_, err := models.CreateNewsletterEmailSend(
+			ctx,
+			tx,
+			newsletter.ID,
+			subscriber.ID,
+			subscriber.Email,
+			results[i].Job.ID,
+		)
+		if err != nil {
+			slog.ErrorContext(
+				ctx,
+				"failed to create newsletter email send tracking",
+				"error",
+				err,
+				"newsletter_id",
+				newsletter.ID,
+				"subscriber_id",
+				subscriber.ID,
+			)
+			return fmt.Errorf("failed to create newsletter email send tracking: %w", err)
+		}
 	}
 
 	return tx.Commit(ctx)

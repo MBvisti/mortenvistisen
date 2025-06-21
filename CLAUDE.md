@@ -3,7 +3,7 @@
 This is a collection of workflows. When the user tells you to use one of these workflows YOU MUST FOLLOW ALL STEPS in the outlined order.
 
 An example of the user specifying what workflow to use:
-use workflow: standard. <task description comes afterwards>
+workflow: standard. <task description comes afterwards>
 
 ## Standard
 

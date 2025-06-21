@@ -9,6 +9,7 @@ type MarketingEmailJobArgs struct {
 	TextVersion     string `json:"text_version"`
 	HtmlVersion     string `json:"html_version"`
 	SubscriberID    string `json:"subscriber_id"`
+	NewsletterID    string `json:"newsletter_id"`
 	UnsubscribeLink string `json:"unsubscribe_link"`
 }
 

@@ -5,8 +5,10 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/mbvisti/mortenvistisen/clients"
 	"github.com/mbvisti/mortenvistisen/config"
+	"github.com/mbvisti/mortenvistisen/models"
 	"github.com/mbvisti/mortenvistisen/psql"
 	"github.com/mbvisti/mortenvistisen/psql/queue/jobs"
 	"github.com/riverqueue/river"
@@ -78,7 +80,52 @@ func (w *MarketingEmailJobWorker) Work(
 			"duration", time.Since(start),
 		)
 		span.RecordError(err)
+		
+		if job.Args.NewsletterID != "" && job.Args.SubscriberID != "" {
+			newsletterID, parseErr := uuid.Parse(job.Args.NewsletterID)
+			subscriberID, parseErr2 := uuid.Parse(job.Args.SubscriberID)
+			if parseErr == nil && parseErr2 == nil {
+				_, trackErr := models.UpdateNewsletterEmailSendStatus(
+					ctx,
+					w.db.Pool,
+					newsletterID,
+					subscriberID,
+					"failed",
+					err.Error(),
+				)
+				if trackErr != nil {
+					slog.ErrorContext(ctx, "Failed to update email send status",
+						"error", trackErr,
+						"newsletter_id", job.Args.NewsletterID,
+						"subscriber_id", job.Args.SubscriberID,
+					)
+				}
+			}
+		}
+		
 		return err
+	}
+
+	if job.Args.NewsletterID != "" && job.Args.SubscriberID != "" {
+		newsletterID, parseErr := uuid.Parse(job.Args.NewsletterID)
+		subscriberID, parseErr2 := uuid.Parse(job.Args.SubscriberID)
+		if parseErr == nil && parseErr2 == nil {
+			_, trackErr := models.UpdateNewsletterEmailSendStatus(
+				ctx,
+				w.db.Pool,
+				newsletterID,
+				subscriberID,
+				"sent",
+				"",
+			)
+			if trackErr != nil {
+				slog.ErrorContext(ctx, "Failed to update email send status",
+					"error", trackErr,
+					"newsletter_id", job.Args.NewsletterID,
+					"subscriber_id", job.Args.SubscriberID,
+				)
+			}
+		}
 	}
 
 	slog.InfoContext(ctx, "Marketing email sent successfully",

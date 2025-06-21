@@ -127,6 +127,31 @@ type NewsletterPaginationResult struct {
 	HasPrevious bool
 }
 
+type NewsletterSendStats struct {
+	NewsletterID   uuid.UUID
+	TotalEmails    int64
+	SentEmails     int64
+	FailedEmails   int64
+	BouncedEmails  int64
+	PendingEmails  int64
+	CompletionRate float64
+}
+
+type NewsletterWithStats struct {
+	Newsletter
+	SendStats *NewsletterSendStats
+}
+
+type NewsletterPaginationResultWithStats struct {
+	Newsletters []NewsletterWithStats
+	TotalCount  int64
+	Page        int
+	PageSize    int
+	TotalPages  int
+	HasNext     bool
+	HasPrevious bool
+}
+
 func GetNewslettersPaginated(
 	ctx context.Context,
 	dbtx db.DBTX,
@@ -181,6 +206,47 @@ func GetNewslettersPaginated(
 		TotalPages:  totalPages,
 		HasNext:     page < totalPages,
 		HasPrevious: page > 1,
+	}, nil
+}
+
+func GetNewslettersPaginatedWithStats(
+	ctx context.Context,
+	dbtx db.DBTX,
+	page int,
+	pageSize int,
+) (NewsletterPaginationResultWithStats, error) {
+	paginationResult, err := GetNewslettersPaginated(ctx, dbtx, page, pageSize)
+	if err != nil {
+		return NewsletterPaginationResultWithStats{}, err
+	}
+
+	allStats, err := GetAllNewsletterSendStats(ctx, dbtx)
+	if err != nil {
+		return NewsletterPaginationResultWithStats{}, err
+	}
+
+	newslettersWithStats := make([]NewsletterWithStats, len(paginationResult.Newsletters))
+	for i, newsletter := range paginationResult.Newsletters {
+		stats, exists := allStats[newsletter.ID]
+		var statsPtr *NewsletterSendStats
+		if exists {
+			statsPtr = &stats
+		}
+		
+		newslettersWithStats[i] = NewsletterWithStats{
+			Newsletter: newsletter,
+			SendStats:  statsPtr,
+		}
+	}
+
+	return NewsletterPaginationResultWithStats{
+		Newsletters: newslettersWithStats,
+		TotalCount:  paginationResult.TotalCount,
+		Page:        paginationResult.Page,
+		PageSize:    paginationResult.PageSize,
+		TotalPages:  paginationResult.TotalPages,
+		HasNext:     paginationResult.HasNext,
+		HasPrevious: paginationResult.HasPrevious,
 	}, nil
 }
 
