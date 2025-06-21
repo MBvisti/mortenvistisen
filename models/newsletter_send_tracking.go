@@ -12,6 +12,8 @@ import (
 
 type NewsletterEmailSend struct {
 	ID           uuid.UUID
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
 	NewsletterID uuid.UUID
 	SubscriberID uuid.UUID
 	EmailAddress string
@@ -19,9 +21,6 @@ type NewsletterEmailSend struct {
 	SentAt       time.Time
 	FailedAt     time.Time
 	ErrorMessage string
-	RiverJobID   int64
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
 }
 
 func CreateNewsletterEmailSend(
