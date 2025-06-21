@@ -1,0 +1,246 @@
+package emails
+
+import "fmt"
+
+type HeaderData struct {
+	Logo        string
+	CompanyName string
+	Title       string
+	Subtitle    string
+}
+
+type ButtonData struct {
+	URL   string
+	Text  string
+	Color string
+}
+
+type FooterData struct {
+	CompanyName    string
+	Address        string
+	UnsubscribeURL string
+}
+
+type TextData struct {
+	Content string
+}
+
+type SpacerData struct {
+	Height string
+}
+
+type EmailData struct {
+	Title       string
+	PreviewText string
+}
+
+templ Header(data HeaderData) {
+	<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="border-collapse: collapse;">
+		<tr>
+			<td style="padding: 32px 24px 24px 24px; text-align: center; background-color: #ffffff;">
+				if data.Logo != "" {
+					<img src={ data.Logo } alt={ data.CompanyName } style="display: block; margin: 0 auto 16px auto; max-width: 180px; height: auto; border: 0;"/>
+				}
+				if data.Title != "" {
+					<h1 style="margin: 0; font-size: 24px; font-weight: 600; color: #1f2937; line-height: 1.3; font-family: 'Nunito Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;">{ data.Title }</h1>
+				}
+				if data.Subtitle != "" {
+					<p style="margin: 8px 0 0 0; font-size: 16px; color: #6b7280; line-height: 1.5; font-family: 'Nunito Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;">{ data.Subtitle }</p>
+				}
+			</td>
+		</tr>
+	</table>
+}
+
+templ Section() {
+	<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="border-collapse: collapse;">
+		<tr>
+			<td style="padding: 24px; background-color: #ffffff;">
+				<div style="font-size: 16px; color: #374151; line-height: 1.6; font-family: 'Nunito Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;">
+					{ children... }
+				</div>
+			</td>
+		</tr>
+	</table>
+}
+
+templ Button(data ButtonData) {
+	<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="border-collapse: collapse;">
+		<tr>
+			<td style="padding: 16px 24px; text-align: center;">
+				<!--[if mso]>
+				<v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href={ data.URL } style="height:44px;v-text-anchor:middle;width:200px;" arcsize="14%" stroke="f" fillcolor="#2563eb">
+				<w:anchorlock/>
+				<center>
+				<![endif]-->
+				<a href={ templ.URL(data.URL) } target="_blank" style="background-color: #2563eb; border: 1px solid #2563eb; border-radius: 6px; color: #ffffff; display: inline-block; font-family: 'Nunito Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 600; line-height: 44px; text-align: center; text-decoration: none; width: 200px; -webkit-text-size-adjust: none; mso-hide: all;">
+					{ data.Text }
+				</a>
+				<!--[if mso]>
+				</center>
+				</v:roundrect>
+				<![endif]-->
+			</td>
+		</tr>
+	</table>
+}
+
+templ Footer(data FooterData) {
+	<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="border-collapse: collapse;">
+		<tr>
+			<td style="padding: 32px 24px; text-align: center; border-top: 1px solid #e5e7eb; background-color: #f9fafb;">
+				if data.CompanyName != "" {
+					<p style="margin: 0 0 8px 0; font-size: 14px; color: #6b7280; font-family: 'Nunito Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; font-weight: 600;">{ data.CompanyName }</p>
+				}
+				if data.Address != "" {
+					<p style="margin: 0 0 16px 0; font-size: 14px; color: #9ca3af; line-height: 1.4; font-family: 'Nunito Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;">{ data.Address }</p>
+				}
+				if data.UnsubscribeURL != "" {
+					<p style="margin: 0; font-size: 12px; color: #9ca3af; font-family: 'Nunito Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;">
+						<a href={ templ.URL(data.UnsubscribeURL) } style="color: #6366f1; text-decoration: underline;">Unsubscribe</a> | 
+					</p>
+				}
+			</td>
+		</tr>
+	</table>
+}
+
+templ TextBlock(data TextData) {
+	<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="border-collapse: collapse;">
+		<tr>
+			<td style="padding: 0 24px 16px 24px;">
+				<p style="margin: 0; font-size: 16px; color: #374151; line-height: 1.6; font-family: 'Nunito Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;">{ data.Content }</p>
+			</td>
+		</tr>
+	</table>
+}
+
+templ Spacer(data SpacerData) {
+	<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="border-collapse: collapse;">
+		<tr>
+			<td style={ fmt.Sprintf("height: %spx; line-height: %spx; font-size: 1px;", data.Height, data.Height) }>&nbsp;</td>
+		</tr>
+	</table>
+}
+
+templ List(items []string) {
+	<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="border-collapse: collapse;">
+		<tr>
+			<td style="padding: 0 24px 16px 24px;">
+				<ul style="margin: 0; padding-left: 20px; font-family: 'Nunito Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; color: #374151; line-height: 1.6;">
+					for _, item := range items {
+						<li style="margin-bottom: 8px;">{ item }</li>
+					}
+				</ul>
+			</td>
+		</tr>
+	</table>
+}
+
+templ BaseLayout(data EmailData) {
+	<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+	<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+		<head>
+			<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<meta name="x-apple-disable-message-reformatting"/>
+			<title>{ data.Title }</title>
+			<!--[if mso]>
+			<noscript>
+				<xml>
+					<o:OfficeDocumentSettings>
+						<o:AllowPNG/>
+						<o:PixelsPerInch>96</o:PixelsPerInch>
+					</o:OfficeDocumentSettings>
+				</xml>
+			</noscript>
+			<![endif]-->
+			<!--[if mso]>
+			<style type="text/css">
+				table, td {border-collapse: collapse;}
+				.spacer, .divider {mso-line-height-rule: exactly;}
+				.fallback-text {font-family: Arial, sans-serif !important;}
+			</style>
+			<![endif]-->
+			<style type="text/css">
+				@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700&display=swap');
+				
+				@media only screen and (max-width: 600px) {
+					.container {
+						width: 100% !important;
+						max-width: 100% !important;
+					}
+					.mobile-padding {
+						padding-left: 16px !important;
+						padding-right: 16px !important;
+					}
+					.mobile-center {
+						text-align: center !important;
+					}
+					.mobile-font-size {
+						font-size: 14px !important;
+						line-height: 1.5 !important;
+					}
+					.mobile-button {
+						width: 100% !important;
+						max-width: 280px !important;
+					}
+				}
+				
+				@media (prefers-color-scheme: dark) {
+					.dark-mode-bg { background-color: #1f2937 !important; }
+					.dark-mode-text { color: #f9fafb !important; }
+					.dark-mode-border { border-color: #374151 !important; }
+				}
+				
+				body, table, td, p, a, li, blockquote {
+					-webkit-text-size-adjust: 100%;
+					-ms-text-size-adjust: 100%;
+				}
+				
+				table, td {
+					mso-table-lspace: 0pt;
+					mso-table-rspace: 0pt;
+				}
+				
+				img {
+					-ms-interpolation-mode: bicubic;
+					border: 0;
+					outline: none;
+					text-decoration: none;
+				}
+			</style>
+		</head>
+		<body style="margin: 0; padding: 0; background-color: #f3f4f6; font-family: 'Nunito Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%;">
+			<div style="display: none; max-height: 0; overflow: hidden; font-size: 1px; line-height: 1px; color: #f3f4f6; opacity: 0;">
+				{ data.PreviewText }
+				<div style="display: none; max-height: 0; overflow: hidden;">
+					&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;
+				</div>
+			</div>
+			<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f3f4f6; border-collapse: collapse;">
+				<tr>
+					<td align="center" style="padding: 24px 16px;">
+						<!--[if mso]>
+						<table role="presentation" border="0" cellspacing="0" cellpadding="0" width="570">
+						<tr>
+						<td>
+						<![endif]-->
+						<table class="container" role="presentation" cellspacing="0" cellpadding="0" border="0" width="570" style="max-width: 570px; width: 100%; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); border-collapse: collapse; overflow: hidden;">
+							<tr>
+								<td style="padding: 0;">
+									{ children... }
+								</td>
+							</tr>
+						</table>
+						<!--[if mso]>
+						</td>
+						</tr>
+						</table>
+						<![endif]-->
+					</td>
+				</tr>
+			</table>
+		</body>
+	</html>
+}

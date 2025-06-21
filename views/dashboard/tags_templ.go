@@ -60,7 +60,7 @@ func Tags(data TagsPageData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"grid grid-cols-1 lg:grid-cols-2 gap-8\"><div class=\"mb-8\"><h2 class=\"text-xl font-semibold mb-4\">Add New Tag</h2><form method=\"POST\" action=\"/dashboard/tags\" class=\"space-y-4\"><div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"grid grid-cols-1 lg:grid-cols-2 gap-6\"><div class=\"mb-6\"><h2 class=\"text-lg font-semibold mb-3\">Add New Tag</h2><form method=\"POST\" action=\"/dashboard/tags\" class=\"space-y-4\"><div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -77,7 +77,7 @@ func Tags(data TagsPageData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div><div class=\"flex justify-end\"><button type=\"submit\" class=\"inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-primary text-primary-content hover:bg-primary/90 focus:ring-primary focus:ring-offset-base-200 w-full py-3 text-base font-semibold\">Add Tag</button></div></form></div><div><h2 class=\"text-xl font-semibold mb-4\">Existing Tags</h2>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div><div class=\"flex justify-end\"><button type=\"submit\" class=\"inline-flex items-center justify-center px-3 py-1.5 text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-primary text-primary-content hover:bg-primary/90 focus:ring-primary focus:ring-offset-base-200\">Add Tag</button></div></form></div><div><h2 class=\"text-lg font-semibold mb-3\">Existing Tags</h2>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -118,7 +118,7 @@ func Tags(data TagsPageData) templ.Component {
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</span></div><div class=\"flex gap-2\"><button class=\"inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-base-300 text-base-content border-0 px-4 py-2 rounded-lg text-sm font-medium cursor-pointer no-underline inline-block hover:bg-base-300/80 transition-all duration-200 shadow-sm hover:shadow-md btn-edit-tag\" data-tag-id=\"")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</span></div><div class=\"flex gap-2\"><button class=\"inline-flex items-center justify-center px-3 py-1.5 text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-base-300 text-base-content hover:bg-base-300/80 transition-all duration-200 shadow-sm hover:shadow-md btn-edit-tag\" data-tag-id=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -157,7 +157,7 @@ func Tags(data TagsPageData) templ.Component {
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" class=\"inline\"><button type=\"submit\" class=\"inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-error text-error-content border-0 px-4 py-2 rounded-lg text-sm font-medium cursor-pointer no-underline inline-block hover:bg-error/90 transition-all duration-200 shadow-sm hover:shadow-md\" onclick=\"return confirm('Are you sure you want to delete this tag?')\">Delete</button></form></div></div>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "\" class=\"inline\"><button type=\"submit\" class=\"inline-flex items-center justify-center px-3 py-1.5 text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-error text-error-content hover:bg-error/90 transition-all duration-200 shadow-sm hover:shadow-md\" onclick=\"return confirm('Are you sure you want to delete this tag?')\">Delete</button></form></div></div>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -167,7 +167,7 @@ func Tags(data TagsPageData) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</div></div><div id=\"edit-tag-modal\" class=\"fixed inset-0 bg-black/50 flex items-center justify-center z-50\" style=\"display: none;\"><div class=\"bg-base-200 border border-base-300 rounded-xl p-6 max-w-md w-full mx-4 shadow-xl\"><h3>Edit Tag</h3><form id=\"edit-tag-form\" method=\"POST\"><div class=\"space-y-2\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</div></div><div id=\"edit-tag-modal\" class=\"fixed inset-0 bg-black/50 flex items-center justify-center z-50\" style=\"display: none;\"><div class=\"bg-base-200 border border-base-300 rounded-lg p-4 max-w-md w-full mx-4 shadow-sm\"><h3>Edit Tag</h3><form id=\"edit-tag-form\" method=\"POST\"><div class=\"space-y-2\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -182,7 +182,7 @@ func Tags(data TagsPageData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</div><div class=\"flex justify-end gap-2 mt-4\"><button type=\"button\" class=\"inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-base-300 text-base-content border-0 px-4 py-2 rounded-lg text-sm font-medium cursor-pointer no-underline inline-block hover:bg-base-300/80 transition-all duration-200 shadow-sm hover:shadow-md\" onclick=\"closeEditModal()\">Cancel</button> <button type=\"submit\" class=\"inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-primary text-primary-content hover:bg-primary/90 focus:ring-primary focus:ring-offset-base-200 w-full py-3 text-base font-semibold\">Update Tag</button></div></form></div></div></div><script>\n\t\t\tfunction openEditModal(tagId, tagTitle) {\n\t\t\t\tdocument.getElementById('edit-tag-modal').style.display = 'block';\n\t\t\t\tdocument.getElementById('edit-tag-form').action = `/dashboard/tags/${tagId}/edit`;\n\t\t\t\tdocument.getElementById('edit-tag-title').value = tagTitle;\n\t\t\t}\n\n\t\t\tfunction closeEditModal() {\n\t\t\t\tdocument.getElementById('edit-tag-modal').style.display = 'none';\n\t\t\t}\n\n\t\t\tdocument.addEventListener('DOMContentLoaded', function() {\n\t\t\t\tdocument.querySelectorAll('.btn-edit-tag').forEach(button => {\n\t\t\t\t\tbutton.addEventListener('click', function() {\n\t\t\t\t\t\tconst tagId = this.dataset.tagId;\n\t\t\t\t\t\tconst tagTitle = this.dataset.tagTitle;\n\t\t\t\t\t\topenEditModal(tagId, tagTitle);\n\t\t\t\t\t});\n\t\t\t\t});\n\t\t\t});\n\t\t</script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</div><div class=\"flex justify-end gap-2 mt-4\"><button type=\"button\" class=\"inline-flex items-center justify-center px-3 py-1.5 text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-base-300 text-base-content hover:bg-base-300/80 transition-all duration-200 shadow-sm hover:shadow-md\" onclick=\"closeEditModal()\">Cancel</button> <button type=\"submit\" class=\"inline-flex items-center justify-center px-3 py-1.5 text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-primary text-primary-content hover:bg-primary/90 focus:ring-primary focus:ring-offset-base-200\">Update Tag</button></div></form></div></div></div><script>\n\t\t\tfunction openEditModal(tagId, tagTitle) {\n\t\t\t\tdocument.getElementById('edit-tag-modal').style.display = 'block';\n\t\t\t\tdocument.getElementById('edit-tag-form').action = `/dashboard/tags/${tagId}/edit`;\n\t\t\t\tdocument.getElementById('edit-tag-title').value = tagTitle;\n\t\t\t}\n\n\t\t\tfunction closeEditModal() {\n\t\t\t\tdocument.getElementById('edit-tag-modal').style.display = 'none';\n\t\t\t}\n\n\t\t\tdocument.addEventListener('DOMContentLoaded', function() {\n\t\t\t\tdocument.querySelectorAll('.btn-edit-tag').forEach(button => {\n\t\t\t\t\tbutton.addEventListener('click', function() {\n\t\t\t\t\t\tconst tagId = this.dataset.tagId;\n\t\t\t\t\t\tconst tagTitle = this.dataset.tagTitle;\n\t\t\t\t\t\topenEditModal(tagId, tagTitle);\n\t\t\t\t\t});\n\t\t\t\t});\n\t\t\t});\n\t\t</script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

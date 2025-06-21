@@ -4,8 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/mbvisti/mortenvistisen/config"
 	"github.com/mbvisti/mortenvistisen/emails"
@@ -137,4 +139,42 @@ func VerifySubscriberEmail(
 	}
 
 	return tx.Commit(ctx)
+}
+
+func GenerateUnsubscribeLink(
+	ctx context.Context,
+	db psql.Postgres,
+	subscriberID uuid.UUID,
+) (string, error) {
+	tx, err := db.BeginTx(ctx)
+	if err != nil {
+		return "", err
+	}
+	defer func() {
+		_ = tx.Rollback(ctx)
+	}()
+
+	expiration := time.Now().Add(30 * 24 * time.Hour)
+
+	token, err := models.NewHashedToken(ctx, tx, models.NewTokenPayload{
+		Expiration: expiration,
+		Meta: models.MetaInformation{
+			Resource:   models.ResourceSubscriber,
+			ResourceID: subscriberID,
+			Scope:      models.ScopeUnsubscribe,
+		},
+	})
+	if err != nil {
+		return "", err
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return "", err
+	}
+
+	unsubscribeURL := fmt.Sprintf("%s/unsubscribe/%s",
+		config.Cfg.GetFullDomain(),
+		token.Value)
+
+	return unsubscribeURL, nil
 }

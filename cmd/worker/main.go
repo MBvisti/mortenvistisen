@@ -36,7 +36,7 @@ func main() {
 	jobStarted := make(chan struct{})
 
 	workers, err := workers.SetupWorkers(workers.WorkerDependencies{
-		DB:          db.Pool,
+		DB:          db,
 		EmailClient: emailClient,
 	})
 	if err != nil {
@@ -47,9 +47,23 @@ func main() {
 		river.QueueDefault: {MaxWorkers: 5},
 		"high":             {MaxWorkers: 100},
 	}
+
+	periodicJobs := []*river.PeriodicJob{
+		// river.NewPeriodicJob(
+		// 	river.PeriodicInterval(24*time.Hour),
+		// 	func() (river.JobArgs, *river.InsertOpts) {
+		// 		return jobs.NewsletterProcessingJobArgs{}, nil
+		// 	},
+		// 	&river.PeriodicJobOpts{
+		// 		RunOnStart: false,
+		// 	},
+		// ),
+	}
+
 	db.NewQueue(
 		queue.WithQueues(q),
 		queue.WithWorkers(workers),
+		queue.WithPeriodicJobs(periodicJobs),
 		queue.WithLogger(slog.Default()),
 	)
 

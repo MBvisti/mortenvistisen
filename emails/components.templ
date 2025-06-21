@@ -2,62 +2,22 @@ package emails
 
 import "fmt"
 
-css anchorPrimary() {
-	border-radius: 4px; 
-	box-sizing: border-box; 
-	cursor: pointer; 
-	display: inline-block; 
-	font-size: 16px; 
-	font-weight: bold; 
-	margin: 0; 
-	padding: 10px 20px; 
-	text-decoration: none; 
-	color: #ffffff;
-	background-color: { primaryColor };
-	border-color: { primaryColor };
-	border: { primaryBorder };
-}
-
-templ brandBanner() {
-	<table
-		id="brandBanner"
-		role="presentation"
-		border="0"
-		cellpadding="0"
-		cellspacing="0"
-		class="main"
-		style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; margin-bottom: 24px;"
-		width="100%"
-	>
-		<tr>
-			<td
-				class="wrapper"
-				style="font-family: Helvetica, sans-serif; font-size: 16px; vertical-align: top; box-sizing: border-box; text-align: left"
-				valign="top"
-			>
-				<p style="font-family: Helvetica, sans-serif; font-size: 32px; font-weight: bold; margin: 0">Grafto</p>
-				<p style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0;">The full-stack web development template for Go</p>
-				<hr/>
-			</td>
-		</tr>
-	</table>
-}
-
-templ btn(title, href string) {
+templ enhancedBtn(text, href, variant, size string) {
 	<table
 		role="presentation"
 		border="0"
 		cellpadding="0"
 		cellspacing="0"
-		class="btn"
-		style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; box-sizing: border-box; width: 100%; min-width: 100%;"
+		class="btn btn-touch"
+		style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; box-sizing: border-box; width: 100%; min-width: 100%; margin: 16px 0;"
 		width="100%"
+		aria-label={ fmt.Sprintf("Button: %s", text) }
 	>
 		<tbody>
 			<tr>
 				<td
-					align="left"
-					style="font-family: Helvetica, sans-serif; font-size: 16px; vertical-align: top; padding-bottom: 16px;"
+					align="center"
+					style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px; vertical-align: top; padding-bottom: 16px;"
 					valign="top"
 				>
 					<table
@@ -70,18 +30,18 @@ templ btn(title, href string) {
 						<tbody>
 							<tr>
 								<td
-									style={ fmt.Sprintf("font-family: Helvetica, sans-serif; font-size: 16px; vertical-align: top; border-radius: 4px; text-align: center; color: #fffff; background-color: %s;", primaryColor) }
+									style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; vertical-align: top; border-radius: 6px; text-align: center;"
 									valign="top"
 									align="center"
-									bgcolor={ fmt.Sprintf("%s", primaryColor) }
 								>
 									<a
 										href={ templ.SafeURL(href) }
 										target="_blank"
-										id="link"
-										class={ anchorPrimary() }
+										role="button"
+										aria-label={ text }
+										style={ getBtnStyle(variant, size) }
 									>
-										{ title }
+										{ text }
 									</a>
 								</td>
 							</tr>
@@ -93,31 +53,113 @@ templ btn(title, href string) {
 	</table>
 }
 
+templ btn(title, href string) {
+	@enhancedBtn(title, href, "primary", "medium")
+}
+
+func getBtnStyle(variant, size string) string {
+	baseStyle := "border-radius: 6px; box-sizing: border-box; cursor: pointer; display: inline-block; font-weight: 600; margin: 0; text-decoration: none; text-align: center; transition: all 0.2s ease-in-out; vertical-align: middle; white-space: nowrap;"
+
+	var colorStyle string
+	switch variant {
+	case "primary":
+		colorStyle = fmt.Sprintf("background-color: %s; color: #ffffff; border: solid 2px %s;", primaryColor, primaryColor)
+	case "secondary":
+		colorStyle = fmt.Sprintf("background-color: %s; color: #ffffff; border: solid 2px %s;", secondaryColor, secondaryColor)
+	case "success":
+		colorStyle = fmt.Sprintf("background-color: %s; color: #ffffff; border: solid 2px %s;", successColor, successColor)
+	case "warning":
+		colorStyle = fmt.Sprintf("background-color: %s; color: #ffffff; border: solid 2px %s;", warningColor, warningColor)
+	case "error":
+		colorStyle = fmt.Sprintf("background-color: %s; color: #ffffff; border: solid 2px %s;", errorColor, errorColor)
+	case "outline":
+		colorStyle = fmt.Sprintf("background-color: transparent; color: %s; border: solid 2px %s;", gray700, gray300)
+	case "ghost":
+		colorStyle = fmt.Sprintf("background-color: transparent; color: %s; border: none;", primaryColor)
+	default:
+		colorStyle = fmt.Sprintf("background-color: %s; color: #ffffff; border: solid 2px %s;", primaryColor, primaryColor)
+	}
+
+	var sizeStyle string
+	switch size {
+	case "small":
+		sizeStyle = fmt.Sprintf("font-size: %s; padding: %s %s; min-height: 36px;", fontSm, spacing2, spacing4)
+	case "medium":
+		sizeStyle = fmt.Sprintf("font-size: %s; padding: %s %s; min-height: 44px;", fontBase, spacing3, spacing6)
+	case "large":
+		sizeStyle = fmt.Sprintf("font-size: %s; padding: %s %s; min-height: 52px;", fontLg, spacing4, spacing8)
+	default:
+		sizeStyle = fmt.Sprintf("font-size: %s; padding: %s %s; min-height: 44px;", fontBase, spacing3, spacing6)
+	}
+
+	return baseStyle + " " + colorStyle + " " + sizeStyle
+}
+
+templ enhancedParagraph(size, color string) {
+	<p class={ "responsive-text-" + size } style={ fmt.Sprintf("font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-weight: normal; margin: 0; margin-bottom: 16px; color: %s;", color) }>
+		{ children... }
+	</p>
+}
+
+templ paragraph() {
+	@enhancedParagraph("base", gray700)
+}
+
 templ preHeader(text string) {
-	<span class="preheader" style="color: transparent; display: none; height: 0; max-height: 0; max-width: 0; opacity: 0; overflow: hidden; mso-hide: all; visibility: hidden; width: 0;">{ text }</span>
+	<div class="preheader" style="color: transparent; display: none; height: 0; max-height: 0; max-width: 0; opacity: 0; overflow: hidden; mso-hide: all; visibility: hidden; width: 0; font-size: 1px; line-height: 1px;" role="presentation" aria-hidden="true">
+		{ text }
+		<div style="display: none; max-height: 0; overflow: hidden;">
+			&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;
+		</div>
+	</div>
+}
+
+templ headerWithLevel(level, size string) {
+	if level == "1" {
+		<h1 class={ "responsive-text-" + size } style={ fmt.Sprintf("font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-weight: 700; margin: 0; margin-bottom: 24px; color: %s;", gray900) }>
+			{ children... }
+		</h1>
+	}
+	if level == "2" {
+		<h2 class={ "responsive-text-" + size } style={ fmt.Sprintf("font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-weight: 600; margin: 0; margin-bottom: 20px; color: %s;", gray900) }>
+			{ children... }
+		</h2>
+	}
+	if level == "3" {
+		<h3 class={ "responsive-text-" + size } style={ fmt.Sprintf("font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-weight: 600; margin: 0; margin-bottom: 16px; color: %s;", gray900) }>
+			{ children... }
+		</h3>
+	}
+	if level == "4" {
+		<h4 class={ "responsive-text-" + size } style={ fmt.Sprintf("font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-weight: 600; margin: 0; margin-bottom: 12px; color: %s;", gray800) }>
+			{ children... }
+		</h4>
+	}
 }
 
 templ header() {
-	<h2 style="font-family: Helvetica, sans-serif; font-weight: normal; margin: 0; margin-bottom: 16px;">
+	<h2 style={ fmt.Sprintf("font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-weight: 600; margin: 0; margin-bottom: 16px; color: %s;", gray900) }>
 		{ children... }
 	</h2>
 }
 
 templ footerWithUnsubscribe(unsubscribeLink string) {
-	<div class="footer" style="clear: both; padding-top: 24px; padding-bottom: 24px; text-align: center; width: 100%;">
+	<div class="footer spacing-6" style="clear: both; padding-top: 32px; padding-bottom: 24px; text-align: center; width: 100%; border-top: 1px solid #e5e7eb; margin-top: 32px;" role="contentinfo" aria-label="Email footer">
 		<table role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%;" width="100%">
 			<tr>
-				<td class="content-block" style="font-family: Helvetica, sans-serif; vertical-align: top; color: #9a9ea6; font-size: 16px; text-align: center;" valign="top" align="center">
-					<span class="apple-link" style="color: #9a9ea6; font-size: 16px; text-align: center;">mbvisti inc</span>
+				<td class="content-block responsive-text-sm" style={ fmt.Sprintf("font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; vertical-align: top; color: %s; font-size: 14px; text-align: center; line-height: 1.6;", gray500) } valign="top" align="center">
+					<span class="apple-link" style={ fmt.Sprintf("color: %s; font-size: 14px; text-align: center; font-weight: 600;", gray600) }>mbvisti inc</span>
 					if unsubscribeLink != "" {
 						<br/>
-						Don't like these emails? <a href={ templ.SafeURL(unsubscribeLink) } style="text-decoration: underline; color: #9a9ea6; font-size: 16px; text-align: center;">Unsubscribe</a>.
+						<br/>
+						<span style={ fmt.Sprintf("color: %s;", gray500) }>Don't like these emails?</span>
+						<a href={ templ.SafeURL(unsubscribeLink) } style={ fmt.Sprintf("text-decoration: underline; color: %s; font-size: 14px; text-align: center; font-weight: 500;", primaryColor) } aria-label="Unsubscribe from emails">Unsubscribe</a>
 					}
 				</td>
 			</tr>
 			<tr>
-				<td class="content-block powered-by" style="font-family: Helvetica, sans-serif; vertical-align: top; color: #9a9ea6; font-size: 16px; text-align: center;" valign="top" align="center">
-					Powered by <a href="https://github.com/mbvisti/mortenvistisen" style="color: #9a9ea6; font-size: 16px; text-align: center; text-decoration: none;">Grafto</a>
+				<td class="content-block powered-by responsive-text-xs" style={ fmt.Sprintf("font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; vertical-align: top; color: %s; font-size: 12px; text-align: center; padding-top: 16px;", gray400) } valign="top" align="center">
+					Powered by <a href="https://github.com/mbvisti/mortenvistisen" style={ fmt.Sprintf("color: %s; font-size: 12px; text-align: center; text-decoration: none; font-weight: 500;", gray500) } aria-label="Grafto website">Grafto</a>
 				</td>
 			</tr>
 		</table>
@@ -125,30 +167,247 @@ templ footerWithUnsubscribe(unsubscribeLink string) {
 }
 
 templ footer() {
-	<div class="footer" style="clear: both; padding-top: 24px; padding-bottom: 24px; text-align: center; width: 100%;">
+	<div class="footer spacing-6" style="clear: both; padding-top: 32px; padding-bottom: 24px; text-align: center; width: 100%; border-top: 1px solid #e5e7eb; margin-top: 32px;" role="contentinfo" aria-label="Email footer">
 		<table role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%;" width="100%">
 			<tr>
-				<td class="content-block" style="font-family: Helvetica, sans-serif; vertical-align: top; color: #9a9ea6; font-size: 16px; text-align: center;" valign="top" align="center">
-					<span class="apple-link" style="color: #9a9ea6; font-size: 16px; text-align: center;">mbvisti inc</span>
+				<td class="content-block responsive-text-sm" style={ fmt.Sprintf("font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; vertical-align: top; color: %s; font-size: 14px; text-align: center;", gray500) } valign="top" align="center">
+					<span class="apple-link" style={ fmt.Sprintf("color: %s; font-size: 14px; text-align: center; font-weight: 600;", gray600) }>mbvisti inc</span>
 				</td>
 			</tr>
 			<tr>
-				<td class="content-block powered-by" style="font-family: Helvetica, sans-serif; vertical-align: top; color: #9a9ea6; font-size: 16px; text-align: center;" valign="top" align="center">
-					Powered by <a href="https://github.com/mbvisti/mortenvistisen" style="color: #9a9ea6; font-size: 16px; text-align: center; text-decoration: none;">Grafto</a>
+				<td class="content-block powered-by responsive-text-xs" style={ fmt.Sprintf("font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; vertical-align: top; color: %s; font-size: 12px; text-align: center; padding-top: 16px;", gray400) } valign="top" align="center">
+					Powered by <a href="https://github.com/mbvisti/mortenvistisen" style={ fmt.Sprintf("color: %s; font-size: 12px; text-align: center; text-decoration: none; font-weight: 500;", gray500) } aria-label="Grafto website">Grafto</a>
 				</td>
 			</tr>
 		</table>
 	</div>
 }
 
-templ paragraph() {
-	<p style="font-family: Helvetica, sans-serif; font-size: 16px; font-weight: normal; margin: 0; margin-bottom: 16px;">
-		{ children... }
-	</p>
+templ brandBanner() {
+	<table
+		id="brandBanner"
+		role="presentation"
+		border="0"
+		cellpadding="0"
+		cellspacing="0"
+		class="main spacing-6"
+		style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; margin-bottom: 32px;"
+		width="100%"
+		aria-label="Brand header"
+	>
+		<tr>
+			<td
+				class="wrapper"
+				style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px; vertical-align: top; box-sizing: border-box; text-align: left; padding: 24px;"
+				valign="top"
+			>
+				<h1 class="responsive-text-3xl" style={ fmt.Sprintf("font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 32px; font-weight: 700; margin: 0; color: %s;", gray900) } role="banner">Grafto</h1>
+				<p class="responsive-text-base" style={ fmt.Sprintf("font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: normal; margin: 8px 0 0 0; color: %s; line-height: 1.6;", gray600) }>The full-stack web development template for Go</p>
+				<div style={ fmt.Sprintf("border-top: 2px solid %s; margin-top: 24px;", gray200) } role="separator" aria-hidden="true"></div>
+			</td>
+		</tr>
+	</table>
 }
 
 templ codeBlock(code string) {
-	<p style="font-family: 'Courier New', Courier, monospace; font-size: 2em; font-weight: bold; margin: 0; margin-bottom: 16px; background-color: #333333; color: #f0f0f0; padding: 10px; border: 1px solid #555555; border-radius: 4px; text-align: center; letter-spacing: 10px;">
-		{ code }
-	</p>
+	<div style={ fmt.Sprintf("background-color: %s; border: 1px solid %s; border-radius: 8px; padding: 16px; margin: 16px 0; overflow-x: auto;", gray100, gray300) } role="region" aria-label="Code block">
+		<pre style={ fmt.Sprintf("font-family: 'SF Mono', Monaco, 'Cascadia Code', 'DejaVu Sans Mono', Consolas, 'Courier New', monospace; font-size: 14px; font-weight: 400; margin: 0; color: %s; white-space: pre-wrap; word-wrap: break-word;", gray800) }><code>{ code }</code></pre>
+	</div>
 }
+
+templ verificationCodeBlock(code string) {
+	<div style={ fmt.Sprintf("background-color: %s; border: 2px solid %s; border-radius: 12px; padding: 24px; margin: 24px 0; text-align: center;", gray50, primaryColor) } role="region" aria-label="Verification code">
+		<p style={ fmt.Sprintf("font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace; font-size: 36px; font-weight: 700; margin: 0; color: %s; letter-spacing: 8px; text-align: center;", primaryColor) } aria-label={ fmt.Sprintf("Verification code: %s", code) }>{ code }</p>
+	</div>
+}
+
+templ hero(title, subtitle, bgColor string, hasImage bool) {
+	<table
+		role="presentation"
+		border="0"
+		cellpadding="0"
+		cellspacing="0"
+		style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; margin-bottom: 32px;"
+		width="100%"
+		aria-label="Hero section"
+	>
+		<tr>
+			<td style={ fmt.Sprintf("font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; vertical-align: top; text-align: center; padding: 48px 24px; background-color: %s; border-radius: 12px;", bgColor) } valign="top" align="center">
+				<h1 class="responsive-text-3xl" style={ fmt.Sprintf("font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 36px; font-weight: 700; margin: 0; margin-bottom: 16px; color: %s; line-height: 1.2;", gray900) }>
+					{ title }
+				</h1>
+				if subtitle != "" {
+					<p class="responsive-text-lg" style={ fmt.Sprintf("font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 18px; font-weight: normal; margin: 0; color: %s; line-height: 1.6;", gray600) }>
+						{ subtitle }
+					</p>
+				}
+			</td>
+		</tr>
+	</table>
+}
+
+//style={ fmt.Sprintf("border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; margin-bottom: 24px; background-color: %s; border: 1px solid %s; border-radius: 12px;", bgLightMainContent, gray200) }
+templ card(title, content string, hasImage bool, imageUrl string) {
+	<table
+		role="presentation"
+		border="0"
+		cellpadding="0"
+		cellspacing="0"
+		width="100%"
+		aria-label="Content card"
+	>
+		<tr>
+			<td style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; vertical-align: top; padding: 24px;" valign="top">
+				if hasImage && imageUrl != "" {
+					<img src={ imageUrl } alt={ title } style="max-width: 100%; height: auto; border-radius: 8px; margin-bottom: 16px; display: block;" role="img"/>
+				}
+				if title != "" {
+					<h3 class="responsive-text-xl" style={ fmt.Sprintf("font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 20px; font-weight: 600; margin: 0; margin-bottom: 12px; color: %s;", gray900) }>
+						{ title }
+					</h3>
+				}
+				<div class="responsive-text-base" style={ fmt.Sprintf("font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px; color: %s; line-height: 1.6;", gray700) }>
+					@templ.Raw(content)
+				</div>
+			</td>
+		</tr>
+	</table>
+}
+
+templ list(items []string, listType string) {
+	<table
+		role="presentation"
+		border="0"
+		cellpadding="0"
+		cellspacing="0"
+		style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; margin-bottom: 24px;"
+		width="100%"
+		aria-label="Content list"
+	>
+		<tr>
+			<td style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; vertical-align: top; padding: 0;" valign="top">
+				if listType == "ordered" {
+					<ol style={ fmt.Sprintf("font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px; color: %s; line-height: 1.6; margin: 0; padding-left: 24px;", gray700) }>
+						for _, item := range items {
+							<li style="margin-bottom: 8px;">{ item }</li>
+						}
+					</ol>
+				} else {
+					<ul style={ fmt.Sprintf("font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px; color: %s; line-height: 1.6; margin: 0; padding-left: 24px;", gray700) }>
+						for _, item := range items {
+							<li style="margin-bottom: 8px;">{ item }</li>
+						}
+					</ul>
+				}
+			</td>
+		</tr>
+	</table>
+}
+
+templ divider() {
+	<table
+		role="presentation"
+		border="0"
+		cellpadding="0"
+		cellspacing="0"
+		style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; margin: 32px 0;"
+		width="100%"
+	>
+		<tr>
+			<td style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; vertical-align: top;" valign="top">
+				<div style={ fmt.Sprintf("border-top: 1px solid %s;", gray300) + " width: 100%;" } role="separator" aria-hidden="true"></div>
+			</td>
+		</tr>
+	</table>
+}
+
+templ badge(text, variant string) {
+	<span style={ getBadgeStyle(variant) } role="status" aria-label={ fmt.Sprintf("Status: %s", text) }>
+		{ text }
+	</span>
+}
+
+func getBadgeStyle(variant string) string {
+	baseStyle := "font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 20px; display: inline-block; text-transform: uppercase; letter-spacing: 0.5px;"
+
+	switch variant {
+	case "success":
+		return baseStyle + fmt.Sprintf(" background-color: %s; color: #ffffff;", successColor)
+	case "warning":
+		return baseStyle + fmt.Sprintf(" background-color: %s; color: #ffffff;", warningColor)
+	case "error":
+		return baseStyle + fmt.Sprintf(" background-color: %s; color: #ffffff;", errorColor)
+	case "info":
+		return baseStyle + fmt.Sprintf(" background-color: %s; color: #ffffff;", infoColor)
+	case "neutral":
+		return baseStyle + fmt.Sprintf(" background-color: %s; color: #ffffff;", gray500)
+	default:
+		return baseStyle + fmt.Sprintf(" background-color: %s; color: #ffffff;", gray500)
+	}
+}
+
+templ alert(title, message, variant string) {
+	<table
+		role="presentation"
+		border="0"
+		cellpadding="0"
+		cellspacing="0"
+		style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; margin-bottom: 24px;"
+		width="100%"
+		role="alert"
+		aria-label={ fmt.Sprintf("%s alert: %s", variant, title) }
+	>
+		<tr>
+			<td style={ getAlertStyle(variant) } valign="top">
+				if title != "" {
+					<p style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 600; margin: 0; margin-bottom: 8px;">
+						{ title }
+					</p>
+				}
+				<p style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; margin: 0; line-height: 1.5;">
+					{ message }
+				</p>
+			</td>
+		</tr>
+	</table>
+}
+
+func getAlertStyle(variant string) string {
+	baseStyle := "font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; vertical-align: top; padding: 16px; border-left: 4px solid; border-radius: 8px;"
+
+	switch variant {
+	case "success":
+		return baseStyle + fmt.Sprintf(" background-color: #ecfdf5; border-color: %s; color: #065f46;", successColor)
+	case "warning":
+		return baseStyle + fmt.Sprintf(" background-color: #fffbeb; border-color: %s; color: #92400e;", warningColor)
+	case "error":
+		return baseStyle + fmt.Sprintf(" background-color: #fef2f2; border-color: %s; color: #991b1b;", errorColor)
+	case "info":
+		return baseStyle + fmt.Sprintf(" background-color: #eff6ff; border-color: %s; color: #1e40af;", infoColor)
+	default:
+		return baseStyle + fmt.Sprintf(" background-color: #eff6ff; border-color: %s; color: #1e40af;", infoColor)
+	}
+}
+
+templ social(links map[string]string) {
+	<table
+		role="presentation"
+		border="0"
+		cellpadding="0"
+		cellspacing="0"
+		style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; margin: 24px 0;"
+		width="100%"
+		aria-label="Social media links"
+	>
+		<tr>
+			<td style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; vertical-align: top; text-align: center; padding: 16px;" valign="top" align="center">
+				for platform, url := range links {
+					<a href={ templ.SafeURL(url) } style={ fmt.Sprintf("display: inline-block; margin: 0 8px; padding: 12px; background-color: %s; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; min-width: 44px; min-height: 44px; line-height: 20px;", primaryColor) + "border-radius: 50%;" } aria-label={ fmt.Sprintf("Follow us on %s", platform) } target="_blank">
+						{ platform }
+					</a>
+				}
+			</td>
+		</tr>
+	</table>
+}
+

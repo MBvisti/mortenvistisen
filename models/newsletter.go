@@ -33,16 +33,7 @@ func GetNewsletterByID(
 		return Newsletter{}, err
 	}
 
-	return Newsletter{
-		ID:          row.ID,
-		CreatedAt:   row.CreatedAt.Time,
-		UpdatedAt:   row.UpdatedAt.Time,
-		ReleasedAt:  row.ReleasedAt.Time,
-		IsPublished: row.IsPublished.Bool,
-		Title:       row.Title,
-		Slug:        row.Slug.String,
-		Content:     row.Content,
-	}, nil
+	return newsletterRowToNewsletter(row), nil
 }
 
 func GetNewsletterByTitle(
@@ -55,16 +46,7 @@ func GetNewsletterByTitle(
 		return Newsletter{}, err
 	}
 
-	return Newsletter{
-		ID:          row.ID,
-		CreatedAt:   row.CreatedAt.Time,
-		UpdatedAt:   row.UpdatedAt.Time,
-		ReleasedAt:  row.ReleasedAt.Time,
-		IsPublished: row.IsPublished.Bool,
-		Title:       row.Title,
-		Slug:        row.Slug.String,
-		Content:     row.Content,
-	}, nil
+	return newsletterRowToNewsletter(row), nil
 }
 
 func GetNewsletterBySlug(
@@ -81,16 +63,7 @@ func GetNewsletterBySlug(
 		return Newsletter{}, err
 	}
 
-	return Newsletter{
-		ID:          row.ID,
-		CreatedAt:   row.CreatedAt.Time,
-		UpdatedAt:   row.UpdatedAt.Time,
-		ReleasedAt:  row.ReleasedAt.Time,
-		IsPublished: row.IsPublished.Bool,
-		Title:       row.Title,
-		Slug:        row.Slug.String,
-		Content:     row.Content,
-	}, nil
+	return newsletterRowToNewsletter(row), nil
 }
 
 func GetNewsletters(
@@ -104,16 +77,7 @@ func GetNewsletters(
 
 	newsletters := make([]Newsletter, len(rows))
 	for i, row := range rows {
-		newsletters[i] = Newsletter{
-			ID:          row.ID,
-			CreatedAt:   row.CreatedAt.Time,
-			UpdatedAt:   row.UpdatedAt.Time,
-			ReleasedAt:  row.ReleasedAt.Time,
-			IsPublished: row.IsPublished.Bool,
-			Title:       row.Title,
-			Slug:        row.Slug.String,
-			Content:     row.Content,
-		}
+		newsletters[i] = newsletterRowToNewsletter(row)
 	}
 
 	return newsletters, nil
@@ -130,16 +94,7 @@ func GetPublishedNewsletters(
 
 	newsletters := make([]Newsletter, len(rows))
 	for i, row := range rows {
-		newsletters[i] = Newsletter{
-			ID:          row.ID,
-			CreatedAt:   row.CreatedAt.Time,
-			UpdatedAt:   row.UpdatedAt.Time,
-			ReleasedAt:  row.ReleasedAt.Time,
-			IsPublished: row.IsPublished.Bool,
-			Title:       row.Title,
-			Slug:        row.Slug.String,
-			Content:     row.Content,
-		}
+		newsletters[i] = newsletterRowToNewsletter(row)
 	}
 
 	return newsletters, nil
@@ -156,16 +111,7 @@ func GetDraftNewsletters(
 
 	newsletters := make([]Newsletter, len(rows))
 	for i, row := range rows {
-		newsletters[i] = Newsletter{
-			ID:          row.ID,
-			CreatedAt:   row.CreatedAt.Time,
-			UpdatedAt:   row.UpdatedAt.Time,
-			ReleasedAt:  row.ReleasedAt.Time,
-			IsPublished: row.IsPublished.Bool,
-			Title:       row.Title,
-			Slug:        row.Slug.String,
-			Content:     row.Content,
-		}
+		newsletters[i] = newsletterRowToNewsletter(row)
 	}
 
 	return newsletters, nil
@@ -173,6 +119,31 @@ func GetDraftNewsletters(
 
 type NewsletterPaginationResult struct {
 	Newsletters []Newsletter
+	TotalCount  int64
+	Page        int
+	PageSize    int
+	TotalPages  int
+	HasNext     bool
+	HasPrevious bool
+}
+
+type NewsletterSendStats struct {
+	NewsletterID   uuid.UUID
+	TotalEmails    int64
+	SentEmails     int64
+	FailedEmails   int64
+	BouncedEmails  int64
+	PendingEmails  int64
+	CompletionRate float64
+}
+
+type NewsletterWithStats struct {
+	Newsletter
+	SendStats *NewsletterSendStats
+}
+
+type NewsletterPaginationResultWithStats struct {
+	Newsletters []NewsletterWithStats
 	TotalCount  int64
 	Page        int
 	PageSize    int
@@ -204,7 +175,6 @@ func GetNewslettersPaginated(
 		return NewsletterPaginationResult{}, err
 	}
 
-	// Get paginated newsletters
 	rows, err := db.Stmts.QueryNewslettersPaginated(
 		ctx,
 		dbtx,
@@ -223,16 +193,7 @@ func GetNewslettersPaginated(
 
 	newsletters := make([]Newsletter, len(rows))
 	for i, row := range rows {
-		newsletters[i] = Newsletter{
-			ID:          row.ID,
-			CreatedAt:   row.CreatedAt.Time,
-			UpdatedAt:   row.UpdatedAt.Time,
-			ReleasedAt:  row.ReleasedAt.Time,
-			IsPublished: row.IsPublished.Bool,
-			Title:       row.Title,
-			Slug:        row.Slug.String,
-			Content:     row.Content,
-		}
+		newsletters[i] = newsletterRowToNewsletter(row)
 	}
 
 	totalPages := int((totalCount + int64(pageSize) - 1) / int64(pageSize))
@@ -248,10 +209,52 @@ func GetNewslettersPaginated(
 	}, nil
 }
 
+func GetNewslettersPaginatedWithStats(
+	ctx context.Context,
+	dbtx db.DBTX,
+	page int,
+	pageSize int,
+) (NewsletterPaginationResultWithStats, error) {
+	paginationResult, err := GetNewslettersPaginated(ctx, dbtx, page, pageSize)
+	if err != nil {
+		return NewsletterPaginationResultWithStats{}, err
+	}
+
+	allStats, err := GetAllNewsletterSendStats(ctx, dbtx)
+	if err != nil {
+		return NewsletterPaginationResultWithStats{}, err
+	}
+
+	newslettersWithStats := make([]NewsletterWithStats, len(paginationResult.Newsletters))
+	for i, newsletter := range paginationResult.Newsletters {
+		stats, exists := allStats[newsletter.ID]
+		var statsPtr *NewsletterSendStats
+		if exists {
+			statsPtr = &stats
+		}
+
+		newslettersWithStats[i] = NewsletterWithStats{
+			Newsletter: newsletter,
+			SendStats:  statsPtr,
+		}
+	}
+
+	return NewsletterPaginationResultWithStats{
+		Newsletters: newslettersWithStats,
+		TotalCount:  paginationResult.TotalCount,
+		Page:        paginationResult.Page,
+		PageSize:    paginationResult.PageSize,
+		TotalPages:  paginationResult.TotalPages,
+		HasNext:     paginationResult.HasNext,
+		HasPrevious: paginationResult.HasPrevious,
+	}, nil
+}
+
 type NewNewsletterPayload struct {
-	Title   string `validate:"required,max=100"`
-	Slug    string `validate:"required,max=255"`
-	Content string
+	Title       string `validate:"required,max=100"`
+	Slug        string `validate:"required,max=255"`
+	Content     string
+	IsPublished bool
 }
 
 func NewNewsletter(
@@ -271,16 +274,22 @@ func NewNewsletter(
 		return Newsletter{}, errors.Join(ErrDomainValidation, err)
 	}
 
+	now := time.Now()
 	newsletter := Newsletter{
-		ID:        uuid.New(),
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-		Title:     data.Title,
-		Slug:      data.Slug,
-		Content:   data.Content,
+		ID:          uuid.New(),
+		CreatedAt:   now,
+		UpdatedAt:   now,
+		Title:       data.Title,
+		Slug:        data.Slug,
+		Content:     data.Content,
+		IsPublished: data.IsPublished,
 	}
 
-	_, err := db.Stmts.InsertNewsletter(ctx, dbtx, db.InsertNewsletterParams{
+	if data.IsPublished {
+		newsletter.ReleasedAt = now
+	}
+
+	row, err := db.Stmts.InsertNewsletter(ctx, dbtx, db.InsertNewsletterParams{
 		ID: newsletter.ID,
 		CreatedAt: pgtype.Timestamptz{
 			Time:  newsletter.CreatedAt,
@@ -296,12 +305,20 @@ func NewNewsletter(
 			Valid:  newsletter.Slug != "",
 		},
 		Content: newsletter.Content,
+		IsPublished: pgtype.Bool{
+			Bool:  newsletter.IsPublished,
+			Valid: true,
+		},
+		ReleasedAt: pgtype.Timestamptz{
+			Time:  newsletter.ReleasedAt,
+			Valid: newsletter.ReleasedAt.IsZero(),
+		},
 	})
 	if err != nil {
 		return Newsletter{}, err
 	}
 
-	return GetNewsletterByID(ctx, dbtx, newsletter.ID)
+	return newsletterRowToNewsletter(row), nil
 }
 
 type UpdateNewsletterPayload struct {
@@ -322,22 +339,30 @@ func UpdateNewsletter(
 		return Newsletter{}, errors.Join(ErrDomainValidation, err)
 	}
 
-	_, err := db.Stmts.UpdateNewsletter(ctx, dbtx, db.UpdateNewsletterParams{
-		ID:        data.ID,
-		UpdatedAt: pgtype.Timestamptz{Time: data.UpdatedAt, Valid: true},
-		Title:     data.Title,
-		Slug: sql.NullString{
-			String: data.Slug,
-			Valid:  data.Slug != "",
+	row, err := db.Stmts.UpdateNewsletter(
+		ctx,
+		dbtx,
+		db.UpdateNewsletterParams{
+			ID:        data.ID,
+			UpdatedAt: pgtype.Timestamptz{Time: data.UpdatedAt, Valid: true},
+			Title:     data.Title,
+			Slug: sql.NullString{
+				String: data.Slug,
+				Valid:  data.Slug != "",
+			},
+			Content:     data.Content,
+			IsPublished: pgtype.Bool{Bool: data.IsPublished, Valid: true},
+			ReleasedAt: pgtype.Timestamptz{
+				Time:  data.UpdatedAt,
+				Valid: data.IsPublished,
+			},
 		},
-		Content:     data.Content,
-		IsPublished: pgtype.Bool{Bool: data.IsPublished, Valid: true},
-	})
+	)
 	if err != nil {
 		return Newsletter{}, err
 	}
 
-	return GetNewsletterByID(ctx, dbtx, data.ID)
+	return newsletterRowToNewsletter(row), nil
 }
 
 type UpdateNewsletterContentPayload struct {
@@ -368,59 +393,7 @@ func UpdateNewsletterContent(
 		return Newsletter{}, err
 	}
 
-	return Newsletter{
-		ID:          row.ID,
-		CreatedAt:   row.CreatedAt.Time,
-		UpdatedAt:   row.UpdatedAt.Time,
-		ReleasedAt:  row.ReleasedAt.Time,
-		IsPublished: row.IsPublished.Bool,
-		Title:       row.Title,
-		Slug:        row.Slug.String,
-		Content:     row.Content,
-	}, nil
-}
-
-type PublishNewsletterPayload struct {
-	ID  uuid.UUID `validate:"required,uuid"`
-	Now time.Time
-}
-
-func PublishNewsletter(
-	ctx context.Context,
-	dbtx db.DBTX,
-	data PublishNewsletterPayload,
-) (Newsletter, error) {
-	if err := validate.Struct(data); err != nil {
-		return Newsletter{}, errors.Join(ErrDomainValidation, err)
-	}
-
-	row, err := db.Stmts.PublishNewsletter(
-		ctx,
-		dbtx,
-		db.PublishNewsletterParams{
-			ID:        data.ID,
-			UpdatedAt: pgtype.Timestamptz{Time: data.Now, Valid: true},
-			ReleasedAt: pgtype.Timestamptz{
-				Time:  data.Now,
-				Valid: true,
-			},
-			IsPublished: pgtype.Bool{Bool: true, Valid: true},
-		},
-	)
-	if err != nil {
-		return Newsletter{}, err
-	}
-
-	return Newsletter{
-		ID:          row.ID,
-		CreatedAt:   row.CreatedAt.Time,
-		UpdatedAt:   row.UpdatedAt.Time,
-		ReleasedAt:  row.ReleasedAt.Time,
-		IsPublished: row.IsPublished.Bool,
-		Title:       row.Title,
-		Slug:        row.Slug.String,
-		Content:     row.Content,
-	}, nil
+	return newsletterRowToNewsletter(row), nil
 }
 
 func DeleteNewsletter(
@@ -429,4 +402,17 @@ func DeleteNewsletter(
 	id uuid.UUID,
 ) error {
 	return db.Stmts.DeleteNewsletter(ctx, dbtx, id)
+}
+
+func newsletterRowToNewsletter(row db.Newsletter) Newsletter {
+	return Newsletter{
+		ID:          row.ID,
+		CreatedAt:   row.CreatedAt.Time,
+		UpdatedAt:   row.UpdatedAt.Time,
+		ReleasedAt:  row.ReleasedAt.Time,
+		IsPublished: row.IsPublished.Bool,
+		Title:       row.Title,
+		Slug:        row.Slug.String,
+		Content:     row.Content,
+	}
 }

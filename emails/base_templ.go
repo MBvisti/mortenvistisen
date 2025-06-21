@@ -13,19 +13,60 @@ import "context"
 import "io"
 
 const (
+	// Primary Colors
 	primaryColor   = "#1d4ed8"
-	secondaryColor = "purple"
+	secondaryColor = "#7c3aed"
 	primaryBorder  = "solid 2px #1d4ed8"
 
-	bgDarkScheme      = "#121212"
-	colorDarkScheme   = "#FFFFFF"
-	bgDarkMainContent = "#212121"
-	bgDarkBrandBanner = "#212121"
+	// Semantic Colors
+	successColor = "#10b981"
+	warningColor = "#f59e0b"
+	errorColor   = "#ef4444"
+	infoColor    = "#3b82f6"
 
-	bgLightScheme      = "#F5F5F5"
-	colorLightScheme   = "#333333"
-	bgLightMainContent = "#FFFFFF"
-	bgLightBrandBanner = "#FFFFFF"
+	// Neutral Colors
+	gray50  = "#f9fafb"
+	gray100 = "#f3f4f6"
+	gray200 = "#e5e7eb"
+	gray300 = "#d1d5db"
+	gray400 = "#9ca3af"
+	gray500 = "#6b7280"
+	gray600 = "#4b5563"
+	gray700 = "#374151"
+	gray800 = "#1f2937"
+	gray900 = "#111827"
+
+	// Dark Mode Colors
+	bgDarkScheme      = "#111827"
+	colorDarkScheme   = "#f9fafb"
+	bgDarkMainContent = "#1f2937"
+	bgDarkBrandBanner = "#1f2937"
+
+	// Light Mode Colors
+	bgLightScheme      = "#f9fafb"
+	colorLightScheme   = "#111827"
+	bgLightMainContent = "#ffffff"
+	bgLightBrandBanner = "#ffffff"
+
+	// Typography Scale
+	fontXs   = "12px"
+	fontSm   = "14px"
+	fontBase = "16px"
+	fontLg   = "18px"
+	fontXl   = "20px"
+	font2xl  = "24px"
+	font3xl  = "32px"
+
+	// Spacing Scale
+	spacing1  = "4px"
+	spacing2  = "8px"
+	spacing3  = "12px"
+	spacing4  = "16px"
+	spacing5  = "20px"
+	spacing6  = "24px"
+	spacing8  = "32px"
+	spacing12 = "48px"
+	spacing16 = "64px"
 )
 
 func borders() templ.CSSClass {
@@ -77,7 +118,7 @@ func mainContent() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" style=\"border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%;\" width=\"100%\"><tr><td class=\"wrapper\" style=\"font-family: Helvetica, sans-serif; font-size: 16px; vertical-align: top; box-sizing: border-box; padding: 24px;\" valign=\"top\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" style=\"border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%;\" width=\"100%\" aria-label=\"Main email content\"><tr><td class=\"wrapper spacing-6\" style=\"font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px; vertical-align: top; box-sizing: border-box; padding: 24px;\" valign=\"top\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -102,7 +143,10 @@ func baseStyles() string {
   		#mainContent {
   		  background-color: %v !important;
   		}
-	}`, bgDarkScheme, colorDarkScheme, bgDarkMainContent)
+  		#brandBanner {
+  		  background-color: %v !important;
+  		}
+	}`, bgDarkScheme, colorDarkScheme, bgDarkMainContent, bgDarkBrandBanner)
 
 	lightScheme := fmt.Sprintf(`@media (prefers-color-scheme: light), (prefers-color-scheme: no-preference) {
   		body {
@@ -112,7 +156,10 @@ func baseStyles() string {
   		#mainContent {
   		  background-color: %v !important;
   		}
-	}`, bgLightScheme, colorLightScheme, bgLightMainContent)
+  		#brandBanner {
+  		  background-color: %v !important;
+  		}
+	}`, bgLightScheme, colorLightScheme, bgLightMainContent, bgLightBrandBanner)
 
 	schemes := lightScheme + "\n" + darkScheme
 
@@ -121,7 +168,68 @@ func baseStyles() string {
 			:root {
     		  color-scheme: light dark;
     		}
+
+			/* Mobile-first base styles (320px+) */
+			.email-container {
+				max-width: 100%;
+				padding: 16px;
+				margin: 0 auto;
+			}
+
+			.responsive-text-xs { font-size: 12px; line-height: 1.5; }
+			.responsive-text-sm { font-size: 14px; line-height: 1.5; }
+			.responsive-text-base { font-size: 16px; line-height: 1.6; }
+			.responsive-text-lg { font-size: 18px; line-height: 1.6; }
+			.responsive-text-xl { font-size: 20px; line-height: 1.6; }
+			.responsive-text-2xl { font-size: 24px; line-height: 1.4; }
+			.responsive-text-3xl { font-size: 28px; line-height: 1.3; }
+
+			.spacing-1 { padding: 4px; }
+			.spacing-2 { padding: 8px; }
+			.spacing-4 { padding: 16px; }
+			.spacing-6 { padding: 24px; }
+			.spacing-8 { padding: 32px; }
+
+			.margin-1 { margin: 4px; }
+			.margin-2 { margin: 8px; }
+			.margin-4 { margin: 16px; }
+			.margin-6 { margin: 24px; }
+			.margin-8 { margin: 32px; }
+
+			/* Touch targets minimum 44x44px */
+			.btn-touch {
+				min-height: 44px;
+				min-width: 44px;
+				display: inline-block;
+			}
+
+			/* Tablet styles (480px+) */
+			@media screen and (min-width: 480px) {
+				.email-container {
+					max-width: 480px;
+					padding: 24px;
+				}
+				.responsive-text-3xl { font-size: 32px; }
+			}
+
+			/* Desktop styles (600px+) */
+			@media screen and (min-width: 600px) {
+				.email-container {
+					max-width: 600px;
+					padding: 32px;
+				}
+			}
+
+			/* Large desktop (768px+) */
+			@media screen and (min-width: 768px) {
+				.email-container {
+					max-width: 640px;
+				}
+			}
+
 		` + schemes + `
+
+			/* Legacy mobile styles for compatibility */
 			@media only screen and (max-width: 640px) {
 				.main p,
 				.main td,
@@ -130,7 +238,7 @@ func baseStyles() string {
 			  	}
 			
 			  	.wrapper {
-			  	  padding: 8px !important;
+			  	  padding: 16px !important;
 			  	}
 			
 			  	.content {
@@ -139,7 +247,7 @@ func baseStyles() string {
 			
 			  	.container {
 			  	  padding: 0 !important;
-			  	  padding-top: 8px !important;
+			  	  padding-top: 16px !important;
 			  	  width: 100% !important;
 			  	}
 			
@@ -158,6 +266,8 @@ func baseStyles() string {
 			  	  font-size: 16px !important;
 			  	  max-width: 100% !important;
 			  	  width: 100% !important;
+			  	  min-height: 44px !important;
+			  	  padding: 12px 24px !important;
 			  	}
 			}
 
@@ -203,7 +313,7 @@ func unsafe(html string) templ.Component {
 	})
 }
 
-func base(title string) templ.Component {
+func base(title string, preheaderText string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -224,20 +334,20 @@ func base(title string) templ.Component {
 			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<!doctype html><html lang=\"en\" style=\"color-scheme: light dark; supported-color-schemes: light dark;\"><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta name=\"color-scheme\" content=\"light dark\"><meta name=\"supported-color-schemes\" content=\"light dark\"><title>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<!doctype html><html lang=\"en\" style=\"color-scheme: light dark; supported-color-schemes: light dark;\"><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta name=\"color-scheme\" content=\"light dark\"><meta name=\"supported-color-schemes\" content=\"light dark\"><meta name=\"format-detection\" content=\"telephone=no\"><meta name=\"format-detection\" content=\"date=no\"><meta name=\"format-detection\" content=\"address=no\"><meta name=\"format-detection\" content=\"email=no\"><meta name=\"x-apple-disable-message-reformatting\"><title>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `emails/base.templ`, Line: 164, Col: 17}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `emails/base.templ`, Line: 280, Col: 17}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, " come on</title>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</title>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -245,7 +355,17 @@ func base(title string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</head><body style=\"font-family: Helvetica, sans-serif; -webkit-font-smoothing: antialiased; font-size: 16px; line-height: 1.3; -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; margin: 0; padding: 0;\"><table role=\"presentation\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"body\" style=\"border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%;\" width=\"100%\"><tr><td style=\"font-family: Helvetica, sans-serif; font-size: 16px; vertical-align: top;\" valign=\"top\">&nbsp;</td><td class=\"container\" style=\"font-family: Helvetica, sans-serif; font-size: 16px; vertical-align: top; max-width: 600px; padding: 0; padding-top: 24px; width: 600px; margin: 0 auto;\" width=\"600\" valign=\"top\"><div class=\"content\" style=\"box-sizing: border-box; display: block; margin: 0 auto; max-width: 600px; padding: 0;\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</head><body style=\"font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; font-size: 16px; line-height: 1.6; -ms-text-size-adjust: 100%; -webkit-text-size-adjust: 100%; margin: 0; padding: 0;\" role=\"main\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if preheaderText != "" {
+			templ_7745c5c3_Err = preHeader(preheaderText).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<table role=\"presentation\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\" class=\"body email-container\" style=\"border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; max-width: 640px; margin: 0 auto;\" width=\"100%\"><tr><td style=\"font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px; vertical-align: top;\" valign=\"top\">&nbsp;</td><td class=\"container\" style=\"font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px; vertical-align: top; max-width: 600px; padding: 0; padding-top: 24px; width: 100%; margin: 0 auto;\" valign=\"top\"><div class=\"content\" style=\"box-sizing: border-box; display: block; margin: 0 auto; max-width: 600px; padding: 0;\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -253,7 +373,7 @@ func base(title string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</div></td><td style=\"font-family: Helvetica, sans-serif; font-size: 16px; vertical-align: top;\" valign=\"top\">&nbsp;</td></tr></table></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</div></td><td style=\"font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px; vertical-align: top;\" valign=\"top\">&nbsp;</td></tr></table></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

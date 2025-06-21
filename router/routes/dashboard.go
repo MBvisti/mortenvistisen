@@ -11,9 +11,6 @@ const (
 
 var Dashboard = []Route{
 	DashboardHome,
-	// DashboardArticles,
-	// DashboardAnalytics,
-	// DashboardSettings,
 	DashboardNewArticle,
 	DashboardStoreArticle,
 	DashboardEditArticle,
@@ -260,6 +257,16 @@ var DashboardDeleteNewsletter = Route{
 	Path:        dashboardRoutePrefix + "/newsletters/:id/delete",
 	Method:      http.MethodPost,
 	HandlerName: "DeleteNewsletter",
+	Middleware: []string{
+		"AuthOnly",
+	},
+}
+
+var DashboardSendNewsletter = Route{
+	Name:        dashboardNamePrefix + ".newsletters.send",
+	Path:        dashboardRoutePrefix + "/newsletters/:id/send",
+	Method:      http.MethodPost,
+	HandlerName: "SendNewsletter",
 	Middleware: []string{
 		"AuthOnly",
 	},

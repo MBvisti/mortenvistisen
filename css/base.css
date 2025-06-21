@@ -1,0 +1,6 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+@source "./views";
+
+@import "./theme.css";
+@import "./components.css";

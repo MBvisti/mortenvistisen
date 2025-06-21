@@ -9,6 +9,7 @@ import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
 import (
+	"fmt"
 	"github.com/mbvisti/mortenvistisen/models"
 	"github.com/mbvisti/mortenvistisen/router/routes"
 	"github.com/mbvisti/mortenvistisen/views/fragments"
@@ -20,19 +21,58 @@ func newslettersToTableRowElements(newsletters []models.Newsletter) components.T
 	tableRowElements := make(components.TableRowElements, len(newsletters))
 	for i, newsletter := range newsletters {
 		publishStatus := "Draft"
-		hightlight := "status-draft"
+		publishHighlight := "status-draft"
 
 		if newsletter.IsPublished {
 			publishStatus = "Published"
-			hightlight = "status-published"
+			publishHighlight = "status-published"
 		}
 
 		tableRowElements[i] = components.TableRow{
 			ID: newsletter.ID,
 			Elements: []components.TableRowElement{
 				{Title: newsletter.Title},
-				{Title: publishStatus, Hightlight: hightlight},
+				{Title: publishStatus, Hightlight: publishHighlight},
 				{Title: newsletter.CreatedAt.Format("2006-01-02")},
+			},
+		}
+	}
+
+	return tableRowElements
+}
+
+func newslettersWithStatsToTableRowElements(newsletters []models.NewsletterWithStats) components.TableRowElements {
+	tableRowElements := make(components.TableRowElements, len(newsletters))
+	for i, newsletter := range newsletters {
+		publishStatus := "Draft"
+		publishHighlight := "status-draft"
+
+		if newsletter.IsPublished {
+			publishStatus = "Published"
+			publishHighlight = "status-published"
+		}
+
+		sendProgress := "N/A"
+		if newsletter.IsPublished && newsletter.SendStats != nil {
+			if newsletter.SendStats.TotalEmails > 0 {
+				sendProgress = fmt.Sprintf("%d of %d sent (%.1f%%)",
+					newsletter.SendStats.SentEmails,
+					newsletter.SendStats.TotalEmails,
+					newsletter.SendStats.CompletionRate)
+			} else {
+				sendProgress = "No recipients"
+			}
+		} else if newsletter.IsPublished {
+			sendProgress = "Legacy"
+		}
+
+		tableRowElements[i] = components.TableRow{
+			ID: newsletter.ID,
+			Elements: []components.TableRowElement{
+				{Title: newsletter.Title},
+				{Title: publishStatus, Hightlight: publishHighlight},
+				{Title: newsletter.CreatedAt.Format("2006-01-02")},
+				{Title: sendProgress},
 			},
 		}
 	}
@@ -95,7 +135,7 @@ func Newsletters(result models.NewsletterPaginationResult) templ.Component {
 			}
 			templ_7745c5c3_Err = components.Table(
 				"Recent newsletters",
-				[]string{"Title", "Status", "Created", "Action"},
+				[]string{"Title", "Publish Status", "Created", "Action"},
 				newslettersToTableRowElements(result.Newsletters),
 				components.Pagination{
 					TotalCount:  result.TotalCount,
@@ -116,7 +156,93 @@ func Newsletters(result models.NewsletterPaginationResult) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
+			return nil
+		})
+		templ_7745c5c3_Err = layouts.Dashboard().Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+func NewslettersWithStats(result models.NewsletterPaginationResultWithStats) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var3 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var3 == nil {
+			templ_7745c5c3_Var3 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Var4 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+			if !templ_7745c5c3_IsBuffer {
+				defer func() {
+					templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+					if templ_7745c5c3_Err == nil {
+						templ_7745c5c3_Err = templ_7745c5c3_BufErr
+					}
+				}()
+			}
+			ctx = templ.InitializeContext(ctx)
+			templ_7745c5c3_Err = components.DashboardHeader("Newsletters", "manage your newsletters").Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, " ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = components.Stats([]templ.Component{
+				components.StatNumberCard("Total Newsletters", result.TotalCount),
+				components.StatNumberCard("Published", int64(countPublishedNewslettersWithStats(result.Newsletters))),
+				components.StatNumberCard("Drafts", int64(countDraftNewslettersWithStats(result.Newsletters))),
+			}).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, " ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = components.Table(
+				"Recent newsletters",
+				[]string{"Title", "Publish Status", "Created", "Send Progress", "Action"},
+				newslettersWithStatsToTableRowElements(result.Newsletters),
+				components.Pagination{
+					TotalCount:  result.TotalCount,
+					Page:        result.Page,
+					PageSize:    result.PageSize,
+					TotalPages:  result.TotalPages,
+					HasNext:     result.HasNext,
+					HasPrevious: result.HasPrevious,
+				},
+				components.ActionBtn{
+					Title: "New newsletter",
+					Route: routes.DashboardNewNewsletter,
+				},
+				components.TableConfig{
+					EditURLPattern: "/dashboard/newsletters/%s/edit",
+				},
+			).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, " ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -126,7 +252,7 @@ func Newsletters(result models.NewsletterPaginationResult) templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = layouts.Dashboard().Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = layouts.Dashboard().Render(templ.WithChildren(ctx, templ_7745c5c3_Var4), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -145,6 +271,26 @@ func countPublishedNewsletters(newsletters []models.Newsletter) int {
 }
 
 func countDraftNewsletters(newsletters []models.Newsletter) int {
+	count := 0
+	for _, newsletter := range newsletters {
+		if !newsletter.IsPublished {
+			count++
+		}
+	}
+	return count
+}
+
+func countPublishedNewslettersWithStats(newsletters []models.NewsletterWithStats) int {
+	count := 0
+	for _, newsletter := range newsletters {
+		if newsletter.IsPublished {
+			count++
+		}
+	}
+	return count
+}
+
+func countDraftNewslettersWithStats(newsletters []models.NewsletterWithStats) int {
 	count := 0
 	for _, newsletter := range newsletters {
 		if !newsletter.IsPublished {

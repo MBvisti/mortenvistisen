@@ -26,26 +26,20 @@ select count(*) from newsletters;
 
 -- name: InsertNewsletter :one
 insert into
-    newsletters (id, created_at, updated_at, title, slug, content)
+    newsletters (id, created_at, updated_at, title, slug, content, is_published, released_at)
 values
-    ($1, $2, $3, $4, $5, $6)
+    ($1, $2, $3, $4, $5, $6, $7, $8)
 returning *;
 
 -- name: UpdateNewsletter :one
 update newsletters
-    set updated_at=$2, title=$3, slug=$4, content=$5, is_published=$6
+    set updated_at=$2, title=$3, slug=$4, content=$5, is_published=$6, released_at=$7
 where id = $1
 returning *;
 
 -- name: UpdateNewsletterContent :one
 update newsletters
     set updated_at=$2, content=$3
-where id = $1
-returning *;
-
--- name: PublishNewsletter :one
-update newsletters
-    set updated_at=$2, is_published=$3, released_at=$4
 where id = $1
 returning *;
 

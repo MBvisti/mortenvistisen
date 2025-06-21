@@ -11,6 +11,7 @@ import (
 	"github.com/mbvisti/mortenvistisen/models"
 	"github.com/mbvisti/mortenvistisen/psql"
 	"github.com/mbvisti/mortenvistisen/router/contexts"
+	"github.com/mbvisti/mortenvistisen/services"
 	"github.com/mbvisti/mortenvistisen/views/dashboard"
 )
 
@@ -69,7 +70,10 @@ func (d Dashboard) Index(c echo.Context) error {
 	}
 
 	// Get complete statistics (not affected by pagination)
-	publishedCount, err := models.CountPublishedArticles(extractCtx(c), d.db.Pool)
+	publishedCount, err := models.CountPublishedArticles(
+		extractCtx(c),
+		d.db.Pool,
+	)
 	if err != nil {
 		publishedCount = 0
 	}
@@ -325,8 +329,6 @@ func (d Dashboard) UpdateArticle(c echo.Context) error {
 		return err
 	}
 
-	slog.Info("IS IT PUBLISHED OR NOT", "p", articlePayload.Published)
-
 	var readTime int32
 	if articlePayload.ReadTime != "" {
 		if parsedTime, err := strconv.ParseInt(articlePayload.ReadTime, 10, 32); err == nil {
@@ -413,7 +415,6 @@ func (d Dashboard) UpdateArticle(c echo.Context) error {
 			return err
 		}
 
-		// Invalidate caches when article is updated/published
 		d.cacheManager.InvalidateLandingPage()
 		d.cacheManager.InvalidateArticle(updatePayload.Slug)
 
@@ -428,7 +429,6 @@ func (d Dashboard) UpdateArticle(c echo.Context) error {
 		return err
 	}
 
-	// Invalidate caches when article is updated
 	d.cacheManager.InvalidateLandingPage()
 	d.cacheManager.InvalidateArticle(updatePayload.Slug)
 
@@ -449,7 +449,6 @@ func (d Dashboard) DeleteArticle(c echo.Context) error {
 		return c.Redirect(302, "/dashboard")
 	}
 
-	// Check if article exists before deleting and get slug for cache invalidation
 	article, err := models.GetArticleByID(
 		extractCtx(c),
 		d.db.Pool,
@@ -466,7 +465,6 @@ func (d Dashboard) DeleteArticle(c echo.Context) error {
 		return c.Redirect(302, "/dashboard")
 	}
 
-	// Delete the article
 	err = models.DeleteArticle(
 		extractCtx(c),
 		d.db.Pool,
@@ -491,15 +489,12 @@ func (d Dashboard) DeleteArticle(c echo.Context) error {
 		return err
 	}
 
-	// Invalidate caches when article is deleted
 	d.cacheManager.InvalidateLandingPage()
 	d.cacheManager.InvalidateArticle(article.Slug)
 
-	// Redirect to dashboard
 	return c.Redirect(302, "/dashboard")
 }
 
-// Tag management handlers
 func (d Dashboard) Tags(c echo.Context) error {
 	tags, err := models.GetArticleTags(extractCtx(c), d.db.Pool)
 	if err != nil {
@@ -696,7 +691,10 @@ func (d Dashboard) Subscribers(c echo.Context) error {
 	}
 
 	monthlyCount, _ := models.CountMonthlySubscribers(extractCtx(c), d.db.Pool)
-	verifiedCount, _ := models.CountVerifiedSubscribers(extractCtx(c), d.db.Pool)
+	verifiedCount, _ := models.CountVerifiedSubscribers(
+		extractCtx(c),
+		d.db.Pool,
+	)
 	unverifiedCount := subscribers.TotalCount - verifiedCount
 
 	result := dashboard.SubscribersSortableResult{
@@ -903,7 +901,6 @@ func (d Dashboard) DeleteSubscriber(c echo.Context) error {
 	return c.Redirect(302, "/dashboard/subscribers")
 }
 
-// Newsletter management handlers
 func (d Dashboard) Newsletters(c echo.Context) error {
 	pageStr := c.QueryParam("page")
 	page := 1
@@ -914,15 +911,15 @@ func (d Dashboard) Newsletters(c echo.Context) error {
 	}
 
 	pageSize := 10
-	newsletters, err := models.GetNewslettersPaginated(
+	newsletters, err := models.GetNewslettersPaginatedWithStats(
 		extractCtx(c),
 		d.db.Pool,
 		page,
 		pageSize,
 	)
 	if err != nil {
-		newsletters = models.NewsletterPaginationResult{
-			Newsletters: []models.Newsletter{},
+		newsletters = models.NewsletterPaginationResultWithStats{
+			Newsletters: []models.NewsletterWithStats{},
 			TotalCount:  0,
 			Page:        1,
 			PageSize:    pageSize,
@@ -932,7 +929,7 @@ func (d Dashboard) Newsletters(c echo.Context) error {
 		}
 	}
 
-	return dashboard.Newsletters(newsletters).Render(renderArgs(c))
+	return dashboard.NewslettersWithStats(newsletters).Render(renderArgs(c))
 }
 
 func (d Dashboard) NewNewsletter(c echo.Context) error {
@@ -945,10 +942,10 @@ func (d Dashboard) NewNewsletter(c echo.Context) error {
 
 func (d Dashboard) StoreNewsletter(c echo.Context) error {
 	type payload struct {
-		Title   string `form:"title"`
-		Slug    string `form:"slug"`
-		Content string `form:"content"`
-		Action  string `form:"action"`
+		Title      string `form:"title"`
+		Slug       string `form:"slug"`
+		Content    string `form:"content"`
+		PublishNow string `form:"publish_now"`
 	}
 
 	var newsletterPayload payload
@@ -956,13 +953,16 @@ func (d Dashboard) StoreNewsletter(c echo.Context) error {
 		return err
 	}
 
+	publishNow := newsletterPayload.PublishNow == "on"
+
 	newsletter, err := models.NewNewsletter(
 		extractCtx(c),
 		d.db.Pool,
 		models.NewNewsletterPayload{
-			Title:   newsletterPayload.Title,
-			Slug:    newsletterPayload.Slug,
-			Content: newsletterPayload.Content,
+			Title:       newsletterPayload.Title,
+			Slug:        newsletterPayload.Slug,
+			Content:     newsletterPayload.Content,
+			IsPublished: publishNow,
 		},
 	)
 	if err != nil {
@@ -987,40 +987,32 @@ func (d Dashboard) StoreNewsletter(c echo.Context) error {
 			Render(renderArgs(c))
 	}
 
-	if newsletterPayload.Action == "publish" {
-		_, err = models.PublishNewsletter(
-			extractCtx(c),
-			d.db.Pool,
-			models.PublishNewsletterPayload{
-				ID:  newsletter.ID,
-				Now: time.Now(),
-			},
-		)
-		if err != nil {
+	if publishNow {
+		if err := services.ScheduleNewsletterRelease(extractCtx(c), d.db, newsletter.ID); err != nil {
 			if err := addFlash(
 				c,
 				contexts.FlashError,
-				"Newsletter created as draft. Publishing failed.",
+				"Failed to schedule newsletter. Please try again.",
+			); err != nil {
+				return err
+			}
+		} else {
+			if err := addFlash(
+				c,
+				contexts.FlashSuccess,
+				"Newsletter published successfully!",
 			); err != nil {
 				return err
 			}
 		}
-
+	} else {
 		if err := addFlash(
 			c,
 			contexts.FlashSuccess,
-			"Newsletter published successfully!",
+			"Newsletter saved as draft successfully!",
 		); err != nil {
 			return err
 		}
-	}
-
-	if err := addFlash(
-		c,
-		contexts.FlashSuccess,
-		"Newsletter saved as draft successfully!",
-	); err != nil {
-		return err
 	}
 
 	return c.Redirect(302, "/dashboard/newsletters")
@@ -1097,6 +1089,22 @@ func (d Dashboard) UpdateNewsletter(c echo.Context) error {
 
 	published := newsletterPayload.Published == "on"
 
+	originalNewsletter, err := models.GetNewsletterByID(
+		extractCtx(c),
+		d.db.Pool,
+		newsletterID,
+	)
+	if err != nil {
+		if err := addFlash(
+			c,
+			contexts.FlashError,
+			"Newsletter not found.",
+		); err != nil {
+			return err
+		}
+		return c.Redirect(302, "/dashboard/newsletters")
+	}
+
 	updatePayload := models.UpdateNewsletterPayload{
 		ID:          newsletterID,
 		UpdatedAt:   time.Now(),
@@ -1105,7 +1113,6 @@ func (d Dashboard) UpdateNewsletter(c echo.Context) error {
 		Content:     newsletterPayload.Content,
 		IsPublished: published,
 	}
-
 	newsletter, err := models.UpdateNewsletter(
 		extractCtx(c),
 		d.db.Pool,
@@ -1140,31 +1147,29 @@ func (d Dashboard) UpdateNewsletter(c echo.Context) error {
 		return dashboard.EditNewsletter(formData).Render(renderArgs(c))
 	}
 
-	if published && newsletter.ReleasedAt.IsZero() {
-		_, err := models.PublishNewsletter(
-			c.Request().Context(),
-			d.db.Pool,
-			models.PublishNewsletterPayload{ID: newsletter.ID, Now: time.Now()},
-		)
-		if err != nil {
+	if published && !originalNewsletter.IsPublished {
+		if err := services.ScheduleNewsletterRelease(extractCtx(c), d.db, newsletter.ID); err != nil {
 			if err := addFlash(
 				c,
 				contexts.FlashError,
-				"Failed to update newsletter. Please try again.",
+				"Failed to schedule newsletter. Please try again.",
 			); err != nil {
 				return err
 			}
-			return err
-		}
-		if err := addFlash(
-			c,
-			contexts.FlashSuccess,
-			"Newsletter published successfully!",
-		); err != nil {
-			return err
+		} else {
+			if err := addFlash(
+				c,
+				contexts.FlashSuccess,
+				"Newsletter published successfully!",
+			); err != nil {
+				return err
+			}
 		}
 
-		return c.Redirect(302, "/dashboard/newsletters")
+		return c.Redirect(
+			302,
+			"/dashboard/newsletters",
+		)
 	}
 
 	if err := addFlash(

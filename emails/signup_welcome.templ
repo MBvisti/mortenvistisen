@@ -22,19 +22,15 @@ func (s SignupWelcome) Generate(ctx context.Context) (Html, Text, error) {
 }
 
 templ (s SignupWelcome) template() {
-	@base("Grafto Newsleter") {
+	@base("Welcome to Grafto!", "Welcome aboard! Please verify your email to get started.") {
+		@brandBanner()
+		@hero("Welcome onboard!", "Thanks for joining Grafto - we're thrilled to have you with us", gray50, false)
 		@mainContent() {
-			@brandBanner()
-			@header() {
-				Welcome onboard!
-			}
-			@paragraph() {
-				Thanks for signing up for { config.Cfg.ProjectName }. We’re thrilled to have you on board.
-			}
-			@paragraph() {
-				To start using our service, you need to verify your email address. Please enter the code below into the form shown on the page after you signed up.
-			}
-			@codeBlock(strings.ToUpper(s.VerificationCode))
+			@card("Getting Started", "Thanks for signing up for " + config.Cfg.ProjectName + ". We're excited to help you build amazing web applications with our full-stack Go template.", false, "")
+			@alert("Verification Required", "To start using our service, you need to verify your email address. Please enter the code below into the form shown on the page after you signed up.", "info")
+			@verificationCodeBlock(strings.ToUpper(s.VerificationCode))
+			@divider()
+			@card("What's Next?", "Once verified, you'll have access to all Grafto features including templates, documentation, and our community resources.", false, "")
 		}
 		@footer()
 	}

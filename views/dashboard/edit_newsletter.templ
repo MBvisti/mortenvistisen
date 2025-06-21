@@ -14,6 +14,7 @@ type EditNewsletterFormData struct {
 	IsPublished bool
 	Slug        string
 	Content     string
+	SendStatus  string
 	Errors      map[string][]string
 }
 
@@ -21,14 +22,14 @@ templ EditNewsletter(formData EditNewsletterFormData) {
 	@layouts.Dashboard() {
 		<div class="max-w-6xl mx-auto px-4">
 			@components.DashboardHeader("Edit Newsletter", "")
-			<div class="mb-4">
+			<div class="mb-3">
 				@components.Link("← Back to Newsletters", routes.DashboardNewsletters.Path)
 			</div>
 			<div class="flex flex-col">
-				<form method="POST" action={ templ.SafeURL(fmt.Sprintf("/dashboard/newsletters/%s/edit", formData.ID)) } class="bg-base-200 border border-base-300 rounded-xl p-6 shadow-lg space-y-8">
+				<form method="POST" action={ templ.SafeURL(fmt.Sprintf("/dashboard/newsletters/%s/edit", formData.ID)) } class="bg-base-200 border border-base-300 rounded-lg p-4 shadow-sm space-y-4" x-data="{ published: false }">
 					<div>
-						<h2 class="text-xl font-semibold mb-4">Newsletter Information</h2>
-						<div class="grid grid-cols-2 gap-4">
+						<h2 class="text-lg font-semibold mb-3">Newsletter Information</h2>
+						<div class="grid grid-cols-2 gap-3">
 							<div>
 								@components.InputField(
 									"Title",
@@ -55,21 +56,39 @@ templ EditNewsletter(formData EditNewsletterFormData) {
 									},
 								)
 							</div>
-							<div>
+							<div x-data="{ published: { if formData.IsPublished }true{ else }false{ end } }">
 								<label class="space-y-1 w-full">
 									<div class="flex justify-between items-center">
-										<span class="text-sm font-medium text-base-content md:text-lg">Publish Status</span>
+										<span class="text-sm font-medium text-base-content">Publish Status</span>
 									</div>
 									<label class="checkbox-wrapper">
 										<input
 											type="checkbox"
 											name="published"
+											id="published"
+											x-model="published"
 											if formData.IsPublished {
 												checked
+												disabled
+												x-init="published = true"
 											}
 										/>
-										<span class="checkbox-label">Published</span>
+										if formData.IsPublished {
+											<input type="hidden" name="published" value="on"/>
+										}
+										<span class="checkbox-label">
+											if formData.IsPublished {
+												Published (Newsletter already sent)
+											} else {
+												Published
+											}
+										</span>
 									</label>
+									if formData.IsPublished {
+										<div class="mt-1">
+											<span class="text-xs text-base-content/70">This newsletter has already been published and sent to subscribers.</span>
+										</div>
+									}
 									if formData.Errors["published"] != nil {
 										<div class="flex justify-between items-center">
 											for _, errMsg := range formData.Errors["published"] {
@@ -82,12 +101,23 @@ templ EditNewsletter(formData EditNewsletterFormData) {
 						</div>
 					</div>
 					<div>
-						<h2 class="text-xl font-semibold mb-4">Newsletter Content</h2>
+						<h2 class="text-lg font-semibold mb-3">Newsletter Content</h2>
 						<textarea id="editorTarget" name="content">{ formData.Content }</textarea>
 					</div>
-					<div class="flex justify-end mt-6">
-						<button type="submit" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-primary text-primary-content hover:bg-primary/90 focus:ring-primary focus:ring-offset-base-200 w-full py-3 text-base font-semibold">
-							Update Newsletter
+					<div class="flex justify-end mt-4">
+						<button
+							type="submit"
+							class="inline-flex items-center justify-center px-3 py-1.5 text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed bg-primary text-primary-content hover:bg-primary/90 focus:ring-primary focus:ring-offset-base-200"
+							if !formData.IsPublished {
+								x-text="published ? 'Publish Newsletter' : 'Update Newsletter'"
+								@click="if (published && !confirm('Are you sure you want to publish this newsletter? It will be sent to all subscribers.')) $event.preventDefault()"
+							}
+						>
+							if formData.IsPublished {
+								Update Newsletter
+							} else {
+								Update Newsletter
+							}
 						</button>
 					</div>
 				</form>

@@ -7,6 +7,7 @@ import (
 
 	"github.com/mbvisti/mortenvistisen/clients"
 	"github.com/mbvisti/mortenvistisen/config"
+	"github.com/mbvisti/mortenvistisen/psql"
 	"github.com/mbvisti/mortenvistisen/psql/queue/jobs"
 	"github.com/riverqueue/river"
 	"go.opentelemetry.io/otel"
@@ -16,6 +17,7 @@ import (
 
 type EmailJobWorker struct {
 	emailClient clients.Email
+	db          psql.Postgres
 	river.WorkerDefaults[jobs.EmailJobArgs]
 }
 
@@ -38,36 +40,17 @@ func (w *EmailJobWorker) Work(
 	)
 	defer span.End()
 
-	var err error
-	if job.Args.Type == "transaction" {
-		span.SetAttributes(attribute.String("email.category", "transaction"))
-		err = w.emailClient.SendTransaction(
-			ctx,
-			clients.EmailPayload{
-				To:       job.Args.To,
-				From:     job.Args.From,
-				Subject:  job.Args.Subject,
-				HtmlBody: job.Args.HtmlVersion,
-				TextBody: job.Args.TextVersion,
-			},
-		)
-	}
-
-	if job.Args.Type != "transaction" {
-		span.SetAttributes(attribute.String("email.category", "marketing"))
-		err = w.emailClient.SendMarketing(
-			ctx,
-			clients.EmailPayload{
-				To:       job.Args.To,
-				From:     job.Args.From,
-				Subject:  job.Args.Subject,
-				HtmlBody: job.Args.HtmlVersion,
-				TextBody: job.Args.TextVersion,
-			},
-			// TODO set this up
-			clients.Unsubscribe{},
-		)
-	}
+	span.SetAttributes(attribute.String("email.category", "transaction"))
+	err := w.emailClient.SendTransaction(
+		ctx,
+		clients.EmailPayload{
+			To:       job.Args.To,
+			From:     job.Args.From,
+			Subject:  job.Args.Subject,
+			HtmlBody: job.Args.HtmlVersion,
+			TextBody: job.Args.TextVersion,
+		},
+	)
 
 	duration := time.Since(start)
 

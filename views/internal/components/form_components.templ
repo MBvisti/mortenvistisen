@@ -27,11 +27,11 @@ func UppercaseFirstWord(sentence string) string {
 templ InputField(title, fieldType, fieldName, placeholder string, attributes templ.Attributes, props InputFieldProps) {
 	<label class="space-y-1 w-full">
 		<div class="flex justify-between items-center">
-			<span class="text-sm font-medium text-base-content md:text-lg">{ title }</span>
+			<span class="text-sm font-medium text-base-content">{ title }</span>
 		</div>
 		<input
 			{ attributes... }
-			class={ "border rounded w-full p-2 bg-base-200", templ.KV("border-error focus:ring-error", len(props.ErrorMsgs)> 0) }
+			class={ "border rounded w-full p-1.5 bg-base-200 text-sm", templ.KV("border-error focus:ring-error", len(props.ErrorMsgs)> 0) }
 			type={ fieldType }
 			placeholder={ placeholder }
 			value={ props.Value }
@@ -50,11 +50,11 @@ templ InputField(title, fieldType, fieldName, placeholder string, attributes tem
 templ InfoFlag(msg string) {
 	<div
 		role="alert"
-		class="flex items-center space-x-3 p-4 rounded-lg border bg-info/20 border-info/30 text-info-content"
+		class="flex items-center space-x-2 p-3 rounded-lg border bg-info/20 border-info/30 text-info-content"
 	>
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
-			class="h-6 w-6 shrink-0 stroke-current"
+			class="h-5 w-5 shrink-0 stroke-current"
 			fill="none"
 			viewBox="0 0 24 24"
 		>
@@ -72,12 +72,12 @@ templ InfoFlag(msg string) {
 templ SuccessFlag(msg string, attributes templ.Attributes) {
 	<div
 		role="alert"
-		class="flex items-center space-x-3 p-4 rounded-lg border bg-success/20 border-success/30 text-success-content"
+		class="flex items-center space-x-2 p-3 rounded-lg border bg-success/20 border-success/30 text-success-content"
 		{ attributes... }
 	>
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
-			class="h-6 w-6 shrink-0 stroke-current"
+			class="h-5 w-5 shrink-0 stroke-current"
 			fill="none"
 			viewBox="0 0 24 24"
 		>
@@ -95,11 +95,11 @@ templ SuccessFlag(msg string, attributes templ.Attributes) {
 templ WarningFlag(msg string) {
 	<div
 		role="alert"
-		class="flex items-center space-x-3 p-4 rounded-lg border bg-warning/20 border-warning/30 text-warning-content"
+		class="flex items-center space-x-2 p-3 rounded-lg border bg-warning/20 border-warning/30 text-warning-content"
 	>
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
-			class="h-6 w-6 shrink-0 stroke-current"
+			class="h-5 w-5 shrink-0 stroke-current"
 			fill="none"
 			viewBox="0 0 24 24"
 		>
@@ -117,11 +117,11 @@ templ WarningFlag(msg string) {
 templ ErrorFlag(msg string) {
 	<div
 		role="alert"
-		class="flex items-center space-x-3 p-4 rounded-lg border bg-error/20 border-error/30 text-error-content"
+		class="flex items-center space-x-2 p-3 rounded-lg border bg-error/20 border-error/30 text-error-content"
 	>
 		<svg
 			xmlns="http://www.w3.org/2000/svg"
-			class="h-6 w-6 shrink-0 stroke-current"
+			class="h-5 w-5 shrink-0 stroke-current"
 			fill="none"
 			viewBox="0 0 24 24"
 		>

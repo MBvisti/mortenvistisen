@@ -142,8 +142,7 @@ func (a App) ArticlePage(c echo.Context) error {
 		return err
 	}
 
-	manager := NewManager()
-	ar, e := manager.ParseContent(article.Content)
+	ar, e := services.ParseMarkdownToHtml(article.Content)
 	if e != nil {
 		return e
 	}
@@ -488,4 +487,91 @@ func verifyTurnstileToken(
 	}
 
 	return turnstileResp.Success, nil
+}
+
+func (a App) HandleUnsubscribe(c echo.Context) error {
+	tokenValue := c.Param("token")
+	if tokenValue == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "Token is required",
+		})
+	}
+
+	ctx := c.Request().Context()
+
+	token, err := models.GetHashedToken(ctx, a.db.Pool, tokenValue)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, map[string]string{
+			"error": "Invalid or expired unsubscribe link",
+		})
+	}
+
+	if token.Meta.Scope != models.ScopeUnsubscribe {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "Invalid token scope",
+		})
+	}
+
+	if token.Meta.Resource != models.ResourceSubscriber {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "Invalid token resource",
+		})
+	}
+
+	if !token.IsValid() {
+		return c.JSON(http.StatusGone, map[string]string{
+			"error": "Unsubscribe link has expired",
+		})
+	}
+
+	subscriber, err := models.GetSubscriber(
+		ctx,
+		a.db.Pool,
+		token.Meta.ResourceID,
+	)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, map[string]string{
+			"error": "Subscriber not found",
+		})
+	}
+
+	tx, err := a.db.BeginTx(ctx)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "Failed to process unsubscribe",
+		})
+	}
+	defer func() {
+		if rollbackErr := a.db.RollBackTx(ctx, tx); rollbackErr != nil {
+			slog.ErrorContext(
+				ctx,
+				"failed to rollback transaction",
+				"error",
+				rollbackErr,
+			)
+		}
+	}()
+
+	if err := models.DeleteSubscriber(ctx, tx, subscriber.ID); err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "Failed to unsubscribe",
+		})
+	}
+
+	if err := models.DeleteToken(ctx, tx, token.ID); err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "Failed to process unsubscribe",
+		})
+	}
+
+	if err := a.db.CommitTx(ctx, tx); err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "Failed to complete unsubscribe",
+		})
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{
+		"message": "Successfully unsubscribed from newsletter",
+		"email":   subscriber.Email,
+	})
 }
