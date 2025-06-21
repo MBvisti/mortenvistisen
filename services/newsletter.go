@@ -52,6 +52,8 @@ func ScheduleNewsletterRelease(
 	if err != nil {
 		return err
 	}
+
+	//nolint:errcheck // not needed
 	defer tx.Rollback(ctx)
 
 	baseTime := time.Now()

@@ -232,7 +232,7 @@ func GetNewslettersPaginatedWithStats(
 		if exists {
 			statsPtr = &stats
 		}
-		
+
 		newslettersWithStats[i] = NewsletterWithStats{
 			Newsletter: newsletter,
 			SendStats:  statsPtr,

@@ -11,10 +11,6 @@ import (
 	"github.com/yuin/goldmark/renderer/html"
 )
 
-type manager struct {
-	markdownHandler goldmark.Markdown
-}
-
 func newParser() goldmark.Markdown {
 	return goldmark.New(
 		goldmark.WithExtensions(
