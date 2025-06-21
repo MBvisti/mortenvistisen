@@ -48,17 +48,13 @@ func ScheduleNewsletterRelease(
 		return fmt.Errorf("failed to get verified subscribers: %w", err)
 	}
 
-	if len(verifiedSubscribers) > MaxDailyEmails {
-		verifiedSubscribers = verifiedSubscribers[:MaxDailyEmails]
-	}
-
 	tx, err := psql.BeginTx(ctx)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback(ctx)
 
-	baseTime := getNextSendTime()
+	baseTime := time.Now()
 	emailJobs := make([]river.InsertManyParams, 0, len(verifiedSubscribers))
 
 	content, err := ParseMarkdownToHtml(newsletter.Content)
@@ -86,8 +82,12 @@ func ScheduleNewsletterRelease(
 			token.Value,
 		)
 
+		day := i / MaxDailyEmails
+		indexInDay := i % MaxDailyEmails
 		scheduledAt := baseTime.Add(
-			time.Duration(calculateEmailDelay(i)) * time.Minute,
+			time.Duration(
+				day*24*60+calculateEmailDelay(indexInDay),
+			) * time.Minute,
 		)
 
 		html, txt, err := emails.Newsletter{
@@ -163,31 +163,11 @@ func ScheduleNewsletterRelease(
 	return tx.Commit(ctx)
 }
 
-func getNextSendTime() time.Time {
-	now := time.Now()
-	sendTime := time.Date(
-		now.Year(),
-		now.Month(),
-		now.Day(),
-		SendStartHour,
-		SendStartMinute,
-		0,
-		0,
-		now.Location(),
-	)
-
-	if sendTime.Before(now) {
-		sendTime = sendTime.Add(24 * time.Hour)
-	}
-
-	return sendTime
-}
-
-func calculateEmailDelay(index int) int {
+func calculateEmailDelay(indexInDay int) int {
 	minDelay := MinDelayMinutes
 	maxDelay := MaxDelayMinutes
 
-	baseDelay := index * 2
+	baseDelay := indexInDay * 2
 
 	randomRange := maxDelay - minDelay + 1
 	randomBig, err := rand.Int(rand.Reader, big.NewInt(int64(randomRange)))
