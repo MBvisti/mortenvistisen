@@ -103,16 +103,14 @@ type Newsletter struct {
 
 type NewsletterEmailSend struct {
 	ID           uuid.UUID
-	NewsletterID uuid.UUID
-	SubscriberID uuid.UUID
-	EmailAddress string
+	CreatedAt    pgtype.Timestamptz
+	UpdatedAt    pgtype.Timestamptz
 	Status       string
 	SentAt       pgtype.Timestamptz
 	FailedAt     pgtype.Timestamptz
 	ErrorMessage sql.NullString
-	RiverJobID   sql.NullInt64
-	CreatedAt    pgtype.Timestamptz
-	UpdatedAt    pgtype.Timestamptz
+	NewsletterID uuid.UUID
+	SubscriberID uuid.UUID
 }
 
 type RiverClient struct {

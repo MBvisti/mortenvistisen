@@ -77,7 +77,7 @@ func (q *Queries) GetAllNewsletterSendStats(ctx context.Context, db DBTX) ([]Get
 }
 
 const getNewsletterEmailSendsByNewsletter = `-- name: GetNewsletterEmailSendsByNewsletter :many
-SELECT id, newsletter_id, subscriber_id, email_address, status, sent_at, failed_at, error_message, river_job_id, created_at, updated_at FROM newsletter_email_sends 
+SELECT id, created_at, updated_at, status, sent_at, failed_at, error_message, newsletter_id, subscriber_id FROM newsletter_email_sends 
 WHERE newsletter_id = $1
 ORDER BY created_at DESC
 `
@@ -93,16 +93,14 @@ func (q *Queries) GetNewsletterEmailSendsByNewsletter(ctx context.Context, db DB
 		var i NewsletterEmailSend
 		if err := rows.Scan(
 			&i.ID,
-			&i.NewsletterID,
-			&i.SubscriberID,
-			&i.EmailAddress,
+			&i.CreatedAt,
+			&i.UpdatedAt,
 			&i.Status,
 			&i.SentAt,
 			&i.FailedAt,
 			&i.ErrorMessage,
-			&i.RiverJobID,
-			&i.CreatedAt,
-			&i.UpdatedAt,
+			&i.NewsletterID,
+			&i.SubscriberID,
 		); err != nil {
 			return nil, err
 		}
@@ -157,41 +155,37 @@ func (q *Queries) GetNewsletterSendStats(ctx context.Context, db DBTX, newslette
 
 const insertNewsletterEmailSend = `-- name: InsertNewsletterEmailSend :one
 INSERT INTO newsletter_email_sends (
-    newsletter_id, subscriber_id, email_address, status, river_job_id
+    id, newsletter_id, subscriber_id, status, created_at, updated_at
 ) VALUES (
-    $1, $2, $3, $4, $5
-) RETURNING id, newsletter_id, subscriber_id, email_address, status, sent_at, failed_at, error_message, river_job_id, created_at, updated_at
+    $1, $2, $3, $4, NOW(), NOW()
+) RETURNING id, created_at, updated_at, status, sent_at, failed_at, error_message, newsletter_id, subscriber_id
 `
 
 type InsertNewsletterEmailSendParams struct {
+	ID           uuid.UUID
 	NewsletterID uuid.UUID
 	SubscriberID uuid.UUID
-	EmailAddress string
 	Status       string
-	RiverJobID   sql.NullInt64
 }
 
 func (q *Queries) InsertNewsletterEmailSend(ctx context.Context, db DBTX, arg InsertNewsletterEmailSendParams) (NewsletterEmailSend, error) {
 	row := db.QueryRow(ctx, insertNewsletterEmailSend,
+		arg.ID,
 		arg.NewsletterID,
 		arg.SubscriberID,
-		arg.EmailAddress,
 		arg.Status,
-		arg.RiverJobID,
 	)
 	var i NewsletterEmailSend
 	err := row.Scan(
 		&i.ID,
-		&i.NewsletterID,
-		&i.SubscriberID,
-		&i.EmailAddress,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 		&i.Status,
 		&i.SentAt,
 		&i.FailedAt,
 		&i.ErrorMessage,
-		&i.RiverJobID,
-		&i.CreatedAt,
-		&i.UpdatedAt,
+		&i.NewsletterID,
+		&i.SubscriberID,
 	)
 	return i, err
 }
@@ -200,18 +194,20 @@ const updateNewsletterEmailSendStatus = `-- name: UpdateNewsletterEmailSendStatu
 UPDATE newsletter_email_sends 
 SET 
     status = $3,
-    sent_at = CASE WHEN $3 = 'sent' THEN NOW() ELSE sent_at END,
-    failed_at = CASE WHEN $3 IN ('failed', 'bounced') THEN NOW() ELSE failed_at END,
-    error_message = $4,
+    sent_at = $4,
+    failed_at = $5,
+    error_message = $6,
     updated_at = NOW()
 WHERE newsletter_id = $1 AND subscriber_id = $2
-RETURNING id, newsletter_id, subscriber_id, email_address, status, sent_at, failed_at, error_message, river_job_id, created_at, updated_at
+RETURNING id, created_at, updated_at, status, sent_at, failed_at, error_message, newsletter_id, subscriber_id
 `
 
 type UpdateNewsletterEmailSendStatusParams struct {
 	NewsletterID uuid.UUID
 	SubscriberID uuid.UUID
 	Status       string
+	SentAt       pgtype.Timestamptz
+	FailedAt     pgtype.Timestamptz
 	ErrorMessage sql.NullString
 }
 
@@ -220,21 +216,21 @@ func (q *Queries) UpdateNewsletterEmailSendStatus(ctx context.Context, db DBTX, 
 		arg.NewsletterID,
 		arg.SubscriberID,
 		arg.Status,
+		arg.SentAt,
+		arg.FailedAt,
 		arg.ErrorMessage,
 	)
 	var i NewsletterEmailSend
 	err := row.Scan(
 		&i.ID,
-		&i.NewsletterID,
-		&i.SubscriberID,
-		&i.EmailAddress,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 		&i.Status,
 		&i.SentAt,
 		&i.FailedAt,
 		&i.ErrorMessage,
-		&i.RiverJobID,
-		&i.CreatedAt,
-		&i.UpdatedAt,
+		&i.NewsletterID,
+		&i.SubscriberID,
 	)
 	return i, err
 }

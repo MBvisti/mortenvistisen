@@ -59,7 +59,7 @@ templ btn(title, href string) {
 
 func getBtnStyle(variant, size string) string {
 	baseStyle := "border-radius: 6px; box-sizing: border-box; cursor: pointer; display: inline-block; font-weight: 600; margin: 0; text-decoration: none; text-align: center; transition: all 0.2s ease-in-out; vertical-align: middle; white-space: nowrap;"
-	
+
 	var colorStyle string
 	switch variant {
 	case "primary":
@@ -79,7 +79,7 @@ func getBtnStyle(variant, size string) string {
 	default:
 		colorStyle = fmt.Sprintf("background-color: %s; color: #ffffff; border: solid 2px %s;", primaryColor, primaryColor)
 	}
-	
+
 	var sizeStyle string
 	switch size {
 	case "small":
@@ -91,7 +91,7 @@ func getBtnStyle(variant, size string) string {
 	default:
 		sizeStyle = fmt.Sprintf("font-size: %s; padding: %s %s; min-height: 44px;", fontBase, spacing3, spacing6)
 	}
-	
+
 	return baseStyle + " " + colorStyle + " " + sizeStyle
 }
 
@@ -150,8 +150,9 @@ templ footerWithUnsubscribe(unsubscribeLink string) {
 				<td class="content-block responsive-text-sm" style={ fmt.Sprintf("font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; vertical-align: top; color: %s; font-size: 14px; text-align: center; line-height: 1.6;", gray500) } valign="top" align="center">
 					<span class="apple-link" style={ fmt.Sprintf("color: %s; font-size: 14px; text-align: center; font-weight: 600;", gray600) }>mbvisti inc</span>
 					if unsubscribeLink != "" {
-						<br/><br/>
-						<span style={ fmt.Sprintf("color: %s;", gray500) }>Don't like these emails?</span> 
+						<br/>
+						<br/>
+						<span style={ fmt.Sprintf("color: %s;", gray500) }>Don't like these emails?</span>
 						<a href={ templ.SafeURL(unsubscribeLink) } style={ fmt.Sprintf("text-decoration: underline; color: %s; font-size: 14px; text-align: center; font-weight: 500;", primaryColor) } aria-label="Unsubscribe from emails">Unsubscribe</a>
 					}
 				</td>
@@ -245,13 +246,13 @@ templ hero(title, subtitle, bgColor string, hasImage bool) {
 	</table>
 }
 
+//style={ fmt.Sprintf("border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; margin-bottom: 24px; background-color: %s; border: 1px solid %s; border-radius: 12px;", bgLightMainContent, gray200) }
 templ card(title, content string, hasImage bool, imageUrl string) {
 	<table
 		role="presentation"
 		border="0"
 		cellpadding="0"
 		cellspacing="0"
-		style={ fmt.Sprintf("border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; width: 100%; margin-bottom: 24px; background-color: %s; border: 1px solid %s; border-radius: 12px;", bgLightMainContent, gray200) }
 		width="100%"
 		aria-label="Content card"
 	>
@@ -314,7 +315,7 @@ templ divider() {
 	>
 		<tr>
 			<td style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; vertical-align: top;" valign="top">
-				<div style={ fmt.Sprintf("border-top: 1px solid %s; width: 100%;", gray300) } role="separator" aria-hidden="true"></div>
+				<div style={ fmt.Sprintf("border-top: 1px solid %s;", gray300) + " width: 100%;" } role="separator" aria-hidden="true"></div>
 			</td>
 		</tr>
 	</table>
@@ -328,7 +329,7 @@ templ badge(text, variant string) {
 
 func getBadgeStyle(variant string) string {
 	baseStyle := "font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 20px; display: inline-block; text-transform: uppercase; letter-spacing: 0.5px;"
-	
+
 	switch variant {
 	case "success":
 		return baseStyle + fmt.Sprintf(" background-color: %s; color: #ffffff;", successColor)
@@ -373,7 +374,7 @@ templ alert(title, message, variant string) {
 
 func getAlertStyle(variant string) string {
 	baseStyle := "font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; vertical-align: top; padding: 16px; border-left: 4px solid; border-radius: 8px;"
-	
+
 	switch variant {
 	case "success":
 		return baseStyle + fmt.Sprintf(" background-color: #ecfdf5; border-color: %s; color: #065f46;", successColor)
@@ -401,7 +402,7 @@ templ social(links map[string]string) {
 		<tr>
 			<td style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; vertical-align: top; text-align: center; padding: 16px;" valign="top" align="center">
 				for platform, url := range links {
-					<a href={ templ.SafeURL(url) } style={ fmt.Sprintf("display: inline-block; margin: 0 8px; padding: 12px; background-color: %s; color: #ffffff; border-radius: 50%; text-decoration: none; font-size: 16px; font-weight: 600; min-width: 44px; min-height: 44px; line-height: 20px;", primaryColor) } aria-label={ fmt.Sprintf("Follow us on %s", platform) } target="_blank">
+					<a href={ templ.SafeURL(url) } style={ fmt.Sprintf("display: inline-block; margin: 0 8px; padding: 12px; background-color: %s; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; min-width: 44px; min-height: 44px; line-height: 20px;", primaryColor) + "border-radius: 50%;" } aria-label={ fmt.Sprintf("Follow us on %s", platform) } target="_blank">
 						{ platform }
 					</a>
 				}
@@ -409,3 +410,4 @@ templ social(links map[string]string) {
 		</tr>
 	</table>
 }
+

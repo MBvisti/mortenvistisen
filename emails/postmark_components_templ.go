@@ -10,39 +10,31 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import "fmt"
 
-type HeaderData struct {
+type PostmarkHeaderData struct {
 	Logo        string
 	CompanyName string
 	Title       string
 	Subtitle    string
 }
 
-type ButtonData struct {
+type PostmarkButtonData struct {
 	URL   string
 	Text  string
-	Color string
+	Style string
 }
 
-type FooterData struct {
+type PostmarkFooterData struct {
 	CompanyName    string
 	Address        string
 	UnsubscribeURL string
 }
 
-type TextData struct {
-	Content string
-}
-
-type SpacerData struct {
-	Height string
-}
-
-type EmailData struct {
+type PostmarkEmailData struct {
 	Title       string
 	PreviewText string
 }
 
-func Header(data HeaderData) templ.Component {
+func PostmarkHeader(data PostmarkHeaderData) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -75,7 +67,7 @@ func Header(data HeaderData) templ.Component {
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(data.Logo)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `emails/base_two.templ`, Line: 42, Col: 25}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `emails/postmark_components.templ`, Line: 34, Col: 25}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
@@ -88,7 +80,7 @@ func Header(data HeaderData) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(data.CompanyName)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `emails/base_two.templ`, Line: 42, Col: 50}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `emails/postmark_components.templ`, Line: 34, Col: 50}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -107,7 +99,7 @@ func Header(data HeaderData) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(data.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `emails/base_two.templ`, Line: 45, Col: 214}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `emails/postmark_components.templ`, Line: 37, Col: 214}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -126,7 +118,7 @@ func Header(data HeaderData) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(data.Subtitle)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `emails/base_two.templ`, Line: 48, Col: 206}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `emails/postmark_components.templ`, Line: 40, Col: 206}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -145,7 +137,7 @@ func Header(data HeaderData) templ.Component {
 	})
 }
 
-func Section() templ.Component {
+func PostmarkSection() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -182,7 +174,7 @@ func Section() templ.Component {
 	})
 }
 
-func Button(data ButtonData) templ.Component {
+func PostmarkButton(data PostmarkButtonData) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -210,7 +202,7 @@ func Button(data ButtonData) templ.Component {
 		var templ_7745c5c3_Var8 templ.SafeURL
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(data.URL))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `emails/base_two.templ`, Line: 76, Col: 33}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `emails/postmark_components.templ`, Line: 68, Col: 33}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -223,7 +215,7 @@ func Button(data ButtonData) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(data.Text)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `emails/base_two.templ`, Line: 77, Col: 16}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `emails/postmark_components.templ`, Line: 69, Col: 16}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -237,7 +229,7 @@ func Button(data ButtonData) templ.Component {
 	})
 }
 
-func Footer(data FooterData) templ.Component {
+func PostmarkFooter(data PostmarkFooterData) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -270,7 +262,7 @@ func Footer(data FooterData) templ.Component {
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(data.CompanyName)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `emails/base_two.templ`, Line: 93, Col: 209}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `emails/postmark_components.templ`, Line: 85, Col: 209}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
@@ -289,7 +281,7 @@ func Footer(data FooterData) templ.Component {
 			var templ_7745c5c3_Var12 string
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(data.Address)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `emails/base_two.templ`, Line: 96, Col: 206}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `emails/postmark_components.templ`, Line: 88, Col: 206}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
@@ -308,7 +300,7 @@ func Footer(data FooterData) templ.Component {
 			var templ_7745c5c3_Var13 templ.SafeURL
 			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(data.UnsubscribeURL))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `emails/base_two.templ`, Line: 100, Col: 46}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `emails/postmark_components.templ`, Line: 92, Col: 46}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {
@@ -327,7 +319,7 @@ func Footer(data FooterData) templ.Component {
 	})
 }
 
-func TextBlock(data TextData) templ.Component {
+func PostmarkSpacer(height string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -348,20 +340,20 @@ func TextBlock(data TextData) templ.Component {
 			templ_7745c5c3_Var14 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<table role=\"presentation\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\" width=\"100%\" style=\"border-collapse: collapse;\"><tr><td style=\"padding: 0 24px 16px 24px;\"><p style=\"margin: 0; font-size: 16px; color: #374151; line-height: 1.6; font-family: 'Nunito Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "<table role=\"presentation\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\" width=\"100%\" style=\"border-collapse: collapse;\"><tr><td style=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var15 string
-		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(data.Content)
+		templ_7745c5c3_Var15, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(fmt.Sprintf("height: %spx; line-height: %spx; font-size: 1px;", height, height))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `emails/base_two.templ`, Line: 113, Col: 196}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `emails/postmark_components.templ`, Line: 104, Col: 94}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "</p></td></tr></table>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "\">&nbsp;</td></tr></table>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -369,7 +361,7 @@ func TextBlock(data TextData) templ.Component {
 	})
 }
 
-func Spacer(data SpacerData) templ.Component {
+func PostmarkDivider() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -390,20 +382,7 @@ func Spacer(data SpacerData) templ.Component {
 			templ_7745c5c3_Var16 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<table role=\"presentation\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\" width=\"100%\" style=\"border-collapse: collapse;\"><tr><td style=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var17 string
-		templ_7745c5c3_Var17, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(fmt.Sprintf("height: %spx; line-height: %spx; font-size: 1px;", data.Height, data.Height))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `emails/base_two.templ`, Line: 122, Col: 104}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "\">&nbsp;</td></tr></table>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<table role=\"presentation\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\" width=\"100%\" style=\"border-collapse: collapse;\"><tr><td style=\"padding: 16px 24px;\"><div style=\"border-top: 1px solid #e5e7eb; width: 100%;\"></div></td></tr></table>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -411,7 +390,7 @@ func Spacer(data SpacerData) templ.Component {
 	})
 }
 
-func List(items []string) templ.Component {
+func PostmarkTextBlock(content string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -427,35 +406,25 @@ func List(items []string) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var18 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var18 == nil {
-			templ_7745c5c3_Var18 = templ.NopComponent
+		templ_7745c5c3_Var17 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var17 == nil {
+			templ_7745c5c3_Var17 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "<table role=\"presentation\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\" width=\"100%\" style=\"border-collapse: collapse;\"><tr><td style=\"padding: 0 24px 16px 24px;\"><ul style=\"margin: 0; padding-left: 20px; font-family: 'Nunito Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; color: #374151; line-height: 1.6;\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<table role=\"presentation\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\" width=\"100%\" style=\"border-collapse: collapse;\"><tr><td style=\"padding: 0 24px 16px 24px;\"><p style=\"margin: 0; font-size: 16px; color: #374151; line-height: 1.6; font-family: 'Nunito Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		for _, item := range items {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "<li style=\"margin-bottom: 8px;\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var19 string
-			templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(item)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `emails/base_two.templ`, Line: 133, Col: 44}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "</li>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
+		var templ_7745c5c3_Var18 string
+		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(content)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `emails/postmark_components.templ`, Line: 123, Col: 191}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "</ul></td></tr></table>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "</p></td></tr></table>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -463,7 +432,7 @@ func List(items []string) templ.Component {
 	})
 }
 
-func BaseLayout(data EmailData) templ.Component {
+func PostmarkHeading(text string, level int) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -479,46 +448,208 @@ func BaseLayout(data EmailData) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var20 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var20 == nil {
-			templ_7745c5c3_Var20 = templ.NopComponent
+		templ_7745c5c3_Var19 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var19 == nil {
+			templ_7745c5c3_Var19 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "<!doctype html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\"><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><meta name=\"x-apple-disable-message-reformatting\"><title>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "<table role=\"presentation\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\" width=\"100%\" style=\"border-collapse: collapse;\"><tr><td style=\"padding: 0 24px 16px 24px;\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var21 string
-		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(data.Title)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `emails/base_two.templ`, Line: 148, Col: 22}
+		if level == 1 {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "<h1 style=\"margin: 0; font-size: 32px; font-weight: 700; color: #111827; line-height: 1.2; font-family: 'Nunito Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var20 string
+			templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(text)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `emails/postmark_components.templ`, Line: 134, Col: 208}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "</h1>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
+		if level == 2 {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "<h2 style=\"margin: 0; font-size: 24px; font-weight: 600; color: #111827; line-height: 1.3; font-family: 'Nunito Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var21 string
+			templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(text)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `emails/postmark_components.templ`, Line: 137, Col: 208}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "</h2>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		if level == 3 {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "<h3 style=\"margin: 0; font-size: 20px; font-weight: 600; color: #111827; line-height: 1.4; font-family: 'Nunito Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var22 string
+			templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(text)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `emails/postmark_components.templ`, Line: 140, Col: 208}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "</h3>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "</td></tr></table>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "</title><!--[if mso]>\n\t\t\t<noscript>\n\t\t\t\t<xml>\n\t\t\t\t\t<o:OfficeDocumentSettings>\n\t\t\t\t\t\t<o:AllowPNG/>\n\t\t\t\t\t\t<o:PixelsPerInch>96</o:PixelsPerInch>\n\t\t\t\t\t</o:OfficeDocumentSettings>\n\t\t\t\t</xml>\n\t\t\t</noscript>\n\t\t\t<![endif]--><!--[if mso]>\n\t\t\t<style type=\"text/css\">\n\t\t\t\ttable, td {border-collapse: collapse;}\n\t\t\t\t.spacer, .divider {mso-line-height-rule: exactly;}\n\t\t\t\t.fallback-text {font-family: Arial, sans-serif !important;}\n\t\t\t</style>\n\t\t\t<![endif]--><style type=\"text/css\">\n\t\t\t\t@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700&display=swap');\n\t\t\t\t\n\t\t\t\t@media only screen and (max-width: 600px) {\n\t\t\t\t\t.container {\n\t\t\t\t\t\twidth: 100% !important;\n\t\t\t\t\t\tmax-width: 100% !important;\n\t\t\t\t\t}\n\t\t\t\t\t.mobile-padding {\n\t\t\t\t\t\tpadding-left: 16px !important;\n\t\t\t\t\t\tpadding-right: 16px !important;\n\t\t\t\t\t}\n\t\t\t\t\t.mobile-center {\n\t\t\t\t\t\ttext-align: center !important;\n\t\t\t\t\t}\n\t\t\t\t\t.mobile-font-size {\n\t\t\t\t\t\tfont-size: 14px !important;\n\t\t\t\t\t\tline-height: 1.5 !important;\n\t\t\t\t\t}\n\t\t\t\t\t.mobile-button {\n\t\t\t\t\t\twidth: 100% !important;\n\t\t\t\t\t\tmax-width: 280px !important;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\t@media (prefers-color-scheme: dark) {\n\t\t\t\t\t.dark-mode-bg { background-color: #1f2937 !important; }\n\t\t\t\t\t.dark-mode-text { color: #f9fafb !important; }\n\t\t\t\t\t.dark-mode-border { border-color: #374151 !important; }\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\tbody, table, td, p, a, li, blockquote {\n\t\t\t\t\t-webkit-text-size-adjust: 100%;\n\t\t\t\t\t-ms-text-size-adjust: 100%;\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\ttable, td {\n\t\t\t\t\tmso-table-lspace: 0pt;\n\t\t\t\t\tmso-table-rspace: 0pt;\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\timg {\n\t\t\t\t\t-ms-interpolation-mode: bicubic;\n\t\t\t\t\tborder: 0;\n\t\t\t\t\toutline: none;\n\t\t\t\t\ttext-decoration: none;\n\t\t\t\t}\n\t\t\t</style></head><body style=\"margin: 0; padding: 0; background-color: #f3f4f6; font-family: 'Nunito Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%;\"><div style=\"display: none; max-height: 0; overflow: hidden; font-size: 1px; line-height: 1px; color: #f3f4f6; opacity: 0;\">")
+		return nil
+	})
+}
+
+func PostmarkCallout(content, variant string) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var23 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var23 == nil {
+			templ_7745c5c3_Var23 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "<table role=\"presentation\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\" width=\"100%\" style=\"border-collapse: collapse;\"><tr><td style=\"padding: 0 24px 16px 24px;\"><div style=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var22 string
-		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(data.PreviewText)
+		var templ_7745c5c3_Var24 string
+		templ_7745c5c3_Var24, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(getPostmarkCalloutStyle(variant))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `emails/base_two.templ`, Line: 217, Col: 22}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `emails/postmark_components.templ`, Line: 151, Col: 49}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "<div style=\"display: none; max-height: 0; overflow: hidden;\">&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;</div></div><table role=\"presentation\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\" width=\"100%\" style=\"background-color: #f3f4f6; border-collapse: collapse;\"><tr><td align=\"center\" style=\"padding: 24px 16px;\"><!--[if mso]>\n\t\t\t\t\t\t<table role=\"presentation\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\" width=\"570\">\n\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t<td>\n\t\t\t\t\t\t<![endif]--><table class=\"container\" role=\"presentation\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\" width=\"570\" style=\"max-width: 570px; width: 100%; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); border-collapse: collapse; overflow: hidden;\"><tr><td style=\"padding: 0;\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templ_7745c5c3_Var20.Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "\"><p style=\"margin: 0; font-size: 16px; line-height: 1.6; font-family: 'Nunito Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "</td></tr></table><!--[if mso]>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t</table>\n\t\t\t\t\t\t<![endif]--></td></tr></table></body></html>")
+		var templ_7745c5c3_Var25 string
+		templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(content)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `emails/postmark_components.templ`, Line: 152, Col: 176}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "</p></div></td></tr></table>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+func getPostmarkCalloutStyle(variant string) string {
+	baseStyle := "padding: 16px; border-radius: 8px; border-left: 4px solid;"
+
+	switch variant {
+	case "info":
+		return baseStyle + " background-color: #eff6ff; border-color: #3b82f6; color: #1e40af;"
+	case "success":
+		return baseStyle + " background-color: #f0fdf4; border-color: #10b981; color: #047857;"
+	case "warning":
+		return baseStyle + " background-color: #fffbeb; border-color: #f59e0b; color: #92400e;"
+	case "error":
+		return baseStyle + " background-color: #fef2f2; border-color: #ef4444; color: #dc2626;"
+	default:
+		return baseStyle + " background-color: #f8fafc; border-color: #64748b; color: #475569;"
+	}
+}
+
+func PostmarkBaseLayout(data PostmarkEmailData) templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var26 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var26 == nil {
+			templ_7745c5c3_Var26 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "<!doctype html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en\"><head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><meta name=\"x-apple-disable-message-reformatting\"><title>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var27 string
+		templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(data.Title)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `emails/postmark_components.templ`, Line: 183, Col: 22}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "</title><!--[if mso]>\n\t\t\t<noscript>\n\t\t\t\t<xml>\n\t\t\t\t\t<o:OfficeDocumentSettings>\n\t\t\t\t\t\t<o:AllowPNG/>\n\t\t\t\t\t\t<o:PixelsPerInch>96</o:PixelsPerInch>\n\t\t\t\t\t</o:OfficeDocumentSettings>\n\t\t\t\t</xml>\n\t\t\t</noscript>\n\t\t\t<![endif]--><!--[if mso]>\n\t\t\t<style type=\"text/css\">\n\t\t\t\ttable, td {border-collapse: collapse;}\n\t\t\t\t.spacer, .divider {mso-line-height-rule: exactly;}\n\t\t\t\t.fallback-text {font-family: Arial, sans-serif !important;}\n\t\t\t</style>\n\t\t\t<![endif]--><style type=\"text/css\">\n\t\t\t\t@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700&display=swap');\n\t\t\t\t\n\t\t\t\t@media only screen and (max-width: 600px) {\n\t\t\t\t\t.container {\n\t\t\t\t\t\twidth: 100% !important;\n\t\t\t\t\t\tmax-width: 100% !important;\n\t\t\t\t\t}\n\t\t\t\t\t.mobile-padding {\n\t\t\t\t\t\tpadding-left: 16px !important;\n\t\t\t\t\t\tpadding-right: 16px !important;\n\t\t\t\t\t}\n\t\t\t\t\t.mobile-center {\n\t\t\t\t\t\ttext-align: center !important;\n\t\t\t\t\t}\n\t\t\t\t\t.mobile-font-size {\n\t\t\t\t\t\tfont-size: 14px !important;\n\t\t\t\t\t\tline-height: 1.5 !important;\n\t\t\t\t\t}\n\t\t\t\t\t.mobile-button {\n\t\t\t\t\t\twidth: 100% !important;\n\t\t\t\t\t\tmax-width: 280px !important;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\t@media (prefers-color-scheme: dark) {\n\t\t\t\t\t.dark-mode-bg { background-color: #1f2937 !important; }\n\t\t\t\t\t.dark-mode-text { color: #f9fafb !important; }\n\t\t\t\t\t.dark-mode-border { border-color: #374151 !important; }\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\tbody, table, td, p, a, li, blockquote {\n\t\t\t\t\t-webkit-text-size-adjust: 100%;\n\t\t\t\t\t-ms-text-size-adjust: 100%;\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\ttable, td {\n\t\t\t\t\tmso-table-lspace: 0pt;\n\t\t\t\t\tmso-table-rspace: 0pt;\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\timg {\n\t\t\t\t\t-ms-interpolation-mode: bicubic;\n\t\t\t\t\tborder: 0;\n\t\t\t\t\toutline: none;\n\t\t\t\t\ttext-decoration: none;\n\t\t\t\t}\n\t\t\t</style></head><body style=\"margin: 0; padding: 0; background-color: #f3f4f6; font-family: 'Nunito Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%;\"><div style=\"display: none; max-height: 0; overflow: hidden; font-size: 1px; line-height: 1px; color: #f3f4f6; opacity: 0;\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var28 string
+		templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(data.PreviewText)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `emails/postmark_components.templ`, Line: 252, Col: 22}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "<div style=\"display: none; max-height: 0; overflow: hidden;\">&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;</div></div><table role=\"presentation\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\" width=\"100%\" style=\"background-color: #f3f4f6; border-collapse: collapse;\"><tr><td align=\"center\" style=\"padding: 24px 16px;\"><!--[if mso]>\n\t\t\t\t\t\t<table role=\"presentation\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\" width=\"570\">\n\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t<td>\n\t\t\t\t\t\t<![endif]--><table class=\"container\" role=\"presentation\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\" width=\"570\" style=\"max-width: 570px; width: 100%; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); border-collapse: collapse; overflow: hidden;\"><tr><td style=\"padding: 0;\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templ_7745c5c3_Var26.Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "</td></tr></table><!--[if mso]>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t</table>\n\t\t\t\t\t\t<![endif]--></td></tr></table></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

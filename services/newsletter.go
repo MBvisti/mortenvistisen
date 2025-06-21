@@ -105,8 +105,8 @@ func ScheduleNewsletterRelease(
 			Subject:         newsletter.Title,
 			HtmlVersion:     html.String(),
 			TextVersion:     txt.String(),
-			SubscriberID:    subscriber.ID.String(),
-			NewsletterID:    newsletter.ID.String(),
+			SubscriberID:    subscriber.ID,
+			NewsletterID:    newsletter.ID,
 			UnsubscribeLink: unsubscribeURL,
 		}
 
@@ -153,7 +153,10 @@ func ScheduleNewsletterRelease(
 				"subscriber_id",
 				subscriber.ID,
 			)
-			return fmt.Errorf("failed to create newsletter email send tracking: %w", err)
+			return fmt.Errorf(
+				"failed to create newsletter email send tracking: %w",
+				err,
+			)
 		}
 	}
 

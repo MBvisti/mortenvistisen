@@ -25,12 +25,11 @@ templ (n Newsletter) template() {
 		Title: n.Subject, PreviewText: n.Subject}) {
 		@Header(HeaderData{
 			Title: n.Subject,
-		},
-		)
+		})
 		@Section() {
 			@templ.Raw(n.Content)
 		}
-		@Spacer(SpacerData{Height: "40"})
+		@Spacer(SpacerData{Height: "24"})
 		@Footer(FooterData{CompanyName: "mbvlabs", UnsubscribeURL: n.UnsubscribeLink})
 	}
 }

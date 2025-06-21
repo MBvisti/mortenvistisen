@@ -1,17 +1,17 @@
 -- name: InsertNewsletterEmailSend :one
 INSERT INTO newsletter_email_sends (
-    newsletter_id, subscriber_id, email_address, status, river_job_id
+    id, newsletter_id, subscriber_id, status, created_at, updated_at
 ) VALUES (
-    $1, $2, $3, $4, $5
+    $1, $2, $3, $4, NOW(), NOW()
 ) RETURNING *;
 
 -- name: UpdateNewsletterEmailSendStatus :one
 UPDATE newsletter_email_sends 
 SET 
     status = $3,
-    sent_at = CASE WHEN $3 = 'sent' THEN NOW() ELSE sent_at END,
-    failed_at = CASE WHEN $3 IN ('failed', 'bounced') THEN NOW() ELSE failed_at END,
-    error_message = $4,
+    sent_at = $4,
+    failed_at = $5,
+    error_message = $6,
     updated_at = NOW()
 WHERE newsletter_id = $1 AND subscriber_id = $2
 RETURNING *;

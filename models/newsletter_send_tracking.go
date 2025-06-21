@@ -24,7 +24,6 @@ type NewsletterEmailSend struct {
 	UpdatedAt    time.Time
 }
 
-
 func CreateNewsletterEmailSend(
 	ctx context.Context,
 	dbtx db.DBTX,
@@ -33,16 +32,15 @@ func CreateNewsletterEmailSend(
 	emailAddress string,
 	riverJobID int64,
 ) (NewsletterEmailSend, error) {
-	row, err := db.Stmts.InsertNewsletterEmailSend(ctx, dbtx, db.InsertNewsletterEmailSendParams{
-		NewsletterID: newsletterID,
-		SubscriberID: subscriberID,
-		EmailAddress: emailAddress,
-		Status:       "pending",
-		RiverJobID: sql.NullInt64{
-			Int64: riverJobID,
-			Valid: riverJobID > 0,
+	row, err := db.Stmts.InsertNewsletterEmailSend(
+		ctx,
+		dbtx,
+		db.InsertNewsletterEmailSendParams{
+			NewsletterID: newsletterID,
+			SubscriberID: subscriberID,
+			Status:       "pending",
 		},
-	})
+	)
 	if err != nil {
 		return NewsletterEmailSend{}, err
 	}
@@ -58,15 +56,19 @@ func UpdateNewsletterEmailSendStatus(
 	status string,
 	errorMessage string,
 ) (NewsletterEmailSend, error) {
-	row, err := db.Stmts.UpdateNewsletterEmailSendStatus(ctx, dbtx, db.UpdateNewsletterEmailSendStatusParams{
-		NewsletterID: newsletterID,
-		SubscriberID: subscriberID,
-		Status:       status,
-		ErrorMessage: sql.NullString{
-			String: errorMessage,
-			Valid:  errorMessage != "",
+	row, err := db.Stmts.UpdateNewsletterEmailSendStatus(
+		ctx,
+		dbtx,
+		db.UpdateNewsletterEmailSendStatusParams{
+			NewsletterID: newsletterID,
+			SubscriberID: subscriberID,
+			Status:       status,
+			ErrorMessage: sql.NullString{
+				String: errorMessage,
+				Valid:  errorMessage != "",
+			},
 		},
-	})
+	)
 	if err != nil {
 		return NewsletterEmailSend{}, err
 	}
@@ -125,7 +127,11 @@ func GetNewsletterEmailSendsByNewsletter(
 	dbtx db.DBTX,
 	newsletterID uuid.UUID,
 ) ([]NewsletterEmailSend, error) {
-	rows, err := db.Stmts.GetNewsletterEmailSendsByNewsletter(ctx, dbtx, newsletterID)
+	rows, err := db.Stmts.GetNewsletterEmailSendsByNewsletter(
+		ctx,
+		dbtx,
+		newsletterID,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -150,21 +156,21 @@ func parseNumericToFloat64(numeric pgtype.Numeric) float64 {
 	if !numeric.Valid {
 		return 0.0
 	}
-	
+
 	return 0.0
 }
 
-func newsletterEmailSendRowToModel(row db.NewsletterEmailSend) NewsletterEmailSend {
+func newsletterEmailSendRowToModel(
+	row db.NewsletterEmailSend,
+) NewsletterEmailSend {
 	return NewsletterEmailSend{
 		ID:           row.ID,
 		NewsletterID: row.NewsletterID,
 		SubscriberID: row.SubscriberID,
-		EmailAddress: row.EmailAddress,
 		Status:       row.Status,
 		SentAt:       row.SentAt.Time,
 		FailedAt:     row.FailedAt.Time,
 		ErrorMessage: row.ErrorMessage.String,
-		RiverJobID:   row.RiverJobID.Int64,
 		CreatedAt:    row.CreatedAt.Time,
 		UpdatedAt:    row.UpdatedAt.Time,
 	}

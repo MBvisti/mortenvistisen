@@ -14,7 +14,6 @@ import (
 	"github.com/mbvisti/mortenvistisen/config"
 	"github.com/mbvisti/mortenvistisen/psql"
 	"github.com/mbvisti/mortenvistisen/psql/queue"
-	"github.com/mbvisti/mortenvistisen/psql/queue/jobs"
 	"github.com/mbvisti/mortenvistisen/psql/queue/workers"
 	"github.com/riverqueue/river"
 )
@@ -50,15 +49,15 @@ func main() {
 	}
 
 	periodicJobs := []*river.PeriodicJob{
-		river.NewPeriodicJob(
-			river.PeriodicInterval(24*time.Hour),
-			func() (river.JobArgs, *river.InsertOpts) {
-				return jobs.NewsletterProcessingJobArgs{}, nil
-			},
-			&river.PeriodicJobOpts{
-				RunOnStart: false,
-			},
-		),
+		// river.NewPeriodicJob(
+		// 	river.PeriodicInterval(24*time.Hour),
+		// 	func() (river.JobArgs, *river.InsertOpts) {
+		// 		return jobs.NewsletterProcessingJobArgs{}, nil
+		// 	},
+		// 	&river.PeriodicJobOpts{
+		// 		RunOnStart: false,
+		// 	},
+		// ),
 	}
 
 	db.NewQueue(
