@@ -121,7 +121,12 @@ func (a Assets) Sitemap(c echo.Context) error {
 		return err
 	}
 
-	sitemap, err := createSitemap(articles)
+	newsletters, err := models.GetNewsletters(c.Request().Context(), a.db.Pool)
+	if err != nil {
+		return err
+	}
+
+	sitemap, err := createSitemap(newsletters, articles)
 	if err != nil {
 		return err
 	}
@@ -152,13 +157,17 @@ type Sitemap struct {
 	URL     []URL    `xml:"url"`
 }
 
-func createSitemap(articles []models.Article) (Sitemap, error) {
+func createSitemap(
+	newsletters []models.Newsletter,
+	articles []models.Article,
+) (Sitemap, error) {
 	baseUrl := config.Cfg.GetFullDomain()
 
 	var urls []URL
 
 	for _, r := range routes.App {
-		if r.Path != "/redirect" && r.Path != "/posts/:articleSlug" {
+		if r.Path != "/redirect" && !strings.Contains(r.Path, ":") &&
+			r.Method != http.MethodPost && r.Method != http.MethodPut {
 			urls = append(urls, URL{
 				Loc: fmt.Sprintf(
 					"%s%s",
@@ -184,7 +193,25 @@ func createSitemap(articles []models.Article) (Sitemap, error) {
 				path,
 			),
 			ChangeFreq: "monthly",
-			LastMod:    article.UpdatedAt.String(),
+			LastMod:    article.UpdatedAt.Format("2006-01-02"),
+		})
+	}
+
+	for _, newsletter := range newsletters {
+		path := strings.Replace(
+			routes.NewsletterPage.Path,
+			":newsletterSlug",
+			newsletter.Slug,
+			1,
+		)
+		urls = append(urls, URL{
+			Loc: fmt.Sprintf(
+				"%s%s",
+				baseUrl,
+				path,
+			),
+			ChangeFreq: "monthly",
+			LastMod:    newsletter.UpdatedAt.Format("2006-01-02"),
 		})
 	}
 
