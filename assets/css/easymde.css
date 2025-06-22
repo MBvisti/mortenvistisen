@@ -7,7 +7,7 @@
 .CodeMirror {
 	font-family: monospace;
 	height: 300px;
-	color: var(--color-base-content);
+	color: white;
 	direction: ltr
 }
 
@@ -248,13 +248,13 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
 }
 
 .CodeMirror-activeline-background {
-	background: var(--color-base-200)
+	background: oklch(52% 0.027 264.364)
 }
 
 .CodeMirror {
 	position: relative;
 	overflow: hidden;
-	background: var(--color-base-100)
+	background: oklch(55.1% 0.027 264.364)
 }
 
 .CodeMirror-scroll {
@@ -519,7 +519,7 @@ span.CodeMirror-selectedtext {
 	font: inherit;
 	z-index: 0;
 	word-wrap: break-word;
-	background: var(--color-base-200)
+	background: oklch(55.1% 0.027 264.364)
 }
 
 .EasyMDEContainer .CodeMirror-scroll {
@@ -527,7 +527,7 @@ span.CodeMirror-selectedtext {
 }
 
 .EasyMDEContainer .CodeMirror-fullscreen {
-	background: var(--color-base-200);
+	background: oklch(55.1% 0.027 264.364);
 	position: fixed !important;
 	top: 0;
 	left: 0;
@@ -773,7 +773,7 @@ span.CodeMirror-selectedtext {
 
 .editor-preview {
 	padding: 10px;
-	background: var(--color-base-100)
+	background: oklch(58% 0.027 264.364)
 }
 
 .editor-preview>p {
@@ -781,7 +781,7 @@ span.CodeMirror-selectedtext {
 }
 
 .editor-preview pre {
-	background: var(--color-base-200);
+	background: oklch(50% 0.027 264.364);
 	margin-bottom: 10px
 }
 

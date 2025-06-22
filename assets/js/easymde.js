@@ -12,7 +12,7 @@ import "./easymde-2_26_0.min.js";
 			"preview", "fullscreen",
 		],
 		indentWithTabs: true,
-		lineNumbers: true,
+		// lineNumbers: true,
 		tabSize: 4,
 	});
 	// const element = document.getElementById('my-text-area');
