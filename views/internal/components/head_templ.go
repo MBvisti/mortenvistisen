@@ -347,7 +347,7 @@ func head(data HeadData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "\" data-cf-beacon='{\"token\": \"423a2fdc6f104a90ac9d9b4d35774148\"}'></script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "\" data-cf-beacon='{\"token\": \"423a2fdc6f104a90ac9d9b4d35774148\"}'></script> <script defer src=\"https://analytics.mbvlabs.com/script.js\" data-website-id=\"0841b4dc-64aa-4c01-be6d-dd4dd8557bda\"></script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
