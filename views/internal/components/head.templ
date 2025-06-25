@@ -85,6 +85,7 @@ templ head(data HeadData) {
 		<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback" defer></script>
 		if os.Getenv("ENVIRONMENT") == config.PROD_ENVIRONMENT {
 			<script defer src={ fmt.Sprintf("%s/%s", config.Cfg.GetFullDomain(), "assets/js/beacon.min.js") } data-cf-beacon='{"token": "423a2fdc6f104a90ac9d9b4d35774148"}'></script>
+			<script defer src="https://mbvlabs-umami.fly.dev/script.js" data-website-id="0841b4dc-64aa-4c01-be6d-dd4dd8557bda"></script>
 		}
 	</head>
 }
