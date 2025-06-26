@@ -57,14 +57,14 @@ var IndexNow = Route{
 
 var CssEntrypoint = Route{
 	Name:        assetsNamePrefix + "css.entry",
-	Path:        assetsNamePrefix + "/css/styles.css",
+	Path:        assetsNamePrefix + "/css/:version/styles.css",
 	Method:      http.MethodGet,
 	HandlerName: "Styles",
 }
 
 var AllCss = Route{
 	Name:        assetsNamePrefix + "css.all",
-	Path:        assetsNamePrefix + "/css/:file",
+	Path:        assetsNamePrefix + "/css/:version/:file",
 	Method:      http.MethodGet,
 	HandlerName: "AllCss",
 }

@@ -7,6 +7,8 @@ import (
 	"github.com/mbvisti/mortenvistisen/router/routes"
 	"time"
 	"os"
+	"strings"
+	"strconv"
 )
 
 type HeadDataOption func(*HeadData)
@@ -98,7 +100,7 @@ func SetupHead(ctx context.Context, opts ...HeadDataOption) templ.Component {
 		Description:    "A starter template for building one-man businesses using Golang.",
 		Slug:           config.Cfg.GetFullDomain(),
 		MetaType:       "website",
-		StylesheetHref: fmt.Sprintf("%s/%s?%v", config.Cfg.GetFullDomain(), routes.CssEntrypoint.Path, startTime),
+		StylesheetHref: fmt.Sprintf("%s/%s", config.Cfg.GetFullDomain(), strings.Replace(routes.CssEntrypoint.Path, ":version", strconv.Itoa(int(startTime)), 1)),
 		ScriptSrc:      fmt.Sprintf("%s/%s?%v", config.Cfg.GetFullDomain(), routes.JsEntrypoint.Path, startTime),
 	}
 
