@@ -71,7 +71,7 @@ var AllCss = Route{
 
 var JsEntrypoint = Route{
 	Name:        assetsNamePrefix + "js.entry",
-	Path:        assetsNamePrefix + "/js/script.js",
+	Path:        assetsNamePrefix + "/js/:version/script.js",
 	Method:      http.MethodGet,
 	HandlerName: "Scripts",
 }
@@ -92,7 +92,7 @@ var JsNav = Route{
 
 var AllJs = Route{
 	Name:        assetsNamePrefix + "js.all",
-	Path:        assetsNamePrefix + "/js/:file",
+	Path:        assetsNamePrefix + "/js/:version/:file",
 	Method:      http.MethodGet,
 	HandlerName: "AllJs",
 }
