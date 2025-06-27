@@ -362,7 +362,7 @@ func head(data HeadData) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "\" data-website-id=\"0841b4dc-64aa-4c01-be6d-dd4dd8557bda\"></script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "\" data-website-id=\"0841b4dc-64aa-4c01-be6d-dd4dd8557bda\" data-host-url=\"https://analytics.mbvlabs.com/api/send\">></script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
