@@ -12,6 +12,7 @@ import (
 
 const (
 	landingPageCacheKey    = "landingPage"
+	postsPageCacheKey      = "postsPage"
 	articlePageCacheKey    = "articlePage--"
 	newsletterPageCacheKey = "newsletterPage--"
 )
@@ -75,6 +76,11 @@ func (cm *CacheManager) GetNewsletterCache() otter.Cache[string, views.Newslette
 func (cm *CacheManager) InvalidateLandingPage() {
 	cm.pageCache.Delete(landingPageCacheKey)
 	slog.Info("Invalidated landing page cache")
+}
+
+func (cm *CacheManager) InvalidatePostsPage() {
+	cm.pageCache.Delete(postsPageCacheKey)
+	slog.Info("Invalidated posts page cache")
 }
 
 func (cm *CacheManager) InvalidateArticle(slug string) {
