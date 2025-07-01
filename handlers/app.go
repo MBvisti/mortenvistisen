@@ -113,6 +113,46 @@ func (a App) NewslettersPage(c echo.Context) error {
 		Render(renderArgs(c))
 }
 
+func (a App) PostsPage(c echo.Context) error {
+	if value, ok := a.cacheManager.GetPageCache().Get(postsPageCacheKey); ok {
+		return views.PostsPage(value).Render(renderArgs(c))
+	}
+
+	articles, err := models.GetPublishedArticles(extractCtx(c), a.db.Pool)
+	if err != nil {
+		return err
+	}
+
+	// Group articles by year
+	articlesByYear := make(map[int][]views.PostItem)
+	for _, article := range articles {
+		year := article.FirstPublishedAt.Year()
+		articlesByYear[year] = append(
+			articlesByYear[year],
+			views.PostItem{
+				Title:       article.Title,
+				Slug:        article.Slug,
+				Excerpt:     article.Excerpt,
+				PublishedAt: article.FirstPublishedAt,
+				ReadTime:    int(article.ReadTime),
+			},
+		)
+	}
+
+	postsComponent := views.Posts(articlesByYear)
+	if ok := a.cacheManager.GetPageCache().Set(postsPageCacheKey, postsComponent); !ok {
+		slog.ErrorContext(
+			c.Request().Context(),
+			"could not set posts page cache",
+			"error",
+			err,
+		)
+	}
+
+	return views.PostsPage(postsComponent).
+		Render(renderArgs(c))
+}
+
 func (a App) AboutPage(c echo.Context) error {
 	return views.AboutPage().Render(renderArgs(c))
 }
@@ -140,6 +180,10 @@ func (a App) ArticlePage(c echo.Context) error {
 	)
 	if err != nil {
 		return err
+	}
+
+	if !article.IsPublished {
+		return redirect(c.Response(), c.Request(), routes.LandingPage.Path)
 	}
 
 	ar, e := services.ParseMarkdownToHtml(article.Content)

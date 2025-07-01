@@ -116,12 +116,18 @@ func (a Assets) Sitemap(c echo.Context) error {
 		return c.XML(http.StatusOK, value)
 	}
 
-	articles, err := models.GetArticles(c.Request().Context(), a.db.Pool)
+	articles, err := models.GetPublishedArticles(
+		c.Request().Context(),
+		a.db.Pool,
+	)
 	if err != nil {
 		return err
 	}
 
-	newsletters, err := models.GetNewsletters(c.Request().Context(), a.db.Pool)
+	newsletters, err := models.GetPublishedNewsletters(
+		c.Request().Context(),
+		a.db.Pool,
+	)
 	if err != nil {
 		return err
 	}
