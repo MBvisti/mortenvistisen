@@ -7,6 +7,8 @@ import (
 	"time"
 	"github.com/mbvisti/mortenvistisen/router/contexts"
 	"github.com/mbvisti/mortenvistisen/views/internal/components"
+	"strings"
+	"strconv"
 )
 
 var startTime = time.Now().Unix()
@@ -18,8 +20,8 @@ templ Dashboard() {
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 			<title>Dashboard - MBV</title>
-			<link href={ fmt.Sprintf("%s/%v?%v", config.Cfg.GetFullDomain(), routes.CssEntrypoint.Path, startTime) } rel="stylesheet"/>
-			<script src={ fmt.Sprintf("%s/%v?%v", config.Cfg.GetFullDomain(), routes.JsEntrypoint.Path, startTime) } type="module"></script>
+			<link href={ fmt.Sprintf("%s/%s", config.Cfg.GetFullDomain(), strings.Replace(routes.CSSEntrypoint.Path, ":version", strconv.Itoa(int(startTime)), 1)) } rel="stylesheet"/>
+			<script src={ fmt.Sprintf("%s/%s", config.Cfg.GetFullDomain(), strings.Replace(routes.JsDashboardEntrypoint.Path, ":version", strconv.Itoa(int(startTime)), 1)) } type="module"></script>
 		</head>
 		<body class="flex h-screen text-base-content bg-base-100">
 			@sidebar()
@@ -31,8 +33,6 @@ templ Dashboard() {
 					@components.ToastMessage(flash)
 				}
 			</div>
-			<script type="text/javascript" src={ config.Cfg.GetFullDomain() + "/" + routes.JsNav.Path }>
-			</script>
 		</body>
 	</html>
 }

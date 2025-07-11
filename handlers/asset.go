@@ -242,7 +242,7 @@ func (a Assets) Styles(c echo.Context) error {
 	return c.Blob(http.StatusOK, "text/css", stylesheet)
 }
 
-func (a Assets) AllCss(c echo.Context) error {
+func (a Assets) IndividualCSSFile(c echo.Context) error {
 	filename := c.Param("file")
 	stylesheet, err := assets.Files.ReadFile(
 		fmt.Sprintf("css/%s", filename),
@@ -256,20 +256,20 @@ func (a Assets) AllCss(c echo.Context) error {
 	return c.Blob(http.StatusOK, "text/css", stylesheet)
 }
 
-func (a Assets) IndividualScript(c echo.Context) error {
-	filename := strings.Split(c.Path(), routes.AssetsRoutePrefix)[1]
-
-	script, err := assets.Files.ReadFile(
-		strings.TrimPrefix(filename, "/"),
-	)
-	if err != nil {
-		return err
-	}
-
-	c = a.enableCaching(c, script)
-
-	return c.Blob(http.StatusOK, "application/javascript", script)
-}
+// func (a Assets) IndividualScript(c echo.Context) error {
+// 	filename := strings.Split(c.Path(), routes.AssetsRoutePrefix)[1]
+//
+// 	script, err := assets.Files.ReadFile(
+// 		strings.TrimPrefix(filename, "/"),
+// 	)
+// 	if err != nil {
+// 		return err
+// 	}
+//
+// 	c = a.enableCaching(c, script)
+//
+// 	return c.Blob(http.StatusOK, "application/javascript", script)
+// }
 
 func (a Assets) Scripts(c echo.Context) error {
 	script, err := assets.Files.ReadFile(
@@ -284,7 +284,20 @@ func (a Assets) Scripts(c echo.Context) error {
 	return c.Blob(http.StatusOK, "application/javascript", script)
 }
 
-func (a Assets) AllJs(c echo.Context) error {
+func (a Assets) ScriptsDashboard(c echo.Context) error {
+	script, err := assets.Files.ReadFile(
+		"js/dashboard_script.js",
+	)
+	if err != nil {
+		return err
+	}
+
+	c = a.enableCaching(c, script)
+
+	return c.Blob(http.StatusOK, "application/javascript", script)
+}
+
+func (a Assets) IndividualScript(c echo.Context) error {
 	filename := c.Param("file")
 	script, err := assets.Files.ReadFile(
 		fmt.Sprintf("js/%s", filename),

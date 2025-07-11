@@ -6,7 +6,7 @@ toolchain go1.24.2
 
 require (
 	github.com/PuerkitoBio/goquery v1.10.3
-	github.com/a-h/templ v0.3.898
+	github.com/a-h/templ v0.3.906
 	github.com/alecthomas/chroma/v2 v2.2.0
 	github.com/dromara/carbon/v2 v2.5.4
 	github.com/exaring/otelpgx v0.9.3

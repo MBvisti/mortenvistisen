@@ -2,7 +2,6 @@ package dashboard
 
 import (
 	"fmt"
-	"github.com/mbvisti/mortenvistisen/config"
 	"github.com/mbvisti/mortenvistisen/router/routes"
 	"github.com/mbvisti/mortenvistisen/views/internal/components"
 	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
@@ -121,7 +120,6 @@ templ EditNewsletter(formData EditNewsletterFormData) {
 						</button>
 					</div>
 				</form>
-				<script type="module" src={ config.Cfg.GetFullDomain() + "/" + routes.JsEasyMDE.Path }></script>
 			</div>
 		</div>
 	}

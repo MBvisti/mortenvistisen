@@ -13,12 +13,10 @@ var Assets = []Route{
 	Robots,
 	Sitemap,
 	LLM,
-	CssEntrypoint,
-	AllCss,
+	CSSEntrypoint,
+	CSSFile,
 	JsEntrypoint,
-	JsEasyMDE,
-	JsNav,
-	AllJs,
+	JavascriptFile,
 	Favicon,
 	Favicon16,
 	Favicon32,
@@ -55,18 +53,18 @@ var IndexNow = Route{
 	HandlerName: "IndexNow",
 }
 
-var CssEntrypoint = Route{
+var CSSEntrypoint = Route{
 	Name:        assetsNamePrefix + "css.entry",
 	Path:        assetsNamePrefix + "/css/:version/styles.css",
 	Method:      http.MethodGet,
 	HandlerName: "Styles",
 }
 
-var AllCss = Route{
-	Name:        assetsNamePrefix + "css.all",
+var CSSFile = Route{
+	Name:        assetsNamePrefix + "css.file",
 	Path:        assetsNamePrefix + "/css/:version/:file",
 	Method:      http.MethodGet,
-	HandlerName: "AllCss",
+	HandlerName: "IndividualCSSFile",
 }
 
 var JsEntrypoint = Route{
@@ -76,25 +74,18 @@ var JsEntrypoint = Route{
 	HandlerName: "Scripts",
 }
 
-var JsEasyMDE = Route{
-	Name:        assetsNamePrefix + "js.easymde",
-	Path:        assetsNamePrefix + "/js/easymde.js",
+var JsDashboardEntrypoint = Route{
+	Name:        assetsNamePrefix + "js.dashboard_entry",
+	Path:        assetsNamePrefix + "/js/:version/dashboard_script.js",
 	Method:      http.MethodGet,
-	HandlerName: "IndividualScript",
+	HandlerName: "ScriptsDashboard",
 }
 
-var JsNav = Route{
-	Name:        assetsNamePrefix + "js.nav",
-	Path:        assetsNamePrefix + "/js/nav.js",
-	Method:      http.MethodGet,
-	HandlerName: "IndividualScript",
-}
-
-var AllJs = Route{
-	Name:        assetsNamePrefix + "js.all",
+var JavascriptFile = Route{
+	Name:        assetsNamePrefix + "js.file",
 	Path:        assetsNamePrefix + "/js/:version/:file",
 	Method:      http.MethodGet,
-	HandlerName: "AllJs",
+	HandlerName: "IndividualScript",
 }
 
 var Favicon = Route{

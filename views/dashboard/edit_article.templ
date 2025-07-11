@@ -1,10 +1,11 @@
 package dashboard
 
-import "github.com/mbvisti/mortenvistisen/views/internal/layouts"
-import "github.com/mbvisti/mortenvistisen/views/internal/components"
-import "github.com/mbvisti/mortenvistisen/router/routes"
-import "github.com/mbvisti/mortenvistisen/config"
-import "time"
+import (
+	"github.com/mbvisti/mortenvistisen/views/internal/layouts"
+	"github.com/mbvisti/mortenvistisen/views/internal/components"
+	"github.com/mbvisti/mortenvistisen/router/routes"
+	"time"
+)
 
 func containsString(slice []string, item string) bool {
 	for _, s := range slice {
@@ -226,7 +227,6 @@ templ EditArticle(formData EditArticleFormData) {
 						</button>
 					</div>
 				</form>
-				<script type="module" src={ config.Cfg.GetFullDomain() + "/" + routes.JsEasyMDE.Path }></script>
 			</div>
 		</div>
 	}
