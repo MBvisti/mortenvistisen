@@ -185,6 +185,15 @@ func createSitemap(
 		}
 	}
 
+	urls = append(urls, URL{
+		Loc: fmt.Sprintf(
+			"%s%s",
+			baseUrl,
+			routes.LLM.Path,
+		),
+		ChangeFreq: "monthly",
+	})
+
 	for _, article := range articles {
 		path := strings.Replace(
 			routes.ArticlePage.Path,

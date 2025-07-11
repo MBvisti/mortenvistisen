@@ -1,7 +1,7 @@
 # Morten Vistisen's Personal Website
 
-Last Updated: January 6, 2025
-LLM.txt Version: 1.0
+Last Updated: July 11, 2025
+LLM.txt Version: 1.1
 
 ## Description
 Personal blog and portfolio website by Morten Vistisen, a self-taught software engineer specializing in Go programming, distributed systems, and web development. The site serves as a knowledge-sharing platform for developers interested in full-stack Go development, entrepreneurship insights, and building production-grade web applications. Features comprehensive content management, newsletter system, and showcases technical projects including courses and open-source tools.
@@ -83,7 +83,6 @@ Personal blog and portfolio website by Morten Vistisen, a self-taught software e
 - **Plain Text**: This llm.txt file for AI context
 
 ## Syndication
-- **RSS Feed**: /rss.xml (planned)
 - **Newsletter Subscription**: Available on homepage
 - **Social Updates**: Follow @mbvisti on Twitter for new content announcements
 
