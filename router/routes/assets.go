@@ -2,6 +2,7 @@ package routes
 
 import (
 	"net/http"
+	"strings"
 )
 
 const (
@@ -16,7 +17,7 @@ var Assets = []Route{
 	CSSEntrypoint,
 	CSSFile,
 	JsEntrypoint,
-	JavascriptFile,
+	JavascriptFile.Route,
 	Favicon,
 	Favicon16,
 	Favicon32,
@@ -81,11 +82,21 @@ var JsDashboardEntrypoint = Route{
 	HandlerName: "ScriptsDashboard",
 }
 
-var JavascriptFile = Route{
-	Name:        assetsNamePrefix + "js.file",
-	Path:        assetsNamePrefix + "/js/:version/:file",
-	Method:      http.MethodGet,
-	HandlerName: "IndividualScript",
+var JavascriptFile = javascriptFile{
+	Route: Route{
+		Name:        assetsNamePrefix + "js.file",
+		Path:        assetsNamePrefix + "/js/:version/:file",
+		Method:      http.MethodGet,
+		HandlerName: "IndividualScript",
+	},
+}
+
+type javascriptFile struct {
+	Route
+}
+
+func (j javascriptFile) GetPath(file string) string {
+	return strings.Replace(j.Path, ":file", file, 1)
 }
 
 var Favicon = Route{

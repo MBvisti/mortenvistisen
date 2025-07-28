@@ -341,9 +341,9 @@ func head(data HeadData) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var20 string
-			templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s/%s", config.Cfg.GetFullDomain(), "assets/js/beacon.min.js"))
+			templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s/%s", config.Cfg.GetFullDomain(), routes.JavascriptFile.GetPath("beacon.min.js")))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/head.templ`, Line: 89, Col: 98}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/head.templ`, Line: 89, Col: 119}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 			if templ_7745c5c3_Err != nil {
@@ -354,9 +354,9 @@ func head(data HeadData) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var21 string
-			templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s/%s", config.Cfg.GetFullDomain(), "assets/js/umami.js"))
+			templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%s/%s", config.Cfg.GetFullDomain(), routes.JavascriptFile.GetPath("umami.js")))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/head.templ`, Line: 92, Col: 93}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/internal/components/head.templ`, Line: 92, Col: 114}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 			if templ_7745c5c3_Err != nil {
