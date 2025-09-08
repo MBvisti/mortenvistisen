@@ -31,7 +31,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.36.0
 	golang.org/x/crypto v0.40.0
 	golang.org/x/net v0.42.0
-	golang.org/x/sync v0.16.0
+	golang.org/x/sync v0.17.0
 	golang.org/x/text v0.27.0
 	gopkg.in/yaml.v2 v2.4.0
 	riverqueue.com/riverui v0.10.0
