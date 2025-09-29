@@ -31,8 +31,8 @@ require (
 	go.opentelemetry.io/otel/trace v1.36.0
 	golang.org/x/crypto v0.40.0
 	golang.org/x/net v0.42.0
-	golang.org/x/sync v0.16.0
-	golang.org/x/text v0.27.0
+	golang.org/x/sync v0.17.0
+	golang.org/x/text v0.29.0
 	gopkg.in/yaml.v2 v2.4.0
 	riverqueue.com/riverui v0.10.0
 )
@@ -102,7 +102,7 @@ require (
 require (
 	github.com/aws/aws-sdk-go v1.55.6
 	github.com/caarlos0/env/v10 v10.0.0
-	github.com/go-faker/faker/v4 v4.5.0
+	github.com/go-faker/faker/v4 v4.7.0
 	github.com/go-playground/validator/v10 v10.26.0
 	github.com/gorilla/csrf v1.7.3
 	github.com/gosimple/slug v1.15.0
