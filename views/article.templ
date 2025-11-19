@@ -56,7 +56,7 @@ func writeNewsletterSubscription(ctx context.Context, w io.Writer, title string)
 			return err
 		}
 
-		err = fragments.NewsletterSubscription(title, false).Render(ctx, w)
+		err = fragments.AndurelPromo().Render(ctx, w)
 		if err != nil {
 			return err
 		}
