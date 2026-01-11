@@ -7,11 +7,14 @@ create table if not exists newsletters (
   updated_at timestamptz not null,
 
   title varchar(100) not null,
+  slug varchar,
+
   meta_title varchar(100) not null,
   meta_description varchar(160) not null,
+
   is_published bool default false,
   released_at timestamptz,
-  slug varchar,
+
   content text
 );
 -- +goose StatementEnd
