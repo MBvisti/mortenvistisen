@@ -16,9 +16,6 @@ const countTokens = `-- name: CountTokens :one
 select count(*) from tokens
 `
 
-// CountTokens
-//
-//	select count(*) from tokens
 func (q *Queries) CountTokens(ctx context.Context, db DBTX) (int64, error) {
 	row := db.QueryRow(ctx, countTokens)
 	var count int64
@@ -30,9 +27,6 @@ const deleteToken = `-- name: DeleteToken :exec
 delete from tokens where id=$1
 `
 
-// DeleteToken
-//
-//	delete from tokens where id=$1
 func (q *Queries) DeleteToken(ctx context.Context, db DBTX, id uuid.UUID) error {
 	_, err := db.Exec(ctx, deleteToken, id)
 	return err
@@ -54,13 +48,6 @@ type InsertTokenParams struct {
 	MetaData  []byte
 }
 
-// InsertToken
-//
-//	insert into
-//	    tokens (id, created_at, updated_at, scope, expires_at, hash, meta_data)
-//	values
-//	    ($1, now(), now(), $2, $3, $4, $5)
-//	returning id, created_at, updated_at, scope, expires_at, hash, meta_data
 func (q *Queries) InsertToken(ctx context.Context, db DBTX, arg InsertTokenParams) (Token, error) {
 	row := db.QueryRow(ctx, insertToken,
 		arg.ID,
@@ -93,11 +80,6 @@ type QueryPaginatedTokensParams struct {
 	Limit  int64
 }
 
-// QueryPaginatedTokens
-//
-//	select id, created_at, updated_at, scope, expires_at, hash, meta_data from tokens
-//	order by created_at desc
-//	limit $2::bigint offset $1::bigint
 func (q *Queries) QueryPaginatedTokens(ctx context.Context, db DBTX, arg QueryPaginatedTokensParams) ([]Token, error) {
 	rows, err := db.Query(ctx, queryPaginatedTokens, arg.Offset, arg.Limit)
 	if err != nil {
@@ -130,9 +112,6 @@ const queryTokenByID = `-- name: QueryTokenByID :one
 select id, created_at, updated_at, scope, expires_at, hash, meta_data from tokens where id=$1
 `
 
-// QueryTokenByID
-//
-//	select id, created_at, updated_at, scope, expires_at, hash, meta_data from tokens where id=$1
 func (q *Queries) QueryTokenByID(ctx context.Context, db DBTX, id uuid.UUID) (Token, error) {
 	row := db.QueryRow(ctx, queryTokenByID, id)
 	var i Token
@@ -157,9 +136,6 @@ type QueryTokenByScopeAndHashParams struct {
 	Hash  string
 }
 
-// QueryTokenByScopeAndHash
-//
-//	select id, created_at, updated_at, scope, expires_at, hash, meta_data from tokens where scope=$1 and hash=$2 limit 1
 func (q *Queries) QueryTokenByScopeAndHash(ctx context.Context, db DBTX, arg QueryTokenByScopeAndHashParams) (Token, error) {
 	row := db.QueryRow(ctx, queryTokenByScopeAndHash, arg.Scope, arg.Hash)
 	var i Token
@@ -179,9 +155,6 @@ const queryTokens = `-- name: QueryTokens :many
 select id, created_at, updated_at, scope, expires_at, hash, meta_data from tokens
 `
 
-// QueryTokens
-//
-//	select id, created_at, updated_at, scope, expires_at, hash, meta_data from tokens
 func (q *Queries) QueryTokens(ctx context.Context, db DBTX) ([]Token, error) {
 	rows, err := db.Query(ctx, queryTokens)
 	if err != nil {
@@ -225,12 +198,6 @@ type UpdateTokenParams struct {
 	MetaData  []byte
 }
 
-// UpdateToken
-//
-//	update tokens
-//	    set updated_at=now(), scope=$2, expires_at=$3, hash=$4, meta_data=$5
-//	where id = $1
-//	returning id, created_at, updated_at, scope, expires_at, hash, meta_data
 func (q *Queries) UpdateToken(ctx context.Context, db DBTX, arg UpdateTokenParams) (Token, error) {
 	row := db.QueryRow(ctx, updateToken,
 		arg.ID,

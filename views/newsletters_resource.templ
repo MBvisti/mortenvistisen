@@ -1,0 +1,241 @@
+package views
+
+import (
+	"fmt"
+	"mortenvistisen/internal/hypermedia"
+	"mortenvistisen/models"
+	"mortenvistisen/router/routes"
+	"mortenvistisen/views/components"
+	"net/http"
+)
+
+templ NewsletterIndex(newsletters []models.Newsletter) {
+	@base() {
+		<main>
+			<div>
+				<h1>Newsletters</h1>
+				<a href={ templ.URL(routes.NewsletterNew.URL()) }>New Newsletter</a>
+			</div>
+			<div>
+				<div>
+					if len(newsletters) == 0 {
+						<p>No newsletters found.</p>
+					} else {
+						<div>
+							<table>
+								<thead>
+									<tr>
+										<th>Created At</th>
+										<th>Updated At</th>
+										<th>Title</th>
+										<th>Meta Title</th>
+										<th>Meta Description</th>
+										<th>Is Published</th>
+										<th>Released At</th>
+										<th>Slug</th>
+										<th>Content</th>
+										<th>Actions</th>
+									</tr>
+								</thead>
+								<tbody>
+									for _, newsletter := range newsletters {
+										<tr>
+											<td>{ newsletter.CreatedAt.String() }</td>
+											<td>{ newsletter.UpdatedAt.String() }</td>
+											<td>{ newsletter.Title }</td>
+											<td>{ newsletter.MetaTitle }</td>
+											<td>{ newsletter.MetaDescription }</td>
+											<td>{ fmt.Sprintf("%t", newsletter.IsPublished) }</td>
+											<td>{ newsletter.ReleasedAt.String() }</td>
+											<td>{ newsletter.Slug }</td>
+											<td>{ newsletter.Content }</td>
+											<td>
+												<a href={ templ.URL(routes.NewsletterShow.URL(newsletter.ID)) }>View</a>
+												<a href={ templ.URL(routes.NewsletterEdit.URL(newsletter.ID)) }>Edit</a>
+											</td>
+										</tr>
+									}
+								</tbody>
+							</table>
+						</div>
+					}
+				</div>
+			</div>
+		</main>
+	}
+}
+
+templ NewsletterShow(newsletter models.Newsletter) {
+	@base() {
+		<main>
+			<div>
+				<h1>Newsletter Details</h1>
+				<div>
+					<a href={ templ.URL(routes.NewsletterEdit.URL(newsletter.ID)) }>Edit</a>
+					<a href={ templ.URL(routes.NewsletterIndex.URL()) }>Back to List</a>
+				</div>
+			</div>
+			<div>
+				<div>
+					<div>
+						<div>
+							<label>Created At</label>
+							<p>{ newsletter.CreatedAt.String() }</p>
+						</div>
+						<div>
+							<label>Updated At</label>
+							<p>{ newsletter.UpdatedAt.String() }</p>
+						</div>
+						<div>
+							<label>Title</label>
+							<p>{ newsletter.Title }</p>
+						</div>
+						<div>
+							<label>Meta Title</label>
+							<p>{ newsletter.MetaTitle }</p>
+						</div>
+						<div>
+							<label>Meta Description</label>
+							<p>{ newsletter.MetaDescription }</p>
+						</div>
+						<div>
+							<label>Is Published</label>
+							<p>{ fmt.Sprintf("%t", newsletter.IsPublished) }</p>
+						</div>
+						<div>
+							<label>Released At</label>
+							<p>{ newsletter.ReleasedAt.String() }</p>
+						</div>
+						<div>
+							<label>Slug</label>
+							<p>{ newsletter.Slug }</p>
+						</div>
+						<div>
+							<label>Content</label>
+							<p>{ newsletter.Content }</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</main>
+	}
+}
+
+templ NewsletterNew() {
+	@base() {
+		<main>
+			<div>
+				<h1>New Newsletter</h1>
+				<a href={ templ.URL(routes.NewsletterIndex.URL()) }>Back to List</a>
+			</div>
+			<div>
+				<div>
+					<form data-on:submit={ hypermedia.DataAction(http.MethodPost, routes.NewsletterCreate.URL(), hypermedia.ActionTypeForm) }>
+						<div>
+							<div>
+								<h2>Newsletter Information</h2>
+								<p>Enter the details for the new newsletter.</p>
+								<div>
+									<div>
+										@components.InputField("Title", "title", "text", "", false, components.FieldProp{})
+									</div>
+									<div>
+										@components.InputField("Meta Title", "meta_title", "text", "", false, components.FieldProp{})
+									</div>
+									<div>
+										@components.InputField("Meta Description", "meta_description", "text", "", false, components.FieldProp{})
+									</div>
+									<div>
+										@components.InputField("Is Published", "is_published", "checkbox", "", false, components.FieldProp{})
+									</div>
+									<div>
+										@components.InputField("Released At", "released_at", "date", "", false, components.FieldProp{})
+									</div>
+									<div>
+										@components.InputField("Slug", "slug", "text", "", false, components.FieldProp{})
+									</div>
+									<div>
+										@components.InputField("Content", "content", "text", "", false, components.FieldProp{})
+									</div>
+								</div>
+							</div>
+						</div>
+						<div>
+							<a href={ templ.URL(routes.NewsletterIndex.URL()) }>Cancel</a>
+							<button type="submit">Create Newsletter</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</main>
+	}
+}
+
+templ NewsletterEdit(newsletter models.Newsletter) {
+	@base() {
+		<main>
+			<div>
+				<h1>Edit Newsletter</h1>
+				<a href={ templ.URL(routes.NewsletterIndex.URL()) }>Back to List</a>
+			</div>
+			<div>
+				<div>
+					<form data-on:submit={ hypermedia.DataAction(http.MethodPut, routes.NewsletterUpdate.URL(newsletter.ID), hypermedia.ActionTypeForm) }>
+						<div>
+							<div>
+								<h2>Newsletter Information</h2>
+								<p>Update the details for this newsletter.</p>
+								<div>
+									<div>
+										@components.InputField("Title", "title", "text", "", false, components.FieldProp{
+											Value: newsletter.Title,
+										})
+									</div>
+									<div>
+										@components.InputField("Meta Title", "meta_title", "text", "", false, components.FieldProp{
+											Value: newsletter.MetaTitle,
+										})
+									</div>
+									<div>
+										@components.InputField("Meta Description", "meta_description", "text", "", false, components.FieldProp{
+											Value: newsletter.MetaDescription,
+										})
+									</div>
+									<div>
+										@components.InputField("Is Published", "is_published", "checkbox", "", false, components.FieldProp{
+											Value: fmt.Sprintf("%t", newsletter.IsPublished),
+										})
+									</div>
+									<div>
+										@components.InputField("Released At", "released_at", "date", "", false, components.FieldProp{
+											Value: newsletter.ReleasedAt.String(),
+										})
+									</div>
+									<div>
+										@components.InputField("Slug", "slug", "text", "", false, components.FieldProp{
+											Value: newsletter.Slug,
+										})
+									</div>
+									<div>
+										@components.InputField("Content", "content", "text", "", false, components.FieldProp{
+											Value: newsletter.Content,
+										})
+									</div>
+								</div>
+							</div>
+						</div>
+						<div>
+							<a href={ templ.URL(routes.NewsletterIndex.URL()) }>Cancel</a>
+							<button type="submit">Update Newsletter</button>
+						</div>
+					</form>
+					<div>
+						<button
+							data-on:click={ hypermedia.DataAction(http.MethodDelete, routes.NewsletterDestroy.URL(newsletter.ID)) }
+						>Destroy Newsletter</button>
+					</div>
+				</div>
+			</div>
+		</main>
+	}
+}
