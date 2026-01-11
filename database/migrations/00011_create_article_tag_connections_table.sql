@@ -4,7 +4,7 @@ SELECT 'up SQL query';
 create table article_tag_connections (
     id uuid primary key,
     article_id uuid not null references articles(id),
-    tag_id uuid not null references article_tags(id)
+    tag_id uuid not null references tags(id)
 );
 -- +goose StatementEnd
 
