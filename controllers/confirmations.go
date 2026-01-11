@@ -1,0 +1,82 @@
+package controllers
+
+import (
+	"log/slog"
+
+	"mortenvistisen/config"
+	"mortenvistisen/internal/storage"
+	"mortenvistisen/router/cookies"
+	"mortenvistisen/router/routes"
+	"mortenvistisen/services"
+	"mortenvistisen/views"
+
+	"github.com/labstack/echo/v4"
+
+	"mortenvistisen/internal/hypermedia"
+)
+
+type Confirmations struct {
+	db  storage.Pool
+	cfg config.Config
+}
+
+func NewConfirmations(db storage.Pool, cfg config.Config) Confirmations {
+	return Confirmations{db, cfg}
+}
+
+func (c Confirmations) New(etx echo.Context) error {
+	return render(etx, views.ConfirmationForm())
+}
+
+func (c Confirmations) Create(etx echo.Context) error {
+	var payload struct {
+		Code string `json:"code"`
+	}
+
+	if err := etx.Bind(&payload); err != nil {
+		slog.ErrorContext(
+			etx.Request().Context(),
+			"could not parse verification form payload",
+			"error",
+			err,
+		)
+		return render(etx, views.BadRequest())
+	}
+
+	if err := services.VerifyEmail(
+		etx.Request().Context(),
+		c.db,
+		c.cfg.Auth.Pepper,
+		services.VerifyEmailData{
+			Code: payload.Code,
+		},
+	); err != nil {
+		slog.ErrorContext(
+			etx.Request().Context(),
+			"failed to verify email",
+			"error",
+			err,
+		)
+
+		var errorMsg string
+		switch err {
+		case services.ErrInvalidVerificationCode:
+			errorMsg = "Invalid verification code"
+		case services.ErrExpiredVerificationCode:
+			errorMsg = "Verification code has expired"
+		default:
+			errorMsg = "Failed to verify email"
+		}
+
+		if flashErr := cookies.AddFlash(etx, cookies.FlashError, errorMsg); flashErr != nil {
+			return render(etx, views.InternalError())
+		}
+		return hypermedia.Redirect(etx, routes.ConfirmationNew.URL())
+	}
+
+	if flashErr := cookies.AddFlash(etx, cookies.FlashSuccess, "Email verified successfully!"); flashErr != nil {
+		return render(etx, views.InternalError())
+	}
+
+	return hypermedia.Redirect(etx, routes.HomePage.URL())
+}

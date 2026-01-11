@@ -1,0 +1,21 @@
+// Package controllers provides HTTP handlers for the web application.
+package controllers
+
+import (
+	"mortenvistisen/internal/renderer"
+	"mortenvistisen/router/cookies"
+
+	"github.com/a-h/templ"
+	"github.com/labstack/echo/v4"
+)
+
+func render(etx echo.Context, t templ.Component) error {
+	return renderer.Render(
+		etx,
+		t,
+		[]renderer.CookieKey{
+			cookies.AppKey,
+			cookies.FlashKey,
+		},
+	)
+}

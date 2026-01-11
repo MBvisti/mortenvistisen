@@ -2,286 +2,241 @@ package main
 
 import (
 	"context"
+	"encoding/hex"
 	"fmt"
-	"io/fs"
 	"log/slog"
 	"os"
 	"os/signal"
+	"strings"
+	"time"
 
-	"github.com/jackc/pgx/v5/stdlib"
-	"github.com/mbvisti/mortenvistisen/clients"
-	"github.com/mbvisti/mortenvistisen/config"
-	"github.com/mbvisti/mortenvistisen/handlers"
-	"github.com/mbvisti/mortenvistisen/handlers/middleware"
-	"github.com/mbvisti/mortenvistisen/psql"
-	"github.com/mbvisti/mortenvistisen/psql/queue"
-	"github.com/mbvisti/mortenvistisen/psql/queue/workers"
-	"github.com/mbvisti/mortenvistisen/router"
-	"github.com/mbvisti/mortenvistisen/server"
-	"github.com/mbvisti/mortenvistisen/telemetry"
-	"github.com/pressly/goose/v3"
-	"github.com/pressly/goose/v3/lock"
+	"mortenvistisen/config"
+	"mortenvistisen/controllers"
+	"mortenvistisen/database"
+	"mortenvistisen/internal/server"
+	"mortenvistisen/internal/storage"
+	"mortenvistisen/queue"
+	"mortenvistisen/router"
+	"mortenvistisen/router/middleware"
+	"mortenvistisen/telemetry"
+	"mortenvistisen/queue/workers"
 	"riverqueue.com/riverui"
+	"mortenvistisen/clients/email"
+
+	"github.com/a-h/templ"
+	//"github.com/labstack/echo/v4"
 )
 
-var AppVersion string
+var appVersion string
 
-func migrate(ctx context.Context) error {
-	slog.Info("STARTING TO MIGRATE")
-
-	cfg := config.NewConfig()
-
-	gooseLock, err := lock.NewPostgresSessionLocker()
+func setupControllers(
+	cfg config.Config,
+	db storage.Pool,
+	insertOnly queue.InsertOnly,
+	rtr *router.Router,
+	riverHandler *riverui.Handler,
+	mw middleware.Middleware,
+) error {
+	pagesCache, err := controllers.NewCacheBuilder[templ.Component]().Build()
 	if err != nil {
 		return err
 	}
 
-	fsys, err := fs.Sub(psql.Migrations, "migrations")
+	assetsCache, err := controllers.NewCacheBuilder[string]().WithSize(2).Build()
 	if err != nil {
 		return err
 	}
+	assets := controllers.NewAssets(assetsCache)
+	api := controllers.NewAPI(db)
+	pages := controllers.NewPages(db, insertOnly, pagesCache)
+	sessions := controllers.NewSessions(db, cfg)
+	registrations := controllers.NewRegistrations(db, insertOnly, cfg)
+	confirmations := controllers.NewConfirmations(db, cfg)
+	resetPasswords := controllers.NewResetPasswords(db, insertOnly, cfg)
 
-	pool, err := psql.CreatePooledConnection(ctx, cfg.GetDatabaseURL())
-	if err != nil {
-		return err
-	}
-	defer pool.Close()
-
-	db := stdlib.OpenDBFromPool(pool)
-
-	gooseProvider, err := goose.NewProvider(
-		goose.DialectPostgres,
-		db,
-		fsys,
-		goose.WithVerbose(true),
-		goose.WithSessionLocker(gooseLock),
+	rtr.RegisterCtrlRoutes(
+		mw,
+		assets,
+		api,
+		pages,
+		sessions,
+		registrations,
+		confirmations,
+		resetPasswords,
 	)
-	if err != nil {
-		return err
-	}
-	_, err = gooseProvider.Up(ctx)
-	if err != nil {
-		return err
-	}
+
+	rtr.RegisterCustomRoutes(
+		riverHandler,
+		pages.NotFound,
+	)
 
 	return nil
 }
 
-func run(ctx context.Context) error {
-	cfg := config.NewConfig()
+func setupRouter(
+	ctx context.Context,
+	cfg config.Config,
+	tel *telemetry.Telemetry,
+	mw middleware.Middleware,
+) (*router.Router, error) {
+	authKey, err := hex.DecodeString(cfg.App.SessionKey)
+	if err != nil {
+		return nil, err
+	}
+	encKey, err := hex.DecodeString(cfg.App.SessionEncryptionKey)
+	if err != nil {
+		return nil, err
+	}
 
+	r, err := router.New(
+		ctx,
+		cfg,
+		router.SetupGlobalMiddleware(cfg, tel, authKey, encKey, mw, "_csrf"),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return r, nil
+}
+
+func parseHeaders(headersStr string) map[string]string {
+	headers := make(map[string]string)
+	if headersStr == "" {
+		return headers
+	}
+
+	pairs := strings.SplitSeq(headersStr, ",")
+	for pair := range pairs {
+		kv := strings.SplitN(pair, "=", 2)
+		if len(kv) == 2 {
+			headers[strings.TrimSpace(kv[0])] = strings.TrimSpace(kv[1])
+		}
+	}
+
+	return headers
+}
+
+func buildTelemetry(ctx context.Context, cfg config.Config) (*telemetry.Telemetry, error) {
+	opts := []telemetry.Option{
+		telemetry.WithService(cfg.Telemetry.ServiceName, cfg.Telemetry.ServiceVersion),
+		telemetry.WithBatchConfig(cfg.Telemetry.BatchSize, cfg.Telemetry.BatchTimeoutMs, 2048),
+		telemetry.WithTraceSampleRate(cfg.Telemetry.TraceSampleRate),
+	}
+
+	opts = append(opts, telemetry.WithLogExporters(telemetry.NewStdoutExporter()))
+
+	if cfg.Telemetry.OtlpMetricsEndpoint != "" {
+		opts = append(opts, telemetry.WithMetricExporters(
+			telemetry.NewOtlpMetricExporter(cfg.Telemetry.OtlpMetricsEndpoint, parseHeaders(cfg.Telemetry.OtlpHeaders))))
+	}
+
+	if cfg.Telemetry.OtlpTracesEndpoint != "" {
+		opts = append(opts, telemetry.WithTraceExporters(
+			telemetry.NewOtlpTraceExporter(cfg.Telemetry.OtlpTracesEndpoint, parseHeaders(cfg.Telemetry.OtlpHeaders))))
+	} else {
+		opts = append(opts, telemetry.WithTraceExporters(telemetry.NewNoopTraceExporter()))
+	}
+
+	return telemetry.New(ctx, opts...)
+}
+
+func run(ctx context.Context) error {
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
 
-	var tel *telemetry.Telemetry
-	if cfg.Environment == config.PROD_ENVIRONMENT {
-		if err := migrate(ctx); err != nil {
-			return err
-		}
+	cfg := config.NewConfig()
 
-		t, err := telemetry.New(
-			ctx,
-			AppVersion,
-			cfg.ServiceName,
-			&telemetry.LokiExporter{
-				LogLevel:   slog.LevelInfo,
-				WithTraces: true,
-				URL:        "https://telemetry-loki.mbvlabs.com",
-				Labels: map[string]string{
-					"env":     cfg.Environment,
-					"service": cfg.ServiceName,
-				},
-			},
-			telemetry.NewOtlpHttpTraceExporter(
-				"telemetry-alloy.mbvlabs.com",
-				false,
-				map[string]string{
-					"Authorization": "Basic YWRtaW46U2Ftc3VuZzIwNjE=",
-				},
-			),
-			telemetry.NewOtlpHttpMetricExporter(
-				"telemetry-alloy.mbvlabs.com",
-				false,
-				map[string]string{
-					"Authorization": "Basic YWRtaW46U2Ftc3VuZzIwNjE=",
-				},
-			),
-		)
-		if err != nil {
-			return fmt.Errorf("failed to initialize telemetry: %w", err)
-		}
-
-		defer func() {
-			if err := t.Shutdown(ctx); err != nil {
-				slog.Error("Failed to shutdown telemetry", "error", err)
-			}
-		}()
-
-		tel = t
+	tel, err := buildTelemetry(ctx, cfg)
+	if err != nil {
+		return fmt.Errorf("failed to initialize telemetry: %w", err)
 	}
-	if cfg.Environment == config.STAGING_ENVIRONMENT {
-		if err := migrate(ctx); err != nil {
-			return err
+	defer func() {
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		if err := tel.Shutdown(shutdownCtx); err != nil {
+			slog.Error("telemetry shutdown error", "error", err)
 		}
+	}()
 
-		t, err := telemetry.New(
-			ctx,
-			AppVersion,
-			cfg.ServiceName,
-			&telemetry.LokiExporter{
-				LogLevel:   slog.LevelInfo,
-				WithTraces: true,
-				URL:        "https://telemetry-loki.mbvlabs.com",
-				Labels: map[string]string{
-					"env":     "staging",
-					"service": "blog-staging",
-				},
-			},
-			telemetry.NewOtlpHttpTraceExporter(
-				"telemetry-alloy.mbvlabs.com",
-				false,
-				map[string]string{
-					"Authorization": "Basic YWRtaW46U2Ftc3VuZzIwNjE=",
-				},
-			),
-			telemetry.NewOtlpHttpMetricExporter(
-				"telemetry-alloy.mbvlabs.com",
-				false,
-				map[string]string{
-					"Authorization": "Basic YWRtaW46U2Ftc3VuZzIwNjE=",
-				},
-			),
-		)
-		if err != nil {
-			return fmt.Errorf("failed to initialize telemetry: %w", err)
-		}
-
-		defer func() {
-			if err := t.Shutdown(ctx); err != nil {
-				slog.Error("Failed to shutdown telemetry", "error", err)
-			}
-		}()
-
-		tel = t
+	if err := tel.HealthCheck(ctx); err != nil {
+		slog.Warn("telemetry health check failed", "error", err)
 	}
 
-	if cfg.Environment == config.DEV_ENVIRONMENT {
-		t, err := telemetry.New(
-			ctx,
-			AppVersion,
-			"dev",
-			&telemetry.StdoutExporter{
-				LogLevel:   slog.LevelDebug,
-				WithTraces: true,
-			},
-			&telemetry.NoopTraceExporter{},
-			&telemetry.NoopMetricExporter{},
-		)
-		if err != nil {
-			return fmt.Errorf("failed to initialize telemetry: %w", err)
-		}
 
-		tel = t
+	db, err := database.NewPostgres(ctx, cfg.DB.GetDatabaseURL())
+	if err != nil {
+		return err
 	}
+	emailClient := mailclients.NewMailpit(cfg.Email.MailpitHost, cfg.Email.MailpitPort)
 
-	if cfg.Environment == config.STAGING_ENVIRONMENT ||
-		cfg.Environment == config.PROD_ENVIRONMENT {
-		defer func() {
-			if err := tel.Shutdown(ctx); err != nil {
-				slog.Error("Failed to shutdown telemetry", "error", err)
-			}
-		}()
-	}
-
-	if err := telemetry.SetupRuntimeMetricsInCallback(telemetry.GetMeter()); err != nil {
-		return fmt.Errorf("failed to setup callback metrics: %w", err)
-	}
-
-	conn, err := psql.CreatePooledConnection(
-		ctx,
-		cfg.GetDatabaseURL(),
-	)
+	wrks, err := workers.Register(emailClient, emailClient)
 	if err != nil {
 		return err
 	}
 
-	emailClient := clients.NewEmail()
-
-	db := psql.NewPostgres(conn, nil)
-
-	queueWorkers, err := workers.SetupWorkers(workers.WorkerDependencies{
-		DB:          db,
-		EmailClient: emailClient,
-	})
-	if err != nil {
-		return err
-	}
-
-	queueLogger, queueLoggerShutdown := telemetry.NewLogger(
-		ctx,
-		&telemetry.StdoutExporter{
-			LogLevel:   slog.LevelError,
-			WithTraces: true,
-		},
-	)
-	if cfg.Environment == config.STAGING_ENVIRONMENT ||
-		cfg.Environment == config.PROD_ENVIRONMENT {
-		defer func() {
-			if err := queueLoggerShutdown(ctx); err != nil {
-				slog.Error("Failed to shutdown telemetry", "error", err)
-			}
-		}()
-	}
-
-	db.NewQueue(
-		queue.WithLogger(queueLogger),
-		queue.WithWorkers(queueWorkers),
-	)
-
-	opts := &riverui.ServerOpts{
-		Client: db.Queue(),
-		DB:     conn,
-		Logger: slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
-			Level: slog.SetLogLoggerLevel(slog.LevelError),
-		})),
-		Prefix: "/river",
-	}
-	riverUI, err := riverui.NewServer(opts)
-	if err != nil {
-		return err
-	}
-
-	if err := riverUI.Start(ctx); err != nil {
-		return err
-	}
-
-	handlers := handlers.NewHandlers(
+	insertOnly, err := queue.NewInsertOnly(
 		db,
-		emailClient,
+		wrks,
 	)
-
-	mw, err := middleware.New(tel.AppTracerProvider)
 	if err != nil {
 		return err
 	}
 
-	routes := router.New(
+	processor, err := queue.NewProcessor(
 		ctx,
-		handlers,
-		mw,
-		riverUI,
-		tel.AppTracerProvider,
+		db,
+		wrks,
 	)
-
-	router, c := routes.SetupRoutes(ctx, handlers.App.NotFoundPage)
-
-	server := server.NewHttp(c, router)
-
-	if err := db.Queue().Start(ctx); err != nil {
+	if err != nil {
 		return err
 	}
 
-	return server.Start(c)
+	mw := middleware.New(db)
+
+	endpoints := riverui.NewEndpoints(processor.Client, nil)
+	opts := &riverui.HandlerOpts{
+		Endpoints: endpoints,
+		Logger:    slog.Default(),
+		Prefix:    "/riverui", // mount the UI and its APIs under /riverui or another path
+	}
+	riverHandler, err := riverui.NewHandler(opts)
+	if err != nil {
+		return err
+	}
+
+	riverHandler.Start(ctx)
+
+	rtr, err := setupRouter(ctx, cfg, tel, mw)
+	if err != nil {
+		return err
+	}
+
+	err = setupControllers(
+		cfg,
+		db,
+		insertOnly,
+		rtr,
+		riverHandler,
+		mw,
+	)
+	if err != nil {
+		return err
+	}
+
+	handler := rtr.Handler
+
+	server := server.New(
+		ctx,
+		cfg.App.Host,
+		cfg.App.Port,
+		config.Env,
+		handler,
+		[]server.Shutdowner{processor},
+	)
+
+	slog.InfoContext(ctx, "starting server", "host", cfg.App.Host, "port", cfg.App.Port)
+	return server.Start(ctx, config.Env)
 }
 
 func main() {

@@ -1,0 +1,73 @@
+package routes
+
+import (
+	"mortenvistisen/internal/routing"
+)
+
+const UserPrefix = "/users"
+
+var SessionNew = routing.NewSimpleRoute(
+	"/sign_in",
+	"new_user_session",
+	UserPrefix,
+)
+
+var SessionCreate = routing.NewSimpleRoute(
+	"/sign_in",
+	"user_session",
+	UserPrefix,
+)
+
+var SessionDestroy = routing.NewSimpleRoute(
+	"/sign_out",
+	"destroy_user_session",
+	UserPrefix,
+)
+
+var PasswordNew = routing.NewSimpleRoute(
+	"/password/new",
+	"new_user_password",
+	UserPrefix,
+)
+
+var PasswordCreate = routing.NewSimpleRoute(
+	"/password",
+	"user_password",
+	UserPrefix,
+)
+
+var PasswordEdit = routing.NewRouteWithToken(
+	"/password/:token/edit",
+	"edit_user_password",
+	UserPrefix,
+)
+
+var PasswordUpdate = routing.NewSimpleRoute(
+	"/password",
+	"user_password",
+	UserPrefix,
+)
+
+var RegistrationNew = routing.NewSimpleRoute(
+	"/sign_up",
+	"new_user_registration",
+	UserPrefix,
+)
+
+var RegistrationCreate = routing.NewSimpleRoute(
+	"/",
+	"user_registration",
+	UserPrefix,
+)
+
+var ConfirmationNew = routing.NewSimpleRoute(
+	"/confirmation/new",
+	"new_user_confirmation",
+	UserPrefix,
+)
+
+var ConfirmationCreate = routing.NewSimpleRoute(
+	"/confirmation",
+	"user_confirmation",
+	UserPrefix,
+)
