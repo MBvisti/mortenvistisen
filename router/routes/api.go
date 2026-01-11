@@ -1,19 +1,13 @@
 package routes
 
-import "net/http"
-
-const (
-	apiV1RoutePrefix = "/api/v1"
-	apiV1NamePrefix  = "api.v1"
+import (
+	"mortenvistisen/internal/routing"
 )
 
-var ApiV1 = []Route{
-	Health,
-}
+const APIPrefix = "/api"
 
-var Health = Route{
-	Name:        apiV1NamePrefix + ".health",
-	Path:        apiV1RoutePrefix + "/health",
-	Method:      http.MethodGet,
-	HandlerName: "Health",
-}
+var Health = routing.NewSimpleRoute(
+	"/health",
+	"api.health",
+	APIPrefix,
+)

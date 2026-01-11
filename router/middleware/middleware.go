@@ -1,0 +1,146 @@
+// Package middleware provides HTTP middleware for the Echo web framework,
+package middleware
+
+import (
+	"log/slog"
+	"strings"
+	"time"
+
+	"mortenvistisen/router/routes"
+	"mortenvistisen/router/cookies"
+	"mortenvistisen/config"
+	"mortenvistisen/internal/storage"
+	"mortenvistisen/telemetry"
+
+	"github.com/labstack/echo/v4"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/metric"
+)
+
+type Middleware struct {
+	db storage.Pool
+}
+
+func New(db storage.Pool) Middleware {
+	return Middleware{db: db}
+}
+
+func (m Middleware) RegisterAppContext(
+	next echo.HandlerFunc,
+) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		if strings.Contains(c.Request().URL.Path, routes.AssetsPrefix) ||
+			strings.Contains(c.Request().URL.Path, routes.APIPrefix) {
+			return next(c)
+		}
+
+		c.Set(string(cookies.AppKey), cookies.GetApp(c))
+
+		return next(c)
+	}
+}
+
+func (m Middleware) RegisterFlashMessagesContext(
+	next echo.HandlerFunc,
+) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		if strings.Contains(c.Request().URL.Path, routes.AssetsPrefix) ||
+			strings.Contains(c.Request().URL.Path, routes.APIPrefix) {
+			return next(c)
+		}
+
+		flashes, err := cookies.GetFlashes(c)
+		if err != nil {
+			slog.Error("Error getting flash messages from session", "error", err)
+			return next(c)
+		}
+
+		c.Set(string(cookies.FlashKey), flashes)
+
+		return next(c)
+	}
+}
+
+
+func (m Middleware) ValidateSession(
+	next echo.HandlerFunc,
+) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		// Skip session validation for static assets and API routes
+		if strings.Contains(c.Request().URL.Path, routes.AssetsPrefix) ||
+			strings.Contains(c.Request().URL.Path, routes.APIPrefix) {
+			return next(c)
+		}
+
+		return next(c)
+	}
+}
+
+func (m Middleware) Logger(tel *telemetry.Telemetry) echo.MiddlewareFunc {
+	var httpRequestsTotal metric.Int64Counter
+	var httpDuration metric.Float64Histogram
+	var httpInFlight metric.Int64UpDownCounter
+
+	if tel.HasMetrics() {
+		var err error
+		httpRequestsTotal, err = telemetry.HTTPRequestsTotal()
+		if err != nil {
+			slog.Warn("failed to create http_requests_total metric", "error", err)
+		}
+		httpDuration, err = telemetry.HTTPRequestDuration()
+		if err != nil {
+			slog.Warn("failed to create http_request_duration metric", "error", err)
+		}
+		httpInFlight, err = telemetry.HTTPRequestsInFlight()
+		if err != nil {
+			slog.Warn("failed to create http_requests_in_flight metric", "error", err)
+		}
+
+		meter := telemetry.GetMeter(config.ServiceName)
+		if err := telemetry.SetupRuntimeMetricsInCallback(meter); err != nil {
+			slog.Warn("failed to setup runtime metrics", "error", err)
+		}
+	}
+
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			if strings.Contains(c.Request().URL.Path, routes.AssetsPrefix) ||
+				strings.Contains(c.Request().URL.Path, routes.APIPrefix) {
+				return next(c)
+			}
+
+			ctx := c.Request().Context()
+			start := time.Now()
+
+			if tel.HasMetrics() && httpInFlight != nil {
+				httpInFlight.Add(ctx, 1)
+				defer httpInFlight.Add(ctx, -1)
+			}
+
+			err := next(c)
+			duration := time.Since(start)
+			statusCode := c.Response().Status
+
+			if tel.HasMetrics() && httpRequestsTotal != nil && httpDuration != nil {
+				attrs := []attribute.KeyValue{
+					attribute.String("method", c.Request().Method),
+					attribute.String("route", c.Path()),
+					attribute.Int("status_code", statusCode),
+				}
+				httpRequestsTotal.Add(ctx, 1, metric.WithAttributes(attrs...))
+				httpDuration.Record(ctx, duration.Seconds(), metric.WithAttributes(attrs...))
+			}
+
+			slog.InfoContext(ctx, "HTTP request completed",
+				"method", c.Request().Method,
+				"path", c.Request().URL.Path,
+				"status", statusCode,
+				"remote_addr", c.RealIP(),
+				"user_agent", c.Request().UserAgent(),
+				"duration", duration.String(),
+			)
+
+			return err
+		}
+	}
+}

@@ -1,44 +1,17 @@
 package config
 
-import (
-	"fmt"
+import "github.com/caarlos0/env/v11"
 
-	"github.com/caarlos0/env/v10"
-)
-
-const (
-	DEV_ENVIRONMENT     = "development"
-	TEST_ENVIRONMENT    = "testing"
-	PROD_ENVIRONMENT    = "production"
-	STAGING_ENVIRONMENT = "staging"
-)
-
-type App struct {
-	ServerHost             string `env:"SERVER_HOST"`
-	ServerPort             string `env:"SERVER_PORT"`
-	AppDomain              string `env:"APP_DOMAIN"`
-	AppProtocol            string `env:"APP_PROTOCOL"`
-	ProjectName            string `env:"PROJECT_NAME"`
-	Environment            string `env:"ENVIRONMENT"`
-	DefaultSenderSignature string `env:"DEFAULT_SENDER_SIGNATURE"`
-	TurnstileSiteKey       string `env:"TURNSTILE_SITE_KEY"`
-	TurnstileSecretKey     string `env:"TURNSTILE_SECRET_KEY"`
+type app struct {
+	Host                 string `env:"HOST" envDefault:"localhost"`
+	Port                 string `env:"PORT" envDefault:"8080"`
+	SessionKey           string `env:"SESSION_KEY"`
+	SessionEncryptionKey string `env:"SESSION_ENCRYPTION_KEY"`
+	TokenSigningKey      string `env:"TOKEN_SIGNING_KEY"`
 }
 
-func (a App) GetFullDomain() string {
-	if a.Environment == DEV_ENVIRONMENT {
-		return fmt.Sprintf(
-			"%v://%v:%v",
-			a.AppProtocol,
-			a.AppDomain,
-			a.ServerPort,
-		)
-	}
-	return fmt.Sprintf("%v://%v", a.AppProtocol, a.AppDomain)
-}
-
-func newApp() App {
-	appCfg := App{}
+func newAppConfig() app {
+	appCfg := app{}
 
 	if err := env.ParseWithOptions(&appCfg, env.Options{
 		RequiredIfNoDef: true,
