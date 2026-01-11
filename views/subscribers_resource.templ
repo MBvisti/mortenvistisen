@@ -1,0 +1,199 @@
+package views
+
+import (
+	"fmt"
+	"mortenvistisen/internal/hypermedia"
+	"mortenvistisen/models"
+	"mortenvistisen/router/routes"
+	"mortenvistisen/views/components"
+	"net/http"
+)
+
+templ SubscriberIndex(subscribers []models.Subscriber) {
+	@base() {
+		<main>
+			<div>
+				<h1>Subscribers</h1>
+				<a href={ templ.URL(routes.SubscriberNew.URL()) }>New Subscriber</a>
+			</div>
+			<div>
+				<div>
+					if len(subscribers) == 0 {
+						<p>No subscribers found.</p>
+					} else {
+						<div>
+							<table>
+								<thead>
+									<tr>
+										<th>Created At</th>
+										<th>Updated At</th>
+										<th>Email</th>
+										<th>Subscribed At</th>
+										<th>Referer</th>
+										<th>Is Verified</th>
+										<th>Actions</th>
+									</tr>
+								</thead>
+								<tbody>
+									for _, subscriber := range subscribers {
+										<tr>
+											<td>{ subscriber.CreatedAt.String() }</td>
+											<td>{ subscriber.UpdatedAt.String() }</td>
+											<td>{ subscriber.Email }</td>
+											<td>{ subscriber.SubscribedAt.String() }</td>
+											<td>{ subscriber.Referer }</td>
+											<td>{ fmt.Sprintf("%t", subscriber.IsVerified) }</td>
+											<td>
+												<a href={ templ.URL(routes.SubscriberShow.URL(subscriber.ID)) }>View</a>
+												<a href={ templ.URL(routes.SubscriberEdit.URL(subscriber.ID)) }>Edit</a>
+											</td>
+										</tr>
+									}
+								</tbody>
+							</table>
+						</div>
+					}
+				</div>
+			</div>
+		</main>
+	}
+}
+
+templ SubscriberShow(subscriber models.Subscriber) {
+	@base() {
+		<main>
+			<div>
+				<h1>Subscriber Details</h1>
+				<div>
+					<a href={ templ.URL(routes.SubscriberEdit.URL(subscriber.ID)) }>Edit</a>
+					<a href={ templ.URL(routes.SubscriberIndex.URL()) }>Back to List</a>
+				</div>
+			</div>
+			<div>
+				<div>
+					<div>
+						<div>
+							<label>Created At</label>
+							<p>{ subscriber.CreatedAt.String() }</p>
+						</div>
+						<div>
+							<label>Updated At</label>
+							<p>{ subscriber.UpdatedAt.String() }</p>
+						</div>
+						<div>
+							<label>Email</label>
+							<p>{ subscriber.Email }</p>
+						</div>
+						<div>
+							<label>Subscribed At</label>
+							<p>{ subscriber.SubscribedAt.String() }</p>
+						</div>
+						<div>
+							<label>Referer</label>
+							<p>{ subscriber.Referer }</p>
+						</div>
+						<div>
+							<label>Is Verified</label>
+							<p>{ fmt.Sprintf("%t", subscriber.IsVerified) }</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</main>
+	}
+}
+
+templ SubscriberNew() {
+	@base() {
+		<main>
+			<div>
+				<h1>New Subscriber</h1>
+				<a href={ templ.URL(routes.SubscriberIndex.URL()) }>Back to List</a>
+			</div>
+			<div>
+				<div>
+					<form data-on:submit={ hypermedia.DataAction(http.MethodPost, routes.SubscriberCreate.URL(), hypermedia.ActionTypeForm) }>
+						<div>
+							<div>
+								<h2>Subscriber Information</h2>
+								<p>Enter the details for the new subscriber.</p>
+								<div>
+									<div>
+										@components.InputField("Email", "email", "text", "", false, components.FieldProp{})
+									</div>
+									<div>
+										@components.InputField("Subscribed At", "subscribed_at", "date", "", false, components.FieldProp{})
+									</div>
+									<div>
+										@components.InputField("Referer", "referer", "text", "", false, components.FieldProp{})
+									</div>
+									<div>
+										@components.InputField("Is Verified", "is_verified", "checkbox", "", false, components.FieldProp{})
+									</div>
+								</div>
+							</div>
+						</div>
+						<div>
+							<a href={ templ.URL(routes.SubscriberIndex.URL()) }>Cancel</a>
+							<button type="submit">Create Subscriber</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</main>
+	}
+}
+
+templ SubscriberEdit(subscriber models.Subscriber) {
+	@base() {
+		<main>
+			<div>
+				<h1>Edit Subscriber</h1>
+				<a href={ templ.URL(routes.SubscriberIndex.URL()) }>Back to List</a>
+			</div>
+			<div>
+				<div>
+					<form data-on:submit={ hypermedia.DataAction(http.MethodPut, routes.SubscriberUpdate.URL(subscriber.ID), hypermedia.ActionTypeForm) }>
+						<div>
+							<div>
+								<h2>Subscriber Information</h2>
+								<p>Update the details for this subscriber.</p>
+								<div>
+									<div>
+										@components.InputField("Email", "email", "text", "", false, components.FieldProp{
+											Value: subscriber.Email,
+										})
+									</div>
+									<div>
+										@components.InputField("Subscribed At", "subscribed_at", "date", "", false, components.FieldProp{
+											Value: subscriber.SubscribedAt.String(),
+										})
+									</div>
+									<div>
+										@components.InputField("Referer", "referer", "text", "", false, components.FieldProp{
+											Value: subscriber.Referer,
+										})
+									</div>
+									<div>
+										@components.InputField("Is Verified", "is_verified", "checkbox", "", false, components.FieldProp{
+											Value: fmt.Sprintf("%t", subscriber.IsVerified),
+										})
+									</div>
+								</div>
+							</div>
+						</div>
+						<div>
+							<a href={ templ.URL(routes.SubscriberIndex.URL()) }>Cancel</a>
+							<button type="submit">Update Subscriber</button>
+						</div>
+					</form>
+					<div>
+						<button
+							data-on:click={ hypermedia.DataAction(http.MethodDelete, routes.SubscriberDestroy.URL(subscriber.ID)) }
+						>Destroy Subscriber</button>
+					</div>
+				</div>
+			</div>
+		</main>
+	}
+}

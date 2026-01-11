@@ -1,7 +1,7 @@
 -- +goose Up
 -- +goose StatementBegin
 SELECT 'up SQL query';
-create table if not exists article_tags (
+create table if not exists tags (
     id uuid not null,
     primary key (id),
 
@@ -15,5 +15,5 @@ create table if not exists article_tags (
 -- +goose Down
 -- +goose StatementBegin
 SELECT 'down SQL query';
-drop table if exists article_tags;
+drop table if exists tags;
 -- +goose StatementEnd

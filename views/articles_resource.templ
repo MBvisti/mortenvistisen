@@ -1,0 +1,269 @@
+package views
+
+import (
+	"fmt"
+	"mortenvistisen/internal/hypermedia"
+	"mortenvistisen/models"
+	"mortenvistisen/router/routes"
+	"mortenvistisen/views/components"
+	"net/http"
+)
+
+templ ArticleIndex(articles []models.Article) {
+	@base() {
+		<main>
+			<div>
+				<h1>Articles</h1>
+				<a href={ templ.URL(routes.ArticleNew.URL()) }>New Article</a>
+			</div>
+			<div>
+				<div>
+					if len(articles) == 0 {
+						<p>No articles found.</p>
+					} else {
+						<div>
+							<table>
+								<thead>
+									<tr>
+										<th>Created At</th>
+										<th>Updated At</th>
+										<th>First Published At</th>
+										<th>Title</th>
+										<th>Excerpt</th>
+										<th>Meta Title</th>
+										<th>Meta Description</th>
+										<th>Slug</th>
+										<th>Image Link</th>
+										<th>Read Time</th>
+										<th>Content</th>
+										<th>Actions</th>
+									</tr>
+								</thead>
+								<tbody>
+									for _, article := range articles {
+										<tr>
+											<td>{ article.CreatedAt.String() }</td>
+											<td>{ article.UpdatedAt.String() }</td>
+											<td>{ article.FirstPublishedAt.String() }</td>
+											<td>{ article.Title }</td>
+											<td>{ article.Excerpt }</td>
+											<td>{ article.MetaTitle }</td>
+											<td>{ article.MetaDescription }</td>
+											<td>{ article.Slug }</td>
+											<td>{ article.ImageLink }</td>
+											<td>{ fmt.Sprintf("%d", article.ReadTime) }</td>
+											<td>{ article.Content }</td>
+											<td>
+												<a href={ templ.URL(routes.ArticleShow.URL(article.ID)) }>View</a>
+												<a href={ templ.URL(routes.ArticleEdit.URL(article.ID)) }>Edit</a>
+											</td>
+										</tr>
+									}
+								</tbody>
+							</table>
+						</div>
+					}
+				</div>
+			</div>
+		</main>
+	}
+}
+
+templ ArticleShow(article models.Article) {
+	@base() {
+		<main>
+			<div>
+				<h1>Article Details</h1>
+				<div>
+					<a href={ templ.URL(routes.ArticleEdit.URL(article.ID)) }>Edit</a>
+					<a href={ templ.URL(routes.ArticleIndex.URL()) }>Back to List</a>
+				</div>
+			</div>
+			<div>
+				<div>
+					<div>
+						<div>
+							<label>Created At</label>
+							<p>{ article.CreatedAt.String() }</p>
+						</div>
+						<div>
+							<label>Updated At</label>
+							<p>{ article.UpdatedAt.String() }</p>
+						</div>
+						<div>
+							<label>First Published At</label>
+							<p>{ article.FirstPublishedAt.String() }</p>
+						</div>
+						<div>
+							<label>Title</label>
+							<p>{ article.Title }</p>
+						</div>
+						<div>
+							<label>Excerpt</label>
+							<p>{ article.Excerpt }</p>
+						</div>
+						<div>
+							<label>Meta Title</label>
+							<p>{ article.MetaTitle }</p>
+						</div>
+						<div>
+							<label>Meta Description</label>
+							<p>{ article.MetaDescription }</p>
+						</div>
+						<div>
+							<label>Slug</label>
+							<p>{ article.Slug }</p>
+						</div>
+						<div>
+							<label>Image Link</label>
+							<p>{ article.ImageLink }</p>
+						</div>
+						<div>
+							<label>Read Time</label>
+							<p>{ fmt.Sprintf("%d", article.ReadTime) }</p>
+						</div>
+						<div>
+							<label>Content</label>
+							<p>{ article.Content }</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</main>
+	}
+}
+
+templ ArticleNew() {
+	@base() {
+		<main>
+			<div>
+				<h1>New Article</h1>
+				<a href={ templ.URL(routes.ArticleIndex.URL()) }>Back to List</a>
+			</div>
+			<div>
+				<div>
+					<form data-on:submit={ hypermedia.DataAction(http.MethodPost, routes.ArticleCreate.URL(), hypermedia.ActionTypeForm) }>
+						<div>
+							<div>
+								<h2>Article Information</h2>
+								<p>Enter the details for the new article.</p>
+								<div>
+									<div>
+										@components.InputField("First Published At", "first_published_at", "date", "", false, components.FieldProp{})
+									</div>
+									<div>
+										@components.InputField("Title", "title", "text", "", false, components.FieldProp{})
+									</div>
+									<div>
+										@components.InputField("Excerpt", "excerpt", "text", "", false, components.FieldProp{})
+									</div>
+									<div>
+										@components.InputField("Meta Title", "meta_title", "text", "", false, components.FieldProp{})
+									</div>
+									<div>
+										@components.InputField("Meta Description", "meta_description", "text", "", false, components.FieldProp{})
+									</div>
+									<div>
+										@components.InputField("Slug", "slug", "text", "", false, components.FieldProp{})
+									</div>
+									<div>
+										@components.InputField("Image Link", "image_link", "text", "", false, components.FieldProp{})
+									</div>
+									<div>
+										@components.InputField("Read Time", "read_time", "number", "", false, components.FieldProp{})
+									</div>
+									<div>
+										@components.InputField("Content", "content", "text", "", false, components.FieldProp{})
+									</div>
+								</div>
+							</div>
+						</div>
+						<div>
+							<a href={ templ.URL(routes.ArticleIndex.URL()) }>Cancel</a>
+							<button type="submit">Create Article</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</main>
+	}
+}
+
+templ ArticleEdit(article models.Article) {
+	@base() {
+		<main>
+			<div>
+				<h1>Edit Article</h1>
+				<a href={ templ.URL(routes.ArticleIndex.URL()) }>Back to List</a>
+			</div>
+			<div>
+				<div>
+					<form data-on:submit={ hypermedia.DataAction(http.MethodPut, routes.ArticleUpdate.URL(article.ID), hypermedia.ActionTypeForm) }>
+						<div>
+							<div>
+								<h2>Article Information</h2>
+								<p>Update the details for this article.</p>
+								<div>
+									<div>
+										@components.InputField("First Published At", "first_published_at", "date", "", false, components.FieldProp{
+											Value: article.FirstPublishedAt.String(),
+										})
+									</div>
+									<div>
+										@components.InputField("Title", "title", "text", "", false, components.FieldProp{
+											Value: article.Title,
+										})
+									</div>
+									<div>
+										@components.InputField("Excerpt", "excerpt", "text", "", false, components.FieldProp{
+											Value: article.Excerpt,
+										})
+									</div>
+									<div>
+										@components.InputField("Meta Title", "meta_title", "text", "", false, components.FieldProp{
+											Value: article.MetaTitle,
+										})
+									</div>
+									<div>
+										@components.InputField("Meta Description", "meta_description", "text", "", false, components.FieldProp{
+											Value: article.MetaDescription,
+										})
+									</div>
+									<div>
+										@components.InputField("Slug", "slug", "text", "", false, components.FieldProp{
+											Value: article.Slug,
+										})
+									</div>
+									<div>
+										@components.InputField("Image Link", "image_link", "text", "", false, components.FieldProp{
+											Value: article.ImageLink,
+										})
+									</div>
+									<div>
+										@components.InputField("Read Time", "read_time", "number", "", false, components.FieldProp{
+											Value: fmt.Sprintf("%d", article.ReadTime),
+										})
+									</div>
+									<div>
+										@components.InputField("Content", "content", "text", "", false, components.FieldProp{
+											Value: article.Content,
+										})
+									</div>
+								</div>
+							</div>
+						</div>
+						<div>
+							<a href={ templ.URL(routes.ArticleIndex.URL()) }>Cancel</a>
+							<button type="submit">Update Article</button>
+						</div>
+					</form>
+					<div>
+						<button
+							data-on:click={ hypermedia.DataAction(http.MethodDelete, routes.ArticleDestroy.URL(article.ID)) }
+						>Destroy Article</button>
+					</div>
+				</div>
+			</div>
+		</main>
+	}
+}

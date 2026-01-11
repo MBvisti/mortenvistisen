@@ -60,6 +60,40 @@ func (ns NullRiverJobState) Value() (driver.Value, error) {
 	return string(ns.RiverJobState), nil
 }
 
+type Article struct {
+	ID               uuid.UUID
+	CreatedAt        pgtype.Timestamptz
+	UpdatedAt        pgtype.Timestamptz
+	FirstPublishedAt pgtype.Timestamptz
+	Title            string
+	Excerpt          string
+	MetaTitle        string
+	MetaDescription  string
+	Slug             string
+	ImageLink        pgtype.Text
+	ReadTime         pgtype.Int4
+	Content          pgtype.Text
+}
+
+type ArticleTagConnection struct {
+	ID        uuid.UUID
+	ArticleID uuid.UUID
+	TagID     uuid.UUID
+}
+
+type Newsletter struct {
+	ID              uuid.UUID
+	CreatedAt       pgtype.Timestamptz
+	UpdatedAt       pgtype.Timestamptz
+	Title           string
+	MetaTitle       string
+	MetaDescription string
+	IsPublished     pgtype.Bool
+	ReleasedAt      pgtype.Timestamptz
+	Slug            pgtype.Text
+	Content         pgtype.Text
+}
+
 type RiverClient struct {
 	ID        string
 	CreatedAt pgtype.Timestamptz
@@ -95,7 +129,7 @@ type RiverJob struct {
 	Kind         string
 	Metadata     []byte
 	Queue        string
-	Tags         []string
+	Tag          []string
 	UniqueKey    []byte
 	UniqueStates pgtype.Bits
 }
@@ -119,6 +153,23 @@ type RiverQueue struct {
 	Metadata  []byte
 	PausedAt  pgtype.Timestamptz
 	UpdatedAt pgtype.Timestamptz
+}
+
+type Subscriber struct {
+	ID           uuid.UUID
+	CreatedAt    pgtype.Timestamptz
+	UpdatedAt    pgtype.Timestamptz
+	Email        pgtype.Text
+	SubscribedAt pgtype.Timestamptz
+	Referer      pgtype.Text
+	IsVerified   pgtype.Bool
+}
+
+type Tag struct {
+	ID        uuid.UUID
+	CreatedAt pgtype.Timestamptz
+	UpdatedAt pgtype.Timestamptz
+	Title     string
 }
 
 type Token struct {

@@ -16,9 +16,6 @@ const countUsers = `-- name: CountUsers :one
 select count(*) from users
 `
 
-// CountUsers
-//
-//	select count(*) from users
 func (q *Queries) CountUsers(ctx context.Context, db DBTX) (int64, error) {
 	row := db.QueryRow(ctx, countUsers)
 	var count int64
@@ -30,9 +27,6 @@ const deleteUser = `-- name: DeleteUser :exec
 delete from users where id=$1
 `
 
-// DeleteUser
-//
-//	delete from users where id=$1
 func (q *Queries) DeleteUser(ctx context.Context, db DBTX, id uuid.UUID) error {
 	_, err := db.Exec(ctx, deleteUser, id)
 	return err
@@ -54,13 +48,6 @@ type InsertUserParams struct {
 	IsAdmin          bool
 }
 
-// InsertUser
-//
-//	insert into
-//	    users (id, created_at, updated_at, email, email_validated_at, password, is_admin)
-//	values
-//	    ($1, now(), now(), $2, $3, $4, $5)
-//	returning id, created_at, updated_at, email, email_validated_at, password, is_admin
 func (q *Queries) InsertUser(ctx context.Context, db DBTX, arg InsertUserParams) (User, error) {
 	row := db.QueryRow(ctx, insertUser,
 		arg.ID,
@@ -93,11 +80,6 @@ type QueryPaginatedUsersParams struct {
 	Limit  int64
 }
 
-// QueryPaginatedUsers
-//
-//	select id, created_at, updated_at, email, email_validated_at, password, is_admin from users
-//	order by created_at desc
-//	limit $2::bigint offset $1::bigint
 func (q *Queries) QueryPaginatedUsers(ctx context.Context, db DBTX, arg QueryPaginatedUsersParams) ([]User, error) {
 	rows, err := db.Query(ctx, queryPaginatedUsers, arg.Offset, arg.Limit)
 	if err != nil {
@@ -130,9 +112,6 @@ const queryUserByEmail = `-- name: QueryUserByEmail :one
 select id, created_at, updated_at, email, email_validated_at, password, is_admin from users where email=$1
 `
 
-// QueryUserByEmail
-//
-//	select id, created_at, updated_at, email, email_validated_at, password, is_admin from users where email=$1
 func (q *Queries) QueryUserByEmail(ctx context.Context, db DBTX, email string) (User, error) {
 	row := db.QueryRow(ctx, queryUserByEmail, email)
 	var i User
@@ -152,9 +131,6 @@ const queryUserByID = `-- name: QueryUserByID :one
 select id, created_at, updated_at, email, email_validated_at, password, is_admin from users where id=$1
 `
 
-// QueryUserByID
-//
-//	select id, created_at, updated_at, email, email_validated_at, password, is_admin from users where id=$1
 func (q *Queries) QueryUserByID(ctx context.Context, db DBTX, id uuid.UUID) (User, error) {
 	row := db.QueryRow(ctx, queryUserByID, id)
 	var i User
@@ -174,9 +150,6 @@ const queryUsers = `-- name: QueryUsers :many
 select id, created_at, updated_at, email, email_validated_at, password, is_admin from users
 `
 
-// QueryUsers
-//
-//	select id, created_at, updated_at, email, email_validated_at, password, is_admin from users
 func (q *Queries) QueryUsers(ctx context.Context, db DBTX) ([]User, error) {
 	rows, err := db.Query(ctx, queryUsers)
 	if err != nil {
@@ -220,12 +193,6 @@ type UpdateUserParams struct {
 	IsAdmin          bool
 }
 
-// UpdateUser
-//
-//	update users
-//	    set updated_at=now(), email=$2, email_validated_at=$3, password=$4, is_admin=$5
-//	where id = $1
-//	returning id, created_at, updated_at, email, email_validated_at, password, is_admin
 func (q *Queries) UpdateUser(ctx context.Context, db DBTX, arg UpdateUserParams) (User, error) {
 	row := db.QueryRow(ctx, updateUser,
 		arg.ID,
