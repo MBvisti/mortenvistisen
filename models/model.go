@@ -1,0 +1,18 @@
+// Package models contains data models and validation logic.
+package models
+
+import (
+	"mortenvistisen/models/internal/db"
+
+	"github.com/go-playground/validator/v10"
+)
+
+var (
+	validate = setupValidator()
+	queries  = db.New()
+)
+
+func setupValidator() *validator.Validate {
+	v := validator.New(validator.WithRequiredStructEnabled())
+	return v
+}

@@ -2,8 +2,8 @@ package telemetry
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
-	"log/slog"
 	"strings"
 
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
@@ -12,55 +12,63 @@ import (
 )
 
 type OtlpHttpTraceExporter struct {
-	otlpEndpoint string
-	insecure     bool
-	headers      map[string]string
-	exporter     sdktrace.SpanExporter
+	endpoint string
+	insecure bool
+	headers  map[string]string
+	exporter sdktrace.SpanExporter
 }
 
-func NewOtlpHttpTraceExporter(
-	endpoint string,
-	insecure bool,
-	headers map[string]string,
-) *OtlpHttpTraceExporter {
+func NewOtlpTraceExporter(endpoint string, headers map[string]string) *OtlpHttpTraceExporter {
+	if endpoint == "" {
+		return nil
+	}
 	return &OtlpHttpTraceExporter{
-		endpoint,
-		insecure,
-		headers,
-		nil,
+		endpoint: endpoint,
+		insecure: false,
+		headers:  headers,
+		exporter: nil,
+	}
+}
+
+func NewOtlpTraceExporterInsecure(endpoint string, headers map[string]string) *OtlpHttpTraceExporter {
+	if endpoint == "" {
+		return nil
+	}
+	return &OtlpHttpTraceExporter{
+		endpoint: endpoint,
+		insecure: true,
+		headers:  headers,
+		exporter: nil,
 	}
 }
 
 func (o *OtlpHttpTraceExporter) Name() string {
-	return "otlp-http"
+	return "otlp-http-traces"
 }
 
-func (o *OtlpHttpTraceExporter) GetSpanExporter(
-	ctx context.Context,
-	res *resource.Resource,
-) (sdktrace.SpanExporter, error) {
-	endpoint := strings.TrimPrefix(o.otlpEndpoint, "http://")
+func (o *OtlpHttpTraceExporter) GetSpanExporter(ctx context.Context, res *resource.Resource) (sdktrace.SpanExporter, error) {
+	endpoint := strings.TrimPrefix(o.endpoint, "http://")
 	endpoint = strings.TrimPrefix(endpoint, "https://")
 
 	opts := []otlptracehttp.Option{
 		otlptracehttp.WithEndpoint(endpoint),
-		otlptracehttp.WithURLPath(
-			"/ingestor/v1/traces",
-		),
 	}
-	if len(o.headers) > 0 {
-		opts = append(opts, otlptracehttp.WithHeaders(o.headers))
-	}
+
 	if o.insecure {
 		opts = append(opts, otlptracehttp.WithInsecure())
+	} else {
+		opts = append(opts, otlptracehttp.WithTLSClientConfig(&tls.Config{
+			MinVersion: tls.VersionTLS12,
+		}))
+	}
+
+	if len(o.headers) > 0 {
+		opts = append(opts, otlptracehttp.WithHeaders(o.headers))
 	}
 
 	exporter, err := otlptracehttp.New(ctx, opts...)
 	if err != nil {
-		return nil, fmt.Errorf(
-			"failed to create OTLP HTTP trace exporter: %w",
-			err,
-		)
+		return nil, fmt.Errorf("failed to create OTLP HTTP trace exporter: %w", err)
 	}
 
 	o.exporter = exporter
@@ -69,20 +77,18 @@ func (o *OtlpHttpTraceExporter) GetSpanExporter(
 
 func (o *OtlpHttpTraceExporter) Shutdown(ctx context.Context) error {
 	if o.exporter != nil {
-		slog.InfoContext(ctx, "OTLP HTTP Trace Exporter shutting down...")
-		return o.exporter.Shutdown(ctx)
+		if err := o.exporter.Shutdown(ctx); err != nil {
+			return fmt.Errorf("failed to shutdown OTLP HTTP trace exporter: %w", err)
+		}
 	}
 	return nil
 }
 
-var _ TraceExporter = new(OtlpHttpTraceExporter)
+var _ TraceExporter = (*OtlpHttpTraceExporter)(nil)
 
 type noopSpanExporter struct{}
 
-func (e *noopSpanExporter) ExportSpans(
-	ctx context.Context,
-	spans []sdktrace.ReadOnlySpan,
-) error {
+func (e *noopSpanExporter) ExportSpans(ctx context.Context, spans []sdktrace.ReadOnlySpan) error {
 	return nil
 }
 
@@ -90,17 +96,19 @@ func (e *noopSpanExporter) Shutdown(ctx context.Context) error {
 	return nil
 }
 
+var _ sdktrace.SpanExporter = (*noopSpanExporter)(nil)
+
 type NoopTraceExporter struct{}
 
-func (n *NoopTraceExporter) Name() string {
-	return "noop"
+func NewNoopTraceExporter() *NoopTraceExporter {
+	return &NoopTraceExporter{}
 }
 
-// GetSpanExporter returns an instance of noopSpanExporter.
-func (n *NoopTraceExporter) GetSpanExporter(
-	ctx context.Context,
-	res *resource.Resource,
-) (sdktrace.SpanExporter, error) {
+func (n *NoopTraceExporter) Name() string {
+	return "noop-traces"
+}
+
+func (n *NoopTraceExporter) GetSpanExporter(ctx context.Context, res *resource.Resource) (sdktrace.SpanExporter, error) {
 	return &noopSpanExporter{}, nil
 }
 
@@ -108,4 +116,4 @@ func (n *NoopTraceExporter) Shutdown(ctx context.Context) error {
 	return nil
 }
 
-var _ TraceExporter = new(NoopTraceExporter)
+var _ TraceExporter = (*NoopTraceExporter)(nil)

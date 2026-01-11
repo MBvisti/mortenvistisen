@@ -3,28 +3,28 @@ package config
 import (
 	"fmt"
 
-	"github.com/caarlos0/env/v10"
+	"github.com/caarlos0/env/v11"
 )
 
-type Database struct {
+type database struct {
 	Port         string `env:"DB_PORT"`
 	Host         string `env:"DB_HOST"`
 	Name         string `env:"DB_NAME"`
 	User         string `env:"DB_USER"`
 	Password     string `env:"DB_PASSWORD"`
 	DatabaseKind string `env:"DB_KIND"`
-	SSL_MODE     string `env:"DB_SSL_MODE"`
+	SslMode      string `env:"DB_SSL_MODE"`
 }
 
-func (d Database) GetDatabaseURL() string {
+func (d database) GetDatabaseURL() string {
 	return fmt.Sprintf("%s://%s:%s@%s:%s/%s?sslmode=%s",
 		d.DatabaseKind, d.User, d.Password, d.Host, d.Port,
-		d.Name, d.SSL_MODE,
+		d.Name, d.SslMode,
 	)
 }
 
-func newDatabase() Database {
-	dataCfg := Database{}
+func newDatabaseConfig() database {
+	dataCfg := database{}
 
 	if err := env.ParseWithOptions(&dataCfg, env.Options{
 		RequiredIfNoDef: true,

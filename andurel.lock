@@ -1,0 +1,54 @@
+{
+  "version": "v1.0.0-alpha.5",
+  "tools": {
+    "air": {
+      "source": "go",
+      "version": "v1.61.7",
+      "module": "github.com/air-verse/air"
+    },
+    "dblab": {
+      "source": "go",
+      "version": "v0.34.2",
+      "module": "github.com/danvergara/dblab"
+    },
+    "goose": {
+      "source": "go",
+      "version": "v3.24.1",
+      "module": "github.com/pressly/goose"
+    },
+    "mailpit": {
+      "source": "go",
+      "version": "v1.21.8",
+      "module": "github.com/axllent/mailpit"
+    },
+    "run": {
+      "source": "built",
+      "version": "v0.1.0",
+      "path": "cmd/run/main.go"
+    },
+    "sqlc": {
+      "source": "go",
+      "version": "v1.30.0",
+      "module": "github.com/sqlc-dev/sqlc"
+    },
+    "tailwindcli": {
+      "source": "binary",
+      "version": "v4.1.17"
+    },
+    "templ": {
+      "source": "go",
+      "version": "v0.3.960",
+      "module": "github.com/a-h/templ"
+    },
+    "usql": {
+      "source": "go",
+      "version": "v0.19.14",
+      "module": "github.com/xo/usql"
+    }
+  },
+  "scaffoldConfig": {
+    "projectName": "mortenvistisen",
+    "database": "postgresql",
+    "cssFramework": "tailwind"
+  }
+}

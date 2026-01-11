@@ -1,0 +1,31 @@
+package router
+
+import (
+	"net/http"
+
+	"mortenvistisen/controllers"
+	"mortenvistisen/router/routes"
+
+	"github.com/labstack/echo/v4"
+)
+
+func registerAssetsRoutes(handler *echo.Echo, assetsController controllers.Assets) {
+	handler.Add(
+		http.MethodGet, routes.Robots.Path(), assetsController.Robots,
+	).Name = routes.Robots.Name()
+
+	handler.Add(
+		http.MethodGet, routes.Sitemap.Path(), assetsController.Sitemap,
+	).Name = routes.Sitemap.Name()
+
+	handler.Add(
+		http.MethodGet, routes.Stylesheet.Path(), assetsController.Stylesheet,
+	).Name = routes.Stylesheet.Name()
+	handler.Add(
+		http.MethodGet, routes.Scripts.Path(), assetsController.Scripts,
+	).Name = routes.Scripts.Name()
+
+	handler.Add(
+		http.MethodGet, routes.Script.Path(), assetsController.Script,
+	).Name = routes.Script.Name()
+}

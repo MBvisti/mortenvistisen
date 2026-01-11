@@ -1,73 +1,76 @@
+// Package config provides application-wide configuration settings.
 package config
 
 import (
+	"fmt"
 	"os"
+	"strings"
+
+	"mortenvistisen/internal/server"
+
+	"github.com/gosimple/slug"
 )
 
-// Cfg instantiate a new cfg but can panic
-var Cfg Config = NewConfig()
+// Global application settings that can be used throughout the codebase with defaults.
+var (
+	Env = func() string {
+		if os.Getenv("ENVIRONMENT") != "" {
+			return os.Getenv("ENVIRONMENT")
+		}
+
+		return server.DevEnvironment
+	}()
+	ProjectName = func() string {
+		if os.Getenv("PROJECT_NAME") != "" {
+			return os.Getenv("PROJECT_NAME")
+		}
+
+		return "andurel"
+	}()
+	ServiceName = func() string {
+		if os.Getenv("TELEMETRY_SERVICE_NAME") != "" {
+			return os.Getenv("TELEMETRY_SERVICE_NAME")
+		}
+
+		return slug.Make(ProjectName)
+	}()
+	Domain = func() string {
+		if os.Getenv("DOMAIN") != "" {
+			return os.Getenv("DOMAIN")
+		}
+
+		return "localhost:8080"
+	}()
+	BaseURL = func() string {
+		var protocol string
+
+		if os.Getenv("PROTOCOL") != "" {
+			protocol = os.Getenv("PROTOCOL")
+		} else {
+			protocol = "http"
+		}
+
+		return fmt.Sprintf("%s://%s", protocol, Domain)
+	}()
+	AppCookieSessionName = func() string {
+		return "app_sess"+slug.Make(strings.ToLower(ProjectName)) + "-" + Env
+	}()
+)
 
 type Config struct {
-	Database
-	Authentication
-	App
-	Telemetry
-	AwsAccessKeyID     string
-	AwsSecretAccessKey string
+	App       app
+	DB        database
+	Telemetry telemetry
+	Email email
+	Auth auth
 }
 
 func NewConfig() Config {
-	var cfg Config
-
-	switch os.Getenv("ENVIRONMENT") {
-	case DEV_ENVIRONMENT, STAGING_ENVIRONMENT, PROD_ENVIRONMENT:
-		awsAccessKeyID := os.Getenv("AWS_ACCESS_KEY_ID")
-		if awsAccessKeyID == "" {
-			panic("missing 'AWS_ACCESS_KEY_ID'")
-		}
-		awsSecretAccessKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
-		if awsSecretAccessKey == "" {
-			panic("missing 'AWS_SECRET_ACCESS_KEY'")
-		}
-
-		cfg = Config{
-			newDatabase(),
-			newAuthentication(),
-			newApp(),
-			newTelemetry(),
-			awsAccessKeyID,
-			awsSecretAccessKey,
-		}
-	default:
-		cfg = newTestConfig()
-	}
-
-	return cfg
-}
-
-func newTestConfig() Config {
 	return Config{
-		Authentication: Authentication{
-			PasswordSalt:         "salty",
-			SessionKey:           "session",
-			SessionEncryptionKey: "session_enc_key",
-			TokenSigningKey:      "token_signing_key",
-			// CsrfToken:            "csrf_token",
-		},
-		App: App{
-			ServerHost:             "0.0.0.0",
-			ServerPort:             "8080",
-			AppDomain:              "testing",
-			AppProtocol:            "http",
-			ProjectName:            "test",
-			Environment:            TEST_ENVIRONMENT,
-			DefaultSenderSignature: "test@testing.com",
-		},
-		Telemetry: Telemetry{
-			ServiceName:  "mortenvistisen-test",
-			OtlpEndpoint: "",
-		},
-		AwsAccessKeyID:     "",
-		AwsSecretAccessKey: "",
+		App:       newAppConfig(),
+		DB:        newDatabaseConfig(),
+		Telemetry: newTelemetryConfig(),
+		Email: newEmailConfig(),
+		Auth: newAuthConfig(),
 	}
 }

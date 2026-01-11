@@ -1,0 +1,50 @@
+package controllers
+
+import (
+	"mortenvistisen/internal/storage"
+	"mortenvistisen/queue"
+	"mortenvistisen/views"
+
+	"github.com/a-h/templ"
+	"github.com/labstack/echo/v4"
+)
+
+type Pages struct {
+	db         storage.Pool
+	insertOnly queue.InsertOnly
+	cache      *Cache[templ.Component]
+}
+
+func NewPages(
+	db storage.Pool,
+	insertOnly queue.InsertOnly,
+	cache *Cache[templ.Component],
+) Pages {
+	return Pages{db, insertOnly, cache}
+}
+
+func (p Pages) Home(etx echo.Context) error {
+	cacheKey := "home"
+
+	component, err := p.cache.Get(cacheKey, func() (templ.Component, error) {
+		return views.Home(), nil
+	})
+	if err != nil {
+		return err
+	}
+
+	return render(etx, component)
+}
+
+func (p Pages) NotFound(etx echo.Context) error {
+	cacheKey := "not_found"
+
+	component, err := p.cache.Get(cacheKey, func() (templ.Component, error) {
+		return views.NotFound(), nil
+	})
+	if err != nil {
+		return err
+	}
+
+	return render(etx, component)
+}
