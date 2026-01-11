@@ -1,4 +1,7 @@
 @import "tailwindcss";
+@import "./basecoat.css";
+@import "./theme.css";
+
 @plugin "@tailwindcss/typography";
 @plugin "@tailwindcss/forms";
 
@@ -13,7 +16,5 @@ body {
 	-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 	text-rendering: optimizeLegibility;
 }
-
-@import "./theme.css";
 
 @source "./views";
