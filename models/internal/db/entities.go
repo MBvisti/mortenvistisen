@@ -86,11 +86,11 @@ type Newsletter struct {
 	CreatedAt       pgtype.Timestamptz
 	UpdatedAt       pgtype.Timestamptz
 	Title           string
+	Slug            pgtype.Text
 	MetaTitle       string
 	MetaDescription string
 	IsPublished     pgtype.Bool
 	ReleasedAt      pgtype.Timestamptz
-	Slug            pgtype.Text
 	Content         pgtype.Text
 }
 

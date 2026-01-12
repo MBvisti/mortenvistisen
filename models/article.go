@@ -254,3 +254,23 @@ func rowToArticle(row db.Article) Article {
 		Content:          row.Content.String,
 	}
 }
+
+func AssociateTagsWithArticle(
+	ctx context.Context,
+	exec storage.Executor,
+	articleID uuid.UUID,
+	tagIDs []uuid.UUID,
+) error {
+	for _, tagID := range tagIDs {
+		params := db.InsertArticleTagConnectionParams{
+			ID:        uuid.New(),
+			ArticleID: articleID,
+			TagID:     tagID,
+		}
+		_, err := queries.InsertArticleTagConnection(ctx, exec, params)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
