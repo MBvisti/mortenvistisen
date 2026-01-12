@@ -37,13 +37,21 @@ func (a Articles) Index(etx echo.Context) error {
 }
 
 func (a Articles) Show(etx echo.Context) error {
-	articleID, err := uuid.Parse(etx.Param("id"))
+	article, err := models.FindArticleBySlug(
+		etx.Request().Context(),
+		a.db.Conn(),
+		etx.Param("slug"),
+	)
 	if err != nil {
-		return render(etx, views.BadRequest())
-	}
+		slog.ErrorContext(
+			etx.Request().Context(),
+			"could not find article",
+			"error",
+			err,
+			"article_slug",
+			etx.Param("slug"),
+		)
 
-	article, err := models.FindArticle(etx.Request().Context(), a.db.Conn(), articleID)
-	if err != nil {
 		return render(etx, views.NotFound())
 	}
 
