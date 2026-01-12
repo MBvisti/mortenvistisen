@@ -122,7 +122,7 @@ func card(publisedAt time.Time, title string, excerpt string, url string) templ.
 	})
 }
 
-func Home() templ.Component {
+func latestVideo() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -143,7 +143,36 @@ func Home() templ.Component {
 			templ_7745c5c3_Var7 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Var8 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<div class=\"bg-background-200 rounded border border-foreground-muted p-6\"><h2 class=\"flex items-center gap-3 text-sm font-semibold text-foreground\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"currentColor\" class=\"h-6 w-6 text-red-500\"><path d=\"M23.498 6.186a2.997 2.997 0 0 0-2.11-2.121C19.505 3.5 12 3.5 12 3.5s-7.505 0-9.388.565A2.997 2.997 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a2.997 2.997 0 0 0 2.11 2.121C4.495 20.5 12 20.5 12 20.5s7.505 0 9.388-.565a2.997 2.997 0 0 0 2.11-2.121C24 15.93 24 12 24 12s0-3.93-.502-5.814z\"></path> <path fill=\"oklch(15% 0.03 180)\" d=\"M9.545 15.568V8.432L15.818 12z\"></path></svg> Latest Video</h2><div class=\"mt-4\"><a href=\"https://youtube.com/@mbvlabs\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"block relative group\"><div class=\"aspect-video rounded-lg overflow-hidden bg-muted\"><img src=\"https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg\" alt=\"Latest YouTube video thumbnail\" class=\"w-full h-full object-cover transition group-hover:scale-105\"><!-- Play button overlay --><div class=\"absolute inset-0 flex items-center justify-center\"><div class=\"w-14 h-14 rounded-full bg-red-600 flex items-center justify-center transition group-hover:bg-red-500 group-hover:scale-110\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"white\" class=\"w-6 h-6 ml-1\"><path d=\"M8 5v14l11-7z\"></path></svg></div></div></div></a><h3 class=\"mt-3 font-semibold text-foreground text-sm sm:text-base line-clamp-2\">Building a Production-Ready Go API</h3><p class=\"mt-1 text-xs sm:text-sm text-foreground-muted\">12K views &bull; 3 days ago</p><a href=\"https://youtube.com/@mortenvistisen\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"mt-4 inline-flex items-center gap-2 text-sm text-foreground-muted hover:text-foreground transition\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 20 20\" fill=\"currentColor\" class=\"w-4 h-4\"><path fill-rule=\"evenodd\" d=\"M4.25 5.5a.75.75 0 0 0-.75.75v8.5c0 .414.336.75.75.75h8.5a.75.75 0 0 0 .75-.75v-4a.75.75 0 0 1 1.5 0v4A2.25 2.25 0 0 1 12.75 17h-8.5A2.25 2.25 0 0 1 2 14.75v-8.5A2.25 2.25 0 0 1 4.25 4h5a.75.75 0 0 1 0 1.5h-5Z\" clip-rule=\"evenodd\"></path> <path fill-rule=\"evenodd\" d=\"M6.194 12.753a.75.75 0 0 0 1.06.053L16.5 4.44v2.81a.75.75 0 0 0 1.5 0v-4.5a.75.75 0 0 0-.75-.75h-4.5a.75.75 0 0 0 0 1.5h2.553l-9.056 8.194a.75.75 0 0 0-.053 1.06Z\" clip-rule=\"evenodd\"></path></svg> View channel</a></div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+func Home() templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var8 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var8 == nil {
+			templ_7745c5c3_Var8 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Var9 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
 			if !templ_7745c5c3_IsBuffer {
@@ -155,7 +184,7 @@ func Home() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<main class=\"mx-auto w-full max-w-7xl lg:px-8 bg-background border-l-1 border-r-1 border-muted-foreground flex-1 flex flex-col\"><div class=\"px-4 sm:px-8 lg:px-12\"><div class=\"mx-auto max-w-2xl lg:max-w-5xl\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<main class=\"mx-auto w-full max-w-7xl lg:px-8 bg-background border-l-1 border-r-1 border-muted-foreground flex-1 flex flex-col pb-10\"><div class=\"px-4 sm:px-8 lg:px-12\"><div class=\"mx-auto max-w-2xl lg:max-w-5xl\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -163,7 +192,7 @@ func Home() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div class=\"mt-10 sm:mt-12 lg:mt-16\"><h2 class=\"text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-foreground mb-4 sm:mb-6\">Latest Posts</h2><div class=\"flex flex-col gap-6 sm:gap-8\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<div class=\"mt-10 sm:mt-12 lg:mt-16\"><div class=\"grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-8 lg:gap-12\"><!-- Latest Posts (left column) --><div><h2 class=\"text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-foreground mb-4 sm:mb-6\">Latest Posts</h2><div class=\"flex flex-col gap-6 sm:gap-8\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -179,13 +208,21 @@ func Home() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div></div></div></div></main>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</div></div><!-- Latest Video (right column) --><div class=\"lg:sticky lg:top-8 lg:self-start\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = latestVideo().Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</div></div></div></div></div></main>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = base().Render(templ.WithChildren(ctx, templ_7745c5c3_Var8), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = base().Render(templ.WithChildren(ctx, templ_7745c5c3_Var9), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
