@@ -2,7 +2,7 @@ package views
 
 templ projectItem(iconBgColor string, iconSvg string, title string, description string, linkText string, linkUrl string) {
 	<div class="flex flex-col">
-		<div class={ "h-10 w-10 rounded-full flex items-center justify-center", iconBgColor }>
+		<div class={ "h-12 w-12 rounded-lg flex items-center justify-center", iconBgColor }>
 			@templ.Raw(iconSvg)
 		</div>
 		<h3 class="mt-4 text-base font-semibold text-foreground">
@@ -41,15 +41,15 @@ templ Projects() {
 					<div class="mt-12 sm:mt-16 lg:mt-20">
 						<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
 							@projectItem(
-								"bg-background-200",
-								`<svg class="h-6 w-6 text-secondary" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>`,
+								"bg-slate-800",
+								`<svg class="h-6 w-6 text-purple-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>`,
 								"Planetaria",
 								"Creating technology to empower civilians to explore space on their own terms.",
 								"planetaria.tech",
 								"https://planetaria.tech",
 							)
 							@projectItem(
-								"bg-background-200",
+								"bg-slate-800",
 								`<svg class="h-6 w-6 text-blue-500" fill="currentColor" viewBox="0 0 24 24"><path d="M13 2.05v2.02c3.95.49 7 3.85 7 7.93 0 4.42-3.58 8-8 8s-8-3.58-8-8c0-4.08 3.05-7.44 7-7.93V2.05C5.94 2.55 2 7.14 2 12c0 5.52 4.48 10 10 10s10-4.48 10-10c0-4.86-3.94-9.45-9-9.95z"></path></svg>`,
 								"Animaginary",
 								"High performance web animation library, hand-written in optimized WASM.",
@@ -57,23 +57,23 @@ templ Projects() {
 								"https://github.com",
 							)
 							@projectItem(
-								"bg-background-200",
-								`<svg class="h-6 w-6 text-red-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"></path></svg>`,
+								"bg-slate-800",
+								`<svg class="h-6 w-6 text-pink-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"></path></svg>`,
 								"HelioStream",
 								"Real-time video streaming library, optimized for interstellar transmission.",
 								"github.com",
 								"https://github.com",
 							)
 							@projectItem(
-								"bg-background-200",
-								`<svg class="h-6 w-6 text-cyan-500" fill="currentColor" viewBox="0 0 24 24"><path d="M20 8h-3V6c0-1.1-.9-2-2-2H9c-1.1 0-2 .9-2 2v2H4c-1.1 0-2 .9-2 2v10h20V10c0-1.1-.9-2-2-2zM9 6h6v2H9V6zm11 12H4v-3h2v1h2v-1h8v1h2v-1h2v3zm-2-5v-1h-2v1H8v-1H6v1H4v-3h16v3h-2z"></path></svg>`,
+								"bg-slate-800",
+								`<svg class="h-6 w-6 text-blue-400" fill="currentColor" viewBox="0 0 24 24"><path d="M20 8h-3V6c0-1.1-.9-2-2-2H9c-1.1 0-2 .9-2 2v2H4c-1.1 0-2 .9-2 2v10h20V10c0-1.1-.9-2-2-2zM9 6h6v2H9V6zm11 12H4v-3h2v1h2v-1h8v1h2v-1h2v3zm-2-5v-1h-2v1H8v-1H6v1H4v-3h16v3h-2z"></path></svg>`,
 								"cosmOS",
 								"The operating system that powers our Planetaria space shuttles.",
 								"github.com",
 								"https://github.com",
 							)
 							@projectItem(
-								"bg-background-200",
+								"bg-slate-800",
 								`<svg class="h-6 w-6 text-blue-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 13v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"></path></svg>`,
 								"OpenShuttle",
 								"The schematics for the first rocket I designed that successfully made it to orbit.",
