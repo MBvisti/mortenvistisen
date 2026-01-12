@@ -19,6 +19,10 @@ func registerArticleRoutes(handler *echo.Echo, article controllers.Articles) {
 	).Name = routes.ArticleShow.Name()
 
 	handler.Add(
+		http.MethodGet, routes.ArticleShowSlug.Path(), article.Show,
+	).Name = routes.ArticleShowSlug.Name()
+
+	handler.Add(
 		http.MethodGet, routes.ArticleNew.Path(), article.New,
 	).Name = routes.ArticleNew.Name()
 

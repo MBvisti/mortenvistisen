@@ -9,13 +9,19 @@ const ArticlePrefix = "/articles"
 var ArticleIndex = routing.NewSimpleRoute(
 	"",
 	"articles.index",
-	ArticlePrefix,
+	"/posts",
 )
 
 var ArticleShow = routing.NewRouteWithID(
 	"/:id",
 	"articles.show",
-	ArticlePrefix,
+	"/posts",
+)
+
+var ArticleShowSlug = routing.NewRouteWithSlug(
+	"/:slug",
+	"articles.slug",
+	"/posts",
 )
 
 var ArticleNew = routing.NewSimpleRoute(

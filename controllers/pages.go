@@ -1,8 +1,12 @@
 package controllers
 
 import (
+	"context"
+
 	"mortenvistisen/internal/storage"
+	"mortenvistisen/models"
 	"mortenvistisen/queue"
+	"mortenvistisen/router/routes"
 	"mortenvistisen/views"
 
 	"github.com/a-h/templ"
@@ -27,7 +31,23 @@ func (p Pages) Home(etx echo.Context) error {
 	cacheKey := "home"
 
 	component, err := p.cache.Get(cacheKey, func() (templ.Component, error) {
-		return views.Home(), nil
+		articles, err := models.FindPublishedArticles(context.Background(), p.db.Conn())
+		if err != nil {
+			return nil, err
+		}
+
+		articleViews := make([]views.ArticleViewData, len(articles))
+		for i, article := range articles {
+			articleViews[i] = views.ArticleViewData{
+				PublishedAt: article.FirstPublishedAt,
+				Title:       article.Title,
+				Excerpt:     article.Excerpt,
+				URL:         routes.ArticleShowSlug.URL(article.Slug),
+				Tags:        article.Tags,
+			}
+		}
+
+		return views.Home(articleViews), nil
 	})
 	if err != nil {
 		return err

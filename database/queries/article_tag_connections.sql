@@ -4,6 +4,12 @@ select * from article_tag_connections where id=$1;
 -- name: QueryArticleTagConnection :many
 select * from article_tag_connections;
 
+-- name: QueryTagsByArticleID :many
+select t.id, t.created_at, t.updated_at, t.title
+from tags t
+inner join article_tag_connections atc on t.id = atc.tag_id
+where atc.article_id = $1;
+
 -- name: InsertArticleTagConnection :one
 insert into
     article_tag_connections (id, article_id, tag_id)

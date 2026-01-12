@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-faker/faker/v4"
 	"github.com/google/uuid"
+	"github.com/gosimple/slug"
 )
 
 // ArticleFactory wraps models.Article for testing
@@ -22,20 +23,21 @@ type ArticleOption func(*ArticleFactory)
 
 // BuildArticle creates an in-memory Article with default test values
 func BuildArticle(opts ...ArticleOption) models.Article {
+	title := faker.Sentence()
 	f := &ArticleFactory{
 		Article: models.Article{
 			ID:               uuid.New(),
 			CreatedAt:        time.Now(),
 			UpdatedAt:        time.Now(),
 			FirstPublishedAt: time.Time{}, // Optional timestamp - zero by default
-			Title:            faker.Word(),
-			Excerpt:          faker.Word(),
-			MetaTitle:        faker.Word(),
-			MetaDescription:  faker.Word(),
-			Slug:             faker.Word(),
+			Title:            title,
+			Excerpt:          faker.Sentence(),
+			MetaTitle:        faker.Sentence(),
+			MetaDescription:  faker.Sentence(),
+			Slug:             slug.Make(title),
 			ImageLink:        faker.Word(),
 			ReadTime:         randomInt(1, 1000, 100),
-			Content:          faker.Word(),
+			Content:          faker.Sentence(),
 		},
 	}
 
@@ -47,7 +49,11 @@ func BuildArticle(opts ...ArticleOption) models.Article {
 }
 
 // CreateArticle creates and persists a Article to the database
-func CreateArticle(ctx context.Context, exec storage.Executor, opts ...ArticleOption) (models.Article, error) {
+func CreateArticle(
+	ctx context.Context,
+	exec storage.Executor,
+	opts ...ArticleOption,
+) (models.Article, error) {
 	f := &ArticleFactory{
 		Article: BuildArticle(opts...),
 	}
@@ -63,7 +69,6 @@ func CreateArticle(ctx context.Context, exec storage.Executor, opts ...ArticleOp
 		Excerpt:          f.Article.Excerpt,
 		MetaTitle:        f.Article.MetaTitle,
 		MetaDescription:  f.Article.MetaDescription,
-		Slug:             f.Article.Slug,
 		ImageLink:        f.Article.ImageLink,
 		ReadTime:         f.Article.ReadTime,
 		Content:          f.Article.Content,
@@ -86,10 +91,15 @@ func CreateArticle(ctx context.Context, exec storage.Executor, opts ...ArticleOp
 }
 
 // CreateArticles creates multiple Article records at once
-func CreateArticles(ctx context.Context, exec storage.Executor, count int, opts ...ArticleOption) ([]models.Article, error) {
+func CreateArticles(
+	ctx context.Context,
+	exec storage.Executor,
+	count int,
+	opts ...ArticleOption,
+) ([]models.Article, error) {
 	articles := make([]models.Article, 0, count)
 
-	for i := 0; i < count; i++ {
+	for i := range count {
 		article, err := CreateArticle(ctx, exec, opts...)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create article %d: %w", i+1, err)
