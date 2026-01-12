@@ -7,7 +7,7 @@ import (
 const ArticlePrefix = "/articles"
 
 var ArticleIndex = routing.NewSimpleRoute(
-	"/",
+	"",
 	"articles.index",
 	ArticlePrefix,
 )

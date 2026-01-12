@@ -10,18 +10,19 @@ import (
 	"strings"
 	"time"
 
+	mailclients "mortenvistisen/clients/email"
 	"mortenvistisen/config"
 	"mortenvistisen/controllers"
 	"mortenvistisen/database"
 	"mortenvistisen/internal/server"
 	"mortenvistisen/internal/storage"
 	"mortenvistisen/queue"
+	"mortenvistisen/queue/workers"
 	"mortenvistisen/router"
 	"mortenvistisen/router/middleware"
 	"mortenvistisen/telemetry"
-	"mortenvistisen/queue/workers"
+
 	"riverqueue.com/riverui"
-	"mortenvistisen/clients/email"
 
 	"github.com/a-h/templ"
 	//"github.com/labstack/echo/v4"
@@ -53,6 +54,7 @@ func setupControllers(
 	registrations := controllers.NewRegistrations(db, insertOnly, cfg)
 	confirmations := controllers.NewConfirmations(db, cfg)
 	resetPasswords := controllers.NewResetPasswords(db, insertOnly, cfg)
+	articles := controllers.NewArticles(db)
 
 	rtr.RegisterCtrlRoutes(
 		mw,
@@ -63,6 +65,7 @@ func setupControllers(
 		registrations,
 		confirmations,
 		resetPasswords,
+		articles,
 	)
 
 	rtr.RegisterCustomRoutes(
@@ -128,12 +131,20 @@ func buildTelemetry(ctx context.Context, cfg config.Config) (*telemetry.Telemetr
 
 	if cfg.Telemetry.OtlpMetricsEndpoint != "" {
 		opts = append(opts, telemetry.WithMetricExporters(
-			telemetry.NewOtlpMetricExporter(cfg.Telemetry.OtlpMetricsEndpoint, parseHeaders(cfg.Telemetry.OtlpHeaders))))
+			telemetry.NewOtlpMetricExporter(
+				cfg.Telemetry.OtlpMetricsEndpoint,
+				parseHeaders(cfg.Telemetry.OtlpHeaders),
+			),
+		))
 	}
 
 	if cfg.Telemetry.OtlpTracesEndpoint != "" {
 		opts = append(opts, telemetry.WithTraceExporters(
-			telemetry.NewOtlpTraceExporter(cfg.Telemetry.OtlpTracesEndpoint, parseHeaders(cfg.Telemetry.OtlpHeaders))))
+			telemetry.NewOtlpTraceExporter(
+				cfg.Telemetry.OtlpTracesEndpoint,
+				parseHeaders(cfg.Telemetry.OtlpHeaders),
+			),
+		))
 	} else {
 		opts = append(opts, telemetry.WithTraceExporters(telemetry.NewNoopTraceExporter()))
 	}
@@ -162,7 +173,6 @@ func run(ctx context.Context) error {
 	if err := tel.HealthCheck(ctx); err != nil {
 		slog.Warn("telemetry health check failed", "error", err)
 	}
-
 
 	db, err := database.NewPostgres(ctx, cfg.DB.GetDatabaseURL())
 	if err != nil {
