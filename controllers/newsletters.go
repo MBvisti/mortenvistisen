@@ -78,7 +78,6 @@ type CreateNewsletterFormPayload struct {
 	MetaDescription string `json:"meta_description"`
 	IsPublished     bool   `json:"is_published"`
 	ReleasedAt      string `json:"released_at"`
-	Slug            string `json:"slug"`
 	Content         string `json:"content"`
 }
 
@@ -109,7 +108,6 @@ func (n Newsletters) Create(etx echo.Context) error {
 			}
 			return time.Time{}
 		}(),
-		Slug:    payload.Slug,
 		Content: payload.Content,
 	}
 

@@ -55,6 +55,7 @@ func setupControllers(
 	confirmations := controllers.NewConfirmations(db, cfg)
 	resetPasswords := controllers.NewResetPasswords(db, insertOnly, cfg)
 	articles := controllers.NewArticles(db)
+	newsletters := controllers.NewNewsletters(db)
 
 	rtr.RegisterCtrlRoutes(
 		mw,
@@ -66,6 +67,7 @@ func setupControllers(
 		confirmations,
 		resetPasswords,
 		articles,
+		newsletters,
 	)
 
 	rtr.RegisterCustomRoutes(

@@ -47,7 +47,7 @@ templ articleItem(article models.Article) {
 		</div>
 		<div class="md:col-span-3">
 			<h3 class="text-base font-semibold tracking-tight text-foreground">
-				<a href={ templ.URL(routes.ArticleShow.URL(article.ID)) } class="hover:text-secondary transition-colors">
+				<a href={ routes.ArticleShowSlug.URL(article.Slug) } class="hover:text-secondary transition-colors">
 					{ article.Title }
 				</a>
 			</h3>
@@ -55,7 +55,7 @@ templ articleItem(article models.Article) {
 				{ article.Excerpt }
 			</p>
 			<a
-				href={ templ.URL(routes.ArticleShow.URL(article.ID)) }
+				href={ routes.ArticleShowSlug.URL(article.Slug) }
 				class="mt-4 inline-flex items-center text-sm font-medium text-secondary hover:text-secondary/80 transition-colors"
 			>
 				Read article

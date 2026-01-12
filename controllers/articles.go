@@ -60,7 +60,6 @@ type CreateArticleFormPayload struct {
 	Excerpt          string `json:"excerpt"`
 	MetaTitle        string `json:"meta_title"`
 	MetaDescription  string `json:"meta_description"`
-	Slug             string `json:"slug"`
 	ImageLink        string `json:"image_link"`
 	ReadTime         int32  `json:"read_time"`
 	Content          string `json:"content"`

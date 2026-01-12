@@ -18,6 +18,12 @@ var NewsletterShow = routing.NewRouteWithID(
 	NewsletterPrefix,
 )
 
+var NewsletterShowSlug = routing.NewRouteWithSlug(
+	"/:slug",
+	"newsletters.show",
+	NewsletterPrefix,
+)
+
 var NewsletterNew = routing.NewSimpleRoute(
 	"/new",
 	"newsletters.new",
