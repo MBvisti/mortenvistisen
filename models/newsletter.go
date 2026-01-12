@@ -39,6 +39,23 @@ func FindNewsletter(
 	return rowToNewsletter(row), nil
 }
 
+func FindNewsletterBySlug(
+	ctx context.Context,
+	exec storage.Executor,
+	slug string,
+) (Newsletter, error) {
+	row, err := queries.QueryNewsletterBySlug(
+		ctx,
+		exec,
+		pgtype.Text{String: slug, Valid: slug != ""},
+	)
+	if err != nil {
+		return Newsletter{}, err
+	}
+
+	return rowToNewsletter(row), nil
+}
+
 type CreateNewsletterData struct {
 	Title           string
 	MetaTitle       string

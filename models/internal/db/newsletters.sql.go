@@ -100,6 +100,28 @@ func (q *Queries) QueryNewsletterByID(ctx context.Context, db DBTX, id uuid.UUID
 	return i, err
 }
 
+const queryNewsletterBySlug = `-- name: QueryNewsletterBySlug :one
+select id, created_at, updated_at, title, slug, meta_title, meta_description, is_published, released_at, content from newsletters where slug=$1
+`
+
+func (q *Queries) QueryNewsletterBySlug(ctx context.Context, db DBTX, slug pgtype.Text) (Newsletter, error) {
+	row := db.QueryRow(ctx, queryNewsletterBySlug, slug)
+	var i Newsletter
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Title,
+		&i.Slug,
+		&i.MetaTitle,
+		&i.MetaDescription,
+		&i.IsPublished,
+		&i.ReleasedAt,
+		&i.Content,
+	)
+	return i, err
+}
+
 const queryNewsletters = `-- name: QueryNewsletters :many
 select id, created_at, updated_at, title, slug, meta_title, meta_description, is_published, released_at, content from newsletters
 `

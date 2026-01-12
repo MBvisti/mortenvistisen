@@ -55,12 +55,11 @@ func (n Newsletters) Index(etx echo.Context) error {
 }
 
 func (n Newsletters) Show(etx echo.Context) error {
-	newsletterID, err := uuid.Parse(etx.Param("id"))
-	if err != nil {
-		return render(etx, views.BadRequest())
-	}
-
-	newsletter, err := models.FindNewsletter(etx.Request().Context(), n.db.Conn(), newsletterID)
+	newsletter, err := models.FindNewsletterBySlug(
+		etx.Request().Context(),
+		n.db.Conn(),
+		etx.Param("slug"),
+	)
 	if err != nil {
 		return render(etx, views.NotFound())
 	}

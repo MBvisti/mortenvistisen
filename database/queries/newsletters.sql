@@ -1,6 +1,9 @@
 -- name: QueryNewsletterByID :one
 select * from newsletters where id=$1;
 
+-- name: QueryNewsletterBySlug :one
+select * from newsletters where slug=$1;
+
 -- name: QueryNewsletters :many
 select * from newsletters;
 
