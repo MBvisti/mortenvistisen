@@ -37,7 +37,7 @@ insert into
     newsletters (id, created_at, updated_at, title, meta_title, meta_description, is_published, released_at, slug, content)
 values
     ($1, now(), now(), $2, $3, $4, $5, $6, $7, $8)
-returning id, created_at, updated_at, title, meta_title, meta_description, is_published, released_at, slug, content
+returning id, created_at, updated_at, title, slug, meta_title, meta_description, is_published, released_at, content
 `
 
 type InsertNewsletterParams struct {
@@ -68,18 +68,18 @@ func (q *Queries) InsertNewsletter(ctx context.Context, db DBTX, arg InsertNewsl
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Title,
+		&i.Slug,
 		&i.MetaTitle,
 		&i.MetaDescription,
 		&i.IsPublished,
 		&i.ReleasedAt,
-		&i.Slug,
 		&i.Content,
 	)
 	return i, err
 }
 
 const queryNewsletterByID = `-- name: QueryNewsletterByID :one
-select id, created_at, updated_at, title, meta_title, meta_description, is_published, released_at, slug, content from newsletters where id=$1
+select id, created_at, updated_at, title, slug, meta_title, meta_description, is_published, released_at, content from newsletters where id=$1
 `
 
 func (q *Queries) QueryNewsletterByID(ctx context.Context, db DBTX, id uuid.UUID) (Newsletter, error) {
@@ -90,18 +90,18 @@ func (q *Queries) QueryNewsletterByID(ctx context.Context, db DBTX, id uuid.UUID
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Title,
+		&i.Slug,
 		&i.MetaTitle,
 		&i.MetaDescription,
 		&i.IsPublished,
 		&i.ReleasedAt,
-		&i.Slug,
 		&i.Content,
 	)
 	return i, err
 }
 
 const queryNewsletters = `-- name: QueryNewsletters :many
-select id, created_at, updated_at, title, meta_title, meta_description, is_published, released_at, slug, content from newsletters
+select id, created_at, updated_at, title, slug, meta_title, meta_description, is_published, released_at, content from newsletters
 `
 
 func (q *Queries) QueryNewsletters(ctx context.Context, db DBTX) ([]Newsletter, error) {
@@ -118,11 +118,11 @@ func (q *Queries) QueryNewsletters(ctx context.Context, db DBTX) ([]Newsletter, 
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.Title,
+			&i.Slug,
 			&i.MetaTitle,
 			&i.MetaDescription,
 			&i.IsPublished,
 			&i.ReleasedAt,
-			&i.Slug,
 			&i.Content,
 		); err != nil {
 			return nil, err
@@ -136,7 +136,7 @@ func (q *Queries) QueryNewsletters(ctx context.Context, db DBTX) ([]Newsletter, 
 }
 
 const queryPaginatedNewsletters = `-- name: QueryPaginatedNewsletters :many
-select id, created_at, updated_at, title, meta_title, meta_description, is_published, released_at, slug, content from newsletters
+select id, created_at, updated_at, title, slug, meta_title, meta_description, is_published, released_at, content from newsletters
 order by created_at desc
 limit $2::bigint offset $1::bigint
 `
@@ -160,11 +160,11 @@ func (q *Queries) QueryPaginatedNewsletters(ctx context.Context, db DBTX, arg Qu
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.Title,
+			&i.Slug,
 			&i.MetaTitle,
 			&i.MetaDescription,
 			&i.IsPublished,
 			&i.ReleasedAt,
-			&i.Slug,
 			&i.Content,
 		); err != nil {
 			return nil, err
@@ -181,7 +181,7 @@ const updateNewsletter = `-- name: UpdateNewsletter :one
 update newsletters
     set updated_at=now(), title=$2, meta_title=$3, meta_description=$4, is_published=$5, released_at=$6, slug=$7, content=$8
 where id = $1
-returning id, created_at, updated_at, title, meta_title, meta_description, is_published, released_at, slug, content
+returning id, created_at, updated_at, title, slug, meta_title, meta_description, is_published, released_at, content
 `
 
 type UpdateNewsletterParams struct {
@@ -212,11 +212,11 @@ func (q *Queries) UpdateNewsletter(ctx context.Context, db DBTX, arg UpdateNewsl
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Title,
+		&i.Slug,
 		&i.MetaTitle,
 		&i.MetaDescription,
 		&i.IsPublished,
 		&i.ReleasedAt,
-		&i.Slug,
 		&i.Content,
 	)
 	return i, err
@@ -228,7 +228,7 @@ insert into
 values
     ($1, now(), now(), $2, $3, $4, $5, $6, $7, $8)
 on conflict (id) do update set updated_at=now(), title=excluded.title, meta_title=excluded.meta_title, meta_description=excluded.meta_description, is_published=excluded.is_published, released_at=excluded.released_at, slug=excluded.slug, content=excluded.content
-returning id, created_at, updated_at, title, meta_title, meta_description, is_published, released_at, slug, content
+returning id, created_at, updated_at, title, slug, meta_title, meta_description, is_published, released_at, content
 `
 
 type UpsertNewsletterParams struct {
@@ -259,11 +259,11 @@ func (q *Queries) UpsertNewsletter(ctx context.Context, db DBTX, arg UpsertNewsl
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Title,
+		&i.Slug,
 		&i.MetaTitle,
 		&i.MetaDescription,
 		&i.IsPublished,
 		&i.ReleasedAt,
-		&i.Slug,
 		&i.Content,
 	)
 	return i, err

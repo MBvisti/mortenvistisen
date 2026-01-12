@@ -15,6 +15,7 @@ sql:
                 - db_type: uuid
                   go_type: github.com/google/uuid.UUID
             rename:
+                article_tag_connections: ArticleTagConnection
                 articles: Article
                 newsletters: Newsletter
                 subscribers: Subscriber

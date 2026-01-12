@@ -5,10 +5,13 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
-	"github.com/joho/godotenv"
 	"mortenvistisen/internal/storage"
 	"mortenvistisen/models/factories"
+
+	"github.com/google/uuid"
+	"github.com/joho/godotenv"
 )
 
 func main() {
@@ -30,8 +33,30 @@ func run() error {
 
 	fmt.Println("Seeding database...")
 
-	// Create an admin user
-	admin, err := factories.CreateUser(ctx, db.Conn(),
+	if err := seedUsers(ctx, db.Conn()); err != nil {
+		return err
+	}
+
+	if err := seedArticles(ctx, db.Conn()); err != nil {
+		return err
+	}
+
+	if err := seedSubscribers(ctx, db.Conn()); err != nil {
+		return err
+	}
+
+	if err := seedNewsletters(ctx, db.Conn()); err != nil {
+		return err
+	}
+
+	fmt.Println("Seeding complete!")
+	return nil
+}
+
+func seedUsers(ctx context.Context, db storage.Executor) error {
+	fmt.Println("\n--- Seeding Users ---")
+
+	admin, err := factories.CreateUser(ctx, db,
 		factories.WithEmail("admin@example.com"),
 		factories.WithIsAdmin(true),
 		factories.WithValidatedEmail(),
@@ -41,8 +66,7 @@ func run() error {
 	}
 	fmt.Printf("Created admin user: %s\n", admin.Email)
 
-	// Create a regular user
-	user, err := factories.CreateUser(ctx, db.Conn(),
+	user, err := factories.CreateUser(ctx, db,
 		factories.WithEmail("user@example.com"),
 		factories.WithValidatedEmail(),
 	)
@@ -51,16 +75,93 @@ func run() error {
 	}
 	fmt.Printf("Created regular user: %s\n", user.Email)
 
-	// Add more seeds here using factories:
-	//
-	// // Create 10 additional users with random emails
-	// users, err := factories.CreateUsers(ctx, db.Conn(), 10)
-	// if err != nil {
-	// 	return fmt.Errorf("failed to create users: %w", err)
-	// }
-	// fmt.Printf("Created %d additional users\n", len(users))
+	users, err := factories.CreateUsers(ctx, db, 8, factories.WithValidatedEmail())
+	if err != nil {
+		return fmt.Errorf("failed to create additional users: %w", err)
+	}
+	fmt.Printf("Created %d additional users\n", len(users))
 
-	fmt.Println("Seeding complete!")
+	return nil
+}
+
+func seedArticles(ctx context.Context, db storage.Executor) error {
+	fmt.Println("\n--- Seeding Articles ---")
+
+	now := time.Now()
+
+	tags, err := factories.CreateTags(ctx, db, 5)
+	if err != nil {
+		return fmt.Errorf("failed to create tags: %w", err)
+	}
+
+	tagIDs := make([]uuid.UUID, len(tags))
+	for i, tag := range tags {
+		tagIDs[i] = tag.ID
+	}
+
+	publishedArticles, err := factories.CreateArticles(ctx, db, 15,
+		factories.WithArticlesFirstPublishedAt(now.AddDate(0, 0, -30)),
+		factories.WithArticlesTags(tagIDs),
+	)
+	if err != nil {
+		return fmt.Errorf("failed to create published articles: %w", err)
+	}
+	fmt.Printf("Created %d published articles with tags\n", len(publishedArticles))
+
+	draftArticles, err := factories.CreateArticles(ctx, db, 8,
+		factories.WithArticlesTags(tagIDs),
+	)
+	if err != nil {
+		return fmt.Errorf("failed to create draft articles: %w", err)
+	}
+	fmt.Printf("Created %d draft articles with tags\n", len(draftArticles))
+
+	return nil
+}
+
+func seedSubscribers(ctx context.Context, db storage.Executor) error {
+	fmt.Println("\n--- Seeding Subscribers ---")
+
+	now := time.Now()
+
+	verifiedSubscribers, err := factories.CreateSubscribers(ctx, db, 20,
+		factories.WithSubscribersSubscribedAt(now.AddDate(0, 0, -60)),
+		factories.WithSubscribersIsVerified(true),
+	)
+	if err != nil {
+		return fmt.Errorf("failed to create verified subscribers: %w", err)
+	}
+	fmt.Printf("Created %d verified subscribers\n", len(verifiedSubscribers))
+
+	unverifiedSubscribers, err := factories.CreateSubscribers(ctx, db, 5)
+	if err != nil {
+		return fmt.Errorf("failed to create unverified subscribers: %w", err)
+	}
+	fmt.Printf("Created %d unverified subscribers\n", len(unverifiedSubscribers))
+
+	return nil
+}
+
+func seedNewsletters(ctx context.Context, db storage.Executor) error {
+	fmt.Println("\n--- Seeding Newsletters ---")
+
+	now := time.Now()
+
+	publishedNewsletters, err := factories.CreateNewsletters(ctx, db, 10,
+		factories.WithNewslettersIsPublished(true),
+		factories.WithNewslettersReleasedAt(now.AddDate(0, 0, -14)),
+	)
+	if err != nil {
+		return fmt.Errorf("failed to create published newsletters: %w", err)
+	}
+	fmt.Printf("Created %d published newsletters\n", len(publishedNewsletters))
+
+	draftNewsletters, err := factories.CreateNewsletters(ctx, db, 5)
+	if err != nil {
+		return fmt.Errorf("failed to create draft newsletters: %w", err)
+	}
+	fmt.Printf("Created %d draft newsletters\n", len(draftNewsletters))
+
 	return nil
 }
 

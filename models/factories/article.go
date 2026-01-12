@@ -15,6 +15,7 @@ import (
 // ArticleFactory wraps models.Article for testing
 type ArticleFactory struct {
 	models.Article // Embedded
+	tagIDs         []uuid.UUID
 }
 
 type ArticleOption func(*ArticleFactory)
@@ -47,26 +48,38 @@ func BuildArticle(opts ...ArticleOption) models.Article {
 
 // CreateArticle creates and persists a Article to the database
 func CreateArticle(ctx context.Context, exec storage.Executor, opts ...ArticleOption) (models.Article, error) {
-	// Build with defaults and required FKs
-	built := BuildArticle(opts...)
+	f := &ArticleFactory{
+		Article: BuildArticle(opts...),
+	}
+
+	for _, opt := range opts {
+		opt(f)
+	}
 
 	// Prepare creation data
 	data := models.CreateArticleData{
-		FirstPublishedAt: built.FirstPublishedAt,
-		Title:            built.Title,
-		Excerpt:          built.Excerpt,
-		MetaTitle:        built.MetaTitle,
-		MetaDescription:  built.MetaDescription,
-		Slug:             built.Slug,
-		ImageLink:        built.ImageLink,
-		ReadTime:         built.ReadTime,
-		Content:          built.Content,
+		FirstPublishedAt: f.Article.FirstPublishedAt,
+		Title:            f.Article.Title,
+		Excerpt:          f.Article.Excerpt,
+		MetaTitle:        f.Article.MetaTitle,
+		MetaDescription:  f.Article.MetaDescription,
+		Slug:             f.Article.Slug,
+		ImageLink:        f.Article.ImageLink,
+		ReadTime:         f.Article.ReadTime,
+		Content:          f.Article.Content,
 	}
 
 	// Use model's Create function
 	article, err := models.CreateArticle(ctx, exec, data)
 	if err != nil {
 		return models.Article{}, err
+	}
+
+	// Associate tags if provided
+	if len(f.tagIDs) > 0 {
+		if err := models.AssociateTagsWithArticle(ctx, exec, article.ID, f.tagIDs); err != nil {
+			return models.Article{}, err
+		}
 	}
 
 	return article, nil
@@ -149,5 +162,12 @@ func WithArticlesReadTime(value int32) ArticleOption {
 func WithArticlesContent(value string) ArticleOption {
 	return func(f *ArticleFactory) {
 		f.Article.Content = value
+	}
+}
+
+// WithArticlesTags sets the tags to associate with the article
+func WithArticlesTags(tagIDs []uuid.UUID) ArticleOption {
+	return func(f *ArticleFactory) {
+		f.tagIDs = tagIDs
 	}
 }
