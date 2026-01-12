@@ -9,16 +9,16 @@ templ hero() {
 		alt=""
 		decoding="async"
 		data-nimg="1"
-		class="my-10 rounded-full bg-background object-cover h-24 w-24 border border-muted-foreground"
+		class="my-6 sm:my-10 rounded-full bg-background object-cover h-20 w-20 sm:h-24 sm:w-24 border border-muted-foreground"
 		style="color:transparent"
 		sizes="4rem"
 		src="https://media.mastergolang.com/mig_selv-removebg-preview.png"
 	/>
 	<div class="max-w-2xl">
-		<h1 class="text-4xl font-bold tracking-tight text-foreground-200 sm:text-5xl">Software Engineer, Freelancer, Bootstrapper</h1>
-		<p class="mt-4 text-base text-foreground-muted">I'm Morten, a software engineer from Denmark living in Spain. I write a lot of Golang while trying to build online businesses. I share my learnings here.</p>
+		<h1 class="text-3xl font-bold tracking-tight text-foreground-200 sm:text-4xl lg:text-5xl">Software Engineer, Freelancer, Bootstrapper</h1>
+		<p class="mt-3 sm:mt-4 text-sm sm:text-base text-foreground-muted">I'm Morten, a software engineer from Denmark living in Spain. I write a lot of Golang while trying to build online businesses. I share my learnings here.</p>
 		<div
-			class="mt-6 flex gap-6"
+			class="mt-4 sm:mt-6 flex gap-4 sm:gap-6"
 		>
 			<a
 				class="group -m-1 p-1"
@@ -50,20 +50,20 @@ templ hero() {
 }
 
 templ card(publisedAt time.Time, title string, excerpt string, url string) {
-	<div class="w-96 card border-none bg-background ">
+	<div class="w-full max-w-96 card border-none bg-background">
 		<header class="px-0">
 			<span class="mb-2 border-l-2 border-secondary text-foreground-muted">
-				<p class="ml-2">{ publisedAt.Format("January 2, 2006") }</p>
+				<p class="ml-2 text-sm">{ publisedAt.Format("January 2, 2006") }</p>
 			</span>
-			<h2 class="font-bold text-lg">{ title }</h2>
+			<h2 class="font-bold text-base sm:text-lg">{ title }</h2>
 		</header>
 		<section class="px-0">
-			<p>{ excerpt }</p>
+			<p class="text-sm sm:text-base">{ excerpt }</p>
 		</section>
 		<footer class="px-0">
 			<a
 				href={ url }
-				class="btn-link px-0 text-center"
+				class="btn-link px-0 text-center text-sm sm:text-base"
 			>
 				Read more &rarr;
 			</a>
@@ -79,11 +79,13 @@ templ Home() {
 			>
 				<div class="mx-auto max-w-2xl lg:max-w-5xl">
 					@hero()
-					<div class="mt-16">
-						<h2 class="text-2xl font-bold tracking-tight text-foreground sm:text-3xl mb-2">Latest Posts</h2>
-						@card(time.Now(), "Educational content in the era of AI", "Thoughts on paid courses in an era where everyone and their grandma are vibe coding & the economic feasibility of long-form courses.", "#")
-						@card(time.Now(), "Building a SaaS with Go and SvelteKit", "A detailed walkthrough of how I built and launched my latest SaaS product using Go for the backend and SvelteKit for the frontend.", "#")
-						@card(time.Now(), "Mastering Concurrency in Go", "An in-depth guide on how to effectively use goroutines and channels to build concurrent applications in Go.", "#")
+					<div class="mt-10 sm:mt-12 lg:mt-16">
+						<h2 class="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-foreground mb-4 sm:mb-6">Latest Posts</h2>
+						<div class="flex flex-col gap-6 sm:gap-8">
+							@card(time.Now(), "Educational content in the era of AI", "Thoughts on paid courses in an era where everyone and their grandma are vibe coding & the economic feasibility of long-form courses.", "#")
+							@card(time.Now(), "Building a SaaS with Go and SvelteKit", "A detailed walkthrough of how I built and launched my latest SaaS product using Go for the backend and SvelteKit for the frontend.", "#")
+							@card(time.Now(), "Mastering Concurrency in Go", "An in-depth guide on how to effectively use goroutines and channels to build concurrent applications in Go.", "#")
+						</div>
 					</div>
 				</div>
 			</div>

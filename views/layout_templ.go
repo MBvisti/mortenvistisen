@@ -43,7 +43,7 @@ func base(headOpts ...components.HeadDataOption) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<body class=\"min-h-screen flex flex-col bg-background-300\"><nav class=\"bg-background py-10 border-l-1 border-r-1 border-b-0 border-muted-foreground w-full mx-auto max-w-7xl lg:px-8 mx-auto text-sm text-muted-foreground flex justify-center\"><ul class=\"bg-background-200 border rounded py-2 px-4 flex space-x-2\"><li><a href=\"/\" class=\"btn-link\">Home</a></li><li><a href=\"/\" class=\"btn-link\">Posts</a></li><li><a href=\"/\" class=\"btn-link\">Projects</a></li><li><a href=\"/\" class=\"btn-link\">Newsletters</a></li><li><a href=\"/\" class=\"btn-link\">About</a></li></ul></nav>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<body class=\"min-h-screen flex flex-col bg-background-300\"><nav class=\"bg-background py-6 sm:py-10 border-l-1 border-r-1 border-b-0 border-muted-foreground w-full mx-auto max-w-7xl lg:px-8 mx-auto text-sm text-muted-foreground flex justify-center px-4 sm:px-0\"><!-- Desktop navigation --><ul class=\"hidden sm:flex bg-background-200 border rounded py-2 px-4 space-x-2\"><li><a href=\"/\" class=\"btn-link\">Home</a></li><li><a href=\"/\" class=\"btn-link\">Posts</a></li><li><a href=\"/\" class=\"btn-link\">Projects</a></li><li><a href=\"/\" class=\"btn-link\">Newsletters</a></li><li><a href=\"/\" class=\"btn-link\">About</a></li></ul><div id=\"mobile-nav\" class=\"dropdown-menu dropdown-menu-end sm:hidden ml-auto\"><button type=\"button\" id=\"mobile-nav-trigger\" aria-haspopup=\"menu\" aria-controls=\"mobile-nav-menu\" aria-expanded=\"false\" aria-label=\"Open menu\" class=\"btn-outline p-2\"><svg class=\"h-6 w-6\" fill=\"none\" viewBox=\"0 0 24 24\" stroke-width=\"1.5\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5\"></path></svg></button><div id=\"mobile-nav-popover\" data-popover aria-hidden=\"true\" data-side=\"left\" class=\"min-w-56\"><div role=\"menu\" id=\"mobile-nav-menu\" aria-labelledby=\"mobile-nav-trigger\"><a href=\"/\" role=\"menuitem\">Home</a> <a href=\"/\" role=\"menuitem\">Posts</a> <a href=\"/\" role=\"menuitem\">Projects</a> <a href=\"/\" role=\"menuitem\">Newsletters</a> <a href=\"/\" role=\"menuitem\">About</a></div></div></div></nav>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -58,7 +58,7 @@ func base(headOpts ...components.HeadDataOption) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(time.Now().Format("2006"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/layout.templ`, Line: 63, Col: 39}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/layout.templ`, Line: 97, Col: 39}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
