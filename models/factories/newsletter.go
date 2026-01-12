@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-faker/faker/v4"
 	"github.com/google/uuid"
+	"github.com/gosimple/slug"
 )
 
 // NewsletterFactory wraps models.Newsletter for testing
@@ -21,18 +22,19 @@ type NewsletterOption func(*NewsletterFactory)
 
 // BuildNewsletter creates an in-memory Newsletter with default test values
 func BuildNewsletter(opts ...NewsletterOption) models.Newsletter {
+	title := faker.Sentence()
 	f := &NewsletterFactory{
 		Newsletter: models.Newsletter{
 			ID:              uuid.New(),
 			CreatedAt:       time.Now(),
 			UpdatedAt:       time.Now(),
-			Title:           faker.Word(),
-			MetaTitle:       faker.Word(),
-			MetaDescription: faker.Word(),
+			Title:           title,
+			MetaTitle:       faker.Sentence(),
+			MetaDescription: faker.Sentence(),
 			IsPublished:     false,
 			ReleasedAt:      time.Time{}, // Optional timestamp - zero by default
-			Slug:            faker.Word(),
-			Content:         faker.Word(),
+			Slug:            slug.Make(title),
+			Content:         faker.Sentence(),
 		},
 	}
 
@@ -59,7 +61,6 @@ func CreateNewsletter(
 		MetaDescription: built.MetaDescription,
 		IsPublished:     built.IsPublished,
 		ReleasedAt:      built.ReleasedAt,
-		Slug:            built.Slug,
 		Content:         built.Content,
 	}
 
@@ -81,7 +82,7 @@ func CreateNewsletters(
 ) ([]models.Newsletter, error) {
 	newsletters := make([]models.Newsletter, 0, count)
 
-	for i := 0; i < count; i++ {
+	for i := range count {
 		newsletter, err := CreateNewsletter(ctx, exec, opts...)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create newsletter %d: %w", i+1, err)

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/gosimple/slug"
 	"github.com/jackc/pgx/v5/pgtype"
 
 	"mortenvistisen/internal/storage"
@@ -44,7 +45,6 @@ type CreateNewsletterData struct {
 	MetaDescription string
 	IsPublished     bool
 	ReleasedAt      time.Time
-	Slug            string
 	Content         string
 }
 
@@ -64,7 +64,7 @@ func CreateNewsletter(
 		MetaDescription: data.MetaDescription,
 		IsPublished:     pgtype.Bool{Bool: data.IsPublished, Valid: true},
 		ReleasedAt:      pgtype.Timestamptz{Time: data.ReleasedAt, Valid: true},
-		Slug:            pgtype.Text{String: data.Slug, Valid: true},
+		Slug:            pgtype.Text{String: slug.Make(data.Title), Valid: true},
 		Content:         pgtype.Text{String: data.Content, Valid: true},
 	}
 	row, err := queries.InsertNewsletter(ctx, exec, params)
@@ -215,7 +215,7 @@ func UpsertNewsletter(
 		MetaDescription: data.MetaDescription,
 		IsPublished:     pgtype.Bool{Bool: data.IsPublished, Valid: true},
 		ReleasedAt:      pgtype.Timestamptz{Time: data.ReleasedAt, Valid: true},
-		Slug:            pgtype.Text{String: data.Slug, Valid: true},
+		Slug:            pgtype.Text{String: slug.Make(data.Title), Valid: true},
 		Content:         pgtype.Text{String: data.Content, Valid: true},
 	}
 	row, err := queries.UpsertNewsletter(ctx, exec, params)

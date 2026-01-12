@@ -19,6 +19,10 @@ func registerNewsletterRoutes(handler *echo.Echo, newsletter controllers.Newslet
 	).Name = routes.NewsletterShow.Name()
 
 	handler.Add(
+		http.MethodGet, routes.NewsletterShowSlug.Path(), newsletter.Show,
+	).Name = routes.NewsletterShowSlug.Name()
+
+	handler.Add(
 		http.MethodGet, routes.NewsletterNew.Path(), newsletter.New,
 	).Name = routes.NewsletterNew.Name()
 

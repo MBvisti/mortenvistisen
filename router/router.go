@@ -104,6 +104,7 @@ func (r *Router) RegisterCtrlRoutes(
 	confirmations controllers.Confirmations,
 	resetPasswords controllers.ResetPasswords,
 	articles controllers.Articles,
+	newsletters controllers.Newsletters,
 ) {
 	registerAPIRoutes(r.Handler, api)
 	registerAssetsRoutes(r.Handler, assets)
@@ -114,6 +115,7 @@ func (r *Router) RegisterCtrlRoutes(
 	registerResetPasswordsRoutes(r.Handler, resetPasswords)
 
 	registerArticleRoutes(r.Handler, articles)
+	registerNewsletterRoutes(r.Handler, newsletters)
 }
 
 func (r *Router) RegisterCustomRoutes(
