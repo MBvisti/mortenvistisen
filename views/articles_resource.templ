@@ -169,136 +169,375 @@ templ ArticleShow(article models.Article) {
 }
 
 templ ArticleNew() {
-	@base() {
-		<main>
-			<div>
-				<h1>New Article</h1>
-				<a href={ templ.URL(routes.ArticleIndex.URL()) }>Back to List</a>
+	@adminBase(components.AddExtraScriptSrc(routes.Script.URL("easymde.js"))) {
+		@adminWrapper() {
+			<div class="mb-6">
+				<div class="flex items-center gap-3 mb-2">
+					<a
+						href={ routes.AdminHome.URL() }
+						class="btn-icon-ghost size-8"
+						aria-label="Back to articles"
+					>
+						<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="m15 18-6-6 6-6"></path>
+						</svg>
+					</a>
+					<h1 class="text-2xl font-bold tracking-tight">New Article</h1>
+				</div>
+				<p class="text-muted-foreground text-sm">Create a new article for your blog.</p>
 			</div>
-			<div>
-				<div>
-					<form data-on:submit={ hypermedia.DataAction(http.MethodPost, routes.ArticleCreate.URL(), hypermedia.ActionTypeForm) }>
-						<div>
-							<div>
-								<h2>Article Information</h2>
-								<p>Enter the details for the new article.</p>
-								<div>
-									<div>
-										@components.InputField("First Published At", "first_published_at", "date", "", false, components.FieldProp{})
-									</div>
-									<div>
-										@components.InputField("Title", "title", "text", "", false, components.FieldProp{})
-									</div>
-									<div>
-										@components.InputField("Excerpt", "excerpt", "text", "", false, components.FieldProp{})
-									</div>
-									<div>
-										@components.InputField("Meta Title", "meta_title", "text", "", false, components.FieldProp{})
-									</div>
-									<div>
-										@components.InputField("Meta Description", "meta_description", "text", "", false, components.FieldProp{})
-									</div>
-									<div>
-										@components.InputField("Slug", "slug", "text", "", false, components.FieldProp{})
-									</div>
-									<div>
-										@components.InputField("Image Link", "image_link", "text", "", false, components.FieldProp{})
-									</div>
-									<div>
-										@components.InputField("Read Time", "read_time", "number", "", false, components.FieldProp{})
-									</div>
-									<div>
-										@components.InputField("Content", "content", "text", "", false, components.FieldProp{})
-									</div>
+			<form
+				class="form"
+				data-indicator:submitting
+				data-on:submit={ hypermedia.DataAction(http.MethodPost, routes.ArticleCreate.URL()) }
+			>
+				<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+					<!-- Left Column: Article Information -->
+					<div class="space-y-6">
+						<fieldset class="fieldset">
+							<legend>Article Details</legend>
+							<p>Basic information about your article.</p>
+							<div role="group" class="field">
+								<label for="title">Title</label>
+								<input
+									type="text"
+									id="title"
+									name="title"
+									placeholder="Enter article title"
+									data-bind="title"
+									data-attr:disabled="$submitting"
+									required
+								/>
+							</div>
+							<div role="group" class="field">
+								<label for="slug">Slug</label>
+								<input
+									type="text"
+									id="slug"
+									name="slug"
+									disabled
+									class="cursor-not-allowed"
+									placeholder="article-url-slug"
+									aria-describedby="slug-desc"
+								/>
+								<p id="slug-desc">URL-friendly version of the title.</p>
+							</div>
+							<div role="group" class="field">
+								<label for="excerpt">Excerpt</label>
+								<textarea
+									id="excerpt"
+									name="excerpt"
+									placeholder="Brief summary of the article..."
+									rows="3"
+									data-bind="excerpt"
+									data-attr:disabled="$submitting"
+									aria-describedby="excerpt-desc"
+								></textarea>
+								<p id="excerpt-desc">A short description that appears in article listings.</p>
+							</div>
+						</fieldset>
+						<fieldset class="fieldset">
+							<legend>SEO & Metadata</legend>
+							<p>Optimize your article for search engines.</p>
+							<div role="group" class="field">
+								<label for="meta_title">Meta Title</label>
+								<input
+									type="text"
+									id="meta_title"
+									name="meta_title"
+									placeholder="SEO title for search engines"
+									data-bind="meta_title"
+									data-attr:disabled="$submitting"
+								/>
+							</div>
+							<div role="group" class="field">
+								<label for="meta_description">Meta Description</label>
+								<textarea
+									id="meta_description"
+									name="meta_description"
+									placeholder="SEO description for search engines..."
+									rows="2"
+									data-bind="meta_description"
+									data-attr:disabled="$submitting"
+								></textarea>
+							</div>
+						</fieldset>
+						<fieldset class="fieldset">
+							<legend>Publishing</legend>
+							<p>Control when and how your article appears.</p>
+							<div class="grid grid-cols-2 gap-4">
+								<div role="group" class="field">
+									<label for="first_published_at">Publish Date</label>
+									<input
+										type="date"
+										id="first_published_at"
+										name="first_published_at"
+										data-bind="first_published_at"
+										data-attr:disabled="$submitting"
+									/>
+								</div>
+								<div role="group" class="field">
+									<label for="read_time">Read Time (min)</label>
+									<input
+										type="number"
+										id="read_time"
+										name="read_time"
+										placeholder="5"
+										min="1"
+										data-bind="read_time"
+										data-attr:disabled="$submitting"
+									/>
 								</div>
 							</div>
-						</div>
-						<div>
-							<a href={ templ.URL(routes.ArticleIndex.URL()) }>Cancel</a>
-							<button type="submit">Create Article</button>
-						</div>
-					</form>
+							<div role="group" class="field">
+								<label for="image_link">Featured Image URL</label>
+								<input
+									type="text"
+									id="image_link"
+									name="image_link"
+									placeholder="https://example.com/image.jpg"
+									data-bind="image_link"
+									data-attr:disabled="$submitting"
+								/>
+							</div>
+						</fieldset>
+					</div>
+					<!-- Right Column: Content Editor -->
+					<div class="space-y-6">
+						<fieldset class="fieldset h-full flex flex-col">
+							<legend>Content</legend>
+							<p>Write your article content below.</p>
+							<!-- WYSIWYG Editor Container -->
+							<div
+								id="editor-container"
+								class="flex-1 min-h-[500px] rounded-md bg-background"
+							>
+								<!-- Placeholder for WYSIWYG editor -->
+								<textarea
+									id="editorTarget"
+									name="content"
+									class="h-full w-full p-4"
+								></textarea>
+							</div>
+						</fieldset>
+					</div>
 				</div>
-			</div>
-		</main>
+				<!-- Form Actions -->
+				<div class="flex items-center justify-end gap-3 mt-8 pt-6 border-t">
+					<a
+						href={ routes.ArticleIndex.URL() }
+						class="btn-outline"
+					>
+						Cancel
+					</a>
+					<button
+						type="submit"
+						class="btn"
+						data-attr:disabled="$submitting"
+					>
+						<span data-show="!$submitting">Create Article</span>
+						<span data-show="$submitting" class="flex items-center gap-2">
+							<svg class="animate-spin size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+								<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+								<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+							</svg>
+							Creating...
+						</span>
+					</button>
+				</div>
+			</form>
+		}
 	}
 }
 
 templ ArticleEdit(article models.Article) {
-	@base() {
-		<main>
-			<div>
-				<h1>Edit Article</h1>
-				<a href={ templ.URL(routes.ArticleIndex.URL()) }>Back to List</a>
+	@adminBase(components.AddExtraScriptSrc(routes.Script.URL("easymde.js"))) {
+		@adminWrapper() {
+			<div class="mb-6">
+				<div class="flex items-center gap-3 mb-2">
+					<a
+						href={ routes.AdminHome.URL() }
+						class="btn-icon-ghost size-8"
+						aria-label="Back to articles"
+					>
+						<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="m15 18-6-6 6-6"></path>
+						</svg>
+					</a>
+					<h1 class="text-2xl font-bold tracking-tight">Edit Article</h1>
+				</div>
+				<p class="text-muted-foreground text-sm">Edit an article for your blog.</p>
 			</div>
-			<div>
-				<div>
-					<form data-on:submit={ hypermedia.DataAction(http.MethodPut, routes.ArticleUpdate.URL(article.ID), hypermedia.ActionTypeForm) }>
-						<div>
-							<div>
-								<h2>Article Information</h2>
-								<p>Update the details for this article.</p>
-								<div>
-									<div>
-										@components.InputField("First Published At", "first_published_at", "date", "", false, components.FieldProp{
-											Value: article.FirstPublishedAt.String(),
-										})
-									</div>
-									<div>
-										@components.InputField("Title", "title", "text", "", false, components.FieldProp{
-											Value: article.Title,
-										})
-									</div>
-									<div>
-										@components.InputField("Excerpt", "excerpt", "text", "", false, components.FieldProp{
-											Value: article.Excerpt,
-										})
-									</div>
-									<div>
-										@components.InputField("Meta Title", "meta_title", "text", "", false, components.FieldProp{
-											Value: article.MetaTitle,
-										})
-									</div>
-									<div>
-										@components.InputField("Meta Description", "meta_description", "text", "", false, components.FieldProp{
-											Value: article.MetaDescription,
-										})
-									</div>
-									<div>
-										@components.InputField("Slug", "slug", "text", "", false, components.FieldProp{
-											Value: article.Slug,
-										})
-									</div>
-									<div>
-										@components.InputField("Image Link", "image_link", "text", "", false, components.FieldProp{
-											Value: article.ImageLink,
-										})
-									</div>
-									<div>
-										@components.InputField("Read Time", "read_time", "number", "", false, components.FieldProp{
-											Value: fmt.Sprintf("%d", article.ReadTime),
-										})
-									</div>
-									<div>
-										@components.InputField("Content", "content", "text", "", false, components.FieldProp{
-											Value: article.Content,
-										})
-									</div>
+			<form
+				class="form"
+				data-indicator:submitting
+				data-on:submit={ hypermedia.DataAction(http.MethodPut, routes.ArticleUpdate.URL(article.ID)) }
+			>
+				<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+					<!-- Left Column: Article Information -->
+					<div class="space-y-6">
+						<fieldset class="fieldset">
+							<legend>Article Details</legend>
+							<p>Basic information about your article.</p>
+							<div role="group" class="field">
+								<label for="title">Title</label>
+								<input
+									type="text"
+									id="title"
+									name="title"
+									placeholder="Enter article title"
+									data-bind="title"
+									value={ article.Title }
+									data-attr:disabled="$submitting"
+									required
+								/>
+							</div>
+							<div role="group" class="field">
+								<label for="slug">Slug</label>
+								<input
+									type="text"
+									id="slug"
+									name="slug"
+									disabled
+									class="cursor-not-allowed"
+									placeholder="article-url-slug"
+									value={ article.Slug }
+									aria-describedby="slug-desc"
+								/>
+								<p id="slug-desc">URL-friendly version of the title.</p>
+							</div>
+							<div role="group" class="field">
+								<label for="excerpt">Excerpt</label>
+								<textarea
+									id="excerpt"
+									name="excerpt"
+									placeholder="Brief summary of the article..."
+									value={ article.Excerpt }
+									rows="3"
+									data-bind="excerpt"
+									data-attr:disabled="$submitting"
+									aria-describedby="excerpt-desc"
+								></textarea>
+								<p id="excerpt-desc">A short description that appears in article listings.</p>
+							</div>
+						</fieldset>
+						<fieldset class="fieldset">
+							<legend>SEO & Metadata</legend>
+							<p>Optimize your article for search engines.</p>
+							<div role="group" class="field">
+								<label for="meta_title">Meta Title</label>
+								<input
+									type="text"
+									id="meta_title"
+									name="meta_title"
+									placeholder="SEO title for search engines"
+									value={ article.MetaTitle }
+									data-bind="meta_title"
+									data-attr:disabled="$submitting"
+								/>
+							</div>
+							<div role="group" class="field">
+								<label for="meta_description">Meta Description</label>
+								<textarea
+									id="meta_description"
+									name="meta_description"
+									placeholder="SEO description for search engines..."
+									rows="2"
+									value={ article.MetaDescription }
+									data-bind="meta_description"
+									data-attr:disabled="$submitting"
+								></textarea>
+							</div>
+						</fieldset>
+						<fieldset class="fieldset">
+							<legend>Publishing</legend>
+							<p>Control when and how your article appears.</p>
+							<div class="grid grid-cols-2 gap-4">
+								<div role="group" class="field">
+									<label for="first_published_at">Publish Date</label>
+									<input
+										type="date"
+										id="first_published_at"
+										name="first_published_at"
+										value={ article.FirstPublishedAt.Format("2006-01-02") }
+										data-bind="first_published_at"
+										data-attr:disabled="$submitting"
+									/>
+								</div>
+								<div role="group" class="field">
+									<label for="read_time">Read Time (min)</label>
+									<input
+										type="number"
+										id="read_time"
+										name="read_time"
+										placeholder="5"
+										min="1"
+										value={ fmt.Sprintf("%d", article.ReadTime) }
+										data-bind="read_time"
+										data-attr:disabled="$submitting"
+									/>
 								</div>
 							</div>
-						</div>
-						<div>
-							<a href={ templ.URL(routes.ArticleIndex.URL()) }>Cancel</a>
-							<button type="submit">Update Article</button>
-						</div>
-					</form>
-					<div>
-						<button
-							data-on:click={ hypermedia.DataAction(http.MethodDelete, routes.ArticleDestroy.URL(article.ID)) }
-						>Destroy Article</button>
+							<div role="group" class="field">
+								<label for="image_link">Featured Image URL</label>
+								<input
+									type="text"
+									id="image_link"
+									name="image_link"
+									placeholder="https://example.com/image.jpg"
+									value={ article.ImageLink }
+									data-bind="image_link"
+									data-attr:disabled="$submitting"
+								/>
+							</div>
+						</fieldset>
+					</div>
+					<!-- Right Column: Content Editor -->
+					<div class="space-y-6">
+						<fieldset class="fieldset h-full flex flex-col">
+							<legend>Content</legend>
+							<p>Write your article content below.</p>
+							<!-- WYSIWYG Editor Container -->
+							<div
+								id="editor-container"
+								class="flex-1 min-h-[500px] bg-background"
+							>
+								<!-- Placeholder for WYSIWYG editor -->
+								<textarea
+									id="editorTarget"
+									name="content"
+									class="h-full w-full p-4"
+								>
+									{ article.Content }
+								</textarea>
+							</div>
+						</fieldset>
 					</div>
 				</div>
-			</div>
-		</main>
+				<!-- Form Actions -->
+				<div class="flex items-center justify-end gap-3 mt-8 pt-6 border-t">
+					<a
+						href={ routes.ArticleIndex.URL() }
+						class="btn-outline"
+					>
+						Cancel
+					</a>
+					<button
+						type="submit"
+						class="btn"
+						data-attr:disabled="$submitting"
+					>
+						<span data-show="!$submitting">Update Article</span>
+						<span data-show="$submitting" class="flex items-center gap-2">
+							<svg class="animate-spin size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+								<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+								<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+							</svg>
+							Creating...
+						</span>
+					</button>
+				</div>
+			</form>
+		}
 	}
 }

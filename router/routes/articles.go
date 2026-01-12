@@ -26,20 +26,20 @@ var ArticleShowSlug = routing.NewRouteWithSlug(
 
 var ArticleNew = routing.NewSimpleRoute(
 	"/new",
-	"articles.new",
-	ArticlePrefix,
+	"admin.articles.new",
+	AdminPrefix+ArticlePrefix,
 )
 
 var ArticleCreate = routing.NewSimpleRoute(
 	"",
-	"articles.create",
-	ArticlePrefix,
+	"admin.articles.create",
+	AdminPrefix+ArticlePrefix,
 )
 
 var ArticleEdit = routing.NewRouteWithID(
 	"/:id/edit",
-	"articles.edit",
-	ArticlePrefix,
+	"admin.articles.edit",
+	AdminPrefix+ArticlePrefix,
 )
 
 var ArticleUpdate = routing.NewRouteWithID(

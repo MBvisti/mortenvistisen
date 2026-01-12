@@ -56,6 +56,15 @@ func (p Pages) Home(etx echo.Context) error {
 	return render(etx, component)
 }
 
+func (p Pages) AdminHome(etx echo.Context) error {
+	paginatedArticles, err := models.PaginateArticles(context.Background(), p.db.Conn(), 1, 10)
+	if err != nil {
+		return err
+	}
+
+	return render(etx, views.Admin(paginatedArticles.Articles))
+}
+
 func (p Pages) NotFound(etx echo.Context) error {
 	cacheKey := "not_found"
 
