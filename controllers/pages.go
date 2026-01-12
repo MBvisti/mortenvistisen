@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"context"
+	"strconv"
 
 	"mortenvistisen/internal/storage"
 	"mortenvistisen/models"
@@ -57,12 +58,19 @@ func (p Pages) Home(etx echo.Context) error {
 }
 
 func (p Pages) AdminHome(etx echo.Context) error {
-	paginatedArticles, err := models.PaginateArticles(context.Background(), p.db.Conn(), 1, 10)
+	page := int64(1)
+	if pageParam := etx.QueryParam("page"); pageParam != "" {
+		if parsed, err := strconv.ParseInt(pageParam, 10, 64); err == nil && parsed > 0 {
+			page = parsed
+		}
+	}
+
+	paginatedArticles, err := models.PaginateArticles(context.Background(), p.db.Conn(), page, 10)
 	if err != nil {
 		return err
 	}
 
-	return render(etx, views.Admin(paginatedArticles.Articles))
+	return render(etx, views.Admin(paginatedArticles))
 }
 
 func (p Pages) NotFound(etx echo.Context) error {
