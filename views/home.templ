@@ -4,6 +4,14 @@ import (
 	"time"
 )
 
+type ArticleViewData struct {
+	PublishedAt time.Time
+	Title       string
+	Excerpt     string
+	URL         string
+	Tags        []string
+}
+
 templ hero() {
 	<img
 		alt=""
@@ -49,27 +57,27 @@ templ hero() {
 	</div>
 }
 
-templ card(publisedAt time.Time, title string, excerpt string, url string, tags []string) {
+templ card(data ArticleViewData) {
 	<div class="w-full max-w-96 card border-none bg-background">
 		<header class="px-0">
 			<span class="mb-2 border-l-2 border-secondary text-foreground-muted">
-				<p class="ml-2 text-sm">{ publisedAt.Format("January 2, 2006") }</p>
+				<p class="ml-2 text-sm">{ data.PublishedAt.Format("January 2, 2006") }</p>
 			</span>
-			<h2 class="font-bold text-base sm:text-lg">{ title }</h2>
+			<h2 class="font-bold text-base sm:text-lg">{ data.Title }</h2>
 		</header>
 		<section class="px-0">
-			<p class="text-sm sm:text-base">{ excerpt }</p>
+			<p class="text-sm sm:text-base">{ data.Excerpt }</p>
 		</section>
 		<footer class="px-0 flex flex-col gap-2 items-start">
-			if len(tags) > 0 {
+			if len(data.Tags) > 0 {
 				<div class="flex flex-wrap gap-2">
-					for _, tag := range tags {
+					for _, tag := range data.Tags {
 						<span class="text-xs px-2 py-1 rounded bg-muted text-foreground-muted">{ tag }</span>
 					}
 				</div>
 			}
 			<a
-				href={ url }
+				href={ data.URL }
 				class="btn-link px-0 text-sm sm:text-base"
 			>
 				Read more &rarr;
@@ -127,7 +135,7 @@ templ latestVideo() {
 	</div>
 }
 
-templ Home() {
+templ Home(articles []ArticleViewData) {
 	@base() {
 		<main class="mx-auto w-full max-w-7xl lg:px-8 bg-background border-l-1 border-r-1 border-muted-foreground flex-1 flex flex-col pb-10">
 			<div
@@ -141,9 +149,9 @@ templ Home() {
 							<div>
 								<h2 class="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-foreground mb-4 sm:mb-6">Latest Posts</h2>
 								<div class="flex flex-col gap-6 sm:gap-8">
-									@card(time.Now(), "Educational content in the era of AI", "Thoughts on paid courses in an era where everyone and their grandma are vibe coding & the economic feasibility of long-form courses.", "#", []string{"AI", "Education", "Thoughts"})
-									@card(time.Now(), "Building a SaaS with Go and SvelteKit", "A detailed walkthrough of how I built and launched my latest SaaS product using Go for the backend and SvelteKit for the frontend.", "#", []string{"Go", "SvelteKit", "SaaS"})
-									@card(time.Now(), "Mastering Concurrency in Go", "An in-depth guide on how to effectively use goroutines and channels to build concurrent applications in Go.", "#", []string{"Go", "Concurrency"})
+									for _, article := range articles {
+										@card(article)
+									}
 								</div>
 							</div>
 							<!-- Latest Video (right column) -->

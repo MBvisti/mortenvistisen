@@ -93,7 +93,6 @@ func (a Articles) Create(etx echo.Context) error {
 		Excerpt:         payload.Excerpt,
 		MetaTitle:       payload.MetaTitle,
 		MetaDescription: payload.MetaDescription,
-		Slug:            payload.Slug,
 		ImageLink:       payload.ImageLink,
 		ReadTime:        payload.ReadTime,
 		Content:         payload.Content,

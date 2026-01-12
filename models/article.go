@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/gosimple/slug"
 	"github.com/jackc/pgx/v5/pgtype"
 
 	"mortenvistisen/internal/storage"
@@ -25,6 +26,7 @@ type Article struct {
 	ImageLink        string
 	ReadTime         int32
 	Content          string
+	Tags             []string
 }
 
 func FindArticle(
@@ -37,7 +39,17 @@ func FindArticle(
 		return Article{}, err
 	}
 
-	return rowToArticle(row), nil
+	tags, err := FindTagsForArticle(ctx, exec, row.ID)
+	if err != nil {
+		return Article{}, err
+	}
+
+	tagNames := make([]string, len(tags))
+	for j, tag := range tags {
+		tagNames[j] = tag.Title
+	}
+
+	return rowToArticle(row, tagNames), nil
 }
 
 type CreateArticleData struct {
@@ -46,7 +58,6 @@ type CreateArticleData struct {
 	Excerpt          string
 	MetaTitle        string
 	MetaDescription  string
-	Slug             string
 	ImageLink        string
 	ReadTime         int32
 	Content          string
@@ -68,7 +79,7 @@ func CreateArticle(
 		Excerpt:          data.Excerpt,
 		MetaTitle:        data.MetaTitle,
 		MetaDescription:  data.MetaDescription,
-		Slug:             data.Slug,
+		Slug:             slug.Make(data.Title),
 		ImageLink:        pgtype.Text{String: data.ImageLink, Valid: true},
 		ReadTime:         pgtype.Int4{Int32: data.ReadTime, Valid: true},
 		Content:          pgtype.Text{String: data.Content, Valid: true},
@@ -78,7 +89,7 @@ func CreateArticle(
 		return Article{}, err
 	}
 
-	return rowToArticle(row), nil
+	return rowToArticle(row, nil), nil
 }
 
 type UpdateArticleData struct {
@@ -122,7 +133,17 @@ func UpdateArticle(
 		return Article{}, err
 	}
 
-	return rowToArticle(row), nil
+	tags, err := FindTagsForArticle(ctx, exec, row.ID)
+	if err != nil {
+		return Article{}, err
+	}
+
+	tagNames := make([]string, len(tags))
+	for j, tag := range tags {
+		tagNames[j] = tag.Title
+	}
+
+	return rowToArticle(row, tagNames), nil
 }
 
 func DestroyArticle(
@@ -144,7 +165,17 @@ func AllArticles(
 
 	articles := make([]Article, len(rows))
 	for i, row := range rows {
-		articles[i] = rowToArticle(row)
+		tags, err := FindTagsForArticle(ctx, exec, row.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		tagNames := make([]string, len(tags))
+		for j, tag := range tags {
+			tagNames[j] = tag.Title
+		}
+
+		articles[i] = rowToArticle(row, tagNames)
 	}
 
 	return articles, nil
@@ -195,7 +226,18 @@ func PaginateArticles(
 
 	articles := make([]Article, len(rows))
 	for i, row := range rows {
-		articles[i] = rowToArticle(row)
+
+		tags, err := FindTagsForArticle(ctx, exec, row.ID)
+		if err != nil {
+			return PaginatedArticles{}, err
+		}
+
+		tagNames := make([]string, len(tags))
+		for j, tag := range tags {
+			tagNames[j] = tag.Title
+		}
+
+		articles[i] = rowToArticle(row, tagNames)
 	}
 
 	totalPages := (totalCount + int64(pageSize) - 1) / int64(pageSize)
@@ -225,7 +267,7 @@ func UpsertArticle(
 		Excerpt:          data.Excerpt,
 		MetaTitle:        data.MetaTitle,
 		MetaDescription:  data.MetaDescription,
-		Slug:             data.Slug,
+		Slug:             slug.Make(data.Title),
 		ImageLink:        pgtype.Text{String: data.ImageLink, Valid: true},
 		ReadTime:         pgtype.Int4{Int32: data.ReadTime, Valid: true},
 		Content:          pgtype.Text{String: data.Content, Valid: true},
@@ -235,24 +277,17 @@ func UpsertArticle(
 		return Article{}, err
 	}
 
-	return rowToArticle(row), nil
-}
-
-func rowToArticle(row db.Article) Article {
-	return Article{
-		ID:               row.ID,
-		CreatedAt:        row.CreatedAt.Time,
-		UpdatedAt:        row.UpdatedAt.Time,
-		FirstPublishedAt: row.FirstPublishedAt.Time,
-		Title:            row.Title,
-		Excerpt:          row.Excerpt,
-		MetaTitle:        row.MetaTitle,
-		MetaDescription:  row.MetaDescription,
-		Slug:             row.Slug,
-		ImageLink:        row.ImageLink.String,
-		ReadTime:         row.ReadTime.Int32,
-		Content:          row.Content.String,
+	tags, err := FindTagsForArticle(ctx, exec, row.ID)
+	if err != nil {
+		return Article{}, err
 	}
+
+	tagNames := make([]string, len(tags))
+	for j, tag := range tags {
+		tagNames[j] = tag.Title
+	}
+
+	return rowToArticle(row, tagNames), nil
 }
 
 func AssociateTagsWithArticle(
@@ -273,4 +308,67 @@ func AssociateTagsWithArticle(
 		}
 	}
 	return nil
+}
+
+func FindPublishedArticles(
+	ctx context.Context,
+	exec storage.Executor,
+) ([]Article, error) {
+	rows, err := queries.QueryPublishedArticles(ctx, exec)
+	if err != nil {
+		return nil, err
+	}
+
+	articles := make([]Article, len(rows))
+	for i, row := range rows {
+		tags, err := FindTagsForArticle(ctx, exec, row.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		tagNames := make([]string, len(tags))
+		for j, tag := range tags {
+			tagNames[j] = tag.Title
+		}
+
+		articles[i] = rowToArticle(row, tagNames)
+	}
+
+	return articles, nil
+}
+
+func FindTagsForArticle(
+	ctx context.Context,
+	exec storage.Executor,
+	articleID uuid.UUID,
+) ([]Tag, error) {
+	rows, err := queries.QueryTagsByArticleID(ctx, exec, articleID)
+	if err != nil {
+		return nil, err
+	}
+
+	tags := make([]Tag, len(rows))
+	for i, row := range rows {
+		tags[i] = rowToTag(row)
+	}
+
+	return tags, nil
+}
+
+func rowToArticle(row db.Article, tags []string) Article {
+	return Article{
+		ID:               row.ID,
+		CreatedAt:        row.CreatedAt.Time,
+		UpdatedAt:        row.UpdatedAt.Time,
+		FirstPublishedAt: row.FirstPublishedAt.Time,
+		Title:            row.Title,
+		Excerpt:          row.Excerpt,
+		MetaTitle:        row.MetaTitle,
+		MetaDescription:  row.MetaDescription,
+		Slug:             row.Slug,
+		ImageLink:        row.ImageLink.String,
+		ReadTime:         row.ReadTime.Int32,
+		Content:          row.Content.String,
+		Tags:             tags,
+	}
 }

@@ -189,6 +189,45 @@ func (q *Queries) QueryPaginatedArticles(ctx context.Context, db DBTX, arg Query
 	return items, nil
 }
 
+const queryPublishedArticles = `-- name: QueryPublishedArticles :many
+select id, created_at, updated_at, first_published_at, title, excerpt, meta_title, meta_description, slug, image_link, read_time, content from articles
+where first_published_at is not null
+order by first_published_at desc
+`
+
+func (q *Queries) QueryPublishedArticles(ctx context.Context, db DBTX) ([]Article, error) {
+	rows, err := db.Query(ctx, queryPublishedArticles)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Article
+	for rows.Next() {
+		var i Article
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.FirstPublishedAt,
+			&i.Title,
+			&i.Excerpt,
+			&i.MetaTitle,
+			&i.MetaDescription,
+			&i.Slug,
+			&i.ImageLink,
+			&i.ReadTime,
+			&i.Content,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateArticle = `-- name: UpdateArticle :one
 update articles
     set updated_at=now(), first_published_at=$2, title=$3, excerpt=$4, meta_title=$5, meta_description=$6, slug=$7, image_link=$8, read_time=$9, content=$10

@@ -4,6 +4,7 @@ import (
 	"mortenvistisen/views/components"
 	"mortenvistisen/router/cookies"
 	"time"
+	"mortenvistisen/router/routes"
 )
 
 templ navigation() {
@@ -20,7 +21,7 @@ templ navigation() {
 			</li>
 			<li>
 				<a
-					href="/"
+					href={ routes.ArticleIndex.URL() }
 					class="btn-link"
 				>
 					Posts
@@ -28,7 +29,7 @@ templ navigation() {
 			</li>
 			<li>
 				<a
-					href="/"
+					href={ routes.ProjectsPage.URL() }
 					class="btn-link"
 				>
 					Projects

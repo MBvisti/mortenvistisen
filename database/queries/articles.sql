@@ -4,6 +4,11 @@ select * from articles where id=$1;
 -- name: QueryArticles :many
 select * from articles;
 
+-- name: QueryPublishedArticles :many
+select * from articles
+where first_published_at is not null
+order by first_published_at desc;
+
 -- name: InsertArticle :one
 insert into
     articles (id, created_at, updated_at, first_published_at, title, excerpt, meta_title, meta_description, slug, image_link, read_time, content)

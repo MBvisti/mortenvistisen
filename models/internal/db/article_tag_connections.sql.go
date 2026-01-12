@@ -87,6 +87,38 @@ func (q *Queries) QueryArticleTagConnectionByID(ctx context.Context, db DBTX, id
 	return i, err
 }
 
+const queryTagsByArticleID = `-- name: QueryTagsByArticleID :many
+select t.id, t.created_at, t.updated_at, t.title
+from tags t
+inner join article_tag_connections atc on t.id = atc.tag_id
+where atc.article_id = $1
+`
+
+func (q *Queries) QueryTagsByArticleID(ctx context.Context, db DBTX, articleID uuid.UUID) ([]Tag, error) {
+	rows, err := db.Query(ctx, queryTagsByArticleID, articleID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Tag
+	for rows.Next() {
+		var i Tag
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Title,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateArticleTagConnection = `-- name: UpdateArticleTagConnection :one
 update article_tag_connections
     set article_id=$2, tag_id=$3
