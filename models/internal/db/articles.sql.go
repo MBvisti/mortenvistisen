@@ -108,6 +108,30 @@ func (q *Queries) QueryArticleByID(ctx context.Context, db DBTX, id uuid.UUID) (
 	return i, err
 }
 
+const queryArticleBySlug = `-- name: QueryArticleBySlug :one
+select id, created_at, updated_at, first_published_at, title, excerpt, meta_title, meta_description, slug, image_link, read_time, content from articles where slug=$1
+`
+
+func (q *Queries) QueryArticleBySlug(ctx context.Context, db DBTX, slug string) (Article, error) {
+	row := db.QueryRow(ctx, queryArticleBySlug, slug)
+	var i Article
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.FirstPublishedAt,
+		&i.Title,
+		&i.Excerpt,
+		&i.MetaTitle,
+		&i.MetaDescription,
+		&i.Slug,
+		&i.ImageLink,
+		&i.ReadTime,
+		&i.Content,
+	)
+	return i, err
+}
+
 const queryArticles = `-- name: QueryArticles :many
 select id, created_at, updated_at, first_published_at, title, excerpt, meta_title, meta_description, slug, image_link, read_time, content from articles
 `

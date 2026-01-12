@@ -1,6 +1,9 @@
 -- name: QueryArticleByID :one
 select * from articles where id=$1;
 
+-- name: QueryArticleBySlug :one
+select * from articles where slug=$1;
+
 -- name: QueryArticles :many
 select * from articles;
 

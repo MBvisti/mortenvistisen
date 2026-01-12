@@ -114,61 +114,52 @@ templ ArticleIndex(articles []models.Article) {
 }
 
 templ ArticleShow(article models.Article) {
-	@base() {
-		<main>
-			<div>
-				<h1>Article Details</h1>
-				<div>
-					<a href={ templ.URL(routes.ArticleEdit.URL(article.ID)) }>Edit</a>
-					<a href={ templ.URL(routes.ArticleIndex.URL()) }>Back to List</a>
-				</div>
-			</div>
-			<div>
-				<div>
-					<div>
-						<div>
-							<label>Created At</label>
-							<p>{ article.CreatedAt.String() }</p>
-						</div>
-						<div>
-							<label>Updated At</label>
-							<p>{ article.UpdatedAt.String() }</p>
-						</div>
-						<div>
-							<label>First Published At</label>
-							<p>{ article.FirstPublishedAt.String() }</p>
-						</div>
-						<div>
-							<label>Title</label>
-							<p>{ article.Title }</p>
-						</div>
-						<div>
-							<label>Excerpt</label>
-							<p>{ article.Excerpt }</p>
-						</div>
-						<div>
-							<label>Meta Title</label>
-							<p>{ article.MetaTitle }</p>
-						</div>
-						<div>
-							<label>Meta Description</label>
-							<p>{ article.MetaDescription }</p>
-						</div>
-						<div>
-							<label>Slug</label>
-							<p>{ article.Slug }</p>
-						</div>
-						<div>
-							<label>Image Link</label>
-							<p>{ article.ImageLink }</p>
-						</div>
-						<div>
-							<label>Read Time</label>
-							<p>{ fmt.Sprintf("%d", article.ReadTime) }</p>
-						</div>
-						<div>
-							<label>Content</label>
-							<p>{ article.Content }</p>
+	@base(
+		components.SetTitle(article.MetaTitle),
+		components.SetDescription(article.MetaDescription),
+		components.SetSlug(routes.ArticleShowSlug.URL(article.Slug)),
+		components.SetImage(article.ImageLink),
+		components.SetImageAlt(article.Title),
+	) {
+		<main class="mx-auto w-full max-w-7xl lg:px-8 bg-background border-l-1 border-r-1 border-muted-foreground flex-1 flex flex-col pb-10">
+			<div class="px-4 sm:px-8 lg:px-12">
+				<div class="mx-auto max-w-2xl">
+					<div class="xl:relative">
+						<div class="mt-10 sm:mt-16 lg:mt-20">
+							<a
+								href={ routes.ArticleIndex.URL() }
+								class="group mb-8 flex h-10 w-10 items-center justify-center rounded-full bg-secondary hover:bg-secondary/70 transition-colors xl:absolute xl:-left-36 xl:-mt-2 xl:mb-0"
+								aria-label="Go back to articles"
+							>
+								<svg viewBox="0 0 16 16" fill="none" aria-hidden="true" class="h-4 w-4 stroke-secondary-foreground transition group-hover:stroke-secondary-foreground/70">
+									<path d="M7.25 11.25 3.75 8m0 0 3.5-3.25M3.75 8h8.5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+								</svg>
+							</a>
+							<div class="flex items-center mb-6 sm:mb-8">
+								<span class="border-l-2 border-muted-foreground pl-3 text-foreground-muted text-sm">
+									{ article.FirstPublishedAt.Format("January 2, 2006") }
+								</span>
+							</div>
+							<h1 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+								{ article.Title }
+							</h1>
+							<p class="mt-4 sm:mt-6 text-base text-foreground-muted leading-relaxed">
+								{ article.Excerpt }
+							</p>
+							if article.ImageLink != "" {
+								<div class="mt-10 sm:mt-12">
+									<img
+										src={ "https://media.mastergolang.com/thumbnails/intro-welcome" }
+										alt={ article.Title }
+										class="w-full rounded-lg object-cover"
+									/>
+								</div>
+							}
+							<div class="mt-10 sm:mt-12 prose prose-invert max-w-none">
+								<div class="text-foreground-muted leading-relaxed">
+									@templ.Raw(article.Content)
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>

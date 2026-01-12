@@ -35,7 +35,7 @@ func BuildArticle(opts ...ArticleOption) models.Article {
 			MetaTitle:        faker.Sentence(),
 			MetaDescription:  faker.Sentence(),
 			Slug:             slug.Make(title),
-			ImageLink:        faker.Word(),
+			ImageLink:        "",
 			ReadTime:         randomInt(1, 1000, 100),
 			Content:          faker.Sentence(),
 		},

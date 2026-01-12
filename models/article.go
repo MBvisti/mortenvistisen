@@ -52,6 +52,29 @@ func FindArticle(
 	return rowToArticle(row, tagNames), nil
 }
 
+func FindArticleBySlug(
+	ctx context.Context,
+	exec storage.Executor,
+	slug string,
+) (Article, error) {
+	row, err := queries.QueryArticleBySlug(ctx, exec, slug)
+	if err != nil {
+		return Article{}, err
+	}
+
+	tags, err := FindTagsForArticle(ctx, exec, row.ID)
+	if err != nil {
+		return Article{}, err
+	}
+
+	tagNames := make([]string, len(tags))
+	for j, tag := range tags {
+		tagNames[j] = tag.Title
+	}
+
+	return rowToArticle(row, tagNames), nil
+}
+
 type CreateArticleData struct {
 	FirstPublishedAt time.Time
 	Title            string
