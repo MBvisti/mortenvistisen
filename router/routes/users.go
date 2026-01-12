@@ -55,7 +55,7 @@ var RegistrationNew = routing.NewSimpleRoute(
 )
 
 var RegistrationCreate = routing.NewSimpleRoute(
-	"/",
+	"",
 	"user_registration",
 	UserPrefix,
 )

@@ -1,5 +1,5 @@
 {
-  "version": "v1.0.0-alpha.5",
+  "version": "v1.0.0-alpha.6",
   "tools": {
     "air": {
       "source": "go",

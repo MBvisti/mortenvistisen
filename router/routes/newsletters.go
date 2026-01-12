@@ -7,7 +7,7 @@ import (
 const NewsletterPrefix = "/newsletters"
 
 var NewsletterIndex = routing.NewSimpleRoute(
-	"/",
+	"",
 	"newsletters.index",
 	NewsletterPrefix,
 )
@@ -31,7 +31,7 @@ var NewsletterNew = routing.NewSimpleRoute(
 )
 
 var NewsletterCreate = routing.NewSimpleRoute(
-	"/",
+	"",
 	"newsletters.create",
 	NewsletterPrefix,
 )

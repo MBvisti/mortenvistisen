@@ -31,7 +31,7 @@ var ArticleNew = routing.NewSimpleRoute(
 )
 
 var ArticleCreate = routing.NewSimpleRoute(
-	"/",
+	"",
 	"articles.create",
 	ArticlePrefix,
 )
