@@ -8,12 +8,12 @@ import (
 	"strings"
 
 	"mortenvistisen/config"
-	"mortenvistisen/internal/server"
-	"mortenvistisen/telemetry"
-	"mortenvistisen/router/cookies"
 	"mortenvistisen/controllers"
-	"mortenvistisen/router/routes"
+	"mortenvistisen/internal/server"
+	"mortenvistisen/router/cookies"
 	"mortenvistisen/router/middleware"
+	"mortenvistisen/router/routes"
+	"mortenvistisen/telemetry"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/sessions"
@@ -103,6 +103,7 @@ func (r *Router) RegisterCtrlRoutes(
 	registrations controllers.Registrations,
 	confirmations controllers.Confirmations,
 	resetPasswords controllers.ResetPasswords,
+	articles controllers.Articles,
 ) {
 	registerAPIRoutes(r.Handler, api)
 	registerAssetsRoutes(r.Handler, assets)
@@ -111,10 +112,14 @@ func (r *Router) RegisterCtrlRoutes(
 	registerRegistrationsRoutes(r.Handler, registrations)
 	registerConfirmationsRoutes(r.Handler, confirmations)
 	registerResetPasswordsRoutes(r.Handler, resetPasswords)
+
+	registerArticleRoutes(r.Handler, articles)
 }
 
 func (r *Router) RegisterCustomRoutes(
-	riverHandler interface{ ServeHTTP(http.ResponseWriter, *http.Request) },
+	riverHandler interface {
+		ServeHTTP(http.ResponseWriter, *http.Request)
+	},
 	notFoundHandler echo.HandlerFunc,
 ) {
 	r.Handler.Any("/riverui*", echo.WrapHandler(riverHandler))

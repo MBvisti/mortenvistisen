@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
-	"strconv"
 	"time"
 
 	"mortenvistisen/internal/storage"
@@ -26,32 +25,15 @@ func NewArticles(db storage.Pool) Articles {
 }
 
 func (a Articles) Index(etx echo.Context) error {
-	page := int64(1)
-	if p := etx.QueryParam("page"); p != "" {
-		if parsed, err := strconv.Atoi(p); err == nil && parsed > 0 {
-			page = int64(parsed)
-		}
-	}
-
-	perPage := int64(25)
-	if pp := etx.QueryParam("per_page"); pp != "" {
-		if parsed, err := strconv.Atoi(pp); err == nil && parsed > 0 &&
-			parsed <= 100 {
-			perPage = int64(parsed)
-		}
-	}
-
-	articlesList, err := models.PaginateArticles(
+	articles, err := models.AllArticles(
 		etx.Request().Context(),
 		a.db.Conn(),
-		page,
-		perPage,
 	)
 	if err != nil {
 		return render(etx, views.InternalError())
 	}
 
-	return render(etx, views.ArticleIndex(articlesList.Articles))
+	return render(etx, views.ArticleIndex(articles))
 }
 
 func (a Articles) Show(etx echo.Context) error {

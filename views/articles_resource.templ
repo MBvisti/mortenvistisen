@@ -9,60 +9,104 @@ import (
 	"net/http"
 )
 
+templ placeholderArticleItem(date string, title string, excerpt string) {
+	<article class="md:grid md:grid-cols-4 md:items-baseline">
+		<div class="md:col-span-1 mb-3 md:mb-0">
+			<span class="border-l-2 border-muted-foreground pl-3 text-foreground-muted text-sm">
+				{ date }
+			</span>
+		</div>
+		<div class="md:col-span-3">
+			<h3 class="text-base font-semibold tracking-tight text-foreground">
+				<a href="#" class="hover:text-secondary transition-colors">
+					{ title }
+				</a>
+			</h3>
+			<p class="mt-2 text-sm text-foreground-muted leading-relaxed">
+				{ excerpt }
+			</p>
+			<a
+				href="#"
+				class="mt-4 inline-flex items-center text-sm font-medium text-secondary hover:text-secondary/80 transition-colors"
+			>
+				Read article
+				<svg viewBox="0 0 16 16" fill="none" aria-hidden="true" class="ml-1 h-4 w-4 stroke-current">
+					<path d="M6.75 5.75 9.25 8l-2.5 2.25" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+				</svg>
+			</a>
+		</div>
+	</article>
+}
+
+templ articleItem(article models.Article) {
+	<article class="md:grid md:grid-cols-4 md:items-baseline">
+		<div class="md:col-span-1 mb-3 md:mb-0">
+			<span class="border-l-2 border-muted-foreground pl-3 text-foreground-muted text-sm">
+				{ article.FirstPublishedAt.Format("January 2, 2006") }
+			</span>
+		</div>
+		<div class="md:col-span-3">
+			<h3 class="text-base font-semibold tracking-tight text-foreground">
+				<a href={ templ.URL(routes.ArticleShow.URL(article.ID)) } class="hover:text-secondary transition-colors">
+					{ article.Title }
+				</a>
+			</h3>
+			<p class="mt-2 text-sm text-foreground-muted leading-relaxed">
+				{ article.Excerpt }
+			</p>
+			<a
+				href={ templ.URL(routes.ArticleShow.URL(article.ID)) }
+				class="mt-4 inline-flex items-center text-sm font-medium text-secondary hover:text-secondary/80 transition-colors"
+			>
+				Read article
+				<svg viewBox="0 0 16 16" fill="none" aria-hidden="true" class="ml-1 h-4 w-4 stroke-current">
+					<path d="M6.75 5.75 9.25 8l-2.5 2.25" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+				</svg>
+			</a>
+		</div>
+	</article>
+}
+
 templ ArticleIndex(articles []models.Article) {
 	@base() {
-		<main>
-			<div>
-				<h1>Articles</h1>
-				<a href={ templ.URL(routes.ArticleNew.URL()) }>New Article</a>
-			</div>
-			<div>
-				<div>
-					if len(articles) == 0 {
-						<p>No articles found.</p>
-					} else {
-						<div>
-							<table>
-								<thead>
-									<tr>
-										<th>Created At</th>
-										<th>Updated At</th>
-										<th>First Published At</th>
-										<th>Title</th>
-										<th>Excerpt</th>
-										<th>Meta Title</th>
-										<th>Meta Description</th>
-										<th>Slug</th>
-										<th>Image Link</th>
-										<th>Read Time</th>
-										<th>Content</th>
-										<th>Actions</th>
-									</tr>
-								</thead>
-								<tbody>
-									for _, article := range articles {
-										<tr>
-											<td>{ article.CreatedAt.String() }</td>
-											<td>{ article.UpdatedAt.String() }</td>
-											<td>{ article.FirstPublishedAt.String() }</td>
-											<td>{ article.Title }</td>
-											<td>{ article.Excerpt }</td>
-											<td>{ article.MetaTitle }</td>
-											<td>{ article.MetaDescription }</td>
-											<td>{ article.Slug }</td>
-											<td>{ article.ImageLink }</td>
-											<td>{ fmt.Sprintf("%d", article.ReadTime) }</td>
-											<td>{ article.Content }</td>
-											<td>
-												<a href={ templ.URL(routes.ArticleShow.URL(article.ID)) }>View</a>
-												<a href={ templ.URL(routes.ArticleEdit.URL(article.ID)) }>Edit</a>
-											</td>
-										</tr>
-									}
-								</tbody>
-							</table>
-						</div>
-					}
+		<main class="mx-auto w-full max-w-7xl lg:px-8 bg-background border-l-1 border-r-1 border-muted-foreground flex-1 flex flex-col pb-10">
+			<div class="px-4 sm:px-8 lg:px-12">
+				<div class="mx-auto max-w-2xl lg:max-w-5xl">
+					<header class="mt-10 sm:mt-16 lg:mt-20 max-w-2xl">
+						<h1 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
+							Writing on software design, company building, and the aerospace industry.
+						</h1>
+						<p class="mt-4 sm:mt-6 text-sm sm:text-base text-foreground-muted">
+							All of my long-form thoughts on programming, leadership, product design, and more, collected in chronological order.
+						</p>
+					</header>
+					<div class="mt-12 sm:mt-16 lg:mt-20">
+						if len(articles) == 0 {
+							<div class="flex flex-col gap-12 sm:gap-16">
+								@placeholderArticleItem(
+									"September 5, 2022",
+									"Crafting a design system for a multiplanetary future",
+									"Most companies try to stay ahead of the curve when it comes to visual design, but for Planetaria we needed to create a brand that would still inspire us 100 years from now when humanity has spread across our entire solar system.",
+								)
+								@placeholderArticleItem(
+									"September 2, 2022",
+									"Introducing Animaginary: High performance web animations",
+									"When you're building a website for a company as ambitious as Planetaria, you need to make an impression. I wanted people to visit our website and see animations that looked more realistic than reality itself.",
+								)
+								@placeholderArticleItem(
+									"July 14, 2022",
+									"Rewriting the cosmOS kernel in Rust",
+									"When we released the first version of cosmOS last year, it was written in Go. Go is a wonderful programming language, but it's been a while since I've seen an article on the front page of Hacker News about rewriting some important tool in Go and I see articles on there about rewriting things in Rust every single week.",
+								)
+							</div>
+						} else {
+							<div class="flex flex-col gap-12 sm:gap-16">
+								for _, article := range articles {
+									@articleItem(article)
+								}
+							</div>
+						}
+					</div>
 				</div>
 			</div>
 		</main>
