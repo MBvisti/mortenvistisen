@@ -13,4 +13,8 @@ func registerPagesRoutes(handler *echo.Echo, pagesController controllers.Pages) 
 	handler.Add(
 		http.MethodGet, routes.HomePage.Path(), pagesController.Home,
 	).Name = routes.HomePage.Name()
+
+	handler.Add(
+		http.MethodGet, routes.ProjectsPage.Path(), pagesController.Projects,
+	).Name = routes.ProjectsPage.Name()
 }

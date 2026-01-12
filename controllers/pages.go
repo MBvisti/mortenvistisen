@@ -48,3 +48,16 @@ func (p Pages) NotFound(etx echo.Context) error {
 
 	return render(etx, component)
 }
+
+func (p Pages) Projects(etx echo.Context) error {
+	cacheKey := "projects"
+
+	component, err := p.cache.Get(cacheKey, func() (templ.Component, error) {
+		return views.Projects(), nil
+	})
+	if err != nil {
+		return err
+	}
+
+	return render(etx, component)
+}
