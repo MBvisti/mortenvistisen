@@ -8,13 +8,59 @@ import (
 
 templ base(headOpts ...components.HeadDataOption) {
 	<!DOCTYPE html>
-	<html lang="en" class="dark">
+	<html lang="en" class="cyber">
 		@components.SetupHead(ctx, headOpts...)
-		<body class="min-h-screen flex flex-col bg-background-100 text-base-content">
+		<body class="min-h-screen flex flex-col bg-background-300">
+			<nav class="bg-background py-10 border-l-1 border-r-1 border-b-0 border-muted-foreground w-full mx-auto max-w-7xl lg:px-8 mx-auto text-sm text-muted-foreground flex justify-center">
+				<ul class="bg-background-200 border rounded py-2 px-4 flex space-x-2">
+					<li>
+						<a
+							href="/"
+							class="btn-link"
+						>
+							Home
+						</a>
+					</li>
+					<li>
+						<a
+							href="/"
+							class="btn-link"
+						>
+							Posts
+						</a>
+					</li>
+					<li>
+						<a
+							href="/"
+							class="btn-link"
+						>
+							Projects
+						</a>
+					</li>
+					<li>
+						<a
+							href="/"
+							class="btn-link"
+						>
+							Newsletters
+						</a>
+					</li>
+					<li>
+						<a
+							href="/"
+							class="btn-link"
+						>
+							About
+						</a>
+					</li>
+				</ul>
+			</nav>
 			{ children... }
 			<footer>
-				<div class="container mx-auto py-4 text-center text-sm text-base-content/50">
-					&copy; { time.Now().Format("2006") } andurel.
+				<div
+					class="mx-auto w-full max-w-7xl lg:px-8 bg-background border-t-1 border-l-1 border-r-1 border-b-0 border-muted-foreground mx-auto py-4 text-center text-sm text-muted-foreground"
+				>
+					&copy; { time.Now().Format("2006") } mbvlabs.
 				</div>
 			</footer>
 		</body>
