@@ -9,7 +9,7 @@ select * from articles;
 
 -- name: QueryPublishedArticles :many
 select * from articles
-where first_published_at is not null
+where published = true
 order by first_published_at desc;
 
 -- name: InsertArticle :one

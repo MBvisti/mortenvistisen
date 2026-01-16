@@ -139,25 +139,18 @@ func (a Articles) Create(etx echo.Context) error {
 		return render(etx, views.NotFound())
 	}
 
+	firstPublishedAt, _ := time.Parse("2006-01-02", payload.FirstPublishedAt)
+
 	data := models.CreateArticleData{
-		// handle string -> uuid in the same way in generator
-		FirstPublishedAt: func() time.Time {
-			if payload.FirstPublishedAt == "" {
-				return time.Time{}
-			}
-			if t, err := time.Parse("2006-01-02", payload.FirstPublishedAt); err == nil {
-				return t
-			}
-			return time.Time{}
-		}(),
-		Title:           payload.Title,
-		Excerpt:         payload.Excerpt,
-		MetaTitle:       payload.MetaTitle,
-		Publiched:       payload.Published,
-		MetaDescription: payload.MetaDescription,
-		ImageLink:       payload.ImageLink,
-		ReadTime:        payload.ReadTime,
-		Content:         payload.Content,
+		FirstPublishedAt: firstPublishedAt,
+		Title:            payload.Title,
+		Excerpt:          payload.Excerpt,
+		MetaTitle:        payload.MetaTitle,
+		Published:        payload.Published,
+		MetaDescription:  payload.MetaDescription,
+		ImageLink:        payload.ImageLink,
+		ReadTime:         payload.ReadTime,
+		Content:          payload.Content,
 	}
 
 	article, err := models.CreateArticle(
@@ -223,25 +216,19 @@ func (a Articles) Update(etx echo.Context) error {
 		return render(etx, views.NotFound())
 	}
 
+	firstPublishedAt, _ := time.Parse("2006-01-02", payload.FirstPublishedAt)
+
 	data := models.UpdateArticleData{
-		ID: articleID,
-		FirstPublishedAt: func() time.Time {
-			if payload.FirstPublishedAt == "" {
-				return time.Time{}
-			}
-			if t, err := time.Parse("2006-01-02", payload.FirstPublishedAt); err == nil {
-				return t
-			}
-			return time.Time{}
-		}(),
-		Title:           payload.Title,
-		Excerpt:         payload.Excerpt,
-		MetaTitle:       payload.MetaTitle,
-		Published:       payload.Published,
-		MetaDescription: payload.MetaDescription,
-		ImageLink:       payload.ImageLink,
-		ReadTime:        payload.ReadTime,
-		Content:         payload.Content,
+		ID:               articleID,
+		FirstPublishedAt: firstPublishedAt,
+		Title:            payload.Title,
+		Excerpt:          payload.Excerpt,
+		MetaTitle:        payload.MetaTitle,
+		Published:        payload.Published,
+		MetaDescription:  payload.MetaDescription,
+		ImageLink:        payload.ImageLink,
+		ReadTime:         payload.ReadTime,
+		Content:          payload.Content,
 	}
 
 	article, err := models.UpdateArticle(

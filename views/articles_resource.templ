@@ -349,12 +349,18 @@ templ ArticleNew() {
 								</div>
 							</div>
 							<div role="group" class="field">
-								<label for="first_published_at">Publish</label>
+								<label for="published">Publish</label>
 								<div class="gap-2 flex flex-row items-start justify-between rounded-lg border p-4 shadow-xs">
 									<div class="flex flex-col gap-0.5">
-										<label for="demo-form-switch" class="leading-normal">Click here to publish</label>
+										<label for="published" class="leading-normal">Click here to publish</label>
 									</div>
-									<input type="checkbox" id="demo-form-switch" role="switch"/>
+									<input
+										type="checkbox"
+										id="published"
+										name="published"
+										role="switch"
+										data-bind="published"
+									/>
 								</div>
 							</div>
 							<div role="group" class="field">
@@ -385,6 +391,7 @@ templ ArticleNew() {
 									id="editorTarget"
 									name="content"
 									class="h-full w-full p-4"
+									data-bind="content"
 								></textarea>
 							</div>
 						</fieldset>
@@ -466,12 +473,11 @@ templ ArticleEdit(article models.Article) {
 										id="excerpt"
 										name="excerpt"
 										placeholder="Brief summary of the article..."
-										value={ article.Excerpt }
 										rows="3"
 										data-bind="excerpt"
 										data-attr:disabled="$submitting"
 										aria-describedby="excerpt-desc"
-									></textarea>
+									>{ article.Excerpt }</textarea>
 								</div>
 							</fieldset>
 							<fieldset class="fieldset col-span-2">
@@ -495,10 +501,9 @@ templ ArticleEdit(article models.Article) {
 										name="metaDescription"
 										placeholder="SEO description for search engines..."
 										rows="2"
-										value={ article.MetaDescription }
 										data-bind="metaDescription"
 										data-attr:disabled="$submitting"
-									></textarea>
+									>{ article.MetaDescription }</textarea>
 								</div>
 							</fieldset>
 							<fieldset class="fieldset col-span-2">
@@ -532,11 +537,16 @@ templ ArticleEdit(article models.Article) {
 							<fieldset class="fieldset col-span-2">
 								<legend>Publishing</legend>
 								<div role="group" class="field">
-									<label for="setToPublish">Publish State</label>
+									<label for="published">Publish State</label>
 									<input
 										type="checkbox"
-										id="setToPublish"
+										id="published"
+										name="published"
 										role="switch"
+										data-bind="published"
+										if article.Published {
+											checked
+										}
 									/>
 								</div>
 								<div role="group" class="field">
@@ -564,9 +574,8 @@ templ ArticleEdit(article models.Article) {
 										id="editorTarget"
 										name="content"
 										class="h-full w-full p-4"
-									>
-										{ article.Content }
-									</textarea>
+										data-bind="content"
+									>{ article.Content }</textarea>
 								</div>
 							</fieldset>
 						</div>

@@ -83,7 +83,7 @@ type CreateArticleData struct {
 	MetaTitle        string
 	MetaDescription  string
 	ImageLink        string
-	Publiched        bool
+	Published        bool
 	ReadTime         int32
 	Content          string
 }
@@ -97,17 +97,23 @@ func CreateArticle(
 		return Article{}, errors.Join(ErrDomainValidation, err)
 	}
 
+	// If published but no first_published_at, auto-set to now
+	firstPublishedAt := data.FirstPublishedAt
+	if data.Published && firstPublishedAt.IsZero() {
+		firstPublishedAt = time.Now()
+	}
+
 	params := db.InsertArticleParams{
 		ID: uuid.New(),
 		FirstPublishedAt: pgtype.Timestamptz{
-			Time:  data.FirstPublishedAt,
-			Valid: !data.FirstPublishedAt.IsZero(),
+			Time:  firstPublishedAt,
+			Valid: !firstPublishedAt.IsZero(),
 		},
 		Title:           data.Title,
 		Excerpt:         data.Excerpt,
 		MetaTitle:       data.MetaTitle,
 		MetaDescription: data.MetaDescription,
-		Published:       data.Publiched,
+		Published:       data.Published,
 		Slug:            slug.Make(data.Title),
 		ImageLink:       pgtype.Text{String: data.ImageLink, Valid: true},
 		ReadTime:        pgtype.Int4{Int32: data.ReadTime, Valid: true},
@@ -145,11 +151,17 @@ func UpdateArticle(
 		return Article{}, errors.Join(ErrDomainValidation, err)
 	}
 
+	// If published but no first_published_at, auto-set to now
+	firstPublishedAt := data.FirstPublishedAt
+	if data.Published && firstPublishedAt.IsZero() {
+		firstPublishedAt = time.Now()
+	}
+
 	params := db.UpdateArticleParams{
 		ID: data.ID,
 		FirstPublishedAt: pgtype.Timestamptz{
-			Time:  data.FirstPublishedAt,
-			Valid: !data.FirstPublishedAt.IsZero(),
+			Time:  firstPublishedAt,
+			Valid: !firstPublishedAt.IsZero(),
 		},
 		Title:           data.Title,
 		Excerpt:         data.Excerpt,
@@ -157,9 +169,9 @@ func UpdateArticle(
 		MetaDescription: data.MetaDescription,
 		Slug:            slug.Make(data.Title),
 		Published:       data.Published,
-		ImageLink:       pgtype.Text{String: data.ImageLink, Valid: true},
-		ReadTime:        pgtype.Int4{Int32: data.ReadTime, Valid: true},
-		Content:         pgtype.Text{String: data.Content, Valid: true},
+		ImageLink:       pgtype.Text{String: data.ImageLink, Valid: data.ImageLink != ""},
+		ReadTime:        pgtype.Int4{Int32: data.ReadTime, Valid: data.ReadTime != 0},
+		Content:         pgtype.Text{String: data.Content, Valid: data.Content != ""},
 	}
 
 	row, err := queries.UpdateArticle(ctx, exec, params)
@@ -301,7 +313,7 @@ func UpsertArticle(
 		Excerpt:          data.Excerpt,
 		MetaTitle:        data.MetaTitle,
 		MetaDescription:  data.MetaDescription,
-		Published:        data.Publiched,
+		Published:        data.Published,
 		Slug:             slug.Make(data.Title),
 		ImageLink:        pgtype.Text{String: data.ImageLink, Valid: true},
 		ReadTime:         pgtype.Int4{Int32: data.ReadTime, Valid: true},
