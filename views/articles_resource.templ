@@ -1,20 +1,22 @@
 package views
 
 import (
+	"bytes"
 	"fmt"
+	"net/http"
+
 	"mortenvistisen/internal/hypermedia"
 	"mortenvistisen/models"
 	"mortenvistisen/router/routes"
 	"mortenvistisen/views/components"
-	"net/http"
 
 	chromahtml "github.com/alecthomas/chroma/v2/formatters/html"
+	"github.com/google/uuid"
 	"github.com/yuin/goldmark"
 	highlighting "github.com/yuin/goldmark-highlighting/v2"
 	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/renderer/html"
-	"bytes"
 )
 
 var mdParser = goldmark.New(
@@ -182,7 +184,7 @@ templ ArticleShow(article models.Article) {
 							<h1 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
 								{ article.Title }
 							</h1>
-							<p class="mt-4 sm:mt-6 text-base text-foreground-muted leading-relaxed">
+							<p class="mt-4 sm:mt-6 text-base text-muted-foreground leading-relaxed">
 								{ article.Excerpt }
 							</p>
 							if article.ImageLink != "" {
@@ -195,9 +197,9 @@ templ ArticleShow(article models.Article) {
 								</div>
 							}
 							<div class="mt-10 sm:mt-12 prose prose-invert max-w-none">
-								<div class="text-foreground-muted leading-relaxed">
+								<article class="prose lg:prose-xl prose-p:text-foreground prose-headings:text-foreground leading-relaxed">
 									@templ.Raw(ParseMarkdownToHtml(article.Content))
-								</div>
+								</article>
 							</div>
 						</div>
 					</div>
@@ -214,7 +216,6 @@ templ InputField(id, fieldType, name, title, placeholder, value, err string, req
 		<input
 			id={ name }
 			type="text"
-			name={ name }
 			placeholder={ placeholder }
 			data-bind={ name }
 			data-attr:disabled="$submitting"
@@ -228,7 +229,82 @@ templ InputField(id, fieldType, name, title, placeholder, value, err string, req
 	</div>
 }
 
-templ ArticleNew() {
+func isTagSelected(tagID uuid.UUID, selectedTagIDs []uuid.UUID) bool {
+	for _, id := range selectedTagIDs {
+		if id == tagID {
+			return true
+		}
+	}
+	return false
+}
+
+templ articleTagsFieldset(allTags []models.Tag, selectedTagIDs []uuid.UUID) {
+	<fieldset class="fieldset" id="article-tags-fieldset">
+		<legend>Select Tags</legend>
+		<p>Choose tags to associate with this article.</p>
+		<div class="grid grid-cols-2 md:grid-cols-3 gap-3 mt-4">
+			for _, tag := range allTags {
+				<label class="flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-muted">
+					<input
+						type="checkbox"
+						data-bind="tagIds"
+						value={ tag.ID.String() }
+						if isTagSelected(tag.ID, selectedTagIDs) {
+							checked
+						}
+					/>
+					<span>{ tag.Title }</span>
+				</label>
+			}
+		</div>
+		if len(allTags) == 0 {
+			<p class="text-muted-foreground text-sm mt-4">No tags available. Create your first tag below.</p>
+		}
+		<button type="button" onclick="document.getElementById('create-tag-dialog').showModal()" class="btn-outline mt-4">
+			+ Create New Tag
+		</button>
+	</fieldset>
+}
+
+// ArticleTagsFieldsetPartial is an exported version of articleTagsFieldset for use in partial updates
+templ ArticleTagsFieldsetPartial(allTags []models.Tag, selectedTagIDs []uuid.UUID) {
+	@articleTagsFieldset(allTags, selectedTagIDs)
+}
+
+templ createTagDialog() {
+	<dialog id="create-tag-dialog" class="dialog w-full sm:max-w-[425px] max-h-[612px]" aria-labelledby="create-tag-dialog-title" aria-describedby="create-tag-dialog-description" onclick="if (event.target === this) this.close()">
+		<div>
+			<header>
+				<h2 id="create-tag-dialog-title">Create New Tag</h2>
+				<p id="create-tag-dialog-description">Add a new tag to the system.</p>
+			</header>
+			<section>
+				<form
+					id="create-tag-form"
+					class="form grid gap-4"
+					data-on:submit={ hypermedia.DataAction(http.MethodPost, routes.TagCreate.URL()) }
+				>
+					<div class="grid gap-3">
+						<label for="new-tag-title">Tag Name</label>
+						<input type="text" id="new-tag-title" name="title" placeholder="Enter tag name" autofocus required data-bind="title"/>
+					</div>
+					<footer class="flex justify-end gap-2 mt-4">
+						<button type="button" class="btn-outline" onclick="this.closest('dialog').close()">Cancel</button>
+						<button type="submit" class="btn">Create Tag</button>
+					</footer>
+				</form>
+			</section>
+			<button type="button" class="absolute top-4 right-4" aria-label="Close dialog" onclick="this.closest('dialog').close()">
+				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M18 6 6 18"></path>
+					<path d="m6 6 12 12"></path>
+				</svg>
+			</button>
+		</div>
+	</dialog>
+}
+
+templ ArticleNew(allTags []models.Tag) {
 	@adminBase(components.AddExtraScriptSrc(routes.Script.URL("easymde.js"))) {
 		@adminWrapper() {
 			<div class="mb-6">
@@ -251,151 +327,164 @@ templ ArticleNew() {
 				data-indicator:submitting
 				data-on:submit={ hypermedia.DataAction(http.MethodPost, routes.ArticleCreate.URL()) }
 			>
-				<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-					<!-- Left Column: Article Information -->
-					<div class="space-y-6 min-w-0">
-						<fieldset class="fieldset">
-							<legend>Article Details</legend>
-							<p>Basic information about your article.</p>
-							@InputField(
-								"article-title",
-								"text",
-								"title",
-								"Title",
-								"Enter article title",
-								"",
-								"",
-								true,
-							)
-							<div role="group" class="field">
-								<label for="slug">Slug</label>
-								<input
-									type="text"
-									id="slug"
-									name="slug"
-									disabled
-									class="cursor-not-allowed"
-									placeholder="article-url-slug"
-									aria-describedby="slug-desc"
-								/>
-							</div>
-							<div role="group" class="field">
-								<label for="excerpt">Excerpt</label>
-								<textarea
-									id="excerpt"
-									name="excerpt"
-									placeholder="Brief summary of the article..."
-									rows="3"
-									data-bind="excerpt"
-									data-attr:disabled="$submitting"
-									aria-describedby="excerpt-desc"
-								></textarea>
-							</div>
-						</fieldset>
-						<fieldset class="fieldset">
-							<legend>SEO & Metadata</legend>
-							<div role="group" class="field">
-								<label for="meta_title">Meta Title</label>
-								<input
-									type="text"
-									id="metaTitle"
-									name="metaTitle"
-									placeholder="SEO title for search engines"
-									data-bind="metaTitle"
-									data-attr:disabled="$submitting"
-									maxlength="100"
-									minlength="3"
-								/>
-							</div>
-							<div role="group" class="field">
-								<label for="meta_description">Meta Description</label>
-								<textarea
-									id="metaDescription"
-									name="metaDescription"
-									placeholder="SEO description for search engines..."
-									rows="2"
-									data-bind="metaDescription"
-									data-attr:disabled="$submitting"
-									maxlength="255"
-									minlength="10"
-								></textarea>
-							</div>
-						</fieldset>
-						<fieldset class="fieldset">
-							<legend>Publishing</legend>
-							<p>Control when and how your article appears.</p>
-							<div class="grid grid-cols-2 gap-4">
+				<!-- Tabs -->
+				<div class="tabs w-full" id="article-form-tabs">
+					<nav role="tablist" aria-orientation="horizontal" class="w-full">
+						<button type="button" role="tab" id="article-form-tabs-tab-1" aria-controls="article-form-tabs-panel-1" aria-selected="true" tabindex="0">Article Data</button>
+						<button type="button" role="tab" id="article-form-tabs-tab-2" aria-controls="article-form-tabs-panel-2" aria-selected="false" tabindex="-1">Article Tags</button>
+					</nav>
+					<!-- Tab 1: Article Data -->
+					<div role="tabpanel" id="article-form-tabs-panel-1" aria-labelledby="article-form-tabs-tab-1" tabindex="0">
+						<div class="space-y-6 min-w-0 pt-6">
+							<fieldset class="fieldset">
+								<legend>Article Details</legend>
+								<p>Basic information about your article.</p>
+								@InputField(
+									"article-title",
+									"text",
+									"title",
+									"Title",
+									"Enter article title",
+									"",
+									"",
+									true,
+								)
 								<div role="group" class="field">
-									<label for="first_published_at">Publish Date</label>
+									<label for="slug">Slug</label>
 									<input
-										type="date"
-										id="firstPublishedAt"
-										name="firstPublishedAt"
-										data-bind="firstPublishedAt"
-										data-attr:disabled="$submitting"
+										type="text"
+										id="slug"
+										name="slug"
+										disabled
+										class="cursor-not-allowed"
+										placeholder="article-url-slug"
+										aria-describedby="slug-desc"
 									/>
 								</div>
 								<div role="group" class="field">
-									<label for="read_time">Read Time (min)</label>
-									<input
-										type="number"
-										id="readTime"
-										name="readTime"
-										placeholder="5"
-										min="0"
-										data-bind="readTime"
+									<label for="excerpt">Excerpt</label>
+									<textarea
+										id="excerpt"
+										name="excerpt"
+										placeholder="Brief summary of the article..."
+										rows="3"
+										data-bind="excerpt"
 										data-attr:disabled="$submitting"
+										aria-describedby="excerpt-desc"
+									></textarea>
+								</div>
+							</fieldset>
+							<fieldset class="fieldset">
+								<legend>SEO & Metadata</legend>
+								<div role="group" class="field">
+									<label for="meta_title">Meta Title</label>
+									<input
+										type="text"
+										id="metaTitle"
+										name="metaTitle"
+										placeholder="SEO title for search engines"
+										data-bind="metaTitle"
+										data-attr:disabled="$submitting"
+										maxlength="100"
+										minlength="3"
 									/>
 								</div>
-							</div>
-							<div role="group" class="field">
-								<label for="published">Publish</label>
-								<div class="gap-2 flex flex-row items-start justify-between rounded-lg border p-4 shadow-xs">
-									<div class="flex flex-col gap-0.5">
-										<label for="published" class="leading-normal">Click here to publish</label>
+								<div role="group" class="field">
+									<label for="meta_description">Meta Description</label>
+									<textarea
+										id="metaDescription"
+										name="metaDescription"
+										placeholder="SEO description for search engines..."
+										rows="2"
+										data-bind="metaDescription"
+										data-attr:disabled="$submitting"
+										maxlength="255"
+										minlength="10"
+									></textarea>
+								</div>
+							</fieldset>
+							<fieldset class="fieldset">
+								<legend>Publishing</legend>
+								<p>Control when and how your article appears.</p>
+								<div class="grid grid-cols-2 gap-4">
+									<div role="group" class="field">
+										<label for="first_published_at">Publish Date</label>
+										<input
+											type="date"
+											id="firstPublishedAt"
+											name="firstPublishedAt"
+											data-bind="firstPublishedAt"
+											data-attr:disabled="$submitting"
+										/>
 									</div>
+									<div role="group" class="field">
+										<label for="read_time">Read Time (min)</label>
+										<input
+											type="number"
+											id="readTime"
+											name="readTime"
+											placeholder="5"
+											min="0"
+											data-bind="readTime"
+											data-attr:disabled="$submitting"
+										/>
+									</div>
+								</div>
+								<div role="group" class="field">
+									<label for="published">Publish</label>
+									<div class="gap-2 flex flex-row items-start justify-between rounded-lg border p-4 shadow-xs">
+										<div class="flex flex-col gap-0.5">
+											<label for="published" class="leading-normal">Click here to publish</label>
+										</div>
+										<input
+											type="checkbox"
+											id="published"
+											name="published"
+											role="switch"
+											data-bind="published"
+										/>
+									</div>
+								</div>
+								<div role="group" class="field">
+									<label for="image_link">Featured Image URL</label>
 									<input
-										type="checkbox"
-										id="published"
-										name="published"
-										role="switch"
-										data-bind="published"
+										type="text"
+										id="imageLink"
+										name="imageLink"
+										placeholder="https://example.com/image.jpg"
+										data-bind="imageLink"
+										data-attr:disabled="$submitting"
 									/>
 								</div>
-							</div>
-							<div role="group" class="field">
-								<label for="image_link">Featured Image URL</label>
-								<input
-									type="text"
-									id="imageLink"
-									name="imageLink"
-									placeholder="https://example.com/image.jpg"
-									data-bind="imageLink"
-									data-attr:disabled="$submitting"
-								/>
-							</div>
-						</fieldset>
+							</fieldset>
+						</div>
 					</div>
-					<!-- Right Column: Content Editor -->
-					<div class="space-y-6">
-						<fieldset class="fieldset h-full flex flex-col">
-							<legend>Content</legend>
-							<p>Write your article content below.</p>
-							<!-- WYSIWYG Editor Container -->
-							<div
-								id="editor-container"
-								class="flex-1 min-h-[500px] rounded-md bg-background"
-							>
-								<!-- Placeholder for WYSIWYG editor -->
-								<textarea
-									id="editorTarget"
-									name="content"
-									class="h-full w-full p-4"
-									data-bind="content"
-								></textarea>
-							</div>
-						</fieldset>
+					<!-- Tab 2: Article Tags -->
+					<div role="tabpanel" id="article-form-tabs-panel-2" aria-labelledby="article-form-tabs-tab-2" tabindex="0" hidden>
+						<div class="space-y-6 min-w-0 pt-6">
+							@articleTagsFieldset(allTags, nil)
+						</div>
 					</div>
+				</div>
+				<!-- Content Editor (Always Visible) -->
+				<div class="space-y-6 mt-8">
+					<fieldset class="fieldset flex flex-col">
+						<legend>Content</legend>
+						<p>Write your article content below.</p>
+						<!-- WYSIWYG Editor Container -->
+						<div
+							id="editor-container"
+							class="flex-1 min-h-[500px] rounded-md bg-background"
+						>
+							<!-- Placeholder for WYSIWYG editor -->
+							<textarea
+								id="editorTarget"
+								name="content"
+								class="h-full w-full p-4"
+								data-bind="content"
+							></textarea>
+						</div>
+					</fieldset>
 				</div>
 				<!-- Form Actions -->
 				<div class="flex items-center justify-end gap-3 mt-8 pt-6 border-t">
@@ -421,14 +510,15 @@ templ ArticleNew() {
 					</button>
 				</div>
 			</form>
+			@createTagDialog()
 		}
 	}
 }
 
-templ ArticleEdit(article models.Article) {
+templ ArticleEdit(article models.Article, allTags []models.Tag, articleTagIDs []uuid.UUID) {
 	@adminBase(components.AddExtraScriptSrc(routes.Script.URL("easymde.js"))) {
 		@adminWrapper() {
-			<div class="w-2/3 mx-auto overflow-hidden">
+			<div class="w-2/3 mx-auto">
 				<div class="mb-6">
 					<div class="flex items-center gap-3 mb-2">
 						<a
@@ -449,137 +539,154 @@ templ ArticleEdit(article models.Article) {
 					data-indicator:submitting
 					data-on:submit={ hypermedia.DataAction(http.MethodPut, routes.ArticleUpdate.URL(article.ID)) }
 				>
-					<div class="grid grid-cols-1 gap-8">
-						<!-- Left Column: Article Information -->
-						<div class="border p-6 bg-background grid grid-cols-4 gap-4">
-							<fieldset class="fieldset col-span-2">
-								<legend>Article Details</legend>
-								<div role="group" class="field">
-									<label for="title">Title</label>
-									<input
-										type="text"
-										id="title"
-										name="title"
-										placeholder="Enter article title"
-										data-bind="title"
-										value={ article.Title }
-										data-attr:disabled="$submitting"
-										required
-									/>
-								</div>
-								<div role="group" class="field">
-									<label for="excerpt">Excerpt</label>
-									<textarea
-										id="excerpt"
-										name="excerpt"
-										placeholder="Brief summary of the article..."
-										rows="3"
-										data-bind="excerpt"
-										data-attr:disabled="$submitting"
-										aria-describedby="excerpt-desc"
-									>{ article.Excerpt }</textarea>
-								</div>
-							</fieldset>
-							<fieldset class="fieldset col-span-2">
-								<legend>SEO & Metadata</legend>
-								<div role="group" class="field">
-									<label for="meta_title">Meta Title</label>
-									<input
-										type="text"
-										id="metaTitle"
-										name="metaTitle"
-										placeholder="SEO title for search engines"
-										value={ article.MetaTitle }
-										data-bind="metaTitle"
-										data-attr:disabled="$submitting"
-									/>
-								</div>
-								<div role="group" class="field">
-									<label for="meta_description">Meta Description</label>
-									<textarea
-										id="metaDescription"
-										name="metaDescription"
-										placeholder="SEO description for search engines..."
-										rows="2"
-										data-bind="metaDescription"
-										data-attr:disabled="$submitting"
-									>{ article.MetaDescription }</textarea>
-								</div>
-							</fieldset>
-							<fieldset class="fieldset col-span-2">
-								<legend>Article Meta</legend>
-								<div role="group" class="field">
-									<label for="read_time">Read Time (min)</label>
-									<input
-										type="number"
-										id="readTime"
-										name="readTime"
-										placeholder="5"
-										min="1"
-										value={ fmt.Sprintf("%d", article.ReadTime) }
-										data-bind="readTime"
-										data-attr:disabled="$submitting"
-									/>
-								</div>
-								<div role="group" class="field">
-									<label for="image_link">Featured Image URL</label>
-									<input
-										type="text"
-										id="imageLink"
-										name="imageLink"
-										placeholder="https://example.com/image.jpg"
-										value={ article.ImageLink }
-										data-bind="imageLink"
-										data-attr:disabled="$submitting"
-									/>
-								</div>
-							</fieldset>
-							<fieldset class="fieldset col-span-2">
-								<legend>Publishing</legend>
-								<div role="group" class="field">
-									<label for="published">Publish State</label>
-									<input
-										type="checkbox"
-										id="published"
-										name="published"
-										role="switch"
-										data-bind="published"
-										if article.Published {
-											checked
-										}
-									/>
-								</div>
-								<div role="group" class="field">
-									<label for="firstPublishedAt">Publish Date</label>
-									<input
-										type="date"
-										id="firstPublishedAt"
-										name="firstPublishedAt"
-										value={ article.FirstPublishedAt.Format("2006-01-02") }
-										data-bind="firstPublishedAt"
-										data-attr:disabled="$submitting"
-									/>
-								</div>
-							</fieldset>
+					<!-- Tabs -->
+					<div class="tabs w-full" id="article-edit-tabs">
+						<nav role="tablist" aria-orientation="horizontal" class="w-full">
+							<button type="button" role="tab" id="article-edit-tabs-tab-1" aria-controls="article-edit-tabs-panel-1" aria-selected="true" tabindex="0">Article Data</button>
+							<button type="button" role="tab" id="article-edit-tabs-tab-2" aria-controls="article-edit-tabs-panel-2" aria-selected="false" tabindex="-1">Article Tags</button>
+						</nav>
+						<div
+							role="tabpanel"
+							id="article-edit-tabs-panel-1"
+							aria-labelledby="article-edit-tabs-tab-1"
+							tabindex="0"
+						>
+							<div class="grid grid-cols-4 gap-6 bg-background p-4 border rounded space-y-6 min-w-0 pt-6">
+								<fieldset class="fieldset col-span-2">
+									<legend>Article Details</legend>
+									<div role="group" class="field">
+										<label for="title">Title</label>
+										<input
+											type="text"
+											id="title"
+											placeholder="Enter article title"
+											data-bind="title"
+											value={ article.Title }
+											data-attr:disabled="$submitting"
+											required
+										/>
+									</div>
+									<div role="group" class="field">
+										<label for="excerpt">Excerpt</label>
+										<textarea
+											id="excerpt"
+											placeholder="Brief summary of the article..."
+											rows="3"
+											data-bind="excerpt"
+											data-attr:disabled="$submitting"
+											aria-describedby="excerpt-desc"
+										>{ article.Excerpt }</textarea>
+									</div>
+								</fieldset>
+								<fieldset class="fieldset col-span-2">
+									<legend>SEO & Metadata</legend>
+									<div role="group" class="field">
+										<label for="meta_title">Meta Title</label>
+										<input
+											type="text"
+											id="metaTitle"
+											placeholder="SEO title for search engines"
+											value={ article.MetaTitle }
+											data-bind="metaTitle"
+											data-attr:disabled="$submitting"
+										/>
+									</div>
+									<div role="group" class="field">
+										<label for="meta_description">Meta Description</label>
+										<textarea
+											id="metaDescription"
+											placeholder="SEO description for search engines..."
+											rows="2"
+											data-bind="metaDescription"
+											data-attr:disabled="$submitting"
+										>{ article.MetaDescription }</textarea>
+									</div>
+								</fieldset>
+								<fieldset class="fieldset col-span-4">
+									<legend>Publishing</legend>
+									<p>Control when and how your article appears.</p>
+									<div class="grid grid-cols-2 gap-4">
+										<div role="group" class="field">
+											<label for="firstPublishedAt">Publish Date</label>
+											<input
+												type="date"
+												id="firstPublishedAt"
+												value={ article.FirstPublishedAt.Format("2006-01-02") }
+												data-bind="firstPublishedAt"
+												data-attr:disabled="$submitting"
+											/>
+										</div>
+										<div role="group" class="field">
+											<label for="read_time">Read Time (min)</label>
+											<input
+												type="number"
+												id="readTime"
+												placeholder="5"
+												min="1"
+												value={ fmt.Sprintf("%d", article.ReadTime) }
+												data-bind="readTime"
+												data-attr:disabled="$submitting"
+											/>
+										</div>
+									</div>
+									<div role="group" class="field">
+										<label for="published">Publish</label>
+										<div class="gap-2 flex flex-row items-start justify-between rounded-lg border p-4 shadow-xs">
+											<div class="flex flex-col gap-0.5">
+												<label for="published" class="leading-normal">Click here to publish</label>
+											</div>
+											<input
+												type="checkbox"
+												id="published"
+												name="published"
+												role="switch"
+												data-bind="published"
+												if article.Published {
+													checked
+												}
+											/>
+										</div>
+									</div>
+									<div role="group" class="field">
+										<label for="image_link">Featured Image URL</label>
+										<input
+											type="text"
+											id="imageLink"
+											placeholder="https://example.com/image.jpg"
+											value={ article.ImageLink }
+											data-bind="imageLink"
+											data-attr:disabled="$submitting"
+										/>
+									</div>
+								</fieldset>
+							</div>
 						</div>
-						<div class="space-y-6 min-w-0">
-							<fieldset class="fieldset h-full flex flex-col min-w-0">
-								<legend>Content</legend>
-								<p>Write your article content below.</p>
-								<div
-									id="editor-container"
-									class="flex-1 min-h-[500px] bg-background overflow-hidden"
-								>
-									<textarea
-										id="editorTarget"
-										name="content"
-										class="h-full w-full p-4"
-										data-bind="content"
-									>{ article.Content }</textarea>
-								</div>
-							</fieldset>
+						<!-- Tab 2: Article Tags -->
+						<div role="tabpanel" id="article-edit-tabs-panel-2" aria-labelledby="article-edit-tabs-tab-2" tabindex="0" hidden>
+							<div class="space-y-6 min-w-0 pt-6">
+								@articleTagsFieldset(allTags, articleTagIDs)
+							</div>
 						</div>
 					</div>
+					<!-- Content Editor (Always Visible) -->
+					<div class="space-y-6 mt-8">
+						<fieldset class="fieldset flex flex-col">
+							<legend>Content</legend>
+							<p>Write your article content below.</p>
+							<!-- WYSIWYG Editor Container -->
+							<div
+								id="editor-container"
+								class="flex-1 min-h-[500px] rounded-md bg-background"
+							>
+								<textarea
+									id="editorTarget"
+									class="h-full w-full p-4"
+									data-bind="content"
+								>{ article.Content }</textarea>
+							</div>
+						</fieldset>
+					</div>
+					<!-- Form Actions -->
 					<div class="flex items-center justify-end gap-3 mt-8 pt-6 border-t">
 						<a
 							href={ routes.AdminHome.URL() }
@@ -603,6 +710,7 @@ templ ArticleEdit(article models.Article) {
 						</button>
 					</div>
 				</form>
+				@createTagDialog()
 			</div>
 		}
 	}

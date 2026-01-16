@@ -36,3 +36,6 @@ values
     ($1, $2, $3)
 on conflict (id) do update set article_id=excluded.article_id, tag_id=excluded.tag_id
 returning *;
+
+-- name: DeleteArticleTagConnectionsByArticleID :exec
+DELETE FROM article_tag_connections WHERE article_id = $1;

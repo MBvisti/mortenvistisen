@@ -31,6 +31,15 @@ func (q *Queries) DeleteArticleTagConnection(ctx context.Context, db DBTX, id uu
 	return err
 }
 
+const deleteArticleTagConnectionsByArticleID = `-- name: DeleteArticleTagConnectionsByArticleID :exec
+DELETE FROM article_tag_connections WHERE article_id = $1
+`
+
+func (q *Queries) DeleteArticleTagConnectionsByArticleID(ctx context.Context, db DBTX, articleID uuid.UUID) error {
+	_, err := db.Exec(ctx, deleteArticleTagConnectionsByArticleID, articleID)
+	return err
+}
+
 const insertArticleTagConnection = `-- name: InsertArticleTagConnection :one
 insert into
     article_tag_connections (id, article_id, tag_id)

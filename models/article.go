@@ -357,6 +357,14 @@ func AssociateTagsWithArticle(
 	return nil
 }
 
+func ClearArticleTagAssociations(
+	ctx context.Context,
+	exec storage.Executor,
+	articleID uuid.UUID,
+) error {
+	return queries.DeleteArticleTagConnectionsByArticleID(ctx, exec, articleID)
+}
+
 func FindPublishedArticles(
 	ctx context.Context,
 	exec storage.Executor,

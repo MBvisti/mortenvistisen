@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"mortenvistisen/internal/hypermedia"
 	"mortenvistisen/internal/storage"
 	"mortenvistisen/models"
 	"mortenvistisen/router/cookies"
@@ -102,6 +103,33 @@ func (t Tags) Create(etx echo.Context) error {
 			return flashErr
 		}
 		return etx.Redirect(http.StatusSeeOther, routes.TagNew.URL())
+	}
+
+	// Check if this is a Datastar request (for the article form dialog)
+	if etx.Request().Header.Get("Accept") == "text/event-stream" {
+		// Return updated tag list for the article form
+		allTags, err := models.AllTags(etx.Request().Context(), t.db.Conn())
+		if err != nil {
+			slog.ErrorContext(
+				etx.Request().Context(),
+				"could not fetch all tags after creating new tag",
+				"error",
+				err,
+			)
+			return render(etx, views.InternalError())
+		}
+
+		// Patch the tag fieldset and close the dialog
+		if err := hypermedia.PatchElementTempl(
+			etx,
+			views.ArticleTagsFieldsetPartial(allTags, nil),
+			hypermedia.WithSelectorID("article-tags-fieldset"),
+		); err != nil {
+			return err
+		}
+
+		// Execute script to close the dialog
+		return hypermedia.ExecuteScript(etx, `document.getElementById('create-tag-dialog').close()`)
 	}
 
 	if flashErr := cookies.AddFlash(etx, cookies.FlashSuccess, "Tag created successfully"); flashErr != nil {

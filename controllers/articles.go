@@ -63,19 +63,31 @@ func (a Articles) Show(etx echo.Context) error {
 }
 
 func (a Articles) New(etx echo.Context) error {
-	return render(etx, views.ArticleNew())
+	allTags, err := models.AllTags(etx.Request().Context(), a.db.Conn())
+	if err != nil {
+		slog.ErrorContext(
+			etx.Request().Context(),
+			"could not fetch all tags",
+			"error",
+			err,
+		)
+		return render(etx, views.InternalError())
+	}
+
+	return render(etx, views.ArticleNew(allTags))
 }
 
 type CreateArticleFormPayload struct {
-	FirstPublishedAt string `json:"firstPublishedAt"`
-	Excerpt          string `json:"excerpt"          validate:"omitempty,min=10,max=255"`
-	Title            string `json:"title"            validate:"omitempty,min=3,max=100"`
-	MetaTitle        string `json:"metaTitle"        validate:"omitempty,min=3,max=100"`
-	MetaDescription  string `json:"metaDescription"  validate:"omitempty,min=10,max=255"`
-	ImageLink        string `json:"imageLink"        validate:"omitempty,url"`
-	ReadTime         int32  `json:"readTime"         validate:"omitempty,min=1"`
-	Content          string `json:"content"          validate:"omitempty,min=20"`
-	Published        bool   `json:"published"`
+	FirstPublishedAt string   `json:"firstPublishedAt"`
+	Excerpt          string   `json:"excerpt"          validate:"omitempty,min=10,max=255"`
+	Title            string   `json:"title"            validate:"omitempty,min=3,max=100"`
+	MetaTitle        string   `json:"metaTitle"        validate:"omitempty,min=3,max=100"`
+	MetaDescription  string   `json:"metaDescription"  validate:"omitempty,min=10,max=255"`
+	ImageLink        string   `json:"imageLink"        validate:"omitempty,url"`
+	ReadTime         int32    `json:"readTime"         validate:"omitempty,min=1"`
+	Content          string   `json:"content"          validate:"omitempty,min=20"`
+	Published        bool     `json:"published"`
+	TagIDs           []string `json:"tagIds"`
 }
 
 func (a Articles) ValidateArticlePayload(etx echo.Context) error {
@@ -165,6 +177,38 @@ func (a Articles) Create(etx echo.Context) error {
 		return etx.Redirect(http.StatusSeeOther, routes.ArticleNew.URL())
 	}
 
+	// Associate tags with the article
+	if len(payload.TagIDs) > 0 {
+		tagUUIDs := make([]uuid.UUID, 0, len(payload.TagIDs))
+		for _, tagIDStr := range payload.TagIDs {
+			tagID, err := uuid.Parse(tagIDStr)
+			if err != nil {
+				slog.ErrorContext(
+					etx.Request().Context(),
+					"could not parse tag UUID",
+					"error",
+					err,
+					"tagID",
+					tagIDStr,
+				)
+				continue
+			}
+			tagUUIDs = append(tagUUIDs, tagID)
+		}
+
+		if len(tagUUIDs) > 0 {
+			if err := models.AssociateTagsWithArticle(etx.Request().Context(), a.db.Conn(), article.ID, tagUUIDs); err != nil {
+				slog.ErrorContext(
+					etx.Request().Context(),
+					"could not associate tags with article",
+					"error",
+					err,
+				)
+				// Don't fail the whole request, just log the error
+			}
+		}
+	}
+
 	if flashErr := cookies.AddFlash(etx, cookies.FlashSuccess, "Article created successfully"); flashErr != nil {
 		return render(etx, views.InternalError())
 	}
@@ -183,19 +227,47 @@ func (a Articles) Edit(etx echo.Context) error {
 		return render(etx, views.NotFound())
 	}
 
-	return render(etx, views.ArticleEdit(article))
+	allTags, err := models.AllTags(etx.Request().Context(), a.db.Conn())
+	if err != nil {
+		slog.ErrorContext(
+			etx.Request().Context(),
+			"could not fetch all tags",
+			"error",
+			err,
+		)
+		return render(etx, views.InternalError())
+	}
+
+	articleTags, err := models.FindTagsForArticle(etx.Request().Context(), a.db.Conn(), articleID)
+	if err != nil {
+		slog.ErrorContext(
+			etx.Request().Context(),
+			"could not fetch article tags",
+			"error",
+			err,
+		)
+		return render(etx, views.InternalError())
+	}
+
+	articleTagIDs := make([]uuid.UUID, len(articleTags))
+	for i, tag := range articleTags {
+		articleTagIDs[i] = tag.ID
+	}
+
+	return render(etx, views.ArticleEdit(article, allTags, articleTagIDs))
 }
 
 type UpdateArticleFormPayload struct {
-	FirstPublishedAt string `json:"firstPublishedAt"`
-	Excerpt          string `json:"excerpt"          validate:"omitempty,min=10,max=255"`
-	Title            string `json:"title"            validate:"omitempty,min=3,max=100"`
-	MetaTitle        string `json:"metaTitle"        validate:"omitempty,min=3,max=100"`
-	MetaDescription  string `json:"metaDescription"  validate:"omitempty,min=10,max=255"`
-	ImageLink        string `json:"imageLink"        validate:"omitempty,url"`
-	ReadTime         int32  `json:"readTime"         validate:"omitempty,min=1"`
-	Content          string `json:"content"          validate:"omitempty,min=20"`
-	Published        bool   `json:"published"`
+	FirstPublishedAt string   `json:"firstPublishedAt"`
+	Excerpt          string   `json:"excerpt"          validate:"omitempty,min=10,max=255"`
+	Title            string   `json:"title"            validate:"omitempty,min=3,max=100"`
+	MetaTitle        string   `json:"metaTitle"        validate:"omitempty,min=3,max=100"`
+	MetaDescription  string   `json:"metaDescription"  validate:"omitempty,min=10,max=255"`
+	ImageLink        string   `json:"imageLink"        validate:"omitempty,url"`
+	ReadTime         int32    `json:"readTime"         validate:"omitempty,min=1"`
+	Content          string   `json:"content"          validate:"omitempty,min=20"`
+	Published        bool     `json:"published"`
+	TagIDs           []string `json:"tagIds"`
 }
 
 func (a Articles) Update(etx echo.Context) error {
@@ -244,6 +316,48 @@ func (a Articles) Update(etx echo.Context) error {
 			http.StatusSeeOther,
 			routes.ArticleEdit.URL(articleID),
 		)
+	}
+
+	// Clear existing tag associations and re-associate
+	if err := models.ClearArticleTagAssociations(etx.Request().Context(), a.db.Conn(), articleID); err != nil {
+		slog.ErrorContext(
+			etx.Request().Context(),
+			"could not clear article tag associations",
+			"error",
+			err,
+		)
+		// Don't fail the whole request, just log the error
+	}
+
+	if len(payload.TagIDs) > 0 {
+		tagUUIDs := make([]uuid.UUID, 0, len(payload.TagIDs))
+		for _, tagIDStr := range payload.TagIDs {
+			tagID, err := uuid.Parse(tagIDStr)
+			if err != nil {
+				slog.ErrorContext(
+					etx.Request().Context(),
+					"could not parse tag UUID",
+					"error",
+					err,
+					"tagID",
+					tagIDStr,
+				)
+				continue
+			}
+			tagUUIDs = append(tagUUIDs, tagID)
+		}
+
+		if len(tagUUIDs) > 0 {
+			if err := models.AssociateTagsWithArticle(etx.Request().Context(), a.db.Conn(), article.ID, tagUUIDs); err != nil {
+				slog.ErrorContext(
+					etx.Request().Context(),
+					"could not associate tags with article",
+					"error",
+					err,
+				)
+				// Don't fail the whole request, just log the error
+			}
+		}
 	}
 
 	if flashErr := cookies.AddFlash(etx, cookies.FlashSuccess, "Article updated successfully"); flashErr != nil {
