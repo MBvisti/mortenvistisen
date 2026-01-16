@@ -278,7 +278,6 @@ templ ArticleNew() {
 									placeholder="article-url-slug"
 									aria-describedby="slug-desc"
 								/>
-								<p id="slug-desc">URL-friendly version of the title.</p>
 							</div>
 							<div role="group" class="field">
 								<label for="excerpt">Excerpt</label>
@@ -291,12 +290,10 @@ templ ArticleNew() {
 									data-attr:disabled="$submitting"
 									aria-describedby="excerpt-desc"
 								></textarea>
-								<p id="excerpt-desc">A short description that appears in article listings.</p>
 							</div>
 						</fieldset>
 						<fieldset class="fieldset">
 							<legend>SEO & Metadata</legend>
-							<p>Optimize your article for search engines.</p>
 							<div role="group" class="field">
 								<label for="meta_title">Meta Title</label>
 								<input
@@ -306,6 +303,8 @@ templ ArticleNew() {
 									placeholder="SEO title for search engines"
 									data-bind="metaTitle"
 									data-attr:disabled="$submitting"
+									maxlength="100"
+									minlength="3"
 								/>
 							</div>
 							<div role="group" class="field">
@@ -317,6 +316,8 @@ templ ArticleNew() {
 									rows="2"
 									data-bind="metaDescription"
 									data-attr:disabled="$submitting"
+									maxlength="255"
+									minlength="10"
 								></textarea>
 							</div>
 						</fieldset>
@@ -441,12 +442,11 @@ templ ArticleEdit(article models.Article) {
 					data-indicator:submitting
 					data-on:submit={ hypermedia.DataAction(http.MethodPut, routes.ArticleUpdate.URL(article.ID)) }
 				>
-					<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+					<div class="grid grid-cols-1 gap-8">
 						<!-- Left Column: Article Information -->
-						<div class="space-y-6 min-w-0">
-							<fieldset class="fieldset">
+						<div class="border p-6 bg-background grid grid-cols-4 gap-4">
+							<fieldset class="fieldset col-span-2">
 								<legend>Article Details</legend>
-								<p>Basic information about your article.</p>
 								<div role="group" class="field">
 									<label for="title">Title</label>
 									<input
@@ -461,20 +461,6 @@ templ ArticleEdit(article models.Article) {
 									/>
 								</div>
 								<div role="group" class="field">
-									<label for="slug">Slug</label>
-									<input
-										type="text"
-										id="slug"
-										name="slug"
-										disabled
-										class="cursor-not-allowed"
-										placeholder="article-url-slug"
-										value={ article.Slug }
-										aria-describedby="slug-desc"
-									/>
-									<p id="slug-desc">URL-friendly version of the title.</p>
-								</div>
-								<div role="group" class="field">
 									<label for="excerpt">Excerpt</label>
 									<textarea
 										id="excerpt"
@@ -486,12 +472,10 @@ templ ArticleEdit(article models.Article) {
 										data-attr:disabled="$submitting"
 										aria-describedby="excerpt-desc"
 									></textarea>
-									<p id="excerpt-desc">A short description that appears in article listings.</p>
 								</div>
 							</fieldset>
-							<fieldset class="fieldset">
+							<fieldset class="fieldset col-span-2">
 								<legend>SEO & Metadata</legend>
-								<p>Optimize your article for search engines.</p>
 								<div role="group" class="field">
 									<label for="meta_title">Meta Title</label>
 									<input
@@ -517,29 +501,8 @@ templ ArticleEdit(article models.Article) {
 									></textarea>
 								</div>
 							</fieldset>
-							<fieldset class="fieldset">
-								<legend>Publishing</legend>
-								<p>Control when and how your article appears.</p>
-								<div class="grid grid-cols-2 gap-4">
-									<div role="group" class="field">
-										<label for="first_published_at">Publish Date</label>
-										<input
-											type="date"
-											id="firstPublishedAt"
-											name="firstPublishedAt"
-											value={ article.FirstPublishedAt.Format("2006-01-02") }
-											data-bind="firstPublishedAt"
-											data-attr:disabled="$submitting"
-										/>
-									</div>
-									<div class="gap-2 flex flex-row items-start justify-between rounded-lg border p-4 shadow-xs">
-										<div class="flex flex-col gap-0.5">
-											<label for="demo-form-switch" class="leading-normal">Marketing emails</label>
-											<p class="text-muted-foreground text-sm">Receive emails about new products, features, and more.</p>
-										</div>
-										<input type="checkbox" id="demo-form-switch" role="switch"/>
-									</div>
-								</div>
+							<fieldset class="fieldset col-span-2">
+								<legend>Article Meta</legend>
 								<div role="group" class="field">
 									<label for="read_time">Read Time (min)</label>
 									<input
@@ -566,18 +529,37 @@ templ ArticleEdit(article models.Article) {
 									/>
 								</div>
 							</fieldset>
+							<fieldset class="fieldset col-span-2">
+								<legend>Publishing</legend>
+								<div role="group" class="field">
+									<label for="setToPublish">Publish State</label>
+									<input
+										type="checkbox"
+										id="setToPublish"
+										role="switch"
+									/>
+								</div>
+								<div role="group" class="field">
+									<label for="firstPublishedAt">Publish Date</label>
+									<input
+										type="date"
+										id="firstPublishedAt"
+										name="firstPublishedAt"
+										value={ article.FirstPublishedAt.Format("2006-01-02") }
+										data-bind="firstPublishedAt"
+										data-attr:disabled="$submitting"
+									/>
+								</div>
+							</fieldset>
 						</div>
-					<!-- Right Column: Content Editor -->
-					<div class="space-y-6 min-w-0">
-						<fieldset class="fieldset h-full flex flex-col min-w-0">
-							<legend>Content</legend>
-							<p>Write your article content below.</p>
-							<!-- WYSIWYG Editor Container -->
-							<div
-								id="editor-container"
-								class="flex-1 min-h-[500px] bg-background overflow-hidden"
-							>
-									<!-- Placeholder for WYSIWYG editor -->
+						<div class="space-y-6 min-w-0">
+							<fieldset class="fieldset h-full flex flex-col min-w-0">
+								<legend>Content</legend>
+								<p>Write your article content below.</p>
+								<div
+									id="editor-container"
+									class="flex-1 min-h-[500px] bg-background overflow-hidden"
+								>
 									<textarea
 										id="editorTarget"
 										name="content"
@@ -589,7 +571,6 @@ templ ArticleEdit(article models.Article) {
 							</fieldset>
 						</div>
 					</div>
-					<!-- Form Actions -->
 					<div class="flex items-center justify-end gap-3 mt-8 pt-6 border-t">
 						<a
 							href={ routes.AdminHome.URL() }
