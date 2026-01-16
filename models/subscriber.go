@@ -47,7 +47,7 @@ func CreateSubscriber(
 	exec storage.Executor,
 	data CreateSubscriberData,
 ) (Subscriber, error) {
-	if err := validate.Struct(data); err != nil {
+	if err := Validate.Struct(data); err != nil {
 		return Subscriber{}, errors.Join(ErrDomainValidation, err)
 	}
 
@@ -80,7 +80,7 @@ func UpdateSubscriber(
 	exec storage.Executor,
 	data UpdateSubscriberData,
 ) (Subscriber, error) {
-	if err := validate.Struct(data); err != nil {
+	if err := Validate.Struct(data); err != nil {
 		return Subscriber{}, errors.Join(ErrDomainValidation, err)
 	}
 
@@ -189,7 +189,7 @@ func UpsertSubscriber(
 	exec storage.Executor,
 	data CreateSubscriberData,
 ) (Subscriber, error) {
-	if err := validate.Struct(data); err != nil {
+	if err := Validate.Struct(data); err != nil {
 		return Subscriber{}, errors.Join(ErrDomainValidation, err)
 	}
 

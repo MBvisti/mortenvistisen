@@ -31,6 +31,10 @@ func registerArticleRoutes(handler *echo.Echo, article controllers.Articles) {
 	).Name = routes.ArticleCreate.Name()
 
 	handler.Add(
+		http.MethodPost, routes.ValidateArticlePayload.Path(), article.ValidateArticlePayload,
+	).Name = routes.ValidateArticlePayload.Name()
+
+	handler.Add(
 		http.MethodGet, routes.ArticleEdit.Path(), article.Edit,
 	).Name = routes.ArticleEdit.Name()
 

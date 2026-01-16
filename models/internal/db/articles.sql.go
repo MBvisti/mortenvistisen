@@ -34,10 +34,10 @@ func (q *Queries) DeleteArticle(ctx context.Context, db DBTX, id uuid.UUID) erro
 
 const insertArticle = `-- name: InsertArticle :one
 insert into
-    articles (id, created_at, updated_at, first_published_at, title, excerpt, meta_title, meta_description, slug, image_link, read_time, content)
+    articles (id, created_at, updated_at, first_published_at, title, excerpt, meta_title, meta_description, slug, image_link, read_time, content, published)
 values
-    ($1, now(), now(), $2, $3, $4, $5, $6, $7, $8, $9, $10)
-returning id, created_at, updated_at, first_published_at, title, excerpt, meta_title, meta_description, slug, image_link, read_time, content
+    ($1, now(), now(), $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+returning id, created_at, updated_at, first_published_at, published, title, excerpt, meta_title, meta_description, slug, image_link, read_time, content
 `
 
 type InsertArticleParams struct {
@@ -51,6 +51,7 @@ type InsertArticleParams struct {
 	ImageLink        pgtype.Text
 	ReadTime         pgtype.Int4
 	Content          pgtype.Text
+	Published        bool
 }
 
 func (q *Queries) InsertArticle(ctx context.Context, db DBTX, arg InsertArticleParams) (Article, error) {
@@ -65,6 +66,7 @@ func (q *Queries) InsertArticle(ctx context.Context, db DBTX, arg InsertArticleP
 		arg.ImageLink,
 		arg.ReadTime,
 		arg.Content,
+		arg.Published,
 	)
 	var i Article
 	err := row.Scan(
@@ -72,6 +74,7 @@ func (q *Queries) InsertArticle(ctx context.Context, db DBTX, arg InsertArticleP
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.FirstPublishedAt,
+		&i.Published,
 		&i.Title,
 		&i.Excerpt,
 		&i.MetaTitle,
@@ -85,7 +88,7 @@ func (q *Queries) InsertArticle(ctx context.Context, db DBTX, arg InsertArticleP
 }
 
 const queryArticleByID = `-- name: QueryArticleByID :one
-select id, created_at, updated_at, first_published_at, title, excerpt, meta_title, meta_description, slug, image_link, read_time, content from articles where id=$1
+select id, created_at, updated_at, first_published_at, published, title, excerpt, meta_title, meta_description, slug, image_link, read_time, content from articles where id=$1
 `
 
 func (q *Queries) QueryArticleByID(ctx context.Context, db DBTX, id uuid.UUID) (Article, error) {
@@ -96,6 +99,7 @@ func (q *Queries) QueryArticleByID(ctx context.Context, db DBTX, id uuid.UUID) (
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.FirstPublishedAt,
+		&i.Published,
 		&i.Title,
 		&i.Excerpt,
 		&i.MetaTitle,
@@ -109,7 +113,7 @@ func (q *Queries) QueryArticleByID(ctx context.Context, db DBTX, id uuid.UUID) (
 }
 
 const queryArticleBySlug = `-- name: QueryArticleBySlug :one
-select id, created_at, updated_at, first_published_at, title, excerpt, meta_title, meta_description, slug, image_link, read_time, content from articles where slug=$1
+select id, created_at, updated_at, first_published_at, published, title, excerpt, meta_title, meta_description, slug, image_link, read_time, content from articles where slug=$1
 `
 
 func (q *Queries) QueryArticleBySlug(ctx context.Context, db DBTX, slug string) (Article, error) {
@@ -120,6 +124,7 @@ func (q *Queries) QueryArticleBySlug(ctx context.Context, db DBTX, slug string) 
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.FirstPublishedAt,
+		&i.Published,
 		&i.Title,
 		&i.Excerpt,
 		&i.MetaTitle,
@@ -133,7 +138,7 @@ func (q *Queries) QueryArticleBySlug(ctx context.Context, db DBTX, slug string) 
 }
 
 const queryArticles = `-- name: QueryArticles :many
-select id, created_at, updated_at, first_published_at, title, excerpt, meta_title, meta_description, slug, image_link, read_time, content from articles
+select id, created_at, updated_at, first_published_at, published, title, excerpt, meta_title, meta_description, slug, image_link, read_time, content from articles
 `
 
 func (q *Queries) QueryArticles(ctx context.Context, db DBTX) ([]Article, error) {
@@ -150,6 +155,7 @@ func (q *Queries) QueryArticles(ctx context.Context, db DBTX) ([]Article, error)
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.FirstPublishedAt,
+			&i.Published,
 			&i.Title,
 			&i.Excerpt,
 			&i.MetaTitle,
@@ -170,7 +176,7 @@ func (q *Queries) QueryArticles(ctx context.Context, db DBTX) ([]Article, error)
 }
 
 const queryPaginatedArticles = `-- name: QueryPaginatedArticles :many
-select id, created_at, updated_at, first_published_at, title, excerpt, meta_title, meta_description, slug, image_link, read_time, content from articles
+select id, created_at, updated_at, first_published_at, published, title, excerpt, meta_title, meta_description, slug, image_link, read_time, content from articles
 order by created_at desc
 limit $2::bigint offset $1::bigint
 `
@@ -194,6 +200,7 @@ func (q *Queries) QueryPaginatedArticles(ctx context.Context, db DBTX, arg Query
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.FirstPublishedAt,
+			&i.Published,
 			&i.Title,
 			&i.Excerpt,
 			&i.MetaTitle,
@@ -214,7 +221,7 @@ func (q *Queries) QueryPaginatedArticles(ctx context.Context, db DBTX, arg Query
 }
 
 const queryPublishedArticles = `-- name: QueryPublishedArticles :many
-select id, created_at, updated_at, first_published_at, title, excerpt, meta_title, meta_description, slug, image_link, read_time, content from articles
+select id, created_at, updated_at, first_published_at, published, title, excerpt, meta_title, meta_description, slug, image_link, read_time, content from articles
 where first_published_at is not null
 order by first_published_at desc
 `
@@ -233,6 +240,7 @@ func (q *Queries) QueryPublishedArticles(ctx context.Context, db DBTX) ([]Articl
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.FirstPublishedAt,
+			&i.Published,
 			&i.Title,
 			&i.Excerpt,
 			&i.MetaTitle,
@@ -254,9 +262,9 @@ func (q *Queries) QueryPublishedArticles(ctx context.Context, db DBTX) ([]Articl
 
 const updateArticle = `-- name: UpdateArticle :one
 update articles
-    set updated_at=now(), first_published_at=$2, title=$3, excerpt=$4, meta_title=$5, meta_description=$6, slug=$7, image_link=$8, read_time=$9, content=$10
+    set updated_at=now(), first_published_at=$2, title=$3, excerpt=$4, meta_title=$5, meta_description=$6, slug=$7, image_link=$8, read_time=$9, content=$10, published=$11
 where id = $1
-returning id, created_at, updated_at, first_published_at, title, excerpt, meta_title, meta_description, slug, image_link, read_time, content
+returning id, created_at, updated_at, first_published_at, published, title, excerpt, meta_title, meta_description, slug, image_link, read_time, content
 `
 
 type UpdateArticleParams struct {
@@ -270,6 +278,7 @@ type UpdateArticleParams struct {
 	ImageLink        pgtype.Text
 	ReadTime         pgtype.Int4
 	Content          pgtype.Text
+	Published        bool
 }
 
 func (q *Queries) UpdateArticle(ctx context.Context, db DBTX, arg UpdateArticleParams) (Article, error) {
@@ -284,6 +293,7 @@ func (q *Queries) UpdateArticle(ctx context.Context, db DBTX, arg UpdateArticleP
 		arg.ImageLink,
 		arg.ReadTime,
 		arg.Content,
+		arg.Published,
 	)
 	var i Article
 	err := row.Scan(
@@ -291,6 +301,7 @@ func (q *Queries) UpdateArticle(ctx context.Context, db DBTX, arg UpdateArticleP
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.FirstPublishedAt,
+		&i.Published,
 		&i.Title,
 		&i.Excerpt,
 		&i.MetaTitle,
@@ -305,11 +316,11 @@ func (q *Queries) UpdateArticle(ctx context.Context, db DBTX, arg UpdateArticleP
 
 const upsertArticle = `-- name: UpsertArticle :one
 insert into
-    articles (id, created_at, updated_at, first_published_at, title, excerpt, meta_title, meta_description, slug, image_link, read_time, content)
+    articles (id, created_at, updated_at, first_published_at, title, excerpt, meta_title, meta_description, slug, image_link, read_time, content, published)
 values
-    ($1, now(), now(), $2, $3, $4, $5, $6, $7, $8, $9, $10)
-on conflict (id) do update set updated_at=now(), first_published_at=excluded.first_published_at, title=excluded.title, excerpt=excluded.excerpt, meta_title=excluded.meta_title, meta_description=excluded.meta_description, slug=excluded.slug, image_link=excluded.image_link, read_time=excluded.read_time, content=excluded.content
-returning id, created_at, updated_at, first_published_at, title, excerpt, meta_title, meta_description, slug, image_link, read_time, content
+    ($1, now(), now(), $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+on conflict (id) do update set updated_at=now(), first_published_at=excluded.first_published_at, title=excluded.title, excerpt=excluded.excerpt, meta_title=excluded.meta_title, meta_description=excluded.meta_description, slug=excluded.slug, image_link=excluded.image_link, read_time=excluded.read_time, content=excluded.content, published=excluded.published
+returning id, created_at, updated_at, first_published_at, published, title, excerpt, meta_title, meta_description, slug, image_link, read_time, content
 `
 
 type UpsertArticleParams struct {
@@ -323,6 +334,7 @@ type UpsertArticleParams struct {
 	ImageLink        pgtype.Text
 	ReadTime         pgtype.Int4
 	Content          pgtype.Text
+	Published        bool
 }
 
 func (q *Queries) UpsertArticle(ctx context.Context, db DBTX, arg UpsertArticleParams) (Article, error) {
@@ -337,6 +349,7 @@ func (q *Queries) UpsertArticle(ctx context.Context, db DBTX, arg UpsertArticleP
 		arg.ImageLink,
 		arg.ReadTime,
 		arg.Content,
+		arg.Published,
 	)
 	var i Article
 	err := row.Scan(
@@ -344,6 +357,7 @@ func (q *Queries) UpsertArticle(ctx context.Context, db DBTX, arg UpsertArticleP
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.FirstPublishedAt,
+		&i.Published,
 		&i.Title,
 		&i.Excerpt,
 		&i.MetaTitle,

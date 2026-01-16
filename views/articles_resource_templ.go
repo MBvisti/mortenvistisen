@@ -15,7 +15,46 @@ import (
 	"mortenvistisen/router/routes"
 	"mortenvistisen/views/components"
 	"net/http"
+
+	"bytes"
+	chromahtml "github.com/alecthomas/chroma/v2/formatters/html"
+	"github.com/yuin/goldmark"
+	highlighting "github.com/yuin/goldmark-highlighting/v2"
+	"github.com/yuin/goldmark/extension"
+	"github.com/yuin/goldmark/parser"
+	"github.com/yuin/goldmark/renderer/html"
 )
+
+var mdParser = goldmark.New(
+	goldmark.WithExtensions(
+		extension.GFM,
+		highlighting.NewHighlighting(
+			highlighting.WithStyle("gruvbox"),
+			highlighting.WithFormatOptions(
+				chromahtml.WithLineNumbers(true),
+				chromahtml.TabWidth(4),
+			),
+		),
+	),
+	goldmark.WithParserOptions(
+		parser.WithAutoHeadingID(),
+		parser.WithAttribute(),
+	),
+	goldmark.WithRendererOptions(
+		html.WithHardWraps(),
+		html.WithXHTML(),
+		html.WithUnsafe(),
+	),
+)
+
+func ParseMarkdownToHtml(content string) string {
+	var htmlOutput bytes.Buffer
+	if err := mdParser.Convert([]byte(content), &htmlOutput); err != nil {
+		return "error parsing markdown"
+	}
+
+	return htmlOutput.String()
+}
 
 func placeholderArticleItem(date string, title string, excerpt string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -45,7 +84,7 @@ func placeholderArticleItem(date string, title string, excerpt string) templ.Com
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(date)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 16, Col: 10}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 55, Col: 10}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -58,7 +97,7 @@ func placeholderArticleItem(date string, title string, excerpt string) templ.Com
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 22, Col: 12}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 61, Col: 12}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -71,7 +110,7 @@ func placeholderArticleItem(date string, title string, excerpt string) templ.Com
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(excerpt)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 26, Col: 13}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 65, Col: 13}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -113,7 +152,7 @@ func articleItem(article models.Article) templ.Component {
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(article.FirstPublishedAt.Format("January 2, 2006"))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 45, Col: 56}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 84, Col: 56}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -126,7 +165,7 @@ func articleItem(article models.Article) templ.Component {
 		var templ_7745c5c3_Var7 templ.SafeURL
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinURLErrs(routes.ArticleShowSlug.URL(article.Slug))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 50, Col: 54}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 89, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -139,7 +178,7 @@ func articleItem(article models.Article) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(article.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 51, Col: 20}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 90, Col: 20}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -152,7 +191,7 @@ func articleItem(article models.Article) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(article.Excerpt)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 55, Col: 21}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 94, Col: 21}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -165,7 +204,7 @@ func articleItem(article models.Article) templ.Component {
 		var templ_7745c5c3_Var10 templ.SafeURL
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinURLErrs(routes.ArticleShowSlug.URL(article.Slug))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 58, Col: 51}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 97, Col: 51}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -319,7 +358,7 @@ func ArticleShow(article models.Article) templ.Component {
 			var templ_7745c5c3_Var15 templ.SafeURL
 			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinURLErrs(routes.ArticleIndex.URL())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 130, Col: 40}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 169, Col: 40}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {
@@ -332,7 +371,7 @@ func ArticleShow(article models.Article) templ.Component {
 			var templ_7745c5c3_Var16 string
 			templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(article.FirstPublishedAt.Format("January 2, 2006"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 140, Col: 61}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 179, Col: 61}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 			if templ_7745c5c3_Err != nil {
@@ -345,7 +384,7 @@ func ArticleShow(article models.Article) templ.Component {
 			var templ_7745c5c3_Var17 string
 			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(article.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 144, Col: 23}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 183, Col: 23}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 			if templ_7745c5c3_Err != nil {
@@ -358,7 +397,7 @@ func ArticleShow(article models.Article) templ.Component {
 			var templ_7745c5c3_Var18 string
 			templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(article.Excerpt)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 147, Col: 25}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 186, Col: 25}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 			if templ_7745c5c3_Err != nil {
@@ -376,7 +415,7 @@ func ArticleShow(article models.Article) templ.Component {
 				var templ_7745c5c3_Var19 string
 				templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs("https://media.mastergolang.com/thumbnails/intro-welcome")
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 152, Col: 73}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 191, Col: 73}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 				if templ_7745c5c3_Err != nil {
@@ -389,7 +428,7 @@ func ArticleShow(article models.Article) templ.Component {
 				var templ_7745c5c3_Var20 string
 				templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(article.Title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 153, Col: 29}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 192, Col: 29}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 				if templ_7745c5c3_Err != nil {
@@ -404,7 +443,7 @@ func ArticleShow(article models.Article) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templ.Raw(article.Content).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = templ.Raw(ParseMarkdownToHtml(article.Content)).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -428,7 +467,8 @@ func ArticleShow(article models.Article) templ.Component {
 	})
 }
 
-func ArticleNew() templ.Component {
+// data-on:input__debounce.1000ms={ hypermedia.DataAction(http.MethodPost, routes.ValidateArticlePayload.URL()) }
+func InputField(id, fieldType, name, title, placeholder, value, err string, required bool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -449,7 +489,134 @@ func ArticleNew() templ.Component {
 			templ_7745c5c3_Var21 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Var22 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "<div id=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var22 string
+		templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(id)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 212, Col: 13}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "\" role=\"group\" class=\"field\"><label for=\"title\">Title </label> <input id=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var23 string
+		templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(name)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 215, Col: 12}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "\" type=\"text\" name=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var24 string
+		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(name)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 217, Col: 14}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "\" placeholder=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var25 string
+		templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(placeholder)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 218, Col: 28}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "\" data-bind=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var26 string
+		templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(name)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 219, Col: 19}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "\" data-attr:disabled=\"$submitting\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if required {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, " required")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "> ")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if err != "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "<p>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var27 string
+			templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(err)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 226, Col: 11}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "</p>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "</div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		return nil
+	})
+}
+
+func ArticleNew() templ.Component {
+	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
+		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
+			return templ_7745c5c3_CtxErr
+		}
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
+		if !templ_7745c5c3_IsBuffer {
+			defer func() {
+				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err == nil {
+					templ_7745c5c3_Err = templ_7745c5c3_BufErr
+				}
+			}()
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var28 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var28 == nil {
+			templ_7745c5c3_Var28 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		templ_7745c5c3_Var29 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
 			if !templ_7745c5c3_IsBuffer {
@@ -461,7 +628,7 @@ func ArticleNew() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Var23 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+			templ_7745c5c3_Var30 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 				templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 				templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
 				if !templ_7745c5c3_IsBuffer {
@@ -473,58 +640,75 @@ func ArticleNew() templ.Component {
 					}()
 				}
 				ctx = templ.InitializeContext(ctx)
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "<div class=\"mb-6\"><div class=\"flex items-center gap-3 mb-2\"><a href=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "<div class=\"mb-6\"><div class=\"flex items-center gap-3 mb-2\"><a href=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var24 templ.SafeURL
-				templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinURLErrs(routes.AdminHome.URL())
+				var templ_7745c5c3_Var31 templ.SafeURL
+				templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinURLErrs(routes.AdminHome.URL())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 177, Col: 35}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 237, Col: 35}
 				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "\" class=\"btn-icon-ghost size-8\" aria-label=\"Back to articles\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m15 18-6-6 6-6\"></path></svg></a><h1 class=\"text-2xl font-bold tracking-tight\">New Article</h1></div><p class=\"text-muted-foreground text-sm\">Create a new article for your blog.</p></div><form class=\"form\" data-indicator:submitting data-on:submit=\"")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var25 string
-				templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(hypermedia.DataAction(http.MethodPost, routes.ArticleCreate.URL()))
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 192, Col: 87}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "\" class=\"btn-icon-ghost size-8\" aria-label=\"Back to articles\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m15 18-6-6 6-6\"></path></svg></a><h1 class=\"text-2xl font-bold tracking-tight\">New Article</h1></div><p class=\"text-muted-foreground text-sm\">Create a new article for your blog.</p></div><form class=\"form\" data-indicator:submitting data-on:submit=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "\"><div class=\"grid grid-cols-1 lg:grid-cols-2 gap-8\"><!-- Left Column: Article Information --><div class=\"space-y-6\"><fieldset class=\"fieldset\"><legend>Article Details</legend><p>Basic information about your article.</p><div role=\"group\" class=\"field\"><label for=\"title\">Title</label> <input type=\"text\" id=\"title\" name=\"title\" placeholder=\"Enter article title\" data-bind=\"title\" data-attr:disabled=\"$submitting\" required></div><div role=\"group\" class=\"field\"><label for=\"slug\">Slug</label> <input type=\"text\" id=\"slug\" name=\"slug\" disabled class=\"cursor-not-allowed\" placeholder=\"article-url-slug\" aria-describedby=\"slug-desc\"><p id=\"slug-desc\">URL-friendly version of the title.</p></div><div role=\"group\" class=\"field\"><label for=\"excerpt\">Excerpt</label> <textarea id=\"excerpt\" name=\"excerpt\" placeholder=\"Brief summary of the article...\" rows=\"3\" data-bind=\"excerpt\" data-attr:disabled=\"$submitting\" aria-describedby=\"excerpt-desc\"></textarea><p id=\"excerpt-desc\">A short description that appears in article listings.</p></div></fieldset><fieldset class=\"fieldset\"><legend>SEO & Metadata</legend><p>Optimize your article for search engines.</p><div role=\"group\" class=\"field\"><label for=\"meta_title\">Meta Title</label> <input type=\"text\" id=\"meta_title\" name=\"meta_title\" placeholder=\"SEO title for search engines\" data-bind=\"meta_title\" data-attr:disabled=\"$submitting\"></div><div role=\"group\" class=\"field\"><label for=\"meta_description\">Meta Description</label> <textarea id=\"meta_description\" name=\"meta_description\" placeholder=\"SEO description for search engines...\" rows=\"2\" data-bind=\"meta_description\" data-attr:disabled=\"$submitting\"></textarea></div></fieldset><fieldset class=\"fieldset\"><legend>Publishing</legend><p>Control when and how your article appears.</p><div class=\"grid grid-cols-2 gap-4\"><div role=\"group\" class=\"field\"><label for=\"first_published_at\">Publish Date</label> <input type=\"date\" id=\"first_published_at\" name=\"first_published_at\" data-bind=\"first_published_at\" data-attr:disabled=\"$submitting\"></div><div role=\"group\" class=\"field\"><label for=\"read_time\">Read Time (min)</label> <input type=\"number\" id=\"read_time\" name=\"read_time\" placeholder=\"5\" min=\"1\" data-bind=\"read_time\" data-attr:disabled=\"$submitting\"></div></div><div role=\"group\" class=\"field\"><label for=\"image_link\">Featured Image URL</label> <input type=\"text\" id=\"image_link\" name=\"image_link\" placeholder=\"https://example.com/image.jpg\" data-bind=\"image_link\" data-attr:disabled=\"$submitting\"></div></fieldset></div><!-- Right Column: Content Editor --><div class=\"space-y-6\"><fieldset class=\"fieldset h-full flex flex-col\"><legend>Content</legend><p>Write your article content below.</p><!-- WYSIWYG Editor Container --><div id=\"editor-container\" class=\"flex-1 min-h-[500px] rounded-md bg-background\"><!-- Placeholder for WYSIWYG editor --><textarea id=\"editorTarget\" name=\"content\" class=\"h-full w-full p-4\"></textarea></div></fieldset></div></div><!-- Form Actions --><div class=\"flex items-center justify-end gap-3 mt-8 pt-6 border-t\"><a href=\"")
+				var templ_7745c5c3_Var32 string
+				templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(hypermedia.DataAction(http.MethodPost, routes.ArticleCreate.URL()))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 252, Col: 87}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var26 templ.SafeURL
-				templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinURLErrs(routes.ArticleIndex.URL())
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 328, Col: 38}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "\"><div class=\"grid grid-cols-1 lg:grid-cols-2 gap-8\"><!-- Left Column: Article Information --><div class=\"space-y-6 min-w-0\"><fieldset class=\"fieldset\"><legend>Article Details</legend><p>Basic information about your article.</p>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "\" class=\"btn-outline\">Cancel</a> <button type=\"submit\" class=\"btn\" data-attr:disabled=\"$submitting\"><span data-show=\"!$submitting\">Create Article</span> <span data-show=\"$submitting\" class=\"flex items-center gap-2\"><svg class=\"animate-spin size-4\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\"><circle class=\"opacity-25\" cx=\"12\" cy=\"12\" r=\"10\" stroke=\"currentColor\" stroke-width=\"4\"></circle> <path class=\"opacity-75\" fill=\"currentColor\" d=\"M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z\"></path></svg> Creating...</span></button></div></form>")
+				templ_7745c5c3_Err = InputField(
+					"article-title",
+					"text",
+					"title",
+					"Title",
+					"Enter article title",
+					"",
+					"",
+					true,
+				).Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "<div role=\"group\" class=\"field\"><label for=\"slug\">Slug</label> <input type=\"text\" id=\"slug\" name=\"slug\" disabled class=\"cursor-not-allowed\" placeholder=\"article-url-slug\" aria-describedby=\"slug-desc\"><p id=\"slug-desc\">URL-friendly version of the title.</p></div><div role=\"group\" class=\"field\"><label for=\"excerpt\">Excerpt</label> <textarea id=\"excerpt\" name=\"excerpt\" placeholder=\"Brief summary of the article...\" rows=\"3\" data-bind=\"excerpt\" data-attr:disabled=\"$submitting\" aria-describedby=\"excerpt-desc\"></textarea><p id=\"excerpt-desc\">A short description that appears in article listings.</p></div></fieldset><fieldset class=\"fieldset\"><legend>SEO & Metadata</legend><p>Optimize your article for search engines.</p><div role=\"group\" class=\"field\"><label for=\"meta_title\">Meta Title</label> <input type=\"text\" id=\"metaTitle\" name=\"metaTitle\" placeholder=\"SEO title for search engines\" data-bind=\"metaTitle\" data-attr:disabled=\"$submitting\"></div><div role=\"group\" class=\"field\"><label for=\"meta_description\">Meta Description</label> <textarea id=\"metaDescription\" name=\"metaDescription\" placeholder=\"SEO description for search engines...\" rows=\"2\" data-bind=\"metaDescription\" data-attr:disabled=\"$submitting\"></textarea></div></fieldset><fieldset class=\"fieldset\"><legend>Publishing</legend><p>Control when and how your article appears.</p><div class=\"grid grid-cols-2 gap-4\"><div role=\"group\" class=\"field\"><label for=\"first_published_at\">Publish Date</label> <input type=\"date\" id=\"firstPublishedAt\" name=\"firstPublishedAt\" data-bind=\"firstPublishedAt\" data-attr:disabled=\"$submitting\"></div><div role=\"group\" class=\"field\"><label for=\"read_time\">Read Time (min)</label> <input type=\"number\" id=\"readTime\" name=\"readTime\" placeholder=\"5\" min=\"0\" data-bind=\"readTime\" data-attr:disabled=\"$submitting\"></div></div><div role=\"group\" class=\"field\"><label for=\"first_published_at\">Publish</label><div class=\"gap-2 flex flex-row items-start justify-between rounded-lg border p-4 shadow-xs\"><div class=\"flex flex-col gap-0.5\"><label for=\"demo-form-switch\" class=\"leading-normal\">Click here to publish</label></div><input type=\"checkbox\" id=\"demo-form-switch\" role=\"switch\"></div></div><div role=\"group\" class=\"field\"><label for=\"image_link\">Featured Image URL</label> <input type=\"text\" id=\"imageLink\" name=\"imageLink\" placeholder=\"https://example.com/image.jpg\" data-bind=\"imageLink\" data-attr:disabled=\"$submitting\"></div></fieldset></div><!-- Right Column: Content Editor --><div class=\"space-y-6\"><fieldset class=\"fieldset h-full flex flex-col\"><legend>Content</legend><p>Write your article content below.</p><!-- WYSIWYG Editor Container --><div id=\"editor-container\" class=\"flex-1 min-h-[500px] rounded-md bg-background\"><!-- Placeholder for WYSIWYG editor --><textarea id=\"editorTarget\" name=\"content\" class=\"h-full w-full p-4\"></textarea></div></fieldset></div></div><!-- Form Actions --><div class=\"flex items-center justify-end gap-3 mt-8 pt-6 border-t\"><a href=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var33 templ.SafeURL
+				templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinURLErrs(routes.AdminHome.URL())
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 395, Col: 35}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "\" class=\"btn-outline\">Cancel</a> <button type=\"submit\" class=\"btn\" data-attr:disabled=\"$submitting\"><span data-show=\"!$submitting\">Create Article</span> <span data-show=\"$submitting\" class=\"flex items-center gap-2\"><svg class=\"animate-spin size-4\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\"><circle class=\"opacity-25\" cx=\"12\" cy=\"12\" r=\"10\" stroke=\"currentColor\" stroke-width=\"4\"></circle> <path class=\"opacity-75\" fill=\"currentColor\" d=\"M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z\"></path></svg> Creating...</span></button></div></form>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				return nil
 			})
-			templ_7745c5c3_Err = adminWrapper().Render(templ.WithChildren(ctx, templ_7745c5c3_Var23), templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = adminWrapper().Render(templ.WithChildren(ctx, templ_7745c5c3_Var30), templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = adminBase(components.AddExtraScriptSrc(routes.Script.URL("easymde.js"))).Render(templ.WithChildren(ctx, templ_7745c5c3_Var22), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = adminBase(components.AddExtraScriptSrc(routes.Script.URL("easymde.js"))).Render(templ.WithChildren(ctx, templ_7745c5c3_Var29), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -548,12 +732,12 @@ func ArticleEdit(article models.Article) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var27 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var27 == nil {
-			templ_7745c5c3_Var27 = templ.NopComponent
+		templ_7745c5c3_Var34 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var34 == nil {
+			templ_7745c5c3_Var34 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Var28 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_Var35 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
 			if !templ_7745c5c3_IsBuffer {
@@ -565,7 +749,7 @@ func ArticleEdit(article models.Article) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Var29 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+			templ_7745c5c3_Var36 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 				templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 				templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
 				if !templ_7745c5c3_IsBuffer {
@@ -577,175 +761,175 @@ func ArticleEdit(article models.Article) templ.Component {
 					}()
 				}
 				ctx = templ.InitializeContext(ctx)
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "<div class=\"mb-6\"><div class=\"flex items-center gap-3 mb-2\"><a href=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, "<div class=\"w-2/3 mx-auto overflow-hidden\"><div class=\"mb-6\"><div class=\"flex items-center gap-3 mb-2\"><a href=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var30 templ.SafeURL
-				templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinURLErrs(routes.AdminHome.URL())
+				var templ_7745c5c3_Var37 templ.SafeURL
+				templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.JoinURLErrs(routes.AdminHome.URL())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 359, Col: 35}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "\" class=\"btn-icon-ghost size-8\" aria-label=\"Back to articles\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m15 18-6-6 6-6\"></path></svg></a><h1 class=\"text-2xl font-bold tracking-tight\">Edit Article</h1></div><p class=\"text-muted-foreground text-sm\">Edit an article for your blog.</p></div><form class=\"form\" data-indicator:submitting data-on:submit=\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var31 string
-				templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(hypermedia.DataAction(http.MethodPut, routes.ArticleUpdate.URL(article.ID)))
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 374, Col: 96}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "\"><div class=\"grid grid-cols-1 lg:grid-cols-2 gap-8\"><!-- Left Column: Article Information --><div class=\"space-y-6\"><fieldset class=\"fieldset\"><legend>Article Details</legend><p>Basic information about your article.</p><div role=\"group\" class=\"field\"><label for=\"title\">Title</label> <input type=\"text\" id=\"title\" name=\"title\" placeholder=\"Enter article title\" data-bind=\"title\" value=\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var32 string
-				templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(article.Title)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 390, Col: 30}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "\" data-attr:disabled=\"$submitting\" required></div><div role=\"group\" class=\"field\"><label for=\"slug\">Slug</label> <input type=\"text\" id=\"slug\" name=\"slug\" disabled class=\"cursor-not-allowed\" placeholder=\"article-url-slug\" value=\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var33 string
-				templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(article.Slug)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 404, Col: 29}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "\" aria-describedby=\"slug-desc\"><p id=\"slug-desc\">URL-friendly version of the title.</p></div><div role=\"group\" class=\"field\"><label for=\"excerpt\">Excerpt</label> <textarea id=\"excerpt\" name=\"excerpt\" placeholder=\"Brief summary of the article...\" value=\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var34 string
-				templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.JoinStringErrs(article.Excerpt)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 415, Col: 32}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var34))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "\" rows=\"3\" data-bind=\"excerpt\" data-attr:disabled=\"$submitting\" aria-describedby=\"excerpt-desc\"></textarea><p id=\"excerpt-desc\">A short description that appears in article listings.</p></div></fieldset><fieldset class=\"fieldset\"><legend>SEO & Metadata</legend><p>Optimize your article for search engines.</p><div role=\"group\" class=\"field\"><label for=\"meta_title\">Meta Title</label> <input type=\"text\" id=\"meta_title\" name=\"meta_title\" placeholder=\"SEO title for search engines\" value=\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var35 string
-				templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs(article.MetaTitle)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 434, Col: 34}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "\" data-bind=\"meta_title\" data-attr:disabled=\"$submitting\"></div><div role=\"group\" class=\"field\"><label for=\"meta_description\">Meta Description</label> <textarea id=\"meta_description\" name=\"meta_description\" placeholder=\"SEO description for search engines...\" rows=\"2\" value=\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var36 string
-				templ_7745c5c3_Var36, templ_7745c5c3_Err = templ.JoinStringErrs(article.MetaDescription)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 446, Col: 40}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var36))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "\" data-bind=\"meta_description\" data-attr:disabled=\"$submitting\"></textarea></div></fieldset><fieldset class=\"fieldset\"><legend>Publishing</legend><p>Control when and how your article appears.</p><div class=\"grid grid-cols-2 gap-4\"><div role=\"group\" class=\"field\"><label for=\"first_published_at\">Publish Date</label> <input type=\"date\" id=\"first_published_at\" name=\"first_published_at\" value=\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var37 string
-				templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.JoinStringErrs(article.FirstPublishedAt.Format("2006-01-02"))
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 462, Col: 63}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 427, Col: 36}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var37))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "\" data-bind=\"first_published_at\" data-attr:disabled=\"$submitting\"></div><div role=\"group\" class=\"field\"><label for=\"read_time\">Read Time (min)</label> <input type=\"number\" id=\"read_time\" name=\"read_time\" placeholder=\"5\" min=\"1\" value=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 44, "\" class=\"btn-icon-ghost size-8\" aria-label=\"Back to articles\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m15 18-6-6 6-6\"></path></svg></a><h1 class=\"text-2xl font-bold tracking-tight\">Edit Article</h1></div><p class=\"text-muted-foreground text-sm\">Edit an article for your blog.</p></div><form class=\"form\" data-indicator:submitting data-on:submit=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var38 string
-				templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", article.ReadTime))
+				templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs(hypermedia.DataAction(http.MethodPut, routes.ArticleUpdate.URL(article.ID)))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 475, Col: 53}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 442, Col: 97}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var38))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "\" data-bind=\"read_time\" data-attr:disabled=\"$submitting\"></div></div><div role=\"group\" class=\"field\"><label for=\"image_link\">Featured Image URL</label> <input type=\"text\" id=\"image_link\" name=\"image_link\" placeholder=\"https://example.com/image.jpg\" value=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "\"><div class=\"grid grid-cols-1 lg:grid-cols-2 gap-8\"><!-- Left Column: Article Information --><div class=\"space-y-6 min-w-0\"><fieldset class=\"fieldset\"><legend>Article Details</legend><p>Basic information about your article.</p><div role=\"group\" class=\"field\"><label for=\"title\">Title</label> <input type=\"text\" id=\"title\" name=\"title\" placeholder=\"Enter article title\" data-bind=\"title\" value=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var39 string
-				templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.JoinStringErrs(article.ImageLink)
+				templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.JoinStringErrs(article.Title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 488, Col: 34}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 458, Col: 31}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var39))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "\" data-bind=\"image_link\" data-attr:disabled=\"$submitting\"></div></fieldset></div><!-- Right Column: Content Editor --><div class=\"space-y-6\"><fieldset class=\"fieldset h-full flex flex-col\"><legend>Content</legend><p>Write your article content below.</p><!-- WYSIWYG Editor Container --><div id=\"editor-container\" class=\"flex-1 min-h-[500px] bg-background\"><!-- Placeholder for WYSIWYG editor --><textarea id=\"editorTarget\" name=\"content\" class=\"h-full w-full p-4\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 46, "\" data-attr:disabled=\"$submitting\" required></div><div role=\"group\" class=\"field\"><label for=\"slug\">Slug</label> <input type=\"text\" id=\"slug\" name=\"slug\" disabled class=\"cursor-not-allowed\" placeholder=\"article-url-slug\" value=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var40 string
-				templ_7745c5c3_Var40, templ_7745c5c3_Err = templ.JoinStringErrs(article.Content)
+				templ_7745c5c3_Var40, templ_7745c5c3_Err = templ.JoinStringErrs(article.Slug)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 511, Col: 26}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 472, Col: 30}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var40))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "</textarea></div></fieldset></div></div><!-- Form Actions --><div class=\"flex items-center justify-end gap-3 mt-8 pt-6 border-t\"><a href=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 47, "\" aria-describedby=\"slug-desc\"><p id=\"slug-desc\">URL-friendly version of the title.</p></div><div role=\"group\" class=\"field\"><label for=\"excerpt\">Excerpt</label> <textarea id=\"excerpt\" name=\"excerpt\" placeholder=\"Brief summary of the article...\" value=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var41 templ.SafeURL
-				templ_7745c5c3_Var41, templ_7745c5c3_Err = templ.JoinURLErrs(routes.ArticleIndex.URL())
+				var templ_7745c5c3_Var41 string
+				templ_7745c5c3_Var41, templ_7745c5c3_Err = templ.JoinStringErrs(article.Excerpt)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 520, Col: 38}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 483, Col: 33}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var41))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, "\" class=\"btn-outline\">Cancel</a> <button type=\"submit\" class=\"btn\" data-attr:disabled=\"$submitting\"><span data-show=\"!$submitting\">Update Article</span> <span data-show=\"$submitting\" class=\"flex items-center gap-2\"><svg class=\"animate-spin size-4\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\"><circle class=\"opacity-25\" cx=\"12\" cy=\"12\" r=\"10\" stroke=\"currentColor\" stroke-width=\"4\"></circle> <path class=\"opacity-75\" fill=\"currentColor\" d=\"M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z\"></path></svg> Creating...</span></button></div></form>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 48, "\" rows=\"3\" data-bind=\"excerpt\" data-attr:disabled=\"$submitting\" aria-describedby=\"excerpt-desc\"></textarea><p id=\"excerpt-desc\">A short description that appears in article listings.</p></div></fieldset><fieldset class=\"fieldset\"><legend>SEO & Metadata</legend><p>Optimize your article for search engines.</p><div role=\"group\" class=\"field\"><label for=\"meta_title\">Meta Title</label> <input type=\"text\" id=\"metaTitle\" name=\"metaTitle\" placeholder=\"SEO title for search engines\" value=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var42 string
+				templ_7745c5c3_Var42, templ_7745c5c3_Err = templ.JoinStringErrs(article.MetaTitle)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 502, Col: 35}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var42))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 49, "\" data-bind=\"metaTitle\" data-attr:disabled=\"$submitting\"></div><div role=\"group\" class=\"field\"><label for=\"meta_description\">Meta Description</label> <textarea id=\"metaDescription\" name=\"metaDescription\" placeholder=\"SEO description for search engines...\" rows=\"2\" value=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var43 string
+				templ_7745c5c3_Var43, templ_7745c5c3_Err = templ.JoinStringErrs(article.MetaDescription)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 514, Col: 41}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var43))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 50, "\" data-bind=\"metaDescription\" data-attr:disabled=\"$submitting\"></textarea></div></fieldset><fieldset class=\"fieldset\"><legend>Publishing</legend><p>Control when and how your article appears.</p><div class=\"grid grid-cols-2 gap-4\"><div role=\"group\" class=\"field\"><label for=\"first_published_at\">Publish Date</label> <input type=\"date\" id=\"firstPublishedAt\" name=\"firstPublishedAt\" value=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var44 string
+				templ_7745c5c3_Var44, templ_7745c5c3_Err = templ.JoinStringErrs(article.FirstPublishedAt.Format("2006-01-02"))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 530, Col: 64}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var44))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 51, "\" data-bind=\"firstPublishedAt\" data-attr:disabled=\"$submitting\"></div><div class=\"gap-2 flex flex-row items-start justify-between rounded-lg border p-4 shadow-xs\"><div class=\"flex flex-col gap-0.5\"><label for=\"demo-form-switch\" class=\"leading-normal\">Marketing emails</label><p class=\"text-muted-foreground text-sm\">Receive emails about new products, features, and more.</p></div><input type=\"checkbox\" id=\"demo-form-switch\" role=\"switch\"></div></div><div role=\"group\" class=\"field\"><label for=\"read_time\">Read Time (min)</label> <input type=\"number\" id=\"readTime\" name=\"readTime\" placeholder=\"5\" min=\"1\" value=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var45 string
+				templ_7745c5c3_Var45, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", article.ReadTime))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 551, Col: 53}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var45))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 52, "\" data-bind=\"readTime\" data-attr:disabled=\"$submitting\"></div><div role=\"group\" class=\"field\"><label for=\"image_link\">Featured Image URL</label> <input type=\"text\" id=\"imageLink\" name=\"imageLink\" placeholder=\"https://example.com/image.jpg\" value=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var46 string
+				templ_7745c5c3_Var46, templ_7745c5c3_Err = templ.JoinStringErrs(article.ImageLink)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 563, Col: 35}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var46))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 53, "\" data-bind=\"imageLink\" data-attr:disabled=\"$submitting\"></div></fieldset></div><!-- Right Column: Content Editor --><div class=\"space-y-6 min-w-0\"><fieldset class=\"fieldset h-full flex flex-col min-w-0\"><legend>Content</legend><p>Write your article content below.</p><!-- WYSIWYG Editor Container --><div id=\"editor-container\" class=\"flex-1 min-h-[500px] bg-background overflow-hidden\"><!-- Placeholder for WYSIWYG editor --><textarea id=\"editorTarget\" name=\"content\" class=\"h-full w-full p-4\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var47 string
+				templ_7745c5c3_Var47, templ_7745c5c3_Err = templ.JoinStringErrs(article.Content)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 586, Col: 27}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var47))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 54, "</textarea></div></fieldset></div></div><!-- Form Actions --><div class=\"flex items-center justify-end gap-3 mt-8 pt-6 border-t\"><a href=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var48 templ.SafeURL
+				templ_7745c5c3_Var48, templ_7745c5c3_Err = templ.JoinURLErrs(routes.AdminHome.URL())
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/articles_resource.templ`, Line: 595, Col: 36}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var48))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 55, "\" class=\"btn-outline\">Cancel</a> <button type=\"submit\" class=\"btn\" data-attr:disabled=\"$submitting\"><span data-show=\"!$submitting\">Update Article</span> <span data-show=\"$submitting\" class=\"flex items-center gap-2\"><svg class=\"animate-spin size-4\" xmlns=\"http://www.w3.org/2000/svg\" fill=\"none\" viewBox=\"0 0 24 24\"><circle class=\"opacity-25\" cx=\"12\" cy=\"12\" r=\"10\" stroke=\"currentColor\" stroke-width=\"4\"></circle> <path class=\"opacity-75\" fill=\"currentColor\" d=\"M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z\"></path></svg> Updating...</span></button></div></form></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				return nil
 			})
-			templ_7745c5c3_Err = adminWrapper().Render(templ.WithChildren(ctx, templ_7745c5c3_Var29), templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = adminWrapper().Render(templ.WithChildren(ctx, templ_7745c5c3_Var36), templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = adminBase(components.AddExtraScriptSrc(routes.Script.URL("easymde.js"))).Render(templ.WithChildren(ctx, templ_7745c5c3_Var28), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = adminBase(components.AddExtraScriptSrc(routes.Script.URL("easymde.js"))).Render(templ.WithChildren(ctx, templ_7745c5c3_Var35), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

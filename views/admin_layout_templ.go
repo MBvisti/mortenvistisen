@@ -285,7 +285,7 @@ func adminBase(headOpts ...components.HeadDataOption) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<header class=\"bg-background sticky inset-x-0 top-0 isolate flex shrink-0 items-center gap-2 border-b z-10\"><div class=\"flex h-16 w-full justify-end items-center gap-2 px-4\"><button class=\"btn-destructive\">Logout</button></div></header><main class=\"flex-1 pb-10 px-4 md:px-14 md:pb8 lg:px-16 lg:pb-20\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<header class=\"bg-background sticky inset-x-0 top-0 isolate flex shrink-0 items-center gap-2 border-b z-10\"><div class=\"flex h-16 w-full justify-end items-center gap-2 px-4\"><button class=\"btn-destructive\">Logout</button></div></header>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -293,7 +293,7 @@ func adminBase(headOpts ...components.HeadDataOption) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</main></body><div id=\"flashContainer\" class=\"fixed top-4 right-4 z-50 space-y-2\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</body><div id=\"flashContainer\" class=\"fixed top-4 right-4 z-50 space-y-2\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

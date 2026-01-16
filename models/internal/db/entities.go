@@ -65,6 +65,7 @@ type Article struct {
 	CreatedAt        pgtype.Timestamptz
 	UpdatedAt        pgtype.Timestamptz
 	FirstPublishedAt pgtype.Timestamptz
+	Published        bool
 	Title            string
 	Excerpt          string
 	MetaTitle        string

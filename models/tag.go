@@ -40,7 +40,7 @@ func CreateTag(
 	exec storage.Executor,
 	data CreateTagData,
 ) (Tag, error) {
-	if err := validate.Struct(data); err != nil {
+	if err := Validate.Struct(data); err != nil {
 		return Tag{}, errors.Join(ErrDomainValidation, err)
 	}
 
@@ -67,7 +67,7 @@ func UpdateTag(
 	exec storage.Executor,
 	data UpdateTagData,
 ) (Tag, error) {
-	if err := validate.Struct(data); err != nil {
+	if err := Validate.Struct(data); err != nil {
 		return Tag{}, errors.Join(ErrDomainValidation, err)
 	}
 
@@ -173,7 +173,7 @@ func UpsertTag(
 	exec storage.Executor,
 	data CreateTagData,
 ) (Tag, error) {
-	if err := validate.Struct(data); err != nil {
+	if err := Validate.Struct(data); err != nil {
 		return Tag{}, errors.Join(ErrDomainValidation, err)
 	}
 

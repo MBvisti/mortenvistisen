@@ -36,6 +36,12 @@ var ArticleCreate = routing.NewSimpleRoute(
 	AdminPrefix+ArticlePrefix,
 )
 
+var ValidateArticlePayload = routing.NewSimpleRoute(
+	"/validate",
+	"admin.articles.create",
+	AdminPrefix+ArticlePrefix,
+)
+
 var ArticleEdit = routing.NewRouteWithID(
 	"/:id/edit",
 	"admin.articles.edit",

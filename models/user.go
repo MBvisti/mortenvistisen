@@ -15,8 +15,8 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"golang.org/x/crypto/argon2"
 
-	"mortenvistisen/models/internal/db"
 	"mortenvistisen/internal/storage"
+	"mortenvistisen/models/internal/db"
 )
 
 type User struct {
@@ -135,7 +135,7 @@ func CreateUser(
 	pepper string,
 	data CreateUserData,
 ) (User, error) {
-	if err := validate.Struct(data); err != nil {
+	if err := Validate.Struct(data); err != nil {
 		return User{}, errors.Join(ErrDomainValidation, err)
 	}
 
@@ -172,7 +172,7 @@ func UpdateUser(
 	exec storage.Executor,
 	data UpdateUserData,
 ) (User, error) {
-	if err := validate.Struct(data); err != nil {
+	if err := Validate.Struct(data); err != nil {
 		return User{}, errors.Join(ErrDomainValidation, err)
 	}
 

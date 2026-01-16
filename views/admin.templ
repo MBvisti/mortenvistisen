@@ -7,9 +7,9 @@ import (
 )
 
 templ adminWrapper() {
-	<div class="w-2/3 mx-auto my-8">
+	<main id="adminWrapper" class="mx-auto my-8 px-4 sm:px-6 lg:px-8">
 		{ children... }
-	</div>
+	</main>
 }
 
 templ Admin(paginated models.PaginatedArticles) {

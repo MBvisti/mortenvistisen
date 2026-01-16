@@ -18,4 +18,9 @@ body {
 	text-rendering: optimizeLegibility;
 }
 
+#adminWrapper {
+	margin-left: var(--sidebar-width);
+	width: calc(100% - var(--sidebar-width));
+}
+
 @source "./views";

@@ -70,7 +70,7 @@ func CreateNewsletter(
 	exec storage.Executor,
 	data CreateNewsletterData,
 ) (Newsletter, error) {
-	if err := validate.Struct(data); err != nil {
+	if err := Validate.Struct(data); err != nil {
 		return Newsletter{}, errors.Join(ErrDomainValidation, err)
 	}
 
@@ -109,7 +109,7 @@ func UpdateNewsletter(
 	exec storage.Executor,
 	data UpdateNewsletterData,
 ) (Newsletter, error) {
-	if err := validate.Struct(data); err != nil {
+	if err := Validate.Struct(data); err != nil {
 		return Newsletter{}, errors.Join(ErrDomainValidation, err)
 	}
 
@@ -221,7 +221,7 @@ func UpsertNewsletter(
 	exec storage.Executor,
 	data CreateNewsletterData,
 ) (Newsletter, error) {
-	if err := validate.Struct(data); err != nil {
+	if err := Validate.Struct(data); err != nil {
 		return Newsletter{}, errors.Join(ErrDomainValidation, err)
 	}
 

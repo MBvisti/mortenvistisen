@@ -13,8 +13,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 
-	"mortenvistisen/models/internal/db"
 	"mortenvistisen/internal/storage"
+	"mortenvistisen/models/internal/db"
 )
 
 type Token struct {
@@ -140,7 +140,7 @@ func createToken(
 	exec storage.Executor,
 	data createTokenData,
 ) (Token, error) {
-	if err := validate.Struct(data); err != nil {
+	if err := Validate.Struct(data); err != nil {
 		return Token{}, errors.Join(ErrDomainValidation, err)
 	}
 
@@ -169,7 +169,6 @@ func DestroyToken(
 ) error {
 	return queries.DeleteToken(ctx, exec, id)
 }
-
 
 type PaginatedTokens struct {
 	Tokens     []Token

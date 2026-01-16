@@ -1,17 +1,21 @@
 package controllers
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
+	"strings"
 	"time"
 
+	"mortenvistisen/internal/hypermedia"
 	"mortenvistisen/internal/storage"
 	"mortenvistisen/models"
 	"mortenvistisen/router/cookies"
 	"mortenvistisen/router/routes"
 	"mortenvistisen/views"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
@@ -63,14 +67,63 @@ func (a Articles) New(etx echo.Context) error {
 }
 
 type CreateArticleFormPayload struct {
-	FirstPublishedAt string `json:"first_published_at"`
-	Title            string `json:"title"`
-	Excerpt          string `json:"excerpt"`
-	MetaTitle        string `json:"meta_title"`
-	MetaDescription  string `json:"meta_description"`
-	ImageLink        string `json:"image_link"`
-	ReadTime         int32  `json:"read_time"`
-	Content          string `json:"content"`
+	FirstPublishedAt string `json:"firstPublishedAt"`
+	Excerpt          string `json:"excerpt"          validate:"omitempty,min=10,max=255"`
+	Title            string `json:"title"            validate:"omitempty,min=3,max=100"`
+	MetaTitle        string `json:"metaTitle"        validate:"omitempty,min=3,max=100"`
+	MetaDescription  string `json:"metaDescription"  validate:"omitempty,min=10,max=255"`
+	ImageLink        string `json:"imageLink"        validate:"omitempty,url"`
+	ReadTime         int32  `json:"readTime"         validate:"omitempty,min=1"`
+	Content          string `json:"content"          validate:"omitempty,min=20"`
+	Published        bool   `json:"published"`
+}
+
+func (a Articles) ValidateArticlePayload(etx echo.Context) error {
+	var payload CreateArticleFormPayload
+	if err := etx.Bind(&payload); err != nil {
+		slog.ErrorContext(
+			etx.Request().Context(),
+			"could not parse CreateArticleFormPayload",
+			"error",
+			err,
+		)
+
+		return render(etx, views.NotFound())
+	}
+
+	if err := models.Validate.Struct(payload); err != nil {
+
+		slog.Info("article payload validation failed", "error", err)
+		var validationErrors validator.ValidationErrors
+		if !errors.As(err, &validationErrors) {
+			slog.ErrorContext(
+				etx.Request().Context(),
+				"could not parse validation errors for article payload",
+				"error",
+				err,
+			)
+			return render(etx, views.NotFound())
+		}
+
+		for _, ve := range validationErrors {
+			return hypermedia.PatchElementTempl(
+				etx,
+				views.InputField(
+					"article"+ve.Field(),
+					"text",
+					strings.ToLower(ve.Field()),
+					ve.Field(),
+					"",
+					ve.Value().(string),
+					"ERR",
+					true,
+				))
+		}
+	}
+
+	slog.Info("article payload validated successfully")
+
+	return nil
 }
 
 func (a Articles) Create(etx echo.Context) error {
@@ -87,6 +140,7 @@ func (a Articles) Create(etx echo.Context) error {
 	}
 
 	data := models.CreateArticleData{
+		// handle string -> uuid in the same way in generator
 		FirstPublishedAt: func() time.Time {
 			if payload.FirstPublishedAt == "" {
 				return time.Time{}
@@ -99,6 +153,7 @@ func (a Articles) Create(etx echo.Context) error {
 		Title:           payload.Title,
 		Excerpt:         payload.Excerpt,
 		MetaTitle:       payload.MetaTitle,
+		Publiched:       payload.Published,
 		MetaDescription: payload.MetaDescription,
 		ImageLink:       payload.ImageLink,
 		ReadTime:        payload.ReadTime,
@@ -121,7 +176,7 @@ func (a Articles) Create(etx echo.Context) error {
 		return render(etx, views.InternalError())
 	}
 
-	return etx.Redirect(http.StatusSeeOther, routes.ArticleShow.URL(article.ID))
+	return hypermedia.Redirect(etx, routes.ArticleEdit.URL(article.ID))
 }
 
 func (a Articles) Edit(etx echo.Context) error {
@@ -139,15 +194,15 @@ func (a Articles) Edit(etx echo.Context) error {
 }
 
 type UpdateArticleFormPayload struct {
-	FirstPublishedAt string `json:"first_published_at"`
-	Title            string `json:"title"`
-	Excerpt          string `json:"excerpt"`
-	MetaTitle        string `json:"meta_title"`
-	MetaDescription  string `json:"meta_description"`
-	Slug             string `json:"slug"`
-	ImageLink        string `json:"image_link"`
-	ReadTime         int32  `json:"read_time"`
-	Content          string `json:"content"`
+	FirstPublishedAt string `json:"firstPublishedAt"`
+	Excerpt          string `json:"excerpt"          validate:"omitempty,min=10,max=255"`
+	Title            string `json:"title"            validate:"omitempty,min=3,max=100"`
+	MetaTitle        string `json:"metaTitle"        validate:"omitempty,min=3,max=100"`
+	MetaDescription  string `json:"metaDescription"  validate:"omitempty,min=10,max=255"`
+	ImageLink        string `json:"imageLink"        validate:"omitempty,url"`
+	ReadTime         int32  `json:"readTime"         validate:"omitempty,min=1"`
+	Content          string `json:"content"          validate:"omitempty,min=20"`
+	Published        bool   `json:"published"`
 }
 
 func (a Articles) Update(etx echo.Context) error {
@@ -182,8 +237,8 @@ func (a Articles) Update(etx echo.Context) error {
 		Title:           payload.Title,
 		Excerpt:         payload.Excerpt,
 		MetaTitle:       payload.MetaTitle,
+		Published:       payload.Published,
 		MetaDescription: payload.MetaDescription,
-		Slug:            payload.Slug,
 		ImageLink:       payload.ImageLink,
 		ReadTime:        payload.ReadTime,
 		Content:         payload.Content,
