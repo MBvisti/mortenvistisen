@@ -2,160 +2,50 @@ package services
 
 import (
 	"context"
+	"database/sql"
 	"errors"
-	"fmt"
-	"time"
 
-	"github.com/mbvisti/mortenvistisen/clients"
-	"github.com/mbvisti/mortenvistisen/config"
-	"github.com/mbvisti/mortenvistisen/emails"
-	"github.com/mbvisti/mortenvistisen/models"
-	"github.com/mbvisti/mortenvistisen/psql"
-	"github.com/mbvisti/mortenvistisen/router/routes"
+	"mortenvistisen/internal/storage"
+	"mortenvistisen/models"
 )
 
 var (
-	ErrUserEmailNotVerified = errors.New("user email is not verified")
-	ErrInvalidAuthDetail    = errors.New(
-		"the provided details does not match our records",
-	)
-	ErrInvalidResetToken = errors.New("provided token is invalid")
+	ErrInvalidCredentials = errors.New("invalid email or password")
+	ErrEmailNotVerified   = errors.New("email not verified")
 )
+
+type LoginData struct {
+	Email    string
+	Password string
+}
 
 func AuthenticateUser(
 	ctx context.Context,
-	db psql.Postgres,
-	email string,
-	providedPassword string,
+	db storage.Pool,
+	salt string,
+	data LoginData,
 ) (models.User, error) {
-	user, err := models.GetUserByEmail(
-		ctx,
-		db.Pool,
-		email,
-	)
+	user, err := models.FindUserByEmail(ctx, db.Conn(), data.Email)
 	if err != nil {
-		return models.User{}, ErrInvalidAuthDetail
+		if errors.Is(err, sql.ErrNoRows) {
+			return models.User{}, ErrInvalidCredentials
+		}
+
+		return models.User{}, err
 	}
 
-	if !user.IsVerified() {
-		return models.User{}, ErrUserEmailNotVerified
+	validPassword, err := user.ValidPassword(data.Password, salt)
+	if err != nil {
+		return models.User{}, err
 	}
 
-	if err := user.ValidatePassword(providedPassword); err != nil {
-		return models.User{}, ErrInvalidAuthDetail
+	if !validPassword {
+		return models.User{}, errors.New("invalid password")
+	}
+
+	if user.EmailValidatedAt.IsZero() {
+		return models.User{}, ErrEmailNotVerified
 	}
 
 	return user, nil
-}
-
-func SendResetPasswordEmail(
-	ctx context.Context,
-	db psql.Postgres,
-	emailClient EmailSender,
-	email string,
-) error {
-	tx, err := db.BeginTx(ctx)
-	if err != nil {
-		return err
-	}
-	//nolint:errcheck //how the setup should be
-	defer tx.Rollback(ctx)
-
-	user, err := models.GetUserByEmail(
-		ctx,
-		tx,
-		email,
-	)
-	if err != nil {
-		return err
-	}
-
-	tkn, err := models.NewHashedToken(
-		ctx,
-		tx,
-		models.NewTokenPayload{
-			Expiration: time.Now().Add(1 * time.Hour),
-			Meta: models.MetaInformation{
-				Resource:   models.ResourceUser,
-				ResourceID: user.ID,
-				Scope:      models.ScopeResetPassword,
-			},
-		},
-	)
-	if err != nil {
-		return err
-	}
-
-	html, txt, err := emails.PasswordReset{
-		ResetLink: fmt.Sprintf(
-			"%s%s?token=%s",
-			config.Cfg.GetFullDomain(),
-			routes.ResetPasswordPage.Path,
-			tkn.Value,
-		),
-	}.Generate(ctx)
-	if err != nil {
-		return err
-	}
-
-	if err := emailClient.SendTransaction(ctx, clients.EmailPayload{
-		To:       user.Email,
-		Subject:  "Action Required | Password reset requested",
-		HtmlBody: html.String(),
-		TextBody: txt.String(),
-	}); err != nil {
-		return err
-	}
-
-	return tx.Commit(ctx)
-}
-
-func ChangeUserPassword(
-	ctx context.Context,
-	db psql.Postgres,
-	providedToken string,
-	password string,
-	confirmPassword string,
-) error {
-	tx, err := db.BeginTx(ctx)
-	if err != nil {
-		return err
-	}
-	//nolint:errcheck //how the setup should be
-	defer tx.Rollback(ctx)
-
-	token, err := models.GetHashedToken(
-		ctx,
-		tx,
-		providedToken,
-	)
-	if err != nil {
-		return err
-	}
-
-	if !token.IsValid() || token.Meta.Scope != models.ScopeResetPassword {
-		return ErrInvalidResetToken
-	}
-
-	if err := models.UpdateUserPassword(
-		ctx,
-		tx,
-		models.UpdateUserPasswordPayload{
-			ID:        token.Meta.ResourceID,
-			UpdatedAt: time.Now(),
-			Password: models.PasswordPair{
-				Password:        password,
-				ConfirmPassword: confirmPassword,
-			},
-		},
-	); err != nil {
-		return err
-	}
-
-	if err := models.DeleteToken(
-		ctx, tx, token.ID); err != nil {
-		return err
-	}
-
-	return tx.Commit(ctx)
 }

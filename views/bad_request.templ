@@ -1,0 +1,11 @@
+package views
+
+import "mortenvistisen/views/components"
+
+templ BadRequest() {
+	@base(
+		components.SetTitle("Bad Request"),
+	) {
+		<h1>The request made was invalid</h1>
+	}
+}

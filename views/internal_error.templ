@@ -1,0 +1,11 @@
+package views
+
+import "mortenvistisen/views/components"
+
+templ InternalError() {
+	@base(
+		components.SetTitle("Server Error"),
+	) {
+		<h1>something went wrong on our end.</h1>
+	}
+}

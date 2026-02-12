@@ -1,0 +1,236 @@
+package views
+
+import (
+	"fmt"
+	"mortenvistisen/internal/hypermedia"
+	"mortenvistisen/models"
+	"mortenvistisen/router/routes"
+	"net/http"
+)
+
+templ SubscriberIndex(data models.PaginatedSubscribers) {
+	@adminBase() {
+		<main class="flex-1 px-6 py-10">
+			<div class="mx-auto flex w-full max-w-5xl flex-col gap-6">
+				<div class="flex flex-wrap items-center justify-between gap-4">
+					<h1 class="text-2xl font-semibold tracking-tight text-base-content">Subscribers</h1>
+					<a href={ routes.SubscriberNew.URL() } class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:opacity-60 disabled:cursor-not-allowed bg-primary text-primary-content shadow-sm hover:bg-primary/90 h-9 px-4 py-2 text-sm rounded-field">New Subscriber</a>
+				</div>
+				if len(data.Subscribers) == 0 {
+					<p class="text-sm text-base-content/60">No subscribers found.</p>
+				} else {
+					<div class="rounded-box border border-base-300 bg-base-100 shadow-sm">
+						<div class="flex flex-wrap items-center justify-between gap-3 border-b border-base-300 px-4 py-3">
+							<p class="text-sm text-base-content/70">Showing { fmt.Sprintf("%d-%d", ((data.Page-1)*data.PageSize)+1, ((data.Page-1)*data.PageSize)+int64(len(data.Subscribers))) } of { fmt.Sprintf("%d", data.TotalCount) } subscribers</p>
+							<p class="text-sm text-base-content/70">Page { fmt.Sprintf("%d", data.Page) } of { fmt.Sprintf("%d", data.TotalPages) }</p>
+						</div>
+						<div class="relative w-full overflow-x-auto">
+							<table class="w-full caption-bottom text-sm">
+								<thead class="[&_tr]:border-b [&_tr]:border-base-300">
+									<tr class="border-b border-base-300 bg-base-200/40">
+										<th class="h-10 px-4 text-left align-middle font-medium text-base-content/70">Email</th>
+										<th class="h-10 px-4 text-left align-middle font-medium text-base-content/70">Subscribed At</th>
+										<th class="h-10 px-4 text-left align-middle font-medium text-base-content/70">Referer</th>
+										<th class="h-10 px-4 text-left align-middle font-medium text-base-content/70">Verified</th>
+										<th class="h-10 px-4 text-left align-middle font-medium text-base-content/70">Actions</th>
+									</tr>
+								</thead>
+								<tbody class="[&_tr:last-child]:border-0">
+									for _, subscriber := range data.Subscribers {
+										<tr class="border-b border-base-300 transition-colors hover:bg-base-200/40">
+											<td class="p-4 align-middle font-medium text-base-content">{ subscriber.Email }</td>
+											<td class="p-4 align-middle text-base-content/80">{ subscriber.SubscribedAt.Format("2006-01-02") }</td>
+											<td class="p-4 align-middle text-base-content/80">
+												<div class="max-w-[14rem] truncate">{ subscriber.Referer }</div>
+											</td>
+											<td class="p-4 align-middle">
+												if subscriber.IsVerified {
+													<span class="inline-flex items-center rounded-field bg-success/15 px-2.5 py-1 text-xs font-medium text-success">Yes</span>
+												} else {
+													<span class="inline-flex items-center rounded-field bg-base-300 px-2.5 py-1 text-xs font-medium text-base-content/70">No</span>
+												}
+											</td>
+											<td class="p-4 align-middle">
+												<div class="flex flex-wrap gap-2 text-sm">
+													<a class="inline-flex h-8 items-center rounded-field border border-base-300 px-3 text-base-content/80 transition hover:bg-base-200 hover:text-base-content" href={ routes.SubscriberShow.URL(subscriber.ID) }>View</a>
+													<a class="inline-flex h-8 items-center rounded-field border border-base-300 px-3 text-base-content/80 transition hover:bg-base-200 hover:text-base-content" href={ routes.SubscriberEdit.URL(subscriber.ID) }>Edit</a>
+												</div>
+											</td>
+										</tr>
+									}
+								</tbody>
+							</table>
+						</div>
+						if data.TotalPages > 1 {
+							<div class="border-t border-base-300 px-4 py-3">
+								<nav class="flex items-center justify-between">
+									if data.Page > 1 {
+										<a href={ fmt.Sprintf("%s?page=%d&per_page=%d", routes.SubscriberIndex.URL(), data.Page-1, data.PageSize) } class="inline-flex h-9 items-center rounded-field border border-base-300 px-3 text-sm text-base-content/80 transition hover:bg-base-200 hover:text-base-content">Previous</a>
+									} else {
+										<span class="inline-flex h-9 items-center rounded-field border border-base-300 px-3 text-sm text-base-content/40">Previous</span>
+									}
+									<span class="text-sm text-base-content/70">{ fmt.Sprintf("Page %d of %d", data.Page, data.TotalPages) }</span>
+									if data.Page < data.TotalPages {
+										<a href={ fmt.Sprintf("%s?page=%d&per_page=%d", routes.SubscriberIndex.URL(), data.Page+1, data.PageSize) } class="inline-flex h-9 items-center rounded-field border border-base-300 px-3 text-sm text-base-content/80 transition hover:bg-base-200 hover:text-base-content">Next</a>
+									} else {
+										<span class="inline-flex h-9 items-center rounded-field border border-base-300 px-3 text-sm text-base-content/40">Next</span>
+									}
+								</nav>
+							</div>
+						}
+					</div>
+				}
+			</div>
+		</main>
+	}
+}
+
+templ SubscriberShow(subscriber models.Subscriber) {
+	@adminBase() {
+		<main class="flex-1 px-6 py-10">
+			<div class="mx-auto flex w-full max-w-4xl flex-col gap-6">
+				<div class="flex flex-wrap items-center justify-between gap-4">
+					<h1 class="text-2xl font-semibold tracking-tight text-base-content">Subscriber Details</h1>
+					<div class="flex flex-wrap items-center gap-3">
+						<a href={ routes.SubscriberEdit.URL(subscriber.ID) } class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:opacity-60 disabled:cursor-not-allowed bg-primary text-primary-content shadow-sm hover:bg-primary/90 h-9 px-4 py-2 text-sm rounded-field">Edit</a>
+						<a class="text-sm text-base-content/70 hover:text-base-content" href={ routes.SubscriberIndex.URL() }>Back to List</a>
+					</div>
+				</div>
+				<div class="rounded-box border border-base-300 bg-base-100 shadow-sm">
+					<div class="p-6 pt-0">
+						<div class="grid gap-5 sm:grid-cols-2">
+							<div class="space-y-1">
+								<label class="text-sm font-medium leading-none text-base-content/80 peer-disabled:cursor-not-allowed peer-disabled:opacity-60">Created At</label>
+								<p class="text-sm text-base-content">{ subscriber.CreatedAt.String() }</p>
+							</div>
+							<div class="space-y-1">
+								<label class="text-sm font-medium leading-none text-base-content/80 peer-disabled:cursor-not-allowed peer-disabled:opacity-60">Updated At</label>
+								<p class="text-sm text-base-content">{ subscriber.UpdatedAt.String() }</p>
+							</div>
+							<div class="space-y-1">
+								<label class="text-sm font-medium leading-none text-base-content/80 peer-disabled:cursor-not-allowed peer-disabled:opacity-60">Email</label>
+								<p class="text-sm text-base-content">{ subscriber.Email }</p>
+							</div>
+							<div class="space-y-1">
+								<label class="text-sm font-medium leading-none text-base-content/80 peer-disabled:cursor-not-allowed peer-disabled:opacity-60">Subscribed At</label>
+								<p class="text-sm text-base-content">{ subscriber.SubscribedAt.String() }</p>
+							</div>
+							<div class="space-y-1">
+								<label class="text-sm font-medium leading-none text-base-content/80 peer-disabled:cursor-not-allowed peer-disabled:opacity-60">Referer</label>
+								<p class="text-sm text-base-content">{ subscriber.Referer }</p>
+							</div>
+							<div class="space-y-1">
+								<label class="text-sm font-medium leading-none text-base-content/80 peer-disabled:cursor-not-allowed peer-disabled:opacity-60">Is Verified</label>
+								<p class="text-sm text-base-content">{ fmt.Sprintf("%t", subscriber.IsVerified) }</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</main>
+	}
+}
+
+templ SubscriberNew() {
+	@adminBase() {
+		<main class="flex-1 flex items-center justify-center px-6 py-10">
+			<div class="mx-auto flex w-full max-w-md flex-col gap-6">
+				<div class="rounded-box border border-base-300 bg-base-100 shadow-sm">
+					<div class="flex flex-col space-y-1.5 p-6">
+						<h3 class="text-lg font-semibold leading-none tracking-tight text-base-content">New Subscriber</h3>
+						<p class="text-sm text-base-content/60">Enter the details for the new subscriber.</p>
+					</div>
+					<div class="p-6 pt-0">
+						<form class="space-y-5" data-indicator:submitting data-on:submit={ "!$submitting && " + hypermedia.DataAction(http.MethodPost, routes.SubscriberCreate.URL()) }>
+							<fieldset data-attr:disabled="$submitting">
+								<div class="space-y-4">
+									<div class="space-y-1">
+										<label class="text-sm font-medium leading-none text-base-content/80 peer-disabled:cursor-not-allowed peer-disabled:opacity-60" for="email">Email</label>
+										<input type="text" class="flex h-9 w-full rounded-field border bg-base-200 px-3 py-1 text-sm text-base-content shadow-inner transition placeholder:text-base-content/40 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:cursor-not-allowed disabled:opacity-60 border-base-300" data-bind="email"/>
+									</div>
+									<div class="space-y-1">
+										<label class="text-sm font-medium leading-none text-base-content/80 peer-disabled:cursor-not-allowed peer-disabled:opacity-60" for="subscribedAt">Subscribed At</label>
+										<div class="relative w-full">
+											<div class="relative">
+												<input type="date" class="flex h-9 w-full rounded-field border border-base-300 bg-base-200 px-3 py-1 pr-8 text-sm text-base-content shadow-inner transition placeholder:text-base-content/40 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:cursor-not-allowed disabled:opacity-60" data-bind="subscribedAt"/>
+												<div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+													<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-base-content/40"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>
+												</div>
+											</div>
+										</div>
+									</div>
+									<div class="space-y-1">
+										<label class="text-sm font-medium leading-none text-base-content/80 peer-disabled:cursor-not-allowed peer-disabled:opacity-60" for="referer">Referer</label>
+										<input type="text" class="flex h-9 w-full rounded-field border bg-base-200 px-3 py-1 text-sm text-base-content shadow-inner transition placeholder:text-base-content/40 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:cursor-not-allowed disabled:opacity-60 border-base-300" data-bind="referer"/>
+									</div>
+									<div class="flex items-center gap-2">
+										<input type="checkbox" class="h-4 w-4 shrink-0 rounded border border-base-300 bg-base-200 accent-primary transition focus:ring-2 focus:ring-primary/50 disabled:cursor-not-allowed disabled:opacity-60" data-bind="isVerified"/>
+										<label class="text-sm font-medium leading-none text-base-content/80 peer-disabled:cursor-not-allowed peer-disabled:opacity-60" for="isVerified">Is Verified</label>
+									</div>
+								</div>
+								<div class="mt-6 space-y-3">
+									<button type="submit" class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:opacity-60 disabled:cursor-not-allowed bg-primary text-primary-content shadow-sm hover:bg-primary/90 h-9 px-4 py-2 text-sm rounded-field w-full">Create Subscriber</button>
+									<a class="inline-flex h-9 w-full items-center justify-center rounded-field border border-base-300 px-4 py-2 text-sm font-medium text-base-content/80 transition hover:bg-base-200/70 hover:text-base-content" href={ routes.SubscriberIndex.URL() }>Back to List</a>
+								</div>
+							</fieldset>
+						</form>
+					</div>
+				</div>
+			</div>
+		</main>
+	}
+}
+
+templ SubscriberEdit(subscriber models.Subscriber) {
+	@adminBase() {
+		<main class="flex-1 flex items-center justify-center px-6 py-10">
+			<div class="mx-auto flex w-full max-w-md flex-col gap-6">
+				<div class="rounded-box border border-base-300 bg-base-100 shadow-sm">
+					<div class="flex flex-col space-y-1.5 p-6">
+						<h3 class="text-lg font-semibold leading-none tracking-tight text-base-content">Edit Subscriber</h3>
+						<p class="text-sm text-base-content/60">Update the details for this subscriber.</p>
+					</div>
+					<div class="p-6 pt-0">
+						<form class="space-y-5" data-indicator:submitting data-on:submit={ "!$submitting && " + hypermedia.DataAction(http.MethodPut, routes.SubscriberUpdate.URL(subscriber.ID)) }>
+							<fieldset data-attr:disabled="$submitting">
+								<div class="space-y-4">
+									<div class="space-y-1">
+										<label class="text-sm font-medium leading-none text-base-content/80 peer-disabled:cursor-not-allowed peer-disabled:opacity-60" for="email">Email</label>
+										<input type="text" class="flex h-9 w-full rounded-field border bg-base-200 px-3 py-1 text-sm text-base-content shadow-inner transition placeholder:text-base-content/40 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:cursor-not-allowed disabled:opacity-60 border-base-300" data-bind="email" value={ subscriber.Email }/>
+									</div>
+									<div class="space-y-1">
+										<label class="text-sm font-medium leading-none text-base-content/80 peer-disabled:cursor-not-allowed peer-disabled:opacity-60" for="subscribedAt">Subscribed At</label>
+										<div class="relative w-full">
+											<div class="relative">
+												<input type="date" class="flex h-9 w-full rounded-field border border-base-300 bg-base-200 px-3 py-1 pr-8 text-sm text-base-content shadow-inner transition placeholder:text-base-content/40 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:cursor-not-allowed disabled:opacity-60" data-bind="subscribedAt" value={ subscriber.SubscribedAt.String() }/>
+												<div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+													<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-base-content/40"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>
+												</div>
+											</div>
+										</div>
+									</div>
+									<div class="space-y-1">
+										<label class="text-sm font-medium leading-none text-base-content/80 peer-disabled:cursor-not-allowed peer-disabled:opacity-60" for="referer">Referer</label>
+										<input type="text" class="flex h-9 w-full rounded-field border bg-base-200 px-3 py-1 text-sm text-base-content shadow-inner transition placeholder:text-base-content/40 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:cursor-not-allowed disabled:opacity-60 border-base-300" data-bind="referer" value={ subscriber.Referer }/>
+									</div>
+									<div class="flex items-center gap-2">
+										<input type="checkbox" class="h-4 w-4 shrink-0 rounded border border-base-300 bg-base-200 accent-primary transition focus:ring-2 focus:ring-primary/50 disabled:cursor-not-allowed disabled:opacity-60" data-bind="isVerified" if subscriber.IsVerified {
+	checked
+}/>
+										<label class="text-sm font-medium leading-none text-base-content/80 peer-disabled:cursor-not-allowed peer-disabled:opacity-60" for="isVerified">Is Verified</label>
+									</div>
+								</div>
+								<div class="mt-6 space-y-3">
+									<button type="submit" class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:opacity-60 disabled:cursor-not-allowed bg-primary text-primary-content shadow-sm hover:bg-primary/90 h-9 px-4 py-2 text-sm rounded-field w-full">Update Subscriber</button>
+									<a class="inline-flex h-9 w-full items-center justify-center rounded-field border border-base-300 px-4 py-2 text-sm font-medium text-base-content/80 transition hover:bg-base-200/70 hover:text-base-content" href={ routes.SubscriberIndex.URL() }>Back to List</a>
+								</div>
+							</fieldset>
+						</form>
+						<div role="separator" class="my-6 shrink-0 bg-base-300 h-px w-full"></div>
+						<button type="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:opacity-60 disabled:cursor-not-allowed bg-error text-error-content shadow-sm hover:bg-error/90 h-9 px-4 py-2 text-sm rounded-field w-full" data-on:click={ hypermedia.DataAction(http.MethodDelete, routes.SubscriberDestroy.URL(subscriber.ID)) }>Destroy Subscriber</button>
+					</div>
+				</div>
+			</div>
+		</main>
+	}
+}

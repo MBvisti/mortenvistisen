@@ -1,0 +1,110 @@
+package views
+
+import (
+	"mortenvistisen/router/cookies"
+	"mortenvistisen/router/routes"
+	"mortenvistisen/views/components"
+)
+
+templ adminSidebarIcon() {
+	<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
+		<line x1="4" x2="20" y1="12" y2="12"></line>
+		<line x1="4" x2="20" y1="6" y2="6"></line>
+		<line x1="4" x2="20" y1="18" y2="18"></line>
+	</svg>
+}
+
+templ adminNavLinks() {
+	<li>
+		@components.Button(
+			components.ButtonProps{Label: "Dashboard"},
+		).MakeGhost().WithSize(components.ButtonSizeDefault).WithHref(routes.AdminHome.URL()).WithFullWidth(true).WithClass("justify-start").Render()
+	</li>
+	<li>
+		@components.Button(
+			components.ButtonProps{Label: "Articles"},
+		).MakeGhost().WithSize(components.ButtonSizeDefault).WithHref(routes.ArticleIndex.URL()).WithFullWidth(true).WithClass("justify-start").Render()
+	</li>
+	<li>
+		@components.Button(
+			components.ButtonProps{Label: "Newsletters"},
+		).MakeGhost().WithSize(components.ButtonSizeDefault).WithHref(routes.NewsletterIndex.URL()).WithFullWidth(true).WithClass("justify-start").Render()
+	</li>
+	<li>
+		@components.Button(
+			components.ButtonProps{Label: "Projects"},
+		).MakeGhost().WithSize(components.ButtonSizeDefault).WithHref(routes.ProjectIndex.URL()).WithFullWidth(true).WithClass("justify-start").Render()
+	</li>
+	<li>
+		@components.Button(
+			components.ButtonProps{Label: "Subscribers"},
+		).MakeGhost().WithSize(components.ButtonSizeDefault).WithHref(routes.SubscriberIndex.URL()).WithFullWidth(true).WithClass("justify-start").Render()
+	</li>
+}
+
+templ adminBase(headOpts ...components.HeadDataOption) {
+	<!DOCTYPE html>
+	<html lang="en" class="dark">
+		@components.SetupHead(ctx, append(headOpts, components.AddStylesheet(routes.Style.URL("easymde.css")))...)
+		<body class="min-h-screen flex bg-base-200 text-base-content">
+			<!-- Desktop sidebar -->
+			<aside class="hidden md:flex flex-col w-64 min-h-screen bg-base-100 border-r border-base-300">
+				<div class="h-14 flex items-center px-4 border-b border-base-300">
+					<a href={ templ.URL(routes.AdminHome.URL()) } class="text-sm font-semibold text-base-content">Admin</a>
+				</div>
+				<nav class="flex-1 p-3 overflow-y-auto">
+					<p class="px-3 py-2 text-xs font-medium text-base-content/60 uppercase tracking-wider">Resources</p>
+					<ul class="flex flex-col gap-0.5">
+						@adminNavLinks()
+					</ul>
+				</nav>
+				<div class="p-3 border-t border-base-300">
+					@components.Button(
+						components.ButtonProps{Label: "Back to site"},
+					).MakeGhost().WithSize(components.ButtonSizeSm).WithHref(routes.HomePage.URL()).WithFullWidth(true).WithClass("justify-start").Render()
+				</div>
+			</aside>
+			<!-- Mobile header -->
+			<div class="md:hidden fixed top-0 left-0 right-0 z-40 bg-base-100 border-b border-base-300 h-14 px-4 flex items-center justify-between">
+				<a href={ templ.URL(routes.AdminHome.URL()) } class="text-sm font-semibold text-base-content">Admin</a>
+				@components.Sheet(adminSidebarIcon(), components.SheetSideLeft) {
+					@components.SheetHeader() {
+						@components.SheetTitle("Admin Navigation")
+					}
+					<p class="px-3 py-2 text-xs font-medium text-base-content/60 uppercase tracking-wider mt-2">Resources</p>
+					<ul class="flex flex-col gap-0.5">
+						@adminNavLinks()
+					</ul>
+					<div class="mt-8">
+						@components.Button(
+							components.ButtonProps{Label: "Back to site"},
+						).MakeGhost().WithSize(components.ButtonSizeSm).WithHref(routes.HomePage.URL()).WithFullWidth(true).WithClass("justify-start").Render()
+					</div>
+				}
+			</div>
+			<!-- Main content area with top bar -->
+			<div class="flex-1 flex flex-col mt-14 md:mt-0">
+				<!-- Top bar -->
+				<header class="hidden md:flex h-14 items-center justify-between border-b border-base-300 bg-base-100 px-6">
+					<div class="flex items-center gap-2">
+						@adminSidebarIcon()
+					</div>
+					<div class="flex items-center gap-2">
+						@components.Button(
+							components.ButtonProps{Label: "Back to site"},
+						).MakeGhost().WithSize(components.ButtonSizeSm).WithHref(routes.HomePage.URL()).Render()
+					</div>
+				</header>
+				<!-- Page content -->
+				<main class="flex-1 p-6 md:p-8">
+					{ children... }
+				</main>
+			</div>
+		</body>
+		<div id="flashContainer" class="fixed top-4 right-4 z-50 space-y-2">
+			for _, flash := range cookies.GetFlashesCtx(ctx) {
+				@components.ToastMessage(flash)
+			}
+		</div>
+	</html>
+}

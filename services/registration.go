@@ -2,128 +2,169 @@ package services
 
 import (
 	"context"
+	"database/sql"
+	"encoding/json"
 	"errors"
 	"time"
 
-	"github.com/mbvisti/mortenvistisen/clients"
-	"github.com/mbvisti/mortenvistisen/emails"
-	"github.com/mbvisti/mortenvistisen/models"
-	"github.com/mbvisti/mortenvistisen/psql"
+	"mortenvistisen/email"
+	"mortenvistisen/internal/storage"
+	"mortenvistisen/models"
+	"mortenvistisen/queue"
+	"mortenvistisen/queue/jobs"
 )
 
-type EmailSender interface {
-	SendTransaction(
-		ctx context.Context,
-		payload clients.EmailPayload,
-	) error
+const userEmailVerification = "user_email_verification"
+
+type RegisterUserData struct {
+	Email           string
+	Password        string
+	ConfirmPassword string
 }
 
 func RegisterUser(
 	ctx context.Context,
-	db psql.Postgres,
-	emailClient EmailSender,
-	email string,
-	password string,
-	confirmPassword string,
+	db storage.Pool,
+	insertOnly queue.InsertOnly,
+	salt string,
+	data RegisterUserData,
 ) error {
 	tx, err := db.BeginTx(ctx)
 	if err != nil {
 		return err
 	}
-	//nolint:errcheck //how the setup should be
-	defer tx.Rollback(ctx)
 
-	if _, err := models.GetUserByEmail(ctx, tx, email); err == nil {
-		return errors.New("user already registred")
-	}
-
-	user, err := models.NewUser(ctx, tx, models.NewUserPayload{
-		Email: email,
-		Password: models.PasswordPair{
-			Password:        password,
-			ConfirmPassword: confirmPassword,
+	user, err := models.CreateUser(ctx, tx, salt, models.CreateUserData{
+		Email: data.Email,
+		PasswordPair: models.PasswordPair{
+			Password:        data.Password,
+			ConfirmPassword: data.ConfirmPassword,
 		},
 	})
 	if err != nil {
 		return err
 	}
 
-	codeToken, err := models.NewCodeToken(ctx, tx, models.NewTokenPayload{
-		Expiration: time.Now().Add(48 * time.Minute),
-		Meta: models.MetaInformation{
-			Resource:   models.ResourceUser,
-			ResourceID: user.ID,
-			Scope:      models.ScopeEmailVerification,
-		},
+	meta, err := json.Marshal(map[string]string{
+		"email": user.Email,
 	})
 	if err != nil {
 		return err
 	}
 
-	html, txt, err := emails.SignupWelcome{
-		VerificationCode: codeToken.Value,
-	}.Generate(ctx)
-	if err != nil {
-		return err
-	}
-
-	if err := emailClient.SendTransaction(ctx, clients.EmailPayload{
-		To:       user.Email,
-		Subject:  "Welcome onboard!",
-		HtmlBody: html.String(),
-		TextBody: txt.String(),
-	}); err != nil {
-		return err
-	}
-
-	return tx.Commit(ctx)
-}
-
-func ValidateUserEmail(
-	ctx context.Context,
-	db psql.Postgres,
-	tokenValue string,
-) error {
-	tx, err := db.BeginTx(ctx)
-	if err != nil {
-		return err
-	}
-	//nolint:errcheck //how the setup should be
-	defer tx.Rollback(ctx)
-
-	token, err := models.GetHashedToken(ctx, tx, tokenValue)
-	if err != nil {
-		return err
-	}
-
-	if !token.IsValid() || token.Meta.Scope != models.ScopeEmailVerification {
-		return errors.New("invalid token")
-	}
-
-	user, err := models.GetUser(
+	code, err := models.CreateCodeToken(
 		ctx,
 		tx,
-		token.Meta.ResourceID,
+		salt,
+		userEmailVerification,
+		time.Now().Add(24*time.Hour),
+		meta,
 	)
 	if err != nil {
 		return err
 	}
 
-	if err := models.UpdateUserEmailToVerified(
-		ctx,
-		tx,
-		models.UpdateUserEmailToVerifiedPayload{
-			ID:         user.ID,
-			Email:      user.Email,
-			VerifiedAt: time.Now(),
-		},
-	); err != nil {
+	vEmail := email.VerifyEmail{VerificationCode: code}
+
+	html, err := vEmail.ToHTML()
+	if err != nil {
 		return err
 	}
 
-	if err := models.DeleteToken(ctx, tx, token.ID); err != nil {
+	text, err := vEmail.ToText()
+	if err != nil {
+		return err
+	}
+
+	_, err = insertOnly.InsertTx(ctx, tx, jobs.SendTransactionalEmailArgs{
+		Data: email.TransactionalData{
+			To:       user.Email,
+			From:     "hello@mortenvistisen.com",
+			Subject:  "Verify Your Email Address",
+			HTMLBody: html,
+			TextBody: text,
+		},
+	}, nil)
+	if err != nil {
 		return err
 	}
 
 	return tx.Commit(ctx)
+}
+
+var (
+	ErrInvalidVerificationCode = errors.New("invalid verification code")
+	ErrExpiredVerificationCode = errors.New("verification code has expired")
+	ErrUserNotFound            = errors.New("user not found")
+)
+
+type VerifyEmailData struct {
+	Code string
+}
+
+func VerifyEmail(
+	ctx context.Context,
+	db storage.Pool,
+	salt string,
+	data VerifyEmailData,
+) (models.User, error) {
+	tx, err := db.BeginTx(ctx)
+	if err != nil {
+		return models.User{}, err
+	}
+	defer tx.Rollback(ctx)
+
+	token, err := models.FindTokenByScopeAndHash(
+		ctx,
+		tx,
+		salt,
+		userEmailVerification,
+		data.Code,
+	)
+	if err != nil {
+		return models.User{}, ErrInvalidVerificationCode
+	}
+
+	if !token.IsValid(data.Code, salt) {
+		return models.User{}, ErrExpiredVerificationCode
+	}
+
+	var meta map[string]string
+	if err := json.Unmarshal(token.MetaData, &meta); err != nil {
+		return models.User{}, err
+	}
+
+	email, ok := meta["email"]
+	if !ok {
+		return models.User{}, errors.New("token metadata missing email")
+	}
+
+	user, err := models.FindUserByEmail(ctx, tx, email)
+	if err != nil {
+		return models.User{}, err
+	}
+
+	user, err = models.UpdateUser(ctx, tx, models.UpdateUserData{
+		ID:    user.ID,
+		Email: user.Email,
+		EmailValidatedAt: sql.NullTime{
+			Time:  time.Now(),
+			Valid: true,
+		},
+		Password: user.Password,
+		IsAdmin:  user.IsAdmin,
+	})
+	if err != nil {
+		return models.User{}, err
+	}
+
+	if err := models.DestroyToken(ctx, tx, token.ID); err != nil {
+		return models.User{}, err
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return models.User{}, err
+	}
+
+	return user, nil
 }

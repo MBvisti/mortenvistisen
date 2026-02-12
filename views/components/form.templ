@@ -1,0 +1,51 @@
+package components
+
+import "mortenvistisen/internal/hypermedia"
+
+type FormProps struct {
+	Action string
+	URL    string
+}
+
+templ Form(props FormProps, opts ...Opt) {
+	if fragmentFrom(opts) != "" {
+		@templ.Fragment(fragmentFrom(opts)) {
+			<form
+				if idFrom(opts) != "" {
+					id={ idFrom(opts) }
+				}
+				data-indicator:submitting
+				data-on:submit={ "!$submitting && " + hypermedia.DataAction(props.Action, props.URL) }
+				if attrsFrom(opts) != nil {
+					{ attrsFrom(opts)... }
+				}
+			>
+				<fieldset
+					class={ classFrom(opts) }
+					data-attr:disabled="$submitting"
+				>
+					{ children... }
+				</fieldset>
+			</form>
+		}
+	} else {
+		<form
+			class={ classFrom(opts) }
+			if idFrom(opts) != "" {
+				id={ idFrom(opts) }
+			}
+			data-indicator:submitting
+			data-on:submit={ "!$submitting && " + hypermedia.DataAction(props.Action, props.URL) }
+			if attrsFrom(opts) != nil {
+				{ attrsFrom(opts)... }
+			}
+		>
+			<fieldset
+				class={ classFrom(opts) }
+				data-attr:disabled="$submitting"
+			>
+				{ children... }
+			</fieldset>
+		</form>
+	}
+}

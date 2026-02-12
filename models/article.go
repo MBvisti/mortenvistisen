@@ -2,361 +2,221 @@ package models
 
 import (
 	"context"
-	"database/sql"
 	"errors"
-	"log/slog"
 	"time"
 
-	"github.com/Masterminds/squirrel"
-	"github.com/google/uuid"
+	"github.com/gosimple/slug"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/mbvisti/mortenvistisen/models/internal/db"
+
+	"mortenvistisen/internal/storage"
+	"mortenvistisen/models/internal/db"
 )
 
 type Article struct {
-	ID               uuid.UUID
+	ID               int32
 	CreatedAt        time.Time
 	UpdatedAt        time.Time
 	FirstPublishedAt time.Time
-	IsPublished      bool
+	Published        bool
 	Title            string
 	Excerpt          string
 	MetaTitle        string
 	MetaDescription  string
 	Slug             string
 	ImageLink        string
-	Content          string
 	ReadTime         int32
-	Tags             []ArticleTag
+	Content          string
 }
 
-func populateArticleTags(
+func FindArticle(
 	ctx context.Context,
-	dbtx db.DBTX,
-	articles []Article,
-) error {
-	for i := range articles {
-		tags, err := GetArticleTagsByArticleID(ctx, dbtx, articles[i].ID)
-		if err != nil {
-			return err
-		}
-		articles[i].Tags = tags
-	}
-	return nil
-}
-
-func GetArticleByID(
-	ctx context.Context,
-	dbtx db.DBTX,
-	id uuid.UUID,
+	exec storage.Executor,
+	id int32,
 ) (Article, error) {
-	row, err := db.Stmts.QueryArticleByID(ctx, dbtx, id)
+	row, err := queries.QueryArticleByID(ctx, exec, id)
 	if err != nil {
 		return Article{}, err
 	}
 
-	tags, err := GetArticleTagsByArticleID(ctx, dbtx, id)
-	if err != nil {
-		return Article{}, err
-	}
-
-	return Article{
-		ID:               row.ID,
-		CreatedAt:        row.CreatedAt.Time,
-		UpdatedAt:        row.UpdatedAt.Time,
-		FirstPublishedAt: row.FirstPublishedAt.Time,
-		IsPublished:      row.IsPublished.Bool,
-		Title:            row.Title,
-		Excerpt:          row.Excerpt,
-		MetaTitle:        row.MetaTitle,
-		MetaDescription:  row.MetaDescription,
-		Slug:             row.Slug,
-		ImageLink:        row.ImageLink.String,
-		Content:          row.Content.String,
-		ReadTime:         row.ReadTime.Int32,
-		Tags:             tags,
-	}, nil
+	return rowToArticle(row), nil
 }
 
-func GetArticleByTitle(
+func FindArticleBySlug(
 	ctx context.Context,
-	dbtx db.DBTX,
-	title string,
-) (Article, error) {
-	row, err := db.Stmts.QueryArticleByTitle(ctx, dbtx, title)
-	if err != nil {
-		return Article{}, err
-	}
-
-	tags, err := GetArticleTagsByArticleID(ctx, dbtx, row.ID)
-	if err != nil {
-		return Article{}, err
-	}
-
-	return Article{
-		ID:               row.ID,
-		CreatedAt:        row.CreatedAt.Time,
-		UpdatedAt:        row.UpdatedAt.Time,
-		FirstPublishedAt: row.FirstPublishedAt.Time,
-		IsPublished:      row.IsPublished.Bool,
-		Title:            row.Title,
-		Excerpt:          row.Excerpt,
-		MetaTitle:        row.MetaTitle,
-		MetaDescription:  row.MetaDescription,
-		Slug:             row.Slug,
-		ImageLink:        row.ImageLink.String,
-		Content:          row.Content.String,
-		ReadTime:         row.ReadTime.Int32,
-		Tags:             tags,
-	}, nil
-}
-
-func GetArticleBySlug(
-	ctx context.Context,
-	dbtx db.DBTX,
+	exec storage.Executor,
 	slug string,
 ) (Article, error) {
-	row, err := db.Stmts.QueryArticleBySlug(ctx, dbtx, slug)
+	row, err := queries.QueryArticleBySlug(ctx, exec, slug)
 	if err != nil {
 		return Article{}, err
 	}
 
-	tags, err := GetArticleTagsByArticleID(ctx, dbtx, row.ID)
-	if err != nil {
-		return Article{}, err
-	}
-
-	return Article{
-		ID:               row.ID,
-		CreatedAt:        row.CreatedAt.Time,
-		UpdatedAt:        row.UpdatedAt.Time,
-		FirstPublishedAt: row.FirstPublishedAt.Time,
-		IsPublished:      row.IsPublished.Bool,
-		Title:            row.Title,
-		Excerpt:          row.Excerpt,
-		MetaTitle:        row.MetaTitle,
-		MetaDescription:  row.MetaDescription,
-		Slug:             row.Slug,
-		ImageLink:        row.ImageLink.String,
-		Content:          row.Content.String,
-		ReadTime:         row.ReadTime.Int32,
-		Tags:             tags,
-	}, nil
+	return rowToArticle(row), nil
 }
 
-func GetArticles(
+type CreateArticleData struct {
+	FirstPublishedAt time.Time
+	Published        bool
+	Title            string
+	Excerpt          string
+	MetaTitle        string
+	MetaDescription  string
+	Slug             string
+	ImageLink        string
+	ReadTime         int32
+	Content          string
+}
+
+func CreateArticle(
 	ctx context.Context,
-	dbtx db.DBTX,
-) ([]Article, error) {
-	rows, err := db.Stmts.QueryArticles(ctx, dbtx)
-	if err != nil {
-		return nil, err
+	exec storage.Executor,
+	data CreateArticleData,
+) (Article, error) {
+	if err := Validate.Struct(data); err != nil {
+		return Article{}, errors.Join(ErrDomainValidation, err)
 	}
 
-	articles := make([]Article, len(rows))
-	for i, row := range rows {
-		articles[i] = Article{
-			ID:               row.ID,
-			CreatedAt:        row.CreatedAt.Time,
-			UpdatedAt:        row.UpdatedAt.Time,
-			FirstPublishedAt: row.FirstPublishedAt.Time,
-			IsPublished:      row.IsPublished.Bool,
-			Title:            row.Title,
-			Excerpt:          row.Excerpt,
-			MetaTitle:        row.MetaTitle,
-			MetaDescription:  row.MetaDescription,
-			Slug:             row.Slug,
-			ImageLink:        row.ImageLink.String,
-			Content:          row.Content.String,
-			ReadTime:         row.ReadTime.Int32,
-		}
-	}
-
-	if err := populateArticleTags(ctx, dbtx, articles); err != nil {
-		return nil, err
-	}
-
-	return articles, nil
-}
-
-func GetPublishedArticles(
-	ctx context.Context,
-	dbtx db.DBTX,
-) ([]Article, error) {
-	rows, err := db.Stmts.QueryPublishedArticles(ctx, dbtx)
-	if err != nil {
-		return nil, err
-	}
-
-	articles := make([]Article, len(rows))
-	for i, row := range rows {
-		articles[i] = Article{
-			ID:               row.ID,
-			CreatedAt:        row.CreatedAt.Time,
-			UpdatedAt:        row.UpdatedAt.Time,
-			FirstPublishedAt: row.FirstPublishedAt.Time,
-			IsPublished:      row.IsPublished.Bool,
-			Title:            row.Title,
-			Excerpt:          row.Excerpt,
-			MetaTitle:        row.MetaTitle,
-			MetaDescription:  row.MetaDescription,
-			Slug:             row.Slug,
-			ImageLink:        row.ImageLink.String,
-			Content:          row.Content.String,
-			ReadTime:         row.ReadTime.Int32,
-		}
-	}
-
-	if err := populateArticleTags(ctx, dbtx, articles); err != nil {
-		return nil, err
-	}
-
-	return articles, nil
-}
-
-func GetDraftArticles(
-	ctx context.Context,
-	dbtx db.DBTX,
-) ([]Article, error) {
-	rows, err := db.Stmts.QueryDraftArticles(ctx, dbtx)
-	if err != nil {
-		return nil, err
-	}
-
-	articles := make([]Article, len(rows))
-	for i, row := range rows {
-		articles[i] = Article{
-			ID:               row.ID,
-			CreatedAt:        row.CreatedAt.Time,
-			UpdatedAt:        row.UpdatedAt.Time,
-			FirstPublishedAt: row.FirstPublishedAt.Time,
-			IsPublished:      row.IsPublished.Bool,
-			Title:            row.Title,
-			Excerpt:          row.Excerpt,
-			MetaTitle:        row.MetaTitle,
-			MetaDescription:  row.MetaDescription,
-			Slug:             row.Slug,
-			ImageLink:        row.ImageLink.String,
-			Content:          row.Content.String,
-			ReadTime:         row.ReadTime.Int32,
-		}
-	}
-
-	if err := populateArticleTags(ctx, dbtx, articles); err != nil {
-		return nil, err
-	}
-
-	return articles, nil
-}
-
-type PaginationResult struct {
-	Articles    []Article
-	TotalCount  int64
-	Page        int
-	PageSize    int
-	TotalPages  int
-	HasNext     bool
-	HasPrevious bool
-}
-
-type SortConfig struct {
-	Field string
-	Order string
-}
-
-var allowedArticleSortFields = map[string]string{
-	"title":      "title",
-	"created_at": "created_at",
-	"updated_at": "updated_at",
-	"status":     "is_published",
-	"published":  "first_published_at",
-	"read_time":  "read_time",
-}
-
-func GetArticlesPaginated(
-	ctx context.Context,
-	dbtx db.DBTX,
-	page int,
-	pageSize int,
-) (PaginationResult, error) {
-	if page < 1 {
-		page = 1
-	}
-	if pageSize < 1 {
-		pageSize = 10
-	}
-	if pageSize > 100 {
-		pageSize = 100 // Limit max page size
-	}
-
-	offset := (page - 1) * pageSize
-
-	// Get total count
-	totalCount, err := db.Stmts.CountArticles(ctx, dbtx)
-	if err != nil {
-		return PaginationResult{}, err
-	}
-
-	// Get paginated articles
-	rows, err := db.Stmts.QueryArticlesPaginated(
-		ctx,
-		dbtx,
-		db.QueryArticlesPaginatedParams{
-			//nolint:gosec // pageSize is bounded above
-			Limit: int32(pageSize),
-			//nolint:gosec // offset is calculated from bounded values
-			Offset: int32(
-				offset,
-			),
+	params := db.InsertArticleParams{
+		FirstPublishedAt: pgtype.Timestamptz{
+			Time:  time.Now(),
+			Valid: data.Published,
 		},
-	)
+		Published:       data.Published,
+		Title:           data.Title,
+		Excerpt:         pgtype.Text{String: data.Excerpt, Valid: true},
+		MetaTitle:       pgtype.Text{String: data.MetaTitle, Valid: true},
+		MetaDescription: pgtype.Text{String: data.MetaDescription, Valid: true},
+		Slug:            slug.Make(data.Title),
+		ImageLink:       pgtype.Text{String: data.ImageLink, Valid: true},
+		ReadTime:        pgtype.Int4{Int32: data.ReadTime, Valid: true},
+		Content:         pgtype.Text{String: data.Content, Valid: true},
+	}
+	row, err := queries.InsertArticle(ctx, exec, params)
 	if err != nil {
-		return PaginationResult{}, err
+		return Article{}, err
+	}
+
+	return rowToArticle(row), nil
+}
+
+type UpdateArticleData struct {
+	ID              int32
+	UpdatedAt       time.Time
+	Published       bool
+	Title           string
+	Excerpt         string
+	MetaTitle       string
+	MetaDescription string
+	Slug            string
+	ImageLink       string
+	ReadTime        int32
+	Content         string
+}
+
+func UpdateArticle(
+	ctx context.Context,
+	exec storage.Executor,
+	data UpdateArticleData,
+) (Article, error) {
+	if err := Validate.Struct(data); err != nil {
+		return Article{}, errors.Join(ErrDomainValidation, err)
+	}
+
+	current, err := FindArticle(ctx, exec, data.ID)
+	if err != nil {
+		return Article{}, err
+	}
+
+	firstPublishedAt := current.FirstPublishedAt
+	if data.Published && firstPublishedAt.IsZero() {
+		firstPublishedAt = time.Now().UTC()
+	}
+
+	params := db.UpdateArticleParams{
+		ID: data.ID,
+		FirstPublishedAt: pgtype.Timestamptz{
+			Time:  firstPublishedAt,
+			Valid: !firstPublishedAt.IsZero(),
+		},
+		Published:       data.Published,
+		Title:           data.Title,
+		Excerpt:         pgtype.Text{String: data.Excerpt, Valid: true},
+		MetaTitle:       pgtype.Text{String: data.MetaTitle, Valid: true},
+		MetaDescription: pgtype.Text{String: data.MetaDescription, Valid: true},
+		Slug:            data.Slug,
+		ImageLink:       pgtype.Text{String: data.ImageLink, Valid: true},
+		ReadTime:        pgtype.Int4{Int32: data.ReadTime, Valid: true},
+		Content:         pgtype.Text{String: data.Content, Valid: true},
+	}
+
+	row, err := queries.UpdateArticle(ctx, exec, params)
+	if err != nil {
+		return Article{}, err
+	}
+
+	return rowToArticle(row), nil
+}
+
+func DestroyArticle(
+	ctx context.Context,
+	exec storage.Executor,
+	id int32,
+) error {
+	if err := clearArticleTagConnections(ctx, exec, id); err != nil {
+		return err
+	}
+
+	return queries.DeleteArticle(ctx, exec, id)
+}
+
+func AllArticles(
+	ctx context.Context,
+	exec storage.Executor,
+) ([]Article, error) {
+	rows, err := queries.QueryArticles(ctx, exec)
+	if err != nil {
+		return nil, err
 	}
 
 	articles := make([]Article, len(rows))
 	for i, row := range rows {
-		articles[i] = Article{
-			ID:               row.ID,
-			CreatedAt:        row.CreatedAt.Time,
-			UpdatedAt:        row.UpdatedAt.Time,
-			FirstPublishedAt: row.FirstPublishedAt.Time,
-			IsPublished:      row.IsPublished.Bool,
-			Title:            row.Title,
-			Excerpt:          row.Excerpt,
-			MetaTitle:        row.MetaTitle,
-			MetaDescription:  row.MetaDescription,
-			Slug:             row.Slug,
-			ImageLink:        row.ImageLink.String,
-			Content:          row.Content.String,
-			ReadTime:         row.ReadTime.Int32,
-		}
+		articles[i] = rowToArticle(row)
 	}
 
-	if err := populateArticleTags(ctx, dbtx, articles); err != nil {
-		return PaginationResult{}, err
-	}
-
-	totalPages := int((totalCount + int64(pageSize) - 1) / int64(pageSize))
-
-	return PaginationResult{
-		Articles:    articles,
-		TotalCount:  totalCount,
-		Page:        page,
-		PageSize:    pageSize,
-		TotalPages:  totalPages,
-		HasNext:     page < totalPages,
-		HasPrevious: page > 1,
-	}, nil
+	return articles, nil
 }
 
-func GetArticlesSorted(
+func AllPublishedArticles(
 	ctx context.Context,
-	dbtx db.DBTX,
-	page int,
-	pageSize int,
-	sort SortConfig,
-) (PaginationResult, error) {
+	exec storage.Executor,
+) ([]Article, error) {
+	rows, err := queries.QueryPublishedArticles(ctx, exec)
+	if err != nil {
+		return nil, err
+	}
+
+	articles := make([]Article, len(rows))
+	for i, row := range rows {
+		articles[i] = rowToArticle(row)
+	}
+
+	return articles, nil
+}
+
+type PaginatedArticles struct {
+	Articles   []Article
+	TotalCount int64
+	Page       int64
+	PageSize   int64
+	TotalPages int64
+}
+
+func PaginateArticles(
+	ctx context.Context,
+	exec storage.Executor,
+	page int64,
+	pageSize int64,
+) (PaginatedArticles, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -369,505 +229,184 @@ func GetArticlesSorted(
 
 	offset := (page - 1) * pageSize
 
-	// Get total count first
-	totalCount, err := db.Stmts.CountArticles(ctx, dbtx)
+	totalCount, err := queries.CountArticles(ctx, exec)
 	if err != nil {
-		return PaginationResult{}, err
+		return PaginatedArticles{}, err
 	}
 
-	// Build the sortable query using Squirrel
-	psql := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
-	query := psql.Select(
-		"id", "created_at", "updated_at", "first_published_at",
-		"title", "excerpt", "meta_title", "meta_description",
-		"slug", "image_link", "content", "read_time", "is_published",
-	).From("articles")
-
-	// Add sorting if valid field provided
-	if sort.Field != "" && sort.Order != "" {
-		if field, ok := allowedArticleSortFields[sort.Field]; ok {
-			orderClause := field
-			if sort.Order == "desc" {
-				orderClause += " DESC"
-			} else {
-				orderClause += " ASC"
-			}
-			query = query.OrderBy(orderClause)
-		} else {
-			// Default sorting if invalid field
-			query = query.OrderBy("created_at DESC")
-		}
-	} else {
-		// Default sorting
-		query = query.OrderBy("created_at DESC")
-	}
-
-	// Add pagination
-	if pageSize >= 0 && offset >= 0 {
-		//nolint:gosec // not needed
-		query = query.Limit(uint64(pageSize)).
-			Offset(uint64(offset))
-	}
-
-	// Build SQL
-	sql, args, err := query.ToSql()
-	if err != nil {
-		return PaginationResult{}, err
-	}
-
-	// Execute query
-	rows, err := dbtx.Query(ctx, sql, args...)
-	if err != nil {
-		return PaginationResult{}, err
-	}
-	defer rows.Close()
-
-	var articles []Article
-	for rows.Next() {
-		var a Article
-		var createdAt, updatedAt, firstPublishedAt pgtype.Timestamptz
-		var imageLink, content pgtype.Text
-		var readTime pgtype.Int4
-		var isPublished pgtype.Bool
-
-		err := rows.Scan(
-			&a.ID, &createdAt, &updatedAt, &firstPublishedAt,
-			&a.Title, &a.Excerpt, &a.MetaTitle, &a.MetaDescription,
-			&a.Slug, &imageLink, &content, &readTime, &isPublished,
-		)
-		if err != nil {
-			return PaginationResult{}, err
-		}
-
-		// Convert pgtype values
-		a.CreatedAt = createdAt.Time
-		a.UpdatedAt = updatedAt.Time
-		a.FirstPublishedAt = firstPublishedAt.Time
-		a.ImageLink = imageLink.String
-		a.Content = content.String
-		a.ReadTime = readTime.Int32
-		a.IsPublished = isPublished.Bool
-
-		articles = append(articles, a)
-	}
-
-	if err = rows.Err(); err != nil {
-		return PaginationResult{}, err
-	}
-
-	// Populate tags for all articles
-	if err := populateArticleTags(ctx, dbtx, articles); err != nil {
-		return PaginationResult{}, err
-	}
-
-	totalPages := int((totalCount + int64(pageSize) - 1) / int64(pageSize))
-
-	return PaginationResult{
-		Articles:    articles,
-		TotalCount:  totalCount,
-		Page:        page,
-		PageSize:    pageSize,
-		TotalPages:  totalPages,
-		HasNext:     page < totalPages,
-		HasPrevious: page > 1,
-	}, nil
-}
-
-type NewArticlePayload struct {
-	Title           string `validate:"required,max=100"`
-	Excerpt         string `validate:"required,max=255"`
-	MetaTitle       string `validate:"required,max=100"`
-	MetaDescription string `validate:"required,max=100"`
-	Slug            string `validate:"required,max=255"`
-	ImageLink       string `validate:"omitempty,max=255"`
-	Content         string
-	ReadTime        int32
-	TagIDs          []string
-}
-
-func NewArticle(
-	ctx context.Context,
-	dbtx db.DBTX,
-	data NewArticlePayload,
-) (Article, error) {
-	if err := validate.Struct(data); err != nil {
-		slog.ErrorContext(
-			ctx,
-			"could not validate new article payload",
-			"error",
-			err,
-			"data",
-			data,
-		)
-		return Article{}, errors.Join(ErrDomainValidation, err)
-	}
-
-	article := Article{
-		ID:              uuid.New(),
-		CreatedAt:       time.Now(),
-		UpdatedAt:       time.Now(),
-		Title:           data.Title,
-		Excerpt:         data.Excerpt,
-		MetaTitle:       data.MetaTitle,
-		MetaDescription: data.MetaDescription,
-		Slug:            data.Slug,
-		ImageLink:       data.ImageLink,
-		Content:         data.Content,
-		ReadTime:        data.ReadTime,
-	}
-
-	_, err := db.Stmts.InsertArticle(ctx, dbtx, db.InsertArticleParams{
-		ID: article.ID,
-		CreatedAt: pgtype.Timestamptz{
-			Time:  article.CreatedAt,
-			Valid: true,
-		},
-		UpdatedAt: pgtype.Timestamptz{
-			Time:  article.UpdatedAt,
-			Valid: true,
-		},
-		Title:           article.Title,
-		Excerpt:         article.Excerpt,
-		MetaTitle:       article.MetaTitle,
-		MetaDescription: article.MetaDescription,
-		Slug:            article.Slug,
-		ImageLink: sql.NullString{
-			String: article.ImageLink,
-			Valid:  article.ImageLink != "",
-		},
-		Content: sql.NullString{
-			String: article.Content,
-			Valid:  article.Content != "",
-		},
-		ReadTime: sql.NullInt32{
-			Int32: article.ReadTime,
-			Valid: article.ReadTime > 0,
-		},
-	})
-	if err != nil {
-		return Article{}, err
-	}
-
-	// Create tag connections
-	for _, tagIDStr := range data.TagIDs {
-		tagID, err := uuid.Parse(tagIDStr)
-		if err != nil {
-			continue // Skip invalid UUIDs
-		}
-		_, err = NewArticleTagConnection(ctx, dbtx, article.ID, tagID)
-		if err != nil {
-			return Article{}, err
-		}
-	}
-
-	// Fetch the created article with tags
-	return GetArticleByID(ctx, dbtx, article.ID)
-}
-
-type UpdateArticlePayload struct {
-	ID              uuid.UUID `validate:"required,uuid"`
-	UpdatedAt       time.Time `validate:"required"`
-	IsPublished     bool
-	Title           string `validate:"required,max=100"`
-	Excerpt         string `validate:"required,max=255"`
-	MetaTitle       string `validate:"required,max=100"`
-	MetaDescription string `validate:"required,max=100"`
-	Slug            string `validate:"required,max=255"`
-	ImageLink       string `validate:"omitempty,max=255"`
-	Content         string
-	ReadTime        int32 `validate:"min=1,max=999"`
-	TagIDs          []string
-}
-
-func UpdateArticle(
-	ctx context.Context,
-	dbtx db.DBTX,
-	data UpdateArticlePayload,
-) (Article, error) {
-	if err := validate.Struct(data); err != nil {
-		return Article{}, errors.Join(ErrDomainValidation, err)
-	}
-
-	_, err := db.Stmts.UpdateArticle(ctx, dbtx, db.UpdateArticleParams{
-		ID:              data.ID,
-		UpdatedAt:       pgtype.Timestamptz{Time: data.UpdatedAt, Valid: true},
-		Title:           data.Title,
-		Excerpt:         data.Excerpt,
-		IsPublished:     sql.NullBool{Bool: data.IsPublished, Valid: true},
-		MetaTitle:       data.MetaTitle,
-		MetaDescription: data.MetaDescription,
-		Slug:            data.Slug,
-		ImageLink: sql.NullString{
-			String: data.ImageLink,
-			Valid:  data.ImageLink != "",
-		},
-		Content: sql.NullString{
-			String: data.Content,
-			Valid:  data.Content != "",
-		},
-		ReadTime: sql.NullInt32{
-			Int32: data.ReadTime,
-			Valid: data.ReadTime > 0,
-		},
-	})
-	if err != nil {
-		return Article{}, err
-	}
-
-	err = DeleteArticleTagConnectionsByArticleID(ctx, dbtx, data.ID)
-	if err != nil {
-		return Article{}, err
-	}
-
-	for _, tagIDStr := range data.TagIDs {
-		tagID, err := uuid.Parse(tagIDStr)
-		if err != nil {
-			continue // Skip invalid UUIDs
-		}
-		_, err = NewArticleTagConnection(ctx, dbtx, data.ID, tagID)
-		if err != nil {
-			return Article{}, err
-		}
-	}
-
-	return GetArticleByID(ctx, dbtx, data.ID)
-}
-
-type UpdateArticleContentPayload struct {
-	ID        uuid.UUID `validate:"required,uuid"`
-	UpdatedAt time.Time `validate:"required"`
-	Content   string
-}
-
-func UpdateArticleContent(
-	ctx context.Context,
-	dbtx db.DBTX,
-	data UpdateArticleContentPayload,
-) (Article, error) {
-	if err := validate.Struct(data); err != nil {
-		return Article{}, errors.Join(ErrDomainValidation, err)
-	}
-
-	row, err := db.Stmts.UpdateArticleContent(
+	rows, err := queries.QueryPaginatedArticles(
 		ctx,
-		dbtx,
-		db.UpdateArticleContentParams{
-			ID:        data.ID,
-			UpdatedAt: pgtype.Timestamptz{Time: data.UpdatedAt, Valid: true},
-			Content: sql.NullString{
-				String: data.Content,
-				Valid:  data.Content != "",
-			},
+		exec,
+		db.QueryPaginatedArticlesParams{
+			Limit:  pageSize,
+			Offset: offset,
 		},
 	)
 	if err != nil {
-		return Article{}, err
+		return PaginatedArticles{}, err
 	}
 
-	tags, err := GetArticleTagsByArticleID(ctx, dbtx, row.ID)
-	if err != nil {
-		return Article{}, err
+	articles := make([]Article, len(rows))
+	for i, row := range rows {
+		articles[i] = rowToArticle(row)
 	}
 
-	return Article{
-		ID:               row.ID,
-		CreatedAt:        row.CreatedAt.Time,
-		UpdatedAt:        row.UpdatedAt.Time,
-		FirstPublishedAt: row.FirstPublishedAt.Time,
-		IsPublished:      row.IsPublished.Bool,
-		Title:            row.Title,
-		Excerpt:          row.Excerpt,
-		MetaTitle:        row.MetaTitle,
-		MetaDescription:  row.MetaDescription,
-		Slug:             row.Slug,
-		ImageLink:        row.ImageLink.String,
-		Content:          row.Content.String,
-		ReadTime:         row.ReadTime.Int32,
-		Tags:             tags,
+	totalPages := (totalCount + int64(pageSize) - 1) / int64(pageSize)
+
+	return PaginatedArticles{
+		Articles:   articles,
+		TotalCount: totalCount,
+		Page:       page,
+		PageSize:   pageSize,
+		TotalPages: totalPages,
 	}, nil
 }
 
-type UpdateArticleMetadataPayload struct {
-	ID              uuid.UUID `validate:"required,uuid"`
-	UpdatedAt       time.Time `validate:"required"`
-	Title           string    `validate:"required,max=100"`
-	Excerpt         string    `validate:"required,max=255"`
-	MetaTitle       string    `validate:"required,max=100"`
-	MetaDescription string    `validate:"required,max=100"`
-	Slug            string    `validate:"required,max=255"`
-	ImageLink       string    `validate:"omitempty,max=255"`
-}
-
-func UpdateArticleMetadata(
+func UpsertArticle(
 	ctx context.Context,
-	dbtx db.DBTX,
-	data UpdateArticleMetadataPayload,
+	exec storage.Executor,
+	data CreateArticleData,
 ) (Article, error) {
-	if err := validate.Struct(data); err != nil {
+	if err := Validate.Struct(data); err != nil {
 		return Article{}, errors.Join(ErrDomainValidation, err)
 	}
 
-	row, err := db.Stmts.UpdateArticleMetadata(
-		ctx,
-		dbtx,
-		db.UpdateArticleMetadataParams{
-			ID: data.ID,
-			UpdatedAt: pgtype.Timestamptz{
-				Time:  data.UpdatedAt,
-				Valid: true,
-			},
-			Title:           data.Title,
-			Excerpt:         data.Excerpt,
-			MetaTitle:       data.MetaTitle,
-			MetaDescription: data.MetaDescription,
-			Slug:            data.Slug,
-			ImageLink: sql.NullString{
-				String: data.ImageLink,
-				Valid:  data.ImageLink != "",
-			},
-		},
-	)
-	if err != nil {
-		return Article{}, err
+	firstPublishedAt := data.FirstPublishedAt
+	if data.Published && firstPublishedAt.IsZero() {
+		firstPublishedAt = time.Now().UTC()
 	}
 
-	tags, err := GetArticleTagsByArticleID(ctx, dbtx, row.ID)
-	if err != nil {
-		return Article{}, err
-	}
-
-	return Article{
-		ID:               row.ID,
-		CreatedAt:        row.CreatedAt.Time,
-		UpdatedAt:        row.UpdatedAt.Time,
-		FirstPublishedAt: row.FirstPublishedAt.Time,
-		IsPublished:      row.IsPublished.Bool,
-		Title:            row.Title,
-		Excerpt:          row.Excerpt,
-		MetaTitle:        row.MetaTitle,
-		MetaDescription:  row.MetaDescription,
-		Slug:             row.Slug,
-		ImageLink:        row.ImageLink.String,
-		Content:          row.Content.String,
-		ReadTime:         row.ReadTime.Int32,
-		Tags:             tags,
-	}, nil
-}
-
-type PublishArticlePayload struct {
-	ID  uuid.UUID `validate:"required,uuid"`
-	Now time.Time // TODO: validate
-}
-
-func PublishArticle(
-	ctx context.Context,
-	dbtx db.DBTX,
-	data PublishArticlePayload,
-) (Article, error) {
-	if err := validate.Struct(data); err != nil {
-		return Article{}, errors.Join(ErrDomainValidation, err)
-	}
-
-	row, err := db.Stmts.PublishArticle(ctx, dbtx, db.PublishArticleParams{
-		ID:        data.ID,
-		UpdatedAt: pgtype.Timestamptz{Time: data.Now, Valid: true},
+	params := db.UpsertArticleParams{
 		FirstPublishedAt: pgtype.Timestamptz{
-			Time:  data.Now,
-			Valid: true,
+			Time:  firstPublishedAt,
+			Valid: !firstPublishedAt.IsZero(),
 		},
-		IsPublished: sql.NullBool{Bool: true, Valid: true},
-	})
+		Published:       data.Published,
+		Title:           data.Title,
+		Excerpt:         pgtype.Text{String: data.Excerpt, Valid: true},
+		MetaTitle:       pgtype.Text{String: data.MetaTitle, Valid: true},
+		MetaDescription: pgtype.Text{String: data.MetaDescription, Valid: true},
+		Slug:            data.Slug,
+		ImageLink:       pgtype.Text{String: data.ImageLink, Valid: true},
+		ReadTime:        pgtype.Int4{Int32: data.ReadTime, Valid: true},
+		Content:         pgtype.Text{String: data.Content, Valid: true},
+	}
+	row, err := queries.UpsertArticle(ctx, exec, params)
 	if err != nil {
 		return Article{}, err
 	}
 
-	tags, err := GetArticleTagsByArticleID(ctx, dbtx, row.ID)
-	if err != nil {
-		return Article{}, err
+	return rowToArticle(row), nil
+}
+
+func CountArticles(
+	ctx context.Context,
+	exec storage.Executor,
+) (int64, error) {
+	return queries.CountArticles(ctx, exec)
+}
+
+func AttachTagsToArticle(
+	ctx context.Context,
+	exec storage.Executor,
+	articleID int32,
+	tagIDs []int32,
+) error {
+	seen := make(map[int32]struct{}, len(tagIDs))
+	for _, tagID := range tagIDs {
+		if tagID <= 0 {
+			continue
+		}
+		if _, exists := seen[tagID]; exists {
+			continue
+		}
+		seen[tagID] = struct{}{}
+
+		if _, err := queries.InsertArticleTagConnection(
+			ctx,
+			exec,
+			db.InsertArticleTagConnectionParams{
+				ArticleID: articleID,
+				TagID:     tagID,
+			},
+		); err != nil {
+			return err
+		}
 	}
 
+	return nil
+}
+
+func TagIDsForArticle(
+	ctx context.Context,
+	exec storage.Executor,
+	articleID int32,
+) ([]int32, error) {
+	connections, err := queries.QueryArticleTagConnection(ctx, exec)
+	if err != nil {
+		return nil, err
+	}
+
+	tagIDs := make([]int32, 0)
+	for _, connection := range connections {
+		if connection.ArticleID != articleID {
+			continue
+		}
+		tagIDs = append(tagIDs, connection.TagID)
+	}
+
+	return tagIDs, nil
+}
+
+func ReplaceTagsForArticle(
+	ctx context.Context,
+	exec storage.Executor,
+	articleID int32,
+	tagIDs []int32,
+) error {
+	if err := clearArticleTagConnections(ctx, exec, articleID); err != nil {
+		return err
+	}
+
+	return AttachTagsToArticle(ctx, exec, articleID, tagIDs)
+}
+
+func clearArticleTagConnections(
+	ctx context.Context,
+	exec storage.Executor,
+	articleID int32,
+) error {
+	connections, err := queries.QueryArticleTagConnection(ctx, exec)
+	if err != nil {
+		return err
+	}
+
+	for _, connection := range connections {
+		if connection.ArticleID != articleID {
+			continue
+		}
+		if err := queries.DeleteArticleTagConnection(ctx, exec, connection.ID); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func rowToArticle(row db.Article) Article {
 	return Article{
 		ID:               row.ID,
 		CreatedAt:        row.CreatedAt.Time,
 		UpdatedAt:        row.UpdatedAt.Time,
 		FirstPublishedAt: row.FirstPublishedAt.Time,
-		IsPublished:      row.IsPublished.Bool,
+		Published:        row.Published,
 		Title:            row.Title,
-		Excerpt:          row.Excerpt,
-		MetaTitle:        row.MetaTitle,
-		MetaDescription:  row.MetaDescription,
+		Excerpt:          row.Excerpt.String,
+		MetaTitle:        row.MetaTitle.String,
+		MetaDescription:  row.MetaDescription.String,
 		Slug:             row.Slug,
 		ImageLink:        row.ImageLink.String,
-		Content:          row.Content.String,
 		ReadTime:         row.ReadTime.Int32,
-		Tags:             tags,
-	}, nil
-}
-
-// type UnpublishArticlePayload struct {
-// 	ID        uuid.UUID `validate:"required,uuid"`
-// 	UpdatedAt time.Time `validate:"required"`
-// }
-//
-// func UnpublishArticle(
-// 	ctx context.Context,
-// 	dbtx db.DBTX,
-// 	data UnpublishArticlePayload,
-// ) (Article, error) {
-// 	if err := validate.Struct(data); err != nil {
-// 		return Article{}, errors.Join(ErrDomainValidation, err)
-// 	}
-//
-// 	row, err := db.Stmts.UnpublishArticle(ctx, dbtx, db.UnpublishArticleParams{
-// 		ID:        data.ID,
-// 		UpdatedAt: pgtype.Timestamptz{Time: data.UpdatedAt, Valid: true},
-// 	})
-// 	if err != nil {
-// 		return Article{}, err
-// 	}
-//
-// 	tags, err := GetArticleTagsByArticleID(ctx, dbtx, row.ID)
-// 	if err != nil {
-// 		return Article{}, err
-// 	}
-//
-// 	return Article{
-// 		ID:               row.ID,
-// 		CreatedAt:        row.CreatedAt.Time,
-// 		UpdatedAt:        row.UpdatedAt.Time,
-// 		FirstPublishedAt: row.PublishedAt.Time,
-// 		Title:            row.Title,
-// 		Excerpt:          row.Excerpt,
-// 		MetaTitle:        row.MetaTitle,
-// 		MetaDescription:  row.MetaDescription,
-// 		Slug:             row.Slug,
-// 		ImageLink:        row.ImageLink.String,
-// 		Content:          row.Content.String,
-// 		ReadTime:         row.ReadTime.Int32,
-// 		Tags:             tags,
-// 	}, nil
-// }
-
-func DeleteArticle(
-	ctx context.Context,
-	dbtx db.DBTX,
-	id uuid.UUID,
-) error {
-	return db.Stmts.DeleteArticle(ctx, dbtx, id)
-}
-
-// CountPublishedArticles returns the total count of published articles
-func CountPublishedArticles(
-	ctx context.Context,
-	dbtx db.DBTX,
-) (int64, error) {
-	return db.Stmts.CountPublishedArticles(ctx, dbtx)
-}
-
-// CountDraftArticles returns the total count of draft articles
-func CountDraftArticles(
-	ctx context.Context,
-	dbtx db.DBTX,
-) (int64, error) {
-	return db.Stmts.CountDraftArticles(ctx, dbtx)
+		Content:          row.Content.String,
+	}
 }

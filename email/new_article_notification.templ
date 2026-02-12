@@ -1,0 +1,83 @@
+package email
+
+import (
+	"bytes"
+	"context"
+)
+
+type NewArticleNotification struct {
+	ArticleTitle string
+	Category     string
+	Summary      string
+	ArticleURL   string
+}
+
+var _ Transformer = (*NewArticleNotification)(nil)
+
+func (n NewArticleNotification) ToHTML() (string, error) {
+	var buf bytes.Buffer
+	if err := n.render().Render(context.Background(), &buf); err != nil {
+		return "", err
+	}
+	return buf.String(), nil
+}
+
+func (n NewArticleNotification) ToText() (string, error) {
+	html, err := n.ToHTML()
+	if err != nil {
+		return "", err
+	}
+	return HTMLToText(html)
+}
+
+templ (n NewArticleNotification) render() {
+	@baseLayout("New Article Published", "A new article is now available to read.") {
+		@spacer("32")
+		@title("New Article Published")
+		@spacer("24")
+		@copy() {
+			<span class="st-Delink" style="color: #414552; text-decoration: none;">
+				Hi,
+			</span>
+		}
+		@copy() {
+			<span class="st-Delink" style="color: #414552; text-decoration: none;">
+				We just published a new article:
+			</span>
+		}
+		@copy() {
+			<span class="st-Delink" style="color: #414552; text-decoration: none;">
+				<strong>{ n.ArticleTitle }</strong>
+				if n.Category != "" {
+					<span> ({ n.Category })</span>
+				}
+			</span>
+		}
+		if n.Summary != "" {
+			@copy() {
+				<span class="st-Delink" style="color: #414552; text-decoration: none;">
+					{ n.Summary }
+				</span>
+			}
+		}
+		@spacer("8")
+		@button(n.ArticleURL, "Read The Article")
+		@spacer("8")
+		@copy() {
+			<span class="st-Delink" style="color: #414552; text-decoration: none;">
+				Or copy and paste this link into your browser:
+			</span>
+		}
+		@copy() {
+			<span class="st-Delink" style="color: #625afa; text-decoration: none; word-break: break-all;">
+				{ n.ArticleURL }
+			</span>
+		}
+		@copy() {
+			<span class="st-Delink" style="color: #414552; text-decoration: none;">
+				Thank you for reading.
+			</span>
+		}
+		@spacer("32")
+	}
+}

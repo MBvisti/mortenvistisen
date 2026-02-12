@@ -1,9 +1,12 @@
-import "./easymde-2_26_0.min.js";
+import "./easymde_2-26-0.min.js";
 
 (function() {
-	new EasyMDE({
-		element: document.getElementById('editorTarget'),
-		maxHeight: '500px',
+	const targetElement = document.getElementById('editorTarget');
+	if (!targetElement) return;
+
+	const easyMDE = new EasyMDE({
+		element: targetElement,
+		maxHeight: '600px',
 		toolbar: [
 			"bold", "italic", "strikethrough", "|",
 			"heading-2", "heading-3", "|",
@@ -12,34 +15,21 @@ import "./easymde-2_26_0.min.js";
 			"preview", "fullscreen",
 		],
 		indentWithTabs: true,
-		// lineNumbers: true,
 		tabSize: 4,
 	});
-	// const element = document.getElementById('my-text-area');
-	// if (element) {
-	// 	new window.EasyMDE({
-	// 		element: element,
-	// 		// placeholder: "Write your article content in Markdown...",
-	// 		spellChecker: false,
-	// 		initialEditType: "markdown",
-	// 		initialValue: "",
-	// 		lineNumbers: true,
-	// 		hideIcons: ["guide", "fullscreen", "side-by-side"],
-	// 		showIcons: ["code", "table"],
-	// 		status: ["autosave", "lines", "words", "cursor"],
-	// 		tabSize: 4,
-	// 		indentWithTabs: true,
-	// 		lineWrapping: true,
-	// 		usageStatistics: false,
-	// 		autofocus: false,
-	// 		toolbar: [
-	// 			"bold", "italic", "strikethrough", "|",
-	// 			"heading-1", "heading-2", "|",
-	// 			"quote", "unordered-list", "ordered-list", "|",
-	// 			"link", "image", "code", "|",
-	// 			"preview",
-	// 		]
-	// 	});
-	// }
-})()
 
+	// Sync editor content back to textarea before form submission
+	const form = targetElement.closest('form');
+	if (form) {
+		form.addEventListener('submit', function() {
+			targetElement.value = easyMDE.value();
+		});
+	}
+
+	// Also sync on editor change for data-bind compatibility
+	easyMDE.codemirror.on('change', function() {
+		targetElement.value = easyMDE.value();
+		// Dispatch input event for any data-binding frameworks
+		targetElement.dispatchEvent(new Event('input', { bubbles: true }));
+	});
+})()

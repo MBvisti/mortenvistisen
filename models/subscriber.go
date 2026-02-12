@@ -2,18 +2,17 @@ package models
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"time"
 
-	"github.com/Masterminds/squirrel"
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/mbvisti/mortenvistisen/models/internal/db"
+
+	"mortenvistisen/internal/storage"
+	"mortenvistisen/models/internal/db"
 )
 
 type Subscriber struct {
-	ID           uuid.UUID
+	ID           int32
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 	Email        string
@@ -22,278 +21,134 @@ type Subscriber struct {
 	IsVerified   bool
 }
 
-func (s Subscriber) IsActive() bool {
-	return s.IsVerified && !s.SubscribedAt.IsZero()
+func FindSubscriber(
+	ctx context.Context,
+	exec storage.Executor,
+	id int32,
+) (Subscriber, error) {
+	row, err := queries.QuerySubscriberByID(ctx, exec, id)
+	if err != nil {
+		return Subscriber{}, err
+	}
+
+	return rowToSubscriber(row), nil
 }
 
-func GetSubscriberByEmail(
+func FindSubscriberByEmail(
 	ctx context.Context,
-	dbtx db.DBTX,
+	exec storage.Executor,
 	email string,
 ) (Subscriber, error) {
-	row, err := db.Stmts.QuerySubscriberByEmail(
-		ctx,
-		dbtx,
-		sql.NullString{String: email, Valid: email != ""},
-	)
+	row, err := queries.QuerySubscriberByEmail(ctx, exec, email)
 	if err != nil {
 		return Subscriber{}, err
 	}
 
-	return Subscriber{
-		ID:           row.ID,
-		CreatedAt:    row.CreatedAt.Time,
-		UpdatedAt:    row.UpdatedAt.Time,
-		Email:        row.Email.String,
-		SubscribedAt: row.SubscribedAt.Time,
-		Referer:      row.Referer.String,
-		IsVerified:   row.IsVerified.Bool,
-	}, nil
+	return rowToSubscriber(row), nil
 }
 
-func GetSubscriber(
-	ctx context.Context,
-	dbtx db.DBTX,
-	id uuid.UUID,
-) (Subscriber, error) {
-	row, err := db.Stmts.QuerySubscriberByID(ctx, dbtx, id)
-	if err != nil {
-		return Subscriber{}, err
-	}
-
-	return Subscriber{
-		ID:           row.ID,
-		CreatedAt:    row.CreatedAt.Time,
-		UpdatedAt:    row.UpdatedAt.Time,
-		Email:        row.Email.String,
-		SubscribedAt: row.SubscribedAt.Time,
-		Referer:      row.Referer.String,
-		IsVerified:   row.IsVerified.Bool,
-	}, nil
-}
-
-func GetAllSubscribers(
-	ctx context.Context,
-	dbtx db.DBTX,
-) ([]Subscriber, error) {
-	rows, err := db.Stmts.QuerySubscribers(ctx, dbtx)
-	if err != nil {
-		return nil, err
-	}
-
-	subscribers := make([]Subscriber, len(rows))
-	for i, row := range rows {
-		subscribers[i] = Subscriber{
-			ID:           row.ID,
-			CreatedAt:    row.CreatedAt.Time,
-			UpdatedAt:    row.UpdatedAt.Time,
-			Email:        row.Email.String,
-			SubscribedAt: row.SubscribedAt.Time,
-			Referer:      row.Referer.String,
-			IsVerified:   row.IsVerified.Bool,
-		}
-	}
-
-	return subscribers, nil
-}
-
-func GetVerifiedSubscribers(
-	ctx context.Context,
-	dbtx db.DBTX,
-) ([]Subscriber, error) {
-	rows, err := db.Stmts.QueryVerifiedSubscribers(ctx, dbtx)
-	if err != nil {
-		return nil, err
-	}
-
-	subscribers := make([]Subscriber, len(rows))
-	for i, row := range rows {
-		subscribers[i] = Subscriber{
-			ID:           row.ID,
-			CreatedAt:    row.CreatedAt.Time,
-			UpdatedAt:    row.UpdatedAt.Time,
-			Email:        row.Email.String,
-			SubscribedAt: row.SubscribedAt.Time,
-			Referer:      row.Referer.String,
-			IsVerified:   row.IsVerified.Bool,
-		}
-	}
-
-	return subscribers, nil
-}
-
-type NewSubscriberPayload struct {
-	Email        string `validate:"required,email"`
+type CreateSubscriberData struct {
+	Email        string
 	SubscribedAt time.Time
 	Referer      string
+	IsVerified   bool
 }
 
-func NewSubscriber(
+func CreateSubscriber(
 	ctx context.Context,
-	dbtx db.DBTX,
-	data NewSubscriberPayload,
+	exec storage.Executor,
+	data CreateSubscriberData,
 ) (Subscriber, error) {
-	if err := validate.Struct(data); err != nil {
+	if err := Validate.Struct(data); err != nil {
 		return Subscriber{}, errors.Join(ErrDomainValidation, err)
 	}
-
-	subscriber := Subscriber{
-		ID:           uuid.New(),
-		CreatedAt:    time.Now(),
-		UpdatedAt:    time.Now(),
-		Email:        data.Email,
-		SubscribedAt: data.SubscribedAt,
-		Referer:      data.Referer,
-		IsVerified:   false,
+	params := db.InsertSubscriberParams{
+		Email:        pgtype.Text{String: data.Email, Valid: true},
+		SubscribedAt: pgtype.Timestamptz{Time: data.SubscribedAt, Valid: true},
+		Referer:      pgtype.Text{String: data.Referer, Valid: true},
+		IsVerified:   pgtype.Bool{Bool: data.IsVerified, Valid: true},
 	}
-
-	_, err := db.Stmts.InsertSubscriber(ctx, dbtx, db.InsertSubscriberParams{
-		ID:        subscriber.ID,
-		CreatedAt: pgtype.Timestamptz{Time: subscriber.CreatedAt, Valid: true},
-		UpdatedAt: pgtype.Timestamptz{Time: subscriber.UpdatedAt, Valid: true},
-		Email: sql.NullString{
-			String: subscriber.Email,
-			Valid:  subscriber.Email != "",
-		},
-		SubscribedAt: pgtype.Timestamptz{
-			Time:  subscriber.SubscribedAt,
-			Valid: !subscriber.SubscribedAt.IsZero(),
-		},
-		Referer: sql.NullString{
-			String: subscriber.Referer,
-			Valid:  subscriber.Referer != "",
-		},
-		IsVerified: pgtype.Bool{Bool: subscriber.IsVerified, Valid: true},
-	})
+	row, err := queries.InsertSubscriber(ctx, exec, params)
 	if err != nil {
 		return Subscriber{}, err
 	}
 
-	return subscriber, nil
+	return rowToSubscriber(row), nil
 }
 
-type UpdateSubscriberPayload struct {
-	ID        uuid.UUID `validate:"required,uuid"`
-	UpdatedAt time.Time `validate:"required"`
-	Email     string    `validate:"required,email"`
-	Referer   string
+type UpdateSubscriberData struct {
+	ID           int32
+	UpdatedAt    time.Time
+	Email        string
+	SubscribedAt time.Time
+	Referer      string
+	IsVerified   bool
 }
 
 func UpdateSubscriber(
 	ctx context.Context,
-	dbtx db.DBTX,
-	data UpdateSubscriberPayload,
+	exec storage.Executor,
+	data UpdateSubscriberData,
 ) (Subscriber, error) {
-	if err := validate.Struct(data); err != nil {
+	if err := Validate.Struct(data); err != nil {
 		return Subscriber{}, errors.Join(ErrDomainValidation, err)
 	}
 
-	row, err := db.Stmts.UpdateSubscriber(ctx, dbtx, db.UpdateSubscriberParams{
-		ID: data.ID,
-		UpdatedAt: pgtype.Timestamptz{
-			Time:  data.UpdatedAt,
-			Valid: true,
-		},
-		Email: sql.NullString{String: data.Email, Valid: data.Email != ""},
-		Referer: sql.NullString{
-			String: data.Referer,
-			Valid:  data.Referer != "",
-		},
-	})
+	params := db.UpdateSubscriberParams{
+		ID:           data.ID,
+		Email:        pgtype.Text{String: data.Email, Valid: true},
+		SubscribedAt: pgtype.Timestamptz{Time: data.SubscribedAt, Valid: true},
+		Referer:      pgtype.Text{String: data.Referer, Valid: true},
+		IsVerified:   pgtype.Bool{Bool: data.IsVerified, Valid: true},
+	}
+
+	row, err := queries.UpdateSubscriber(ctx, exec, params)
 	if err != nil {
 		return Subscriber{}, err
 	}
 
-	return Subscriber{
-		ID:           row.ID,
-		CreatedAt:    row.CreatedAt.Time,
-		UpdatedAt:    row.UpdatedAt.Time,
-		Email:        row.Email.String,
-		SubscribedAt: row.SubscribedAt.Time,
-		Referer:      row.Referer.String,
-		IsVerified:   row.IsVerified.Bool,
-	}, nil
+	return rowToSubscriber(row), nil
 }
 
-type VerifySubscriberPayload struct {
-	ID         uuid.UUID `validate:"required,uuid"`
-	UpdatedAt  time.Time `validate:"required"`
-	IsVerified bool      `validate:"required"`
-}
-
-func VerifySubscriber(
+func DestroySubscriber(
 	ctx context.Context,
-	dbtx db.DBTX,
-	data VerifySubscriberPayload,
+	exec storage.Executor,
+	id int32,
 ) error {
-	if err := validate.Struct(data); err != nil {
-		return errors.Join(ErrDomainValidation, err)
+	return queries.DeleteSubscriber(ctx, exec, id)
+}
+
+func AllSubscribers(
+	ctx context.Context,
+	exec storage.Executor,
+) ([]Subscriber, error) {
+	rows, err := queries.QuerySubscribers(ctx, exec)
+	if err != nil {
+		return nil, err
 	}
 
-	return db.Stmts.VerifySubscriber(ctx, dbtx, db.VerifySubscriberParams{
-		ID: data.ID,
-		UpdatedAt: pgtype.Timestamptz{
-			Time:  data.UpdatedAt,
-			Valid: true,
-		},
-		IsVerified: pgtype.Bool{Bool: data.IsVerified, Valid: true},
-	})
+	subscribers := make([]Subscriber, len(rows))
+	for i, row := range rows {
+		subscribers[i] = rowToSubscriber(row)
+	}
+
+	return subscribers, nil
 }
 
-func DeleteSubscriber(
-	ctx context.Context,
-	dbtx db.DBTX,
-	id uuid.UUID,
-) error {
-	return db.Stmts.DeleteSubscriber(ctx, dbtx, id)
-}
-
-func CountSubscribers(
-	ctx context.Context,
-	dbtx db.DBTX,
-) (int64, error) {
-	return db.Stmts.CountSubscribers(ctx, dbtx)
-}
-
-func CountVerifiedSubscribers(
-	ctx context.Context,
-	dbtx db.DBTX,
-) (int64, error) {
-	return db.Stmts.CountVerifiedSubscribers(ctx, dbtx)
-}
-
-func CountMonthlySubscribers(
-	ctx context.Context,
-	dbtx db.DBTX,
-) (int64, error) {
-	return db.Stmts.CountMonthlySubscribers(ctx, dbtx)
-}
-
-type SubscriberPaginationResult struct {
+type PaginatedSubscribers struct {
 	Subscribers []Subscriber
 	TotalCount  int64
-	Page        int
-	PageSize    int
-	TotalPages  int
-	HasNext     bool
-	HasPrevious bool
+	Page        int64
+	PageSize    int64
+	TotalPages  int64
 }
 
-var allowedSubscriberSortFields = map[string]string{
-	"email":         "email",
-	"created_at":    "created_at",
-	"subscribed_at": "subscribed_at",
-	"status":        "is_verified",
-	"referer":       "referer",
-}
-
-func GetSubscribersSorted(
+func PaginateSubscribers(
 	ctx context.Context,
-	dbtx db.DBTX,
-	page int,
-	pageSize int,
-	sort SortConfig,
-) (SubscriberPaginationResult, error) {
+	exec storage.Executor,
+	page int64,
+	pageSize int64,
+) (PaginatedSubscribers, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -306,95 +161,76 @@ func GetSubscribersSorted(
 
 	offset := (page - 1) * pageSize
 
-	// Get total count first
-	totalCount, err := db.Stmts.CountSubscribers(ctx, dbtx)
+	totalCount, err := queries.CountSubscribers(ctx, exec)
 	if err != nil {
-		return SubscriberPaginationResult{}, err
+		return PaginatedSubscribers{}, err
 	}
 
-	// Build the sortable query using Squirrel
-	psql := squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
-	query := psql.Select(
-		"id", "created_at", "updated_at", "email",
-		"subscribed_at", "referer", "is_verified",
-	).From("subscribers")
-
-	// Add sorting if valid field provided
-	if sort.Field != "" && sort.Order != "" {
-		if field, ok := allowedSubscriberSortFields[sort.Field]; ok {
-			orderClause := field
-			if sort.Order == "desc" {
-				orderClause += " DESC"
-			} else {
-				orderClause += " ASC"
-			}
-			query = query.OrderBy(orderClause)
-		} else {
-			// Default sorting if invalid field
-			query = query.OrderBy("created_at DESC")
-		}
-	} else {
-		// Default sorting
-		query = query.OrderBy("created_at DESC")
-	}
-
-	// Add pagination
-	if pageSize >= 0 && offset >= 0 {
-		query = query.Limit(uint64(pageSize)).Offset(uint64(offset)) // #nosec G115 - pageSize and offset are validated to be non-negative
-	}
-
-	// Build SQL
-	sql, args, err := query.ToSql()
+	rows, err := queries.QueryPaginatedSubscribers(
+		ctx,
+		exec,
+		db.QueryPaginatedSubscribersParams{
+			Limit:  pageSize,
+			Offset: offset,
+		},
+	)
 	if err != nil {
-		return SubscriberPaginationResult{}, err
+		return PaginatedSubscribers{}, err
 	}
 
-	// Execute query
-	rows, err := dbtx.Query(ctx, sql, args...)
-	if err != nil {
-		return SubscriberPaginationResult{}, err
-	}
-	defer rows.Close()
-
-	var subscribers []Subscriber
-	for rows.Next() {
-		var s Subscriber
-		var createdAt, updatedAt, subscribedAt pgtype.Timestamptz
-		var email, referer pgtype.Text
-		var isVerified pgtype.Bool
-
-		err := rows.Scan(
-			&s.ID, &createdAt, &updatedAt, &email,
-			&subscribedAt, &referer, &isVerified,
-		)
-		if err != nil {
-			return SubscriberPaginationResult{}, err
-		}
-
-		// Convert pgtype values
-		s.CreatedAt = createdAt.Time
-		s.UpdatedAt = updatedAt.Time
-		s.SubscribedAt = subscribedAt.Time
-		s.Email = email.String
-		s.Referer = referer.String
-		s.IsVerified = isVerified.Bool
-
-		subscribers = append(subscribers, s)
+	subscribers := make([]Subscriber, len(rows))
+	for i, row := range rows {
+		subscribers[i] = rowToSubscriber(row)
 	}
 
-	if err = rows.Err(); err != nil {
-		return SubscriberPaginationResult{}, err
-	}
+	totalPages := (totalCount + int64(pageSize) - 1) / int64(pageSize)
 
-	totalPages := int((totalCount + int64(pageSize) - 1) / int64(pageSize))
-
-	return SubscriberPaginationResult{
+	return PaginatedSubscribers{
 		Subscribers: subscribers,
 		TotalCount:  totalCount,
 		Page:        page,
 		PageSize:    pageSize,
 		TotalPages:  totalPages,
-		HasNext:     page < totalPages,
-		HasPrevious: page > 1,
 	}, nil
+}
+
+func UpsertSubscriber(
+	ctx context.Context,
+	exec storage.Executor,
+	data CreateSubscriberData,
+) (Subscriber, error) {
+	if err := Validate.Struct(data); err != nil {
+		return Subscriber{}, errors.Join(ErrDomainValidation, err)
+	}
+	params := db.UpsertSubscriberParams{
+		Email:        pgtype.Text{String: data.Email, Valid: true},
+		SubscribedAt: pgtype.Timestamptz{Time: data.SubscribedAt, Valid: true},
+		Referer:      pgtype.Text{String: data.Referer, Valid: true},
+		IsVerified:   pgtype.Bool{Bool: data.IsVerified, Valid: true},
+	}
+	row, err := queries.UpsertSubscriber(ctx, exec, params)
+	if err != nil {
+		return Subscriber{}, err
+	}
+
+	return rowToSubscriber(row), nil
+}
+
+func CountSubscribers(
+	ctx context.Context,
+	exec storage.Executor,
+) (int64, error) {
+	return queries.CountSubscribers(ctx, exec)
+}
+
+func rowToSubscriber(row db.Subscriber) Subscriber {
+	return Subscriber{
+		ID:           row.ID,
+		CreatedAt:    row.CreatedAt.Time,
+		UpdatedAt:    row.UpdatedAt.Time,
+		Email:        row.Email.String,
+		SubscribedAt: row.SubscribedAt.Time,
+		Referer:      row.Referer.String,
+		IsVerified:   row.IsVerified.Bool,
+	}
 }

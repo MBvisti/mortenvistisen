@@ -1,0 +1,84 @@
+package email
+
+import (
+	"bytes"
+	"context"
+)
+
+type NewsletterRelease struct {
+	NewsletterTitle string
+	IssueLabel      string
+	Highlights      string
+	NewsletterHTML  string
+	ReadURL         string
+}
+
+var _ Transformer = (*NewsletterRelease)(nil)
+
+func (n NewsletterRelease) ToHTML() (string, error) {
+	var buf bytes.Buffer
+	if err := n.render().Render(context.Background(), &buf); err != nil {
+		return "", err
+	}
+	return buf.String(), nil
+}
+
+func (n NewsletterRelease) ToText() (string, error) {
+	html, err := n.ToHTML()
+	if err != nil {
+		return "", err
+	}
+	return HTMLToText(html)
+}
+
+templ (n NewsletterRelease) render() {
+	@baseLayout("New Newsletter Release", "A new newsletter issue is now available.") {
+		@spacer("32")
+		@title("New Newsletter Release")
+		@spacer("24")
+		@copy() {
+			<span class="st-Delink" style="color: #414552; text-decoration: none;">
+				Hi,
+			</span>
+		}
+		@copy() {
+			<span class="st-Delink" style="color: #414552; text-decoration: none;">
+				{ n.NewsletterTitle } is out now.
+				if n.IssueLabel != "" {
+					<span> ({ n.IssueLabel })</span>
+				}
+			</span>
+		}
+		if n.NewsletterHTML != "" {
+			@copy() {
+				@templ.Raw(n.NewsletterHTML)
+			}
+		}
+		if n.Highlights != "" {
+			@copy() {
+				<span class="st-Delink" style="color: #414552; text-decoration: none;">
+					{ n.Highlights }
+				</span>
+			}
+		}
+		@spacer("8")
+		@button(n.ReadURL, "Open On The Website")
+		@spacer("8")
+		@copy() {
+			<span class="st-Delink" style="color: #414552; text-decoration: none;">
+				Or copy and paste this link into your browser:
+			</span>
+		}
+		@copy() {
+			<span class="st-Delink" style="color: #625afa; text-decoration: none; word-break: break-all;">
+				{ n.ReadURL }
+			</span>
+		}
+		@copy() {
+			<span class="st-Delink" style="color: #414552; text-decoration: none;">
+				Thanks for subscribing.
+			</span>
+		}
+		@spacer("32")
+	}
+}

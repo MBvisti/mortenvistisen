@@ -1,0 +1,500 @@
+package views
+
+import (
+	"fmt"
+	"mortenvistisen/internal/hypermedia"
+	"mortenvistisen/models"
+	"mortenvistisen/router/routes"
+	"mortenvistisen/views/components"
+	"net/http"
+)
+
+templ Article(article models.Article) {
+	@base(
+		components.SetTitle(metaOr(article.MetaTitle, article.Title)),
+		components.SetDescription(metaOr(article.MetaDescription, article.Excerpt)),
+		components.SetSlug("/posts/"+article.Slug),
+		components.SetImage(article.ImageLink),
+		components.SetImageAlt(article.Title),
+		components.SetMetaType("article"),
+	) {
+		<main class="container mx-auto bg-base-100 flex-1 flex flex-col px-4 sm:px-6 lg:px-8">
+			<div class="relative mt-12 sm:mt-16 lg:mt-24 flex justify-center">
+				<!-- Back button -->
+				<div class="hidden lg:block absolute left-0 top-0">
+					<a
+						href="javascript:history.back()"
+						class="flex h-10 w-10 items-center justify-center rounded-full border border-base-content/10 bg-base-200 shadow-sm transition hover:bg-base-300"
+						aria-label="Go back"
+					>
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="h-4 w-4 text-base-content/60">
+							<path fill-rule="evenodd" d="M9.78 4.22a.75.75 0 0 1 0 1.06L7.06 8l2.72 2.72a.75.75 0 1 1-1.06 1.06L5.47 8.53a.75.75 0 0 1 0-1.06l3.25-3.25a.75.75 0 0 1 1.06 0Z" clip-rule="evenodd"></path>
+						</svg>
+					</a>
+				</div>
+				<!-- Article content -->
+				<article class="w-full max-w-2xl">
+					<header class="flex flex-col">
+						<time datetime={ article.FirstPublishedAt.Format("2006-01-02") } class="flex items-center text-sm text-base-content/50">
+							<span class="h-4 w-0.5 rounded-full bg-base-content/20"></span>
+							<span class="ml-3">{ article.FirstPublishedAt.Format("January 2, 2006") }</span>
+						</time>
+						if article.UpdatedAt.After(article.FirstPublishedAt) {
+							<time datetime={ article.UpdatedAt.Format("2006-01-02") } class="mt-2 flex items-center text-sm text-base-content/50">
+								<span class="h-4 w-0.5 rounded-full bg-base-content/20"></span>
+								<span class="ml-3">Updated { article.UpdatedAt.Format("January 2, 2006") }</span>
+							</time>
+						}
+						<h1 class="mt-6 text-3xl sm:text-4xl font-bold tracking-tight text-base-content">
+							{ article.Title }
+						</h1>
+					</header>
+					if article.ImageLink != "" {
+						<div class="mt-8 overflow-hidden rounded-2xl">
+							<img src={ article.ImageLink } alt={ article.Title } class="w-full h-auto object-cover"/>
+						</div>
+					}
+					<div class="mt-8 prose prose-invert prose-lg max-w-none prose-headings:text-base-content prose-p:text-base-content/80 prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-base-content prose-code:text-base-content prose-pre:bg-base-200 prose-pre:border prose-pre:border-base-content/10 prose-img:rounded-2xl prose-ol:text-base-content/80 prose-ul:text-base-content/80 prose-li:text-base-content/80">
+						@templ.Raw(markdownToHTML(article.Content))
+					</div>
+				</article>
+			</div>
+		</main>
+	}
+}
+
+templ ArticleIndex(data models.PaginatedArticles) {
+	@adminBase() {
+		<main class="flex-1 px-6 py-10">
+			<div class="mx-auto flex w-full max-w-5xl flex-col gap-6">
+				<div class="flex flex-wrap items-center justify-between gap-4">
+					<h1 class="text-2xl font-semibold tracking-tight text-base-content">Articles</h1>
+					<a href={ routes.ArticleNew.URL() } class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:opacity-60 disabled:cursor-not-allowed bg-primary text-primary-content shadow-sm hover:bg-primary/90 h-9 px-4 py-2 text-sm rounded-field">New Article</a>
+				</div>
+				if len(data.Articles) == 0 {
+					<p class="text-sm text-base-content/60">No articles found.</p>
+				} else {
+					<div class="rounded-box border border-base-300 bg-base-100 shadow-sm">
+						<div class="flex flex-wrap items-center justify-between gap-3 border-b border-base-300 px-4 py-3">
+							<p class="text-sm text-base-content/70">Showing { fmt.Sprintf("%d-%d", ((data.Page-1)*data.PageSize)+1, ((data.Page-1)*data.PageSize)+int64(len(data.Articles))) } of { fmt.Sprintf("%d", data.TotalCount) } articles</p>
+							<p class="text-sm text-base-content/70">Page { fmt.Sprintf("%d", data.Page) } of { fmt.Sprintf("%d", data.TotalPages) }</p>
+						</div>
+						<div class="relative w-full overflow-x-auto">
+							<table class="w-full caption-bottom text-sm">
+								<thead class="[&_tr]:border-b [&_tr]:border-base-300">
+									<tr class="border-b border-base-300 bg-base-200/40">
+										<th class="h-10 px-4 text-left align-middle font-medium text-base-content/70">Article</th>
+										<th class="h-10 px-4 text-left align-middle font-medium text-base-content/70">Status</th>
+										<th class="h-10 px-4 text-left align-middle font-medium text-base-content/70">Published At</th>
+										<th class="h-10 px-4 text-left align-middle font-medium text-base-content/70">Updated At</th>
+										<th class="h-10 px-4 text-left align-middle font-medium text-base-content/70">Read Time</th>
+										<th class="h-10 px-4 text-left align-middle font-medium text-base-content/70">Actions</th>
+									</tr>
+								</thead>
+								<tbody class="[&_tr:last-child]:border-0">
+									for _, article := range data.Articles {
+										<tr class="border-b border-base-300 transition-colors hover:bg-base-200/40">
+											<td class="p-4 align-middle">
+												<div class="max-w-[24rem] space-y-1">
+													<div class="truncate font-medium text-base-content">{ article.Title }</div>
+													<div class="truncate text-xs text-base-content/60">{ article.Slug }</div>
+												</div>
+											</td>
+											<td class="p-4 align-middle">
+												if article.Published {
+													<span class="inline-flex items-center rounded-field bg-success/15 px-2.5 py-1 text-xs font-medium text-success">Published</span>
+												} else {
+													<span class="inline-flex items-center rounded-field bg-base-300 px-2.5 py-1 text-xs font-medium text-base-content/70">Draft</span>
+												}
+											</td>
+											<td class="p-4 align-middle text-base-content/80">{ article.FirstPublishedAt.Format("2006-01-02") }</td>
+											<td class="p-4 align-middle text-base-content/80">{ article.UpdatedAt.Format("2006-01-02") }</td>
+											<td class="p-4 align-middle text-base-content/80">{ fmt.Sprintf("%d min", article.ReadTime) }</td>
+											<td class="p-4 align-middle">
+												<div class="flex flex-wrap gap-2 text-sm">
+													<a class="inline-flex h-8 items-center rounded-field border border-base-300 px-3 text-base-content/80 transition hover:bg-base-200 hover:text-base-content" href={ routes.ArticleShow.URL(article.ID) }>View</a>
+													<a class="inline-flex h-8 items-center rounded-field border border-base-300 px-3 text-base-content/80 transition hover:bg-base-200 hover:text-base-content" href={ routes.ArticleEdit.URL(article.ID) }>Edit</a>
+												</div>
+											</td>
+										</tr>
+									}
+								</tbody>
+							</table>
+						</div>
+						if data.TotalPages > 1 {
+							<div class="border-t border-base-300 px-4 py-3">
+								<nav class="flex items-center justify-between">
+									if data.Page > 1 {
+										<a href={ fmt.Sprintf("%s?page=%d&per_page=%d", routes.ArticleIndex.URL(), data.Page-1, data.PageSize) } class="inline-flex h-9 items-center rounded-field border border-base-300 px-3 text-sm text-base-content/80 transition hover:bg-base-200 hover:text-base-content">Previous</a>
+									} else {
+										<span class="inline-flex h-9 items-center rounded-field border border-base-300 px-3 text-sm text-base-content/40">Previous</span>
+									}
+									<span class="text-sm text-base-content/70">{ fmt.Sprintf("Page %d of %d", data.Page, data.TotalPages) }</span>
+									if data.Page < data.TotalPages {
+										<a href={ fmt.Sprintf("%s?page=%d&per_page=%d", routes.ArticleIndex.URL(), data.Page+1, data.PageSize) } class="inline-flex h-9 items-center rounded-field border border-base-300 px-3 text-sm text-base-content/80 transition hover:bg-base-200 hover:text-base-content">Next</a>
+									} else {
+										<span class="inline-flex h-9 items-center rounded-field border border-base-300 px-3 text-sm text-base-content/40">Next</span>
+									}
+								</nav>
+							</div>
+						}
+					</div>
+				}
+			</div>
+		</main>
+	}
+}
+
+templ ArticleShow(article models.Article) {
+	@adminBase() {
+		<main class="flex-1 px-6 py-10">
+			<div class="mx-auto flex w-full max-w-4xl flex-col gap-6">
+				<div class="flex flex-wrap items-center justify-between gap-4">
+					<h1 class="text-2xl font-semibold tracking-tight text-base-content">Article Details</h1>
+					<div class="flex flex-wrap items-center gap-3">
+						<a href={ routes.ArticleEdit.URL(article.ID) } class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:opacity-60 disabled:cursor-not-allowed bg-primary text-primary-content shadow-sm hover:bg-primary/90 h-9 px-4 py-2 text-sm rounded-field">Edit</a>
+						<a class="text-sm text-base-content/70 hover:text-base-content" href={ routes.ArticleIndex.URL() }>Back to List</a>
+					</div>
+				</div>
+				<div class="rounded-box border border-base-300 bg-base-100 shadow-sm">
+					<div class="p-6 pt-0">
+						<div class="grid gap-5 sm:grid-cols-2">
+							<div class="space-y-1">
+								<label class="text-sm font-medium leading-none text-base-content/80 peer-disabled:cursor-not-allowed peer-disabled:opacity-60">Created At</label>
+								<p class="text-sm text-base-content">{ article.CreatedAt.String() }</p>
+							</div>
+							<div class="space-y-1">
+								<label class="text-sm font-medium leading-none text-base-content/80 peer-disabled:cursor-not-allowed peer-disabled:opacity-60">Updated At</label>
+								<p class="text-sm text-base-content">{ article.UpdatedAt.String() }</p>
+							</div>
+							<div class="space-y-1">
+								<label class="text-sm font-medium leading-none text-base-content/80 peer-disabled:cursor-not-allowed peer-disabled:opacity-60">First Published At</label>
+								<p class="text-sm text-base-content">{ article.FirstPublishedAt.String() }</p>
+							</div>
+							<div class="space-y-1">
+								<label class="text-sm font-medium leading-none text-base-content/80 peer-disabled:cursor-not-allowed peer-disabled:opacity-60">Published</label>
+								<p class="text-sm text-base-content">{ fmt.Sprintf("%t", article.Published) }</p>
+							</div>
+							<div class="space-y-1">
+								<label class="text-sm font-medium leading-none text-base-content/80 peer-disabled:cursor-not-allowed peer-disabled:opacity-60">Title</label>
+								<p class="text-sm text-base-content">{ article.Title }</p>
+							</div>
+							<div class="space-y-1">
+								<label class="text-sm font-medium leading-none text-base-content/80 peer-disabled:cursor-not-allowed peer-disabled:opacity-60">Excerpt</label>
+								<p class="text-sm text-base-content">{ article.Excerpt }</p>
+							</div>
+							<div class="space-y-1">
+								<label class="text-sm font-medium leading-none text-base-content/80 peer-disabled:cursor-not-allowed peer-disabled:opacity-60">Meta Title</label>
+								<p class="text-sm text-base-content">{ article.MetaTitle }</p>
+							</div>
+							<div class="space-y-1">
+								<label class="text-sm font-medium leading-none text-base-content/80 peer-disabled:cursor-not-allowed peer-disabled:opacity-60">Meta Description</label>
+								<p class="text-sm text-base-content">{ article.MetaDescription }</p>
+							</div>
+							<div class="space-y-1">
+								<label class="text-sm font-medium leading-none text-base-content/80 peer-disabled:cursor-not-allowed peer-disabled:opacity-60">Slug</label>
+								<p class="text-sm text-base-content">{ article.Slug }</p>
+							</div>
+							<div class="space-y-1">
+								<label class="text-sm font-medium leading-none text-base-content/80 peer-disabled:cursor-not-allowed peer-disabled:opacity-60">Image Link</label>
+								<p class="text-sm text-base-content">{ article.ImageLink }</p>
+							</div>
+							<div class="space-y-1">
+								<label class="text-sm font-medium leading-none text-base-content/80 peer-disabled:cursor-not-allowed peer-disabled:opacity-60">Read Time</label>
+								<p class="text-sm text-base-content">{ fmt.Sprintf("%d", article.ReadTime) }</p>
+							</div>
+							<div class="space-y-1">
+								<label class="text-sm font-medium leading-none text-base-content/80 peer-disabled:cursor-not-allowed peer-disabled:opacity-60">Content</label>
+								<p class="text-sm text-base-content">{ article.Content }</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</main>
+	}
+}
+
+type ResourceField struct {
+	Error string
+	Value string
+}
+
+type ArticleNewField string
+
+func (f ArticleNewField) String() string {
+	return string(f)
+}
+
+const (
+	ArticleNewFragment             ArticleNewField = "articleNewFragmentForm"
+	ArticleNewTitleField           ArticleNewField = "title"
+	ArticleNewExcerptField         ArticleNewField = "excerpt"
+	ArticleNewMetaTitleField       ArticleNewField = "metaTitle"
+	ArticleNewMetaDescriptionField ArticleNewField = "metaDescription"
+	ArticleNewImageLinkField       ArticleNewField = "imageLink"
+	ArticleNewReadTimeField        ArticleNewField = "readTime"
+	ArticleNewPublishedField       ArticleNewField = "published"
+	ArticleNewContentField         ArticleNewField = "content"
+)
+
+templ ArticleNew(tags []models.Tag, resourceFields map[ArticleNewField]ResourceField) {
+	@adminBase() {
+		<main class="flex-1 px-6 py-10">
+			<div class="mx-auto flex w-full max-w-5xl flex-col gap-6">
+				<div class="rounded-box border border-base-300 bg-base-100 shadow-sm">
+					<div class="flex flex-col space-y-1.5 p-6">
+						<h3 class="text-lg font-semibold leading-none tracking-tight text-base-content">New Article</h3>
+						<p class="text-sm text-base-content/60">Enter the details for the new article.</p>
+					</div>
+					<div class="p-6 pt-0">
+						@components.Form(
+							components.FormProps{Action: http.MethodPost, URL: routes.ArticleCreate.URL()},
+							components.WithClass("space-y-5"), components.WithFragment(ArticleNewFragment.String()),
+						) {
+							<div>
+								@components.Tabs("article-new-tab", "info") {
+									@components.TabsList(components.WithClass("grid w-full grid-cols-3")) {
+										@components.TabsTrigger("articleNewTab", "info", "Info", components.WithClass("w-full"))
+										@components.TabsTrigger("articleNewTab", "content", "Content", components.WithClass("w-full"))
+										@components.TabsTrigger("articleNewTab", "tags", "Tags", components.WithClass("w-full"))
+									}
+									@components.TabsContent("articleNewTab", "info", components.WithClass("min-h-[620px]")) {
+										<div class="space-y-4">
+											<div class="space-y-1">
+												@components.Label(components.LabelProps{Text: "Title"}).WithFor("title").Render()
+												@components.Input(ArticleNewTitleField.String()).WithID("title").WithValue(resourceFields[ArticleNewTitleField].Value).WithHasError(resourceFields[ArticleNewTitleField].Error != "").Render()
+												if resourceFields[ArticleNewTitleField].Error != "" {
+													<p class="text-sm text-error">{ resourceFields[ArticleNewTitleField].Error }</p>
+												}
+											</div>
+											<div class="space-y-1">
+												@components.Label(components.LabelProps{Text: "Excerpt"}).WithFor("excerpt").Render()
+												@components.Textarea(ArticleNewExcerptField.String()).WithID("excerpt").WithRows(4).WithValue(resourceFields[ArticleNewExcerptField].Value).WithHasError(resourceFields[ArticleNewExcerptField].Error != "").Render()
+												if resourceFields[ArticleNewExcerptField].Error != "" {
+													<p class="text-sm text-error">{ resourceFields[ArticleNewExcerptField].Error }</p>
+												}
+											</div>
+											<div class="space-y-1">
+												@components.Label(components.LabelProps{Text: "Meta Title"}).WithFor("metaTitle").Render()
+												@components.Input(ArticleNewMetaTitleField.String()).WithID("metaTitle").WithValue(resourceFields[ArticleNewMetaTitleField].Value).WithHasError(resourceFields[ArticleNewMetaTitleField].Error != "").Render()
+												if resourceFields[ArticleNewMetaTitleField].Error != "" {
+													<p class="text-sm text-error">{ resourceFields[ArticleNewMetaTitleField].Error }</p>
+												}
+											</div>
+											<div class="space-y-1">
+												@components.Label(components.LabelProps{Text: "Meta Description"}).WithFor("metaDescription").Render()
+												@components.Textarea(ArticleNewMetaDescriptionField.String()).WithID("metaDescription").WithRows(4).WithValue(resourceFields[ArticleNewMetaDescriptionField].Value).WithHasError(resourceFields[ArticleNewMetaDescriptionField].Error != "").Render()
+												if resourceFields[ArticleNewMetaDescriptionField].Error != "" {
+													<p class="text-sm text-error">{ resourceFields[ArticleNewMetaDescriptionField].Error }</p>
+												}
+											</div>
+											<div class="space-y-1">
+												@components.Label(components.LabelProps{Text: "Image Link"}).WithFor("imageLink").Render()
+												@components.Input(ArticleNewImageLinkField.String()).WithType(components.InputTypeURL).WithID("imageLink").WithValue(resourceFields[ArticleNewImageLinkField].Value).WithHasError(resourceFields[ArticleNewImageLinkField].Error != "").Render()
+												if resourceFields[ArticleNewImageLinkField].Error != "" {
+													<p class="text-sm text-error">{ resourceFields[ArticleNewImageLinkField].Error }</p>
+												}
+											</div>
+											<div class="space-y-1">
+												@components.Label(components.LabelProps{Text: "Read Time"}).WithFor("readTime").Render()
+												@components.Input(ArticleNewReadTimeField.String()).WithType(components.InputTypeNumber).WithID("readTime").WithValue(resourceFields[ArticleNewReadTimeField].Value).WithHasError(resourceFields[ArticleNewReadTimeField].Error != "").Render()
+												if resourceFields[ArticleNewReadTimeField].Error != "" {
+													<p class="text-sm text-error">{ resourceFields[ArticleNewReadTimeField].Error }</p>
+												}
+											</div>
+											<div class="mt-4 flex items-center gap-2">
+												@components.Checkbox(ArticleNewPublishedField.String()).WithID("published").WithChecked(resourceFields[ArticleNewPublishedField].Value == "true" || resourceFields[ArticleNewPublishedField].Value == "on" || resourceFields[ArticleNewPublishedField].Value == "1").Render()
+												@components.Label(components.LabelProps{Text: "Published"}).WithFor("published").Render()
+											</div>
+											if resourceFields[ArticleNewPublishedField].Error != "" {
+												<p class="text-sm text-error">{ resourceFields[ArticleNewPublishedField].Error }</p>
+											}
+										</div>
+									}
+									@components.TabsContent("articleNewTab", "content", components.WithClass("min-h-[620px]")) {
+										<div class="space-y-6 mt-8">
+											<fieldset class="fieldset flex flex-col">
+												<div id="editor-container" class="h-[420px] rounded-md bg-background">
+													<textarea id="editorTarget" name="content" class="h-full w-full p-4" data-bind={ ArticleNewContentField.String() }>{ resourceFields[ArticleNewContentField].Value }</textarea>
+												</div>
+												if resourceFields[ArticleNewContentField].Error != "" {
+													<p class="mt-2 text-sm text-error">{ resourceFields[ArticleNewContentField].Error }</p>
+												}
+											</fieldset>
+										</div>
+									}
+									@components.TabsContent("articleNewTab", "tags", components.WithClass("min-h-[620px]")) {
+										<div class="space-y-6 mt-8">
+											<div class="space-y-1">
+												@components.Label(components.LabelProps{Text: "Associate Tags"}).Render()
+												<p class="text-sm text-base-content/60">Select one or more tags for this article.</p>
+											</div>
+											if len(tags) == 0 {
+												<div class="rounded-box border border-base-300 bg-base-200/40 p-4">
+													<p class="text-sm text-base-content/70">No tags are available yet. Create tags first to associate them with this article.</p>
+													<a class="mt-3 inline-flex h-8 items-center rounded-field border border-base-300 px-3 text-sm text-base-content/80 transition hover:bg-base-200 hover:text-base-content" href={ routes.TagNew.URL() }>Create Tag</a>
+												</div>
+											} else {
+												<div class="grid gap-3 sm:grid-cols-2">
+													for _, tag := range tags {
+														<label class="flex items-center gap-2 rounded-field border border-base-300 bg-base-200 px-3 py-2 text-sm text-base-content">
+															@components.Checkbox(fmt.Sprintf("tagSelections.%d", tag.ID)).WithID(fmt.Sprintf("tag-%d", tag.ID)).Render()
+															<span>{ tag.Title }</span>
+														</label>
+													}
+												</div>
+											}
+										</div>
+									}
+								}
+							</div>
+							<div class="mt-24 space-y-3">
+								<button type="submit" class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:opacity-60 disabled:cursor-not-allowed bg-primary text-primary-content shadow-sm hover:bg-primary/90 h-9 px-4 py-2 text-sm rounded-field w-full">Create Article</button>
+								<a class="inline-flex h-9 w-full items-center justify-center rounded-field border border-base-300 px-4 py-2 text-sm font-medium text-base-content/80 transition hover:bg-base-200/70 hover:text-base-content" href={ routes.ArticleIndex.URL() }>Back to List</a>
+							</div>
+						}
+					</div>
+				</div>
+			</div>
+		</main>
+	}
+}
+
+type ArticleUpdateField string
+
+func (f ArticleUpdateField) String() string {
+	return string(f)
+}
+
+const (
+	ArticleUpdateFragment             ArticleUpdateField = "articleUpdateFragmentForm"
+	ArticleUpdateFirstPublishedAtField ArticleUpdateField = "firstPublishedAt"
+	ArticleUpdateTitleField           ArticleUpdateField = "title"
+	ArticleUpdateExcerptField         ArticleUpdateField = "excerpt"
+	ArticleUpdateMetaTitleField       ArticleUpdateField = "metaTitle"
+	ArticleUpdateMetaDescriptionField ArticleUpdateField = "metaDescription"
+	ArticleUpdateSlugField            ArticleUpdateField = "slug"
+	ArticleUpdateImageLinkField       ArticleUpdateField = "imageLink"
+	ArticleUpdateReadTimeField        ArticleUpdateField = "readTime"
+	ArticleUpdatePublishedField       ArticleUpdateField = "published"
+	ArticleUpdateContentField         ArticleUpdateField = "content"
+)
+
+templ ArticleUpdate(article models.Article, tags []models.Tag, selectedTagIDs map[int32]bool) {
+	@adminBase() {
+		<main class="flex-1 px-6 py-10">
+			<div class="mx-auto flex w-full max-w-5xl flex-col gap-6">
+				<div class="rounded-box border border-base-300 bg-base-100 shadow-sm">
+					<div class="flex flex-col space-y-1.5 p-6">
+						<h3 class="text-lg font-semibold leading-none tracking-tight text-base-content">Edit Article</h3>
+						<p class="text-sm text-base-content/60">Update the details for this article.</p>
+					</div>
+					<div class="p-6 pt-0">
+						@components.Form(
+							components.FormProps{Action: http.MethodPut, URL: routes.ArticleUpdate.URL(article.ID)},
+							components.WithClass("space-y-5"), components.WithFragment(ArticleUpdateFragment.String()),
+						) {
+							<div>
+								@components.Tabs("article-update-tab", "info") {
+									@components.TabsList(components.WithClass("grid w-full grid-cols-3")) {
+										@components.TabsTrigger("articleUpdateTab", "info", "Info", components.WithClass("w-full"))
+										@components.TabsTrigger("articleUpdateTab", "content", "Content", components.WithClass("w-full"))
+										@components.TabsTrigger("articleUpdateTab", "tags", "Tags", components.WithClass("w-full"))
+									}
+									@components.TabsContent("articleUpdateTab", "info", components.WithClass("min-h-[620px]")) {
+										<div class="space-y-4">
+											<div class="space-y-1">
+												@components.Label(components.LabelProps{Text: "First Published At"}).WithFor("firstPublishedAt").Render()
+												@components.Input(ArticleUpdateFirstPublishedAtField.String()).WithType(components.InputTypeDate).WithID("firstPublishedAt").WithValue(func() string {
+													if article.FirstPublishedAt.IsZero() {
+														return ""
+													}
+													return article.FirstPublishedAt.Format("2006-01-02")
+												}()).Render()
+											</div>
+											<div class="mt-4 flex items-center gap-2">
+												@components.Checkbox(ArticleUpdatePublishedField.String()).WithID("published").WithChecked(article.Published).Render()
+												@components.Label(components.LabelProps{Text: "Published"}).WithFor("published").Render()
+											</div>
+											<div class="space-y-1">
+												@components.Label(components.LabelProps{Text: "Title"}).WithFor("title").Render()
+												@components.Input(ArticleUpdateTitleField.String()).WithID("title").WithValue(article.Title).Render()
+											</div>
+											<div class="space-y-1">
+												@components.Label(components.LabelProps{Text: "Excerpt"}).WithFor("excerpt").Render()
+												@components.Textarea(ArticleUpdateExcerptField.String()).WithID("excerpt").WithRows(4).WithValue(article.Excerpt).Render()
+											</div>
+											<div class="space-y-1">
+												@components.Label(components.LabelProps{Text: "Meta Title"}).WithFor("metaTitle").Render()
+												@components.Input(ArticleUpdateMetaTitleField.String()).WithID("metaTitle").WithValue(article.MetaTitle).Render()
+											</div>
+											<div class="space-y-1">
+												@components.Label(components.LabelProps{Text: "Meta Description"}).WithFor("metaDescription").Render()
+												@components.Textarea(ArticleUpdateMetaDescriptionField.String()).WithID("metaDescription").WithRows(4).WithValue(article.MetaDescription).Render()
+											</div>
+											<div class="space-y-1">
+												@components.Label(components.LabelProps{Text: "Slug"}).WithFor("slug").Render()
+												@components.Input(ArticleUpdateSlugField.String()).WithID("slug").WithValue(article.Slug).Render()
+											</div>
+											<div class="space-y-1">
+												@components.Label(components.LabelProps{Text: "Image Link"}).WithFor("imageLink").Render()
+												@components.Input(ArticleUpdateImageLinkField.String()).WithType(components.InputTypeURL).WithID("imageLink").WithValue(article.ImageLink).Render()
+											</div>
+											<div class="space-y-1">
+												@components.Label(components.LabelProps{Text: "Read Time"}).WithFor("readTime").Render()
+												@components.Input(ArticleUpdateReadTimeField.String()).WithType(components.InputTypeNumber).WithID("readTime").WithValue(fmt.Sprintf("%d", article.ReadTime)).Render()
+											</div>
+										</div>
+									}
+									@components.TabsContent("articleUpdateTab", "content", components.WithClass("min-h-[620px]")) {
+										<div class="space-y-6 mt-8">
+											<fieldset class="fieldset flex flex-col">
+												<div id="editor-container" class="h-[420px] rounded-md bg-background">
+													<textarea id="editorTarget" name="content" class="h-full w-full p-4" data-bind={ ArticleUpdateContentField.String() }>{ article.Content }</textarea>
+												</div>
+											</fieldset>
+										</div>
+									}
+									@components.TabsContent("articleUpdateTab", "tags", components.WithClass("min-h-[620px]")) {
+										<div class="space-y-6 mt-8">
+											<div class="space-y-1">
+												@components.Label(components.LabelProps{Text: "Associate Tags"}).Render()
+												<p class="text-sm text-base-content/60">Select one or more tags for this article.</p>
+											</div>
+											if len(tags) == 0 {
+												<div class="rounded-box border border-base-300 bg-base-200/40 p-4">
+													<p class="text-sm text-base-content/70">No tags are available yet. Create tags first to associate them with this article.</p>
+													<a class="mt-3 inline-flex h-8 items-center rounded-field border border-base-300 px-3 text-sm text-base-content/80 transition hover:bg-base-200 hover:text-base-content" href={ routes.TagNew.URL() }>Create Tag</a>
+												</div>
+											} else {
+												<div class="grid gap-3 sm:grid-cols-2">
+													for _, tag := range tags {
+														<label class="flex items-center gap-2 rounded-field border border-base-300 bg-base-200 px-3 py-2 text-sm text-base-content">
+															@components.Checkbox(fmt.Sprintf("tagSelections.%d", tag.ID)).WithID(fmt.Sprintf("tag-%d", tag.ID)).WithChecked(selectedTagIDs[tag.ID]).Render()
+															<span>{ tag.Title }</span>
+														</label>
+													}
+												</div>
+											}
+										</div>
+									}
+								}
+							</div>
+							<div class="mt-24 space-y-3">
+								<button type="submit" class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:opacity-60 disabled:cursor-not-allowed bg-primary text-primary-content shadow-sm hover:bg-primary/90 h-9 px-4 py-2 text-sm rounded-field w-full">Update Article</button>
+								<a class="inline-flex h-9 w-full items-center justify-center rounded-field border border-base-300 px-4 py-2 text-sm font-medium text-base-content/80 transition hover:bg-base-200/70 hover:text-base-content" href={ routes.ArticleIndex.URL() }>Back to List</a>
+							</div>
+						}
+						<div role="separator" class="my-6 shrink-0 bg-base-300 h-px w-full"></div>
+						<button type="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:opacity-60 disabled:cursor-not-allowed bg-error text-error-content shadow-sm hover:bg-error/90 h-9 px-4 py-2 text-sm rounded-field w-full" data-on:click={ hypermedia.DataAction(http.MethodDelete, routes.ArticleDestroy.URL(article.ID)) }>Destroy Article</button>
+					</div>
+				</div>
+			</div>
+		</main>
+	}
+}
+
+templ ArticleEdit(article models.Article) {
+	@ArticleUpdate(article, nil, nil)
+}

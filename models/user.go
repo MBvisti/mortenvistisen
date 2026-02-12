@@ -2,265 +2,306 @@ package models
 
 import (
 	"context"
+	"crypto/rand"
 	"crypto/subtle"
+	"database/sql"
+	"encoding/base64"
 	"errors"
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/mbvisti/mortenvistisen/config"
-	"github.com/mbvisti/mortenvistisen/models/internal/db"
 	"golang.org/x/crypto/argon2"
+
+	"mortenvistisen/models/internal/db"
+	"mortenvistisen/internal/storage"
 )
 
 type User struct {
-	ID              uuid.UUID
-	CreatedAt       time.Time
-	UpdatedAt       time.Time
-	Email           string
-	EmailVerifiedAt time.Time
-	IsAdmin         bool
-	HashedPassword  string
+	ID               uuid.UUID
+	CreatedAt        time.Time
+	UpdatedAt        time.Time
+	Email            string
+	EmailValidatedAt time.Time
+	Password         []byte
+	IsAdmin          bool
 }
 
-func (ue User) IsVerified() bool {
-	return !ue.EmailVerifiedAt.IsZero()
+func (u User) HasValidatedEmail() bool {
+	return !u.EmailValidatedAt.IsZero()
 }
 
-func (ue User) ValidatePassword(providedPassword string) error {
-	if t := subtle.ConstantTimeCompare(HashPassword(providedPassword), []byte(ue.HashedPassword)); t == 1 {
-		return nil
+func (u User) ValidPassword(providedPassword, pepper string) (bool, error) {
+	parts := strings.Split(string(u.Password), ":")
+	if len(parts) != 2 {
+		return false, fmt.Errorf("invalid stored password format")
 	}
 
-	return errors.New("invalid password")
+	expectedHash, err := base64.RawStdEncoding.DecodeString(parts[0])
+	if err != nil {
+		return false, fmt.Errorf("failed to decode hash: %w", err)
+	}
+
+	salt, err := base64.RawStdEncoding.DecodeString(parts[1])
+	if err != nil {
+		return false, fmt.Errorf("failed to decode pepper: %w", err)
+	}
+
+	newHash := argon2.IDKey(
+		[]byte(providedPassword+pepper),
+		salt,
+		2,
+		19*1024,
+		1,
+		uint32(len(expectedHash)),
+	)
+
+	return subtle.ConstantTimeCompare(newHash, expectedHash) == 1, nil
 }
 
-type PasswordPair struct {
-	Password        string `validate:"required,gte=6"`
-	ConfirmPassword string `validate:"required,gte=6"`
+func generateSalt(size int) ([]byte, error) {
+	salt := make([]byte, size)
+	_, err := rand.Read(salt)
+	if err != nil {
+		return nil, err
+	}
+
+	return salt, nil
 }
 
-func HashPassword(password string) []byte {
-	return argon2.IDKey(
-		[]byte(password),
-		[]byte(config.Cfg.PasswordSalt),
+func HashPassword(password, pepper string) (string, error) {
+	salt, err := generateSalt(16)
+	if err != nil {
+		return "", err
+	}
+
+	hash := argon2.IDKey(
+		[]byte(password+pepper),
+		[]byte(salt),
 		2,
 		19*1024,
 		1,
 		32,
 	)
+
+	encodedHash := fmt.Sprintf("%s:%s",
+		base64.RawStdEncoding.EncodeToString(hash),
+		base64.RawStdEncoding.EncodeToString(salt))
+
+	return encodedHash, nil
 }
 
-func GetUserByEmail(
+func FindUser(
 	ctx context.Context,
-	dbtx db.DBTX,
-	email string,
-) (User, error) {
-	user, err := db.Stmts.QueryUserByEmail(ctx, dbtx, email)
-	if err != nil {
-		return User{}, err
-	}
-
-	return User{
-		ID:              user.ID,
-		CreatedAt:       user.CreatedAt.Time,
-		UpdatedAt:       user.UpdatedAt.Time,
-		Email:           user.Email,
-		HashedPassword:  string(user.Password),
-		EmailVerifiedAt: user.EmailVerifiedAt.Time,
-		IsAdmin:         user.IsAdmin,
-	}, nil
-}
-
-func GetUser(
-	ctx context.Context,
-	dbtx db.DBTX,
+	exec storage.Executor,
 	id uuid.UUID,
 ) (User, error) {
-	row, err := db.Stmts.QueryUserByID(ctx, dbtx, id)
+	row, err := queries.QueryUserByID(ctx, exec, id)
 	if err != nil {
 		return User{}, err
 	}
 
-	return User{
-		ID:              id,
-		CreatedAt:       row.CreatedAt.Time,
-		UpdatedAt:       row.UpdatedAt.Time,
-		Email:           row.Email,
-		EmailVerifiedAt: row.EmailVerifiedAt.Time,
-		HashedPassword:  string(row.Password),
-		IsAdmin:         false,
-	}, nil
+	return rowToUser(row)
 }
 
-type NewUserPayload struct {
-	Email    string `validate:"required,email"`
-	Password PasswordPair
-}
-
-func NewUser(
+func FindUserByEmail(
 	ctx context.Context,
-	dbtx db.DBTX,
-	data NewUserPayload,
+	exec storage.Executor,
+	email string,
 ) (User, error) {
-	if err := validate.Struct(data); err != nil {
+	row, err := queries.QueryUserByEmail(ctx, exec, strings.ToLower(email))
+	if err != nil {
+		return User{}, err
+	}
+
+	return rowToUser(row)
+}
+
+type PasswordPair struct {
+	Password        string `validate:"required,min=8,max=72"`
+	ConfirmPassword string `validate:"required,min=8,max=72"`
+}
+
+type CreateUserData struct {
+	Email        string `validate:"required,email,max=255"`
+	PasswordPair PasswordPair
+}
+
+func CreateUser(
+	ctx context.Context,
+	exec storage.Executor,
+	pepper string,
+	data CreateUserData,
+) (User, error) {
+	if err := Validate.Struct(data); err != nil {
 		return User{}, errors.Join(ErrDomainValidation, err)
 	}
 
-	usr := User{
-		ID:        uuid.New(),
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-		Email:     data.Email,
-	}
-	hp := HashPassword(data.Password.Password)
-	usr.HashedPassword = string(hp)
-
-	_, err := db.Stmts.InsertUser(ctx, dbtx, db.InsertUserParams{
-		ID:        usr.ID,
-		CreatedAt: pgtype.Timestamptz{Time: usr.CreatedAt, Valid: true},
-		UpdatedAt: pgtype.Timestamptz{Time: usr.UpdatedAt, Valid: true},
-		Email:     usr.Email,
-		Password:  hp,
-	})
+	hashedPassword, err := HashPassword(data.PasswordPair.Password, pepper)
 	if err != nil {
 		return User{}, err
 	}
 
-	return usr, nil
+	params := db.InsertUserParams{
+		ID:               uuid.New(),
+		Email:            strings.ToLower(data.Email),
+		EmailValidatedAt: pgtype.Timestamptz{},
+		Password:         []byte(hashedPassword),
+		IsAdmin:          false,
+	}
+	row, err := queries.InsertUser(ctx, exec, params)
+	if err != nil {
+		return User{}, err
+	}
+
+	return rowToUser(row)
 }
 
-type UpdateUserPayload struct {
-	ID        uuid.UUID `validate:"required,uuid"`
-	UpdatedAt time.Time `validate:"required"`
-	Email     string    `validate:"required,email"`
+type UpdateUserData struct {
+	ID               uuid.UUID
+	Email            string `validate:"required,email,max=255"`
+	EmailValidatedAt sql.NullTime
+	Password         []byte
+	IsAdmin          bool
 }
 
 func UpdateUser(
 	ctx context.Context,
-	dbtx db.DBTX,
-	data UpdateUserPayload,
+	exec storage.Executor,
+	data UpdateUserData,
 ) (User, error) {
-	if err := validate.Struct(data); err != nil {
+	if err := Validate.Struct(data); err != nil {
 		return User{}, errors.Join(ErrDomainValidation, err)
 	}
 
-	row, err := db.Stmts.UpdateUser(ctx, dbtx, db.UpdateUserParams{
-		ID: data.ID,
-		UpdatedAt: pgtype.Timestamptz{
-			Time:  data.UpdatedAt,
-			Valid: true,
-		},
-		Email: data.Email,
-	})
+	currentRow, err := queries.QueryUserByID(ctx, exec, data.ID)
 	if err != nil {
 		return User{}, err
 	}
 
-	return User{
-		ID:              row.ID,
-		CreatedAt:       row.CreatedAt.Time,
-		UpdatedAt:       row.UpdatedAt.Time,
-		Email:           row.Email,
-		EmailVerifiedAt: row.EmailVerifiedAt.Time,
-		IsAdmin:         false,
-	}, nil
-}
-
-type UpdateUserPasswordPayload struct {
-	ID        uuid.UUID `validate:"required,uuid"`
-	UpdatedAt time.Time `validate:"required"`
-	Password  PasswordPair
-}
-
-func UpdateUserPassword(
-	ctx context.Context,
-	dbtx db.DBTX,
-	data UpdateUserPasswordPayload,
-) error {
-	if err := validate.Struct(data); err != nil {
-		return errors.Join(ErrDomainValidation, err)
+	email := strings.ToLower(data.Email)
+	if email == "" {
+		email = currentRow.Email
 	}
 
-	return db.Stmts.ChangeUserPassword(ctx, dbtx, db.ChangeUserPasswordParams{
-		ID: data.ID,
-		UpdatedAt: pgtype.Timestamptz{
-			Time:  data.UpdatedAt,
+	currentEmailValidatedAt := sql.NullTime{}
+	if currentRow.EmailValidatedAt.Valid {
+		currentEmailValidatedAt = sql.NullTime{
+			Time:  currentRow.EmailValidatedAt.Time,
 			Valid: true,
+		}
+	}
+
+	emailValidatedAt := data.EmailValidatedAt
+	if !emailValidatedAt.Valid && currentRow.EmailValidatedAt.Valid {
+		emailValidatedAt = currentEmailValidatedAt
+	}
+
+	password := data.Password
+	if len(password) == 0 {
+		password = currentRow.Password
+	}
+
+	params := db.UpdateUserParams{
+		ID:    data.ID,
+		Email: email,
+		EmailValidatedAt: pgtype.Timestamptz{
+			Time:  emailValidatedAt.Time,
+			Valid: emailValidatedAt.Valid,
 		},
-		Password: HashPassword(data.Password.Password),
-	})
-}
-
-type UpdateUserEmailToVerifiedPayload struct {
-	ID         uuid.UUID `validate:"required,uuid"`
-	Email      string    `validate:"required,email"`
-	VerifiedAt time.Time `validate:"required"`
-}
-
-func UpdateUserEmailToVerified(
-	ctx context.Context,
-	dbtx db.DBTX,
-	data UpdateUserEmailToVerifiedPayload,
-) error {
-	if err := validate.Struct(data); err != nil {
-		return errors.Join(ErrDomainValidation, err)
+		Password: password,
+		IsAdmin:  data.IsAdmin,
 	}
 
-	time := pgtype.Timestamptz{
-		Time:  data.VerifiedAt,
-		Valid: true,
-	}
-
-	return db.Stmts.VerifyUserEmail(ctx, dbtx, db.VerifyUserEmailParams{
-		Email:           data.Email,
-		UpdatedAt:       time,
-		EmailVerifiedAt: time,
-	})
-}
-
-type MakeUserAdminPayload struct {
-	UserID    uuid.UUID `validate:"required,uuid"`
-	UpdatedAt time.Time `validate:"required"`
-	ActorID   uuid.UUID `validate:"required,uuid"`
-}
-
-func MakeUserAdmin(
-	ctx context.Context,
-	dbtx db.DBTX,
-	data MakeUserAdminPayload,
-) (User, error) {
-	if err := validate.Struct(data); err != nil {
-		return User{}, errors.Join(ErrDomainValidation, err)
-	}
-
-	actor, err := GetUser(ctx, dbtx, data.ActorID)
+	row, err := queries.UpdateUser(ctx, exec, params)
 	if err != nil {
 		return User{}, err
 	}
-	if !actor.IsAdmin {
-		return User{}, ErrMustBeAdmin
+
+	return rowToUser(row)
+}
+
+func DestroyUser(
+	ctx context.Context,
+	exec storage.Executor,
+	id uuid.UUID,
+) error {
+	return queries.DeleteUser(ctx, exec, id)
+}
+
+type PaginatedUsers struct {
+	Users      []User
+	TotalCount int64
+	Page       int64
+	PageSize   int64
+	TotalPages int64
+}
+
+func PaginateUsers(
+	ctx context.Context,
+	exec storage.Executor,
+	page int64,
+	pageSize int64,
+) (PaginatedUsers, error) {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 10
+	}
+	if pageSize > 100 {
+		pageSize = 100
 	}
 
-	row, err := db.Stmts.UpdateUserIsAdmin(
+	offset := (page - 1) * pageSize
+
+	totalCount, err := queries.CountUsers(ctx, exec)
+	if err != nil {
+		return PaginatedUsers{}, err
+	}
+
+	rows, err := queries.QueryPaginatedUsers(
 		ctx,
-		dbtx,
-		db.UpdateUserIsAdminParams{
-			ID:        data.UserID,
-			IsAdmin:   true,
-			UpdatedAt: pgtype.Timestamptz{Time: data.UpdatedAt, Valid: true},
+		exec,
+		db.QueryPaginatedUsersParams{
+			Limit:  pageSize,
+			Offset: offset,
 		},
 	)
 	if err != nil {
-		return User{}, err
+		return PaginatedUsers{}, err
 	}
 
+	users := make([]User, len(rows))
+	for i, row := range rows {
+		user, convErr := rowToUser(row)
+		if convErr != nil {
+			return PaginatedUsers{}, convErr
+		}
+		users[i] = user
+	}
+
+	totalPages := (totalCount + int64(pageSize) - 1) / int64(pageSize)
+
+	return PaginatedUsers{
+		Users:      users,
+		TotalCount: totalCount,
+		Page:       page,
+		PageSize:   pageSize,
+		TotalPages: totalPages,
+	}, nil
+}
+
+func rowToUser(row db.User) (User, error) {
 	return User{
-		ID:              row.ID,
-		CreatedAt:       row.CreatedAt.Time,
-		UpdatedAt:       row.UpdatedAt.Time,
-		Email:           row.Email,
-		EmailVerifiedAt: row.EmailVerifiedAt.Time,
-		IsAdmin:         true,
+		ID:               row.ID,
+		CreatedAt:        row.CreatedAt.Time,
+		UpdatedAt:        row.UpdatedAt.Time,
+		Email:            row.Email,
+		EmailValidatedAt: row.EmailValidatedAt.Time,
+		Password:         row.Password,
+		IsAdmin:          row.IsAdmin,
 	}, nil
 }

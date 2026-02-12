@@ -1,0 +1,69 @@
+package views
+
+import (
+	"fmt"
+	"mortenvistisen/router/routes"
+	"mortenvistisen/views/components"
+)
+
+templ AdminHome(articleCount, newsletterCount, projectCount, subscriberCount int64) {
+	@adminBase(components.SetTitle("Admin Dashboard")) {
+		<div class="max-w-4xl">
+			<h1 class="text-2xl font-bold text-base-content mb-6">Dashboard</h1>
+			<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+				@components.Card() {
+					@components.CardHeader() {
+						@components.CardTitle("Articles")
+					}
+					@components.CardContent() {
+						<p class="text-3xl font-bold text-base-content">{ fmt.Sprintf("%d", articleCount) }</p>
+					}
+					@components.CardFooter() {
+						@components.Button(
+							components.ButtonProps{Label: "View all"},
+						).MakeGhost().WithSize(components.ButtonSizeSm).WithHref(routes.ArticleIndex.URL()).Render()
+					}
+				}
+				@components.Card() {
+					@components.CardHeader() {
+						@components.CardTitle("Newsletters")
+					}
+					@components.CardContent() {
+						<p class="text-3xl font-bold text-base-content">{ fmt.Sprintf("%d", newsletterCount) }</p>
+					}
+					@components.CardFooter() {
+						@components.Button(
+							components.ButtonProps{Label: "View all"},
+						).MakeGhost().WithSize(components.ButtonSizeSm).WithHref(routes.NewsletterIndex.URL()).Render()
+					}
+				}
+				@components.Card() {
+					@components.CardHeader() {
+						@components.CardTitle("Projects")
+					}
+					@components.CardContent() {
+						<p class="text-3xl font-bold text-base-content">{ fmt.Sprintf("%d", projectCount) }</p>
+					}
+					@components.CardFooter() {
+						@components.Button(
+							components.ButtonProps{Label: "View all"},
+						).MakeGhost().WithSize(components.ButtonSizeSm).WithHref(routes.ProjectIndex.URL()).Render()
+					}
+				}
+				@components.Card() {
+					@components.CardHeader() {
+						@components.CardTitle("Subscribers")
+					}
+					@components.CardContent() {
+						<p class="text-3xl font-bold text-base-content">{ fmt.Sprintf("%d", subscriberCount) }</p>
+					}
+					@components.CardFooter() {
+						@components.Button(
+							components.ButtonProps{Label: "View all"},
+						).MakeGhost().WithSize(components.ButtonSizeSm).WithHref(routes.SubscriberIndex.URL()).Render()
+					}
+				}
+			</div>
+		</div>
+	}
+}

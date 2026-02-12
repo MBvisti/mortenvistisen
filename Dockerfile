@@ -1,23 +1,35 @@
-FROM golang:1.24 AS build-go
+FROM debian:bookworm-slim AS css-builder
 
-ARG appRelease=0.0.1
+WORKDIR /usr/src/app
 
-ENV APP_RELEASE=$appRelease
+COPY bin/tailwindcli ./bin/tailwindcli
+COPY css ./css
+COPY views ./views
 
-WORKDIR /
+RUN ./bin/tailwindcli -i ./css/base.css -o ./assets/css/style.css --minify
+
+FROM golang:1.25-bookworm AS builder
+
+WORKDIR /usr/src/app
+
+COPY go.mod go.sum ./
+RUN go mod download && go mod verify
 
 COPY . .
+COPY --from=css-builder /usr/src/app/assets/css/style.css ./assets/css/style.css
 
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w -X main.version=$APP_RELEASE" -mod=readonly -v -o app cmd/app/main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -v -o /run-app ./cmd/app
 
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -mod=readonly -v -o healthcheck cmd/healthcheck/main.go
+FROM debian:bookworm-slim
 
-FROM scratch
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /
+COPY --from=builder /run-app /usr/local/bin/run-app
 
-COPY --from=build-go /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=build-go app app
-COPY --from=build-go healthcheck healthcheck
+WORKDIR /app
 
-CMD ["./app"]
+EXPOSE 8080
+
+CMD ["run-app"]

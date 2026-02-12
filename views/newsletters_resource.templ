@@ -1,0 +1,364 @@
+package views
+
+import (
+	"fmt"
+	"mortenvistisen/internal/hypermedia"
+	"mortenvistisen/models"
+	"mortenvistisen/router/routes"
+	"mortenvistisen/views/components"
+	"net/http"
+)
+
+templ Newsletter(newsletter models.Newsletter) {
+	@base(
+		components.SetTitle(metaOr(newsletter.MetaTitle, newsletter.Title)),
+		components.SetDescription(newsletter.MetaDescription),
+		components.SetSlug("/newsletters/"+newsletter.Slug),
+		components.SetMetaType("article"),
+	) {
+		<main class="container mx-auto bg-base-100 flex-1 flex flex-col px-4 sm:px-6 lg:px-8">
+			<div class="relative mt-12 sm:mt-16 lg:mt-24 flex justify-center">
+				<div class="hidden lg:block absolute left-0 top-0">
+					<a
+						href="javascript:history.back()"
+						class="flex h-10 w-10 items-center justify-center rounded-full border border-base-content/10 bg-base-200 shadow-sm transition hover:bg-base-300"
+						aria-label="Go back"
+					>
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="h-4 w-4 text-base-content/60">
+							<path fill-rule="evenodd" d="M9.78 4.22a.75.75 0 0 1 0 1.06L7.06 8l2.72 2.72a.75.75 0 1 1-1.06 1.06L5.47 8.53a.75.75 0 0 1 0-1.06l3.25-3.25a.75.75 0 0 1 1.06 0Z" clip-rule="evenodd"></path>
+						</svg>
+					</a>
+				</div>
+				<article class="w-full max-w-2xl">
+					<header class="flex flex-col">
+						<time datetime={ newsletter.ReleasedAt.Format("2006-01-02") } class="flex items-center text-sm text-base-content/50">
+							<span class="h-4 w-0.5 rounded-full bg-base-content/20"></span>
+							<span class="ml-3">{ newsletter.ReleasedAt.Format("January 2, 2006") }</span>
+						</time>
+						<h1 class="mt-6 text-3xl sm:text-4xl font-bold tracking-tight text-base-content">
+							{ newsletter.Title }
+						</h1>
+					</header>
+					<div class="mt-8 prose prose-invert prose-lg max-w-none prose-headings:text-base-content prose-p:text-base-content/80 prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-base-content prose-code:text-base-content prose-pre:bg-base-200 prose-pre:border prose-pre:border-base-content/10 prose-img:rounded-2xl prose-ol:text-base-content/80 prose-ul:text-base-content/80 prose-li:text-base-content/80">
+						@templ.Raw(markdownToHTML(newsletter.Content))
+					</div>
+				</article>
+			</div>
+		</main>
+	}
+}
+
+templ NewsletterIndex(data models.PaginatedNewsletters) {
+	@adminBase() {
+		<main class="flex-1 px-6 py-10">
+			<div class="mx-auto flex w-full max-w-5xl flex-col gap-6">
+				<div class="flex flex-wrap items-center justify-between gap-4">
+					<h1 class="text-2xl font-semibold tracking-tight text-base-content">Newsletters</h1>
+					<a href={ routes.NewsletterNew.URL() } class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:opacity-60 disabled:cursor-not-allowed bg-primary text-primary-content shadow-sm hover:bg-primary/90 h-9 px-4 py-2 text-sm rounded-field">New Newsletter</a>
+				</div>
+				if len(data.Newsletters) == 0 {
+					<p class="text-sm text-base-content/60">No newsletters found.</p>
+				} else {
+					<div class="rounded-box border border-base-300 bg-base-100 shadow-sm">
+						<div class="flex flex-wrap items-center justify-between gap-3 border-b border-base-300 px-4 py-3">
+							<p class="text-sm text-base-content/70">Showing { fmt.Sprintf("%d-%d", ((data.Page-1)*data.PageSize)+1, ((data.Page-1)*data.PageSize)+int64(len(data.Newsletters))) } of { fmt.Sprintf("%d", data.TotalCount) } newsletters</p>
+							<p class="text-sm text-base-content/70">Page { fmt.Sprintf("%d", data.Page) } of { fmt.Sprintf("%d", data.TotalPages) }</p>
+						</div>
+						<div class="relative w-full overflow-x-auto">
+							<table class="w-full caption-bottom text-sm">
+								<thead class="[&_tr]:border-b [&_tr]:border-base-300">
+									<tr class="border-b border-base-300 bg-base-200/40">
+										<th class="h-10 px-4 text-left align-middle font-medium text-base-content/70">Newsletter</th>
+										<th class="h-10 px-4 text-left align-middle font-medium text-base-content/70">Status</th>
+										<th class="h-10 px-4 text-left align-middle font-medium text-base-content/70">Released At</th>
+										<th class="h-10 px-4 text-left align-middle font-medium text-base-content/70">Updated At</th>
+										<th class="h-10 px-4 text-left align-middle font-medium text-base-content/70">Actions</th>
+									</tr>
+								</thead>
+								<tbody class="[&_tr:last-child]:border-0">
+									for _, newsletter := range data.Newsletters {
+										<tr class="border-b border-base-300 transition-colors hover:bg-base-200/40">
+											<td class="p-4 align-middle">
+												<div class="max-w-[24rem] space-y-1">
+													<div class="truncate font-medium text-base-content">{ newsletter.Title }</div>
+													<div class="truncate text-xs text-base-content/60">{ newsletter.Slug }</div>
+												</div>
+											</td>
+											<td class="p-4 align-middle">
+												if newsletter.IsPublished {
+													<span class="inline-flex items-center rounded-field bg-success/15 px-2.5 py-1 text-xs font-medium text-success">Published</span>
+												} else {
+													<span class="inline-flex items-center rounded-field bg-base-300 px-2.5 py-1 text-xs font-medium text-base-content/70">Draft</span>
+												}
+											</td>
+											<td class="p-4 align-middle text-base-content/80">{ newsletter.ReleasedAt.Format("2006-01-02") }</td>
+											<td class="p-4 align-middle text-base-content/80">{ newsletter.UpdatedAt.Format("2006-01-02") }</td>
+											<td class="p-4 align-middle">
+												<div class="flex flex-wrap gap-2 text-sm">
+													<a class="inline-flex h-8 items-center rounded-field border border-base-300 px-3 text-base-content/80 transition hover:bg-base-200 hover:text-base-content" href={ routes.NewsletterShow.URL(newsletter.ID) }>View</a>
+													<a class="inline-flex h-8 items-center rounded-field border border-base-300 px-3 text-base-content/80 transition hover:bg-base-200 hover:text-base-content" href={ routes.NewsletterEdit.URL(newsletter.ID) }>Edit</a>
+												</div>
+											</td>
+										</tr>
+									}
+								</tbody>
+							</table>
+						</div>
+						if data.TotalPages > 1 {
+							<div class="border-t border-base-300 px-4 py-3">
+								<nav class="flex items-center justify-between">
+									if data.Page > 1 {
+										<a href={ fmt.Sprintf("%s?page=%d&per_page=%d", routes.NewsletterIndex.URL(), data.Page-1, data.PageSize) } class="inline-flex h-9 items-center rounded-field border border-base-300 px-3 text-sm text-base-content/80 transition hover:bg-base-200 hover:text-base-content">Previous</a>
+									} else {
+										<span class="inline-flex h-9 items-center rounded-field border border-base-300 px-3 text-sm text-base-content/40">Previous</span>
+									}
+									<span class="text-sm text-base-content/70">{ fmt.Sprintf("Page %d of %d", data.Page, data.TotalPages) }</span>
+									if data.Page < data.TotalPages {
+										<a href={ fmt.Sprintf("%s?page=%d&per_page=%d", routes.NewsletterIndex.URL(), data.Page+1, data.PageSize) } class="inline-flex h-9 items-center rounded-field border border-base-300 px-3 text-sm text-base-content/80 transition hover:bg-base-200 hover:text-base-content">Next</a>
+									} else {
+										<span class="inline-flex h-9 items-center rounded-field border border-base-300 px-3 text-sm text-base-content/40">Next</span>
+									}
+								</nav>
+							</div>
+						}
+					</div>
+				}
+			</div>
+		</main>
+	}
+}
+
+templ NewsletterShow(newsletter models.Newsletter) {
+	@adminBase() {
+		<main class="flex-1 px-6 py-10">
+			<div class="mx-auto flex w-full max-w-4xl flex-col gap-6">
+				<div class="flex flex-wrap items-center justify-between gap-4">
+					<h1 class="text-2xl font-semibold tracking-tight text-base-content">Newsletter Details</h1>
+					<div class="flex flex-wrap items-center gap-3">
+						<a href={ routes.NewsletterEdit.URL(newsletter.ID) } class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:opacity-60 disabled:cursor-not-allowed bg-primary text-primary-content shadow-sm hover:bg-primary/90 h-9 px-4 py-2 text-sm rounded-field">Edit</a>
+						<a class="text-sm text-base-content/70 hover:text-base-content" href={ routes.NewsletterIndex.URL() }>Back to List</a>
+					</div>
+				</div>
+				<div class="rounded-box border border-base-300 bg-base-100 shadow-sm">
+					<div class="p-6 pt-0">
+						<div class="grid gap-5 sm:grid-cols-2">
+							<div class="space-y-1">
+								<label class="text-sm font-medium leading-none text-base-content/80 peer-disabled:cursor-not-allowed peer-disabled:opacity-60">Created At</label>
+								<p class="text-sm text-base-content">{ newsletter.CreatedAt.String() }</p>
+							</div>
+							<div class="space-y-1">
+								<label class="text-sm font-medium leading-none text-base-content/80 peer-disabled:cursor-not-allowed peer-disabled:opacity-60">Updated At</label>
+								<p class="text-sm text-base-content">{ newsletter.UpdatedAt.String() }</p>
+							</div>
+							<div class="space-y-1">
+								<label class="text-sm font-medium leading-none text-base-content/80 peer-disabled:cursor-not-allowed peer-disabled:opacity-60">Title</label>
+								<p class="text-sm text-base-content">{ newsletter.Title }</p>
+							</div>
+							<div class="space-y-1">
+								<label class="text-sm font-medium leading-none text-base-content/80 peer-disabled:cursor-not-allowed peer-disabled:opacity-60">Slug</label>
+								<p class="text-sm text-base-content">{ newsletter.Slug }</p>
+							</div>
+							<div class="space-y-1">
+								<label class="text-sm font-medium leading-none text-base-content/80 peer-disabled:cursor-not-allowed peer-disabled:opacity-60">Meta Title</label>
+								<p class="text-sm text-base-content">{ newsletter.MetaTitle }</p>
+							</div>
+							<div class="space-y-1">
+								<label class="text-sm font-medium leading-none text-base-content/80 peer-disabled:cursor-not-allowed peer-disabled:opacity-60">Meta Description</label>
+								<p class="text-sm text-base-content">{ newsletter.MetaDescription }</p>
+							</div>
+							<div class="space-y-1">
+								<label class="text-sm font-medium leading-none text-base-content/80 peer-disabled:cursor-not-allowed peer-disabled:opacity-60">Is Published</label>
+								<p class="text-sm text-base-content">{ fmt.Sprintf("%t", newsletter.IsPublished) }</p>
+							</div>
+							<div class="space-y-1">
+								<label class="text-sm font-medium leading-none text-base-content/80 peer-disabled:cursor-not-allowed peer-disabled:opacity-60">Released At</label>
+								<p class="text-sm text-base-content">{ newsletter.ReleasedAt.String() }</p>
+							</div>
+							<div class="space-y-1">
+								<label class="text-sm font-medium leading-none text-base-content/80 peer-disabled:cursor-not-allowed peer-disabled:opacity-60">Content</label>
+								<p class="text-sm text-base-content">{ newsletter.Content }</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</main>
+	}
+}
+
+type NewsletterNewField string
+
+func (f NewsletterNewField) String() string {
+	return string(f)
+}
+
+const (
+	NewsletterNewFragment             NewsletterNewField = "newsletterNewFragmentForm"
+	NewsletterNewTitleField           NewsletterNewField = "title"
+	NewsletterNewMetaTitleField       NewsletterNewField = "metaTitle"
+	NewsletterNewMetaDescriptionField NewsletterNewField = "metaDescription"
+	NewsletterNewIsPublishedField     NewsletterNewField = "isPublished"
+	NewsletterNewReleasedAtField      NewsletterNewField = "releasedAt"
+	NewsletterNewContentField         NewsletterNewField = "content"
+)
+
+templ NewsletterNew() {
+	@adminBase() {
+		<main class="flex-1 px-6 py-10">
+			<div class="mx-auto flex w-full max-w-5xl flex-col gap-6">
+				<div class="rounded-box border border-base-300 bg-base-100 shadow-sm">
+					<div class="flex flex-col space-y-1.5 p-6">
+						<h3 class="text-lg font-semibold leading-none tracking-tight text-base-content">New Newsletter</h3>
+						<p class="text-sm text-base-content/60">Enter the details for the new newsletter.</p>
+					</div>
+					<div class="p-6 pt-0">
+						@components.Form(
+							components.FormProps{Action: http.MethodPost, URL: routes.NewsletterCreate.URL()},
+							components.WithClass("space-y-5"), components.WithFragment(NewsletterNewFragment.String()),
+						) {
+							<div>
+								@components.Tabs("newsletter-new-tab", "info") {
+									@components.TabsList(components.WithClass("grid w-full grid-cols-2")) {
+										@components.TabsTrigger("newsletterNewTab", "info", "Info", components.WithClass("w-full"))
+										@components.TabsTrigger("newsletterNewTab", "content", "Content", components.WithClass("w-full"))
+									}
+									@components.TabsContent("newsletterNewTab", "info", components.WithClass("min-h-[620px]")) {
+										<div class="space-y-4">
+											<div class="space-y-1">
+												@components.Label(components.LabelProps{Text: "Title"}).WithFor("title").Render()
+												@components.Input(NewsletterNewTitleField.String()).WithID("title").Render()
+											</div>
+											<div class="space-y-1">
+												@components.Label(components.LabelProps{Text: "Meta Title"}).WithFor("metaTitle").Render()
+												@components.Input(NewsletterNewMetaTitleField.String()).WithID("metaTitle").Render()
+											</div>
+											<div class="space-y-1">
+												@components.Label(components.LabelProps{Text: "Meta Description"}).WithFor("metaDescription").Render()
+												@components.Textarea(NewsletterNewMetaDescriptionField.String()).WithID("metaDescription").WithRows(4).Render()
+											</div>
+											<div class="mt-4 flex items-center gap-2">
+												@components.Checkbox(NewsletterNewIsPublishedField.String()).WithID("isPublished").Render()
+												@components.Label(components.LabelProps{Text: "Is Published"}).WithFor("isPublished").Render()
+											</div>
+											<div class="space-y-1">
+												@components.Label(components.LabelProps{Text: "Released At"}).WithFor("releasedAt").Render()
+												@components.Input(NewsletterNewReleasedAtField.String()).WithType(components.InputTypeDate).WithID("releasedAt").Render()
+											</div>
+										</div>
+									}
+									@components.TabsContent("newsletterNewTab", "content", components.WithClass("min-h-[620px]")) {
+										<div class="space-y-6 mt-8">
+											<fieldset class="fieldset flex flex-col">
+												<div id="editor-container" class="h-[420px] rounded-md bg-background">
+													<textarea id="editorTarget" name="content" class="h-full w-full p-4" data-bind={ NewsletterNewContentField.String() }></textarea>
+												</div>
+											</fieldset>
+										</div>
+									}
+								}
+							</div>
+							<div class="mt-24 space-y-3">
+								<button type="submit" class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:opacity-60 disabled:cursor-not-allowed bg-primary text-primary-content shadow-sm hover:bg-primary/90 h-9 px-4 py-2 text-sm rounded-field w-full">Create Newsletter</button>
+								<a class="inline-flex h-9 w-full items-center justify-center rounded-field border border-base-300 px-4 py-2 text-sm font-medium text-base-content/80 transition hover:bg-base-200/70 hover:text-base-content" href={ routes.NewsletterIndex.URL() }>Back to List</a>
+							</div>
+						}
+					</div>
+				</div>
+			</div>
+		</main>
+	}
+}
+
+type NewsletterUpdateField string
+
+func (f NewsletterUpdateField) String() string {
+	return string(f)
+}
+
+const (
+	NewsletterUpdateFragment             NewsletterUpdateField = "newsletterUpdateFragmentForm"
+	NewsletterUpdateTitleField           NewsletterUpdateField = "title"
+	NewsletterUpdateMetaTitleField       NewsletterUpdateField = "metaTitle"
+	NewsletterUpdateMetaDescriptionField NewsletterUpdateField = "metaDescription"
+	NewsletterUpdateIsPublishedField     NewsletterUpdateField = "isPublished"
+	NewsletterUpdateReleasedAtField      NewsletterUpdateField = "releasedAt"
+	NewsletterUpdateContentField         NewsletterUpdateField = "content"
+)
+
+templ NewsletterUpdate(newsletter models.Newsletter) {
+	@adminBase() {
+		<main class="flex-1 px-6 py-10">
+			<div class="mx-auto flex w-full max-w-5xl flex-col gap-6">
+				<div class="rounded-box border border-base-300 bg-base-100 shadow-sm">
+					<div class="flex flex-col space-y-1.5 p-6">
+						<h3 class="text-lg font-semibold leading-none tracking-tight text-base-content">Edit Newsletter</h3>
+						<p class="text-sm text-base-content/60">Update the details for this newsletter.</p>
+					</div>
+					<div class="p-6 pt-0">
+						@components.Form(
+							components.FormProps{Action: http.MethodPut, URL: routes.NewsletterUpdate.URL(newsletter.ID)},
+							components.WithClass("space-y-5"), components.WithFragment(NewsletterUpdateFragment.String()),
+						) {
+							<div>
+								@components.Tabs("newsletter-update-tab", "info") {
+									@components.TabsList(components.WithClass("grid w-full grid-cols-2")) {
+										@components.TabsTrigger("newsletterUpdateTab", "info", "Info", components.WithClass("w-full"))
+										@components.TabsTrigger("newsletterUpdateTab", "content", "Content", components.WithClass("w-full"))
+									}
+									@components.TabsContent("newsletterUpdateTab", "info", components.WithClass("min-h-[620px]")) {
+										<div class="space-y-4">
+											<div class="space-y-1">
+												@components.Label(components.LabelProps{Text: "Title"}).WithFor("title").Render()
+												@components.Input(NewsletterUpdateTitleField.String()).WithID("title").WithValue(newsletter.Title).Render()
+											</div>
+											<div class="space-y-1">
+												@components.Label(components.LabelProps{Text: "Meta Title"}).WithFor("metaTitle").Render()
+												@components.Input(NewsletterUpdateMetaTitleField.String()).WithID("metaTitle").WithValue(newsletter.MetaTitle).Render()
+											</div>
+											<div class="space-y-1">
+												@components.Label(components.LabelProps{Text: "Meta Description"}).WithFor("metaDescription").Render()
+												@components.Textarea(NewsletterUpdateMetaDescriptionField.String()).WithID("metaDescription").WithRows(4).WithValue(newsletter.MetaDescription).Render()
+											</div>
+											<div class="mt-4 flex items-center gap-2">
+												@components.Checkbox(NewsletterUpdateIsPublishedField.String()).WithID("isPublished").WithChecked(newsletter.IsPublished).Render()
+												@components.Label(components.LabelProps{Text: "Is Published"}).WithFor("isPublished").Render()
+											</div>
+											<div class="space-y-1">
+												@components.Label(components.LabelProps{Text: "Released At"}).WithFor("releasedAt").Render()
+												@components.Input(NewsletterUpdateReleasedAtField.String()).WithType(components.InputTypeDate).WithID("releasedAt").WithValue(func() string {
+													if newsletter.ReleasedAt.IsZero() {
+														return ""
+													}
+													return newsletter.ReleasedAt.Format("2006-01-02")
+												}()).Render()
+											</div>
+										</div>
+									}
+									@components.TabsContent("newsletterUpdateTab", "content", components.WithClass("min-h-[620px]")) {
+										<div class="space-y-6 mt-8">
+											<fieldset class="fieldset flex flex-col">
+												<div id="editor-container" class="h-[420px] rounded-md bg-background">
+													<textarea id="editorTarget" name="content" class="h-full w-full p-4" data-bind={ NewsletterUpdateContentField.String() }>{ newsletter.Content }</textarea>
+												</div>
+											</fieldset>
+										</div>
+									}
+								}
+							</div>
+							<div class="mt-24 space-y-3">
+								<button type="submit" class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:opacity-60 disabled:cursor-not-allowed bg-primary text-primary-content shadow-sm hover:bg-primary/90 h-9 px-4 py-2 text-sm rounded-field w-full">Update Newsletter</button>
+								<a class="inline-flex h-9 w-full items-center justify-center rounded-field border border-base-300 px-4 py-2 text-sm font-medium text-base-content/80 transition hover:bg-base-200/70 hover:text-base-content" href={ routes.NewsletterIndex.URL() }>Back to List</a>
+							</div>
+						}
+						<div role="separator" class="my-6 shrink-0 bg-base-300 h-px w-full"></div>
+						<button type="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:opacity-60 disabled:cursor-not-allowed bg-error text-error-content shadow-sm hover:bg-error/90 h-9 px-4 py-2 text-sm rounded-field w-full" data-on:click={ hypermedia.DataAction(http.MethodDelete, routes.NewsletterDestroy.URL(newsletter.ID)) }>Destroy Newsletter</button>
+					</div>
+				</div>
+			</div>
+		</main>
+	}
+}
+
+templ NewsletterEdit(newsletter models.Newsletter) {
+	@NewsletterUpdate(newsletter)
+}

@@ -1,0 +1,46 @@
+package views
+
+import (
+	"net/http"
+
+	"mortenvistisen/router/routes"
+	"mortenvistisen/views/components"
+)
+
+templ SubscriberConfirmationForm() {
+	@base(
+		components.SetTitle("Confirm Subscription"),
+		components.SetDescription("Confirm your newsletter subscription to start receiving new issues."),
+	) {
+		<main class="container mx-auto bg-base-100 flex-1 px-4 sm:px-6 lg:px-8">
+			<section class="mx-auto w-full max-w-5xl pt-16 pb-24 sm:pt-20 sm:pb-28 lg:pt-24 lg:pb-32">
+				<header class="mx-auto max-w-3xl text-center">
+					<h1 class="text-3xl font-bold tracking-tight text-base-content sm:text-4xl">
+						Confirm your newsletter signup.
+					</h1>
+					<p class="mt-4 text-base text-base-content/60 sm:text-lg">
+						We sent you a 6-character verification code. Enter it below to start receiving new issues.
+					</p>
+				</header>
+				<div class="mx-auto mt-10 w-full max-w-xl">
+					@components.Card(components.WithClass("rounded-2xl bg-base-200/60")) {
+						@components.CardContent(components.WithClass("space-y-6 p-6 sm:p-7")) {
+							@components.Form(
+								components.FormProps{Action: http.MethodPost, URL: routes.SubscriberVerificationCreate.URL()},
+								components.WithClass("space-y-5"),
+							) {
+								<div class="space-y-2">
+									<label class="text-sm font-medium leading-none text-base-content/80" for="code">Verification Code</label>
+									@components.InputOTP("code").WithID("code").WithLength(6).WithMode(components.InputOTPModeAlphanumeric).WithClass("w-full justify-center gap-3").Render()
+								</div>
+								@components.Button(
+									components.ButtonProps{Label: "Confirm Subscription"},
+								).WithType(components.ButtonTypeSubmit).WithFullWidth(true).WithLoadingLabel("Loading", "submitting").Render()
+							}
+						}
+					}
+				</div>
+			</section>
+		</main>
+	}
+}

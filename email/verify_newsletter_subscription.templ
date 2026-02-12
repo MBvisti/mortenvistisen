@@ -1,0 +1,78 @@
+package email
+
+import (
+	"bytes"
+	"context"
+)
+
+type VerifyNewsletterSubscription struct {
+	VerificationCode string
+	VerificationURL  string
+}
+
+var _ Transformer = (*VerifyNewsletterSubscription)(nil)
+
+func (v VerifyNewsletterSubscription) ToHTML() (string, error) {
+	var buf bytes.Buffer
+	if err := v.render().Render(context.Background(), &buf); err != nil {
+		return "", err
+	}
+	return buf.String(), nil
+}
+
+func (v VerifyNewsletterSubscription) ToText() (string, error) {
+	html, err := v.ToHTML()
+	if err != nil {
+		return "", err
+	}
+	return HTMLToText(html)
+}
+
+templ (v VerifyNewsletterSubscription) render() {
+	@baseLayout("Verify Newsletter Subscription", "Confirm your newsletter subscription with the verification code.") {
+		@spacer("32")
+		@title("Verify Newsletter Subscription")
+		@spacer("24")
+		@copy() {
+			<span class="st-Delink" style="color: #414552; text-decoration: none;">
+				Hi,
+			</span>
+		}
+		@copy() {
+			<span class="st-Delink" style="color: #414552; text-decoration: none;">
+				Thanks for subscribing. Enter this verification code on the confirmation page:
+			</span>
+		}
+		@spacer("8")
+		@verificationCodeBox(v.VerificationCode)
+		@spacer("8")
+		@copy() {
+			<span class="st-Delink" style="color: #414552; text-decoration: none;">
+				Open this page to submit the code:
+			</span>
+		}
+		@copy() {
+			<span class="st-Delink" style="color: #625afa; text-decoration: none; word-break: break-all;">
+				{ v.VerificationURL }
+			</span>
+		}
+		@copy() {
+			<span class="st-Delink" style="color: #414552; text-decoration: none;">
+				This code expires in 30 minutes.
+			</span>
+		}
+		@copy() {
+			<span class="st-Delink" style="color: #414552; text-decoration: none;">
+				If this wasn't you, you can ignore this email.
+			</span>
+		}
+		@copy() {
+			<span class="st-Delink" style="color: #414552; text-decoration: none;">
+				Best regards,
+				<br/>
+				Morten Vistisen
+			</span>
+		}
+		@spacer("32")
+	}
+}

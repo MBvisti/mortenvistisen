@@ -1,135 +1,49 @@
+// Package routes contains all the routes used throughout the project
 package routes
 
 import (
-	"net/http"
-	"strings"
+	"fmt"
+	"time"
+
+	"mortenvistisen/internal/routing"
 )
 
-const (
-	AssetsRoutePrefix = "/assets"
-	assetsNamePrefix  = "assets"
+const AssetsPrefix = "/assets"
+
+var startTime = time.Now().Unix()
+
+var Robots = routing.NewSimpleRoute(
+	"/robots.txt",
+	"assets.robots",
+	"",
 )
 
-var Assets = []Route{
-	Robots,
-	Sitemap,
-	LLM,
-	CSSEntrypoint,
-	CSSFile,
-	JsEntrypoint,
-	JavascriptFile.Route,
-	Favicon,
-	Favicon16,
-	Favicon32,
-	FaviconAppletouch,
-	FaviconSiteManifest,
-	IndexNow,
-}
+var Sitemap = routing.NewSimpleRoute(
+	"/sitemap.xml",
+	"assets.sitemap",
+	"",
+)
 
-var Robots = Route{
-	Name:        ".robots",
-	Path:        "/robots.txt",
-	Method:      http.MethodGet,
-	HandlerName: "Robots",
-}
+var Stylesheet = routing.NewSimpleRoute(
+	fmt.Sprintf("/css/%v/style.css", startTime),
+	"css.stylesheet",
+	AssetsPrefix,
+)
 
-var Sitemap = Route{
-	Name:        ".sitemap",
-	Path:        "/sitemap.xml",
-	Method:      http.MethodGet,
-	HandlerName: "Sitemap",
-}
+var Scripts = routing.NewSimpleRoute(
+	fmt.Sprintf("/js/%v/scripts.js", startTime),
+	"js.scripts",
+	AssetsPrefix,
+)
 
-var LLM = Route{
-	Name:        ".llm",
-	Path:        "/llm.txt",
-	Method:      http.MethodGet,
-	HandlerName: "LLM",
-}
+var Script = routing.NewRouteWithFile(
+	fmt.Sprintf("/js/%v/:file", startTime),
+	"js.script",
+	AssetsPrefix,
+)
 
-var IndexNow = Route{
-	Name:        ".index_now",
-	Path:        "/4zd8j69sf3ju2hnfxmebr3czub8uu63m.txt",
-	Method:      http.MethodGet,
-	HandlerName: "IndexNow",
-}
-
-var CSSEntrypoint = Route{
-	Name:        assetsNamePrefix + "css.entry",
-	Path:        assetsNamePrefix + "/css/:version/styles.css",
-	Method:      http.MethodGet,
-	HandlerName: "Styles",
-}
-
-var CSSFile = Route{
-	Name:        assetsNamePrefix + "css.file",
-	Path:        assetsNamePrefix + "/css/:version/:file",
-	Method:      http.MethodGet,
-	HandlerName: "IndividualCSSFile",
-}
-
-var JsEntrypoint = Route{
-	Name:        assetsNamePrefix + "js.entry",
-	Path:        assetsNamePrefix + "/js/:version/script.js",
-	Method:      http.MethodGet,
-	HandlerName: "Scripts",
-}
-
-var JsDashboardEntrypoint = Route{
-	Name:        assetsNamePrefix + "js.dashboard_entry",
-	Path:        assetsNamePrefix + "/js/:version/dashboard_script.js",
-	Method:      http.MethodGet,
-	HandlerName: "ScriptsDashboard",
-}
-
-var JavascriptFile = javascriptFile{
-	Route: Route{
-		Name:        assetsNamePrefix + "js.file",
-		Path:        assetsNamePrefix + "/js/:version/:file",
-		Method:      http.MethodGet,
-		HandlerName: "IndividualScript",
-	},
-}
-
-type javascriptFile struct {
-	Route
-}
-
-func (j javascriptFile) GetPath(file string) string {
-	return strings.Replace(j.Path, ":file", file, 1)
-}
-
-var Favicon = Route{
-	Name:        assetsNamePrefix + ".favicon",
-	Path:        "/favicon.ico",
-	Method:      http.MethodGet,
-	HandlerName: "Favicon",
-}
-
-var Favicon16 = Route{
-	Name:        assetsNamePrefix + ".favicon_16",
-	Path:        assetsNamePrefix + "/favicon-16x16.png",
-	Method:      http.MethodGet,
-	HandlerName: "Favicon16",
-}
-
-var Favicon32 = Route{
-	Name:        assetsNamePrefix + ".favicon_32",
-	Path:        assetsNamePrefix + "/favicon-32x32.png",
-	Method:      http.MethodGet,
-	HandlerName: "Favicon32",
-}
-
-var FaviconAppletouch = Route{
-	Name:        assetsNamePrefix + ".favicon_appletouch",
-	Path:        assetsNamePrefix + "/apple-touch-icon.png",
-	Method:      http.MethodGet,
-	HandlerName: "FaviconAppleTouch",
-}
-
-var FaviconSiteManifest = Route{
-	Name:        assetsNamePrefix + ".favicon_site_manifest",
-	Path:        assetsNamePrefix + "/site.webmanifest",
-	Method:      http.MethodGet,
-	HandlerName: "FaviconSiteManifest",
-}
+var Style = routing.NewRouteWithFile(
+	fmt.Sprintf("/css/%v/:file", startTime),
+	"css.style",
+	AssetsPrefix,
+)
