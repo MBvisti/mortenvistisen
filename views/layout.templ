@@ -1,7 +1,9 @@
 package views
 
 import (
+	"mortenvistisen/config"
 	"mortenvistisen/internal/renderer"
+	"mortenvistisen/internal/server"
 	"mortenvistisen/router/cookies"
 	"mortenvistisen/router/routes"
 	"mortenvistisen/views/components"
@@ -180,5 +182,8 @@ templ base(headOpts ...components.HeadDataOption) {
 				@components.ToastMessage(flash)
 			}
 		</div>
+		if config.Env == server.ProdEnvironment {
+			<script defer src="https://analytics.mbvlabs.com/t/script.js" data-website-id="7f285ded-b7e4-4c9d-953c-e79d74643696"></script>
+		}
 	</html>
 }

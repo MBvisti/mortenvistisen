@@ -8,7 +8,7 @@ import (
 )
 
 templ TagIndex(tags []models.Tag) {
-	@base() {
+	@adminBase() {
 		<main class="flex-1 px-6 py-10">
 			<div class="mx-auto flex w-full max-w-5xl flex-col gap-6">
 				<div class="flex flex-wrap items-center justify-between gap-4">
@@ -52,7 +52,7 @@ templ TagIndex(tags []models.Tag) {
 }
 
 templ TagShow(tag models.Tag) {
-	@base() {
+	@adminBase() {
 		<main class="flex-1 px-6 py-10">
 			<div class="mx-auto flex w-full max-w-4xl flex-col gap-6">
 				<div class="flex flex-wrap items-center justify-between gap-4">
@@ -86,7 +86,7 @@ templ TagShow(tag models.Tag) {
 }
 
 templ TagNew() {
-	@base() {
+	@adminBase() {
 		<main class="flex-1 flex items-center justify-center px-6 py-10">
 			<div class="mx-auto flex w-full max-w-md flex-col gap-6">
 				<div class="rounded-box border border-base-300 bg-base-100 shadow-sm">
@@ -117,7 +117,7 @@ templ TagNew() {
 }
 
 templ TagEdit(tag models.Tag) {
-	@base() {
+	@adminBase() {
 		<main class="flex-1 flex items-center justify-center px-6 py-10">
 			<div class="mx-auto flex w-full max-w-md flex-col gap-6">
 				<div class="rounded-box border border-base-300 bg-base-100 shadow-sm">

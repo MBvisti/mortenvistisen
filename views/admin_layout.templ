@@ -40,6 +40,11 @@ templ adminNavLinks() {
 			components.ButtonProps{Label: "Subscribers"},
 		).MakeGhost().WithSize(components.ButtonSizeDefault).WithHref(routes.SubscriberIndex.URL()).WithFullWidth(true).WithClass("justify-start").Render()
 	</li>
+	<li>
+		@components.Button(
+			components.ButtonProps{Label: "Tags"},
+		).MakeGhost().WithSize(components.ButtonSizeDefault).WithHref(routes.TagIndex.URL()).WithFullWidth(true).WithClass("justify-start").Render()
+	</li>
 }
 
 templ adminBase(headOpts ...components.HeadDataOption) {
