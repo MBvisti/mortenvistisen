@@ -25,6 +25,15 @@ func (r Router) RegisterPagesRoutes(pages controllers.Pages) error {
 	}
 
 	_, err = r.e.AddRoute(echo.Route{
+		Method:  http.MethodHead,
+		Path:    routes.HomePage.Path(),
+		Handler: pages.Home,
+	})
+	if err != nil {
+		errs = append(errs, err)
+	}
+
+	_, err = r.e.AddRoute(echo.Route{
 		Method:  http.MethodGet,
 		Path:    routes.AboutPage.Path(),
 		Name:    routes.AboutPage.Name(),
