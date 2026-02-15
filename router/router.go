@@ -74,7 +74,7 @@ func SetupGlobalMiddleware(
 		mw.RegisterFlashMessagesContext,
 		echomw.CORSWithConfig(echomw.CORSConfig{
 			AllowOrigins:     []string{"https://*", "http://*"},
-			AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
+			AllowMethods:     []string{"GET", "HEAD", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
 			AllowHeaders:     []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 			AllowCredentials: true,
 			MaxAge:           300,
