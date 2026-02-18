@@ -16,7 +16,6 @@ import (
 	"mortenvistisen/router/routes"
 
 	"github.com/labstack/echo/v5"
-	"gopkg.in/yaml.v2"
 )
 
 const threeMonthsCache = "7776000"
@@ -62,26 +61,12 @@ func (a Assets) enableCaching(etx *echo.Context, content []byte) *echo.Context {
 }
 
 func createRobotsTxt() (string, error) {
-	type robotsTxt struct {
-		UserAgent string `yaml:"User-agent"`
-		Allow     string `yaml:"Allow"`
-		Sitemap   string `yaml:"Sitemap"`
-	}
-
-	robots, err := yaml.Marshal(robotsTxt{
-		UserAgent: "*",
-		Allow:     "/",
-		Sitemap: fmt.Sprintf(
-			"%s%s",
-			config.BaseURL,
-			routes.Sitemap.URL(),
-		),
-	})
-	if err != nil {
-		return "", err
-	}
-
-	return string(robots), nil
+	robots := fmt.Sprintf(
+		"User-agent: *\nDisallow: /admin/\nDisallow: /riverui\nDisallow: /login\nDisallow: /register\nDisallow: /confirm-email\nDisallow: /reset-password\nAllow: /\nSitemap: %s%s\n",
+		config.BaseURL,
+		routes.Sitemap.URL(),
+	)
+	return robots, nil
 }
 
 func (a Assets) Robots(etx *echo.Context) error {

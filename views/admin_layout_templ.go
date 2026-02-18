@@ -157,7 +157,7 @@ func adminBase(headOpts ...components.HeadDataOption) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = components.SetupHead(ctx, append(headOpts, components.AddStylesheet(routes.Style.URL("easymde.css")))...).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = components.SetupHead(ctx, append(append([]components.HeadDataOption{components.SetNoIndex()}, headOpts...), components.AddStylesheet(routes.Style.URL("easymde.css")))...).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

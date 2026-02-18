@@ -189,7 +189,7 @@ func Home(articles []models.Article) templ.Component {
 						var templ_7745c5c3_Var8 templ.SafeURL
 						templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(routes.Article.URL(article.Slug)))
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/home.templ`, Line: 113, Col: 62}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/home.templ`, Line: 114, Col: 62}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 						if templ_7745c5c3_Err != nil {
@@ -394,6 +394,7 @@ func Home(articles []models.Article) templ.Component {
 			return nil
 		})
 		templ_7745c5c3_Err = base(
+			components.SetRawTitle("Morten Vistisen — Go Engineer, Freelancer & Bootstrapper"),
 			components.SetDescription("I'm Morten, a software engineer from Denmark living in Spain. I write a lot of Golang while trying to build online businesses."),
 		).Render(templ.WithChildren(ctx, templ_7745c5c3_Var3), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {

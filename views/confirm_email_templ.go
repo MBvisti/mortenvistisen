@@ -119,6 +119,7 @@ func ConfirmationForm() templ.Component {
 			return nil
 		})
 		templ_7745c5c3_Err = base(
+			components.SetNoIndex(),
 			components.SetTitle("Verify Email"),
 			components.SetDescription("Enter your verification code to confirm your email address."),
 		).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)

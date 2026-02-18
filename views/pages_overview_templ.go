@@ -338,7 +338,7 @@ func ProjectsOverview(projects []models.Project) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<main class=\"container mx-auto bg-base-100 flex-1 px-4 sm:px-6 lg:px-8\"><section class=\"mx-auto max-w-5xl pt-14 pb-20 sm:pt-16 sm:pb-24 lg:pt-20 lg:pb-28\"><header class=\"max-w-3xl\"><h1 class=\"text-3xl font-bold tracking-tight text-base-content sm:text-4xl lg:text-5xl\">Projects I've built, open-source or commercial, over the years. <br></h1><p class=\"mt-5 max-w-3xl text-base leading-7 text-base-content/60\">A collections of things I've made. Projects spanning Go, web development, and beyond. Some are one-off experiments, while others have turned into full-fledged products.</p></header><div class=\"mt-14 grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:mt-16 lg:grid-cols-3\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<main class=\"container mx-auto bg-base-100 flex-1 px-4 sm:px-6 lg:px-8\"><section class=\"mx-auto max-w-5xl pt-14 pb-20 sm:pt-16 sm:pb-24 lg:pt-20 lg:pb-28\"><header class=\"max-w-3xl\"><h1 class=\"text-3xl font-bold tracking-tight text-base-content sm:text-4xl lg:text-5xl\">Projects I've built, open-source or commercial, over the years.</h1><p class=\"mt-5 max-w-3xl text-base leading-7 text-base-content/60\">A collection of things I've made. Projects spanning Go, web development, and beyond. Some are one-off experiments, while others have turned into full-fledged products.</p></header><div class=\"mt-14 grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:mt-16 lg:grid-cols-3\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -350,7 +350,7 @@ func ProjectsOverview(projects []models.Project) templ.Component {
 				var templ_7745c5c3_Var17 string
 				templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(projectIconLetter(project.Title))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages_overview.templ`, Line: 153, Col: 43}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages_overview.templ`, Line: 152, Col: 43}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 				if templ_7745c5c3_Err != nil {
@@ -363,7 +363,7 @@ func ProjectsOverview(projects []models.Project) templ.Component {
 				var templ_7745c5c3_Var18 templ.SafeURL
 				templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(routes.Project.URL(project.Slug)))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages_overview.templ`, Line: 156, Col: 62}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages_overview.templ`, Line: 155, Col: 62}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 				if templ_7745c5c3_Err != nil {
@@ -376,7 +376,7 @@ func ProjectsOverview(projects []models.Project) templ.Component {
 				var templ_7745c5c3_Var19 string
 				templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(project.Title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages_overview.templ`, Line: 156, Col: 132}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages_overview.templ`, Line: 155, Col: 132}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 				if templ_7745c5c3_Err != nil {
@@ -389,7 +389,7 @@ func ProjectsOverview(projects []models.Project) templ.Component {
 				var templ_7745c5c3_Var20 string
 				templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(project.Description)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages_overview.templ`, Line: 160, Col: 79}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages_overview.templ`, Line: 159, Col: 79}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 				if templ_7745c5c3_Err != nil {
@@ -407,7 +407,7 @@ func ProjectsOverview(projects []models.Project) templ.Component {
 					var templ_7745c5c3_Var21 templ.SafeURL
 					templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinURLErrs(project.ProjectURL)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages_overview.templ`, Line: 162, Col: 37}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages_overview.templ`, Line: 161, Col: 37}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 					if templ_7745c5c3_Err != nil {
@@ -420,7 +420,7 @@ func ProjectsOverview(projects []models.Project) templ.Component {
 					var templ_7745c5c3_Var22 string
 					templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(projectURLLabel(project.ProjectURL))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages_overview.templ`, Line: 166, Col: 53}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages_overview.templ`, Line: 165, Col: 53}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 					if templ_7745c5c3_Err != nil {
@@ -438,7 +438,7 @@ func ProjectsOverview(projects []models.Project) templ.Component {
 					var templ_7745c5c3_Var23 templ.SafeURL
 					templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinURLErrs(templ.URL(routes.Project.URL(project.Slug)))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages_overview.templ`, Line: 169, Col: 62}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/pages_overview.templ`, Line: 168, Col: 62}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 					if templ_7745c5c3_Err != nil {
@@ -468,7 +468,7 @@ func ProjectsOverview(projects []models.Project) templ.Component {
 		})
 		templ_7745c5c3_Err = base(
 			components.SetTitle("Projects"),
-			components.SetDescription("Projects I've built, open-source or commercial, over the years. A collections of things I've made."),
+			components.SetDescription("Projects I've built, open-source or commercial, over the years. A collection of things I've made."),
 			components.SetSlug("/projects"),
 		).Render(templ.WithChildren(ctx, templ_7745c5c3_Var16), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {

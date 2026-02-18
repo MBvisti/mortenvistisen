@@ -11,6 +11,7 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"mortenvistisen/internal/hypermedia"
 	"mortenvistisen/router/routes"
+	"mortenvistisen/views/components"
 	"net/http"
 )
 
@@ -54,7 +55,7 @@ func RegistrationForm() templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs("!$submitting && " + hypermedia.DataAction(http.MethodPost, routes.RegistrationCreate.URL()))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/registration.templ`, Line: 14, Col: 164}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/registration.templ`, Line: 15, Col: 164}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -67,7 +68,7 @@ func RegistrationForm() templ.Component {
 			var templ_7745c5c3_Var4 templ.SafeURL
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinURLErrs(routes.SessionNew.URL())
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/registration.templ`, Line: 41, Col: 106}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/registration.templ`, Line: 42, Col: 106}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -79,7 +80,7 @@ func RegistrationForm() templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = base().Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = base(components.SetNoIndex()).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

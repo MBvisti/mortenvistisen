@@ -1,13 +1,57 @@
 package views
 
 import (
+	"encoding/json"
 	"fmt"
+	"mortenvistisen/config"
 	"mortenvistisen/internal/hypermedia"
 	"mortenvistisen/models"
 	"mortenvistisen/router/routes"
 	"mortenvistisen/views/components"
 	"net/http"
+	"time"
 )
+
+func articleJSONLD(article models.Article) string {
+	type authorSchema struct {
+		Type string `json:"@type"`
+		Name string `json:"name"`
+		URL  string `json:"url"`
+	}
+	type schema struct {
+		Context       string       `json:"@context"`
+		Type          string       `json:"@type"`
+		Name          string       `json:"name"`
+		Description   string       `json:"description"`
+		Image         string       `json:"image,omitempty"`
+		DatePublished string       `json:"datePublished"`
+		DateModified  string       `json:"dateModified"`
+		Author        authorSchema `json:"author"`
+	}
+	image := article.ImageLink
+	if image == "" {
+		image = "https://media.mortenvistisen.com/mig_selv-removebg-preview.png"
+	}
+	s := schema{
+		Context:       "https://schema.org",
+		Type:          "Article",
+		Name:          article.Title,
+		Description:   metaOr(article.MetaDescription, article.Excerpt),
+		Image:         image,
+		DatePublished: article.FirstPublishedAt.Format(time.RFC3339),
+		DateModified:  article.UpdatedAt.Format(time.RFC3339),
+		Author: authorSchema{
+			Type: "Person",
+			Name: "Morten Vistisen",
+			URL:  config.BaseURL + "/about",
+		},
+	}
+	b, err := json.Marshal(s)
+	if err != nil {
+		return ""
+	}
+	return string(b)
+}
 
 templ Article(article models.Article) {
 	@base(
@@ -17,13 +61,17 @@ templ Article(article models.Article) {
 		components.SetImage(article.ImageLink),
 		components.SetImageAlt(article.Title),
 		components.SetMetaType("article"),
+		components.SetExtraMeta(components.MetaContent{Property: "article:published_time", Content: article.FirstPublishedAt.Format(time.RFC3339)}),
+		components.SetExtraMeta(components.MetaContent{Property: "article:modified_time", Content: article.UpdatedAt.Format(time.RFC3339)}),
+		components.SetExtraMeta(components.MetaContent{Property: "article:author", Content: config.BaseURL + "/about"}),
+		components.AddStructuredData(articleJSONLD(article)),
 	) {
 		<main class="container mx-auto bg-base-100 flex-1 flex flex-col px-4 sm:px-6 lg:px-8">
 			<div class="relative mt-12 sm:mt-16 lg:mt-24 flex justify-center">
 				<!-- Back button -->
 				<div class="hidden lg:block absolute left-0 top-0">
 					<a
-						href="javascript:history.back()"
+						href={ templ.URL(routes.ArticleOverview.URL()) }
 						class="flex h-10 w-10 items-center justify-center rounded-full border border-base-content/10 bg-base-200 shadow-sm transition hover:bg-base-300"
 						aria-label="Go back"
 					>

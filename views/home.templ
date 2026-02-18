@@ -83,6 +83,7 @@ templ socialLinks() {
 
 templ Home(articles []models.Article) {
 	@base(
+		components.SetRawTitle("Morten Vistisen — Go Engineer, Freelancer & Bootstrapper"),
 		components.SetDescription("I'm Morten, a software engineer from Denmark living in Spain. I write a lot of Golang while trying to build online businesses."),
 	) {
 		<main class="container mx-auto bg-base-100 flex-1 flex flex-col px-4 sm:px-6 lg:px-8">

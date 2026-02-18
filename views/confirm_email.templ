@@ -8,6 +8,7 @@ import (
 
 templ ConfirmationForm() {
 	@base(
+		components.SetNoIndex(),
 		components.SetTitle("Verify Email"),
 		components.SetDescription("Enter your verification code to confirm your email address."),
 	) {

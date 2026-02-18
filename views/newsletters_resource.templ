@@ -20,7 +20,7 @@ templ Newsletter(newsletter models.Newsletter) {
 			<div class="relative mt-12 sm:mt-16 lg:mt-24 flex justify-center">
 				<div class="hidden lg:block absolute left-0 top-0">
 					<a
-						href="javascript:history.back()"
+						href={ templ.URL(routes.NewsletterOverview.URL()) }
 						class="flex h-10 w-10 items-center justify-center rounded-full border border-base-content/10 bg-base-200 shadow-sm transition hover:bg-base-300"
 						aria-label="Go back"
 					>

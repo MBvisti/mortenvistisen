@@ -142,36 +142,48 @@ templ base(headOpts ...components.HeadDataOption) {
 			@navigation()
 			{ children... }
 			<footer>
-				<div class="bg-base-100 container mx-auto py-4 text-center text-sm text-base-content/50 px-4 sm:px-6 lg:px-8">
+				<div class="bg-base-100 container mx-auto py-8 text-sm text-base-content/70 px-4 sm:px-6 lg:px-8">
 					<div class={ publicShellClass }>
 						@components.Separator().WithOrientation(components.SeparatorHorizontal).SetClass("h-px shrink-0 w-full bg-gray-200/40 my-6").Render()
-						<div class="w-full flex flex-col sm:flex-row justify-between items-center gap-4">
-							<ul class="p-2 flex flex-wrap justify-center gap-2">
-								<li>
-									@components.Button(
-										components.ButtonProps{Label: "Posts"},
-									).MakeGhost().WithSize(components.ButtonSizeDefault).WithHref(routes.ArticleOverview.URL()).Render()
-								</li>
-								<li>
-									@components.Button(
-										components.ButtonProps{Label: "Projects"},
-									).MakeGhost().WithSize(components.ButtonSizeDefault).WithHref(routes.ProjectOverview.URL()).Render()
-								</li>
-								<li>
-									@components.Button(
-										components.ButtonProps{Label: "About"},
-									).MakeGhost().WithSize(components.ButtonSizeDefault).WithHref(routes.AboutPage.URL()).Render()
-								</li>
-								<li>
-									@components.Button(
-										components.ButtonProps{Label: "Contact"},
-									).MakeGhost().WithSize(components.ButtonSizeDefault).WithHref(routes.AboutPage.URL()).Render()
-								</li>
-							</ul>
-							<span class="flex items-start flex-col">
-								&copy; { time.Now().Format("2006") } Morten Vistisen. All rights reserved.
-								<p>Built with <a href="https://github.com/mbvlabs/andurel" class="underline">Andurel</a>.</p>
-							</span>
+						<div class="grid w-full gap-10 pb-10 sm:grid-cols-2 lg:grid-cols-[minmax(280px,1.35fr)_repeat(3,minmax(0,1fr))] lg:gap-14">
+							<div class="space-y-5">
+								<h2 class="text-3xl font-semibold leading-tight text-base-content">Morten Vistisen</h2>
+								<p class="max-w-sm text-base leading-8 text-base-content/65">
+									Notes on building practical software with Go, distributed systems, and product-minded engineering.
+								</p>
+								@components.Button(
+									components.ButtonProps{Label: "Built with andurel"},
+								).WithHref("https://github.com/mbvlabs/andurel").WithClass("").WithSize(components.ButtonSizeSm).Render()
+							</div>
+							<div>
+								<h3 class="mb-4 text-xs font-semibold uppercase tracking-[0.24em] text-base-content/55">Blog</h3>
+								<ul class="space-y-3">
+									<li><a href={ routes.ArticleOverview.URL() } class="hover:text-base-content transition">Posts</a></li>
+									<li><a href={ routes.ProjectOverview.URL() } class="hover:text-base-content transition">Projects</a></li>
+									<li><a href={ routes.AboutPage.URL() } class="hover:text-base-content transition">About</a></li>
+								</ul>
+							</div>
+							<div>
+								<h3 class="mb-4 text-xs font-semibold uppercase tracking-[0.24em] text-base-content/55">Links</h3>
+								<ul class="space-y-3">
+									<li><a href="https://github.com/mbvisti" class="hover:text-base-content transition" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+									<li><a href="https://www.youtube.com/@mbvlabs" class="hover:text-base-content transition" target="_blank" rel="noopener noreferrer">YouTube</a></li>
+									<li><a href="https://twitch.tv/mbvlabs" class="hover:text-base-content transition" target="_blank" rel="noopener noreferrer">Twitch</a></li>
+									<li><a href="https://linkedin.com/in/mortenvistisen" class="hover:text-base-content transition" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
+								</ul>
+							</div>
+							<div>
+								<h3 class="mb-4 text-xs font-semibold uppercase tracking-[0.24em] text-base-content/55">More</h3>
+								<ul class="space-y-3">
+									<li><a href="https://mastergolang.com" class="hover:text-base-content transition" target="_blank" rel="noopener noreferrer">Master Golang</a></li>
+									<li><a href="https://deploycrate.com" class="hover:text-base-content transition" target="_blank" rel="noopener noreferrer">DeployCrate</a></li>
+									<li><a href="https://mbvlabs.com" class="hover:text-base-content transition" target="_blank" rel="noopener noreferrer">MBVLabs</a></li>
+								</ul>
+							</div>
+						</div>
+						@components.Separator().WithOrientation(components.SeparatorHorizontal).SetClass("h-px shrink-0 w-full bg-gray-200/40").Render()
+						<div class="pt-6 text-base-content/55">
+							&copy; { time.Now().Format("2006") } Morten Vistisen. All rights reserved.
 						</div>
 					</div>
 				</div>

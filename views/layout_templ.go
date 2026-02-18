@@ -398,7 +398,7 @@ func base(headOpts ...components.HeadDataOption) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<footer><div class=\"bg-base-100 container mx-auto py-4 text-center text-sm text-base-content/50 px-4 sm:px-6 lg:px-8\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<footer><div class=\"bg-base-100 container mx-auto py-8 text-sm text-base-content/70 px-4 sm:px-6 lg:px-8\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -428,60 +428,77 @@ func base(headOpts ...components.HeadDataOption) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "<div class=\"w-full flex flex-col sm:flex-row justify-between items-center gap-4\"><ul class=\"p-2 flex flex-wrap justify-center gap-2\"><li>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "<div class=\"grid w-full gap-10 pb-10 sm:grid-cols-2 lg:grid-cols-[minmax(280px,1.35fr)_repeat(3,minmax(0,1fr))] lg:gap-14\"><div class=\"space-y-5\"><h2 class=\"text-3xl font-semibold leading-tight text-base-content\">Morten Vistisen</h2><p class=\"max-w-sm text-base leading-8 text-base-content/65\">Notes on building practical software with Go, distributed systems, and product-minded engineering.</p>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = components.Button(
-			components.ButtonProps{Label: "Posts"},
-		).MakeGhost().WithSize(components.ButtonSizeDefault).WithHref(routes.ArticleOverview.URL()).Render().Render(ctx, templ_7745c5c3_Buffer)
+			components.ButtonProps{Label: "Built with andurel"},
+		).WithHref("https://github.com/mbvlabs/andurel").WithClass("").WithSize(components.ButtonSizeSm).Render().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "</li><li>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "</div><div><h3 class=\"mb-4 text-xs font-semibold uppercase tracking-[0.24em] text-base-content/55\">Blog</h3><ul class=\"space-y-3\"><li><a href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = components.Button(
-			components.ButtonProps{Label: "Projects"},
-		).MakeGhost().WithSize(components.ButtonSizeDefault).WithHref(routes.ProjectOverview.URL()).Render().Render(ctx, templ_7745c5c3_Buffer)
+		var templ_7745c5c3_Var14 templ.SafeURL
+		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinURLErrs(routes.ArticleOverview.URL())
 		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "</li><li>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = components.Button(
-			components.ButtonProps{Label: "About"},
-		).MakeGhost().WithSize(components.ButtonSizeDefault).WithHref(routes.AboutPage.URL()).Render().Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "</li><li>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = components.Button(
-			components.ButtonProps{Label: "Contact"},
-		).MakeGhost().WithSize(components.ButtonSizeDefault).WithHref(routes.AboutPage.URL()).Render().Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "</li></ul><span class=\"flex items-start flex-col\">&copy; ")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var14 string
-		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(time.Now().Format("2006"))
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/layout.templ`, Line: 172, Col: 42}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/layout.templ`, Line: 161, Col: 51}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, " Morten Vistisen. All rights reserved.<p>Built with <a href=\"https://github.com/mbvlabs/andurel\" class=\"underline\">Andurel</a>.</p></span></div></div></div></footer></body><div id=\"flashContainer\" class=\"fixed top-4 right-4 z-50 space-y-2\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "\" class=\"hover:text-base-content transition\">Posts</a></li><li><a href=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var15 templ.SafeURL
+		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinURLErrs(routes.ProjectOverview.URL())
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/layout.templ`, Line: 162, Col: 51}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "\" class=\"hover:text-base-content transition\">Projects</a></li><li><a href=\"")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var16 templ.SafeURL
+		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinURLErrs(routes.AboutPage.URL())
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/layout.templ`, Line: 163, Col: 45}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "\" class=\"hover:text-base-content transition\">About</a></li></ul></div><div><h3 class=\"mb-4 text-xs font-semibold uppercase tracking-[0.24em] text-base-content/55\">Links</h3><ul class=\"space-y-3\"><li><a href=\"https://github.com/mbvisti\" class=\"hover:text-base-content transition\" target=\"_blank\" rel=\"noopener noreferrer\">GitHub</a></li><li><a href=\"https://www.youtube.com/@mbvlabs\" class=\"hover:text-base-content transition\" target=\"_blank\" rel=\"noopener noreferrer\">YouTube</a></li><li><a href=\"https://twitch.tv/mbvlabs\" class=\"hover:text-base-content transition\" target=\"_blank\" rel=\"noopener noreferrer\">Twitch</a></li><li><a href=\"https://linkedin.com/in/mortenvistisen\" class=\"hover:text-base-content transition\" target=\"_blank\" rel=\"noopener noreferrer\">LinkedIn</a></li></ul></div><div><h3 class=\"mb-4 text-xs font-semibold uppercase tracking-[0.24em] text-base-content/55\">More</h3><ul class=\"space-y-3\"><li><a href=\"https://mastergolang.com\" class=\"hover:text-base-content transition\" target=\"_blank\" rel=\"noopener noreferrer\">Master Golang</a></li><li><a href=\"https://deploycrate.com\" class=\"hover:text-base-content transition\" target=\"_blank\" rel=\"noopener noreferrer\">DeployCrate</a></li><li><a href=\"https://mbvlabs.com\" class=\"hover:text-base-content transition\" target=\"_blank\" rel=\"noopener noreferrer\">MBVLabs</a></li></ul></div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = components.Separator().WithOrientation(components.SeparatorHorizontal).SetClass("h-px shrink-0 w-full bg-gray-200/40").Render().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "<div class=\"pt-6 text-base-content/55\">&copy; ")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var17 string
+		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(time.Now().Format("2006"))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/layout.templ`, Line: 186, Col: 41}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, " Morten Vistisen. All rights reserved.</div></div></div></footer></body><div id=\"flashContainer\" class=\"fixed top-4 right-4 z-50 space-y-2\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -491,17 +508,17 @@ func base(headOpts ...components.HeadDataOption) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if config.Env == server.ProdEnvironment {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "<script defer src=\"https://analytics.mbvlabs.com/t/script.js\" data-website-id=\"7f285ded-b7e4-4c9d-953c-e79d74643696\"></script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "<script defer src=\"https://analytics.mbvlabs.com/t/script.js\" data-website-id=\"7f285ded-b7e4-4c9d-953c-e79d74643696\"></script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "</html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "</html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

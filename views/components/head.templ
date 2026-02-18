@@ -2,6 +2,7 @@ package components
 
 import (
 	"context"
+	"fmt"
 	"mortenvistisen/config"
 	"mortenvistisen/router/routes"
 )
@@ -15,23 +16,31 @@ type MetaContent struct {
 }
 
 type HeadData struct {
-	siteName       string
-	Title          string
-	Description    string
-	Image          string
-	ImageAlt       string
-	Slug           string
-	canonical      string
-	MetaType       string
-	stylesheetHref string
-	scriptSrc      string
-	ExtraStyles    []string
-	ExtraMeta      []MetaContent
+	siteName           string
+	Title              string
+	Description        string
+	Image              string
+	ImageAlt           string
+	Slug               string
+	canonical          string
+	MetaType           string
+	stylesheetHref     string
+	scriptSrc          string
+	ExtraStyles        []string
+	ExtraMeta          []MetaContent
+	noIndex            bool
+	structuredDataHTML string
 }
 
 func SetTitle(title string) HeadDataOption {
 	return func(hd *HeadData) {
 		hd.Title = title + " - " + hd.siteName
+	}
+}
+
+func SetRawTitle(title string) HeadDataOption {
+	return func(hd *HeadData) {
+		hd.Title = title
 	}
 }
 
@@ -79,12 +88,28 @@ func AddStylesheet(href string) HeadDataOption {
 	}
 }
 
+func SetNoIndex() HeadDataOption {
+	return func(hd *HeadData) {
+		hd.noIndex = true
+	}
+}
+
+func AddStructuredData(jsonLD string) HeadDataOption {
+	return func(hd *HeadData) {
+		hd.structuredDataHTML += `<script type="application/ld+json">` + jsonLD + `</script>`
+	}
+}
+
 templ head(data HeadData) {
 	<head>
 		<meta charset="UTF-8"/>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 		<meta name="twitter:card" content="summary_large_image"/>
-		<meta name="twitter:creator" content="@mbvlabs"/>
+		<meta name="twitter:creator" content="@mbvisti"/>
+		<meta name="twitter:site" content="@mbvisti"/>
+		if data.noIndex {
+			<meta name="robots" content="noindex, nofollow"/>
+		}
 		<title>
 			{ data.Title }
 		</title>
@@ -133,20 +158,27 @@ templ head(data HeadData) {
 		<link rel="icon" type="image/png" sizes="512x512" href="https://media.andurel.com/favicon/android-chrome-512x512.png"/>
 		<link rel="manifest" href="https://media.andurel.com/favicon/site.webmanifest"/>
 		<script src={ data.scriptSrc } type="module"></script>
+		@templ.Raw(data.structuredDataHTML)
 	</head>
 }
 
 func SetupHead(ctx context.Context, opts ...HeadDataOption) templ.Component {
+	personScript := `<script type="application/ld+json">` + fmt.Sprintf(
+		`{"@context":"https://schema.org","@type":"Person","name":"Morten Vistisen","url":"%s","jobTitle":"Software Engineer","sameAs":["https://github.com/mbvisti","https://linkedin.com/in/mortenvistisen","https://x.com/mbvisti","https://www.youtube.com/@mbvlabs","https://twitch.tv/mbvlabs"]}`,
+		config.BaseURL,
+	) + `</script>`
 
 	data := &HeadData{
-		siteName:       config.ProjectName,
-		Title:          config.ProjectName,
-		Description:    "Software engineer from Denmark living in Spain. Writing about Go, web development, distributed systems, and building online businesses.",
-		Slug:           "/",
-		canonical:      config.BaseURL,
-		MetaType:       "website",
-		stylesheetHref: routes.Stylesheet.URL(),
-		scriptSrc:      routes.Scripts.URL(),
+		siteName:           config.ProjectName,
+		Title:              config.ProjectName,
+		Description:        "Software engineer from Denmark living in Spain. Writing about Go, web development, distributed systems, and building online businesses.",
+		Slug:               "/",
+		canonical:          config.BaseURL,
+		MetaType:           "website",
+		stylesheetHref:     routes.Stylesheet.URL(),
+		scriptSrc:          routes.Scripts.URL(),
+		Image:              "https://media.mortenvistisen.com/mig_selv-removebg-preview.png",
+		structuredDataHTML: personScript,
 	}
 
 	for _, opt := range opts {

@@ -130,18 +130,17 @@ templ NewslettersOverview(newsletters []models.Newsletter) {
 templ ProjectsOverview(projects []models.Project) {
 	@base(
 		components.SetTitle("Projects"),
-		components.SetDescription("Projects I've built, open-source or commercial, over the years. A collections of things I've made."),
+		components.SetDescription("Projects I've built, open-source or commercial, over the years. A collection of things I've made."),
 		components.SetSlug("/projects"),
 	) {
 		<main class="container mx-auto bg-base-100 flex-1 px-4 sm:px-6 lg:px-8">
 			<section class="mx-auto max-w-5xl pt-14 pb-20 sm:pt-16 sm:pb-24 lg:pt-20 lg:pb-28">
 				<header class="max-w-3xl">
 					<h1 class="text-3xl font-bold tracking-tight text-base-content sm:text-4xl lg:text-5xl">
-						Projects I've built, open-source or commercial, over the years. 
-						<br/>
+						Projects I've built, open-source or commercial, over the years.
 					</h1>
 					<p class="mt-5 max-w-3xl text-base leading-7 text-base-content/60">
-						A collections of things I've made. Projects spanning Go, web development, and beyond.
+						A collection of things I've made. Projects spanning Go, web development, and beyond.
 						Some are one-off experiments, while others have turned into full-fledged products.
 					</p>
 				</header>
