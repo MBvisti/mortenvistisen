@@ -100,6 +100,11 @@ func (m *Mailpit) SendMarketing(ctx context.Context, payload email.MarketingPayl
 		headers["Reply-To"] = payload.ReplyTo
 	}
 
+	if payload.UnsubscribeURL != "" {
+		headers["List-Unsubscribe"] = fmt.Sprintf("<%s>", payload.UnsubscribeURL)
+		headers["List-Unsubscribe-Post"] = "List-Unsubscribe=One-Click"
+	}
+
 	headers["Subject"] = payload.Subject
 	headers["MIME-Version"] = "1.0"
 	headers["Content-Type"] = fmt.Sprintf("multipart/alternative; boundary=\"%s\"", boundary)

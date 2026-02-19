@@ -48,6 +48,12 @@ var SubscriberVerificationCreate = routing.NewSimpleRoute(
 	SubscriberPrefix,
 )
 
+var SubscriberUnsubscribe = routing.NewSimpleRoute(
+	"/unsubscribe",
+	"subscribers.unsubscribe",
+	"",
+)
+
 var SubscriberEdit = routing.NewRouteWithSerialID(
 	"/:id/edit",
 	"subscribers.edit",

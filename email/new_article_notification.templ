@@ -10,6 +10,7 @@ type NewArticleNotification struct {
 	Category     string
 	Summary      string
 	ArticleURL   string
+	UnsubscribeURL string
 }
 
 var _ Transformer = (*NewArticleNotification)(nil)
@@ -77,6 +78,17 @@ templ (n NewArticleNotification) render() {
 			<span class="st-Delink" style="color: #414552; text-decoration: none;">
 				Thank you for reading.
 			</span>
+		}
+		if n.UnsubscribeURL != "" {
+			@spacer("8")
+			@copy() {
+				<span class="st-Delink" style="color: #687385; text-decoration: none;">
+					Want fewer emails?
+					<a href={ n.UnsubscribeURL } style="color: #625afa; text-decoration: underline;">
+						Unsubscribe here
+					</a>.
+				</span>
+			}
 		}
 		@spacer("32")
 	}

@@ -11,6 +11,7 @@ type NewsletterRelease struct {
 	Highlights      string
 	NewsletterHTML  string
 	ReadURL         string
+	UnsubscribeURL  string
 }
 
 var _ Transformer = (*NewsletterRelease)(nil)
@@ -78,6 +79,17 @@ templ (n NewsletterRelease) render() {
 			<span class="st-Delink" style="color: #414552; text-decoration: none;">
 				Thanks for subscribing.
 			</span>
+		}
+		if n.UnsubscribeURL != "" {
+			@spacer("8")
+			@copy() {
+				<span class="st-Delink" style="color: #687385; text-decoration: none;">
+					Want fewer emails?
+					<a href={ n.UnsubscribeURL } style="color: #625afa; text-decoration: underline;">
+						Unsubscribe here
+					</a>.
+				</span>
+			}
 		}
 		@spacer("32")
 	}

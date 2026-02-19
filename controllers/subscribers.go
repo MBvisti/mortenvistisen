@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -209,6 +210,64 @@ func (s Subscribers) VerificationCreate(etx *echo.Context) error {
 	}
 
 	return etx.Redirect(http.StatusSeeOther, routes.HomePage.URL())
+}
+
+func (s Subscribers) Unsubscribe(etx *echo.Context) error {
+	ctx := etx.Request().Context()
+	tokenValue := strings.TrimSpace(etx.QueryParam("token"))
+	if tokenValue == "" {
+		return etx.String(http.StatusBadRequest, "Invalid unsubscribe link.")
+	}
+
+	tx, err := s.db.BeginTx(ctx)
+	if err != nil {
+		return etx.String(http.StatusInternalServerError, "Could not process unsubscribe request.")
+	}
+	defer tx.Rollback(ctx)
+
+	token, err := models.FindTokenByScopeAndHash(
+		ctx,
+		tx,
+		s.cfg.Auth.Pepper,
+		subscriberUnsubscribeScope,
+		tokenValue,
+	)
+	if err != nil || !token.IsValid(tokenValue, s.cfg.Auth.Pepper) {
+		return etx.String(http.StatusBadRequest, "This unsubscribe link is invalid or expired.")
+	}
+
+	var meta subscriberUnsubscribeMeta
+	if err := json.Unmarshal(token.MetaData, &meta); err != nil || meta.SubscriberID <= 0 {
+		return etx.String(http.StatusBadRequest, "This unsubscribe link is invalid.")
+	}
+
+	subscriber, err := models.FindSubscriber(ctx, tx, meta.SubscriberID)
+	if err != nil {
+		return etx.String(http.StatusBadRequest, "Subscriber not found for this unsubscribe link.")
+	}
+
+	if subscriber.IsVerified {
+		_, err = models.UpdateSubscriber(ctx, tx, models.UpdateSubscriberData{
+			ID:           subscriber.ID,
+			Email:        subscriber.Email,
+			SubscribedAt: subscriber.SubscribedAt,
+			Referer:      subscriber.Referer,
+			IsVerified:   false,
+		})
+		if err != nil {
+			return etx.String(http.StatusInternalServerError, "Could not unsubscribe at this time.")
+		}
+	}
+
+	if err := models.DestroyToken(ctx, tx, token.ID); err != nil {
+		return etx.String(http.StatusInternalServerError, "Could not finalize unsubscribe.")
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return etx.String(http.StatusInternalServerError, "Could not finalize unsubscribe.")
+	}
+
+	return etx.String(http.StatusOK, "You have been unsubscribed from newsletter updates.")
 }
 
 func (s Subscribers) Create(etx *echo.Context) error {

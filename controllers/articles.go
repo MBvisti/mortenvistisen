@@ -29,12 +29,14 @@ import (
 type Articles struct {
 	db         storage.Pool
 	insertOnly queue.InsertOnly
+	cfg        config.Config
 }
 
-func NewArticles(db storage.Pool, insertOnly queue.InsertOnly) Articles {
+func NewArticles(db storage.Pool, insertOnly queue.InsertOnly, cfg config.Config) Articles {
 	return Articles{
 		db:         db,
 		insertOnly: insertOnly,
+		cfg:        cfg,
 	}
 }
 
@@ -417,21 +419,7 @@ func (a Articles) scheduleArticleReleaseEmails(
 		return subscribers[i].ID < subscribers[j].ID
 	})
 
-	articleEmail := email.NewArticleNotification{
-		ArticleTitle: article.Title,
-		Summary:      article.Excerpt,
-		ArticleURL:   articlePublicURL(article),
-	}
-
-	htmlBody, err := articleEmail.ToHTML()
-	if err != nil {
-		return 0, err
-	}
-
-	textBody, err := articleEmail.ToText()
-	if err != nil {
-		return 0, err
-	}
+	articleURL := articlePublicURL(article)
 
 	scheduleBase := time.Now().UTC().Add(10 * time.Second).Truncate(time.Second)
 
@@ -447,6 +435,34 @@ func (a Articles) scheduleArticleReleaseEmails(
 			continue
 		}
 
+		unsubscribeToken, err := createSubscriberUnsubscribeToken(
+			ctx,
+			tx,
+			a.cfg.Auth.Pepper,
+			subscriber.ID,
+		)
+		if err != nil {
+			return 0, err
+		}
+		unsubscribeURL := newsletterUnsubscribeURL(unsubscribeToken)
+
+		articleEmail := email.NewArticleNotification{
+			ArticleTitle:   article.Title,
+			Summary:        article.Excerpt,
+			ArticleURL:     articleURL,
+			UnsubscribeURL: unsubscribeURL,
+		}
+
+		htmlBody, err := articleEmail.ToHTML()
+		if err != nil {
+			return 0, err
+		}
+
+		textBody, err := articleEmail.ToText()
+		if err != nil {
+			return 0, err
+		}
+
 		scheduledAt := scheduledNewsletterSendTime(scheduleBase, sendIndex)
 		insertParams = append(insertParams, river.InsertManyParams{
 			Args: jobs.SendMarketingEmailArgs{
@@ -456,7 +472,7 @@ func (a Articles) scheduleArticleReleaseEmails(
 					Subject:        article.Title,
 					HTMLBody:       htmlBody,
 					TextBody:       textBody,
-					UnsubscribeURL: newsletterUnsubscribeURL(),
+					UnsubscribeURL: unsubscribeURL,
 					Tags:           []string{"article_release"},
 					Metadata: map[string]string{
 						"article_id":    strconv.Itoa(int(article.ID)),

@@ -31,6 +31,16 @@ func (r Router) RegisterSubscriberRoutes(subscriber controllers.Subscribers) err
 
 	_, err = r.e.AddRoute(echo.Route{
 		Method:  http.MethodGet,
+		Path:    routes.SubscriberUnsubscribe.Path(),
+		Name:    routes.SubscriberUnsubscribe.Name(),
+		Handler: subscriber.Unsubscribe,
+	})
+	if err != nil {
+		errs = append(errs, err)
+	}
+
+	_, err = r.e.AddRoute(echo.Route{
+		Method:  http.MethodGet,
 		Path:    routes.SubscriberVerificationNew.Path(),
 		Name:    routes.SubscriberVerificationNew.Name(),
 		Handler: subscriber.VerificationNew,

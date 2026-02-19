@@ -159,6 +159,19 @@ func (a *AwsSes) SendMarketing(ctx context.Context, payload email.MarketingPaylo
 		}
 	}
 
+	if payload.UnsubscribeURL != "" {
+		content.Simple.Headers = append(content.Simple.Headers,
+			types.MessageHeader{
+				Name:  aws.String("List-Unsubscribe"),
+				Value: aws.String(fmt.Sprintf("<%s>", payload.UnsubscribeURL)),
+			},
+			types.MessageHeader{
+				Name:  aws.String("List-Unsubscribe-Post"),
+				Value: aws.String("List-Unsubscribe=One-Click"),
+			},
+		)
+	}
+
 	// Build send request
 	input := &sesv2.SendEmailInput{
 		Destination:      destination,

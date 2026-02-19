@@ -87,7 +87,7 @@ func setupControllers(
 		return err
 	}
 
-	articles := controllers.NewArticles(db, insertOnly)
+	articles := controllers.NewArticles(db, insertOnly, cfg)
 	if err := r.RegisterArticleRoutes(articles); err != nil {
 		return err
 	}
@@ -97,7 +97,7 @@ func setupControllers(
 		return err
 	}
 
-	newsletters := controllers.NewNewsletters(db, insertOnly)
+	newsletters := controllers.NewNewsletters(db, insertOnly, cfg)
 	if err := r.RegisterNewsletterRoutes(newsletters); err != nil {
 		return err
 	}

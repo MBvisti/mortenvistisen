@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"net/url"
 	"sort"
 	"strconv"
 	"strings"
@@ -29,6 +30,7 @@ import (
 type Newsletters struct {
 	db         storage.Pool
 	insertOnly queue.InsertOnly
+	cfg        config.Config
 }
 
 const (
@@ -36,10 +38,11 @@ const (
 	newsletterSendSpacing  = 3 * time.Second
 )
 
-func NewNewsletters(db storage.Pool, insertOnly queue.InsertOnly) Newsletters {
+func NewNewsletters(db storage.Pool, insertOnly queue.InsertOnly, cfg config.Config) Newsletters {
 	return Newsletters{
 		db:         db,
 		insertOnly: insertOnly,
+		cfg:        cfg,
 	}
 }
 
@@ -366,23 +369,6 @@ func (n Newsletters) scheduleNewsletterReleaseEmails(
 	})
 
 	readURL := newsletterPublicURL(newsletter)
-	newsletterEmail := email.NewsletterRelease{
-		NewsletterTitle: newsletter.Title,
-		IssueLabel:      newsletterIssueLabel(newsletter),
-		Highlights:      newsletter.MetaDescription,
-		NewsletterHTML:  newsletter.Content,
-		ReadURL:         readURL,
-	}
-
-	htmlBody, err := newsletterEmail.ToHTML()
-	if err != nil {
-		return 0, err
-	}
-
-	textBody, err := newsletterEmail.ToText()
-	if err != nil {
-		return 0, err
-	}
 
 	scheduleBase := time.Now().UTC().Add(10 * time.Second).Truncate(time.Second)
 
@@ -398,16 +384,46 @@ func (n Newsletters) scheduleNewsletterReleaseEmails(
 			continue
 		}
 
+		unsubscribeToken, err := createSubscriberUnsubscribeToken(
+			ctx,
+			tx,
+			n.cfg.Auth.Pepper,
+			subscriber.ID,
+		)
+		if err != nil {
+			return 0, err
+		}
+		unsubscribeURL := newsletterUnsubscribeURL(unsubscribeToken)
+
+		newsletterEmail := email.NewsletterRelease{
+			NewsletterTitle: newsletter.Title,
+			IssueLabel:      newsletterIssueLabel(newsletter),
+			Highlights:      newsletter.MetaDescription,
+			NewsletterHTML:  newsletter.Content,
+			ReadURL:         readURL,
+			UnsubscribeURL:  unsubscribeURL,
+		}
+
+		htmlBody, err := newsletterEmail.ToHTML()
+		if err != nil {
+			return 0, err
+		}
+
+		textBody, err := newsletterEmail.ToText()
+		if err != nil {
+			return 0, err
+		}
+
 		scheduledAt := scheduledNewsletterSendTime(scheduleBase, sendIndex)
 		insertParams = append(insertParams, river.InsertManyParams{
 			Args: jobs.SendMarketingEmailArgs{
 				Data: email.MarketingData{
 					To:             []string{emailAddress},
-					From:           "newsletter@mortenvistisenc.com",
+					From:           "newsletter@mortenvistisen.com",
 					Subject:        newsletter.Title,
 					HTMLBody:       htmlBody,
 					TextBody:       textBody,
-					UnsubscribeURL: newsletterUnsubscribeURL(),
+					UnsubscribeURL: unsubscribeURL,
 					Tags:           []string{"newsletter_release"},
 					Metadata: map[string]string{
 						"newsletter_id": strconv.Itoa(int(newsletter.ID)),
@@ -460,6 +476,11 @@ func newsletterPublicURL(newsletter models.Newsletter) string {
 	return fmt.Sprintf("%s%s", baseURL, routes.NewsletterShow.URL(newsletter.ID))
 }
 
-func newsletterUnsubscribeURL() string {
-	return fmt.Sprintf("%s/unsubscribe", strings.TrimRight(config.BaseURL, "/"))
+func newsletterUnsubscribeURL(token string) string {
+	base := strings.TrimRight(config.BaseURL, "/")
+	if token == "" {
+		return fmt.Sprintf("%s/unsubscribe", base)
+	}
+
+	return fmt.Sprintf("%s/unsubscribe?token=%s", base, url.QueryEscape(token))
 }
