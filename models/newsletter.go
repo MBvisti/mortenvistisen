@@ -5,6 +5,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/gosimple/slug"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 
@@ -79,7 +80,7 @@ func CreateNewsletter(
 	}
 	params := db.InsertNewsletterParams{
 		Title:           data.Title,
-		Slug:            pgtype.Text{String: data.Slug, Valid: true},
+		Slug:            pgtype.Text{String: slug.Make(data.Title), Valid: data.Title != ""},
 		MetaTitle:       data.MetaTitle,
 		MetaDescription: data.MetaDescription,
 		IsPublished:     pgtype.Bool{Bool: data.IsPublished, Valid: true},
@@ -130,7 +131,7 @@ func UpdateNewsletter(
 	params := db.UpdateNewsletterParams{
 		ID:              data.ID,
 		Title:           data.Title,
-		Slug:            pgtype.Text{String: data.Slug, Valid: true},
+		Slug:            pgtype.Text{String: slug.Make(data.Title), Valid: data.Title != ""},
 		MetaTitle:       data.MetaTitle,
 		MetaDescription: data.MetaDescription,
 		IsPublished:     pgtype.Bool{Bool: data.IsPublished, Valid: true},
@@ -257,7 +258,7 @@ func UpsertNewsletter(
 	}
 	params := db.UpsertNewsletterParams{
 		Title:           data.Title,
-		Slug:            pgtype.Text{String: data.Slug, Valid: true},
+		Slug:            pgtype.Text{String: slug.Make(data.Title), Valid: data.Title != ""},
 		MetaTitle:       data.MetaTitle,
 		MetaDescription: data.MetaDescription,
 		IsPublished:     pgtype.Bool{Bool: data.IsPublished, Valid: true},
