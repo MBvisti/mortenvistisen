@@ -11,6 +11,7 @@ templ Form(props FormProps, opts ...Opt) {
 	if fragmentFrom(opts) != "" {
 		@templ.Fragment(fragmentFrom(opts)) {
 			<form
+				class={ classFrom(opts) }
 				if idFrom(opts) != "" {
 					id={ idFrom(opts) }
 				}
@@ -21,7 +22,6 @@ templ Form(props FormProps, opts ...Opt) {
 				}
 			>
 				<fieldset
-					class={ classFrom(opts) }
 					data-attr:disabled="$submitting"
 				>
 					{ children... }
@@ -41,7 +41,6 @@ templ Form(props FormProps, opts ...Opt) {
 			}
 		>
 			<fieldset
-				class={ classFrom(opts) }
 				data-attr:disabled="$submitting"
 			>
 				{ children... }
