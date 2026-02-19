@@ -19,6 +19,7 @@ import (
 	"mortenvistisen/queue/jobs"
 	"mortenvistisen/router/cookies"
 	"mortenvistisen/router/routes"
+	"mortenvistisen/services"
 	"mortenvistisen/views"
 
 	"github.com/jackc/pgx/v5"
@@ -399,7 +400,7 @@ func (n Newsletters) scheduleNewsletterReleaseEmails(
 			NewsletterTitle: newsletter.Title,
 			IssueLabel:      newsletterIssueLabel(newsletter),
 			Highlights:      newsletter.MetaDescription,
-			NewsletterHTML:  newsletter.Content,
+			NewsletterHTML:  services.MarkdownToHTML(newsletter.Content),
 			ReadURL:         readURL,
 			UnsubscribeURL:  unsubscribeURL,
 		}
