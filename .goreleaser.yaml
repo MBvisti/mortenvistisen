@@ -1,0 +1,29 @@
+version: 2
+
+builds:
+  - id: mortenvistisen-blog
+    main: ./cmd/app
+    binary: mortenvistisen_blog
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+    ldflags:
+      - -s -w
+      - -X main.appVersion={{.ShortCommit}}
+
+archives:
+  - id: mortenvistisen
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+    formats:
+      - binary
+
+release:
+  prerelease: true
+  make_latest: false
+  name_template: "staging"
+
+changelog:
+  disable: true
