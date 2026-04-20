@@ -1,0 +1,44 @@
+name: Production Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  id-token: write
+  contents: write
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  GO_VERSION: '1.26.0'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Configure git
+        run: |
+          git config user.email "github-actions@mbvlabs.com"
+          git config user.name "MBV (GA)"
+
+      - name: Install GoReleaser
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          install-only: true
+          version: v2.7.0
+
+      - name: Run GoReleaser (production)
+        run: goreleaser release --clean --skip=validate --config .goreleaser.prod.yaml
+        env:
+          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+
