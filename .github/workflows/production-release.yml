@@ -4,14 +4,6 @@ on:
   release:
     types: [published]
 
-permissions:
-  id-token: write
-  contents: write
-
-env:
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  GO_VERSION: '1.26.0'
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -21,24 +13,112 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
         with:
-          go-version: ${{ env.GO_VERSION }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Configure git
-        run: |
-          git config user.email "github-actions@mbvlabs.com"
-          git config user.name "MBV (GA)"
-
-      - name: Install GoReleaser
-        uses: goreleaser/goreleaser-action@v6
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
         with:
-          install-only: true
-          version: v2.7.0
+          push: true
+          tags: |
+            mbvlabs/blog:${{ github.event.release.tag_name }}
+            mbvlabs/blog:latest
 
-      - name: Run GoReleaser (production)
-        run: goreleaser release --clean --skip=validate --config .goreleaser.prod.yaml
+  notify-production:
+    needs: build
+    runs-on: ubuntu-latest
+    outputs:
+      status_url: ${{ steps.notify.outputs.status_url }}
+    steps:
+      - name: Notify production webhook
+        id: notify
         env:
-          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+          SECRET: ${{ secrets.PRODUCTION_WEBHOOK_SECRET }}
+          SOURCE_VERSION: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+
+          BODY='{"source_version": "'"$SOURCE_VERSION"'"}'
+
+          RESPONSE_FILE=$(mktemp)
+          HTTP_STATUS=$(curl -sS -o "$RESPONSE_FILE" -w "%{http_code}" -X POST "https://deploycrate.com/api/v1/deploy-hook/environments/12" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $SECRET" \
+            -d "$BODY")
+
+          RESPONSE=$(cat "$RESPONSE_FILE")
+          rm -f "$RESPONSE_FILE"
+
+          if [ "$HTTP_STATUS" -lt 200 ] || [ "$HTTP_STATUS" -ge 300 ]; then
+            echo "Webhook request failed with HTTP $HTTP_STATUS"
+            echo "$RESPONSE"
+            exit 1
+          fi
+
+          STATUS_URL=$(printf '%s' "$RESPONSE" | jq -er '.status_url')
+          echo "Webhook accepted: $STATUS_URL"
+          echo "status_url=$STATUS_URL" >> "$GITHUB_OUTPUT"
+
+  wait-for-production:
+    needs: notify-production
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for production deploy
+        env:
+          STATUS_URL: ${{ needs.notify-production.outputs.status_url }}
+        run: |
+          set -euo pipefail
+
+          ATTEMPT=1
+          MAX_ATTEMPTS=60
+          SLEEP_SECONDS=10
+
+          while [ "$ATTEMPT" -le "$MAX_ATTEMPTS" ]; do
+            RESPONSE_FILE=$(mktemp)
+            HTTP_STATUS=$(curl -sS -o "$RESPONSE_FILE" -w "%{http_code}" "$STATUS_URL")
+            STATUS_RESPONSE=$(cat "$RESPONSE_FILE")
+            rm -f "$RESPONSE_FILE"
+
+            if [ "$HTTP_STATUS" -eq 502 ] || [ "$HTTP_STATUS" -eq 503 ]; then
+              echo "Attempt $ATTEMPT/$MAX_ATTEMPTS: HTTP $HTTP_STATUS (app restarting, retrying...)"
+              ATTEMPT=$((ATTEMPT + 1))
+              sleep "$SLEEP_SECONDS"
+              continue
+            fi
+
+            if [ "$HTTP_STATUS" -lt 200 ] || [ "$HTTP_STATUS" -ge 300 ]; then
+              echo "Status poll failed with HTTP $HTTP_STATUS"
+              echo "$STATUS_RESPONSE"
+              exit 1
+            fi
+
+            STATUS=$(printf '%s' "$STATUS_RESPONSE" | jq -er '.status')
+            COMPLETED_TARGETS=$(printf '%s' "$STATUS_RESPONSE" | jq -r '.completed_targets // 0')
+            FAILED_TARGETS=$(printf '%s' "$STATUS_RESPONSE" | jq -r '.failed_targets // 0')
+            TOTAL_TARGETS=$(printf '%s' "$STATUS_RESPONSE" | jq -r '.total_targets // 0')
+
+            echo "Attempt $ATTEMPT/$MAX_ATTEMPTS: status=$STATUS completed=$COMPLETED_TARGETS failed=$FAILED_TARGETS total=$TOTAL_TARGETS"
+
+            case "$STATUS" in
+              succeeded)
+                exit 0
+                ;;
+              failed)
+                echo "$STATUS_RESPONSE"
+                exit 1
+                ;;
+            esac
+
+            if [ "$ATTEMPT" -eq "$MAX_ATTEMPTS" ]; then
+              echo "Timed out waiting for deploy completion"
+              echo "$STATUS_RESPONSE"
+              exit 1
+            fi
+
+            ATTEMPT=$((ATTEMPT + 1))
+            sleep "$SLEEP_SECONDS"
+          done
 
