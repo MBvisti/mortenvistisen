@@ -85,7 +85,7 @@ func Home(articles []models.Article) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<span class=\"w-full flex flex-col items-start\"><h1 class=\"text-start text-3xl sm:text-4xl lg:text-6xl text-base-content font-bold mb-6\">Software Engineer, Freelancer, Bootstrapper</h1><p class=\"text-start text-base sm:text-lg text-base-content/50 w-full md:w-2/3\">I'm Morten, a software engineer from Denmark living in Spain. I write a lot of Golang while trying to build online businesses.</p></span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<span class=\"w-full flex flex-col items-start\"><h1 class=\"text-start text-3xl sm:text-4xl lg:text-6xl text-base-content font-bold mb-6\">Software Engineer, Freelancer, <i>Bootstrapper</i></h1><p class=\"text-start text-base sm:text-lg text-base-content/50 w-full md:w-2/3\">I'm Morten, a software engineer from Denmark living in Spain. I write a lot of Golang while trying to build online businesses.</p></span>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

@@ -1484,6 +1484,12 @@
       border-color: color-mix(in oklab, var(--color-base-content) 10%, transparent);
     }
   }
+  .border-base-content\/40 {
+    border-color: var(--color-base-content);
+    @supports (color: color-mix(in lab, red, red)) {
+      border-color: color-mix(in oklab, var(--color-base-content) 40%, transparent);
+    }
+  }
   .border-error {
     border-color: var(--color-error);
   }
