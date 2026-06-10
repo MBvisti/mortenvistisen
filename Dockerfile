@@ -1,8 +1,7 @@
-FROM debian:bookworm-slim AS css-builder
+FROM mbvlabs/andurel:latest AS css-builder
 
 WORKDIR /usr/src/app
 
-COPY bin/tailwindcli ./bin/tailwindcli
 COPY css ./css
 COPY views ./views
 
