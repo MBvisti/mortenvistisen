@@ -7,7 +7,7 @@ COPY views ./views
 
 RUN ./bin/tailwindcli -i ./css/base.css -o ./assets/css/style.css --minify
 
-FROM golang:1.25-bookworm AS builder
+FROM golang:1.26-bookworm AS builder
 
 WORKDIR /usr/src/app
 
