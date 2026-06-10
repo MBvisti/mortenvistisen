@@ -72,5 +72,15 @@ func (r Router) RegisterAssetsRoutes(assets controllers.Assets) error {
 		errs = append(errs, err)
 	}
 
+	_, err = r.e.AddRoute(echo.Route{
+		Method:  http.MethodGet,
+		Path:    routes.IndexNow.Path(),
+		Name:    routes.IndexNow.Name(),
+		Handler: assets.IndexNow,
+	})
+	if err != nil {
+		errs = append(errs, err)
+	}
+
 	return errors.Join(errs...)
 }

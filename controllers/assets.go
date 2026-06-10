@@ -262,3 +262,11 @@ func (a Assets) Style(etx *echo.Context) error {
 	etx = a.enableCaching(etx, stylesheet)
 	return etx.Blob(http.StatusOK, "text/css", stylesheet)
 }
+
+func (a Assets) IndexNow(etx *echo.Context) error {
+	return etx.Blob(
+		http.StatusOK,
+		"text/plain; charset=utf-8",
+		[]byte("4zd8j69sf3ju2hnfxmebr3czub8uu63m"),
+	)
+}

@@ -47,3 +47,9 @@ var Style = routing.NewRouteWithFile(
 	"css.style",
 	AssetsPrefix,
 )
+
+var IndexNow = routing.NewSimpleRoute(
+	"/4zd8j69sf3ju2hnfxmebr3czub8uu63m.txt",
+	"assets.index_now",
+	"",
+)
