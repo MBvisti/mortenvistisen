@@ -19,6 +19,7 @@ tmp/
 *~
 
 node_modules/
+bin/
 
 Dockerfile
 .dockerignore

@@ -1,10 +1,17 @@
-ARG GO_VERSION=1.26.0
-FROM debian:bookworm-slim AS css-builder
+ARG GO_VERSION=1.26.5
+FROM node:24-bookworm-slim AS css-builder
 
 WORKDIR /usr/src/app
 
-COPY bin/tailwindcli ./bin/tailwindcli
+RUN corepack enable && corepack prepare pnpm@11.3.0 --activate
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN pnpm install --frozen-lockfile
+
+ADD https://github.com/tailwindlabs/tailwindcss/releases/download/v4.3.2/tailwindcss-linux-x64 ./bin/tailwindcli
+RUN echo "5036c4fb4328e0bcdbb6065c70d8ac9452e0d4c947113a788a8f94fd390425c1  ./bin/tailwindcli" | sha256sum -c - \
+    && chmod +x ./bin/tailwindcli
 COPY css ./css
+COPY resources ./resources
 COPY views ./views
 
 RUN ./bin/tailwindcli -i ./css/base.css -o ./assets/css/style.css --minify
