@@ -1,5 +1,5 @@
 ARG GO_VERSION=1.26.5
-FROM node:24-bookworm-slim AS css-builder
+FROM node:24-bookworm-slim AS assets-builder
 
 WORKDIR /usr/src/app
 
@@ -13,8 +13,10 @@ RUN echo "5036c4fb4328e0bcdbb6065c70d8ac9452e0d4c947113a788a8f94fd390425c1  ./bi
 COPY css ./css
 COPY resources ./resources
 COPY views ./views
+COPY vite.config.ts tsconfig.json components.json ./
 
 RUN ./bin/tailwindcli -i ./css/base.css -o ./assets/css/style.css --minify
+RUN pnpm build
 
 FROM golang:${GO_VERSION}-bookworm AS builder
 
@@ -24,7 +26,8 @@ COPY go.mod go.sum ./
 RUN go mod download && go mod verify
 
 COPY . .
-COPY --from=css-builder /usr/src/app/assets/css/style.css ./assets/css/style.css
+COPY --from=assets-builder /usr/src/app/assets/css/style.css ./assets/css/style.css
+COPY --from=assets-builder /usr/src/app/assets/dist ./assets/dist
 
 RUN CGO_ENABLED=0 GOOS=linux go build -v -o /run-app ./cmd/app
 
@@ -37,6 +40,8 @@ RUN apt-get update && apt-get install -y \
 COPY --from=builder /run-app /usr/local/bin/run-app
 
 WORKDIR /app
+
+COPY --from=builder /usr/src/app/views/root.go.html ./views/root.go.html
 
 EXPOSE 8080
 
