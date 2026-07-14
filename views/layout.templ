@@ -13,18 +13,42 @@ templ base(headOpts ...HeadDataOption) {
 		@SetupHead(ctx, headOpts...)
 		<body id="top" class="public-site min-h-screen">
 			<a class="public-skip-link" href="#main-content">Skip to content</a>
-			<header>
+			<header data-signals:mobileNavOpen="false">
 				<div class="public-shell flex min-h-16 items-center gap-5">
 					<a class="shrink-0 text-sm font-bold uppercase tracking-tight text-[#f2ead8]" href={ routes.HomePage.URL() } aria-label="Morten Vistisen home">
 						<span class="hidden sm:inline">Morten Vistisen</span>
 						<span class="sm:hidden">MV</span>
 					</a>
-					<nav class="ml-auto min-w-0 overflow-x-auto" aria-label="Primary navigation">
+					<nav class="ml-auto hidden min-w-0 overflow-x-auto md:block" aria-label="Primary navigation">
 						<ul class="flex w-max items-center gap-1 text-[0.68rem] font-medium uppercase tracking-[0.12em] text-[#aaa393]">
 							<li><a class="public-nav-link" href={ routes.PostIndex.URL() }>Writing</a></li>
 							<li><a class="public-nav-link" href={ routes.NewsletterIndex.URL() }>Newsletters</a></li>
 							<li><a class="public-nav-link" href={ routes.ProjectIndex.URL() }>Projects</a></li>
 							<li><a class="public-nav-link" href={ routes.AboutPage.URL() }>About</a></li>
+						</ul>
+					</nav>
+					<button class="ml-auto inline-flex h-11 w-11 items-center justify-center text-[#f2ead8] md:hidden" type="button" aria-label="Open menu" aria-controls="mobile-navigation" data-attr:aria-expanded="$mobileNavOpen ? 'true' : 'false'" data-on:click="$mobileNavOpen = true">
+						<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+							<path d="M4 7H20M4 17H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+						</svg>
+					</button>
+				</div>
+				<div id="mobile-navigation" class="fixed inset-0 z-50 min-h-screen overflow-y-auto bg-[#ff6b1a] px-5 py-4 text-[#130f0b] md:hidden" style="display: none;" data-show="$mobileNavOpen">
+					<div class="flex items-center justify-between">
+						<a class="text-sm font-bold uppercase tracking-tight" href={ routes.HomePage.URL() } aria-label="Morten Vistisen home" data-on:click="$mobileNavOpen = false">Morten Vistisen</a>
+						<button class="inline-flex h-11 w-11 items-center justify-center" type="button" aria-label="Close menu" data-on:click="$mobileNavOpen = false">
+							<svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+								<path d="M5 5L19 19M19 5L5 19" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+							</svg>
+						</button>
+					</div>
+					<nav class="mt-12" aria-label="Mobile navigation">
+						<ul>
+							<li><a class="block border-t py-5 font-heading text-4xl font-bold uppercase" href={ routes.HomePage.URL() } data-on:click="$mobileNavOpen = false">Home</a></li>
+							<li><a class="block border-t py-5 font-heading text-4xl font-bold uppercase" href={ routes.PostIndex.URL() } data-on:click="$mobileNavOpen = false">Writing</a></li>
+							<li><a class="block border-t py-5 font-heading text-4xl font-bold uppercase" href={ routes.NewsletterIndex.URL() } data-on:click="$mobileNavOpen = false">Newsletters</a></li>
+							<li><a class="block border-t py-5 font-heading text-4xl font-bold uppercase" href={ routes.ProjectIndex.URL() } data-on:click="$mobileNavOpen = false">Projects</a></li>
+							<li><a class="block border-t border-b py-5 font-heading text-4xl font-bold uppercase" href={ routes.AboutPage.URL() } data-on:click="$mobileNavOpen = false">About</a></li>
 						</ul>
 					</nav>
 				</div>
