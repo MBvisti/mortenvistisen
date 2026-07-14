@@ -60,6 +60,10 @@ export type ArticlePagination = {
   TotalPages: number
 }
 
+export type ArticleFilters = {
+  Status: string
+}
+
 const dateFormatter = new Intl.DateTimeFormat('en', {
   day: 'numeric',
   month: 'short',

@@ -364,6 +364,10 @@ func (a article) LatestPublished(
 	return entities, nil
 }
 
+type ArticleFilter struct {
+	Published *bool
+}
+
 type PaginatedArticles struct {
 	Articles   []ArticleEntity
 	TotalCount int64
@@ -372,9 +376,17 @@ type PaginatedArticles struct {
 	TotalPages int64
 }
 
+func applyArticleFilter(query *bun.SelectQuery, filter ArticleFilter) *bun.SelectQuery {
+	if filter.Published != nil {
+		query = query.Where("published = ?", *filter.Published)
+	}
+	return query
+}
+
 func (a article) Paginate(
 	ctx context.Context,
 	db storage.Executor,
+	filter ArticleFilter,
 	page, pageSize int64,
 ) (PaginatedArticles, error) {
 	if page < 1 {
@@ -387,8 +399,10 @@ func (a article) Paginate(
 		pageSize = 100
 	}
 
-	totalCount, err := db.NewSelect().
-		Model(&ArticleEntity{}).Count(ctx)
+	totalCount, err := applyArticleFilter(
+		db.NewSelect().Model((*ArticleEntity)(nil)),
+		filter,
+	).Count(ctx)
 	if err != nil {
 		return PaginatedArticles{}, err
 	}
@@ -400,8 +414,10 @@ func (a article) Paginate(
 	offset := (page - 1) * pageSize
 
 	entities := make([]ArticleEntity, 0, int(pageSize))
-	if err := db.NewSelect().
-		Model(&entities).
+	if err := applyArticleFilter(
+		db.NewSelect().Model(&entities),
+		filter,
+	).
 		OrderExpr("updated_at DESC").
 		Limit(int(pageSize)).
 		Offset(int(offset)).

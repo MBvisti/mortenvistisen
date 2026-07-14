@@ -185,7 +185,19 @@ type ArticlePaginationData struct {
 	TotalPages int64
 }
 
+type ArticleFiltersData struct {
+	Status string
+}
+
 const articlePageSize int64 = 10
+
+func articleStatusFilter(status string) models.ArticleFilter {
+	published := status == "published"
+	if published || status == "draft" {
+		return models.ArticleFilter{Published: &published}
+	}
+	return models.ArticleFilter{}
+}
 
 func (a Articles) Index(etx *echo.Context) error {
 	page := int64(1)
@@ -195,9 +207,16 @@ func (a Articles) Index(etx *echo.Context) error {
 		}
 	}
 
+	status := etx.QueryParam("status")
+	filter := articleStatusFilter(status)
+	if filter.Published == nil {
+		status = ""
+	}
+
 	articlesList, err := models.Article.Paginate(
 		etx.Request().Context(),
 		a.db.Executor(),
+		filter,
 		page,
 		articlePageSize,
 	)
@@ -213,6 +232,7 @@ func (a Articles) Index(etx *echo.Context) error {
 			TotalCount: articlesList.TotalCount,
 			TotalPages: articlesList.TotalPages,
 		},
+		"filters": ArticleFiltersData{Status: status},
 	})
 }
 

@@ -61,6 +61,7 @@ func (d Dashboards) Index(etx *echo.Context) error {
 	articlesList, err := models.Article.Paginate(
 		ctx,
 		db,
+		models.ArticleFilter{},
 		1,
 		dashboardRecentLimit,
 	)

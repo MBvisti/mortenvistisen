@@ -3,12 +3,13 @@ import { Link, router } from '@inertiajs/react'
 
 import {
   formatArticleDate,
+  type ArticleFilters,
   type ArticleItem,
   type ArticlePagination,
 } from './types'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Table,
   TableBody,
@@ -22,6 +23,7 @@ import { routes } from '@/routes'
 type IndexProps = {
   items: ArticleItem[]
   pagination: ArticlePagination
+  filters: ArticleFilters
 }
 
 function ClickableRow({
@@ -60,11 +62,14 @@ function ClickableRow({
   )
 }
 
-function pageHref(page: number) {
-  return `${routes.adminArticleIndex()}?page=${page}`
+function pageHref(page: number, status: string) {
+  const params = new URLSearchParams({ page: String(page) })
+  if (status) params.set('status', status)
+  return `${routes.adminArticleIndex()}?${params.toString()}`
 }
 
-export default function Index({ items, pagination }: IndexProps) {
+export default function Index({ items, pagination, filters }: IndexProps) {
+  const hasFilter = Boolean(filters.Status)
   const firstItem = pagination.TotalCount === 0 ? 0 : (pagination.Page - 1) * pagination.PageSize + 1
   const lastItem = Math.min(
     pagination.Page * pagination.PageSize,
@@ -90,9 +95,30 @@ export default function Index({ items, pagination }: IndexProps) {
           <CardTitle>All articles</CardTitle>
           <CardDescription>
             {pagination.TotalCount === 0
-              ? 'No articles yet.'
-              : `Showing ${firstItem}-${lastItem} of ${pagination.TotalCount} articles.`}
+              ? hasFilter
+                ? 'No articles match this release status.'
+                : 'No articles yet.'
+              : `Showing ${firstItem}-${lastItem} of ${pagination.TotalCount} matching articles.`}
           </CardDescription>
+          <CardAction>
+            <label className="flex items-center gap-3 text-sm text-muted-foreground">
+              Release status
+              <select
+                value={filters.Status}
+                onChange={(event) => router.get(
+                  routes.adminArticleIndex(),
+                  { status: event.target.value || undefined },
+                  { preserveState: true, replace: true },
+                )}
+                className="h-9 border border-input bg-popover px-3 text-sm text-popover-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                style={{ colorScheme: 'dark' }}
+              >
+                <option value="">All</option>
+                <option value="published">Published</option>
+                <option value="draft">Draft</option>
+              </select>
+            </label>
+          </CardAction>
         </CardHeader>
         <CardContent className="px-0">
           <Table>
@@ -109,7 +135,9 @@ export default function Index({ items, pagination }: IndexProps) {
               {items.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
-                    No articles yet. Create your first article to get started.
+                    {hasFilter
+                      ? 'No articles match this release status.'
+                      : 'No articles yet. Create your first article to get started.'}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -167,7 +195,7 @@ export default function Index({ items, pagination }: IndexProps) {
                     size="sm"
                     render={
                       <Link
-                        href={pageHref(pagination.Page - 1)}
+                        href={pageHref(pagination.Page - 1, filters.Status)}
                         preserveScroll
                       />
                     }
@@ -185,7 +213,7 @@ export default function Index({ items, pagination }: IndexProps) {
                     size="sm"
                     render={
                       <Link
-                        href={pageHref(pagination.Page + 1)}
+                        href={pageHref(pagination.Page + 1, filters.Status)}
                         preserveScroll
                       />
                     }
