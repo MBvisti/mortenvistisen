@@ -32,7 +32,6 @@ var constructors = fx.Provide(
 	NewPosts,
 	NewNewsletters,
 	NewProjects,
-	api.NewArticles,
 )
 
 var Module = fx.Module(
@@ -93,9 +92,6 @@ var Module = fx.Module(
 		return c.RegisterRoutes(r)
 	}),
 	fx.Invoke(func(r *router.Router, c Projects) error {
-		return c.RegisterRoutes(r)
-	}),
-	fx.Invoke(func(r *router.Router, c api.Articles) error {
 		return c.RegisterRoutes(r)
 	}),
 )
