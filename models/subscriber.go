@@ -2,152 +2,255 @@ package models
 
 import (
 	"context"
+	"database/sql"
 	"errors"
+	"mortenvistisen/internal/storage"
+	"mortenvistisen/internal/validation"
+	"net/mail"
+	"strings"
 	"time"
 
-	"github.com/jackc/pgx/v5/pgtype"
-
-	"mortenvistisen/internal/storage"
-	"mortenvistisen/models/internal/db"
+	"github.com/uptrace/bun"
 )
 
-type Subscriber struct {
-	ID           int32
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
-	Email        string
-	SubscribedAt time.Time
-	Referer      string
-	IsVerified   bool
+const (
+	subscriberEmailMaxLength   = 254
+	subscriberRefererMaxLength = 2048
+)
+
+type SubscriberEntity struct {
+	bun.BaseModel `bun:"table:subscribers,alias:subscribers"`
+	ID            int32          `bun:"id,pk,autoincrement"`
+	CreatedAt     time.Time      `bun:"created_at"`
+	UpdatedAt     time.Time      `bun:"updated_at"`
+	Email         sql.NullString `bun:"email"`
+	SubscribedAt  sql.NullTime   `bun:"subscribed_at"`
+	Referer       sql.NullString `bun:"referer"`
+	IsVerified    sql.NullBool   `bun:"is_verified"`
 }
 
-func FindSubscriber(
+func (e *SubscriberEntity) validationBuilder() *validation.ValidationBuilder {
+	b := validation.NewBuilder()
+	b.Required("email", e.Email)
+	b.MaxLen("email", e.Email, subscriberEmailMaxLength)
+	b.AddRule("email", "email", "must be a valid email address")
+	if e.Email.Valid {
+		emailAddress := strings.TrimSpace(e.Email.String)
+		if emailAddress != "" {
+			parsedAddress, err := mail.ParseAddress(emailAddress)
+			if err != nil || parsedAddress.Address != emailAddress {
+				b.AddField("email", "email", "must be a valid email address")
+			}
+		}
+	}
+	b.Required("subscribedAt", e.SubscribedAt)
+	b.MaxLen("referer", e.Referer, subscriberRefererMaxLength)
+
+	return b
+}
+
+func (e *SubscriberEntity) Validate() error {
+	return e.validationBuilder().Err()
+}
+
+func SubscriberValidationRules() validation.Rules {
+	return (&SubscriberEntity{}).validationBuilder().Rules()
+}
+
+func (s subscriber) Find(
 	ctx context.Context,
-	exec storage.Executor,
+	db storage.Executor,
 	id int32,
-) (Subscriber, error) {
-	row, err := queries.QuerySubscriberByID(ctx, exec, id)
-	if err != nil {
-		return Subscriber{}, err
+) (SubscriberEntity, error) {
+	var entity SubscriberEntity
+	if err := db.NewSelect().
+		Model(&entity).
+		Where("id = ?", id).
+		Scan(ctx); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return SubscriberEntity{}, ErrNotFound
+		}
+		return SubscriberEntity{}, err
 	}
 
-	return rowToSubscriber(row), nil
-}
-
-func FindSubscriberByEmail(
-	ctx context.Context,
-	exec storage.Executor,
-	email string,
-) (Subscriber, error) {
-	row, err := queries.QuerySubscriberByEmail(ctx, exec, email)
-	if err != nil {
-		return Subscriber{}, err
-	}
-
-	return rowToSubscriber(row), nil
+	return entity, nil
 }
 
 type CreateSubscriberData struct {
-	Email        string
-	SubscribedAt time.Time
-	Referer      string
-	IsVerified   bool
+	Email        sql.NullString
+	SubscribedAt sql.NullTime
+	Referer      sql.NullString
+	IsVerified   sql.NullBool
 }
 
-func CreateSubscriber(
+func (s subscriber) Create(
 	ctx context.Context,
-	exec storage.Executor,
+	db storage.Executor,
 	data CreateSubscriberData,
-) (Subscriber, error) {
-	if err := Validate.Struct(data); err != nil {
-		return Subscriber{}, errors.Join(ErrDomainValidation, err)
-	}
-	params := db.InsertSubscriberParams{
-		Email:        pgtype.Text{String: data.Email, Valid: true},
-		SubscribedAt: pgtype.Timestamptz{Time: data.SubscribedAt, Valid: true},
-		Referer:      pgtype.Text{String: data.Referer, Valid: true},
-		IsVerified:   pgtype.Bool{Bool: data.IsVerified, Valid: true},
-	}
-	row, err := queries.InsertSubscriber(ctx, exec, params)
-	if err != nil {
-		return Subscriber{}, err
+) (SubscriberEntity, error) {
+	email := data.Email
+	if email.Valid {
+		email.String = strings.ToLower(strings.TrimSpace(email.String))
 	}
 
-	return rowToSubscriber(row), nil
+	entity := SubscriberEntity{
+		CreatedAt:    time.Now(),
+		UpdatedAt:    time.Now(),
+		Email:        email,
+		SubscribedAt: data.SubscribedAt,
+		Referer:      normalizeOptionalString(data.Referer),
+		IsVerified:   data.IsVerified,
+	}
+
+	if err := validation.Validate(&entity); err != nil {
+		return SubscriberEntity{}, errors.Join(ErrDomainValidation, err)
+	}
+
+	if _, err := db.NewInsert().Model(&entity).Exec(ctx); err != nil {
+		return SubscriberEntity{}, err
+	}
+
+	return entity, nil
 }
 
 type UpdateSubscriberData struct {
 	ID           int32
 	UpdatedAt    time.Time
-	Email        string
-	SubscribedAt time.Time
-	Referer      string
-	IsVerified   bool
+	Email        sql.NullString
+	SubscribedAt sql.NullTime
+	Referer      sql.NullString
+	IsVerified   sql.NullBool
 }
 
-func UpdateSubscriber(
+func (s subscriber) Update(
 	ctx context.Context,
-	exec storage.Executor,
+	db storage.Executor,
 	data UpdateSubscriberData,
-) (Subscriber, error) {
-	if err := Validate.Struct(data); err != nil {
-		return Subscriber{}, errors.Join(ErrDomainValidation, err)
+) (SubscriberEntity, error) {
+	email := data.Email
+	if email.Valid {
+		email.String = strings.ToLower(strings.TrimSpace(email.String))
 	}
 
-	params := db.UpdateSubscriberParams{
+	entity := SubscriberEntity{
 		ID:           data.ID,
-		Email:        pgtype.Text{String: data.Email, Valid: true},
-		SubscribedAt: pgtype.Timestamptz{Time: data.SubscribedAt, Valid: true},
-		Referer:      pgtype.Text{String: data.Referer, Valid: true},
-		IsVerified:   pgtype.Bool{Bool: data.IsVerified, Valid: true},
+		UpdatedAt:    time.Now(),
+		Email:        email,
+		SubscribedAt: data.SubscribedAt,
+		Referer:      normalizeOptionalString(data.Referer),
+		IsVerified:   data.IsVerified,
 	}
 
-	row, err := queries.UpdateSubscriber(ctx, exec, params)
-	if err != nil {
-		return Subscriber{}, err
+	if err := validation.Validate(&entity); err != nil {
+		return SubscriberEntity{}, errors.Join(ErrDomainValidation, err)
 	}
 
-	return rowToSubscriber(row), nil
+	if err := db.NewUpdate().
+		Model(&entity).
+		Column("updated_at").
+		Column("email").
+		Column("subscribed_at").
+		Column("referer").
+		Column("is_verified").
+		WherePK().
+		Returning("*").
+		Scan(ctx); err != nil {
+		return SubscriberEntity{}, err
+	}
+
+	return entity, nil
 }
 
-func DestroySubscriber(
+func (s subscriber) MarkVerified(
 	ctx context.Context,
-	exec storage.Executor,
+	db storage.Executor,
 	id int32,
-) error {
-	return queries.DeleteSubscriber(ctx, exec, id)
+) (SubscriberEntity, error) {
+	var entity SubscriberEntity
+	if err := db.NewUpdate().
+		Model(&entity).
+		Set("is_verified = TRUE").
+		Set("updated_at = ?", time.Now()).
+		Where("id = ?", id).
+		Returning("*").
+		Scan(ctx); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return SubscriberEntity{}, ErrNotFound
+		}
+		return SubscriberEntity{}, err
+	}
+
+	return entity, nil
 }
 
-func AllSubscribers(
+func (s subscriber) Destroy(ctx context.Context, db storage.Executor, id int32) error {
+	_, err := db.NewDelete().
+		Model((*SubscriberEntity)(nil)).
+		Where("id = ?", id).
+		Exec(ctx)
+
+	return err
+}
+
+func (s subscriber) DestroyMany(
 	ctx context.Context,
-	exec storage.Executor,
-) ([]Subscriber, error) {
-	rows, err := queries.QuerySubscribers(ctx, exec)
+	db storage.Executor,
+	ids []int32,
+) (int64, error) {
+	if len(ids) == 0 {
+		return 0, nil
+	}
+
+	result, err := db.NewDelete().
+		Model((*SubscriberEntity)(nil)).
+		Where("id IN (?)", bun.In(ids)).
+		Exec(ctx)
 	if err != nil {
+		return 0, err
+	}
+
+	return result.RowsAffected()
+}
+
+func (s subscriber) All(ctx context.Context, db storage.Executor) ([]SubscriberEntity, error) {
+	var entities []SubscriberEntity
+	if err := db.NewSelect().
+		Model(&entities).
+		Scan(ctx); err != nil {
 		return nil, err
 	}
 
-	subscribers := make([]Subscriber, len(rows))
-	for i, row := range rows {
-		subscribers[i] = rowToSubscriber(row)
+	return entities, nil
+}
+
+func (s subscriber) Verified(ctx context.Context, db storage.Executor) ([]SubscriberEntity, error) {
+	var entities []SubscriberEntity
+	if err := db.NewSelect().
+		Model(&entities).
+		Where("is_verified = TRUE").
+		Where("subscribed_at IS NOT NULL").
+		Where("email IS NOT NULL").
+		Where("email <> ''").
+		OrderExpr("id ASC").
+		Scan(ctx); err != nil {
+		return nil, err
 	}
 
-	return subscribers, nil
+	return entities, nil
 }
 
 type PaginatedSubscribers struct {
-	Subscribers []Subscriber
+	Subscribers []SubscriberEntity
 	TotalCount  int64
 	Page        int64
 	PageSize    int64
 	TotalPages  int64
 }
 
-func PaginateSubscribers(
+func (s subscriber) Paginate(
 	ctx context.Context,
-	exec storage.Executor,
-	page int64,
-	pageSize int64,
+	db storage.Executor,
+	page, pageSize int64,
 ) (PaginatedSubscribers, error) {
 	if page < 1 {
 		page = 1
@@ -159,78 +262,71 @@ func PaginateSubscribers(
 		pageSize = 100
 	}
 
+	totalCount, err := db.NewSelect().
+		Model(&SubscriberEntity{}).Count(ctx)
+	if err != nil {
+		return PaginatedSubscribers{}, err
+	}
+
+	totalPages := (int64(totalCount) + pageSize - 1) / pageSize
+	if totalPages > 0 && page > totalPages {
+		page = totalPages
+	}
 	offset := (page - 1) * pageSize
 
-	totalCount, err := queries.CountSubscribers(ctx, exec)
-	if err != nil {
+	entities := make([]SubscriberEntity, 0, int(pageSize))
+	if err := db.NewSelect().
+		Model(&entities).
+		OrderExpr("updated_at DESC").
+		Limit(int(pageSize)).
+		Offset(int(offset)).
+		Scan(ctx); err != nil {
 		return PaginatedSubscribers{}, err
 	}
-
-	rows, err := queries.QueryPaginatedSubscribers(
-		ctx,
-		exec,
-		db.QueryPaginatedSubscribersParams{
-			Limit:  pageSize,
-			Offset: offset,
-		},
-	)
-	if err != nil {
-		return PaginatedSubscribers{}, err
-	}
-
-	subscribers := make([]Subscriber, len(rows))
-	for i, row := range rows {
-		subscribers[i] = rowToSubscriber(row)
-	}
-
-	totalPages := (totalCount + int64(pageSize) - 1) / int64(pageSize)
 
 	return PaginatedSubscribers{
-		Subscribers: subscribers,
-		TotalCount:  totalCount,
+		Subscribers: entities,
+		TotalCount:  int64(totalCount),
 		Page:        page,
 		PageSize:    pageSize,
 		TotalPages:  totalPages,
 	}, nil
 }
 
-func UpsertSubscriber(
+func (s subscriber) Upsert(
 	ctx context.Context,
-	exec storage.Executor,
+	db storage.Executor,
 	data CreateSubscriberData,
-) (Subscriber, error) {
-	if err := Validate.Struct(data); err != nil {
-		return Subscriber{}, errors.Join(ErrDomainValidation, err)
-	}
-	params := db.UpsertSubscriberParams{
-		Email:        pgtype.Text{String: data.Email, Valid: true},
-		SubscribedAt: pgtype.Timestamptz{Time: data.SubscribedAt, Valid: true},
-		Referer:      pgtype.Text{String: data.Referer, Valid: true},
-		IsVerified:   pgtype.Bool{Bool: data.IsVerified, Valid: true},
-	}
-	row, err := queries.UpsertSubscriber(ctx, exec, params)
-	if err != nil {
-		return Subscriber{}, err
+) (SubscriberEntity, error) {
+	email := data.Email
+	if email.Valid {
+		email.String = strings.ToLower(strings.TrimSpace(email.String))
 	}
 
-	return rowToSubscriber(row), nil
-}
-
-func CountSubscribers(
-	ctx context.Context,
-	exec storage.Executor,
-) (int64, error) {
-	return queries.CountSubscribers(ctx, exec)
-}
-
-func rowToSubscriber(row db.Subscriber) Subscriber {
-	return Subscriber{
-		ID:           row.ID,
-		CreatedAt:    row.CreatedAt.Time,
-		UpdatedAt:    row.UpdatedAt.Time,
-		Email:        row.Email.String,
-		SubscribedAt: row.SubscribedAt.Time,
-		Referer:      row.Referer.String,
-		IsVerified:   row.IsVerified.Bool,
+	entity := SubscriberEntity{
+		CreatedAt:    time.Now(),
+		UpdatedAt:    time.Now(),
+		Email:        email,
+		SubscribedAt: data.SubscribedAt,
+		Referer:      normalizeOptionalString(data.Referer),
+		IsVerified:   data.IsVerified,
 	}
+
+	if err := validation.Validate(&entity); err != nil {
+		return SubscriberEntity{}, errors.Join(ErrDomainValidation, err)
+	}
+
+	if err := db.NewInsert().
+		Model(&entity).
+		On("CONFLICT (id) DO UPDATE").
+		Set("email = excluded.email").
+		Set("subscribed_at = excluded.subscribed_at").
+		Set("referer = excluded.referer").
+		Set("is_verified = excluded.is_verified").
+		Returning("*").
+		Scan(ctx); err != nil {
+		return SubscriberEntity{}, err
+	}
+
+	return entity, nil
 }

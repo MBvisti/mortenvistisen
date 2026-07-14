@@ -1,18 +1,26 @@
 // Package models contains data models and validation logic.
 package models
 
-import (
-	"mortenvistisen/models/internal/db"
-
-	"github.com/go-playground/validator/v10"
+type (
+	user                 struct{}
+	token                struct{}
+	article              struct{}
+	tag                  struct{}
+	articleTagConnection struct{}
+	newsletter           struct{}
+	subscriber           struct{}
+	project              struct{}
+	job                  struct{}
 )
 
 var (
-	Validate = setupValidator()
-	queries  = db.New()
+	User                 user
+	Token                token
+	Article              article
+	Tag                  tag
+	ArticleTagConnection articleTagConnection
+	Newsletter           newsletter
+	Subscriber           subscriber
+	Project              project
+	Job                  job
 )
-
-func setupValidator() *validator.Validate {
-	v := validator.New(validator.WithRequiredStructEnabled())
-	return v
-}

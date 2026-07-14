@@ -41,15 +41,8 @@ var Script = routing.NewRouteWithFile(
 	"js.script",
 	AssetsPrefix,
 )
-
-var Style = routing.NewRouteWithFile(
-	fmt.Sprintf("/css/%v/:file", startTime),
-	"css.style",
+var ViteBuild = routing.NewSimpleRoute(
+	fmt.Sprintf("/dist/%v/*", startTime),
+	"vite.build",
 	AssetsPrefix,
-)
-
-var IndexNow = routing.NewSimpleRoute(
-	"/4zd8j69sf3ju2hnfxmebr3czub8uu63m.txt",
-	"assets.index_now",
-	"",
 )

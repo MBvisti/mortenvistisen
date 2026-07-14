@@ -1,0 +1,48 @@
+package views
+
+import "mortenvistisen/router/routes"
+
+templ PageAbout() {
+	@base(
+		SetTitle("About"),
+		SetDescription("About Morten Vistisen, a Danish software engineer, freelancer, and bootstrapper living in Spain."),
+		SetSlug(routes.AboutPage.URL()),
+		SetSchema(PageSchema("AboutPage", []SchemaBreadcrumb{
+			{Name: "Home", Path: routes.HomePage.URL()},
+			{Name: "About", Path: routes.AboutPage.URL()},
+		})),
+	) {
+		<main id="main-content" class="flex-1">
+			<div class="public-shell py-8 sm:py-12">
+				@PublicBreadcrumbs([]PublicBreadcrumb{
+					{Label: "Home", URL: routes.HomePage.URL()},
+					{Label: "About"},
+				})
+				<header class="my-10 max-w-5xl sm:my-14">
+					<h1 class="public-show-title text-[#f2ead8]">Engineer, freelancer, bootstrapper.</h1>
+				</header>
+				<div class="grid grid-cols-1 gap-3 lg:grid-cols-12">
+					<section class="public-panel lg:col-span-12" aria-labelledby="about-introduction">
+						<h2 id="about-introduction" class="public-card-heading mt-8">I build software that stays understandable.</h2>
+						<div class="mt-8 space-y-5 text-lg leading-8 text-[#aaa393]">
+							<p>I studied finance, quickly realized I'd rather build things than model spreadsheets, and pivoted into software engineering. For the past 8 years I've been building technical products across startups and SMEs, from legal tech to green tech, media to pharma, picking up Go, Ruby, TypeScript, and way too much React along the way.</p>
+							<p>These days I mostly write Go and actively advocate for building web apps with traditional, server-rendered tools. I'm also deep into distributed systems, helping companies build things that actually scale. On the side, I'm building AI agents and exploring how LLMs can enhance "old school" web tech like traditional MPAs. Think less hype, more practical. Andurel is one of those experiments.</p>
+							<p>If there's one thing I've learned, it's that keeping software simple for as long as possible is a superpower. It lets you stay agile, ship fast, and avoid drowning in technical debt. My background in both finance and engineering means I tend to think about code in terms of what actually moves the needle for the business, not just what's technically fun to build.</p>
+						</div>
+					</section>
+					<section class="public-panel lg:col-span-12" aria-labelledby="about-elsewhere">
+						<p class="public-label text-[#8df7a4]">Elsewhere</p>
+						<h2 id="about-elsewhere" class="public-card-heading mt-8">Find me online.</h2>
+						@PublicSocialLinks("mt-8 flex flex-wrap gap-x-6 gap-y-3 text-sm text-[#aaa393]")
+					</section>
+					<section class="public-panel public-panel-primary lg:col-span-12" aria-labelledby="work-with-me">
+						<p class="public-label text-[#130f0b]">Work with me</p>
+						<h2 id="work-with-me" class="public-heading mt-8 text-[#130f0b]">Build something practical.</h2>
+						<p class="mt-6 max-w-3xl text-lg leading-8 text-[#130f0b]">I work with companies through MBV Labs. Visit mbvlabs.com to learn how we can work together.</p>
+						<a class="mt-8 inline-flex text-lg font-bold uppercase text-[#130f0b] underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#130f0b]" href="https://mbvlabs.com" target="_blank" rel="noopener noreferrer">Visit MBV Labs ↗</a>
+					</section>
+				</div>
+			</div>
+		</main>
+	}
+}

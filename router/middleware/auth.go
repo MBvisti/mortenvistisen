@@ -12,14 +12,9 @@ import (
 	"github.com/maypok86/otter/v2"
 )
 
-type ipRateLimitState struct {
-	Hits   int32
-	Banned bool
-}
-
 func AuthOnly(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c *echo.Context) error {
-		if cookies.GetApp(c).IsAuthenticated {
+		if cookies.ExtractFromCookieApp(c).IsAuthenticated {
 			return next(c)
 		}
 
@@ -31,63 +26,30 @@ func IPRateLimiter(
 	limit int32,
 	redirectURL routing.Route,
 ) func(next echo.HandlerFunc) echo.HandlerFunc {
-	return ipRateLimiter(limit, 10*time.Minute, 10*time.Minute, redirectURL)
-}
-
-func IPRateLimiterWithBan(
-	limit int32,
-	window time.Duration,
-	banDuration time.Duration,
-	redirectURL routing.Route,
-) func(next echo.HandlerFunc) echo.HandlerFunc {
-	return ipRateLimiter(limit, window, banDuration, redirectURL)
-}
-
-func ipRateLimiter(
-	limit int32,
-	window time.Duration,
-	banDuration time.Duration,
-	redirectURL routing.Route,
-) func(next echo.HandlerFunc) echo.HandlerFunc {
-	cache := otter.Must(&otter.Options[string, ipRateLimitState]{
-		MaximumSize: 1000,
-		ExpiryCalculator: otter.ExpiryCreatingFunc(
-			func(entry otter.Entry[string, ipRateLimitState]) time.Duration {
-				if entry.Value.Banned {
-					return banDuration
-				}
-
-				return window
-			},
-		),
+	cache := otter.Must(&otter.Options[string, int32]{
+		MaximumSize:      1000,
+		ExpiryCalculator: otter.ExpiryCreating[string, int32](10 * time.Minute),
 	})
 
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c *echo.Context) error {
 			ip := c.RealIP()
+			allowed := false
+			cache.Compute(ip, func(hits int32, found bool) (int32, otter.ComputeOp) {
+				if !found {
+					hits = 0
+				}
+				if hits >= limit {
+					return hits, otter.CancelOp
+				}
 
-			hits, ok := cache.GetIfPresent(ip)
-			if !ok {
-				cache.Set(ip, ipRateLimitState{
-					Hits: 1,
-				})
-				return next(c)
+				allowed = true
+				return hits + 1, otter.WriteOp
+			})
+
+			if !allowed {
+				return c.String(http.StatusTooManyRequests, redirectURL.URL())
 			}
-
-			if hits.Banned {
-				return c.Redirect(http.StatusTooManyRequests, redirectURL.URL())
-			}
-
-			if hits.Hits >= limit {
-				cache.Set(ip, ipRateLimitState{
-					Hits:   hits.Hits + 1,
-					Banned: true,
-				})
-				return c.Redirect(http.StatusTooManyRequests, redirectURL.URL())
-			}
-
-			hits.Hits++
-			cache.Set(ip, hits)
 
 			return next(c)
 		}

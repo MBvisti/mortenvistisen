@@ -2,27 +2,91 @@
 package controllers
 
 import (
-	"context"
-	"io"
-	"mortenvistisen/internal/renderer"
-	"mortenvistisen/router/cookies"
+	"mortenvistisen/controllers/admin"
+	"mortenvistisen/router"
 
-	"github.com/a-h/templ"
-	"github.com/labstack/echo/v5"
+	"go.uber.org/fx"
 )
 
-func render(etx *echo.Context, t templ.Component) error {
-	pathAwareComponent := templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
-		withPathCtx := renderer.WithRequestPath(ctx, etx.Request().URL.Path)
-		return t.Render(withPathCtx, w)
-	})
+var otherCache = NewCacheBuilder[string]().WithSize(2).Build
 
-	return renderer.Render(
-		etx,
-		pathAwareComponent,
-		[]renderer.CookieKey{
-			cookies.AppKey,
-			cookies.FlashKey,
-		},
-	)
-}
+var constructors = fx.Provide(
+	otherCache,
+	NewPages,
+	NewAssets,
+	NewAPI,
+	NewSessions,
+	NewRegistrations,
+	NewConfirmations,
+	NewSubscriberConfirmations,
+	NewResetPasswords,
+	admin.NewArticles,
+	admin.NewTags,
+	admin.NewNewsletters,
+	admin.NewSubscribers,
+	admin.NewProjects,
+	admin.NewDashboards,
+	admin.NewJobs,
+	NewPosts,
+	NewNewsletters,
+	NewProjects,
+)
+
+var Module = fx.Module(
+	"controllers",
+	constructors,
+	fx.Invoke(func(r *router.Router, c Pages) error {
+		return c.RegisterRoutes(r)
+	}),
+	fx.Invoke(func(r *router.Router, c Assets) error {
+		return c.RegisterRoutes(r)
+	}),
+	fx.Invoke(func(r *router.Router, c API) error {
+		return c.RegisterRoutes(r)
+	}),
+	fx.Invoke(func(r *router.Router, c Sessions) error {
+		return c.RegisterRoutes(r)
+	}),
+	fx.Invoke(func(r *router.Router, c Registrations) error {
+		return c.RegisterRoutes(r)
+	}),
+	fx.Invoke(func(r *router.Router, c Confirmations) error {
+		return c.RegisterRoutes(r)
+	}),
+	fx.Invoke(func(r *router.Router, c SubscriberConfirmations) error {
+		return c.RegisterRoutes(r)
+	}),
+	fx.Invoke(func(r *router.Router, c ResetPasswords) error {
+		return c.RegisterRoutes(r)
+	}),
+	fx.Invoke(func(r *router.Router, c admin.Articles) error {
+		return c.RegisterRoutes(r)
+	}),
+	fx.Invoke(func(r *router.Router, c admin.Tags) error {
+		return c.RegisterRoutes(r)
+	}),
+	fx.Invoke(func(r *router.Router, c admin.Newsletters) error {
+		return c.RegisterRoutes(r)
+	}),
+	fx.Invoke(func(r *router.Router, c admin.Subscribers) error {
+		return c.RegisterRoutes(r)
+	}),
+	fx.Invoke(func(r *router.Router, c admin.Projects) error {
+		return c.RegisterRoutes(r)
+	}),
+	fx.Invoke(func(r *router.Router, c admin.Dashboards) error {
+		return c.RegisterRoutes(r)
+	}),
+	fx.Invoke(func(r *router.Router, c admin.Jobs) error {
+		return c.RegisterRoutes(r)
+	}),
+	fx.Invoke(func(r *router.Router, c Posts) error {
+		return c.RegisterRoutes(r)
+	}),
+	fx.Invoke(func(r *router.Router, c Newsletters) error {
+		return c.RegisterRoutes(r)
+	}),
+	fx.Invoke(func(r *router.Router, c Projects) error {
+		return c.RegisterRoutes(r)
+	}),
+)

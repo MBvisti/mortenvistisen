@@ -1,38 +1,60 @@
 package controllers
 
 import (
+	"errors"
 	"log/slog"
 	"net/http"
 
-	"mortenvistisen/config"
-	"mortenvistisen/internal/storage"
-	"mortenvistisen/queue"
+	"mortenvistisen/internal/inertia"
+	"mortenvistisen/internal/validation"
+	"mortenvistisen/router"
 	"mortenvistisen/router/cookies"
+	"mortenvistisen/router/middleware"
 	"mortenvistisen/router/routes"
 	"mortenvistisen/services"
-	"mortenvistisen/views"
 
 	"github.com/labstack/echo/v5"
-
-	"mortenvistisen/internal/hypermedia"
 )
 
 type Registrations struct {
-	db         storage.Pool
-	insertOnly queue.InsertOnly
-	cfg        config.Config
+	identity services.Identity
 }
 
-func NewRegistrations(
-	db storage.Pool,
-	insertOnly queue.InsertOnly,
-	cfg config.Config,
-) Registrations {
-	return Registrations{db, insertOnly, cfg}
+func NewRegistrations(identity services.Identity) Registrations {
+	return Registrations{identity}
+}
+
+func (r Registrations) RegisterRoutes(rtr *router.Router) error {
+	errs := []error{}
+
+	_, err := rtr.AddRoute(echo.Route{
+		Method:  http.MethodGet,
+		Path:    routes.RegistrationNew.Path(),
+		Name:    routes.RegistrationNew.Name(),
+		Handler: r.New,
+	})
+	if err != nil {
+		errs = append(errs, err)
+	}
+
+	_, err = rtr.AddRoute(echo.Route{
+		Method:  http.MethodPost,
+		Path:    routes.RegistrationCreate.Path(),
+		Name:    routes.RegistrationCreate.Name(),
+		Handler: r.Create,
+		Middlewares: []echo.MiddlewareFunc{
+			middleware.IPRateLimiter(5, routes.RegistrationNew),
+		},
+	})
+	if err != nil {
+		errs = append(errs, err)
+	}
+
+	return errors.Join(errs...)
 }
 
 func (r Registrations) New(etx *echo.Context) error {
-	return render(etx, views.RegistrationForm())
+	return inertia.Page(etx, "Auth/Registration", inertia.Props{})
 }
 
 func (r Registrations) Create(etx *echo.Context) error {
@@ -49,20 +71,26 @@ func (r Registrations) Create(etx *echo.Context) error {
 			"error",
 			err,
 		)
-		return render(etx, views.BadRequest())
+		return inertia.Page(etx, "Errors/BadRequest", inertia.Props{})
 	}
 
-	if err := services.RegisterUser(
+	if err := r.identity.RegisterUser(
 		etx.Request().Context(),
-		r.db,
-		r.insertOnly,
-		r.cfg.Auth.Pepper,
 		services.RegisterUserData{
 			Email:           payload.Email,
 			Password:        payload.Password,
 			ConfirmPassword: payload.ConfirmPassword,
 		},
 	); err != nil {
+		if validationErrors, ok := validation.As(err); ok {
+			return inertia.Page(
+				etx,
+				"Auth/Registration",
+				inertia.Props{},
+				inertia.WithValidationErrors(validationErrors.ToMap()),
+			)
+		}
+
 		slog.ErrorContext(
 			etx.Request().Context(),
 			"failed to register user",
@@ -70,12 +98,16 @@ func (r Registrations) Create(etx *echo.Context) error {
 			err,
 		)
 
-		if flashErr := cookies.AddFlash(etx, cookies.FlashError, "Failed to register user"); flashErr != nil {
-			return render(etx, views.InternalError())
+		if flashErr := cookies.AddFlash(
+			etx,
+			cookies.FlashError,
+			"Failed to register user",
+		); flashErr != nil {
+			return inertia.Page(etx, "Errors/InternalError", inertia.Props{})
 		}
 
-		return etx.Redirect(http.StatusSeeOther, routes.RegistrationNew.URL())
+		return inertia.Redirect(etx, routes.RegistrationNew.URL())
 	}
 
-	return hypermedia.Redirect(etx, routes.ConfirmationNew.URL())
+	return inertia.Redirect(etx, routes.ConfirmationNew.URL())
 }

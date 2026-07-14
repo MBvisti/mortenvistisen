@@ -1,381 +1,157 @@
 package views
 
 import (
-	"fmt"
-	"mortenvistisen/internal/hypermedia"
 	"mortenvistisen/models"
 	"mortenvistisen/router/routes"
-	"mortenvistisen/views/components"
-	"net/http"
+	"strings"
 )
 
-templ Project(project models.Project) {
+type ProjectIndex struct {
+	Items       []models.ProjectEntity
+	CurrentPage int64
+	TotalPages  int64
+}
+
+func (pi ProjectIndex) PageFragment() string {
+	return "project-index-page-fragment"
+}
+
+templ (pi ProjectIndex) Page() {
 	@base(
-		components.SetTitle(project.Title),
-		components.SetDescription(project.Description),
-		components.SetSlug("/projects/"+project.Slug),
-		components.SetMetaType("article"),
+		SetTitle("Projects"),
+		SetDescription("Products and experiments built by Morten Vistisen."),
+		SetSlug(publicPageURL(routes.ProjectIndex.URL(), pi.CurrentPage)),
+		SetSchema(ProjectIndexSchema(pi.Items)),
 	) {
-		<main class="container mx-auto bg-base-100 flex-1 px-4 sm:px-6 lg:px-8">
-			<section class="mx-auto max-w-4xl pt-14 pb-20 sm:pt-16 sm:pb-24 lg:pt-20 lg:pb-28">
-				<a
-					href={ routes.ProjectOverview.URL() }
-					class="inline-flex items-center gap-2 rounded-field border border-base-300 px-3 py-1.5 text-sm text-base-content/75 transition hover:bg-base-200 hover:text-base-content"
-				>
-					All projects
-				</a>
-
-				<header class="mt-8 space-y-5">
-					<h1 class="text-3xl font-bold tracking-tight text-base-content sm:text-4xl lg:text-5xl">{ project.Title }</h1>
-					<div class="flex flex-wrap gap-3 text-sm text-base-content/70">
-						if !project.StartedAt.IsZero() {
-							<span class="inline-flex items-center rounded-field border border-base-300 bg-base-200/60 px-3 py-1">Started { project.StartedAt.Format("2006-01-02") }</span>
-						}
-						if project.Status != "" {
-							<span class="inline-flex items-center rounded-field border border-base-300 bg-base-200/60 px-3 py-1">Status: { project.Status }</span>
-						}
-					</div>
-					if project.Description != "" {
-						<p class="text-base leading-7 text-base-content/70 sm:text-lg">{ project.Description }</p>
+		@templ.Fragment(pi.PageFragment()) {
+			<main id="main-content" class="flex-1">
+				<div class="public-shell py-8 sm:py-12">
+					@PublicBreadcrumbs([]PublicBreadcrumb{
+						{Label: "Home", URL: routes.HomePage.URL()},
+						{Label: "Projects"},
+					})
+					<header class="my-10 max-w-5xl sm:my-14">
+						<h1 class="public-display text-[#f2ead8]">Products and experiments.</h1>
+						<p class="mt-7 max-w-2xl text-lg leading-8 text-[#aaa393]">Practical software, independent products, and ideas tested in public.</p>
+					</header>
+					if len(pi.Items) == 0 {
+						<div class="public-panel">
+							<p class="public-label text-[#8df7a4]">Signal pending</p>
+							<p class="mt-4 text-[#aaa393]">No published projects are online yet.</p>
+						</div>
+					} else {
+						<div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+							for _, project := range pi.Items {
+								<a class="public-panel public-panel-link public-text-link flex min-h-72 flex-col justify-between" href={ routes.ProjectShow.URL(project.Slug) }>
+									<div>
+										<div class="mb-8 flex flex-wrap items-center justify-between gap-3">
+											<p class="public-label text-[#8df7a4]">{ publicDate(project.StartedAt) }</p>
+											<p class="public-label text-[#8f8a7d]">{ project.Status }</p>
+										</div>
+										<h2 class="public-card-heading">{ project.Title }</h2>
+									</div>
+									<p class="mt-8 leading-7 text-[#aaa393]">{ project.Description }</p>
+								</a>
+							}
+						</div>
 					}
-					if project.ProjectURL != "" {
-						<a href={ project.ProjectURL } target="_blank" rel="noopener noreferrer" class="btn">Visit project</a>
-					}
-				</header>
-
-				if project.Content != "" {
-					<div class="mt-10 prose prose-lg max-w-none prose-headings:text-base-content prose-p:text-base-content/75 prose-a:text-primary prose-strong:text-base-content prose-pre:bg-base-200 prose-pre:border prose-pre:border-base-content/10 prose-code:text-base-content prose-ul:text-base-content/75 prose-ol:text-base-content/75">
-						@templ.Raw(markdownToHTML(project.Content))
-					</div>
-				}
-			</section>
-		</main>
+					@PublicPagination(routes.ProjectIndex.URL(), pi.CurrentPage, pi.TotalPages)
+				</div>
+			</main>
+		}
 	}
 }
 
-templ ProjectIndex(data models.PaginatedProjects) {
-	@adminBase() {
-		<main class="flex-1 px-6 py-10">
-			<div class="mx-auto flex w-full max-w-6xl flex-col gap-6">
-				<div class="flex flex-wrap items-center justify-between gap-4">
-					<h1 class="text-2xl font-semibold tracking-tight text-base-content">Projects</h1>
-					<a href={ routes.ProjectNew.URL() } class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:opacity-60 disabled:cursor-not-allowed bg-primary text-primary-content shadow-sm hover:bg-primary/90 h-9 px-4 py-2 text-sm rounded-field">New Project</a>
-				</div>
-				if len(data.Projects) == 0 {
-					<p class="text-sm text-base-content/60">No projects found.</p>
-				} else {
-					<div class="rounded-box border border-base-300 bg-base-100 shadow-sm">
-						<div class="flex flex-wrap items-center justify-between gap-3 border-b border-base-300 px-4 py-3">
-							<p class="text-sm text-base-content/70">Showing { fmt.Sprintf("%d-%d", ((data.Page-1)*data.PageSize)+1, ((data.Page-1)*data.PageSize)+int64(len(data.Projects))) } of { fmt.Sprintf("%d", data.TotalCount) } projects</p>
-							<p class="text-sm text-base-content/70">Page { fmt.Sprintf("%d", data.Page) } of { fmt.Sprintf("%d", data.TotalPages) }</p>
-						</div>
-						<div class="relative w-full overflow-x-auto">
-							<table class="w-full caption-bottom text-sm">
-								<thead class="[&_tr]:border-b [&_tr]:border-base-300">
-									<tr class="border-b border-base-300 bg-base-200/40">
-										<th class="h-10 px-4 text-left align-middle font-medium text-base-content/70">Project</th>
-										<th class="h-10 px-4 text-left align-middle font-medium text-base-content/70">Status</th>
-										<th class="h-10 px-4 text-left align-middle font-medium text-base-content/70">Started</th>
-										<th class="h-10 px-4 text-left align-middle font-medium text-base-content/70">Published</th>
-										<th class="h-10 px-4 text-left align-middle font-medium text-base-content/70">Actions</th>
-									</tr>
-								</thead>
-								<tbody class="[&_tr:last-child]:border-0">
-									for _, project := range data.Projects {
-										<tr class="border-b border-base-300 transition-colors hover:bg-base-200/40">
-											<td class="p-4 align-middle">
-												<div class="max-w-[24rem] space-y-1">
-													<div class="truncate font-medium text-base-content">{ project.Title }</div>
-													<div class="truncate text-xs text-base-content/60">{ project.Slug }</div>
-												</div>
-											</td>
-											<td class="p-4 align-middle text-base-content/80">{ project.Status }</td>
-											<td class="p-4 align-middle text-base-content/80">{ func() string {
-												if project.StartedAt.IsZero() {
-													return "-"
-												}
-												return project.StartedAt.Format("2006-01-02")
-											}() }</td>
-											<td class="p-4 align-middle">
-												if project.Published {
-													<span class="inline-flex items-center rounded-field bg-success/15 px-2.5 py-1 text-xs font-medium text-success">Published</span>
-												} else {
-													<span class="inline-flex items-center rounded-field bg-base-300 px-2.5 py-1 text-xs font-medium text-base-content/70">Draft</span>
-												}
-											</td>
-											<td class="p-4 align-middle">
-												<div class="flex flex-wrap gap-2 text-sm">
-													<a class="inline-flex h-8 items-center rounded-field border border-base-300 px-3 text-base-content/80 transition hover:bg-base-200 hover:text-base-content" href={ routes.ProjectShow.URL(project.ID) }>View</a>
-													<a class="inline-flex h-8 items-center rounded-field border border-base-300 px-3 text-base-content/80 transition hover:bg-base-200 hover:text-base-content" href={ routes.ProjectEdit.URL(project.ID) }>Edit</a>
-												</div>
-											</td>
-										</tr>
-									}
-								</tbody>
-							</table>
-						</div>
-						if data.TotalPages > 1 {
-							<div class="border-t border-base-300 px-4 py-3">
-								<nav class="flex items-center justify-between">
-									if data.Page > 1 {
-										<a href={ fmt.Sprintf("%s?page=%d&per_page=%d", routes.ProjectIndex.URL(), data.Page-1, data.PageSize) } class="inline-flex h-9 items-center rounded-field border border-base-300 px-3 text-sm text-base-content/80 transition hover:bg-base-200 hover:text-base-content">Previous</a>
-									} else {
-										<span class="inline-flex h-9 items-center rounded-field border border-base-300 px-3 text-sm text-base-content/40">Previous</span>
-									}
-									<span class="text-sm text-base-content/70">{ fmt.Sprintf("Page %d of %d", data.Page, data.TotalPages) }</span>
-									if data.Page < data.TotalPages {
-										<a href={ fmt.Sprintf("%s?page=%d&per_page=%d", routes.ProjectIndex.URL(), data.Page+1, data.PageSize) } class="inline-flex h-9 items-center rounded-field border border-base-300 px-3 text-sm text-base-content/80 transition hover:bg-base-200 hover:text-base-content">Next</a>
-									} else {
-										<span class="inline-flex h-9 items-center rounded-field border border-base-300 px-3 text-sm text-base-content/40">Next</span>
-									}
-								</nav>
-							</div>
-						}
-					</div>
-				}
-			</div>
-		</main>
-	}
+type ProjectShow struct {
+	Item     models.ProjectEntity
+	Content  templ.Component
+	Headings []HeadingInfo
+	Related  []models.ProjectEntity
 }
 
-templ ProjectShow(project models.Project) {
-	@adminBase() {
-		<main class="flex-1 px-6 py-10">
-			<div class="mx-auto flex w-full max-w-5xl flex-col gap-6">
-				<div class="flex flex-wrap items-center justify-between gap-4">
-					<h1 class="text-2xl font-semibold tracking-tight text-base-content">Project Details</h1>
-					<div class="flex flex-wrap items-center gap-3">
-						<a href={ routes.ProjectEdit.URL(project.ID) } class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:opacity-60 disabled:cursor-not-allowed bg-primary text-primary-content shadow-sm hover:bg-primary/90 h-9 px-4 py-2 text-sm rounded-field">Edit</a>
-						<a class="text-sm text-base-content/70 hover:text-base-content" href={ routes.ProjectIndex.URL() }>Back to List</a>
-					</div>
-				</div>
-				<div class="rounded-box border border-base-300 bg-base-100 shadow-sm">
-					<div class="p-6 pt-0">
-						<div class="grid gap-5 sm:grid-cols-2">
-							<div class="space-y-1">
-								<label class="text-sm font-medium leading-none text-base-content/80">Created At</label>
-								<p class="text-sm text-base-content">{ project.CreatedAt.String() }</p>
-							</div>
-							<div class="space-y-1">
-								<label class="text-sm font-medium leading-none text-base-content/80">Updated At</label>
-								<p class="text-sm text-base-content">{ project.UpdatedAt.String() }</p>
-							</div>
-							<div class="space-y-1">
-								<label class="text-sm font-medium leading-none text-base-content/80">Published</label>
-								<p class="text-sm text-base-content">{ fmt.Sprintf("%t", project.Published) }</p>
-							</div>
-							<div class="space-y-1">
-								<label class="text-sm font-medium leading-none text-base-content/80">Title</label>
-								<p class="text-sm text-base-content">{ project.Title }</p>
-							</div>
-							<div class="space-y-1">
-								<label class="text-sm font-medium leading-none text-base-content/80">Slug</label>
-								<p class="text-sm text-base-content">{ project.Slug }</p>
-							</div>
-							<div class="space-y-1">
-								<label class="text-sm font-medium leading-none text-base-content/80">Date Started</label>
-								<p class="text-sm text-base-content">{ func() string {
-									if project.StartedAt.IsZero() {
-										return ""
-									}
-									return project.StartedAt.Format("2006-01-02")
-								}() }</p>
-							</div>
-							<div class="space-y-1">
-								<label class="text-sm font-medium leading-none text-base-content/80">Status</label>
-								<p class="text-sm text-base-content">{ project.Status }</p>
-							</div>
-							<div class="space-y-1 sm:col-span-2">
-								<label class="text-sm font-medium leading-none text-base-content/80">Description</label>
-								<p class="text-sm text-base-content">{ project.Description }</p>
-							</div>
-							<div class="space-y-1 sm:col-span-2">
-								<label class="text-sm font-medium leading-none text-base-content/80">Project URL</label>
-								<p class="text-sm text-base-content">{ project.ProjectURL }</p>
-							</div>
-							<div class="space-y-1 sm:col-span-2">
-								<label class="text-sm font-medium leading-none text-base-content/80">Content</label>
-								<p class="whitespace-pre-wrap text-sm text-base-content">{ project.Content }</p>
-							</div>
+func (ps ProjectShow) PageFragment() string {
+	return "project-show-page-fragment"
+}
+
+func (ps ProjectShow) metaDescription() string {
+	if description := strings.TrimSpace(ps.Item.MetaDescription); description != "" {
+		return description
+	}
+	return ps.Item.Description
+}
+
+func (ps ProjectShow) headOptions() []HeadDataOption {
+	title := ps.Item.Title
+	if ps.Item.MetaTitle != "" {
+		title = ps.Item.MetaTitle
+	}
+	opts := []HeadDataOption{
+		SetTitle(title),
+		SetDescription(ps.metaDescription()),
+		SetSlug(routes.ProjectShow.URL(ps.Item.Slug)),
+		SetMetaType("website"),
+		SetSchema(ProjectShowSchema(ps.Item)),
+	}
+	if imageURL, ok := publicImageURL(ps.Item.MetaImageLink); ok {
+		opts = append(opts, SetImage(imageURL), SetImageAlt(ps.Item.Title+" social image"))
+	} else if imageURL, ok := publicImageURL(ps.Item.ImageLink); ok {
+		opts = append(opts, SetImage(imageURL), SetImageAlt(ps.Item.Title+" cover image"))
+	}
+	return opts
+}
+
+templ (ps ProjectShow) Page() {
+	@base(ps.headOptions()...) {
+		@templ.Fragment(ps.PageFragment()) {
+			<main id="main-content" class="flex-1">
+				<div class="public-shell py-8 sm:py-12">
+					@PublicBreadcrumbs([]PublicBreadcrumb{
+						{Label: "Home", URL: routes.HomePage.URL()},
+						{Label: "Projects", URL: routes.ProjectIndex.URL()},
+						{Label: ps.Item.Title},
+					})
+					<header class="my-8 sm:my-10">
+						<h1 class="public-show-title text-[#f2ead8]">{ ps.Item.Title }</h1>
+						@PublicByline()
+						<p class="mt-7 max-w-2xl text-lg leading-8 text-[#aaa393]">{ ps.Item.Description }</p>
+					</header>
+					@PublicShowMetadata([]PublicShowMetadataItem{
+						{Label: "Started", Value: publicDate(ps.Item.StartedAt)},
+						{Label: "Status", Value: ps.Item.Status},
+						{Label: "Type", Value: "Project"},
+					})
+					if imageURL, ok := publicImageURL(ps.Item.ImageLink); ok {
+						<img class="mt-10 aspect-video w-full border border-[#2f3a37] object-cover sm:mt-12" src={ imageURL } alt={ ps.Item.Title + " cover image" } width="1600" height="900" decoding="async"/>
+					}
+					<div class={ "public-article-content mt-10 sm:mt-12", templ.KV("public-article-content-with-toc", len(ps.Headings) > 0) }>
+						@PublicTableOfContents(ps.Headings)
+						<div class="min-w-0">
+							<article class="prose prose-public max-w-none min-w-0 prose-headings:font-heading prose-headings:font-bold prose-headings:uppercase prose-pre:border prose-pre:border-[#2f3a37] prose-img:h-auto prose-img:w-full prose-img:border prose-img:border-[#2f3a37] [&_h2]:scroll-mt-8">
+								@ps.Content
+							</article>
+							if ps.Item.ProjectUrl.Valid {
+								<div class="public-panel public-panel-primary mt-12 max-w-3xl">
+									<p class="public-label text-[#130f0b]">Visit project</p>
+									<a class="mt-5 inline-flex text-lg font-bold uppercase text-[#130f0b] underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#130f0b]" href={ ps.Item.ProjectUrl.String } target="_blank" rel="noopener noreferrer">Open { ps.Item.Title } ↗</a>
+								</div>
+							}
 						</div>
 					</div>
-				</div>
-			</div>
-		</main>
-	}
-}
-
-type ProjectNewField string
-
-func (f ProjectNewField) String() string {
-	return string(f)
-}
-
-const (
-	ProjectNewFragment    ProjectNewField = "projectNewFragmentForm"
-	ProjectNewPublished   ProjectNewField = "published"
-	ProjectNewTitle       ProjectNewField = "title"
-	ProjectNewSlug        ProjectNewField = "slug"
-	ProjectNewStartedAt   ProjectNewField = "startedAt"
-	ProjectNewStatus      ProjectNewField = "status"
-	ProjectNewDescription ProjectNewField = "description"
-	ProjectNewProjectURL  ProjectNewField = "projectUrl"
-	ProjectNewContent     ProjectNewField = "content"
-)
-
-templ ProjectNew() {
-	@adminBase() {
-		<main class="flex-1 px-6 py-10">
-			<div class="mx-auto flex w-full max-w-3xl flex-col gap-6">
-				<div class="rounded-box border border-base-300 bg-base-100 shadow-sm">
-					<div class="flex flex-col space-y-1.5 p-6">
-						<h3 class="text-lg font-semibold leading-none tracking-tight text-base-content">New Project</h3>
-						<p class="text-sm text-base-content/60">Enter project details.</p>
-					</div>
-					<div class="p-6 pt-0">
-						@components.Form(
-							components.FormProps{Action: http.MethodPost, URL: routes.ProjectCreate.URL()},
-							components.WithClass("space-y-5"), components.WithFragment(ProjectNewFragment.String()),
-						) {
-							@projectForm(false, models.Project{})
-							<div class="space-y-3">
-								<button type="submit" class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:opacity-60 disabled:cursor-not-allowed bg-primary text-primary-content shadow-sm hover:bg-primary/90 h-9 px-4 py-2 text-sm rounded-field w-full">Create Project</button>
-								<a class="inline-flex h-9 w-full items-center justify-center rounded-field border border-base-300 px-4 py-2 text-sm font-medium text-base-content/80 transition hover:bg-base-200/70 hover:text-base-content" href={ routes.ProjectIndex.URL() }>Back to List</a>
+					if len(ps.Related) > 0 {
+						<section class="mt-12 border-t border-[#2f3a37] pt-10" aria-labelledby="related-projects-title">
+							<h2 id="related-projects-title" class="public-heading text-[#f2ead8]">Related projects</h2>
+							<div class="mt-6 grid grid-cols-1 gap-3 md:grid-cols-3">
+								for _, project := range ps.Related {
+									<a class="public-panel public-panel-link public-text-link" href={ routes.ProjectShow.URL(project.Slug) }>
+										<p class="public-label text-[#8df7a4]">{ project.Status }</p>
+										<h3 class="public-card-heading mt-6">{ project.Title }</h3>
+									</a>
+								}
 							</div>
-						}
-					</div>
-				</div>
-			</div>
-		</main>
-	}
-}
-
-type ProjectUpdateField string
-
-func (f ProjectUpdateField) String() string {
-	return string(f)
-}
-
-const (
-	ProjectUpdateFragment    ProjectUpdateField = "projectUpdateFragmentForm"
-	ProjectUpdatePublished   ProjectUpdateField = "published"
-	ProjectUpdateTitle       ProjectUpdateField = "title"
-	ProjectUpdateSlug        ProjectUpdateField = "slug"
-	ProjectUpdateStartedAt   ProjectUpdateField = "startedAt"
-	ProjectUpdateStatus      ProjectUpdateField = "status"
-	ProjectUpdateDescription ProjectUpdateField = "description"
-	ProjectUpdateProjectURL  ProjectUpdateField = "projectUrl"
-	ProjectUpdateContent     ProjectUpdateField = "content"
-)
-
-templ ProjectUpdate(project models.Project) {
-	@adminBase() {
-		<main class="flex-1 px-6 py-10">
-			<div class="mx-auto flex w-full max-w-3xl flex-col gap-6">
-				<div class="rounded-box border border-base-300 bg-base-100 shadow-sm">
-					<div class="flex flex-col space-y-1.5 p-6">
-						<h3 class="text-lg font-semibold leading-none tracking-tight text-base-content">Edit Project</h3>
-						<p class="text-sm text-base-content/60">Update project details.</p>
-					</div>
-					<div class="p-6 pt-0">
-						@components.Form(
-							components.FormProps{Action: http.MethodPut, URL: routes.ProjectUpdate.URL(project.ID)},
-							components.WithClass("space-y-5"), components.WithFragment(ProjectUpdateFragment.String()),
-						) {
-							@projectForm(true, project)
-							<div class="space-y-3">
-								<button type="submit" class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:opacity-60 disabled:cursor-not-allowed bg-primary text-primary-content shadow-sm hover:bg-primary/90 h-9 px-4 py-2 text-sm rounded-field w-full">Update Project</button>
-								<a class="inline-flex h-9 w-full items-center justify-center rounded-field border border-base-300 px-4 py-2 text-sm font-medium text-base-content/80 transition hover:bg-base-200/70 hover:text-base-content" href={ routes.ProjectIndex.URL() }>Back to List</a>
-							</div>
-						}
-						<div role="separator" class="my-6 shrink-0 bg-base-300 h-px w-full"></div>
-						<button type="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:opacity-60 disabled:cursor-not-allowed bg-error text-error-content shadow-sm hover:bg-error/90 h-9 px-4 py-2 text-sm rounded-field w-full" data-on:click={ hypermedia.DataAction(http.MethodDelete, routes.ProjectDestroy.URL(project.ID)) }>Destroy Project</button>
-					</div>
-				</div>
-			</div>
-		</main>
-	}
-}
-
-templ projectForm(isEdit bool, project models.Project) {
-	<div class="space-y-4">
-		<div class="space-y-1">
-			@components.Label(components.LabelProps{Text: "Title"}).WithFor("title").Render()
-			@components.Input(ProjectNewTitle.String()).WithID("title").WithValue(func() string {
-				if isEdit {
-					return project.Title
-				}
-				return ""
-			}()).Render()
-		</div>
-		<div class="space-y-1">
-			@components.Label(components.LabelProps{Text: "Slug"}).WithFor("slug").Render()
-			@components.Input(ProjectNewSlug.String()).WithID("slug").WithValue(func() string {
-				if isEdit {
-					return project.Slug
-				}
-				return ""
-			}()).Render()
-		</div>
-		<div class="grid gap-4 sm:grid-cols-2">
-			<div class="space-y-1">
-				@components.Label(components.LabelProps{Text: "Date Started"}).WithFor("startedAt").Render()
-				@components.Input(ProjectNewStartedAt.String()).WithType(components.InputTypeDate).WithID("startedAt").WithValue(func() string {
-					if isEdit && !project.StartedAt.IsZero() {
-						return project.StartedAt.Format("2006-01-02")
+						</section>
 					}
-					return ""
-				}()).Render()
-			</div>
-			<div class="space-y-1">
-				@components.Label(components.LabelProps{Text: "Status"}).WithFor("status").Render()
-				@components.Input(ProjectNewStatus.String()).WithID("status").WithValue(func() string {
-					if isEdit {
-						return project.Status
-					}
-					return ""
-				}()).Render()
-			</div>
-		</div>
-		<div class="space-y-1">
-			@components.Label(components.LabelProps{Text: "Description"}).WithFor("description").Render()
-			@components.Textarea(ProjectNewDescription.String()).WithID("description").WithRows(4).WithValue(func() string {
-				if isEdit {
-					return project.Description
-				}
-				return ""
-			}()).Render()
-		</div>
-		<div class="space-y-1">
-			@components.Label(components.LabelProps{Text: "Project URL (optional)"}).WithFor("projectUrl").Render()
-			@components.Input(ProjectNewProjectURL.String()).WithType(components.InputTypeURL).WithID("projectUrl").WithValue(func() string {
-				if isEdit {
-					return project.ProjectURL
-				}
-				return ""
-			}()).Render()
-		</div>
-		<div class="space-y-1">
-			@components.Label(components.LabelProps{Text: "Content"}).WithFor("content").Render()
-			@components.Textarea(ProjectNewContent.String()).WithID("content").WithRows(16).WithValue(func() string {
-				if isEdit {
-					return project.Content
-				}
-				return ""
-			}()).Render()
-		</div>
-		<div class="mt-1 flex items-center gap-2">
-			@components.Checkbox(ProjectNewPublished.String()).WithID("published").WithChecked(func() bool {
-				if isEdit {
-					return project.Published
-				}
-				return false
-			}()).Render()
-			@components.Label(components.LabelProps{Text: "Published"}).WithFor("published").Render()
-		</div>
-	</div>
-}
-
-templ ProjectEdit(project models.Project) {
-	@ProjectUpdate(project)
+				</div>
+			</main>
+		}
+	}
 }

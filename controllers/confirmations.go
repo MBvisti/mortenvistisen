@@ -1,31 +1,56 @@
 package controllers
 
 import (
+	"errors"
 	"log/slog"
+	"net/http"
 
-	"mortenvistisen/config"
-	"mortenvistisen/internal/storage"
+	"mortenvistisen/internal/inertia"
+	"mortenvistisen/internal/validation"
+	"mortenvistisen/router"
 	"mortenvistisen/router/cookies"
 	"mortenvistisen/router/routes"
 	"mortenvistisen/services"
-	"mortenvistisen/views"
 
 	"github.com/labstack/echo/v5"
-
-	"mortenvistisen/internal/hypermedia"
 )
 
 type Confirmations struct {
-	db  storage.Pool
-	cfg config.Config
+	identity services.Identity
 }
 
-func NewConfirmations(db storage.Pool, cfg config.Config) Confirmations {
-	return Confirmations{db, cfg}
+func NewConfirmations(identity services.Identity) Confirmations {
+	return Confirmations{identity}
+}
+
+func (c Confirmations) RegisterRoutes(r *router.Router) error {
+	errs := []error{}
+
+	_, err := r.AddRoute(echo.Route{
+		Method:  http.MethodGet,
+		Path:    routes.ConfirmationNew.Path(),
+		Name:    routes.ConfirmationNew.Name(),
+		Handler: c.New,
+	})
+	if err != nil {
+		errs = append(errs, err)
+	}
+
+	_, err = r.AddRoute(echo.Route{
+		Method:  http.MethodPost,
+		Path:    routes.ConfirmationCreate.Path(),
+		Name:    routes.ConfirmationCreate.Name(),
+		Handler: c.Create,
+	})
+	if err != nil {
+		errs = append(errs, err)
+	}
+
+	return errors.Join(errs...)
 }
 
 func (c Confirmations) New(etx *echo.Context) error {
-	return render(etx, views.ConfirmationForm())
+	return inertia.Page(etx, "Auth/ConfirmEmail", inertia.Props{})
 }
 
 func (c Confirmations) Create(etx *echo.Context) error {
@@ -40,18 +65,25 @@ func (c Confirmations) Create(etx *echo.Context) error {
 			"error",
 			err,
 		)
-		return render(etx, views.BadRequest())
+		return inertia.Page(etx, "Errors/BadRequest", inertia.Props{})
 	}
 
-	user, err := services.VerifyEmail(
+	user, err := c.identity.VerifyEmail(
 		etx.Request().Context(),
-		c.db,
-		c.cfg.Auth.Pepper,
 		services.VerifyEmailData{
 			Code: payload.Code,
 		},
 	)
 	if err != nil {
+		if validationErrors, ok := validation.As(err); ok {
+			return inertia.Page(
+				etx,
+				"Auth/ConfirmEmail",
+				inertia.Props{},
+				inertia.WithValidationErrors(validationErrors.ToMap()),
+			)
+		}
+
 		slog.ErrorContext(
 			etx.Request().Context(),
 			"failed to verify email",
@@ -60,19 +92,19 @@ func (c Confirmations) Create(etx *echo.Context) error {
 		)
 
 		var errorMsg string
-		switch err {
-		case services.ErrInvalidVerificationCode:
+		switch {
+		case errors.Is(err, services.ErrInvalidVerificationCode):
 			errorMsg = "Invalid verification code"
-		case services.ErrExpiredVerificationCode:
+		case errors.Is(err, services.ErrExpiredVerificationCode):
 			errorMsg = "Verification code has expired"
 		default:
 			errorMsg = "Failed to verify email"
 		}
 
 		if flashErr := cookies.AddFlash(etx, cookies.FlashError, errorMsg); flashErr != nil {
-			return render(etx, views.InternalError())
+			return inertia.Page(etx, "Errors/InternalError", inertia.Props{})
 		}
-		return hypermedia.Redirect(etx, routes.ConfirmationNew.URL())
+		return inertia.Redirect(etx, routes.ConfirmationNew.URL())
 	}
 
 	if err := cookies.CreateAppSession(etx, user); err != nil {
@@ -83,12 +115,16 @@ func (c Confirmations) Create(etx *echo.Context) error {
 			err,
 		)
 
-		return render(etx, views.InternalError())
+		return inertia.Page(etx, "Errors/InternalError", inertia.Props{})
 	}
 
-	if flashErr := cookies.AddFlash(etx, cookies.FlashSuccess, "Email verified successfully!"); flashErr != nil {
-		return render(etx, views.InternalError())
+	if flashErr := cookies.AddFlash(
+		etx,
+		cookies.FlashSuccess,
+		"Email verified successfully!",
+	); flashErr != nil {
+		return inertia.Page(etx, "Errors/InternalError", inertia.Props{})
 	}
 
-	return hypermedia.Redirect(etx, routes.HomePage.URL())
+	return inertia.Location(etx, routes.HomePage.URL())
 }

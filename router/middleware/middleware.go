@@ -5,12 +5,13 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
 	"mortenvistisen/config"
+	"mortenvistisen/internal/request"
 	"mortenvistisen/internal/server"
-	"mortenvistisen/internal/storage"
 	"mortenvistisen/router/cookies"
 	"mortenvistisen/router/routes"
 	"mortenvistisen/telemetry"
@@ -19,62 +20,97 @@ import (
 	echomw "github.com/labstack/echo/v5/middleware"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
-	"go.opentelemetry.io/otel/semconv/v1.26.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
 	"go.opentelemetry.io/otel/trace"
 )
 
-type Middleware struct {
-	db storage.Pool
-}
-
-func New(db storage.Pool) Middleware {
-	return Middleware{db: db}
-}
-
-func (m Middleware) RegisterAppContext(
+func RegisterRequestMeta(
 	next echo.HandlerFunc,
 ) echo.HandlerFunc {
 	return func(c *echo.Context) error {
-		if strings.Contains(c.Request().URL.Path, routes.AssetsPrefix) ||
-			strings.Contains(c.Request().URL.Path, routes.APIPrefix) {
+		if isAssetsPath(c.Request().URL.Path) || isAPIPath(c.Request().URL.Path) {
 			return next(c)
 		}
 
-		c.Set(string(cookies.AppKey), cookies.GetApp(c))
+		appCookie := cookies.ExtractFromCookieApp(c)
+		appCookie.CurrentPath = c.Request().URL.Path
 
-		return next(c)
-	}
-}
-
-func (m Middleware) RegisterFlashMessagesContext(
-	next echo.HandlerFunc,
-) echo.HandlerFunc {
-	return func(c *echo.Context) error {
-		if strings.Contains(c.Request().URL.Path, routes.AssetsPrefix) ||
-			strings.Contains(c.Request().URL.Path, routes.APIPrefix) {
-			return next(c)
-		}
-
-		flashes, err := cookies.GetFlashes(c)
+		flashes, err := cookies.ExtractFlashes(c)
 		if err != nil {
 			slog.Error("Error getting flash messages from session", "error", err)
-			return next(c)
 		}
 
-		c.Set(string(cookies.FlashKey), flashes)
+		returnTo := cookies.GetReturnTo(c)
+
+		method := c.Request().Method
+		if method == http.MethodGet || method == http.MethodHead {
+			referer := strings.TrimSpace(c.Request().Referer())
+			if referer == "" {
+				if sessErr := cookies.SetReturnTo(c, ""); sessErr != nil {
+					slog.Warn("Error clearing return_to", "error", sessErr)
+				}
+				returnTo = ""
+			} else {
+				refererURL, parseErr := url.Parse(referer)
+				if parseErr != nil {
+					if sessErr := cookies.SetReturnTo(c, ""); sessErr != nil {
+						slog.Warn("Error clearing return_to", "error", sessErr)
+					}
+					returnTo = ""
+				} else if refererURL.Host != "" && !strings.EqualFold(refererURL.Host, c.Request().Host) {
+					if sessErr := cookies.SetReturnTo(c, ""); sessErr != nil {
+						slog.Warn("Error clearing return_to", "error", sessErr)
+					}
+					returnTo = ""
+				} else {
+					newReturnTo := refererURL.EscapedPath()
+					if refererURL.RawQuery != "" {
+						newReturnTo += "?" + refererURL.RawQuery
+					}
+					if newReturnTo == "" {
+						newReturnTo = "/"
+					}
+
+					current := c.Request().URL.Path
+					if c.Request().URL.RawQuery != "" {
+						current += "?" + c.Request().URL.RawQuery
+					}
+
+					if newReturnTo == current ||
+						!strings.HasPrefix(newReturnTo, "/") ||
+						strings.HasPrefix(newReturnTo, "//") {
+						if sessErr := cookies.SetReturnTo(c, ""); sessErr != nil {
+							slog.Warn("Error clearing return_to", "error", sessErr)
+						}
+						returnTo = ""
+					} else {
+						if sessErr := cookies.SetReturnTo(c, newReturnTo); sessErr != nil {
+							slog.Warn("Error setting return_to", "error", sessErr)
+						}
+						returnTo = newReturnTo
+					}
+				}
+			}
+		}
+
+		ctx := request.BuildRequestMeta(c.Request().Context(), map[request.AppContextKey]any{
+			request.SessionCookieKey:  appCookie,
+			request.SessionFlashesKey: flashes,
+			request.BackURLKey:        returnTo,
+		})
+
+		c.SetRequest(c.Request().WithContext(ctx))
 
 		return next(c)
 	}
 }
 
-
-func (m Middleware) ValidateSession(
+func ValidateSession(
 	next echo.HandlerFunc,
 ) echo.HandlerFunc {
 	return func(c *echo.Context) error {
 		// Skip session validation for static assets and API routes
-		if strings.Contains(c.Request().URL.Path, routes.AssetsPrefix) ||
-			strings.Contains(c.Request().URL.Path, routes.APIPrefix) {
+		if isAssetsPath(c.Request().URL.Path) || isAPIPath(c.Request().URL.Path) {
 			return next(c)
 		}
 
@@ -82,7 +118,40 @@ func (m Middleware) ValidateSession(
 	}
 }
 
-func (m Middleware) Logger(tel *telemetry.Telemetry) echo.MiddlewareFunc {
+func isAPIPath(path string) bool {
+	return matchesPathPrefix(path, routes.APIPrefix)
+}
+
+func isAssetsPath(path string) bool {
+	return matchesPathPrefix(path, routes.AssetsPrefix)
+}
+
+func matchesPathPrefix(path, prefix string) bool {
+	prefix = strings.TrimSuffix(prefix, "/")
+	if prefix == "" {
+		return false
+	}
+
+	return path == prefix || strings.HasPrefix(path, prefix+"/")
+}
+
+func hasNonEmptyBearerToken(authorization string) bool {
+	parts := strings.Fields(authorization)
+	return len(parts) == 2 && strings.EqualFold(parts[0], "Bearer") && parts[1] != ""
+}
+
+func hasApplicationSessionCookie(request *http.Request) bool {
+	_, err := request.Cookie(config.AppCookieSessionName)
+	return err == nil
+}
+
+func mayBypassCSRF(request *http.Request) bool {
+	return isAPIPath(request.URL.Path) &&
+		hasNonEmptyBearerToken(request.Header.Get("Authorization")) &&
+		!hasApplicationSessionCookie(request)
+}
+
+func Logger(tel *telemetry.Telemetry) echo.MiddlewareFunc {
 	var httpRequestsTotal metric.Int64Counter
 	var httpDuration metric.Float64Histogram
 	var httpInFlight metric.Int64UpDownCounter
@@ -110,8 +179,7 @@ func (m Middleware) Logger(tel *telemetry.Telemetry) echo.MiddlewareFunc {
 
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c *echo.Context) error {
-			if strings.Contains(c.Request().URL.Path, routes.AssetsPrefix) ||
-				strings.Contains(c.Request().URL.Path, routes.APIPrefix) {
+			if isAssetsPath(c.Request().URL.Path) || isAPIPath(c.Request().URL.Path) {
 				return next(c)
 			}
 
@@ -156,11 +224,10 @@ func (m Middleware) Logger(tel *telemetry.Telemetry) echo.MiddlewareFunc {
 	}
 }
 
-func (m Middleware) TraceRouteAttributes(tel *telemetry.Telemetry) echo.MiddlewareFunc {
+func TraceRouteAttributes(tel *telemetry.Telemetry) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c *echo.Context) error {
-			if strings.Contains(c.Request().URL.Path, routes.AssetsPrefix) ||
-				strings.Contains(c.Request().URL.Path, routes.APIPrefix) {
+			if isAssetsPath(c.Request().URL.Path) || isAPIPath(c.Request().URL.Path) {
 				return next(c)
 			}
 
@@ -188,7 +255,7 @@ func (m Middleware) TraceRouteAttributes(tel *telemetry.Telemetry) echo.Middlewa
 	}
 }
 
-func (m Middleware) CSRFMiddleware(cfg config.Config, csrfName string) (echo.MiddlewareFunc, error) {
+func CSRFMiddleware(cfg config.Config, csrfName string) (echo.MiddlewareFunc, error) {
 	strategy := strings.TrimSpace(cfg.App.CSRFStrategy)
 
 	var headerOnly bool
@@ -211,11 +278,10 @@ func (m Middleware) CSRFMiddleware(cfg config.Config, csrfName string) (echo.Mid
 
 	csrfConfig := echomw.CSRFConfig{
 		Skipper: func(c *echo.Context) bool {
-			return strings.Contains(c.Request().URL.Path, routes.APIPrefix) ||
-				strings.Contains(c.Request().URL.Path, routes.AssetsPrefix)
+			return mayBypassCSRF(c.Request())
 		},
-		TokenLookup:    tokenLookup,
-		CookiePath:     "/",
+		TokenLookup: tokenLookup,
+		CookiePath:  "/",
 		CookieDomain: func() string {
 			if config.Env == server.ProdEnvironment {
 				return config.Domain
@@ -233,9 +299,7 @@ func (m Middleware) CSRFMiddleware(cfg config.Config, csrfName string) (echo.Mid
 
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c *echo.Context) error {
-			path := c.Request().URL.Path
-			if strings.Contains(path, routes.APIPrefix) ||
-				strings.Contains(path, routes.AssetsPrefix) {
+			if mayBypassCSRF(c.Request()) {
 				return next(c)
 			}
 
@@ -247,15 +311,21 @@ func (m Middleware) CSRFMiddleware(cfg config.Config, csrfName string) (echo.Mid
 				method != http.MethodOptions && method != http.MethodTrace
 
 			if isUnsafe {
-				secFetchSite := strings.ToLower(strings.TrimSpace(c.Request().Header.Get("Sec-Fetch-Site")))
+				secFetchSite := strings.ToLower(
+					strings.TrimSpace(c.Request().Header.Get("Sec-Fetch-Site")),
+				)
 
 				// In header_only mode, reject requests missing Sec-Fetch-Site
 				if headerOnly && (secFetchSite == "" || secFetchSite == "none") {
-					return echo.NewHTTPError(http.StatusForbidden, "CSRF verification failed: missing Sec-Fetch-Site header")
+					return echo.NewHTTPError(
+						http.StatusForbidden,
+						"CSRF verification failed: missing Sec-Fetch-Site header",
+					)
 				}
 
 				// In legacy mode, log when falling back to form token
-				if !headerOnly && secFetchSite != "same-origin" && secFetchSite != "same-site" && secFetchSite != "cross-site" {
+				if !headerOnly && secFetchSite != "same-origin" && secFetchSite != "same-site" &&
+					secFetchSite != "cross-site" {
 					if c.Request().Header.Get("X-CSRF-Token") == "" && c.FormValue("_csrf") != "" {
 						slog.Warn("CSRF check fell back to legacy token")
 					}
@@ -267,4 +337,3 @@ func (m Middleware) CSRFMiddleware(cfg config.Config, csrfName string) (echo.Mid
 		}
 	}, nil
 }
-

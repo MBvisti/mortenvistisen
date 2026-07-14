@@ -1,0 +1,67 @@
+package email
+
+import (
+	"bytes"
+	"context"
+)
+
+type SubscriberConfirmation struct {
+	ConfirmationURL  string
+	VerificationCode string
+}
+
+var _ Transformer = (*SubscriberConfirmation)(nil)
+
+func (s SubscriberConfirmation) ToHTML() (string, error) {
+	var buf bytes.Buffer
+	if err := s.render().Render(context.Background(), &buf); err != nil {
+		return "", err
+	}
+	return buf.String(), nil
+}
+
+func (s SubscriberConfirmation) ToText() (string, error) {
+	html, err := s.ToHTML()
+	if err != nil {
+		return "", err
+	}
+	return HTMLToText(html)
+}
+
+templ (s SubscriberConfirmation) render() {
+	@baseLayout("Confirm Your Email Address", "Confirm your email address to finish subscribing.") {
+		@spacer("32")
+		@title("Confirm Your Email Address")
+		@spacer("24")
+		@copy() {
+			<span class="st-Delink" style="color: #414552; text-decoration: none;">
+				Confirm your email address to receive new articles and newsletters.
+			</span>
+		}
+		@spacer("8")
+		@button(s.ConfirmationURL, "Confirm My Email")
+		@spacer("8")
+		@copy() {
+			<span class="st-Delink" style="color: #414552; text-decoration: none;">
+				Open the confirmation page and enter this code:
+			</span>
+		}
+		@verificationCodeBox(s.VerificationCode)
+		@copy() {
+			<span class="st-Delink" style="color: #414552; text-decoration: none;">
+				Or copy and paste this link into your browser:
+			</span>
+		}
+		@copy() {
+			<span class="st-Delink" style="color: #625afa; text-decoration: none; word-break: break-all;">
+				{ s.ConfirmationURL }
+			</span>
+		}
+		@copy() {
+			<span class="st-Delink" style="color: #414552; text-decoration: none;">
+				This code expires in 24 hours. If you did not subscribe, you can ignore this email.
+			</span>
+		}
+		@spacer("32")
+	}
+}

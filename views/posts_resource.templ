@@ -1,0 +1,195 @@
+package views
+
+import (
+	"mortenvistisen/models"
+	"mortenvistisen/router/routes"
+)
+
+type PostIndex struct {
+	Items       []models.ArticleEntity
+	CurrentPage int64
+	TotalPages  int64
+}
+
+func (pi PostIndex) PageFragment() string {
+	return "post-index-page-fragment"
+}
+
+templ (pi PostIndex) Page() {
+	@base(
+		SetTitle("Writing"),
+		SetDescription("Articles on Go, practical systems, products, and engineering."),
+		SetSlug(publicPageURL(routes.PostIndex.URL(), pi.CurrentPage)),
+		SetSchema(PostIndexSchema(pi.Items)),
+	) {
+		@templ.Fragment(pi.PageFragment()) {
+			<main id="main-content" class="flex-1">
+				<div class="public-shell py-8 sm:py-12">
+					@PublicBreadcrumbs([]PublicBreadcrumb{
+						{Label: "Home", URL: routes.HomePage.URL()},
+						{Label: "Posts"},
+					})
+					<header class="my-10 max-w-5xl sm:my-14">
+						<h1 class="public-display text-[#f2ead8]">Writing from the workshop.</h1>
+						<p class="mt-7 max-w-2xl text-lg leading-8 text-[#aaa393]">Notes on Go, maintainable systems, and building useful products.</p>
+					</header>
+					if len(pi.Items) == 0 {
+						<div class="public-panel">
+							<p class="public-label text-[#8df7a4]">Signal pending</p>
+							<p class="mt-4 text-[#aaa393]">No published posts are online yet.</p>
+						</div>
+					} else {
+						<div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+							for _, article := range pi.Items {
+								<a class="public-panel public-panel-link public-text-link flex min-h-72 flex-col justify-between" href={ routes.PostShow.URL(article.Slug) }>
+									<div>
+										<div class="mb-8 flex flex-wrap items-center justify-between gap-3">
+											<p class="public-label text-[#8df7a4]">{ publicDate(article.FirstPublishedAt) }</p>
+											if article.ReadTime.Valid {
+												<p class="public-label text-[#8f8a7d]">{ article.ReadTime.Int32 } min read</p>
+											}
+										</div>
+										<h2 class="public-card-heading">{ article.Title }</h2>
+									</div>
+									if article.Excerpt.Valid {
+										<p class="mt-8 leading-7 text-[#aaa393]">{ article.Excerpt.String }</p>
+									}
+								</a>
+							}
+						</div>
+					}
+					@PublicPagination(routes.PostIndex.URL(), pi.CurrentPage, pi.TotalPages)
+				</div>
+			</main>
+		}
+	}
+}
+
+type PostShow struct {
+	Item     models.ArticleEntity
+	Content  templ.Component
+	Headings []HeadingInfo
+	Tags     []models.TagEntity
+	Related  []models.ArticleEntity
+}
+
+func (ps PostShow) PageFragment() string {
+	return "post-show-page-fragment"
+}
+
+func (ps PostShow) headOptions() []HeadDataOption {
+	title := ps.Item.Title
+	if ps.Item.MetaTitle.Valid {
+		title = ps.Item.MetaTitle.String
+	}
+	description := ""
+	if ps.Item.MetaDescription.Valid {
+		description = ps.Item.MetaDescription.String
+	} else if ps.Item.Excerpt.Valid {
+		description = ps.Item.Excerpt.String
+	}
+	opts := []HeadDataOption{
+		SetTitle(title),
+		SetDescription(description),
+		SetSlug(routes.PostShow.URL(ps.Item.Slug)),
+		SetMetaType("article"),
+		SetSchema(PostShowSchema(ps.Item, ps.Tags)),
+	}
+	if imageURL, ok := publicImageURL(ps.Item.MetaImageLink); ok {
+		opts = append(opts, SetImage(imageURL), SetImageAlt(ps.Item.Title+" social image"))
+	} else if imageURL, ok := publicImageURL(ps.Item.ImageLink); ok {
+		opts = append(opts, SetImage(imageURL), SetImageAlt(ps.Item.Title+" cover image"))
+	}
+	return opts
+}
+
+templ (ps PostShow) Page() {
+	@base(ps.headOptions()...) {
+		@templ.Fragment(ps.PageFragment()) {
+			<main id="main-content" class="flex-1">
+				<div class="public-shell py-8 sm:py-12">
+					@PublicBreadcrumbs([]PublicBreadcrumb{
+						{Label: "Home", URL: routes.HomePage.URL()},
+						{Label: "Posts", URL: routes.PostIndex.URL()},
+						{Label: ps.Item.Title},
+					})
+					<header class="my-8 sm:my-10">
+						<h1 class="public-show-title text-[#f2ead8]">{ ps.Item.Title }</h1>
+						@PublicByline()
+					</header>
+					<div class="public-show-meta">
+						<div class="public-show-meta-item">
+							<p class="public-label text-[#8df7a4]">01 / Published</p>
+							<p class="mt-4 text-sm leading-6 text-[#e4dfd2]">
+								{ publicDate(ps.Item.FirstPublishedAt) }
+								if ps.Item.FirstPublishedAt.Valid && ps.Item.UpdatedAt.After(ps.Item.FirstPublishedAt.Time) {
+									<span class="mx-2 align-middle text-[0.4rem] text-[#8f8a7d]" aria-hidden="true">●</span>
+									<span class="text-[#8f8a7d]">Updated { ps.Item.UpdatedAt.Format("02.01.2006") }</span>
+								}
+							</p>
+						</div>
+						<div class="public-show-meta-item">
+							<p class="public-label text-[#8df7a4]">02 / Read time</p>
+							<p class="mt-4 text-sm leading-6 text-[#e4dfd2]">{ publicReadTime(ps.Item.ReadTime) }</p>
+						</div>
+						<div class="public-show-meta-item">
+							<p class="public-label text-[#8df7a4]">03 / Tags</p>
+							@publicPostTags(ps.Tags)
+						</div>
+					</div>
+					if imageURL, ok := publicImageURL(ps.Item.ImageLink); ok {
+						<img class="mt-10 aspect-video w-full border border-[#2f3a37] object-cover sm:mt-12" src={ imageURL } alt={ ps.Item.Title + " cover image" } width="1600" height="900" decoding="async"/>
+					}
+					<div class={ "public-article-content mt-10 sm:mt-12", templ.KV("public-article-content-with-toc", len(ps.Headings) > 0) }>
+						@PublicTableOfContents(ps.Headings)
+						<article class="prose prose-public max-w-none min-w-0 prose-headings:font-heading prose-headings:font-bold prose-headings:uppercase prose-pre:border prose-pre:border-[#2f3a37] prose-img:h-auto prose-img:w-full prose-img:border prose-img:border-[#2f3a37] [&_h2]:scroll-mt-8">
+							@ps.Content
+						</article>
+					</div>
+					if len(ps.Related) > 0 {
+						<section class="mt-12 border-t border-[#2f3a37] pt-10" aria-labelledby="related-writing-title">
+							<h2 id="related-writing-title" class="public-heading text-[#f2ead8]">Related writing</h2>
+							<div class="mt-6 grid grid-cols-1 gap-3 md:grid-cols-3">
+								for _, article := range ps.Related {
+									<a class="public-panel public-panel-link public-text-link" href={ routes.PostShow.URL(article.Slug) }>
+										<p class="public-label text-[#8df7a4]">{ publicDate(article.FirstPublishedAt) }</p>
+										<h3 class="public-card-heading mt-6">{ article.Title }</h3>
+									</a>
+								}
+							</div>
+						</section>
+					}
+				</div>
+			</main>
+		}
+	}
+}
+
+templ publicPostTags(tags []models.TagEntity) {
+	if len(tags) == 0 {
+		<p class="mt-4 text-sm leading-6 text-[#8f8a7d]">No tags</p>
+	} else {
+		<ul class="mt-4 flex flex-wrap gap-2">
+			for _, tag := range tags[:min(3, len(tags))] {
+				@publicPostTag(tag)
+			}
+		</ul>
+		if len(tags) > 3 {
+			<details class="group mt-3">
+				<summary class="public-label cursor-pointer text-[#8df7a4]">
+					<span class="group-open:hidden">Show { len(tags) - 3 } more</span>
+					<span class="hidden group-open:inline">Show less</span>
+				</summary>
+				<ul class="mt-3 flex flex-wrap gap-2">
+					for _, tag := range tags[3:] {
+						@publicPostTag(tag)
+					}
+				</ul>
+			</details>
+		}
+	}
+}
+
+templ publicPostTag(tag models.TagEntity) {
+	<li class="max-w-full break-words border border-[#52605c] px-2 py-1 text-xs leading-5 text-[#e4dfd2]">{ tag.Title }</li>
+}

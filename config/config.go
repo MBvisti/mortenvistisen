@@ -9,6 +9,8 @@ import (
 	"mortenvistisen/internal/server"
 
 	"github.com/gosimple/slug"
+
+	"go.uber.org/fx"
 )
 
 // Global application settings that can be used throughout the codebase with defaults.
@@ -55,14 +57,22 @@ var (
 	AppCookieSessionName = func() string {
 		return "app_sess_" + slug.Make(strings.ToLower(ProjectName)) + "-" + Env
 	}()
+	DefaultSenderSignature = func() string {
+		if os.Getenv("DEFAULT_SENDER_SIGNATURE") != "" {
+			return os.Getenv("DEFAULT_SENDER_SIGNATURE")
+		}
+
+		return "noreply@" + Domain
+	}()
 )
 
 type Config struct {
 	App       app
-	DB        database
+	DB        Database
 	Telemetry telemetry
 	Email     email
 	AwsSes    awsSes
+	R2        r2
 	Auth      auth
 }
 
@@ -72,7 +82,10 @@ func NewConfig() Config {
 		DB:        newDatabaseConfig(),
 		Telemetry: newTelemetryConfig(),
 		Email:     newEmailConfig(),
-		Auth:      newAuthConfig(),
 		AwsSes:    newAwsSesConfig(),
+		R2:        newR2Config(),
+		Auth:      newAuthConfig(),
 	}
 }
+
+var Module = fx.Module("config", fx.Provide(NewConfig))
