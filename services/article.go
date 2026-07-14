@@ -297,10 +297,12 @@ type ArticlePatch struct {
 	Excerpt         *string
 	MetaTitle       *string
 	MetaDescription *string
+	ImageLink       *string
 }
 
 func (p ArticlePatch) Empty() bool {
-	return p.Title == nil && p.Excerpt == nil && p.MetaTitle == nil && p.MetaDescription == nil
+	return p.Title == nil && p.Excerpt == nil && p.MetaTitle == nil &&
+		p.MetaDescription == nil && p.ImageLink == nil
 }
 
 func (a Article) Patch(
@@ -356,6 +358,9 @@ func applyArticlePatch(current models.ArticleEntity, patch ArticlePatch) models.
 	}
 	if patch.MetaDescription != nil {
 		data.MetaDescription = sql.NullString{String: *patch.MetaDescription, Valid: true}
+	}
+	if patch.ImageLink != nil {
+		data.ImageLink = sql.NullString{String: *patch.ImageLink, Valid: true}
 	}
 	return data
 }

@@ -124,22 +124,26 @@ func TestApplyArticlePatchPreservesOmittedFields(t *testing.T) {
 		MetaTitle:       sql.NullString{String: "Original meta title", Valid: true},
 		MetaDescription: sql.NullString{String: "Original meta description", Valid: true},
 		Slug:            "original-slug",
+		ImageLink:       sql.NullString{String: "https://example.com/original.png", Valid: true},
 	}
 	title := "Updated title"
 	metaDescription := "Updated meta description"
+	imageLink := "https://example.com/updated.png"
 
 	got := applyArticlePatch(current, ArticlePatch{
 		Title:           &title,
 		MetaDescription: &metaDescription,
+		ImageLink:       &imageLink,
 	})
 
-	if got.Title != title || got.MetaDescription.String != metaDescription {
+	if got.Title != title || got.MetaDescription.String != metaDescription ||
+		got.ImageLink.String != imageLink {
 		t.Fatalf("applyArticlePatch() did not apply supplied fields: %#v", got)
 	}
 	if got.Excerpt != current.Excerpt || got.MetaTitle != current.MetaTitle || got.Slug != current.Slug {
 		t.Fatalf("applyArticlePatch() changed omitted fields: %#v", got)
 	}
-	if !(ArticlePatch{}).Empty() || (ArticlePatch{Title: &title}).Empty() {
+	if !(ArticlePatch{}).Empty() || (ArticlePatch{ImageLink: &imageLink}).Empty() {
 		t.Fatal("ArticlePatch.Empty() returned the wrong result")
 	}
 }

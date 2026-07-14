@@ -44,6 +44,7 @@ type updateArticlePayload struct {
 	Excerpt         *string `json:"excerpt"`
 	MetaTitle       *string `json:"metaTitle"`
 	MetaDescription *string `json:"metaDescription"`
+	ImageLink       *string `json:"imageLink"`
 }
 
 type articleResponse struct {
@@ -52,6 +53,7 @@ type articleResponse struct {
 	Excerpt         string `json:"excerpt"`
 	MetaTitle       string `json:"metaTitle"`
 	MetaDescription string `json:"metaDescription"`
+	ImageLink       string `json:"imageLink"`
 }
 
 type errorResponse struct {
@@ -75,6 +77,7 @@ func (a Articles) Update(etx *echo.Context) error {
 		Excerpt:         payload.Excerpt,
 		MetaTitle:       payload.MetaTitle,
 		MetaDescription: payload.MetaDescription,
+		ImageLink:       payload.ImageLink,
 	}
 	if patch.Empty() {
 		return etx.JSON(http.StatusBadRequest, errorResponse{Error: "at least one field is required"})
@@ -102,5 +105,6 @@ func (a Articles) Update(etx *echo.Context) error {
 		Excerpt:         article.Excerpt.String,
 		MetaTitle:       article.MetaTitle.String,
 		MetaDescription: article.MetaDescription.String,
+		ImageLink:       article.ImageLink.String,
 	})
 }
