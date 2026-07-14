@@ -1,0 +1,60 @@
+package email
+
+import (
+	"bytes"
+	"context"
+)
+
+type ArticlePublished struct {
+	Title          string
+	Excerpt        string
+	ImageURL       string
+	UnsubscribeURL string
+}
+
+var _ Transformer = (*ArticlePublished)(nil)
+
+func (e ArticlePublished) ToHTML() (string, error) {
+	var buf bytes.Buffer
+	if err := e.render().Render(context.Background(), &buf); err != nil {
+		return "", err
+	}
+	return buf.String(), nil
+}
+
+func (e ArticlePublished) ToText() (string, error) {
+	html, err := e.ToHTML()
+	if err != nil {
+		return "", err
+	}
+	return HTMLToText(html)
+}
+
+templ (e ArticlePublished) render() {
+	@baseLayout(e.Title, e.Excerpt) {
+		@spacer("32")
+		@title(e.Title)
+		@spacer("24")
+		@copy() {
+			<span class="st-Delink" style="color: #414552; text-decoration: none;">
+				A new article has just been published.
+			</span>
+		}
+		@copy() {
+			<img src={ e.ImageURL } alt="" width="504" style="border: 0; display: block; height: auto; max-width: 100%; width: 504px;"/>
+		}
+		@copy() {
+			<span class="st-Delink" style="color: #414552; text-decoration: none;">
+				{ e.Excerpt }
+			</span>
+		}
+		@divider()
+		@copy() {
+			<span class="st-Delink" style="color: #687385; font-size: 12px; text-decoration: none;">
+				You are receiving this update because you subscribed.
+				<a href={ e.UnsubscribeURL } style="color: #625afa;">Unsubscribe</a>
+			</span>
+		}
+		@spacer("32")
+	}
+}

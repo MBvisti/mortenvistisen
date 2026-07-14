@@ -1,32 +1,70 @@
 package controllers
 
 import (
+	"errors"
 	"log/slog"
 	"net/http"
 
-	"mortenvistisen/config"
-	"mortenvistisen/internal/storage"
+	"mortenvistisen/internal/inertia"
+	"mortenvistisen/internal/validation"
+	"mortenvistisen/router"
 	"mortenvistisen/router/cookies"
+	"mortenvistisen/router/middleware"
 	"mortenvistisen/router/routes"
 	"mortenvistisen/services"
-	"mortenvistisen/views"
 
 	"github.com/labstack/echo/v5"
-
-	"mortenvistisen/internal/hypermedia"
 )
 
 type Sessions struct {
-	db  storage.Pool
-	cfg config.Config
+	identity services.Identity
 }
 
-func NewSessions(db storage.Pool, cfg config.Config) Sessions {
-	return Sessions{db, cfg}
+func NewSessions(identity services.Identity) Sessions {
+	return Sessions{identity}
+}
+
+func (s Sessions) RegisterRoutes(r *router.Router) error {
+	errs := []error{}
+
+	_, err := r.AddRoute(echo.Route{
+		Method:  http.MethodGet,
+		Path:    routes.SessionNew.Path(),
+		Name:    routes.SessionNew.Name(),
+		Handler: s.New,
+	})
+	if err != nil {
+		errs = append(errs, err)
+	}
+
+	_, err = r.AddRoute(echo.Route{
+		Method:  http.MethodPost,
+		Path:    routes.SessionCreate.Path(),
+		Name:    routes.SessionCreate.Name(),
+		Handler: s.Create,
+		Middlewares: []echo.MiddlewareFunc{
+			middleware.IPRateLimiter(5, routes.SessionNew),
+		},
+	})
+	if err != nil {
+		errs = append(errs, err)
+	}
+
+	_, err = r.AddRoute(echo.Route{
+		Method:  http.MethodDelete,
+		Path:    routes.SessionDestroy.Path(),
+		Name:    routes.SessionDestroy.Name(),
+		Handler: s.Destroy,
+	})
+	if err != nil {
+		errs = append(errs, err)
+	}
+
+	return errors.Join(errs...)
 }
 
 func (s Sessions) New(etx *echo.Context) error {
-	return render(etx, views.LoginForm())
+	return inertia.Page(etx, "Auth/Login", inertia.Props{})
 }
 
 func (s Sessions) Create(etx *echo.Context) error {
@@ -42,19 +80,26 @@ func (s Sessions) Create(etx *echo.Context) error {
 			"error",
 			err,
 		)
-		return render(etx, views.BadRequest())
+		return inertia.Page(etx, "Errors/BadRequest", inertia.Props{})
 	}
 
-	user, err := services.AuthenticateUser(
+	user, err := s.identity.AuthenticateUser(
 		etx.Request().Context(),
-		s.db,
-		s.cfg.Auth.Pepper,
 		services.LoginData{
 			Email:    payload.Email,
 			Password: payload.Password,
 		},
 	)
 	if err != nil {
+		if validationErrors, ok := validation.As(err); ok {
+			return inertia.Page(
+				etx,
+				"Auth/Login",
+				inertia.Props{},
+				inertia.WithValidationErrors(validationErrors.ToMap()),
+			)
+		}
+
 		slog.ErrorContext(
 			etx.Request().Context(),
 			"failed to authenticate user",
@@ -63,20 +108,20 @@ func (s Sessions) Create(etx *echo.Context) error {
 		)
 
 		var errorMsg string
-		switch err {
-		case services.ErrInvalidCredentials:
+		switch {
+		case errors.Is(err, services.ErrInvalidCredentials):
 			errorMsg = "Invalid email or password"
-		case services.ErrEmailNotVerified:
+		case errors.Is(err, services.ErrEmailNotVerified):
 			errorMsg = "Please verify your email before logging in"
 		default:
 			errorMsg = "Failed to log in"
 		}
 
 		if flashErr := cookies.AddFlash(etx, cookies.FlashError, errorMsg); flashErr != nil {
-			return render(etx, views.InternalError())
+			return inertia.Page(etx, "Errors/InternalError", inertia.Props{})
 		}
 
-		return etx.Redirect(http.StatusSeeOther, routes.SessionNew.URL())
+		return inertia.Redirect(etx, routes.SessionNew.URL(), http.StatusSeeOther)
 	}
 
 	if err := cookies.CreateAppSession(etx, user); err != nil {
@@ -87,14 +132,18 @@ func (s Sessions) Create(etx *echo.Context) error {
 			err,
 		)
 
-		return render(etx, views.InternalError())
+		return inertia.Page(etx, "Errors/InternalError", inertia.Props{})
 	}
 
-	if flashErr := cookies.AddFlash(etx, cookies.FlashSuccess, "Successfully logged in!"); flashErr != nil {
-		return render(etx, views.InternalError())
+	if flashErr := cookies.AddFlash(
+		etx,
+		cookies.FlashSuccess,
+		"Successfully logged in!",
+	); flashErr != nil {
+		return inertia.Page(etx, "Errors/InternalError", inertia.Props{})
 	}
 
-	return hypermedia.Redirect(etx, routes.HomePage.URL())
+	return inertia.Location(etx, routes.HomePage.URL())
 }
 
 func (s Sessions) Destroy(etx *echo.Context) error {
@@ -105,12 +154,16 @@ func (s Sessions) Destroy(etx *echo.Context) error {
 			"error",
 			err,
 		)
-		return render(etx, views.InternalError())
+		return inertia.Page(etx, "Errors/InternalError", inertia.Props{})
 	}
 
-	if flashErr := cookies.AddFlash(etx, cookies.FlashSuccess, "Successfully logged out!"); flashErr != nil {
-		return render(etx, views.InternalError())
+	if flashErr := cookies.AddFlash(
+		etx,
+		cookies.FlashSuccess,
+		"Successfully logged out!",
+	); flashErr != nil {
+		return inertia.Page(etx, "Errors/InternalError", inertia.Props{})
 	}
 
-	return etx.Redirect(http.StatusSeeOther, routes.SessionNew.URL())
+	return inertia.Redirect(etx, routes.SessionNew.URL(), http.StatusSeeOther)
 }

@@ -1,13 +1,15 @@
-FROM mbvlabs/andurel:latest AS css-builder
+ARG GO_VERSION=1.26.0
+FROM debian:bookworm-slim AS css-builder
 
 WORKDIR /usr/src/app
 
+COPY bin/tailwindcli ./bin/tailwindcli
 COPY css ./css
 COPY views ./views
 
 RUN ./bin/tailwindcli -i ./css/base.css -o ./assets/css/style.css --minify
 
-FROM golang:1.26-bookworm AS builder
+FROM golang:${GO_VERSION}-bookworm AS builder
 
 WORKDIR /usr/src/app
 

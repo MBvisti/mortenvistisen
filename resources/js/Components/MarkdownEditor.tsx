@@ -1,0 +1,217 @@
+import { useEffect, useRef } from 'react'
+import { Markdown } from '@tiptap/markdown'
+import { EditorContent, useEditor } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
+import {
+  Bold,
+  Code,
+  Code2,
+  Heading2,
+  Heading3,
+  Heading4,
+  Italic,
+  List,
+  ListOrdered,
+  Quote,
+  Redo2,
+  Undo2,
+} from 'lucide-react'
+
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
+
+type MarkdownEditorProps = {
+  value: string
+  onChange: (value: string) => void
+  invalid?: boolean
+  ariaLabel?: string
+}
+
+type ToolbarButtonProps = {
+  label: string
+  active?: boolean
+  disabled?: boolean
+  onClick: () => void
+  children: React.ReactNode
+}
+
+function ToolbarButton({
+  label,
+  active = false,
+  disabled = false,
+  onClick,
+  children,
+}: ToolbarButtonProps) {
+  return (
+    <Button
+      type="button"
+      variant={active ? 'secondary' : 'ghost'}
+      size="icon-sm"
+      disabled={disabled}
+      onClick={onClick}
+      aria-label={label}
+      title={label}
+      aria-pressed={active}
+    >
+      {children}
+    </Button>
+  )
+}
+
+export function MarkdownEditor({
+  value,
+  onChange,
+  invalid = false,
+  ariaLabel = 'Markdown content',
+}: MarkdownEditorProps) {
+  const onChangeRef = useRef(onChange)
+  onChangeRef.current = onChange
+
+  const editor = useEditor({
+    immediatelyRender: false,
+    extensions: [
+      StarterKit.configure({
+        heading: {
+          levels: [2, 3, 4],
+        },
+        codeBlock: {
+          enableTabIndentation: true,
+          tabSize: 2,
+        },
+      }),
+      Markdown,
+    ],
+    content: value,
+    contentType: 'markdown',
+    editorProps: {
+      attributes: {
+        class:
+          'tiptap min-h-96 px-5 py-4 text-sm leading-7 text-foreground outline-none',
+        'aria-label': ariaLabel,
+      },
+    },
+    onUpdate: ({ editor: currentEditor }) => {
+      onChangeRef.current(currentEditor.getMarkdown())
+    },
+  })
+
+  useEffect(() => {
+    if (!editor || editor.getMarkdown() === value) {
+      return
+    }
+
+    editor.commands.setContent(value, {
+      contentType: 'markdown',
+      emitUpdate: false,
+    })
+  }, [editor, value])
+
+  if (!editor) {
+    return (
+      <div className="min-h-96 animate-pulse rounded-none border border-border bg-muted/20" />
+    )
+  }
+
+  return (
+    <div
+      className={cn(
+        'overflow-hidden rounded-none border border-input bg-transparent transition-colors focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/30',
+        invalid && 'border-destructive ring-2 ring-destructive/20',
+      )}
+    >
+      <div className="flex flex-wrap items-center gap-1 border-b border-border bg-muted/30 p-2">
+        <ToolbarButton
+          label="Heading 2"
+          active={editor.isActive('heading', { level: 2 })}
+          onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+        >
+          <Heading2 />
+        </ToolbarButton>
+        <ToolbarButton
+          label="Heading 3"
+          active={editor.isActive('heading', { level: 3 })}
+          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+        >
+          <Heading3 />
+        </ToolbarButton>
+        <ToolbarButton
+          label="Heading 4"
+          active={editor.isActive('heading', { level: 4 })}
+          onClick={() => editor.chain().focus().toggleHeading({ level: 4 }).run()}
+        >
+          <Heading4 />
+        </ToolbarButton>
+        <ToolbarButton
+          label="Bold"
+          active={editor.isActive('bold')}
+          onClick={() => editor.chain().focus().toggleBold().run()}
+        >
+          <Bold />
+        </ToolbarButton>
+        <ToolbarButton
+          label="Italic"
+          active={editor.isActive('italic')}
+          onClick={() => editor.chain().focus().toggleItalic().run()}
+        >
+          <Italic />
+        </ToolbarButton>
+        <ToolbarButton
+          label="Inline code"
+          active={editor.isActive('code')}
+          onClick={() => editor.chain().focus().toggleCode().run()}
+        >
+          <Code />
+        </ToolbarButton>
+        <span className="mx-1 h-6 w-px bg-border" aria-hidden="true" />
+        <ToolbarButton
+          label="Bullet list"
+          active={editor.isActive('bulletList')}
+          onClick={() => editor.chain().focus().toggleBulletList().run()}
+        >
+          <List />
+        </ToolbarButton>
+        <ToolbarButton
+          label="Numbered list"
+          active={editor.isActive('orderedList')}
+          onClick={() => editor.chain().focus().toggleOrderedList().run()}
+        >
+          <ListOrdered />
+        </ToolbarButton>
+        <ToolbarButton
+          label="Quote"
+          active={editor.isActive('blockquote')}
+          onClick={() => editor.chain().focus().toggleBlockquote().run()}
+        >
+          <Quote />
+        </ToolbarButton>
+        <ToolbarButton
+          label="Code block"
+          active={editor.isActive('codeBlock')}
+          onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+        >
+          <Code2 />
+        </ToolbarButton>
+        <span className="mx-1 h-6 w-px bg-border" aria-hidden="true" />
+        <ToolbarButton
+          label="Undo"
+          disabled={!editor.can().chain().focus().undo().run()}
+          onClick={() => editor.chain().focus().undo().run()}
+        >
+          <Undo2 />
+        </ToolbarButton>
+        <ToolbarButton
+          label="Redo"
+          disabled={!editor.can().chain().focus().redo().run()}
+          onClick={() => editor.chain().focus().redo().run()}
+        >
+          <Redo2 />
+        </ToolbarButton>
+      </div>
+
+      <EditorContent
+        editor={editor}
+        className="[&_.tiptap_blockquote]:my-4 [&_.tiptap_blockquote]:border-l-2 [&_.tiptap_blockquote]:border-primary/50 [&_.tiptap_blockquote]:pl-4 [&_.tiptap_code]:rounded-sm [&_.tiptap_code]:bg-muted [&_.tiptap_code]:px-1 [&_.tiptap_code]:py-0.5 [&_.tiptap_code]:font-mono [&_.tiptap_h2]:mb-4 [&_.tiptap_h2]:mt-6 [&_.tiptap_h2]:font-heading [&_.tiptap_h2]:text-2xl [&_.tiptap_h2]:font-semibold [&_.tiptap_h3]:mb-3 [&_.tiptap_h3]:mt-5 [&_.tiptap_h3]:font-heading [&_.tiptap_h3]:text-xl [&_.tiptap_h3]:font-semibold [&_.tiptap_h4]:mb-2 [&_.tiptap_h4]:mt-4 [&_.tiptap_h4]:font-heading [&_.tiptap_h4]:text-lg [&_.tiptap_h4]:font-semibold [&_.tiptap_li]:my-1 [&_.tiptap_ol]:my-4 [&_.tiptap_ol]:list-decimal [&_.tiptap_ol]:pl-6 [&_.tiptap_p]:my-3 [&_.tiptap_pre]:my-5 [&_.tiptap_pre]:overflow-x-auto [&_.tiptap_pre]:border [&_.tiptap_pre]:border-border [&_.tiptap_pre]:bg-slate-950 [&_.tiptap_pre]:p-4 [&_.tiptap_pre]:font-mono [&_.tiptap_pre]:text-sm [&_.tiptap_pre]:leading-6 [&_.tiptap_pre]:text-slate-100 [&_.tiptap_pre_code]:bg-transparent [&_.tiptap_pre_code]:p-0 [&_.tiptap_ul]:my-4 [&_.tiptap_ul]:list-disc [&_.tiptap_ul]:pl-6"
+      />
+    </div>
+  )
+}

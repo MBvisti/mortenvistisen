@@ -1,0 +1,146 @@
+package views
+
+import (
+	"database/sql"
+	"mortenvistisen/models"
+	"mortenvistisen/router/routes"
+)
+
+type Landing struct {
+	Articles   []models.ArticleEntity
+	Projects   []models.ProjectEntity
+	Newsletters []models.NewsletterEntity
+}
+
+func (l Landing) PageFragment() string {
+	return "landing-page-fragment"
+}
+
+func publicDate(value sql.NullTime) string {
+	if !value.Valid {
+		return "DATE PENDING"
+	}
+	return value.Time.Format("02.01.2006")
+}
+
+templ (l Landing) Page() {
+	@base(
+		SetTitle("Software Engineer, Freelancer & Bootstrapper"),
+		SetDescription("I'm Morten, a software engineer from Denmark living in Spain. I write Go and build online businesses."),
+		SetImage("https://media.mortenvistisen.com/mig_selv-removebg-preview.png"),
+		SetImageAlt("Portrait of Morten Vistisen"),
+		SetSchema(HomePageSchema()),
+	) {
+		@templ.Fragment(l.PageFragment()) {
+			<main id="main-content" class="flex-1">
+				<div class="public-shell py-3 sm:py-4">
+					<section id="about" aria-labelledby="landing-title" class="grid grid-cols-1 gap-3 lg:grid-cols-12">
+						<div class="public-panel flex min-h-[28rem] flex-col justify-between lg:col-span-12 lg:min-h-[34rem]">
+							<p class="public-label text-[#8df7a4]">Software engineer</p>
+							<div>
+								<h1 id="landing-title" class="public-display text-[#f2ead8]">I build practical software with <span class="text-[#ff6b1a]">Go.</span></h1>
+								<p class="mt-7 max-w-2xl text-lg leading-8 text-[#aaa393] sm:text-xl">
+									Freelancer, bootstrapper, and writer focused on useful systems that stay understandable.
+								</p>
+							</div>
+							<p class="public-label text-[#8f8a7d]">Go / distributed systems</p>
+						</div>
+					</section>
+
+					<section id="writing" aria-labelledby="writing-title" class="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-12">
+						<a class="public-panel public-panel-primary flex min-h-64 flex-col justify-between transition hover:border-[#8df7a4] hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#130f0b] lg:col-span-4" href={ routes.PostIndex.URL() }>
+							<p class="public-label text-[#130f0b]">01 / Writing</p>
+							<h2 id="writing-title" class="public-heading text-[#130f0b]">Latest transmissions</h2>
+							<span aria-hidden="true" class="text-5xl leading-none">↘</span>
+						</a>
+						if len(l.Articles) == 0 {
+							<div class="lg:col-span-8">
+								@emptyLandingPanel("Writing archive", "No published articles are online yet.")
+							</div>
+						} else {
+							for index, article := range l.Articles {
+								<a class={ "public-panel public-panel-link public-text-link flex min-h-64 flex-col justify-between", templ.KV("lg:col-span-8", index == 0), templ.KV("lg:col-span-6", index > 0) } href={ routes.PostShow.URL(article.Slug) }>
+									<div>
+										<div class="mb-8 flex flex-wrap items-center justify-between gap-3">
+											<p class="public-label text-[#8df7a4]">Article / { publicDate(article.FirstPublishedAt) }</p>
+											if article.ReadTime.Valid {
+												<p class="public-label text-[#8f8a7d]">{ article.ReadTime.Int32 } min read</p>
+											}
+										</div>
+										<h3 class="public-card-heading">{ article.Title }</h3>
+									</div>
+									if article.Excerpt.Valid {
+										<p class="mt-8 max-w-2xl text-base leading-7 text-[#aaa393]">{ article.Excerpt.String }</p>
+									}
+								</a>
+							}
+						}
+					</section>
+
+					<section id="projects" aria-labelledby="projects-title" class="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-12">
+						<a class="public-panel public-panel-link public-text-link flex min-h-64 flex-col justify-between lg:col-span-4" href={ routes.ProjectIndex.URL() }>
+							<p class="public-label text-[#8df7a4]">02 / Projects</p>
+							<h2 id="projects-title" class="public-heading">In orbit</h2>
+							<p class="text-[#8f8a7d]">Products and experiments currently transmitting.</p>
+						</a>
+						if len(l.Projects) == 0 {
+							<div class="lg:col-span-8">
+								@emptyLandingPanel("Project log", "No published projects are online yet.")
+							</div>
+						} else {
+							for _, project := range l.Projects {
+								<a class="public-panel public-panel-link public-text-link flex min-h-64 flex-col justify-between lg:col-span-4" href={ routes.ProjectShow.URL(project.Slug) }>
+									@projectPanel(project)
+								</a>
+							}
+						}
+					</section>
+
+					<section id="newsletter" aria-labelledby="newsletter-title" class="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-12">
+						<a class="public-panel public-panel-primary flex min-h-64 flex-col justify-between transition hover:border-[#8df7a4] hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#130f0b] lg:col-span-4" href={ routes.NewsletterIndex.URL() }>
+							<p class="public-label text-[#130f0b]">03 / Field notes</p>
+							<h2 id="newsletter-title" class="public-heading text-[#130f0b]">Newsletter</h2>
+							<span aria-hidden="true" class="text-5xl leading-none">→</span>
+						</a>
+						if len(l.Newsletters) == 0 {
+							<div class="lg:col-span-8">
+								@emptyLandingPanel("Field notes", "No published newsletter issue is online yet.")
+							</div>
+						} else {
+							for _, newsletter := range l.Newsletters {
+								<a class="public-panel public-panel-link public-text-link flex min-h-64 flex-col justify-between lg:col-span-8" href={ routes.NewsletterShow.URL(newsletter.Slug.String) }>
+									<div>
+										<p class="public-label mb-8 text-[#8df7a4]">Latest issue / { publicDate(newsletter.ReleasedAt) }</p>
+										<h3 class="public-card-heading">{ newsletter.Title }</h3>
+									</div>
+									<p class="mt-8 max-w-3xl text-base leading-7 text-[#aaa393]">{ newsletter.MetaDescription }</p>
+								</a>
+							}
+						}
+					</section>
+				</div>
+			</main>
+		}
+	}
+}
+
+templ projectPanel(project models.ProjectEntity) {
+	<div>
+		<div class="mb-8 flex flex-wrap items-center justify-between gap-3">
+			<p class="public-label text-[#8df7a4]">Project / { publicDate(project.StartedAt) }</p>
+			<p class="public-label text-[#8f8a7d]">{ project.Status }</p>
+		</div>
+		<h3 class="public-card-heading">{ project.Title }</h3>
+	</div>
+	<p class="mt-8 text-base leading-7 text-[#aaa393]">{ project.Description }</p>
+}
+
+templ emptyLandingPanel(title string, description string) {
+	<div class="public-panel flex min-h-64 flex-col justify-between">
+		<p class="public-label text-[#8df7a4]">Signal pending</p>
+		<div>
+			<h3 class="public-card-heading">{ title }</h3>
+			<p class="mt-4 text-[#aaa393]">{ description }</p>
+		</div>
+	</div>
+}

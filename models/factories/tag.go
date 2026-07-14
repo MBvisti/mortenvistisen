@@ -11,21 +11,19 @@ import (
 	"github.com/go-faker/faker/v4"
 )
 
-// TagFactory wraps models.Tag for testing
+// TagFactory wraps models.TagEntity for testing
 type TagFactory struct {
-	models.Tag // Embedded
+	models.TagEntity
 }
 
 type TagOption func(*TagFactory)
 
-// BuildTag creates an in-memory Tag with default test values
-func BuildTag(opts ...TagOption) models.Tag {
+// BuildTag creates an in-memory Tag with default test values.
+// Auto-managed fields (ID, timestamps) are left at zero and set by CreateTag.
+func BuildTag(opts ...TagOption) models.TagEntity {
 	f := &TagFactory{
-		Tag: models.Tag{
-			ID:        0, // Will be assigned by database or test setup
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
-			Title:     faker.Word(),
+		TagEntity: models.TagEntity{
+			Title: faker.Word(),
 		},
 	}
 
@@ -33,38 +31,46 @@ func BuildTag(opts ...TagOption) models.Tag {
 		opt(f)
 	}
 
-	return f.Tag
+	return f.TagEntity
 }
 
-// CreateTag creates and persists a Tag to the database
-func CreateTag(ctx context.Context, exec storage.Executor, opts ...TagOption) (models.Tag, error) {
-	// Build with defaults and required FKs
+// CreateTag creates and persists a Tag to the database.
+// It returns the entity populated with all DB-assigned values via RETURNING *.
+func CreateTag(
+	ctx context.Context,
+	exec storage.Executor,
+	opts ...TagOption,
+) (models.TagEntity, error) {
 	built := BuildTag(opts...)
 
-	// Prepare creation data
-	data := models.CreateTagData{
-		Title: built.Title,
+	entity := models.TagEntity{
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		Title:     built.Title,
 	}
 
-	// Use model's Create function
-	tag, err := models.CreateTag(ctx, exec, data)
-	if err != nil {
-		return models.Tag{}, err
+	if err := exec.NewInsert().Model(&entity).Returning("*").Scan(ctx); err != nil {
+		return models.TagEntity{}, err
 	}
 
-	return tag, nil
+	return entity, nil
 }
 
 // CreateTags creates multiple Tag records at once
-func CreateTags(ctx context.Context, exec storage.Executor, count int, opts ...TagOption) ([]models.Tag, error) {
-	tags := make([]models.Tag, 0, count)
+func CreateTags(
+	ctx context.Context,
+	exec storage.Executor,
+	count int,
+	opts ...TagOption,
+) ([]models.TagEntity, error) {
+	tags := make([]models.TagEntity, 0, count)
 
-	for i := 0; i < count; i++ {
-		tag, err := CreateTag(ctx, exec, opts...)
+	for i := range count {
+		entity, err := CreateTag(ctx, exec, opts...)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create tag %d: %w", i+1, err)
 		}
-		tags = append(tags, tag)
+		tags = append(tags, entity)
 	}
 
 	return tags, nil
@@ -75,6 +81,6 @@ func CreateTags(ctx context.Context, exec storage.Executor, count int, opts ...T
 // WithTagsTitle sets the Title field
 func WithTagsTitle(value string) TagOption {
 	return func(f *TagFactory) {
-		f.Tag.Title = value
+		f.TagEntity.Title = value
 	}
 }

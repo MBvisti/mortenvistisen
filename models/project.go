@@ -2,190 +2,349 @@ package models
 
 import (
 	"context"
+	"database/sql"
 	"errors"
+	"mortenvistisen/internal/storage"
+	"mortenvistisen/internal/validation"
 	"time"
 
-	"github.com/jackc/pgx/v5/pgtype"
-
-	"mortenvistisen/internal/storage"
-	"mortenvistisen/models/internal/db"
+	"github.com/uptrace/bun"
 )
 
-type Project struct {
-	ID          int32
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	Published   bool
-	Title       string
-	Slug        string
-	StartedAt   time.Time
-	Status      string
-	Description string
-	Content     string
-	ProjectURL  string
+const (
+	projectTitleMaxLength                      = 120
+	projectMetaTitleRecommendedMinLength       = 50
+	projectMetaTitleMaxLength                  = 60
+	projectMetaDescriptionRecommendedMinLength = 120
+	projectMetaDescriptionMaxLength            = 160
+	projectStatusMaxLength                     = 80
+	projectURLMaxLength                        = 255
+)
+
+type ProjectEntity struct {
+	bun.BaseModel `bun:"table:projects,alias:projects"`
+
+	ID              int32          `bun:"id,pk,autoincrement"`
+	CreatedAt       time.Time      `bun:"created_at"`
+	UpdatedAt       time.Time      `bun:"updated_at"`
+	Published       bool           `bun:"published"`
+	Title           string         `bun:"title"`
+	Slug            string         `bun:"slug"`
+	StartedAt       sql.NullTime   `bun:"started_at"`
+	Status          string         `bun:"status"`
+	Description     string         `bun:"description"`
+	Content         string         `bun:"content"`
+	ProjectUrl      sql.NullString `bun:"project_url"`
+	MetaTitle       string         `bun:"meta_title"`
+	MetaDescription string         `bun:"meta_description"`
+	ImageLink       sql.NullString `bun:"image_link"`
+	MetaImageLink   sql.NullString `bun:"meta_image_link"`
 }
 
-func FindProject(
-	ctx context.Context,
-	exec storage.Executor,
-	id int32,
-) (Project, error) {
-	row, err := queries.QueryProjectByID(ctx, exec, id)
-	if err != nil {
-		return Project{}, err
+func (e *ProjectEntity) validationBuilder() *validation.ValidationBuilder {
+	b := validation.NewBuilder()
+	b.Required("title", e.Title)
+	b.MaxLen("title", e.Title, projectTitleMaxLength)
+	b.Required("slug", e.Slug)
+	b.RequiredWhen(e.Published, "startedAt", e.StartedAt)
+	b.RequiredWhen(e.Published, "status", e.Status)
+	b.RequiredWhen(e.Published, "description", e.Description)
+	b.RequiredWhen(e.Published, "metaTitle", e.MetaTitle)
+	b.RequiredWhen(e.Published, "metaDescription", e.MetaDescription)
+	b.RequiredWhen(e.Published, "imageLink", e.ImageLink)
+	b.RequiredWhen(e.Published, "content", e.Content)
+	b.URL("imageLink", e.ImageLink)
+	b.URL("metaImageLink", e.MetaImageLink)
+	b.MaxLen("status", e.Status, projectStatusMaxLength)
+	b.MaxLen("metaTitle", e.MetaTitle, projectMetaTitleMaxLength)
+	b.RecommendedLenBetween(
+		"metaTitle",
+		projectMetaTitleRecommendedMinLength,
+		projectMetaTitleMaxLength,
+	)
+	b.MaxLen(
+		"metaDescription",
+		e.MetaDescription,
+		projectMetaDescriptionMaxLength,
+	)
+	b.RecommendedLenBetween(
+		"metaDescription",
+		projectMetaDescriptionRecommendedMinLength,
+		projectMetaDescriptionMaxLength,
+	)
+	b.MaxLen("projectUrl", e.ProjectUrl, projectURLMaxLength)
+	b.URL("projectUrl", e.ProjectUrl)
+
+	return b
+}
+
+func (e *ProjectEntity) Validate() error {
+	return e.validationBuilder().Err()
+}
+
+func ProjectValidationRules(published bool) validation.Rules {
+	return (&ProjectEntity{Published: published}).validationBuilder().Rules()
+}
+
+func (p project) Find(ctx context.Context, db storage.Executor, id int32) (ProjectEntity, error) {
+	var entity ProjectEntity
+	if err := db.NewSelect().
+		Model(&entity).
+		Where("id = ?", id).
+		Scan(ctx); err != nil {
+		return ProjectEntity{}, err
 	}
 
-	return rowToProject(row), nil
+	return entity, nil
 }
 
-func FindProjectBySlug(
+func (p project) FindPublishedBySlug(
 	ctx context.Context,
-	exec storage.Executor,
+	db storage.Executor,
 	slug string,
-) (Project, error) {
-	row, err := queries.QueryProjectBySlug(ctx, exec, slug)
-	if err != nil {
-		return Project{}, err
+) (ProjectEntity, error) {
+	var entity ProjectEntity
+	if err := db.NewSelect().
+		Model(&entity).
+		Where("slug = ?", slug).
+		Where("published = TRUE").
+		Where("started_at IS NOT NULL").
+		Scan(ctx); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return ProjectEntity{}, ErrNotFound
+		}
+		return ProjectEntity{}, err
 	}
 
-	return rowToProject(row), nil
+	return entity, nil
+}
+
+func (p project) FindForUpdate(
+	ctx context.Context,
+	db storage.Executor,
+	id int32,
+) (ProjectEntity, error) {
+	var entity ProjectEntity
+	if err := db.NewSelect().
+		Model(&entity).
+		Where("id = ?", id).
+		For("UPDATE").
+		Scan(ctx); err != nil {
+		return ProjectEntity{}, err
+	}
+
+	return entity, nil
 }
 
 type CreateProjectData struct {
-	Published   bool
-	Title       string
-	Slug        string
-	StartedAt   time.Time
-	Status      string
-	Description string
-	Content     string
-	ProjectURL  string
+	Published       bool
+	Title           string
+	Slug            string
+	StartedAt       sql.NullTime
+	Status          string
+	Description     string
+	MetaTitle       string
+	MetaDescription string
+	ImageLink       sql.NullString
+	MetaImageLink   sql.NullString
+	Content         string
+	ProjectUrl      sql.NullString
 }
 
-func CreateProject(
+func (d CreateProjectData) Validate() error {
+	entity := ProjectEntity{
+		Published:       d.Published,
+		Title:           d.Title,
+		Slug:            d.Slug,
+		StartedAt:       d.StartedAt,
+		Status:          d.Status,
+		Description:     d.Description,
+		MetaTitle:       d.MetaTitle,
+		MetaDescription: d.MetaDescription,
+		ImageLink:       normalizeOptionalString(d.ImageLink),
+		MetaImageLink:   normalizeOptionalString(d.MetaImageLink),
+		Content:         d.Content,
+		ProjectUrl:      normalizeOptionalString(d.ProjectUrl),
+	}
+	if err := validation.Validate(&entity); err != nil {
+		return errors.Join(ErrDomainValidation, err)
+	}
+	return nil
+}
+
+func (p project) Create(
 	ctx context.Context,
-	exec storage.Executor,
+	db storage.Executor,
 	data CreateProjectData,
-) (Project, error) {
-	if err := Validate.Struct(data); err != nil {
-		return Project{}, errors.Join(ErrDomainValidation, err)
+) (ProjectEntity, error) {
+	entity := ProjectEntity{
+		CreatedAt:       time.Now(),
+		UpdatedAt:       time.Now(),
+		Published:       data.Published,
+		Title:           data.Title,
+		Slug:            data.Slug,
+		StartedAt:       data.StartedAt,
+		Status:          data.Status,
+		Description:     data.Description,
+		MetaTitle:       data.MetaTitle,
+		MetaDescription: data.MetaDescription,
+		ImageLink:       normalizeOptionalString(data.ImageLink),
+		MetaImageLink:   normalizeOptionalString(data.MetaImageLink),
+		Content:         data.Content,
+		ProjectUrl:      normalizeOptionalString(data.ProjectUrl),
 	}
 
-	params := db.InsertProjectParams{
-		Published:   data.Published,
-		Title:       data.Title,
-		Slug:        data.Slug,
-		StartedAt:   pgtype.Timestamptz{Time: data.StartedAt, Valid: !data.StartedAt.IsZero()},
-		Status:      data.Status,
-		Description: data.Description,
-		Content:     data.Content,
-		ProjectUrl:  pgtype.Text{String: data.ProjectURL, Valid: data.ProjectURL != ""},
+	if err := validation.Validate(&entity); err != nil {
+		return ProjectEntity{}, errors.Join(ErrDomainValidation, err)
 	}
 
-	row, err := queries.InsertProject(ctx, exec, params)
-	if err != nil {
-		return Project{}, err
+	if _, err := db.NewInsert().Model(&entity).Exec(ctx); err != nil {
+		return ProjectEntity{}, err
 	}
 
-	return rowToProject(row), nil
+	return entity, nil
 }
 
 type UpdateProjectData struct {
-	ID          int32
-	Published   bool
-	Title       string
-	Slug        string
-	StartedAt   time.Time
-	Status      string
-	Description string
-	Content     string
-	ProjectURL  string
+	ID              int32
+	UpdatedAt       time.Time
+	Published       bool
+	Title           string
+	Slug            string
+	StartedAt       sql.NullTime
+	Status          string
+	Description     string
+	MetaTitle       string
+	MetaDescription string
+	ImageLink       sql.NullString
+	MetaImageLink   sql.NullString
+	Content         string
+	ProjectUrl      sql.NullString
 }
 
-func UpdateProject(
+func (d UpdateProjectData) Validate() error {
+	entity := ProjectEntity{
+		ID:              d.ID,
+		Published:       d.Published,
+		Title:           d.Title,
+		Slug:            d.Slug,
+		StartedAt:       d.StartedAt,
+		Status:          d.Status,
+		Description:     d.Description,
+		MetaTitle:       d.MetaTitle,
+		MetaDescription: d.MetaDescription,
+		ImageLink:       normalizeOptionalString(d.ImageLink),
+		MetaImageLink:   normalizeOptionalString(d.MetaImageLink),
+		Content:         d.Content,
+		ProjectUrl:      normalizeOptionalString(d.ProjectUrl),
+	}
+	if err := validation.Validate(&entity); err != nil {
+		return errors.Join(ErrDomainValidation, err)
+	}
+	return nil
+}
+
+func (p project) Update(
 	ctx context.Context,
-	exec storage.Executor,
+	db storage.Executor,
 	data UpdateProjectData,
-) (Project, error) {
-	if err := Validate.Struct(data); err != nil {
-		return Project{}, errors.Join(ErrDomainValidation, err)
+) (ProjectEntity, error) {
+	entity := ProjectEntity{
+		ID:              data.ID,
+		UpdatedAt:       time.Now(),
+		Published:       data.Published,
+		Title:           data.Title,
+		Slug:            data.Slug,
+		StartedAt:       data.StartedAt,
+		Status:          data.Status,
+		Description:     data.Description,
+		MetaTitle:       data.MetaTitle,
+		MetaDescription: data.MetaDescription,
+		ImageLink:       normalizeOptionalString(data.ImageLink),
+		MetaImageLink:   normalizeOptionalString(data.MetaImageLink),
+		Content:         data.Content,
+		ProjectUrl:      normalizeOptionalString(data.ProjectUrl),
 	}
 
-	params := db.UpdateProjectParams{
-		ID:          data.ID,
-		Published:   data.Published,
-		Title:       data.Title,
-		Slug:        data.Slug,
-		StartedAt:   pgtype.Timestamptz{Time: data.StartedAt, Valid: !data.StartedAt.IsZero()},
-		Status:      data.Status,
-		Description: data.Description,
-		Content:     data.Content,
-		ProjectUrl:  pgtype.Text{String: data.ProjectURL, Valid: data.ProjectURL != ""},
+	if err := validation.Validate(&entity); err != nil {
+		return ProjectEntity{}, errors.Join(ErrDomainValidation, err)
 	}
 
-	row, err := queries.UpdateProject(ctx, exec, params)
-	if err != nil {
-		return Project{}, err
+	if err := db.NewUpdate().
+		Model(&entity).
+		Column("updated_at").
+		Column("published").
+		Column("title").
+		Column("slug").
+		Column("started_at").
+		Column("status").
+		Column("description").
+		Column("meta_title").
+		Column("meta_description").
+		Column("image_link").
+		Column("meta_image_link").
+		Column("content").
+		Column("project_url").
+		WherePK().
+		Returning("*").
+		Scan(ctx); err != nil {
+		return ProjectEntity{}, err
 	}
 
-	return rowToProject(row), nil
+	return entity, nil
 }
 
-func DestroyProject(
-	ctx context.Context,
-	exec storage.Executor,
-	id int32,
-) error {
-	return queries.DeleteProject(ctx, exec, id)
+func (p project) Destroy(ctx context.Context, db storage.Executor, id int32) error {
+	_, err := db.NewDelete().
+		Model((*ProjectEntity)(nil)).
+		Where("id = ?", id).
+		Exec(ctx)
+
+	return err
 }
 
-func AllProjects(
-	ctx context.Context,
-	exec storage.Executor,
-) ([]Project, error) {
-	rows, err := queries.QueryProjects(ctx, exec)
-	if err != nil {
+func (p project) All(ctx context.Context, db storage.Executor) ([]ProjectEntity, error) {
+	var entities []ProjectEntity
+	if err := db.NewSelect().
+		Model(&entities).
+		Scan(ctx); err != nil {
 		return nil, err
 	}
 
-	projects := make([]Project, len(rows))
-	for i, row := range rows {
-		projects[i] = rowToProject(row)
-	}
-
-	return projects, nil
+	return entities, nil
 }
 
-func AllPublishedProjects(
+func (p project) LatestPublished(
 	ctx context.Context,
-	exec storage.Executor,
-) ([]Project, error) {
-	rows, err := queries.QueryPublishedProjects(ctx, exec)
-	if err != nil {
+	db storage.Executor,
+	limit int,
+) ([]ProjectEntity, error) {
+	var entities []ProjectEntity
+	if err := db.NewSelect().
+		Model(&entities).
+		Where("published = TRUE").
+		Where("started_at IS NOT NULL").
+		OrderExpr("started_at DESC").
+		Limit(limit).
+		Scan(ctx); err != nil {
 		return nil, err
 	}
 
-	projects := make([]Project, len(rows))
-	for i, row := range rows {
-		projects[i] = rowToProject(row)
-	}
-
-	return projects, nil
+	return entities, nil
 }
 
 type PaginatedProjects struct {
-	Projects   []Project
+	Projects   []ProjectEntity
 	TotalCount int64
 	Page       int64
 	PageSize   int64
 	TotalPages int64
 }
 
-func PaginateProjects(
+func (p project) Paginate(
 	ctx context.Context,
-	exec storage.Executor,
-	page int64,
-	pageSize int64,
+	db storage.Executor,
+	page, pageSize int64,
 ) (PaginatedProjects, error) {
 	if page < 1 {
 		page = 1
@@ -199,86 +358,127 @@ func PaginateProjects(
 
 	offset := (page - 1) * pageSize
 
-	totalCount, err := queries.CountProjects(ctx, exec)
+	totalCount, err := db.NewSelect().
+		Model(&ProjectEntity{}).Count(ctx)
 	if err != nil {
 		return PaginatedProjects{}, err
 	}
 
-	rows, err := queries.QueryPaginatedProjects(
-		ctx,
-		exec,
-		db.QueryPaginatedProjectsParams{
-			Limit:  pageSize,
-			Offset: offset,
-		},
-	)
-	if err != nil {
+	entities := make([]ProjectEntity, 0, int(pageSize))
+	if err := db.NewSelect().
+		Model(&entities).
+		Limit(int(pageSize)).
+		Offset(int(offset)).
+		Scan(ctx); err != nil {
 		return PaginatedProjects{}, err
 	}
 
-	projects := make([]Project, len(rows))
-	for i, row := range rows {
-		projects[i] = rowToProject(row)
-	}
-
-	totalPages := (totalCount + int64(pageSize) - 1) / int64(pageSize)
+	totalPages := (int64(totalCount) + pageSize - 1) / pageSize
 
 	return PaginatedProjects{
-		Projects:   projects,
-		TotalCount: totalCount,
+		Projects:   entities,
+		TotalCount: int64(totalCount),
 		Page:       page,
 		PageSize:   pageSize,
 		TotalPages: totalPages,
 	}, nil
 }
 
-func UpsertProject(
+func (p project) PaginatePublished(
 	ctx context.Context,
-	exec storage.Executor,
-	data CreateProjectData,
-) (Project, error) {
-	if err := Validate.Struct(data); err != nil {
-		return Project{}, errors.Join(ErrDomainValidation, err)
+	db storage.Executor,
+	page, pageSize int64,
+) (PaginatedProjects, error) {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 10
+	}
+	if pageSize > 100 {
+		pageSize = 100
 	}
 
-	params := db.UpsertProjectParams{
-		Published:   data.Published,
-		Title:       data.Title,
-		Slug:        data.Slug,
-		StartedAt:   pgtype.Timestamptz{Time: data.StartedAt, Valid: !data.StartedAt.IsZero()},
-		Status:      data.Status,
-		Description: data.Description,
-		Content:     data.Content,
-		ProjectUrl:  pgtype.Text{String: data.ProjectURL, Valid: data.ProjectURL != ""},
-	}
-
-	row, err := queries.UpsertProject(ctx, exec, params)
+	totalCount, err := db.NewSelect().
+		Model(&ProjectEntity{}).
+		Where("published = TRUE").
+		Where("started_at IS NOT NULL").
+		Count(ctx)
 	if err != nil {
-		return Project{}, err
+		return PaginatedProjects{}, err
 	}
 
-	return rowToProject(row), nil
+	totalPages := (int64(totalCount) + pageSize - 1) / pageSize
+	if totalPages > 0 && page > totalPages {
+		page = totalPages
+	}
+
+	entities := make([]ProjectEntity, 0, int(pageSize))
+	if err := db.NewSelect().
+		Model(&entities).
+		Where("published = TRUE").
+		Where("started_at IS NOT NULL").
+		OrderExpr("started_at DESC").
+		Limit(int(pageSize)).
+		Offset(int((page - 1) * pageSize)).
+		Scan(ctx); err != nil {
+		return PaginatedProjects{}, err
+	}
+
+	return PaginatedProjects{
+		Projects:   entities,
+		TotalCount: int64(totalCount),
+		Page:       page,
+		PageSize:   pageSize,
+		TotalPages: totalPages,
+	}, nil
 }
 
-func CountProjects(
+func (p project) Upsert(
 	ctx context.Context,
-	exec storage.Executor,
-) (int64, error) {
-	return queries.CountProjects(ctx, exec)
-}
-
-func rowToProject(row db.Project) Project {
-	return Project{
-		ID:          row.ID,
-		CreatedAt:   row.CreatedAt.Time,
-		UpdatedAt:   row.UpdatedAt.Time,
-		Published:   row.Published,
-		Title:       row.Title,
-		Slug:        row.Slug,
-		StartedAt:   row.StartedAt.Time,
-		Status:      row.Status,
-		Description: row.Description,
-		Content:     row.Content,
-		ProjectURL:  row.ProjectUrl.String,
+	db storage.Executor,
+	data CreateProjectData,
+) (ProjectEntity, error) {
+	entity := ProjectEntity{
+		CreatedAt:       time.Now(),
+		UpdatedAt:       time.Now(),
+		Published:       data.Published,
+		Title:           data.Title,
+		Slug:            data.Slug,
+		StartedAt:       data.StartedAt,
+		Status:          data.Status,
+		Description:     data.Description,
+		MetaTitle:       data.MetaTitle,
+		MetaDescription: data.MetaDescription,
+		ImageLink:       normalizeOptionalString(data.ImageLink),
+		MetaImageLink:   normalizeOptionalString(data.MetaImageLink),
+		Content:         data.Content,
+		ProjectUrl:      normalizeOptionalString(data.ProjectUrl),
 	}
+
+	if err := validation.Validate(&entity); err != nil {
+		return ProjectEntity{}, errors.Join(ErrDomainValidation, err)
+	}
+
+	if err := db.NewInsert().
+		Model(&entity).
+		On("CONFLICT (id) DO UPDATE").
+		Set("published = excluded.published").
+		Set("title = excluded.title").
+		Set("slug = excluded.slug").
+		Set("started_at = excluded.started_at").
+		Set("status = excluded.status").
+		Set("description = excluded.description").
+		Set("meta_title = excluded.meta_title").
+		Set("meta_description = excluded.meta_description").
+		Set("image_link = excluded.image_link").
+		Set("meta_image_link = excluded.meta_image_link").
+		Set("content = excluded.content").
+		Set("project_url = excluded.project_url").
+		Returning("*").
+		Scan(ctx); err != nil {
+		return ProjectEntity{}, err
+	}
+
+	return entity, nil
 }

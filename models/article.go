@@ -2,220 +2,360 @@ package models
 
 import (
 	"context"
+	"database/sql"
 	"errors"
+	"mortenvistisen/internal/storage"
+	"mortenvistisen/internal/validation"
+	"strings"
 	"time"
 
-	"github.com/gosimple/slug"
-	"github.com/jackc/pgx/v5/pgtype"
-
-	"mortenvistisen/internal/storage"
-	"mortenvistisen/models/internal/db"
+	"github.com/uptrace/bun"
 )
 
-type Article struct {
-	ID               int32
-	CreatedAt        time.Time
-	UpdatedAt        time.Time
-	FirstPublishedAt time.Time
-	Published        bool
-	Title            string
-	Excerpt          string
-	MetaTitle        string
-	MetaDescription  string
-	Slug             string
-	ImageLink        string
-	ReadTime         int32
-	Content          string
+const (
+	articleTitleRecommendedMinLength           = 50
+	articleTitleMaxLength                      = 60
+	articleMetaTitleRecommendedMinLength       = 50
+	articleMetaTitleMaxLength                  = 60
+	articleMetaDescriptionRecommendedMinLength = 120
+	articleMetaDescriptionMaxLength            = 160
+)
+
+type ArticleEntity struct {
+	bun.BaseModel `bun:"table:articles,alias:articles"`
+
+	ID               int32          `bun:"id,pk,autoincrement"`
+	CreatedAt        time.Time      `bun:"created_at"`
+	UpdatedAt        time.Time      `bun:"updated_at"`
+	FirstPublishedAt sql.NullTime   `bun:"first_published_at"`
+	Published        bool           `bun:"published"`
+	Title            string         `bun:"title"`
+	Excerpt          sql.NullString `bun:"excerpt"`
+	MetaTitle        sql.NullString `bun:"meta_title"`
+	MetaDescription  sql.NullString `bun:"meta_description"`
+	Slug             string         `bun:"slug"`
+	ImageLink        sql.NullString `bun:"image_link"`
+	ReadTime         sql.NullInt32  `bun:"read_time"`
+	Content          sql.NullString `bun:"content"`
+	MetaImageLink    sql.NullString `bun:"meta_image_link"`
 }
 
-func FindArticle(
-	ctx context.Context,
-	exec storage.Executor,
-	id int32,
-) (Article, error) {
-	row, err := queries.QueryArticleByID(ctx, exec, id)
-	if err != nil {
-		return Article{}, err
+func (e *ArticleEntity) validationBuilder() *validation.ValidationBuilder {
+	b := validation.NewBuilder()
+	b.Required("title", e.Title)
+	b.MaxLen("title", e.Title, articleTitleMaxLength)
+	b.RecommendedLenBetween(
+		"title",
+		articleTitleRecommendedMinLength,
+		articleTitleMaxLength,
+	)
+	b.Required("slug", e.Slug)
+	b.RequiredWhen(e.Published, "firstPublishedAt", e.FirstPublishedAt)
+	b.RequiredWhen(e.Published, "excerpt", e.Excerpt)
+	b.RequiredWhen(e.Published, "metaTitle", e.MetaTitle)
+	b.RequiredWhen(e.Published, "metaDescription", e.MetaDescription)
+	b.RequiredWhen(e.Published, "imageLink", e.ImageLink)
+	b.RequiredWhen(e.Published, "readTime", e.ReadTime)
+	b.RequiredWhen(e.Published, "content", e.Content)
+	b.MaxLen("metaTitle", e.MetaTitle, articleMetaTitleMaxLength)
+	b.RecommendedLenBetween(
+		"metaTitle",
+		articleMetaTitleRecommendedMinLength,
+		articleMetaTitleMaxLength,
+	)
+	b.MaxLen(
+		"metaDescription",
+		e.MetaDescription,
+		articleMetaDescriptionMaxLength,
+	)
+	b.RecommendedLenBetween(
+		"metaDescription",
+		articleMetaDescriptionRecommendedMinLength,
+		articleMetaDescriptionMaxLength,
+	)
+	b.URL("imageLink", e.ImageLink)
+	b.URL("metaImageLink", e.MetaImageLink)
+	if e.Published {
+		b.MinInt("readTime", e.ReadTime, 1)
+	} else {
+		b.MinInt("readTime", e.ReadTime, 0)
 	}
 
-	return rowToArticle(row), nil
+	return b
 }
 
-func FindArticleBySlug(
+func (e *ArticleEntity) Validate() error {
+	return e.validationBuilder().Err()
+}
+
+func ArticleValidationRules(published bool) validation.Rules {
+	return (&ArticleEntity{Published: published}).validationBuilder().Rules()
+}
+
+func (a article) Find(ctx context.Context, db storage.Executor, id int32) (ArticleEntity, error) {
+	var entity ArticleEntity
+	if err := db.NewSelect().
+		Model(&entity).
+		Where("id = ?", id).
+		Scan(ctx); err != nil {
+		return ArticleEntity{}, err
+	}
+
+	return entity, nil
+}
+
+func (a article) FindPublishedBySlug(
 	ctx context.Context,
-	exec storage.Executor,
+	db storage.Executor,
 	slug string,
-) (Article, error) {
-	row, err := queries.QueryArticleBySlug(ctx, exec, slug)
-	if err != nil {
-		return Article{}, err
+) (ArticleEntity, error) {
+	var entity ArticleEntity
+	if err := db.NewSelect().
+		Model(&entity).
+		Where("slug = ?", slug).
+		Where("published = TRUE").
+		Where("first_published_at IS NOT NULL").
+		Scan(ctx); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return ArticleEntity{}, ErrNotFound
+		}
+		return ArticleEntity{}, err
 	}
 
-	return rowToArticle(row), nil
+	return entity, nil
+}
+
+func (a article) FindForUpdate(
+	ctx context.Context,
+	db storage.Executor,
+	id int32,
+) (ArticleEntity, error) {
+	var entity ArticleEntity
+	if err := db.NewSelect().
+		Model(&entity).
+		Where("id = ?", id).
+		For("UPDATE").
+		Scan(ctx); err != nil {
+		return ArticleEntity{}, err
+	}
+
+	return entity, nil
 }
 
 type CreateArticleData struct {
-	FirstPublishedAt time.Time
+	FirstPublishedAt sql.NullTime
 	Published        bool
 	Title            string
-	Excerpt          string
-	MetaTitle        string
-	MetaDescription  string
+	Excerpt          sql.NullString
+	MetaTitle        sql.NullString
+	MetaDescription  sql.NullString
 	Slug             string
-	ImageLink        string
-	ReadTime         int32
-	Content          string
+	ImageLink        sql.NullString
+	MetaImageLink    sql.NullString
+	ReadTime         sql.NullInt32
+	Content          sql.NullString
 }
 
-func CreateArticle(
+func (d CreateArticleData) Validate() error {
+	entity := ArticleEntity{
+		FirstPublishedAt: d.FirstPublishedAt,
+		Published:        d.Published,
+		Title:            d.Title,
+		Excerpt:          normalizeOptionalString(d.Excerpt),
+		MetaTitle:        normalizeOptionalString(d.MetaTitle),
+		MetaDescription:  normalizeOptionalString(d.MetaDescription),
+		Slug:             d.Slug,
+		ImageLink:        normalizeOptionalString(d.ImageLink),
+		MetaImageLink:    normalizeOptionalString(d.MetaImageLink),
+		ReadTime:         d.ReadTime,
+		Content:          normalizeOptionalString(d.Content),
+	}
+
+	if err := validation.Validate(&entity); err != nil {
+		return errors.Join(ErrDomainValidation, err)
+	}
+
+	return nil
+}
+
+func normalizeOptionalString(value sql.NullString) sql.NullString {
+	if !value.Valid || strings.TrimSpace(value.String) == "" {
+		return sql.NullString{}
+	}
+
+	return value
+}
+
+func (a article) Create(
 	ctx context.Context,
-	exec storage.Executor,
+	db storage.Executor,
 	data CreateArticleData,
-) (Article, error) {
-	if err := Validate.Struct(data); err != nil {
-		return Article{}, errors.Join(ErrDomainValidation, err)
+) (ArticleEntity, error) {
+	if err := data.Validate(); err != nil {
+		return ArticleEntity{}, err
 	}
 
-	params := db.InsertArticleParams{
-		FirstPublishedAt: pgtype.Timestamptz{
-			Time:  time.Now(),
-			Valid: data.Published,
-		},
-		Published:       data.Published,
-		Title:           data.Title,
-		Excerpt:         pgtype.Text{String: data.Excerpt, Valid: true},
-		MetaTitle:       pgtype.Text{String: data.MetaTitle, Valid: true},
-		MetaDescription: pgtype.Text{String: data.MetaDescription, Valid: true},
-		Slug:            slug.Make(data.Title),
-		ImageLink:       pgtype.Text{String: data.ImageLink, Valid: true},
-		ReadTime:        pgtype.Int4{Int32: data.ReadTime, Valid: true},
-		Content:         pgtype.Text{String: data.Content, Valid: true},
-	}
-	row, err := queries.InsertArticle(ctx, exec, params)
-	if err != nil {
-		return Article{}, err
+	entity := ArticleEntity{
+		CreatedAt:        time.Now(),
+		UpdatedAt:        time.Now(),
+		FirstPublishedAt: data.FirstPublishedAt,
+		Published:        data.Published,
+		Title:            data.Title,
+		Excerpt:          normalizeOptionalString(data.Excerpt),
+		MetaTitle:        normalizeOptionalString(data.MetaTitle),
+		MetaDescription:  normalizeOptionalString(data.MetaDescription),
+		Slug:             data.Slug,
+		ImageLink:        normalizeOptionalString(data.ImageLink),
+		MetaImageLink:    normalizeOptionalString(data.MetaImageLink),
+		ReadTime:         data.ReadTime,
+		Content:          normalizeOptionalString(data.Content),
 	}
 
-	return rowToArticle(row), nil
+	if _, err := db.NewInsert().Model(&entity).Exec(ctx); err != nil {
+		return ArticleEntity{}, err
+	}
+
+	return entity, nil
 }
 
 type UpdateArticleData struct {
-	ID              int32
-	UpdatedAt       time.Time
-	Published       bool
-	Title           string
-	Excerpt         string
-	MetaTitle       string
-	MetaDescription string
-	Slug            string
-	ImageLink       string
-	ReadTime        int32
-	Content         string
+	ID               int32
+	UpdatedAt        time.Time
+	FirstPublishedAt sql.NullTime
+	Published        bool
+	Title            string
+	Excerpt          sql.NullString
+	MetaTitle        sql.NullString
+	MetaDescription  sql.NullString
+	Slug             string
+	ImageLink        sql.NullString
+	MetaImageLink    sql.NullString
+	ReadTime         sql.NullInt32
+	Content          sql.NullString
 }
 
-func UpdateArticle(
+func (d UpdateArticleData) Validate() error {
+	entity := ArticleEntity{
+		ID:               d.ID,
+		FirstPublishedAt: d.FirstPublishedAt,
+		Published:        d.Published,
+		Title:            d.Title,
+		Excerpt:          normalizeOptionalString(d.Excerpt),
+		MetaTitle:        normalizeOptionalString(d.MetaTitle),
+		MetaDescription:  normalizeOptionalString(d.MetaDescription),
+		Slug:             d.Slug,
+		ImageLink:        normalizeOptionalString(d.ImageLink),
+		MetaImageLink:    normalizeOptionalString(d.MetaImageLink),
+		ReadTime:         d.ReadTime,
+		Content:          normalizeOptionalString(d.Content),
+	}
+
+	if err := validation.Validate(&entity); err != nil {
+		return errors.Join(ErrDomainValidation, err)
+	}
+
+	return nil
+}
+
+func (a article) Update(
 	ctx context.Context,
-	exec storage.Executor,
+	db storage.Executor,
 	data UpdateArticleData,
-) (Article, error) {
-	if err := Validate.Struct(data); err != nil {
-		return Article{}, errors.Join(ErrDomainValidation, err)
+) (ArticleEntity, error) {
+	if err := data.Validate(); err != nil {
+		return ArticleEntity{}, err
 	}
 
-	current, err := FindArticle(ctx, exec, data.ID)
-	if err != nil {
-		return Article{}, err
+	entity := ArticleEntity{
+		ID:               data.ID,
+		UpdatedAt:        time.Now(),
+		FirstPublishedAt: data.FirstPublishedAt,
+		Published:        data.Published,
+		Title:            data.Title,
+		Excerpt:          normalizeOptionalString(data.Excerpt),
+		MetaTitle:        normalizeOptionalString(data.MetaTitle),
+		MetaDescription:  normalizeOptionalString(data.MetaDescription),
+		Slug:             data.Slug,
+		ImageLink:        normalizeOptionalString(data.ImageLink),
+		MetaImageLink:    normalizeOptionalString(data.MetaImageLink),
+		ReadTime:         data.ReadTime,
+		Content:          normalizeOptionalString(data.Content),
 	}
 
-	firstPublishedAt := current.FirstPublishedAt
-	if data.Published && firstPublishedAt.IsZero() {
-		firstPublishedAt = time.Now().UTC()
+	if err := db.NewUpdate().
+		Model(&entity).
+		Column("updated_at").
+		Column("first_published_at").
+		Column("published").
+		Column("title").
+		Column("excerpt").
+		Column("meta_title").
+		Column("meta_description").
+		Column("slug").
+		Column("image_link").
+		Column("meta_image_link").
+		Column("read_time").
+		Column("content").
+		WherePK().
+		Returning("*").
+		Scan(ctx); err != nil {
+		return ArticleEntity{}, err
 	}
 
-	params := db.UpdateArticleParams{
-		ID: data.ID,
-		FirstPublishedAt: pgtype.Timestamptz{
-			Time:  firstPublishedAt,
-			Valid: !firstPublishedAt.IsZero(),
-		},
-		Published:       data.Published,
-		Title:           data.Title,
-		Excerpt:         pgtype.Text{String: data.Excerpt, Valid: true},
-		MetaTitle:       pgtype.Text{String: data.MetaTitle, Valid: true},
-		MetaDescription: pgtype.Text{String: data.MetaDescription, Valid: true},
-		Slug:            data.Slug,
-		ImageLink:       pgtype.Text{String: data.ImageLink, Valid: true},
-		ReadTime:        pgtype.Int4{Int32: data.ReadTime, Valid: true},
-		Content:         pgtype.Text{String: data.Content, Valid: true},
-	}
-
-	row, err := queries.UpdateArticle(ctx, exec, params)
-	if err != nil {
-		return Article{}, err
-	}
-
-	return rowToArticle(row), nil
+	return entity, nil
 }
 
-func DestroyArticle(
-	ctx context.Context,
-	exec storage.Executor,
-	id int32,
-) error {
-	if err := clearArticleTagConnections(ctx, exec, id); err != nil {
-		return err
-	}
+func (a article) Destroy(ctx context.Context, db storage.Executor, id int32) error {
+	_, err := db.NewDelete().
+		Model((*ArticleEntity)(nil)).
+		Where("id = ?", id).
+		Exec(ctx)
 
-	return queries.DeleteArticle(ctx, exec, id)
+	return err
 }
 
-func AllArticles(
-	ctx context.Context,
-	exec storage.Executor,
-) ([]Article, error) {
-	rows, err := queries.QueryArticles(ctx, exec)
-	if err != nil {
+func (a article) All(ctx context.Context, db storage.Executor) ([]ArticleEntity, error) {
+	var entities []ArticleEntity
+	if err := db.NewSelect().
+		Model(&entities).
+		Scan(ctx); err != nil {
 		return nil, err
 	}
 
-	articles := make([]Article, len(rows))
-	for i, row := range rows {
-		articles[i] = rowToArticle(row)
-	}
-
-	return articles, nil
+	return entities, nil
 }
 
-func AllPublishedArticles(
+func (a article) LatestPublished(
 	ctx context.Context,
-	exec storage.Executor,
-) ([]Article, error) {
-	rows, err := queries.QueryPublishedArticles(ctx, exec)
-	if err != nil {
+	db storage.Executor,
+	limit int,
+) ([]ArticleEntity, error) {
+	var entities []ArticleEntity
+	if err := db.NewSelect().
+		Model(&entities).
+		Where("published = TRUE").
+		Where("first_published_at IS NOT NULL").
+		OrderExpr("first_published_at DESC").
+		Limit(limit).
+		Scan(ctx); err != nil {
 		return nil, err
 	}
 
-	articles := make([]Article, len(rows))
-	for i, row := range rows {
-		articles[i] = rowToArticle(row)
-	}
-
-	return articles, nil
+	return entities, nil
 }
 
 type PaginatedArticles struct {
-	Articles   []Article
+	Articles   []ArticleEntity
 	TotalCount int64
 	Page       int64
 	PageSize   int64
 	TotalPages int64
 }
 
-func PaginateArticles(
+func (a article) Paginate(
 	ctx context.Context,
-	exec storage.Executor,
-	page int64,
-	pageSize int64,
+	db storage.Executor,
+	page, pageSize int64,
 ) (PaginatedArticles, error) {
 	if page < 1 {
 		page = 1
@@ -227,186 +367,130 @@ func PaginateArticles(
 		pageSize = 100
 	}
 
+	totalCount, err := db.NewSelect().
+		Model(&ArticleEntity{}).Count(ctx)
+	if err != nil {
+		return PaginatedArticles{}, err
+	}
+
+	totalPages := (int64(totalCount) + pageSize - 1) / pageSize
+	if totalPages > 0 && page > totalPages {
+		page = totalPages
+	}
 	offset := (page - 1) * pageSize
 
-	totalCount, err := queries.CountArticles(ctx, exec)
-	if err != nil {
+	entities := make([]ArticleEntity, 0, int(pageSize))
+	if err := db.NewSelect().
+		Model(&entities).
+		OrderExpr("updated_at DESC").
+		Limit(int(pageSize)).
+		Offset(int(offset)).
+		Scan(ctx); err != nil {
 		return PaginatedArticles{}, err
 	}
-
-	rows, err := queries.QueryPaginatedArticles(
-		ctx,
-		exec,
-		db.QueryPaginatedArticlesParams{
-			Limit:  pageSize,
-			Offset: offset,
-		},
-	)
-	if err != nil {
-		return PaginatedArticles{}, err
-	}
-
-	articles := make([]Article, len(rows))
-	for i, row := range rows {
-		articles[i] = rowToArticle(row)
-	}
-
-	totalPages := (totalCount + int64(pageSize) - 1) / int64(pageSize)
 
 	return PaginatedArticles{
-		Articles:   articles,
-		TotalCount: totalCount,
+		Articles:   entities,
+		TotalCount: int64(totalCount),
 		Page:       page,
 		PageSize:   pageSize,
 		TotalPages: totalPages,
 	}, nil
 }
 
-func UpsertArticle(
+func (a article) PaginatePublished(
 	ctx context.Context,
-	exec storage.Executor,
+	db storage.Executor,
+	page, pageSize int64,
+) (PaginatedArticles, error) {
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 10
+	}
+	if pageSize > 100 {
+		pageSize = 100
+	}
+
+	totalCount, err := db.NewSelect().
+		Model(&ArticleEntity{}).
+		Where("published = TRUE").
+		Where("first_published_at IS NOT NULL").
+		Count(ctx)
+	if err != nil {
+		return PaginatedArticles{}, err
+	}
+
+	totalPages := (int64(totalCount) + pageSize - 1) / pageSize
+	if totalPages > 0 && page > totalPages {
+		page = totalPages
+	}
+
+	entities := make([]ArticleEntity, 0, int(pageSize))
+	if err := db.NewSelect().
+		Model(&entities).
+		Where("published = TRUE").
+		Where("first_published_at IS NOT NULL").
+		OrderExpr("first_published_at DESC").
+		Limit(int(pageSize)).
+		Offset(int((page - 1) * pageSize)).
+		Scan(ctx); err != nil {
+		return PaginatedArticles{}, err
+	}
+
+	return PaginatedArticles{
+		Articles:   entities,
+		TotalCount: int64(totalCount),
+		Page:       page,
+		PageSize:   pageSize,
+		TotalPages: totalPages,
+	}, nil
+}
+
+func (a article) Upsert(
+	ctx context.Context,
+	db storage.Executor,
 	data CreateArticleData,
-) (Article, error) {
-	if err := Validate.Struct(data); err != nil {
-		return Article{}, errors.Join(ErrDomainValidation, err)
+) (ArticleEntity, error) {
+	entity := ArticleEntity{
+		CreatedAt:        time.Now(),
+		UpdatedAt:        time.Now(),
+		FirstPublishedAt: data.FirstPublishedAt,
+		Published:        data.Published,
+		Title:            data.Title,
+		Excerpt:          normalizeOptionalString(data.Excerpt),
+		MetaTitle:        normalizeOptionalString(data.MetaTitle),
+		MetaDescription:  normalizeOptionalString(data.MetaDescription),
+		Slug:             data.Slug,
+		ImageLink:        normalizeOptionalString(data.ImageLink),
+		MetaImageLink:    normalizeOptionalString(data.MetaImageLink),
+		ReadTime:         data.ReadTime,
+		Content:          normalizeOptionalString(data.Content),
 	}
 
-	firstPublishedAt := data.FirstPublishedAt
-	if data.Published && firstPublishedAt.IsZero() {
-		firstPublishedAt = time.Now().UTC()
+	if err := validation.Validate(&entity); err != nil {
+		return ArticleEntity{}, errors.Join(ErrDomainValidation, err)
 	}
 
-	params := db.UpsertArticleParams{
-		FirstPublishedAt: pgtype.Timestamptz{
-			Time:  firstPublishedAt,
-			Valid: !firstPublishedAt.IsZero(),
-		},
-		Published:       data.Published,
-		Title:           data.Title,
-		Excerpt:         pgtype.Text{String: data.Excerpt, Valid: true},
-		MetaTitle:       pgtype.Text{String: data.MetaTitle, Valid: true},
-		MetaDescription: pgtype.Text{String: data.MetaDescription, Valid: true},
-		Slug:            data.Slug,
-		ImageLink:       pgtype.Text{String: data.ImageLink, Valid: true},
-		ReadTime:        pgtype.Int4{Int32: data.ReadTime, Valid: true},
-		Content:         pgtype.Text{String: data.Content, Valid: true},
-	}
-	row, err := queries.UpsertArticle(ctx, exec, params)
-	if err != nil {
-		return Article{}, err
-	}
-
-	return rowToArticle(row), nil
-}
-
-func CountArticles(
-	ctx context.Context,
-	exec storage.Executor,
-) (int64, error) {
-	return queries.CountArticles(ctx, exec)
-}
-
-func AttachTagsToArticle(
-	ctx context.Context,
-	exec storage.Executor,
-	articleID int32,
-	tagIDs []int32,
-) error {
-	seen := make(map[int32]struct{}, len(tagIDs))
-	for _, tagID := range tagIDs {
-		if tagID <= 0 {
-			continue
-		}
-		if _, exists := seen[tagID]; exists {
-			continue
-		}
-		seen[tagID] = struct{}{}
-
-		if _, err := queries.InsertArticleTagConnection(
-			ctx,
-			exec,
-			db.InsertArticleTagConnectionParams{
-				ArticleID: articleID,
-				TagID:     tagID,
-			},
-		); err != nil {
-			return err
-		}
+	if err := db.NewInsert().
+		Model(&entity).
+		On("CONFLICT (id) DO UPDATE").
+		Set("first_published_at = excluded.first_published_at").
+		Set("published = excluded.published").
+		Set("title = excluded.title").
+		Set("excerpt = excluded.excerpt").
+		Set("meta_title = excluded.meta_title").
+		Set("meta_description = excluded.meta_description").
+		Set("slug = excluded.slug").
+		Set("image_link = excluded.image_link").
+		Set("meta_image_link = excluded.meta_image_link").
+		Set("read_time = excluded.read_time").
+		Set("content = excluded.content").
+		Returning("*").
+		Scan(ctx); err != nil {
+		return ArticleEntity{}, err
 	}
 
-	return nil
-}
-
-func TagIDsForArticle(
-	ctx context.Context,
-	exec storage.Executor,
-	articleID int32,
-) ([]int32, error) {
-	connections, err := queries.QueryArticleTagConnection(ctx, exec)
-	if err != nil {
-		return nil, err
-	}
-
-	tagIDs := make([]int32, 0)
-	for _, connection := range connections {
-		if connection.ArticleID != articleID {
-			continue
-		}
-		tagIDs = append(tagIDs, connection.TagID)
-	}
-
-	return tagIDs, nil
-}
-
-func ReplaceTagsForArticle(
-	ctx context.Context,
-	exec storage.Executor,
-	articleID int32,
-	tagIDs []int32,
-) error {
-	if err := clearArticleTagConnections(ctx, exec, articleID); err != nil {
-		return err
-	}
-
-	return AttachTagsToArticle(ctx, exec, articleID, tagIDs)
-}
-
-func clearArticleTagConnections(
-	ctx context.Context,
-	exec storage.Executor,
-	articleID int32,
-) error {
-	connections, err := queries.QueryArticleTagConnection(ctx, exec)
-	if err != nil {
-		return err
-	}
-
-	for _, connection := range connections {
-		if connection.ArticleID != articleID {
-			continue
-		}
-		if err := queries.DeleteArticleTagConnection(ctx, exec, connection.ID); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func rowToArticle(row db.Article) Article {
-	return Article{
-		ID:               row.ID,
-		CreatedAt:        row.CreatedAt.Time,
-		UpdatedAt:        row.UpdatedAt.Time,
-		FirstPublishedAt: row.FirstPublishedAt.Time,
-		Published:        row.Published,
-		Title:            row.Title,
-		Excerpt:          row.Excerpt.String,
-		MetaTitle:        row.MetaTitle.String,
-		MetaDescription:  row.MetaDescription.String,
-		Slug:             row.Slug,
-		ImageLink:        row.ImageLink.String,
-		ReadTime:         row.ReadTime.Int32,
-		Content:          row.Content.String,
-	}
+	return entity, nil
 }
