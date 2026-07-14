@@ -66,7 +66,7 @@ func joinAssetURL(base, path string) string {
 
 func SetTitle(title string) HeadDataOption {
 	return func(hd *HeadData) {
-		hd.Title = title + " - " + hd.siteName
+		hd.Title = title
 	}
 }
 

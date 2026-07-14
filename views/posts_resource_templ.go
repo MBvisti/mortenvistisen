@@ -207,7 +207,7 @@ func (pi PostIndex) Page() templ.Component {
 		})
 		templ_7745c5c3_Err = base(
 			SetTitle("Writing"),
-			SetDescription("Articles on Go, practical systems, products, and engineering."),
+			SetDescription("Read practical articles by Morten Vistisen about Go, software engineering, maintainable systems, product development, and building useful online businesses."),
 			SetSlug(publicPageURL(routes.PostIndex.URL(), pi.CurrentPage)),
 			SetSchema(PostIndexSchema(pi.Items)),
 		).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)

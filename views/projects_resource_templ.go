@@ -188,7 +188,7 @@ func (pi ProjectIndex) Page() templ.Component {
 		})
 		templ_7745c5c3_Err = base(
 			SetTitle("Projects"),
-			SetDescription("Products and experiments built by Morten Vistisen."),
+			SetDescription("Explore software products, open-source tools, and practical experiments built by Morten Vistisen, a Danish software engineer and independent maker."),
 			SetSlug(publicPageURL(routes.ProjectIndex.URL(), pi.CurrentPage)),
 			SetSchema(ProjectIndexSchema(pi.Items)),
 		).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)

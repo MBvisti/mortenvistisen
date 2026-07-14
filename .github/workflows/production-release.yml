@@ -37,7 +37,7 @@ jobs:
         id: notify
         env:
           SECRET: ${{ secrets.PRODUCTION_WEBHOOK_SECRET }}
-          SOURCE_VERSION: ${{ github.ref_name }}
+          SOURCE_VERSION: ${{ github.event.release.tag_name }}
         run: |
           set -euo pipefail
 

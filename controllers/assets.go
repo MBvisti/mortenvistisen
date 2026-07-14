@@ -58,6 +58,16 @@ func (a Assets) RegisterRoutes(r *router.Router) error {
 
 	_, err = r.AddRoute(echo.Route{
 		Method:  http.MethodGet,
+		Path:    routes.IndexNowKey.Path(),
+		Name:    routes.IndexNowKey.Name(),
+		Handler: a.IndexNowKey,
+	})
+	if err != nil {
+		errs = append(errs, err)
+	}
+
+	_, err = r.AddRoute(echo.Route{
+		Method:  http.MethodGet,
 		Path:    routes.Stylesheet.Path(),
 		Name:    routes.Stylesheet.Name(),
 		Handler: a.Stylesheet,
@@ -152,6 +162,10 @@ func (a Assets) Robots(etx *echo.Context) error {
 	}
 
 	return etx.String(http.StatusOK, robotsTxt)
+}
+
+func (a Assets) IndexNowKey(etx *echo.Context) error {
+	return etx.String(http.StatusOK, routes.IndexNowKeyValue)
 }
 
 func (a Assets) Sitemap(etx *echo.Context) error {

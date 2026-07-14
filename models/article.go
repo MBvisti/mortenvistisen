@@ -142,6 +142,26 @@ func (a article) FindForUpdate(
 	return entity, nil
 }
 
+func (a article) FindForUpdateBySlug(
+	ctx context.Context,
+	db storage.Executor,
+	slug string,
+) (ArticleEntity, error) {
+	var entity ArticleEntity
+	if err := db.NewSelect().
+		Model(&entity).
+		Where("slug = ?", slug).
+		For("UPDATE").
+		Scan(ctx); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return ArticleEntity{}, ErrNotFound
+		}
+		return ArticleEntity{}, err
+	}
+
+	return entity, nil
+}
+
 type CreateArticleData struct {
 	FirstPublishedAt sql.NullTime
 	Published        bool

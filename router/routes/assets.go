@@ -8,7 +8,10 @@ import (
 	"mortenvistisen/internal/routing"
 )
 
-const AssetsPrefix = "/assets"
+const (
+	AssetsPrefix     = "/assets"
+	IndexNowKeyValue = "4zd8i69sf3ju2hnfxmebr3czub8uu63m"
+)
 
 var startTime = time.Now().Unix()
 
@@ -21,6 +24,12 @@ var Robots = routing.NewSimpleRoute(
 var Sitemap = routing.NewSimpleRoute(
 	"/sitemap.xml",
 	"assets.sitemap",
+	"",
+)
+
+var IndexNowKey = routing.NewSimpleRoute(
+	"/"+IndexNowKeyValue+".txt",
+	"assets.index_now_key",
 	"",
 )
 

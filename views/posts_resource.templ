@@ -18,7 +18,7 @@ func (pi PostIndex) PageFragment() string {
 templ (pi PostIndex) Page() {
 	@base(
 		SetTitle("Writing"),
-		SetDescription("Articles on Go, practical systems, products, and engineering."),
+		SetDescription("Read practical articles by Morten Vistisen about Go, software engineering, maintainable systems, product development, and building useful online businesses."),
 		SetSlug(publicPageURL(routes.PostIndex.URL(), pi.CurrentPage)),
 		SetSchema(PostIndexSchema(pi.Items)),
 	) {

@@ -3,6 +3,7 @@ package controllers
 
 import (
 	"mortenvistisen/controllers/admin"
+	"mortenvistisen/controllers/api"
 	"mortenvistisen/router"
 
 	"go.uber.org/fx"
@@ -15,6 +16,7 @@ var constructors = fx.Provide(
 	NewPages,
 	NewAssets,
 	NewAPI,
+	api.NewArticles,
 	NewSessions,
 	NewRegistrations,
 	NewConfirmations,
@@ -30,6 +32,7 @@ var constructors = fx.Provide(
 	NewPosts,
 	NewNewsletters,
 	NewProjects,
+	api.NewArticles,
 )
 
 var Module = fx.Module(
@@ -42,6 +45,9 @@ var Module = fx.Module(
 		return c.RegisterRoutes(r)
 	}),
 	fx.Invoke(func(r *router.Router, c API) error {
+		return c.RegisterRoutes(r)
+	}),
+	fx.Invoke(func(r *router.Router, c api.Articles) error {
 		return c.RegisterRoutes(r)
 	}),
 	fx.Invoke(func(r *router.Router, c Sessions) error {
@@ -87,6 +93,9 @@ var Module = fx.Module(
 		return c.RegisterRoutes(r)
 	}),
 	fx.Invoke(func(r *router.Router, c Projects) error {
+		return c.RegisterRoutes(r)
+	}),
+	fx.Invoke(func(r *router.Router, c api.Articles) error {
 		return c.RegisterRoutes(r)
 	}),
 )

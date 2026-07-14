@@ -174,7 +174,7 @@ func (ni NewsletterIndex) Page() templ.Component {
 		})
 		templ_7745c5c3_Err = base(
 			SetTitle("Newsletters"),
-			SetDescription("Field notes and dispatches on software, products, and independent work."),
+			SetDescription("Read Morten Vistisen's field notes and newsletters about software engineering, building useful products, independent work, and lessons from the workshop."),
 			SetSlug(publicPageURL(routes.NewsletterIndex.URL(), ni.CurrentPage)),
 			SetSchema(NewsletterIndexSchema(ni.Items)),
 		).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)

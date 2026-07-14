@@ -70,7 +70,7 @@ func PageAbout() templ.Component {
 		})
 		templ_7745c5c3_Err = base(
 			SetTitle("About"),
-			SetDescription("About Morten Vistisen, a Danish software engineer, freelancer, and bootstrapper living in Spain."),
+			SetDescription("Learn about Morten Vistisen, a Danish software engineer, freelancer, and independent maker living in Spain, focused on Go and practical products."),
 			SetSlug(routes.AboutPage.URL()),
 			SetSchema(PageSchema("AboutPage", []SchemaBreadcrumb{
 				{Name: "Home", Path: routes.HomePage.URL()},

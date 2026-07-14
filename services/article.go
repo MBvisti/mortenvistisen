@@ -292,6 +292,74 @@ func (a Article) Update(
 	return article, nil
 }
 
+type ArticlePatch struct {
+	Title           *string
+	Excerpt         *string
+	MetaTitle       *string
+	MetaDescription *string
+}
+
+func (p ArticlePatch) Empty() bool {
+	return p.Title == nil && p.Excerpt == nil && p.MetaTitle == nil && p.MetaDescription == nil
+}
+
+func (a Article) Patch(
+	ctx context.Context,
+	slug string,
+	patch ArticlePatch,
+) (models.ArticleEntity, error) {
+	tx, err := a.db.BeginTx(ctx, nil)
+	if err != nil {
+		return models.ArticleEntity{}, fmt.Errorf("begin article patch transaction: %w", err)
+	}
+	defer func() { _ = tx.Rollback() }()
+
+	current, err := models.Article.FindForUpdateBySlug(ctx, tx, slug)
+	if err != nil {
+		return models.ArticleEntity{}, err
+	}
+
+	article, err := models.Article.Update(ctx, tx, applyArticlePatch(current, patch))
+	if err != nil {
+		return models.ArticleEntity{}, err
+	}
+	if err := tx.Commit(); err != nil {
+		return models.ArticleEntity{}, fmt.Errorf("commit article patch transaction: %w", err)
+	}
+
+	return article, nil
+}
+
+func applyArticlePatch(current models.ArticleEntity, patch ArticlePatch) models.UpdateArticleData {
+	data := models.UpdateArticleData{
+		ID:               current.ID,
+		FirstPublishedAt: current.FirstPublishedAt,
+		Published:        current.Published,
+		Title:            current.Title,
+		Excerpt:          current.Excerpt,
+		MetaTitle:        current.MetaTitle,
+		MetaDescription:  current.MetaDescription,
+		Slug:             current.Slug,
+		ImageLink:        current.ImageLink,
+		MetaImageLink:    current.MetaImageLink,
+		ReadTime:         current.ReadTime,
+		Content:          current.Content,
+	}
+	if patch.Title != nil {
+		data.Title = *patch.Title
+	}
+	if patch.Excerpt != nil {
+		data.Excerpt = sql.NullString{String: *patch.Excerpt, Valid: true}
+	}
+	if patch.MetaTitle != nil {
+		data.MetaTitle = sql.NullString{String: *patch.MetaTitle, Valid: true}
+	}
+	if patch.MetaDescription != nil {
+		data.MetaDescription = sql.NullString{String: *patch.MetaDescription, Valid: true}
+	}
+	return data
+}
+
 func (a Article) enqueueImageDeletion(
 	ctx context.Context,
 	sqlTx *sql.Tx,

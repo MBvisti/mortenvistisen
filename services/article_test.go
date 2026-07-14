@@ -115,3 +115,31 @@ func TestFirstPublicationJobs(t *testing.T) {
 		}
 	}
 }
+
+func TestApplyArticlePatchPreservesOmittedFields(t *testing.T) {
+	current := models.ArticleEntity{
+		ID:              42,
+		Title:           "Original title",
+		Excerpt:         sql.NullString{String: "Original excerpt", Valid: true},
+		MetaTitle:       sql.NullString{String: "Original meta title", Valid: true},
+		MetaDescription: sql.NullString{String: "Original meta description", Valid: true},
+		Slug:            "original-slug",
+	}
+	title := "Updated title"
+	metaDescription := "Updated meta description"
+
+	got := applyArticlePatch(current, ArticlePatch{
+		Title:           &title,
+		MetaDescription: &metaDescription,
+	})
+
+	if got.Title != title || got.MetaDescription.String != metaDescription {
+		t.Fatalf("applyArticlePatch() did not apply supplied fields: %#v", got)
+	}
+	if got.Excerpt != current.Excerpt || got.MetaTitle != current.MetaTitle || got.Slug != current.Slug {
+		t.Fatalf("applyArticlePatch() changed omitted fields: %#v", got)
+	}
+	if !(ArticlePatch{}).Empty() || (ArticlePatch{Title: &title}).Empty() {
+		t.Fatal("ArticlePatch.Empty() returned the wrong result")
+	}
+}

@@ -19,7 +19,7 @@ func (pi ProjectIndex) PageFragment() string {
 templ (pi ProjectIndex) Page() {
 	@base(
 		SetTitle("Projects"),
-		SetDescription("Products and experiments built by Morten Vistisen."),
+		SetDescription("Explore software products, open-source tools, and practical experiments built by Morten Vistisen, a Danish software engineer and independent maker."),
 		SetSlug(publicPageURL(routes.ProjectIndex.URL(), pi.CurrentPage)),
 		SetSchema(ProjectIndexSchema(pi.Items)),
 	) {
