@@ -18,7 +18,7 @@ func (pi ProjectIndex) PageFragment() string {
 
 templ (pi ProjectIndex) Page() {
 	@base(
-		SetTitle("Projects"),
+		SetTitle("Software Projects and Experiments | Morten Vistisen"),
 		SetDescription("Explore software products, open-source tools, and practical experiments built by Morten Vistisen, a Danish software engineer and independent maker."),
 		SetSlug(publicPageURL(routes.ProjectIndex.URL(), pi.CurrentPage)),
 		SetSchema(ProjectIndexSchema(pi.Items)),
@@ -80,11 +80,21 @@ func (ps ProjectShow) metaDescription() string {
 	return ps.Item.Description
 }
 
-func (ps ProjectShow) headOptions() []HeadDataOption {
-	title := ps.Item.Title
-	if ps.Item.MetaTitle != "" {
-		title = ps.Item.MetaTitle
+func projectPageTitle(project models.ProjectEntity) string {
+	switch project.Slug {
+	case "andurel":
+		return "Andurel: Productive Go Web Framework | Morten Vistisen"
+	case "deploy-crate":
+		return "Deploy Crate: Automated App Deployments | Morten Vistisen"
 	}
+	if project.MetaTitle != "" {
+		return project.MetaTitle
+	}
+	return project.Title
+}
+
+func (ps ProjectShow) headOptions() []HeadDataOption {
+	title := projectPageTitle(ps.Item)
 	opts := []HeadDataOption{
 		SetTitle(title),
 		SetDescription(ps.metaDescription()),

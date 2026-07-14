@@ -3,6 +3,7 @@ package views
 import (
 	"mortenvistisen/models"
 	"mortenvistisen/router/routes"
+	"strconv"
 )
 
 type PostIndex struct {
@@ -15,9 +16,16 @@ func (pi PostIndex) PageFragment() string {
 	return "post-index-page-fragment"
 }
 
+func (pi PostIndex) pageTitle() string {
+	if pi.CurrentPage > 1 {
+		return "Software Engineering Articles, Page " + strconv.FormatInt(pi.CurrentPage, 10) + " | Morten Vistisen"
+	}
+	return "Go and Software Engineering Articles | Morten Vistisen"
+}
+
 templ (pi PostIndex) Page() {
 	@base(
-		SetTitle("Writing"),
+		SetTitle(pi.pageTitle()),
 		SetDescription("Read practical articles by Morten Vistisen about Go, software engineering, maintainable systems, product development, and building useful online businesses."),
 		SetSlug(publicPageURL(routes.PostIndex.URL(), pi.CurrentPage)),
 		SetSchema(PostIndexSchema(pi.Items)),

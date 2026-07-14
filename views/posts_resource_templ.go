@@ -11,6 +11,7 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"mortenvistisen/models"
 	"mortenvistisen/router/routes"
+	"strconv"
 )
 
 type PostIndex struct {
@@ -21,6 +22,13 @@ type PostIndex struct {
 
 func (pi PostIndex) PageFragment() string {
 	return "post-index-page-fragment"
+}
+
+func (pi PostIndex) pageTitle() string {
+	if pi.CurrentPage > 1 {
+		return "Software Engineering Articles, Page " + strconv.FormatInt(pi.CurrentPage, 10) + " | Morten Vistisen"
+	}
+	return "Go and Software Engineering Articles | Morten Vistisen"
 }
 
 func (pi PostIndex) Page() templ.Component {
@@ -101,7 +109,7 @@ func (pi PostIndex) Page() templ.Component {
 						var templ_7745c5c3_Var4 templ.SafeURL
 						templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinURLErrs(routes.PostShow.URL(article.Slug))
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/posts_resource.templ`, Line: 44, Col: 146}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/posts_resource.templ`, Line: 52, Col: 146}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 						if templ_7745c5c3_Err != nil {
@@ -114,7 +122,7 @@ func (pi PostIndex) Page() templ.Component {
 						var templ_7745c5c3_Var5 string
 						templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(publicDate(article.FirstPublishedAt))
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/posts_resource.templ`, Line: 47, Col: 88}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/posts_resource.templ`, Line: 55, Col: 88}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 						if templ_7745c5c3_Err != nil {
@@ -132,7 +140,7 @@ func (pi PostIndex) Page() templ.Component {
 							var templ_7745c5c3_Var6 string
 							templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(article.ReadTime.Int32)
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/posts_resource.templ`, Line: 49, Col: 75}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/posts_resource.templ`, Line: 57, Col: 75}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 							if templ_7745c5c3_Err != nil {
@@ -150,7 +158,7 @@ func (pi PostIndex) Page() templ.Component {
 						var templ_7745c5c3_Var7 string
 						templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(article.Title)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/posts_resource.templ`, Line: 52, Col: 57}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/posts_resource.templ`, Line: 60, Col: 57}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 						if templ_7745c5c3_Err != nil {
@@ -168,7 +176,7 @@ func (pi PostIndex) Page() templ.Component {
 							var templ_7745c5c3_Var8 string
 							templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(article.Excerpt.String)
 							if templ_7745c5c3_Err != nil {
-								return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/posts_resource.templ`, Line: 55, Col: 75}
+								return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/posts_resource.templ`, Line: 63, Col: 75}
 							}
 							_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 							if templ_7745c5c3_Err != nil {
@@ -206,7 +214,7 @@ func (pi PostIndex) Page() templ.Component {
 			return nil
 		})
 		templ_7745c5c3_Err = base(
-			SetTitle("Writing"),
+			SetTitle(pi.pageTitle()),
 			SetDescription("Read practical articles by Morten Vistisen about Go, software engineering, maintainable systems, product development, and building useful online businesses."),
 			SetSlug(publicPageURL(routes.PostIndex.URL(), pi.CurrentPage)),
 			SetSchema(PostIndexSchema(pi.Items)),
@@ -320,7 +328,7 @@ func (ps PostShow) Page() templ.Component {
 				var templ_7745c5c3_Var12 string
 				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(ps.Item.Title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/posts_resource.templ`, Line: 117, Col: 66}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/posts_resource.templ`, Line: 125, Col: 66}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 				if templ_7745c5c3_Err != nil {
@@ -341,7 +349,7 @@ func (ps PostShow) Page() templ.Component {
 				var templ_7745c5c3_Var13 string
 				templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(publicDate(ps.Item.FirstPublishedAt))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/posts_resource.templ`, Line: 124, Col: 46}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/posts_resource.templ`, Line: 132, Col: 46}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 				if templ_7745c5c3_Err != nil {
@@ -359,7 +367,7 @@ func (ps PostShow) Page() templ.Component {
 					var templ_7745c5c3_Var14 string
 					templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(ps.Item.UpdatedAt.Format("02.01.2006"))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/posts_resource.templ`, Line: 127, Col: 86}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/posts_resource.templ`, Line: 135, Col: 86}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 					if templ_7745c5c3_Err != nil {
@@ -377,7 +385,7 @@ func (ps PostShow) Page() templ.Component {
 				var templ_7745c5c3_Var15 string
 				templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(publicReadTime(ps.Item.ReadTime))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/posts_resource.templ`, Line: 133, Col: 90}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/posts_resource.templ`, Line: 141, Col: 90}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 				if templ_7745c5c3_Err != nil {
@@ -403,7 +411,7 @@ func (ps PostShow) Page() templ.Component {
 					var templ_7745c5c3_Var16 string
 					templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.ResolveAttributeValue(imageURL)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/posts_resource.templ`, Line: 141, Col: 105}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/posts_resource.templ`, Line: 149, Col: 105}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var16)
 					if templ_7745c5c3_Err != nil {
@@ -416,7 +424,7 @@ func (ps PostShow) Page() templ.Component {
 					var templ_7745c5c3_Var17 string
 					templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.ResolveAttributeValue(ps.Item.Title + " cover image")
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/posts_resource.templ`, Line: 141, Col: 144}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/posts_resource.templ`, Line: 149, Col: 144}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var17)
 					if templ_7745c5c3_Err != nil {
@@ -478,7 +486,7 @@ func (ps PostShow) Page() templ.Component {
 						var templ_7745c5c3_Var20 templ.SafeURL
 						templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinURLErrs(routes.PostShow.URL(article.Slug))
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/posts_resource.templ`, Line: 154, Col: 108}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/posts_resource.templ`, Line: 162, Col: 108}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 						if templ_7745c5c3_Err != nil {
@@ -491,7 +499,7 @@ func (ps PostShow) Page() templ.Component {
 						var templ_7745c5c3_Var21 string
 						templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(publicDate(article.FirstPublishedAt))
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/posts_resource.templ`, Line: 155, Col: 87}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/posts_resource.templ`, Line: 163, Col: 87}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 						if templ_7745c5c3_Err != nil {
@@ -504,7 +512,7 @@ func (ps PostShow) Page() templ.Component {
 						var templ_7745c5c3_Var22 string
 						templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(article.Title)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/posts_resource.templ`, Line: 156, Col: 62}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/posts_resource.templ`, Line: 164, Col: 62}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 						if templ_7745c5c3_Err != nil {
@@ -589,7 +597,7 @@ func publicPostTags(tags []models.TagEntity) templ.Component {
 				var templ_7745c5c3_Var24 string
 				templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(len(tags) - 3)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/posts_resource.templ`, Line: 180, Col: 57}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/posts_resource.templ`, Line: 188, Col: 57}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 				if templ_7745c5c3_Err != nil {
@@ -643,7 +651,7 @@ func publicPostTag(tag models.TagEntity) templ.Component {
 		var templ_7745c5c3_Var26 string
 		templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(tag.Title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/posts_resource.templ`, Line: 194, Col: 114}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/posts_resource.templ`, Line: 202, Col: 114}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 		if templ_7745c5c3_Err != nil {

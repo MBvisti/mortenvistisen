@@ -187,7 +187,7 @@ func (pi ProjectIndex) Page() templ.Component {
 			return nil
 		})
 		templ_7745c5c3_Err = base(
-			SetTitle("Projects"),
+			SetTitle("Software Projects and Experiments | Morten Vistisen"),
 			SetDescription("Explore software products, open-source tools, and practical experiments built by Morten Vistisen, a Danish software engineer and independent maker."),
 			SetSlug(publicPageURL(routes.ProjectIndex.URL(), pi.CurrentPage)),
 			SetSchema(ProjectIndexSchema(pi.Items)),
@@ -217,11 +217,21 @@ func (ps ProjectShow) metaDescription() string {
 	return ps.Item.Description
 }
 
-func (ps ProjectShow) headOptions() []HeadDataOption {
-	title := ps.Item.Title
-	if ps.Item.MetaTitle != "" {
-		title = ps.Item.MetaTitle
+func projectPageTitle(project models.ProjectEntity) string {
+	switch project.Slug {
+	case "andurel":
+		return "Andurel: Productive Go Web Framework | Morten Vistisen"
+	case "deploy-crate":
+		return "Deploy Crate: Automated App Deployments | Morten Vistisen"
 	}
+	if project.MetaTitle != "" {
+		return project.MetaTitle
+	}
+	return project.Title
+}
+
+func (ps ProjectShow) headOptions() []HeadDataOption {
+	title := projectPageTitle(ps.Item)
 	opts := []HeadDataOption{
 		SetTitle(title),
 		SetDescription(ps.metaDescription()),
@@ -301,7 +311,7 @@ func (ps ProjectShow) Page() templ.Component {
 				var templ_7745c5c3_Var12 string
 				templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(ps.Item.Title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/projects_resource.templ`, Line: 114, Col: 66}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/projects_resource.templ`, Line: 124, Col: 66}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 				if templ_7745c5c3_Err != nil {
@@ -322,7 +332,7 @@ func (ps ProjectShow) Page() templ.Component {
 				var templ_7745c5c3_Var13 string
 				templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(ps.Item.Description)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/projects_resource.templ`, Line: 116, Col: 86}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/projects_resource.templ`, Line: 126, Col: 86}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 				if templ_7745c5c3_Err != nil {
@@ -348,7 +358,7 @@ func (ps ProjectShow) Page() templ.Component {
 					var templ_7745c5c3_Var14 string
 					templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.ResolveAttributeValue(imageURL)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/projects_resource.templ`, Line: 124, Col: 105}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/projects_resource.templ`, Line: 134, Col: 105}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var14)
 					if templ_7745c5c3_Err != nil {
@@ -361,7 +371,7 @@ func (ps ProjectShow) Page() templ.Component {
 					var templ_7745c5c3_Var15 string
 					templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.ResolveAttributeValue(ps.Item.Title + " cover image")
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/projects_resource.templ`, Line: 124, Col: 144}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/projects_resource.templ`, Line: 134, Col: 144}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var15)
 					if templ_7745c5c3_Err != nil {
@@ -418,7 +428,7 @@ func (ps ProjectShow) Page() templ.Component {
 					var templ_7745c5c3_Var18 templ.SafeURL
 					templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinURLErrs(ps.Item.ProjectUrl.String)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/projects_resource.templ`, Line: 135, Col: 228}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/projects_resource.templ`, Line: 145, Col: 228}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 					if templ_7745c5c3_Err != nil {
@@ -431,7 +441,7 @@ func (ps ProjectShow) Page() templ.Component {
 					var templ_7745c5c3_Var19 string
 					templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(ps.Item.Title)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/projects_resource.templ`, Line: 135, Col: 293}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/projects_resource.templ`, Line: 145, Col: 293}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 					if templ_7745c5c3_Err != nil {
@@ -459,7 +469,7 @@ func (ps ProjectShow) Page() templ.Component {
 						var templ_7745c5c3_Var20 templ.SafeURL
 						templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinURLErrs(routes.ProjectShow.URL(project.Slug))
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/projects_resource.templ`, Line: 145, Col: 111}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/projects_resource.templ`, Line: 155, Col: 111}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 						if templ_7745c5c3_Err != nil {
@@ -472,7 +482,7 @@ func (ps ProjectShow) Page() templ.Component {
 						var templ_7745c5c3_Var21 string
 						templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(project.Status)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/projects_resource.templ`, Line: 146, Col: 65}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/projects_resource.templ`, Line: 156, Col: 65}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 						if templ_7745c5c3_Err != nil {
@@ -485,7 +495,7 @@ func (ps ProjectShow) Page() templ.Component {
 						var templ_7745c5c3_Var22 string
 						templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(project.Title)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/projects_resource.templ`, Line: 147, Col: 62}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/projects_resource.templ`, Line: 157, Col: 62}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 						if templ_7745c5c3_Err != nil {

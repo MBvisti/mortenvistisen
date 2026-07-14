@@ -173,7 +173,7 @@ func (ni NewsletterIndex) Page() templ.Component {
 			return nil
 		})
 		templ_7745c5c3_Err = base(
-			SetTitle("Newsletters"),
+			SetTitle("Software Engineering Newsletters | Morten Vistisen"),
 			SetDescription("Read Morten Vistisen's field notes and newsletters about software engineering, building useful products, independent work, and lessons from the workshop."),
 			SetSlug(publicPageURL(routes.NewsletterIndex.URL(), ni.CurrentPage)),
 			SetSchema(NewsletterIndexSchema(ni.Items)),

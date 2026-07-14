@@ -69,7 +69,7 @@ func PageAbout() templ.Component {
 			return nil
 		})
 		templ_7745c5c3_Err = base(
-			SetTitle("About"),
+			SetTitle("About Morten Vistisen | Go Engineer and Indie Builder"),
 			SetDescription("Learn about Morten Vistisen, a Danish software engineer, freelancer, and independent maker living in Spain, focused on Go and practical products."),
 			SetSlug(routes.AboutPage.URL()),
 			SetSchema(PageSchema("AboutPage", []SchemaBreadcrumb{

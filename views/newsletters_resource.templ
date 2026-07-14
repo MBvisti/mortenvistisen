@@ -17,7 +17,7 @@ func (ni NewsletterIndex) PageFragment() string {
 
 templ (ni NewsletterIndex) Page() {
 	@base(
-		SetTitle("Newsletters"),
+		SetTitle("Software Engineering Newsletters | Morten Vistisen"),
 		SetDescription("Read Morten Vistisen's field notes and newsletters about software engineering, building useful products, independent work, and lessons from the workshop."),
 		SetSlug(publicPageURL(routes.NewsletterIndex.URL(), ni.CurrentPage)),
 		SetSchema(NewsletterIndexSchema(ni.Items)),
