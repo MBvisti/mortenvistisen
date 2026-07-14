@@ -9,31 +9,30 @@ import (
 	"net/textproto"
 	"strings"
 
-	"mortenvistisen/email"
-
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
+	awsconfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/sesv2"
 	"github.com/aws/aws-sdk-go-v2/service/sesv2/types"
+
+	appconfig "mortenvistisen/config"
+	"mortenvistisen/email"
 )
 
-var (
-	_ email.TransactionalSender = (*AwsSes)(nil)
-	_ email.MarketingSender     = (*AwsSes)(nil)
-)
+var _ email.TransactionalSender = (*AwsSes)(nil)
+var _ email.MarketingSender = (*AwsSes)(nil)
 
 type AwsSes struct {
 	client           *sesv2.Client
 	configurationSet string
 }
 
-func NewAwsSes(region, accessKeyID, secretAccessKey, configurationSet string) *AwsSes {
-	cfg, err := config.LoadDefaultConfig(context.Background(),
-		config.WithRegion(region),
-		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
-			accessKeyID,
-			secretAccessKey,
+func NewAwsSes(cfg appconfig.Config) *AwsSes {
+	awsCfg, err := awsconfig.LoadDefaultConfig(context.Background(),
+		awsconfig.WithRegion(cfg.AwsSes.Region),
+		awsconfig.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
+			cfg.AwsSes.AccessKeyID,
+			cfg.AwsSes.SecretAccessKey,
 			"",
 		)),
 	)
@@ -41,11 +40,11 @@ func NewAwsSes(region, accessKeyID, secretAccessKey, configurationSet string) *A
 		panic(fmt.Sprintf("failed to load AWS SES config: %v", err))
 	}
 
-	client := sesv2.NewFromConfig(cfg)
+	client := sesv2.NewFromConfig(awsCfg)
 
 	return &AwsSes{
 		client:           client,
-		configurationSet: configurationSet,
+		configurationSet: cfg.AwsSes.ConfigurationSet,
 	}
 }
 
@@ -157,19 +156,6 @@ func (a *AwsSes) SendMarketing(ctx context.Context, payload email.MarketingPaylo
 		content.Simple.Body.Html = &types.Content{
 			Data: aws.String(payload.HTMLBody),
 		}
-	}
-
-	if payload.UnsubscribeURL != "" {
-		content.Simple.Headers = append(content.Simple.Headers,
-			types.MessageHeader{
-				Name:  aws.String("List-Unsubscribe"),
-				Value: aws.String(fmt.Sprintf("<%s>", payload.UnsubscribeURL)),
-			},
-			types.MessageHeader{
-				Name:  aws.String("List-Unsubscribe-Post"),
-				Value: aws.String("List-Unsubscribe=One-Click"),
-			},
-		)
 	}
 
 	// Build send request

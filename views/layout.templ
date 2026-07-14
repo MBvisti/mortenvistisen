@@ -1,201 +1,68 @@
 package views
 
 import (
-	"mortenvistisen/config"
-	"mortenvistisen/internal/renderer"
-	"mortenvistisen/internal/server"
+	"mortenvistisen/internal/request"
 	"mortenvistisen/router/cookies"
 	"mortenvistisen/router/routes"
-	"mortenvistisen/views/components"
-	"strings"
 	"time"
 )
 
-func metaOr(primary, fallback string) string {
-	if primary != "" {
-		return primary
-	}
-	return fallback
-}
-
-const avatarSrc = "https://media.mortenvistisen.com/mig_selv-removebg-preview.png"
-const publicShellClass = "mx-auto w-full max-w-5xl"
-
-func navLinkIsActive(currentPath string, href string) bool {
-	if href == "/" {
-		return currentPath == "/"
-	}
-
-	return strings.HasPrefix(currentPath, href)
-}
-
-func navLinkClass(currentPath string, href string) string {
-	if navLinkIsActive(currentPath, href) {
-		return "bg-base-100 text-primary shadow-sm ring-1 ring-primary/20"
-	}
-
-	return "text-base-content/80 hover:text-base-content"
-}
-
-templ hamburgerIcon() {
-	<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
-		<line x1="4" x2="20" y1="12" y2="12"></line>
-		<line x1="4" x2="20" y1="6" y2="6"></line>
-		<line x1="4" x2="20" y1="18" y2="18"></line>
-	</svg>
-}
-
-templ navLinks() {
-	<li>
-		@components.Button(
-			components.ButtonProps{Label: "Posts"},
-		).MakeGhost().WithSize(components.ButtonSizeDefault).WithHref(routes.ArticleOverview.URL()).WithClass(navLinkClass(renderer.RequestPathFromContext(ctx), routes.ArticleOverview.URL())).Render()
-	</li>
-	<li>
-		@components.Button(
-			components.ButtonProps{Label: "Newsletters"},
-		).MakeGhost().WithSize(components.ButtonSizeDefault).WithHref(routes.NewsletterOverview.URL()).WithClass(navLinkClass(renderer.RequestPathFromContext(ctx), routes.NewsletterOverview.URL())).Render()
-	</li>
-	<li>
-		@components.Button(
-			components.ButtonProps{Label: "Projects"},
-		).MakeGhost().WithSize(components.ButtonSizeDefault).WithHref(routes.ProjectOverview.URL()).WithClass(navLinkClass(renderer.RequestPathFromContext(ctx), routes.ProjectOverview.URL())).Render()
-	</li>
-	<li>
-		@components.Button(
-			components.ButtonProps{Label: "About"},
-		).MakeGhost().WithSize(components.ButtonSizeDefault).WithHref(routes.AboutPage.URL()).WithClass(navLinkClass(renderer.RequestPathFromContext(ctx), routes.AboutPage.URL())).Render()
-	</li>
-}
-
-templ themeSwitcher() {
-	<button
-		type="button"
-		class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-base-300 bg-base-100/60 text-base-content/80 transition hover:bg-base-200 hover:text-base-content focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
-		aria-label="Toggle color theme"
-		title="Toggle color theme"
-		data-on:click="const next = $theme == 'dark' ? 'light' : 'dark'; $theme = next; localStorage.setItem('theme', next); document.documentElement.classList.remove('light', 'dark'); document.documentElement.classList.add(next)"
-	>
-		<svg data-show="$theme == 'dark'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
-			<path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"></path>
-		</svg>
-		<svg data-show="$theme == 'light'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
-			<circle cx="12" cy="12" r="4"></circle>
-			<path d="M12 2v2"></path>
-			<path d="M12 20v2"></path>
-			<path d="m4.93 4.93 1.41 1.41"></path>
-			<path d="m17.66 17.66 1.41 1.41"></path>
-			<path d="M2 12h2"></path>
-			<path d="M20 12h2"></path>
-			<path d="m6.34 17.66-1.41 1.41"></path>
-			<path d="m19.07 4.93-1.41 1.41"></path>
-		</svg>
-	</button>
-}
-
-templ navigation() {
-	<nav class="bg-base-100 container mx-auto px-4 sm:px-6 lg:px-8">
-		<div class={ publicShellClass }>
-			<div class="mt-4 w-full flex items-center gap-3 md:grid md:grid-cols-[2.25rem_auto_2.25rem] md:gap-4">
-				<div class="hidden md:flex h-9 w-9 items-center justify-center">
-					if renderer.RequestPathFromContext(ctx) != "/" {
-						<a href={ templ.URL(routes.HomePage.URL()) } aria-label="Go to home page">
-							@components.Avatar().WithSrc(avatarSrc).WithAlt("Morten Vistisen").WithSize(components.AvatarSizeSm).WithClass("border border-base-300").Render()
-						</a>
-					}
-				</div>
-				if renderer.RequestPathFromContext(ctx) != routes.HomePage.URL() {
-					<a href={ templ.URL(routes.HomePage.URL()) } aria-label="Go to home page" class="md:hidden">
-						@components.Avatar().WithSrc(avatarSrc).WithAlt("Morten Vistisen").WithSize(components.AvatarSizeSm).WithClass("border border-base-300").Render()
-					</a>
-				}
-				<ul class="hidden w-fit mx-auto md:inline-flex items-center justify-center gap-2 bg-base-300 px-2 py-2">
-					@navLinks()
-				</ul>
-				<div class="ml-auto flex items-center gap-2">
-					@themeSwitcher()
-					<div class="md:hidden">
-						@components.Sheet(hamburgerIcon(), components.SheetSideRight) {
-							@components.SheetHeader() {
-								@components.SheetTitle("Navigation")
-							}
-							<ul class="flex flex-col gap-2 mt-4">
-								@navLinks()
-							</ul>
-						}
-					</div>
-				</div>
-			</div>
-		</div>
-	</nav>
-}
-
-templ base(headOpts ...components.HeadDataOption) {
+templ base(headOpts ...HeadDataOption) {
 	<!DOCTYPE html>
 	<html lang="en" class="dark">
-		@components.SetupHead(ctx, headOpts...)
-		<body
-			class="min-h-screen flex flex-col bg-base-300 text-base-content"
-			data-signals:theme="'dark'"
-			data-init="const stored = localStorage.getItem('theme'); const next = stored == 'light' || stored == 'dark' ? stored : 'dark'; $theme = next; document.documentElement.classList.remove('light', 'dark'); document.documentElement.classList.add(next); localStorage.setItem('theme', next)"
-		>
-			@navigation()
+		@SetupHead(ctx, headOpts...)
+		<body id="top" class="public-site min-h-screen">
+			<a class="public-skip-link" href="#main-content">Skip to content</a>
+			<header>
+				<div class="public-shell flex min-h-16 items-center gap-5">
+					<a class="shrink-0 text-sm font-bold uppercase tracking-tight text-[#f2ead8]" href={ routes.HomePage.URL() } aria-label="Morten Vistisen home">
+						<span class="hidden sm:inline">Morten Vistisen</span>
+						<span class="sm:hidden">MV</span>
+					</a>
+					<nav class="ml-auto min-w-0 overflow-x-auto" aria-label="Primary navigation">
+						<ul class="flex w-max items-center gap-1 text-[0.68rem] font-medium uppercase tracking-[0.12em] text-[#aaa393]">
+							<li><a class="public-nav-link" href={ routes.PostIndex.URL() }>Writing</a></li>
+							<li><a class="public-nav-link" href={ routes.NewsletterIndex.URL() }>Newsletters</a></li>
+							<li><a class="public-nav-link" href={ routes.ProjectIndex.URL() }>Projects</a></li>
+							<li><a class="public-nav-link" href={ routes.AboutPage.URL() }>About</a></li>
+						</ul>
+					</nav>
+				</div>
+			</header>
 			{ children... }
-			<footer>
-				<div class="bg-base-100 container mx-auto py-8 text-sm text-base-content/70 px-4 sm:px-6 lg:px-8">
-					<div class={ publicShellClass }>
-						@components.Separator().WithOrientation(components.SeparatorHorizontal).SetClass("h-px shrink-0 w-full bg-gray-200/40 my-6").Render()
-						<div class="grid w-full gap-10 pb-10 sm:grid-cols-2 lg:grid-cols-[minmax(280px,1.35fr)_repeat(3,minmax(0,1fr))] lg:gap-14">
-							<div class="space-y-5">
-								<h2 class="text-3xl font-semibold leading-tight text-base-content">Morten Vistisen</h2>
-								<p class="max-w-sm text-base leading-8 text-base-content/65">
-									Notes on building practical software with Go, distributed systems, and product-minded engineering.
-								</p>
-								@components.Button(
-									components.ButtonProps{Label: "Built with andurel"},
-								).WithHref("https://github.com/mbvlabs/andurel").WithClass("").WithSize(components.ButtonSizeSm).Render()
-							</div>
-							<div>
-								<h3 class="mb-4 text-xs font-semibold uppercase tracking-[0.24em] text-base-content/55">Blog</h3>
-								<ul class="space-y-3">
-									<li><a href={ routes.ArticleOverview.URL() } class="hover:text-base-content transition">Posts</a></li>
-									<li><a href={ routes.ProjectOverview.URL() } class="hover:text-base-content transition">Projects</a></li>
-									<li><a href={ routes.AboutPage.URL() } class="hover:text-base-content transition">About</a></li>
-								</ul>
-							</div>
-							<div>
-								<h3 class="mb-4 text-xs font-semibold uppercase tracking-[0.24em] text-base-content/55">Links</h3>
-								<ul class="space-y-3">
-									<li><a href="https://github.com/mbvisti" class="hover:text-base-content transition" target="_blank" rel="noopener noreferrer">GitHub</a></li>
-									<li><a href="https://www.youtube.com/@mbvlabs" class="hover:text-base-content transition" target="_blank" rel="noopener noreferrer">YouTube</a></li>
-									<li><a href="https://twitch.tv/mbvlabs" class="hover:text-base-content transition" target="_blank" rel="noopener noreferrer">Twitch</a></li>
-									<li><a href="https://linkedin.com/in/mortenvistisen" class="hover:text-base-content transition" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
-								</ul>
-							</div>
-							<div>
-								<h3 class="mb-4 text-xs font-semibold uppercase tracking-[0.24em] text-base-content/55">More</h3>
-								<ul class="space-y-3">
-									<li><a href="https://mastergolang.com" class="hover:text-base-content transition" target="_blank" rel="noopener noreferrer">Master Golang</a></li>
-									<li><a href="https://deploycrate.com" class="hover:text-base-content transition" target="_blank" rel="noopener noreferrer">DeployCrate</a></li>
-									<li><a href="https://mbvlabs.com" class="hover:text-base-content transition" target="_blank" rel="noopener noreferrer">MBVLabs</a></li>
-								</ul>
-							</div>
-						</div>
-						@components.Separator().WithOrientation(components.SeparatorHorizontal).SetClass("h-px shrink-0 w-full bg-gray-200/40").Render()
-						<div class="pt-6 text-base-content/55">
-							&copy; { time.Now().Format("2006") } Morten Vistisen. All rights reserved.
-						</div>
+			<footer class="mt-3 border-t border-[#2f3a37] bg-[#101414]">
+				<div class="public-shell grid grid-cols-1 gap-10 py-10 md:grid-cols-12 md:py-14">
+					<div class="md:col-span-6">
+						<p class="public-label text-[#8df7a4]">Morten Vistisen / 2026</p>
+						<h2 class="public-card-heading mt-6 max-w-xl">Practical software. Clear thinking.</h2>
+						<p class="mt-5 max-w-lg leading-7 text-[#aaa393]">Notes on building with Go, distributed systems, and product-minded engineering.</p>
+					</div>
+					<nav class="md:col-span-3" aria-label="Footer navigation">
+						<h3 class="public-label text-[#8f8a7d]">Index</h3>
+						<ul class="mt-5 space-y-3 text-sm text-[#aaa393]">
+							<li><a class="public-text-link" href={ routes.PostIndex.URL() }>Writing</a></li>
+							<li><a class="public-text-link" href={ routes.NewsletterIndex.URL() }>Newsletters</a></li>
+							<li><a class="public-text-link" href={ routes.ProjectIndex.URL() }>Projects</a></li>
+							<li><a class="public-text-link" href={ routes.AboutPage.URL() }>About</a></li>
+						</ul>
+					</nav>
+					<nav class="md:col-span-3" aria-label="Social links">
+						<h3 class="public-label text-[#8f8a7d]">Elsewhere</h3>
+						@PublicSocialLinks("mt-5 space-y-3 text-sm text-[#aaa393]")
+					</nav>
+					<div class="flex flex-col gap-3 border-t border-[#2f3a37] pt-6 text-xs text-[#8f8a7d] md:col-span-12 md:flex-row md:items-center md:justify-between">
+						<p>&copy; { time.Now().Format("2006") } Morten Vistisen. All rights reserved.</p>
+						<a class="public-text-link uppercase tracking-[0.12em]" href="https://andurel.com" target="_blank" rel="noopener noreferrer">Built with Andurel</a>
 					</div>
 				</div>
 			</footer>
+			<div id="flashContainer" class="fixed bottom-4 right-4 z-50 flex max-w-[calc(100%-2rem)] flex-col gap-2">
+				for _, flash := range request.ExtractContext[[]cookies.FlashMessage](ctx, request.SessionFlashesKey) {
+					<div class="border border-[#52605c] bg-[#101414] px-4 py-3 text-sm text-[#e4dfd2]">
+						{ flash.Message }
+					</div>
+				}
+			</div>
 		</body>
-		<div id="flashContainer" class="fixed top-4 right-4 z-50 space-y-2">
-			for _, flash := range cookies.GetFlashesCtx(ctx) {
-				@components.ToastMessage(flash)
-			}
-		</div>
-		if config.Env == server.ProdEnvironment {
-			<script defer src="https://analytics.mbvlabs.com/t/script.js" data-website-id="7f285ded-b7e4-4c9d-953c-e79d74643696"></script>
-		}
 	</html>
 }

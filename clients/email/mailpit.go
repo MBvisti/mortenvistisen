@@ -6,6 +6,7 @@ import (
 	"net/smtp"
 	"strings"
 
+	"mortenvistisen/config"
 	"mortenvistisen/email"
 )
 
@@ -17,10 +18,10 @@ type Mailpit struct {
 	port string
 }
 
-func NewMailpit(host, port string) *Mailpit {
+func NewMailpit(cfg config.Config) *Mailpit {
 	return &Mailpit{
-		host,
-		port,
+		host: cfg.Email.MailpitHost,
+		port: cfg.Email.MailpitPort,
 	}
 }
 
@@ -98,11 +99,6 @@ func (m *Mailpit) SendMarketing(ctx context.Context, payload email.MarketingPayl
 
 	if payload.ReplyTo != "" {
 		headers["Reply-To"] = payload.ReplyTo
-	}
-
-	if payload.UnsubscribeURL != "" {
-		headers["List-Unsubscribe"] = fmt.Sprintf("<%s>", payload.UnsubscribeURL)
-		headers["List-Unsubscribe-Post"] = "List-Unsubscribe=One-Click"
 	}
 
 	headers["Subject"] = payload.Subject

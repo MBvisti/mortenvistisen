@@ -1,230 +1,107 @@
 package controllers
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
 
+	"mortenvistisen/internal/hypermedia"
 	"mortenvistisen/internal/storage"
 	"mortenvistisen/models"
 	"mortenvistisen/queue"
+	"mortenvistisen/router"
+	"mortenvistisen/router/routes"
 	"mortenvistisen/views"
 
-	"github.com/a-h/templ"
 	"github.com/labstack/echo/v5"
 )
 
 type Pages struct {
 	db         storage.Pool
 	insertOnly queue.InsertOnly
-	cache      *Cache[templ.Component]
 }
 
 func NewPages(
 	db storage.Pool,
 	insertOnly queue.InsertOnly,
-	cache *Cache[templ.Component],
 ) Pages {
-	return Pages{db, insertOnly, cache}
+	return Pages{db, insertOnly}
+}
+
+func (p Pages) RegisterRoutes(r *router.Router) error {
+	errs := []error{}
+
+	_, err := r.AddRoute(echo.Route{
+		Method:  http.MethodGet,
+		Path:    routes.HomePage.Path(),
+		Name:    routes.HomePage.Name(),
+		Handler: p.Home,
+	})
+	if err != nil {
+		errs = append(errs, err)
+	}
+
+	_, err = r.AddRoute(echo.Route{
+		Method: http.MethodHead,
+		Path:   routes.HomePage.Path(),
+		Name:   routes.HomePage.Name() + ".head",
+		Handler: func(etx *echo.Context) error {
+			etx.NoContent(http.StatusOK)
+			return nil
+		},
+	})
+	if err != nil {
+		errs = append(errs, err)
+	}
+
+	_ = r.AddRouteNotFound(p.NotFound)
+
+	_, err = r.AddRoute(echo.Route{
+		Method:  http.MethodGet,
+		Path:    routes.AboutPage.Path(),
+		Name:    routes.AboutPage.Name(),
+		Handler: p.About,
+	})
+	if err != nil {
+		errs = append(errs, err)
+	}
+	return errors.Join(errs...)
 }
 
 func (p Pages) Home(etx *echo.Context) error {
-	cacheKey := "pages:home"
-
-	component, err := p.cache.Get(cacheKey, func() (templ.Component, error) {
-		articles, err := models.AllPublishedArticles(etx.Request().Context(), p.db.Conn())
-		if err != nil {
-			return views.Home(nil), err
-		}
-
-		return views.Home(articles), nil
-	})
-	if err != nil {
-		return render(etx, views.InternalError())
-	}
-
-	return render(etx, component)
-}
-
-func (p Pages) About(etx *echo.Context) error {
-	return render(etx, views.About())
-}
-
-func (p Pages) Article(etx *echo.Context) error {
-	slug := etx.Param("slug")
-	cacheKey := "pages:article:" + slug
-
-	component, err := p.cache.Get(cacheKey, func() (templ.Component, error) {
-		article, err := models.FindArticleBySlug(etx.Request().Context(), p.db.Conn(), slug)
-		if err != nil {
-			return views.Article(models.Article{}), err
-		}
-
-		return views.Article(article), nil
-	})
-	if err != nil {
-		return render(etx, views.InternalError())
-	}
-
-	return render(etx, component)
-}
-
-func (p Pages) ArticlesOverview(etx *echo.Context) error {
-	cacheKey := "pages:articles_overview"
-
-	component, err := p.cache.Get(cacheKey, func() (templ.Component, error) {
-		articles, err := models.AllPublishedArticles(etx.Request().Context(), p.db.Conn())
-		if err != nil {
-			return views.ArticlesOverview(nil), err
-		}
-
-		published := make([]models.Article, 0, len(articles))
-		for _, article := range articles {
-			if article.Published {
-				published = append(published, article)
-			}
-		}
-
-		return views.ArticlesOverview(published), nil
-	})
-	if err != nil {
-		return render(etx, views.InternalError())
-	}
-
-	return render(etx, component)
-}
-
-func (p Pages) Project(etx *echo.Context) error {
-	slug := etx.Param("slug")
-	cacheKey := "pages:project:" + slug
-
-	component, err := p.cache.Get(cacheKey, func() (templ.Component, error) {
-		project, err := models.FindProjectBySlug(etx.Request().Context(), p.db.Conn(), slug)
-		if err != nil {
-			return views.Project(models.Project{}), err
-		}
-
-		return views.Project(project), nil
-	})
-	if err != nil {
-		return render(etx, views.InternalError())
-	}
-
-	return render(etx, component)
-}
-
-func (p Pages) ProjectsOverview(etx *echo.Context) error {
-	cacheKey := "pages:projects_overview"
-
-	component, err := p.cache.Get(cacheKey, func() (templ.Component, error) {
-		projects, err := models.AllPublishedProjects(etx.Request().Context(), p.db.Conn())
-		if err != nil {
-			return views.ProjectsOverview(nil), err
-		}
-
-		published := make([]models.Project, 0, len(projects))
-		for _, project := range projects {
-			if project.Published {
-				published = append(published, project)
-			}
-		}
-
-		return views.ProjectsOverview(published), nil
-	})
-	if err != nil {
-		return render(etx, views.InternalError())
-	}
-
-	return render(etx, component)
-}
-
-func (p Pages) Newsletter(etx *echo.Context) error {
-	slug := etx.Param("slug")
-	cacheKey := "pages:newsletter:" + slug
-
-	component, err := p.cache.Get(cacheKey, func() (templ.Component, error) {
-		newsletter, err := models.FindNewsletterBySlug(etx.Request().Context(), p.db.Conn(), slug)
-		if err != nil {
-			return views.Newsletter(models.Newsletter{}), err
-		}
-
-		return views.Newsletter(newsletter), nil
-	})
-	if err != nil {
-		return render(etx, views.InternalError())
-	}
-
-	return render(etx, component)
-}
-
-func (p Pages) NewslettersOverview(etx *echo.Context) error {
-	cacheKey := "pages:newsletters_overview"
-	component, err := p.cache.Get(cacheKey, func() (templ.Component, error) {
-		newsletters, err := models.AllPublishedNewsletters(etx.Request().Context(), p.db.Conn())
-		if err != nil {
-			return views.NewslettersOverview(nil), err
-		}
-
-		published := make([]models.Newsletter, 0, len(newsletters))
-		for _, newsletter := range newsletters {
-			if newsletter.IsPublished {
-				published = append(published, newsletter)
-			}
-		}
-
-		return views.NewslettersOverview(published), nil
-	})
-	if err != nil {
-		return render(etx, views.InternalError())
-	}
-
-	return render(etx, component)
-}
-
-func (p Pages) AdminHome(etx *echo.Context) error {
 	ctx := etx.Request().Context()
-	conn := p.db.Conn()
+	db := p.db.Executor()
 
-	articleCount, err := models.CountArticles(ctx, conn)
+	articles, err := models.Article.LatestPublished(ctx, db, 3)
 	if err != nil {
-		return err
+		return fmt.Errorf("load landing articles: %w", err)
 	}
 
-	newsletterCount, err := models.CountNewsletters(ctx, conn)
+	projects, err := models.Project.LatestPublished(ctx, db, 2)
 	if err != nil {
-		return err
+		return fmt.Errorf("load landing projects: %w", err)
 	}
 
-	projectCount, err := models.CountProjects(ctx, conn)
+	newsletters, err := models.Newsletter.LatestPublished(ctx, db, 1)
 	if err != nil {
-		return err
+		return fmt.Errorf("load landing newsletters: %w", err)
 	}
 
-	subscriberCount, err := models.CountSubscribers(ctx, conn)
-	if err != nil {
-		return err
-	}
+	return hypermedia.RenderPage(etx, views.Landing{
+		Articles:    articles,
+		Projects:    projects,
+		Newsletters: newsletters,
+	}.Page())
+}
 
-	return render(
-		etx,
-		views.AdminHome(articleCount, newsletterCount, projectCount, subscriberCount),
-	)
+func publicNotFound(etx *echo.Context) error {
+	return hypermedia.RenderPage(etx, views.NotFound(), hypermedia.WithStatus(http.StatusNotFound))
 }
 
 func (p Pages) NotFound(etx *echo.Context) error {
-	cacheKey := "not_found"
+	return publicNotFound(etx)
+}
 
-	component, err := p.cache.Get(cacheKey, func() (templ.Component, error) {
-		return views.NotFound(), nil
-	})
-	if err != nil {
-		return err
-	}
-
-	buf := templ.GetBuffer()
-	defer templ.ReleaseBuffer(buf)
-
-	if err := component.Render(etx.Request().Context(), buf); err != nil {
-		return err
-	}
-
-	return etx.HTML(http.StatusNotFound, buf.String())
+func (p Pages) About(etx *echo.Context) error {
+	return hypermedia.RenderPage(etx, views.PageAbout())
 }

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Andurel"
+  short_description: "Enforce CLI-first Andurel generation"
+  default_prompt: "Use $andurel to generate or update Andurel project code through the CLI first, then place custom behavior in the correct layer."

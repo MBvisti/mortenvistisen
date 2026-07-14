@@ -3,50 +3,110 @@ package models
 import (
 	"context"
 	"errors"
+	"mortenvistisen/internal/storage"
+	"mortenvistisen/internal/validation"
+	"strings"
 	"time"
 
-	"mortenvistisen/internal/storage"
-	"mortenvistisen/models/internal/db"
+	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/uptrace/bun"
 )
 
-type Tag struct {
-	ID        int32
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	Title     string
+const tagTitleMaxLength = 255
+
+type TagEntity struct {
+	bun.BaseModel `bun:"table:tags,alias:tags"`
+	ID            int32     `bun:"id,pk,autoincrement"`
+	CreatedAt     time.Time `bun:"created_at"`
+	UpdatedAt     time.Time `bun:"updated_at"`
+	Title         string    `bun:"title"`
 }
 
-func FindTag(
-	ctx context.Context,
-	exec storage.Executor,
-	id int32,
-) (Tag, error) {
-	row, err := queries.QueryTagByID(ctx, exec, id)
-	if err != nil {
-		return Tag{}, err
+func (e *TagEntity) validationBuilder() *validation.ValidationBuilder {
+	b := validation.NewBuilder()
+	b.Required("title", e.Title)
+	b.MaxLen("title", e.Title, tagTitleMaxLength)
+
+	return b
+}
+
+func (e *TagEntity) Validate() error {
+	return e.validationBuilder().Err()
+}
+
+func TagValidationRules() validation.Rules {
+	return (&TagEntity{}).validationBuilder().Rules()
+}
+
+func (t tag) Find(ctx context.Context, db storage.Executor, id int32) (TagEntity, error) {
+	var entity TagEntity
+	if err := db.NewSelect().
+		Model(&entity).
+		Where("id = ?", id).
+		Scan(ctx); err != nil {
+		return TagEntity{}, err
 	}
 
-	return rowToTag(row), nil
+	return entity, nil
+}
+
+func (t tag) FindByTitle(
+	ctx context.Context,
+	db storage.Executor,
+	title string,
+) (TagEntity, error) {
+	var entity TagEntity
+	if err := db.NewSelect().
+		Model(&entity).
+		Where("LOWER(BTRIM(title)) = LOWER(BTRIM(?))", title).
+		Scan(ctx); err != nil {
+		return TagEntity{}, err
+	}
+
+	return entity, nil
+}
+
+func (t tag) FindByIDs(ctx context.Context, db storage.Executor, ids []int32) ([]TagEntity, error) {
+	if len(ids) == 0 {
+		return []TagEntity{}, nil
+	}
+
+	entities := make([]TagEntity, 0, len(ids))
+	if err := db.NewSelect().
+		Model(&entities).
+		Where("id IN (?)", bun.In(ids)).
+		OrderExpr("LOWER(title) ASC").
+		Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	return entities, nil
 }
 
 type CreateTagData struct {
 	Title string
 }
 
-func CreateTag(
+func (t tag) Create(
 	ctx context.Context,
-	exec storage.Executor,
+	db storage.Executor,
 	data CreateTagData,
-) (Tag, error) {
-	if err := Validate.Struct(data); err != nil {
-		return Tag{}, errors.Join(ErrDomainValidation, err)
-	}
-	row, err := queries.InsertTag(ctx, exec, data.Title)
-	if err != nil {
-		return Tag{}, err
+) (TagEntity, error) {
+	entity := TagEntity{
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		Title:     strings.TrimSpace(data.Title),
 	}
 
-	return rowToTag(row), nil
+	if err := validation.Validate(&entity); err != nil {
+		return TagEntity{}, errors.Join(ErrDomainValidation, err)
+	}
+
+	if _, err := db.NewInsert().Model(&entity).Exec(ctx); err != nil {
+		return TagEntity{}, tagPersistenceError(err)
+	}
+
+	return entity, nil
 }
 
 type UpdateTagData struct {
@@ -55,67 +115,91 @@ type UpdateTagData struct {
 	Title     string
 }
 
-func UpdateTag(
+func (t tag) Update(
 	ctx context.Context,
-	exec storage.Executor,
+	db storage.Executor,
 	data UpdateTagData,
-) (Tag, error) {
-	if err := Validate.Struct(data); err != nil {
-		return Tag{}, errors.Join(ErrDomainValidation, err)
+) (TagEntity, error) {
+	entity := TagEntity{
+		ID:        data.ID,
+		UpdatedAt: time.Now(),
+		Title:     strings.TrimSpace(data.Title),
 	}
 
-	params := db.UpdateTagParams{
-		ID:    data.ID,
-		Title: data.Title,
+	if err := validation.Validate(&entity); err != nil {
+		return TagEntity{}, errors.Join(ErrDomainValidation, err)
 	}
 
-	row, err := queries.UpdateTag(ctx, exec, params)
-	if err != nil {
-		return Tag{}, err
+	if err := db.NewUpdate().
+		Model(&entity).
+		Column("updated_at").
+		Column("title").
+		WherePK().
+		Returning("*").
+		Scan(ctx); err != nil {
+		return TagEntity{}, tagPersistenceError(err)
 	}
 
-	return rowToTag(row), nil
+	return entity, nil
 }
 
-func DestroyTag(
-	ctx context.Context,
-	exec storage.Executor,
-	id int32,
-) error {
-	return queries.DeleteTag(ctx, exec, id)
+func tagPersistenceError(err error) error {
+	var postgresErr *pgconn.PgError
+	if errors.As(err, &postgresErr) && postgresErr.Code == "23505" {
+		validationErr := validation.ValidationErrors{{
+			Field:   "title",
+			Code:    "unique",
+			Message: "A tag with this title already exists.",
+		}}
+		return errors.Join(ErrDomainValidation, validationErr)
+	}
+
+	return err
 }
 
-func AllTags(
-	ctx context.Context,
-	exec storage.Executor,
-) ([]Tag, error) {
-	rows, err := queries.QueryTags(ctx, exec)
-	if err != nil {
+func (t tag) Destroy(ctx context.Context, db storage.Executor, id int32) error {
+	_, err := db.NewDelete().
+		Model((*TagEntity)(nil)).
+		Where("id = ?", id).
+		Exec(ctx)
+
+	return err
+}
+
+func (t tag) All(ctx context.Context, db storage.Executor) ([]TagEntity, error) {
+	var entities []TagEntity
+	if err := db.NewSelect().
+		Model(&entities).
+		OrderExpr("LOWER(title) ASC").
+		Scan(ctx); err != nil {
 		return nil, err
 	}
 
-	tags := make([]Tag, len(rows))
-	for i, row := range rows {
-		tags[i] = rowToTag(row)
-	}
-
-	return tags, nil
+	return entities, nil
 }
 
-type PaginatedTags struct {
-	Tags       []Tag
+type TagWithUsage struct {
+	ID           int32     `bun:"id"`
+	CreatedAt    time.Time `bun:"created_at"`
+	UpdatedAt    time.Time `bun:"updated_at"`
+	Title        string    `bun:"title"`
+	ArticleCount int64     `bun:"article_count"`
+}
+
+type PaginatedTagsWithUsage struct {
+	Tags       []TagWithUsage
 	TotalCount int64
 	Page       int64
 	PageSize   int64
 	TotalPages int64
 }
 
-func PaginateTags(
+func (t tag) PaginateWithUsage(
 	ctx context.Context,
-	exec storage.Executor,
+	db storage.Executor,
 	page int64,
 	pageSize int64,
-) (PaginatedTags, error) {
+) (PaginatedTagsWithUsage, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -126,62 +210,62 @@ func PaginateTags(
 		pageSize = 100
 	}
 
-	offset := (page - 1) * pageSize
-
-	totalCount, err := queries.CountTags(ctx, exec)
+	totalCount, err := db.NewSelect().Model((*TagEntity)(nil)).Count(ctx)
 	if err != nil {
-		return PaginatedTags{}, err
+		return PaginatedTagsWithUsage{}, err
+	}
+	totalPages := (int64(totalCount) + pageSize - 1) / pageSize
+	if totalPages > 0 && page > totalPages {
+		page = totalPages
 	}
 
-	rows, err := queries.QueryPaginatedTags(
-		ctx,
-		exec,
-		db.QueryPaginatedTagsParams{
-			Limit:  pageSize,
-			Offset: offset,
-		},
-	)
-	if err != nil {
-		return PaginatedTags{}, err
+	items := make([]TagWithUsage, 0)
+	if err := db.NewSelect().
+		TableExpr("tags AS tags").
+		Column("tags.id", "tags.created_at", "tags.updated_at", "tags.title").
+		ColumnExpr("COUNT(article_tag_connections.id) AS article_count").
+		Join("LEFT JOIN article_tag_connections ON article_tag_connections.tag_id = tags.id").
+		Group("tags.id").
+		OrderExpr("LOWER(tags.title) ASC").
+		Limit(int(pageSize)).
+		Offset(int((page-1)*pageSize)).
+		Scan(ctx, &items); err != nil {
+		return PaginatedTagsWithUsage{}, err
 	}
 
-	tags := make([]Tag, len(rows))
-	for i, row := range rows {
-		tags[i] = rowToTag(row)
-	}
-
-	totalPages := (totalCount + int64(pageSize) - 1) / int64(pageSize)
-
-	return PaginatedTags{
-		Tags:       tags,
-		TotalCount: totalCount,
+	return PaginatedTagsWithUsage{
+		Tags:       items,
+		TotalCount: int64(totalCount),
 		Page:       page,
 		PageSize:   pageSize,
 		TotalPages: totalPages,
 	}, nil
 }
 
-func UpsertTag(
+func (t tag) Upsert(
 	ctx context.Context,
-	exec storage.Executor,
+	db storage.Executor,
 	data CreateTagData,
-) (Tag, error) {
-	if err := Validate.Struct(data); err != nil {
-		return Tag{}, errors.Join(ErrDomainValidation, err)
-	}
-	row, err := queries.UpsertTag(ctx, exec, data.Title)
-	if err != nil {
-		return Tag{}, err
+) (TagEntity, error) {
+	entity := TagEntity{
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		Title:     strings.TrimSpace(data.Title),
 	}
 
-	return rowToTag(row), nil
-}
-
-func rowToTag(row db.Tag) Tag {
-	return Tag{
-		ID:        row.ID,
-		CreatedAt: row.CreatedAt.Time,
-		UpdatedAt: row.UpdatedAt.Time,
-		Title:     row.Title,
+	if err := validation.Validate(&entity); err != nil {
+		return TagEntity{}, errors.Join(ErrDomainValidation, err)
 	}
+
+	if err := db.NewInsert().
+		Model(&entity).
+		On("CONFLICT ((LOWER(BTRIM(title)))) DO UPDATE").
+		Set("title = EXCLUDED.title").
+		Set("updated_at = EXCLUDED.updated_at").
+		Returning("*").
+		Scan(ctx); err != nil {
+		return TagEntity{}, err
+	}
+
+	return entity, nil
 }

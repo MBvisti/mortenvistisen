@@ -1,5 +1,0 @@
-FROM debian:bookworm-slim
-
-WORKDIR /usr/src/app
-
-COPY bin/ ./bin

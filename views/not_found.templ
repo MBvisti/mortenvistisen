@@ -1,11 +1,13 @@
 package views
 
-import "mortenvistisen/views/components"
-
 templ NotFound() {
-	@base(
-		components.SetTitle("Page Not Found"),
-	) {
-		<h1>Not found</h1>
+	@base(SetTitle("Not found")) {
+		<main id="main-content" class="flex flex-1 items-center justify-center px-4 py-12">
+			<div class="public-panel w-full max-w-lg text-center">
+				<p class="public-label text-[#8df7a4]">404 / Signal lost</p>
+				<h1 class="public-card-heading mt-6">Not found</h1>
+				<p class="mt-5 leading-7 text-[#aaa393]">The page you are looking for could not be found.</p>
+			</div>
+		</main>
 	}
 }
