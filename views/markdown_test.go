@@ -30,6 +30,24 @@ func TestPublicPostTagsKeepsHiddenTagsInDOM(t *testing.T) {
 	}
 }
 
+func TestRenderMarkdownSupportsTablesAndHighlightedCode(t *testing.T) {
+	content, _, err := RenderMarkdown("```go\nfunc main() {}\n```\n\n| Name | Value |\n| --- | --- |\n| Language | Go |\n")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var output strings.Builder
+	if err := content.Render(context.Background(), &output); err != nil {
+		t.Fatal(err)
+	}
+	html := output.String()
+	for _, expected := range []string{"<span", "<table>", "<thead>", "<tbody>"} {
+		if !strings.Contains(html, expected) {
+			t.Fatalf("rendered Markdown is missing %q: %s", expected, html)
+		}
+	}
+}
+
 func TestRenderMarkdownExtractsHeadings(t *testing.T) {
 	content, headings, err := RenderMarkdown("## First *heading*\n\nBody.\n\n![Diagram](https://example.com/diagram.png)\n\n## First heading\n")
 	if err != nil {

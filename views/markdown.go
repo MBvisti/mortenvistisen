@@ -6,8 +6,11 @@ import (
 	"strings"
 
 	"github.com/a-h/templ"
+	chromahtml "github.com/alecthomas/chroma/v2/formatters/html"
 	"github.com/yuin/goldmark"
+	highlighting "github.com/yuin/goldmark-highlighting/v2"
 	"github.com/yuin/goldmark/ast"
+	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/text"
 )
@@ -18,6 +21,16 @@ type HeadingInfo struct {
 }
 
 var markdownRenderer = goldmark.New(
+	goldmark.WithExtensions(
+		extension.GFM,
+		highlighting.NewHighlighting(
+			highlighting.WithStyle("gruvbox"),
+			highlighting.WithFormatOptions(
+				chromahtml.WithLineNumbers(true),
+				chromahtml.TabWidth(4),
+			),
+		),
+	),
 	goldmark.WithParserOptions(
 		parser.WithAutoHeadingID(),
 		parser.WithAttribute(),

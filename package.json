@@ -10,6 +10,7 @@
     "@fontsource-variable/noto-sans": "^5.2.10",
     "@fontsource-variable/roboto": "^5.2.10",
     "@inertiajs/react": "^2.0.0",
+    "@tiptap/extension-table": "3.27.3",
     "@tiptap/markdown": "^3.27.3",
     "@tiptap/react": "^3.27.3",
     "@tiptap/starter-kit": "^3.27.3",
