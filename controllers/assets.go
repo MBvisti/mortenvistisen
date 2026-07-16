@@ -78,6 +78,16 @@ func (a Assets) RegisterRoutes(r *router.Router) error {
 
 	_, err = r.AddRoute(echo.Route{
 		Method:  http.MethodGet,
+		Path:    routes.Font.Path(),
+		Name:    routes.Font.Name(),
+		Handler: a.Font,
+	})
+	if err != nil {
+		errs = append(errs, err)
+	}
+
+	_, err = r.AddRoute(echo.Route{
+		Method:  http.MethodGet,
 		Path:    routes.Scripts.Path(),
 		Name:    routes.Scripts.Name(),
 		Handler: a.Scripts,
@@ -279,6 +289,21 @@ func (a Assets) Stylesheet(etx *echo.Context) error {
 
 	etx = a.enableCaching(etx, stylesheet)
 	return etx.Blob(http.StatusOK, "text/css", stylesheet)
+}
+
+func (a Assets) Font(etx *echo.Context) error {
+	file := path.Base(etx.Param("file"))
+	if !strings.HasSuffix(file, ".woff2") {
+		return echo.NewHTTPError(http.StatusNotFound, http.StatusText(http.StatusNotFound))
+	}
+
+	font, err := assets.Files.ReadFile("css/files/" + file)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusNotFound, http.StatusText(http.StatusNotFound))
+	}
+
+	etx = a.enableCaching(etx, font)
+	return etx.Blob(http.StatusOK, "font/woff2", font)
 }
 
 func (a Assets) Scripts(etx *echo.Context) error {

@@ -15,7 +15,10 @@ COPY resources ./resources
 COPY views ./views
 COPY vite.config.ts tsconfig.json components.json ./
 
-RUN ./bin/tailwindcli -i ./css/base.css -o ./assets/css/style.css --minify
+RUN ./bin/tailwindcli -i ./css/base.css -o ./assets/css/style.css --minify \
+    && mkdir -p ./assets/css/files \
+    && cp ./node_modules/@fontsource-variable/noto-sans/files/*-wght-normal.woff2 ./assets/css/files/ \
+    && cp ./node_modules/@fontsource-variable/roboto/files/*-wght-normal.woff2 ./assets/css/files/
 RUN pnpm build
 
 FROM golang:${GO_VERSION}-bookworm AS builder
@@ -26,7 +29,7 @@ COPY go.mod go.sum ./
 RUN go mod download && go mod verify
 
 COPY . .
-COPY --from=assets-builder /usr/src/app/assets/css/style.css ./assets/css/style.css
+COPY --from=assets-builder /usr/src/app/assets/css ./assets/css
 COPY --from=assets-builder /usr/src/app/assets/dist ./assets/dist
 
 RUN CGO_ENABLED=0 GOOS=linux go build -v -o /run-app ./cmd/app

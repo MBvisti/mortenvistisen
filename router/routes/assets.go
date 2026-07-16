@@ -39,6 +39,12 @@ var Stylesheet = routing.NewSimpleRoute(
 	AssetsPrefix,
 )
 
+var Font = routing.NewRouteWithFile(
+	fmt.Sprintf("/css/%v/files/:file", startTime),
+	"css.font",
+	AssetsPrefix,
+)
+
 var Scripts = routing.NewSimpleRoute(
 	fmt.Sprintf("/js/%v/scripts.js", startTime),
 	"js.scripts",
