@@ -31,7 +31,7 @@ var appVersion string
 func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
-	if err := inertia.Init("views/root.go.html"); err != nil {
+	if err := inertia.Init("inertia/root.go.html"); err != nil {
 		fmt.Fprintf(os.Stderr, "failed to initialize inertia: %s\n", err)
 		os.Exit(1)
 	}

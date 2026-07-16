@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "version": "v1.2.9",
+  "version": "v1.5.2",
   "extensions": {
     "aws-ses": {
       "appliedAt": "2026-07-09T18:17:04+02:00"
