@@ -1,12 +1,15 @@
 package controllers
 
 import (
+	"database/sql"
 	"errors"
 	"log/slog"
 	"net/http"
+	"time"
 
 	"mortenvistisen/internal/inertia"
 	"mortenvistisen/internal/validation"
+	"mortenvistisen/models"
 	"mortenvistisen/router"
 	"mortenvistisen/router/cookies"
 	"mortenvistisen/router/middleware"
@@ -16,20 +19,33 @@ import (
 	"github.com/labstack/echo/v5"
 )
 
-type SubscriberConfirmations struct {
+type Subscribers struct {
 	confirmation services.SubscriberConfirmation
 }
 
-func NewSubscriberConfirmations(
+func NewSubscribers(
 	confirmation services.SubscriberConfirmation,
-) SubscriberConfirmations {
-	return SubscriberConfirmations{confirmation: confirmation}
+) Subscribers {
+	return Subscribers{confirmation: confirmation}
 }
 
-func (s SubscriberConfirmations) RegisterRoutes(r *router.Router) error {
+func (s Subscribers) RegisterRoutes(r *router.Router) error {
 	var errs []error
 
 	_, err := r.AddRoute(echo.Route{
+		Method:  http.MethodPost,
+		Path:    routes.SubscriberCreate.Path(),
+		Name:    routes.SubscriberCreate.Name(),
+		Handler: s.Subscribe,
+		Middlewares: []echo.MiddlewareFunc{
+			middleware.IPRateLimiter(5, routes.NewsletterIndex),
+		},
+	})
+	if err != nil {
+		errs = append(errs, err)
+	}
+
+	_, err = r.AddRoute(echo.Route{
 		Method:  http.MethodGet,
 		Path:    routes.SubscriberConfirmationNew.Path(),
 		Name:    routes.SubscriberConfirmationNew.Name(),
@@ -55,12 +71,63 @@ func (s SubscriberConfirmations) RegisterRoutes(r *router.Router) error {
 	return errors.Join(errs...)
 }
 
-func (s SubscriberConfirmations) New(etx *echo.Context) error {
+func (s Subscribers) Subscribe(etx *echo.Context) error {
+	var payload struct {
+		Email string `form:"email" json:"email"`
+	}
+	if err := etx.Bind(&payload); err != nil {
+		if flashErr := cookies.AddFlash(
+			etx,
+			cookies.FlashError,
+			"Enter a valid email address",
+		); flashErr != nil {
+			return flashErr
+		}
+		return etx.Redirect(http.StatusSeeOther, routes.NewsletterIndex.URL())
+	}
+
+	err := s.confirmation.Subscribe(
+		etx.Request().Context(),
+		models.CreateSubscriberData{
+			Email:        sql.NullString{String: payload.Email, Valid: true},
+			SubscribedAt: sql.NullTime{Time: time.Now(), Valid: true},
+			Referer:      sql.NullString{String: routes.NewsletterIndex.URL(), Valid: true},
+			IsVerified:   sql.NullBool{Bool: false, Valid: true},
+		},
+	)
+	if err != nil {
+		message := "Could not subscribe right now. Please try again."
+		if _, ok := validation.As(err); ok {
+			message = "Enter a valid email address"
+		} else {
+			slog.ErrorContext(
+				etx.Request().Context(),
+				"failed to subscribe newsletter reader",
+				"error", err,
+			)
+		}
+		if flashErr := cookies.AddFlash(etx, cookies.FlashError, message); flashErr != nil {
+			return flashErr
+		}
+		return etx.Redirect(http.StatusSeeOther, routes.NewsletterIndex.URL())
+	}
+
+	if err := cookies.AddFlash(
+		etx,
+		cookies.FlashSuccess,
+		"Thanks. If confirmation is needed, check your inbox.",
+	); err != nil {
+		return err
+	}
+	return etx.Redirect(http.StatusSeeOther, routes.NewsletterIndex.URL())
+}
+
+func (s Subscribers) New(etx *echo.Context) error {
 	etx.Response().Header().Set("Referrer-Policy", "no-referrer")
 	return inertia.Page(etx, "Subscription/ConfirmEmail", inertia.Props{})
 }
 
-func (s SubscriberConfirmations) Create(etx *echo.Context) error {
+func (s Subscribers) Create(etx *echo.Context) error {
 	var payload struct {
 		Code string `json:"code"`
 	}

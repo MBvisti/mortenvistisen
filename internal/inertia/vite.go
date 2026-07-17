@@ -31,8 +31,7 @@ func initVite() (*viteTags, error) {
 		tags := &viteTags{
 			ViteHead: template.HTML(`<script type="module" src="http://localhost:5173/assets/dist/@vite/client"></script>`),
 		}
-		
-		
+
 		tags.ViteHead += template.HTML(`<script type="module">
 import RefreshRuntime from "http://localhost:5173/assets/dist/@react-refresh"
 RefreshRuntime.injectIntoGlobalHook(window)
@@ -41,7 +40,7 @@ window.$RefreshSig$ = () => (type) => type
 window.__vite_plugin_react_preamble_installed__ = true
 </script>`)
 		tags.ViteBody = template.HTML(`<script type="module" src="http://localhost:5173/assets/dist/resources/js/app.tsx"></script>`)
-		
+
 		return tags, nil
 	}
 
@@ -54,13 +53,12 @@ window.__vite_plugin_react_preamble_installed__ = true
 	if err := json.Unmarshal(data, &manifest); err != nil {
 		return nil, fmt.Errorf("vite: parse manifest: %w", err)
 	}
-	
-	
+
 	entry, ok := manifest["resources/js/app.tsx"]
 	if !ok {
 		return nil, fmt.Errorf("vite: entry point not found in manifest")
 	}
-	
+
 	tags := &viteTags{}
 	viteBuildPrefix := strings.TrimSuffix(routes.ViteBuild.Path(), "*")
 	for _, css := range entry.CSS {

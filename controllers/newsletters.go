@@ -99,7 +99,10 @@ func (n Newsletters) Show(etx *echo.Context) error {
 	if err != nil {
 		return fmt.Errorf("load related newsletters: %w", err)
 	}
-	related = slices.DeleteFunc(related, func(item models.NewsletterEntity) bool { return item.ID == newsletter.ID })
+	related = slices.DeleteFunc(
+		related,
+		func(item models.NewsletterEntity) bool { return item.ID == newsletter.ID },
+	)
 	related = related[:min(3, len(related))]
 
 	return hypermedia.RenderPage(etx, views.NewsletterShow{

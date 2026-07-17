@@ -16,6 +16,8 @@ import (
 	"mortenvistisen/queue"
 	"mortenvistisen/queue/jobs"
 	"mortenvistisen/router/routes"
+
+	"github.com/uptrace/bun"
 )
 
 const (
@@ -55,6 +57,34 @@ func NewSubscriberConfirmation(
 	}
 }
 
+func (s SubscriberConfirmation) Subscribe(
+	ctx context.Context,
+	data models.CreateSubscriberData,
+) error {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("begin subscriber subscription transaction: %w", err)
+	}
+
+	subscriber, err := models.Subscriber.Upsert(ctx, tx, data)
+	if err != nil {
+		_ = tx.Rollback()
+		return err
+	}
+	if !subscriber.IsVerified.Bool {
+		if err := s.send(ctx, tx, subscriber); err != nil {
+			_ = tx.Rollback()
+			return err
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("commit subscriber subscription transaction: %w", err)
+	}
+
+	return nil
+}
+
 func (s SubscriberConfirmation) Send(ctx context.Context, subscriberID int32) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -70,20 +100,34 @@ func (s SubscriberConfirmation) Send(ctx context.Context, subscriberID int32) er
 		_ = tx.Rollback()
 		return ErrSubscriberAlreadyVerified
 	}
+	if err := s.send(ctx, tx, subscriber); err != nil {
+		_ = tx.Rollback()
+		return err
+	}
 
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("commit subscriber confirmation transaction: %w", err)
+	}
+
+	return nil
+}
+
+func (s SubscriberConfirmation) send(
+	ctx context.Context,
+	tx bun.Tx,
+	subscriber models.SubscriberEntity,
+) error {
 	metadata, err := json.Marshal(subscriberConfirmationMetadata{
 		SubscriberID: subscriber.ID,
 		Email:        subscriber.Email.String,
 	})
 	if err != nil {
-		_ = tx.Rollback()
 		return fmt.Errorf("marshal subscriber confirmation metadata: %w", err)
 	}
 	metadataFilter, err := json.Marshal(map[string]int32{
 		"subscriber_id": subscriber.ID,
 	})
 	if err != nil {
-		_ = tx.Rollback()
 		return fmt.Errorf("marshal subscriber confirmation filter: %w", err)
 	}
 	if err := models.Token.DestroyByScopeAndMetadata(
@@ -92,7 +136,6 @@ func (s SubscriberConfirmation) Send(ctx context.Context, subscriberID int32) er
 		subscriberEmailVerification,
 		metadataFilter,
 	); err != nil {
-		_ = tx.Rollback()
 		return fmt.Errorf("invalidate prior subscriber confirmation codes: %w", err)
 	}
 
@@ -105,23 +148,15 @@ func (s SubscriberConfirmation) Send(ctx context.Context, subscriberID int32) er
 		metadata,
 	)
 	if err != nil {
-		_ = tx.Rollback()
 		return fmt.Errorf("create subscriber confirmation code: %w", err)
 	}
 
 	args, err := subscriberConfirmationJob(subscriber, code)
 	if err != nil {
-		_ = tx.Rollback()
 		return err
 	}
-
 	if _, err := s.insertOnly.InsertTx(ctx, tx.Tx, args, nil); err != nil {
-		_ = tx.Rollback()
 		return fmt.Errorf("queue subscriber confirmation email: %w", err)
-	}
-
-	if err := tx.Commit(); err != nil {
-		return fmt.Errorf("commit subscriber confirmation transaction: %w", err)
 	}
 
 	return nil

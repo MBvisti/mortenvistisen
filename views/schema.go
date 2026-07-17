@@ -56,7 +56,13 @@ func buildStructuredData(data HeadData) map[string]any {
 			"jobTitle":    "Software Engineer",
 			"description": "Danish software engineer and writer living in Spain, focused on Go, distributed systems, and practical software.",
 			"sameAs":      personSameAs,
-			"knowsAbout":  []string{"Go", "Distributed systems", "Web development", "Software architecture", "Bootstrapping"},
+			"knowsAbout": []string{
+				"Go",
+				"Distributed systems",
+				"Web development",
+				"Software architecture",
+				"Bootstrapping",
+			},
 		},
 		{
 			"@type":       "WebSite",
@@ -135,7 +141,10 @@ func PostIndexSchema(items []models.ArticleEntity) SchemaBuilder {
 	return collectionSchema(
 		"Writing",
 		"Articles on Go, practical systems, products, and engineering.",
-		[]SchemaBreadcrumb{{Name: "Home", Path: routes.HomePage.URL()}, {Name: "Posts", Path: routes.PostIndex.URL()}},
+		[]SchemaBreadcrumb{
+			{Name: "Home", Path: routes.HomePage.URL()},
+			{Name: "Posts", Path: routes.PostIndex.URL()},
+		},
 		listItems,
 	)
 }
@@ -162,9 +171,21 @@ func PostShowSchema(post models.ArticleEntity, tags []models.TagEntity) SchemaBu
 		if imageURL, ok := publicImageURL(post.ImageLink); ok {
 			node["image"] = buildCanonicalURL(data.canonical, imageURL)
 		}
-		addPublishedDates(node, post.FirstPublishedAt.Valid, post.FirstPublishedAt.Time, post.UpdatedAt)
+		addPublishedDates(
+			node,
+			post.FirstPublishedAt.Valid,
+			post.FirstPublishedAt.Time,
+			post.UpdatedAt,
+		)
 		return []SchemaNode{
-			breadcrumbSchema(data, []SchemaBreadcrumb{{Name: "Home", Path: routes.HomePage.URL()}, {Name: "Posts", Path: routes.PostIndex.URL()}, {Name: post.Title, Path: routes.PostShow.URL(post.Slug)}}),
+			breadcrumbSchema(
+				data,
+				[]SchemaBreadcrumb{
+					{Name: "Home", Path: routes.HomePage.URL()},
+					{Name: "Posts", Path: routes.PostIndex.URL()},
+					{Name: post.Title, Path: routes.PostShow.URL(post.Slug)},
+				},
+			),
 			node,
 		}
 	}
@@ -173,7 +194,11 @@ func PostShowSchema(post models.ArticleEntity, tags []models.TagEntity) SchemaBu
 func NewsletterIndexSchema(items []models.NewsletterEntity) SchemaBuilder {
 	listItems := make([]schemaListItem, 0, len(items))
 	for _, item := range items {
-		listItem := schemaListItem{Name: item.Title, Path: routes.NewsletterShow.URL(item.Slug.String), Description: item.MetaDescription}
+		listItem := schemaListItem{
+			Name:        item.Title,
+			Path:        routes.NewsletterShow.URL(item.Slug.String),
+			Description: item.MetaDescription,
+		}
 		if imageURL, ok := publicImageURL(item.ImageLink); ok {
 			listItem.Image = imageURL
 		}
@@ -182,7 +207,10 @@ func NewsletterIndexSchema(items []models.NewsletterEntity) SchemaBuilder {
 	return collectionSchema(
 		"Newsletters",
 		"Field notes and dispatches on software, products, and independent work.",
-		[]SchemaBreadcrumb{{Name: "Home", Path: routes.HomePage.URL()}, {Name: "Newsletters", Path: routes.NewsletterIndex.URL()}},
+		[]SchemaBreadcrumb{
+			{Name: "Home", Path: routes.HomePage.URL()},
+			{Name: "Newsletters", Path: routes.NewsletterIndex.URL()},
+		},
 		listItems,
 	)
 }
@@ -202,9 +230,24 @@ func NewsletterShowSchema(newsletter models.NewsletterEntity) SchemaBuilder {
 		if imageURL, ok := publicImageURL(newsletter.ImageLink); ok {
 			node["image"] = buildCanonicalURL(data.canonical, imageURL)
 		}
-		addPublishedDates(node, newsletter.ReleasedAt.Valid, newsletter.ReleasedAt.Time, newsletter.UpdatedAt)
+		addPublishedDates(
+			node,
+			newsletter.ReleasedAt.Valid,
+			newsletter.ReleasedAt.Time,
+			newsletter.UpdatedAt,
+		)
 		return []SchemaNode{
-			breadcrumbSchema(data, []SchemaBreadcrumb{{Name: "Home", Path: routes.HomePage.URL()}, {Name: "Newsletters", Path: routes.NewsletterIndex.URL()}, {Name: newsletter.Title, Path: routes.NewsletterShow.URL(newsletter.Slug.String)}}),
+			breadcrumbSchema(
+				data,
+				[]SchemaBreadcrumb{
+					{Name: "Home", Path: routes.HomePage.URL()},
+					{Name: "Newsletters", Path: routes.NewsletterIndex.URL()},
+					{
+						Name: newsletter.Title,
+						Path: routes.NewsletterShow.URL(newsletter.Slug.String),
+					},
+				},
+			),
 			node,
 		}
 	}
@@ -213,7 +256,11 @@ func NewsletterShowSchema(newsletter models.NewsletterEntity) SchemaBuilder {
 func ProjectIndexSchema(items []models.ProjectEntity) SchemaBuilder {
 	listItems := make([]schemaListItem, 0, len(items))
 	for _, item := range items {
-		listItem := schemaListItem{Name: item.Title, Path: routes.ProjectShow.URL(item.Slug), Description: item.Description}
+		listItem := schemaListItem{
+			Name:        item.Title,
+			Path:        routes.ProjectShow.URL(item.Slug),
+			Description: item.Description,
+		}
 		if imageURL, ok := publicImageURL(item.ImageLink); ok {
 			listItem.Image = imageURL
 		}
@@ -222,7 +269,10 @@ func ProjectIndexSchema(items []models.ProjectEntity) SchemaBuilder {
 	return collectionSchema(
 		"Projects",
 		"Products and experiments built by Morten Vistisen.",
-		[]SchemaBreadcrumb{{Name: "Home", Path: routes.HomePage.URL()}, {Name: "Projects", Path: routes.ProjectIndex.URL()}},
+		[]SchemaBreadcrumb{
+			{Name: "Home", Path: routes.HomePage.URL()},
+			{Name: "Projects", Path: routes.ProjectIndex.URL()},
+		},
 		listItems,
 	)
 }
@@ -251,13 +301,24 @@ func ProjectShowSchema(project models.ProjectEntity) SchemaBuilder {
 			node["dateModified"] = project.UpdatedAt.Format(time.RFC3339)
 		}
 		return []SchemaNode{
-			breadcrumbSchema(data, []SchemaBreadcrumb{{Name: "Home", Path: routes.HomePage.URL()}, {Name: "Projects", Path: routes.ProjectIndex.URL()}, {Name: project.Title, Path: routes.ProjectShow.URL(project.Slug)}}),
+			breadcrumbSchema(
+				data,
+				[]SchemaBreadcrumb{
+					{Name: "Home", Path: routes.HomePage.URL()},
+					{Name: "Projects", Path: routes.ProjectIndex.URL()},
+					{Name: project.Title, Path: routes.ProjectShow.URL(project.Slug)},
+				},
+			),
 			node,
 		}
 	}
 }
 
-func collectionSchema(name, description string, breadcrumbs []SchemaBreadcrumb, items []schemaListItem) SchemaBuilder {
+func collectionSchema(
+	name, description string,
+	breadcrumbs []SchemaBreadcrumb,
+	items []schemaListItem,
+) SchemaBuilder {
 	return func(data HeadData) []SchemaNode {
 		nodes := []SchemaNode{
 			breadcrumbSchema(data, breadcrumbs),

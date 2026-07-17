@@ -25,7 +25,14 @@ func TestParsePublicPage(t *testing.T) {
 	} {
 		page, ok := parsePublicPage(test.value)
 		if page != test.page || ok != test.ok {
-			t.Fatalf("parsePublicPage(%q) = (%d, %t), want (%d, %t)", test.value, page, ok, test.page, test.ok)
+			t.Fatalf(
+				"parsePublicPage(%q) = (%d, %t), want (%d, %t)",
+				test.value,
+				page,
+				ok,
+				test.page,
+				test.ok,
+			)
 		}
 	}
 	if publicPageExists(2, 1) || !publicPageExists(1, 0) {
@@ -37,7 +44,9 @@ func TestCreateSitemapIncludesPublishedContent(t *testing.T) {
 	updatedAt := time.Date(2026, time.July, 14, 12, 0, 0, 0, time.UTC)
 	sitemap, err := createSitemap(
 		[]models.ArticleEntity{{Slug: "article", UpdatedAt: updatedAt}},
-		[]models.NewsletterEntity{{Slug: sql.NullString{String: "newsletter", Valid: true}, UpdatedAt: updatedAt}},
+		[]models.NewsletterEntity{
+			{Slug: sql.NullString{String: "newsletter", Valid: true}, UpdatedAt: updatedAt},
+		},
 		[]models.ProjectEntity{{Slug: "project", UpdatedAt: updatedAt}},
 	)
 	if err != nil {

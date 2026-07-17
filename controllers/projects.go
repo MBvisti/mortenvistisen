@@ -95,7 +95,10 @@ func (p Projects) Show(etx *echo.Context) error {
 	if err != nil {
 		return fmt.Errorf("load related projects: %w", err)
 	}
-	related = slices.DeleteFunc(related, func(item models.ProjectEntity) bool { return item.ID == project.ID })
+	related = slices.DeleteFunc(
+		related,
+		func(item models.ProjectEntity) bool { return item.ID == project.ID },
+	)
 	related = related[:min(3, len(related))]
 
 	return hypermedia.RenderPage(etx, views.ProjectShow{

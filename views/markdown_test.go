@@ -25,13 +25,16 @@ func TestPublicPostTagsKeepsHiddenTagsInDOM(t *testing.T) {
 			t.Fatalf("tag %q is missing from the DOM", tag.Title)
 		}
 	}
-	if !strings.Contains(output.String(), "<details") || !strings.Contains(output.String(), "Show 2 more") {
+	if !strings.Contains(output.String(), "<details") ||
+		!strings.Contains(output.String(), "Show 2 more") {
 		t.Fatalf("expected native show-more disclosure: %s", output.String())
 	}
 }
 
 func TestRenderMarkdownSupportsTablesAndHighlightedCode(t *testing.T) {
-	content, _, err := RenderMarkdown("```go\nfunc main() {}\n```\n\n| Name | Value |\n| --- | --- |\n| Language | Go |\n")
+	content, _, err := RenderMarkdown(
+		"```go\nfunc main() {}\n```\n\n| Name | Value |\n| --- | --- |\n| Language | Go |\n",
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -49,7 +52,9 @@ func TestRenderMarkdownSupportsTablesAndHighlightedCode(t *testing.T) {
 }
 
 func TestRenderMarkdownExtractsHeadings(t *testing.T) {
-	content, headings, err := RenderMarkdown("## First *heading*\n\nBody.\n\n![Diagram](https://example.com/diagram.png)\n\n## First heading\n")
+	content, headings, err := RenderMarkdown(
+		"## First *heading*\n\nBody.\n\n![Diagram](https://example.com/diagram.png)\n\n## First heading\n",
+	)
 	if err != nil {
 		t.Fatal(err)
 	}

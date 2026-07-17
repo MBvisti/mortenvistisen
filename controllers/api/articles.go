@@ -80,7 +80,10 @@ func (a Articles) Update(etx *echo.Context) error {
 		ImageLink:       payload.ImageLink,
 	}
 	if patch.Empty() {
-		return etx.JSON(http.StatusBadRequest, errorResponse{Error: "at least one field is required"})
+		return etx.JSON(
+			http.StatusBadRequest,
+			errorResponse{Error: "at least one field is required"},
+		)
 	}
 
 	article, err := a.article.Patch(etx.Request().Context(), slug, patch)
@@ -96,7 +99,10 @@ func (a Articles) Update(etx *echo.Context) error {
 		}
 
 		slog.ErrorContext(etx.Request().Context(), "failed to patch article", "error", err)
-		return etx.JSON(http.StatusInternalServerError, errorResponse{Error: "failed to update article"})
+		return etx.JSON(
+			http.StatusInternalServerError,
+			errorResponse{Error: "failed to update article"},
+		)
 	}
 
 	return etx.JSON(http.StatusOK, articleResponse{

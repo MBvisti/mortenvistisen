@@ -145,8 +145,11 @@ func TestPublishedProjectRequiresCompleteContent(t *testing.T) {
 			Description:     "A useful project summary",
 			MetaTitle:       "Search title",
 			MetaDescription: "Search description",
-			ImageLink:       sql.NullString{String: "https://media.example.com/project.png", Valid: true},
-			Content:         "# Complete project",
+			ImageLink: sql.NullString{
+				String: "https://media.example.com/project.png",
+				Valid:  true,
+			},
+			Content: "# Complete project",
 		}
 	}
 

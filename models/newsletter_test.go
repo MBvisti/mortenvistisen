@@ -121,8 +121,11 @@ func TestPublishedNewsletterRequiresCompleteContent(t *testing.T) {
 			MetaDescription: "Search description",
 			IsPublished:     sql.NullBool{Bool: true, Valid: true},
 			ReleasedAt:      sql.NullTime{Time: time.Now(), Valid: true},
-			ImageLink:       sql.NullString{String: "https://media.example.com/cover.png", Valid: true},
-			Content:         sql.NullString{String: "# Complete newsletter", Valid: true},
+			ImageLink: sql.NullString{
+				String: "https://media.example.com/cover.png",
+				Valid:  true,
+			},
+			Content: sql.NullString{String: "# Complete newsletter", Valid: true},
 		}
 	}
 

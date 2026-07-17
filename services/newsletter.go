@@ -206,7 +206,12 @@ func (n Newsletter) Update(
 		}
 	}
 	if !imageLinksEqual(current.MetaImageLink, newsletter.MetaImageLink) {
-		if err := n.enqueueImageDeletion(ctx, tx.Tx, current.ID, current.MetaImageLink); err != nil {
+		if err := n.enqueueImageDeletion(
+			ctx,
+			tx.Tx,
+			current.ID,
+			current.MetaImageLink,
+		); err != nil {
 			_ = tx.Rollback()
 			return models.NewsletterEntity{}, err
 		}

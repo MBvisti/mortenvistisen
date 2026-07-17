@@ -121,7 +121,10 @@ func (p Posts) Show(etx *echo.Context) error {
 	if err != nil {
 		return fmt.Errorf("load related posts: %w", err)
 	}
-	related = slices.DeleteFunc(related, func(item models.ArticleEntity) bool { return item.ID == post.ID })
+	related = slices.DeleteFunc(
+		related,
+		func(item models.ArticleEntity) bool { return item.ID == post.ID },
+	)
 	related = related[:min(3, len(related))]
 
 	return hypermedia.RenderPage(etx, views.PostShow{

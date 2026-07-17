@@ -121,13 +121,13 @@ templ PublicPagination(path string, page, totalPages int64) {
 	if totalPages > 1 {
 		<nav class="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-[#2f3a37] pt-6" aria-label="Pagination">
 			if page > 1 {
-				<a class="public-text-link public-label text-[#8df7a4]" href={ templ.SafeURL(publicPageURL(path, page - 1)) }>← Previous</a>
+				<a class="public-text-link public-label text-[#8df7a4]" href={ templ.SafeURL(publicPageURL(path, page-1)) }>← Previous</a>
 			} else {
 				<span></span>
 			}
 			<span class="public-label text-[#8f8a7d]">Page { strconv.FormatInt(page, 10) } / { strconv.FormatInt(totalPages, 10) }</span>
 			if page < totalPages {
-				<a class="public-text-link public-label text-[#8df7a4]" href={ templ.SafeURL(publicPageURL(path, page + 1)) }>Next →</a>
+				<a class="public-text-link public-label text-[#8df7a4]" href={ templ.SafeURL(publicPageURL(path, page+1)) }>Next →</a>
 			} else {
 				<span></span>
 			}

@@ -33,6 +33,18 @@ templ (ni NewsletterIndex) Page() {
 						<h1 class="public-display text-[#f2ead8]">Field notes and dispatches.</h1>
 						<p class="mt-7 max-w-2xl text-lg leading-8 text-[#aaa393]">Longer observations from the workshop, sent when there is something useful to share.</p>
 					</header>
+					<section class="public-panel mb-3 grid gap-8 lg:grid-cols-2 lg:items-end" aria-labelledby="newsletter-subscription-title">
+						<div>
+							<p class="public-label text-[#8df7a4]">Stay in the loop</p>
+							<h2 id="newsletter-subscription-title" class="public-card-heading mt-5">Get the next dispatch.</h2>
+							<p class="mt-4 max-w-xl leading-7 text-[#aaa393]">Enter your email and confirm it from your inbox. No fixed schedule, only useful updates.</p>
+						</div>
+						<form class="flex flex-col gap-3 sm:flex-row" action={ routes.SubscriberCreate.URL() } method="post">
+							<label class="sr-only" for="newsletter-email">Email address</label>
+							<input id="newsletter-email" class="min-h-12 min-w-0 flex-1 border border-[#52605c] bg-[#101414] px-4 text-[#f2ead8] placeholder:text-[#8f8a7d] focus:border-[#8df7a4] focus:outline-none" type="email" name="email" placeholder="you@example.com" autocomplete="email" maxlength="254" required/>
+							<button class="min-h-12 border border-[#8df7a4] bg-[#8df7a4] px-6 font-bold uppercase tracking-[0.08em] text-[#130f0b] hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#8df7a4]" type="submit">Subscribe</button>
+						</form>
+					</section>
 					if len(ni.Items) == 0 {
 						<div class="public-panel">
 							<p class="public-label text-[#8df7a4]">Signal pending</p>

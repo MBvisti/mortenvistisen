@@ -335,7 +335,7 @@ func PublicPagination(path string, page, totalPages int64) templ.Component {
 				var templ_7745c5c3_Var14 templ.SafeURL
 				templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(publicPageURL(path, page-1)))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/public_components.templ`, Line: 124, Col: 111}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/public_components.templ`, Line: 124, Col: 109}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 				if templ_7745c5c3_Err != nil {
@@ -389,7 +389,7 @@ func PublicPagination(path string, page, totalPages int64) templ.Component {
 				var templ_7745c5c3_Var17 templ.SafeURL
 				templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(publicPageURL(path, page+1)))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/public_components.templ`, Line: 130, Col: 111}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/public_components.templ`, Line: 130, Col: 109}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 				if templ_7745c5c3_Err != nil {

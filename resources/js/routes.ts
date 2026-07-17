@@ -63,4 +63,5 @@ export const routes = {
   sessionNew: () => '/users/sign-in',
   subscriberConfirmationCreate: () => '/subscriptions/confirmation',
   subscriberConfirmationNew: () => '/subscriptions/confirmation',
+  subscriberCreate: () => '/subscriptions',
 }

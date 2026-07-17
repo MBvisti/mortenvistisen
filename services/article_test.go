@@ -140,7 +140,8 @@ func TestApplyArticlePatchPreservesOmittedFields(t *testing.T) {
 		got.ImageLink.String != imageLink {
 		t.Fatalf("applyArticlePatch() did not apply supplied fields: %#v", got)
 	}
-	if got.Excerpt != current.Excerpt || got.MetaTitle != current.MetaTitle || got.Slug != current.Slug {
+	if got.Excerpt != current.Excerpt || got.MetaTitle != current.MetaTitle ||
+		got.Slug != current.Slug {
 		t.Fatalf("applyArticlePatch() changed omitted fields: %#v", got)
 	}
 	if !(ArticlePatch{}).Empty() || (ArticlePatch{ImageLink: &imageLink}).Empty() {

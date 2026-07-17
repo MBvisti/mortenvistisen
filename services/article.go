@@ -255,7 +255,12 @@ func (a Article) Update(
 		}
 	}
 	if !imageLinksEqual(current.MetaImageLink, article.MetaImageLink) {
-		if err := a.enqueueImageDeletion(ctx, tx.Tx, current.ID, current.MetaImageLink); err != nil {
+		if err := a.enqueueImageDeletion(
+			ctx,
+			tx.Tx,
+			current.ID,
+			current.MetaImageLink,
+		); err != nil {
 			_ = tx.Rollback()
 			return models.ArticleEntity{}, err
 		}
@@ -411,7 +416,10 @@ func prepareCover(
 		return nil, "", coverValidationError("empty", "The selected image is empty.")
 	}
 	if cover.Size > maxCoverSize {
-		return nil, "", coverValidationError("max_size", "The selected image must be 10 MB or smaller.")
+		return nil, "", coverValidationError(
+			"max_size",
+			"The selected image must be 10 MB or smaller.",
+		)
 	}
 
 	extension := strings.ToLower(filepath.Ext(filename))
@@ -522,7 +530,14 @@ func cleanupUploadedImages(
 	defer cancel()
 	for _, object := range uploaded {
 		if err := store.Delete(cleanupCtx, object.Key); err != nil {
-			slog.ErrorContext(cleanupCtx, "could not clean up uploaded image", "key", object.Key, "error", err)
+			slog.ErrorContext(
+				cleanupCtx,
+				"could not clean up uploaded image",
+				"key",
+				object.Key,
+				"error",
+				err,
+			)
 		}
 	}
 }

@@ -177,7 +177,12 @@ func (p Project) Update(
 		}
 	}
 	if !imageLinksEqual(current.MetaImageLink, project.MetaImageLink) {
-		if err := p.enqueueImageDeletion(ctx, tx.Tx, current.ID, current.MetaImageLink); err != nil {
+		if err := p.enqueueImageDeletion(
+			ctx,
+			tx.Tx,
+			current.ID,
+			current.MetaImageLink,
+		); err != nil {
 			_ = tx.Rollback()
 			return models.ProjectEntity{}, err
 		}

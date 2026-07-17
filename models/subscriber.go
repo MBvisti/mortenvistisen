@@ -318,11 +318,10 @@ func (s subscriber) Upsert(
 
 	if err := db.NewInsert().
 		Model(&entity).
-		On("CONFLICT (id) DO UPDATE").
-		Set("email = excluded.email").
+		On("CONFLICT (email) WHERE email IS NOT NULL DO UPDATE").
+		Set("updated_at = excluded.updated_at").
 		Set("subscribed_at = excluded.subscribed_at").
 		Set("referer = excluded.referer").
-		Set("is_verified = excluded.is_verified").
 		Returning("*").
 		Scan(ctx); err != nil {
 		return SubscriberEntity{}, err
