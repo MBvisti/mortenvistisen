@@ -142,7 +142,7 @@ templ (ps ProjectShow) Page() {
 							if ps.Item.ProjectUrl.Valid {
 								<div class="public-panel public-panel-primary mt-12 max-w-3xl">
 									<p class="public-label text-[#130f0b]">Visit project</p>
-									<a class="mt-5 inline-flex text-lg font-bold uppercase text-[#130f0b] underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#130f0b]" href={ ps.Item.ProjectUrl.String } target="_blank" rel="noopener noreferrer">Open { ps.Item.Title } ↗</a>
+									<a class="mt-5 inline-flex text-lg font-bold uppercase text-[#130f0b] underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#130f0b]" href={ ps.Item.ProjectUrl.String } target="_blank" rel="noopener noreferrer" data-palantir-event={ "project-" + ps.Item.Slug + "-cta-clicked" }>Open { ps.Item.Title } ↗</a>
 								</div>
 							}
 						</div>

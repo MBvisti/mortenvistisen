@@ -92,7 +92,7 @@ func (ni NewsletterIndex) Page() templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" method=\"post\"><label class=\"sr-only\" for=\"newsletter-email\">Email address</label> <input id=\"newsletter-email\" class=\"min-h-12 min-w-0 flex-1 border border-[#52605c] bg-[#101414] px-4 text-[#f2ead8] placeholder:text-[#8f8a7d] focus:border-[#8df7a4] focus:outline-none\" type=\"email\" name=\"email\" placeholder=\"you@example.com\" autocomplete=\"email\" maxlength=\"254\" required> <button class=\"min-h-12 border border-[#8df7a4] bg-[#8df7a4] px-6 font-bold uppercase tracking-[0.08em] text-[#130f0b] hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#8df7a4]\" type=\"submit\">Subscribe</button></form></section>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" method=\"post\"><label class=\"sr-only\" for=\"newsletter-email\">Email address</label> <input id=\"newsletter-email\" class=\"min-h-12 min-w-0 flex-1 border border-[#52605c] bg-[#101414] px-4 text-[#f2ead8] placeholder:text-[#8f8a7d] focus:border-[#8df7a4] focus:outline-none\" type=\"email\" name=\"email\" placeholder=\"you@example.com\" autocomplete=\"email\" maxlength=\"254\" required> <button class=\"min-h-12 border border-[#8df7a4] bg-[#8df7a4] px-6 font-bold uppercase tracking-[0.08em] text-[#130f0b] hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#8df7a4]\" type=\"submit\" data-palantir-event=\"newsletter-subscribe-clicked\">Subscribe</button></form></section>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
