@@ -82,7 +82,7 @@ func CreateArticles(
 ) ([]models.ArticleEntity, error) {
 	articles := make([]models.ArticleEntity, 0, count)
 
-	for i := 0; i < count; i++ {
+	for i := range count {
 		entity, err := CreateArticle(ctx, exec, opts...)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create article %d: %w", i+1, err)

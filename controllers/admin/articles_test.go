@@ -7,8 +7,8 @@ func TestArticleStatusFilter(t *testing.T) {
 		status string
 		want   *bool
 	}{
-		{status: "published", want: boolPointer(true)},
-		{status: "draft", want: boolPointer(false)},
+		{status: "published", want: new(true)},
+		{status: "draft", want: new(false)},
 		{status: "invalid"},
 	}
 
@@ -28,6 +28,7 @@ func TestArticleStatusFilter(t *testing.T) {
 	}
 }
 
+//go:fix inline
 func boolPointer(value bool) *bool {
-	return &value
+	return new(value)
 }

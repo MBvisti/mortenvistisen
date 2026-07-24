@@ -78,7 +78,7 @@ func CreateNewsletters(
 ) ([]models.NewsletterEntity, error) {
 	newsletters := make([]models.NewsletterEntity, 0, count)
 
-	for i := 0; i < count; i++ {
+	for i := range count {
 		entity, err := CreateNewsletter(ctx, exec, opts...)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create newsletter %d: %w", i+1, err)

@@ -9,7 +9,7 @@ import (
 	"go.uber.org/fx"
 )
 
-var otherCache = NewCacheBuilder[string]().WithSize(2).Build
+var otherCache = NewCacheBuilder[string]().WithSize(3).Build
 
 var constructors = fx.Provide(
 	otherCache,

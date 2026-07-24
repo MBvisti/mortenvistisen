@@ -140,6 +140,7 @@ templ head(data HeadData) {
 		}
 		<meta name="description" content={ data.Description }/>
 		<link rel="canonical" href={ data.canonicalURL }/>
+		<link rel="alternate" type="application/rss+xml" title="Morten Vistisen RSS Feed" href={ routes.RSS.URL() }/>
 		if data.faviconBaseURL != "" {
 			<link rel="icon" type="image/x-icon" href={ joinAssetURL(data.faviconBaseURL, "favicon.ico") }/>
 			<link rel="icon" type="image/png" sizes="16x16" href={ joinAssetURL(data.faviconBaseURL, "favicon-16x16.png") }/>

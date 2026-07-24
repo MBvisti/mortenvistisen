@@ -84,7 +84,7 @@ func CreateProjects(
 ) ([]models.ProjectEntity, error) {
 	projects := make([]models.ProjectEntity, 0, count)
 
-	for i := 0; i < count; i++ {
+	for i := range count {
 		entity, err := CreateProject(ctx, exec, opts...)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create project %d: %w", i+1, err)

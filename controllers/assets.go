@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"context"
 	"crypto/md5"
+	"database/sql"
 	"encoding/xml"
 	"errors"
 	"fmt"
@@ -24,13 +26,26 @@ import (
 
 const threeMonthsCache = "7776000"
 
+const (
+	rssCacheKey     = "assets:rss"
+	rssCacheControl = "public, max-age=900"
+	rssContentType  = "application/rss+xml; charset=utf-8"
+)
+
 type Assets struct {
-	cache *Cache[string]
-	db    storage.Pool
+	cache           *Cache[string]
+	db              storage.Pool
+	loadRSSArticles func(context.Context, int) ([]models.ArticleEntity, error)
 }
 
 func NewAssets(cache *Cache[string], db storage.Pool) Assets {
-	return Assets{cache: cache, db: db}
+	return Assets{
+		cache: cache,
+		db:    db,
+		loadRSSArticles: func(ctx context.Context, limit int) ([]models.ArticleEntity, error) {
+			return models.Article.LatestPublished(ctx, db.Executor(), limit)
+		},
+	}
 }
 
 func (a Assets) RegisterRoutes(r *router.Router) error {
@@ -41,6 +56,16 @@ func (a Assets) RegisterRoutes(r *router.Router) error {
 		Path:    routes.Robots.Path(),
 		Name:    routes.Robots.Name(),
 		Handler: a.Robots,
+	})
+	if err != nil {
+		errs = append(errs, err)
+	}
+
+	_, err = r.AddRoute(echo.Route{
+		Method:  http.MethodGet,
+		Path:    routes.RSS.Path(),
+		Name:    routes.RSS.Name(),
+		Handler: a.RSS,
 	})
 	if err != nil {
 		errs = append(errs, err)
@@ -205,6 +230,131 @@ func (a Assets) Sitemap(etx *echo.Context) error {
 	return etx.Blob(http.StatusOK, "application/xml", []byte(sitemap))
 }
 
+type RSSGUID struct {
+	IsPermaLink bool   `xml:"isPermaLink,attr"`
+	Value       string `xml:",chardata"`
+}
+
+type RSSItem struct {
+	Title       string  `xml:"title"`
+	Link        string  `xml:"link"`
+	GUID        RSSGUID `xml:"guid"`
+	PubDate     string  `xml:"pubDate,omitempty"`
+	Description string  `xml:"description"`
+}
+
+type RSSChannel struct {
+	Title         string    `xml:"title"`
+	Link          string    `xml:"link"`
+	Description   string    `xml:"description"`
+	Language      string    `xml:"language"`
+	LastBuildDate string    `xml:"lastBuildDate,omitempty"`
+	PubDate       string    `xml:"pubDate,omitempty"`
+	Generator     string    `xml:"generator"`
+	Items         []RSSItem `xml:"item"`
+}
+
+type RSSFeed struct {
+	XMLName xml.Name   `xml:"rss"`
+	Version string     `xml:"version,attr"`
+	Channel RSSChannel `xml:"channel"`
+}
+
+func rssDate(value sql.NullTime) string {
+	if !value.Valid || value.Time.IsZero() {
+		return ""
+	}
+
+	return value.Time.UTC().Format(time.RFC1123Z)
+}
+
+func absoluteURL(value string) string {
+	return strings.TrimRight(config.BaseURL, "/") + "/" + strings.TrimLeft(value, "/")
+}
+
+func createRSS(articles []models.ArticleEntity) (string, error) {
+	items := make([]RSSItem, 0, len(articles))
+	var latestUpdate time.Time
+	for _, article := range articles {
+		link := absoluteURL(routes.PostShow.URL(article.Slug))
+		items = append(items, RSSItem{
+			Title: article.Title,
+			Link:  link,
+			GUID: RSSGUID{
+				IsPermaLink: true,
+				Value:       link,
+			},
+			PubDate:     rssDate(article.FirstPublishedAt),
+			Description: article.Excerpt.String,
+		})
+
+		updatedAt := article.UpdatedAt
+		if updatedAt.IsZero() && article.FirstPublishedAt.Valid {
+			updatedAt = article.FirstPublishedAt.Time
+		}
+		if updatedAt.After(latestUpdate) {
+			latestUpdate = updatedAt
+		}
+	}
+
+	feed := RSSFeed{
+		Version: "2.0",
+		Channel: RSSChannel{
+			Title:         "Morten Vistisen",
+			Link:          absoluteURL(routes.HomePage.URL()),
+			Description:   "Notes on building with Go, distributed systems, and product-minded engineering.",
+			Language:      "en-US",
+			LastBuildDate: latestUpdate.UTC().Format(time.RFC1123Z),
+			Generator:     "Andurel",
+			Items:         items,
+		},
+	}
+	if len(items) > 0 {
+		feed.Channel.PubDate = items[0].PubDate
+	}
+	if latestUpdate.IsZero() {
+		feed.Channel.LastBuildDate = ""
+	}
+
+	xmlBytes, err := xml.MarshalIndent(feed, "", "  ")
+	if err != nil {
+		return "", err
+	}
+
+	return xml.Header + string(xmlBytes), nil
+}
+
+func writeRSSResponse(etx *echo.Context, content []byte) error {
+	//nolint:gosec // The digest is only used as an HTTP cache validator.
+	hash := md5.Sum(content)
+	etag := fmt.Sprintf(`"%x-%x"`, hash, len(content))
+
+	etx.Response().Header().Set("Cache-Control", rssCacheControl)
+	etx.Response().Header().Set("ETag", etag)
+	etx.Response().Header().Set("Vary", "Accept-Encoding")
+	if etx.Request().Header.Get("If-None-Match") == etag {
+		return etx.NoContent(http.StatusNotModified)
+	}
+
+	return etx.Blob(http.StatusOK, rssContentType, content)
+}
+
+func (a Assets) RSS(etx *echo.Context) error {
+	feed, err := a.cache.Get(rssCacheKey, func() (string, error) {
+		articles, err := a.loadRSSArticles(etx.Request().Context(), 0)
+		if err != nil {
+			return "", fmt.Errorf("load RSS articles: %w", err)
+		}
+
+		return createRSS(articles)
+	})
+	if err != nil {
+		return err
+	}
+
+	return writeRSSResponse(etx, []byte(feed))
+}
+
 type URL struct {
 	XMLName    xml.Name `xml:"url"`
 	Loc        string   `xml:"loc"`
@@ -224,9 +374,6 @@ func createSitemap(
 	newsletters []models.NewsletterEntity,
 	projects []models.ProjectEntity,
 ) (string, error) {
-	absoluteURL := func(value string) string {
-		return strings.TrimRight(config.BaseURL, "/") + "/" + strings.TrimLeft(value, "/")
-	}
 	lastModified := func(value time.Time) string {
 		if value.IsZero() {
 			return ""

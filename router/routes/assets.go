@@ -27,6 +27,12 @@ var Sitemap = routing.NewSimpleRoute(
 	"",
 )
 
+var RSS = routing.NewSimpleRoute(
+	"/rss.xml",
+	"assets.rss",
+	"",
+)
+
 var IndexNowKey = routing.NewSimpleRoute(
 	"/"+IndexNowKeyValue+".txt",
 	"assets.index_now_key",
