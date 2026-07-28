@@ -365,13 +365,7 @@ DOMAIN=localhost:8080
 PROTOCOL=http
 
 # Database
-DB_KIND=postgres
-DB_HOST=127.0.0.1
-DB_PORT=5432
-DB_NAME=mortenvistisen_development
-DB_USER=postgres
-DB_PASSWORD=postgres
-DB_SSL_MODE=disable
+DATABASE_URL=postgres://postgres:postgres@127.0.0.1:5432/mortenvistisen_development?sslmode=disable
 
 # Email (Mailpit for development)
 MAILPIT_HOST=0.0.0.0
