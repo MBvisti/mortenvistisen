@@ -89,7 +89,7 @@ func (l Landing) Page() templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\"><p class=\"public-label text-[#130f0b]\">01 / Writing</p><h2 id=\"writing-title\" class=\"public-heading text-[#130f0b]\">Latest transmissions</h2><span aria-hidden=\"true\" class=\"text-5xl leading-none\">↘</span></a> ")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\"><p class=\"public-label text-[#130f0b]\">01 / Writing</p><h2 id=\"writing-title\" class=\"public-heading text-[#130f0b]\">LATEST TRANSMISSIONS</h2><span aria-hidden=\"true\" class=\"text-5xl leading-none\">↘</span></a> ")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
