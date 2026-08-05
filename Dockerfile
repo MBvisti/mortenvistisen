@@ -32,7 +32,8 @@ COPY . .
 COPY --from=assets-builder /usr/src/app/assets/css ./assets/css
 COPY --from=assets-builder /usr/src/app/assets/dist ./assets/dist
 
-RUN CGO_ENABLED=0 GOOS=linux go build -v -o /run-app ./cmd/app
+RUN CGO_ENABLED=0 GOOS=linux go build -v -o /run-app ./cmd/app \
+    && CGO_ENABLED=0 GOOS=linux go build -v -o /run-worker ./cmd/worker
 
 FROM debian:bookworm-slim
 
@@ -41,6 +42,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /run-app /usr/local/bin/run-app
+COPY --from=builder /run-worker /usr/local/bin/run-worker
 
 WORKDIR /app
 
