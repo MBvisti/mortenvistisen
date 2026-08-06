@@ -55,7 +55,7 @@ var (
 		return fmt.Sprintf("%s://%s", protocol, Domain)
 	}()
 	AppCookieSessionName = func() string {
-		return "app_sess_" + slug.Make(strings.ToLower(ProjectName)) + "-" + Env
+		return "app sess " + slug.Make(strings.ToLower(ProjectName)) + " " + Env
 	}()
 	DefaultSenderSignature = func() string {
 		if os.Getenv("DEFAULT_SENDER_SIGNATURE") != "" {
