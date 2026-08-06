@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 
+	"mortenvistisen/config"
 	"mortenvistisen/database/seeds"
 	"mortenvistisen/internal/storage"
 
@@ -40,7 +41,7 @@ func run(args []string) error {
 
 	ctx := context.Background()
 
-	db, err := storage.NewPostgres(ctx, os.Getenv("DATABASE_URL"))
+	db, err := storage.NewPostgres(ctx, buildDatabaseURL())
 	if err != nil {
 		return fmt.Errorf("failed to connect to database: %w", err)
 	}
@@ -61,4 +62,15 @@ func run(args []string) error {
 
 	fmt.Println("Seeding complete!")
 	return nil
+}
+
+func buildDatabaseURL() string {
+	return config.PostgresURL(
+		os.Getenv("DB_HOST"),
+		os.Getenv("DB_PORT"),
+		os.Getenv("DB_NAME"),
+		os.Getenv("DB_USER"),
+		os.Getenv("DB_PASSWORD"),
+		os.Getenv("DB_SSL_MODE"),
+	)
 }

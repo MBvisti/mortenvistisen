@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 
+	"mortenvistisen/config"
 	"mortenvistisen/database"
 	"mortenvistisen/internal/storage"
 
@@ -42,13 +43,12 @@ func run(args []string) error {
 }
 
 func buildDatabaseURL() string {
-	return fmt.Sprintf("%s://%s:%s@%s:%s/%s?sslmode=%s",
-		os.Getenv("DB_KIND"),
-		os.Getenv("DB_USER"),
-		os.Getenv("DB_PASSWORD"),
+	return config.PostgresURL(
 		os.Getenv("DB_HOST"),
 		os.Getenv("DB_PORT"),
 		os.Getenv("DB_NAME"),
+		os.Getenv("DB_USER"),
+		os.Getenv("DB_PASSWORD"),
 		os.Getenv("DB_SSL_MODE"),
 	)
 }
