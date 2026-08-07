@@ -2,9 +2,7 @@ package telemetry
 
 import (
 	"context"
-	"crypto/tls"
 	"fmt"
-	"strings"
 
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
 	"go.opentelemetry.io/otel/sdk/resource"
@@ -53,19 +51,16 @@ func (o *OtlpHttpTraceExporter) GetSpanExporter(
 	ctx context.Context,
 	res *resource.Resource,
 ) (sdktrace.SpanExporter, error) {
-	endpoint := strings.TrimPrefix(o.endpoint, "http://")
-	endpoint = strings.TrimPrefix(endpoint, "https://")
-
-	opts := []otlptracehttp.Option{
-		otlptracehttp.WithEndpoint(endpoint),
+	endpoint, err := otlpHTTPURL(o.endpoint, "traces")
+	if err != nil {
+		return nil, err
 	}
 
+	opts := []otlptracehttp.Option{
+		otlptracehttp.WithEndpointURL(endpoint),
+	}
 	if o.insecure {
 		opts = append(opts, otlptracehttp.WithInsecure())
-	} else {
-		opts = append(opts, otlptracehttp.WithTLSClientConfig(&tls.Config{
-			MinVersion: tls.VersionTLS12,
-		}))
 	}
 
 	if len(o.headers) > 0 {
