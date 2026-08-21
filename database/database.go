@@ -30,7 +30,7 @@ type Postgres struct {
 var _ storage.Pool = (*Postgres)(nil)
 
 func NewPostgres(ctx context.Context, cfg config.Config) (*Postgres, error) {
-	pgxCfg, err := pgx.ParseConfig(cfg.DB.GetDatabaseURL())
+	pgxCfg, err := pgx.ParseConfig(cfg.DB.URL())
 	if err != nil {
 		slog.ErrorContext(ctx, "could not parse database connection string", "error", err)
 		return nil, fmt.Errorf("database: parse database URL: %w", err)

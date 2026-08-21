@@ -2,14 +2,12 @@ package main
 
 import (
 	"context"
-	"flag"
 	"fmt"
 	"log"
 	"os"
-	"strings"
 
 	"mortenvistisen/config"
-	"mortenvistisen/database/seeds"
+	"mortenvistisen/database"
 	"mortenvistisen/internal/storage"
 
 	"github.com/joho/godotenv"
@@ -22,19 +20,8 @@ func main() {
 }
 
 func run(args []string) error {
-	flags := flag.NewFlagSet("seeds", flag.ExitOnError)
-	list := flags.Bool("list", false, "list available seeds")
-	if err := flags.Parse(args); err != nil {
-		return err
-	}
-
-	if *list {
-		fmt.Println(strings.Join(seeds.Names(), "\n"))
-		return nil
-	}
-
-	if flags.NArg() > 1 {
-		return fmt.Errorf("expected at most one seed name, got %d", flags.NArg())
+	if len(args) > 0 {
+		return fmt.Errorf("unexpected argument %q", args[0])
 	}
 
 	godotenv.Load()
@@ -47,20 +34,11 @@ func run(args []string) error {
 	}
 	defer db.Close()
 
-	seedName := ""
-	if flags.NArg() == 1 {
-		seedName = flags.Arg(0)
-	}
-	if seedName == "" {
-		seedName = seeds.Default
+	if err := storage.RunMigrations(ctx, db.Conn(), database.Migrations, "migrations"); err != nil {
+		return fmt.Errorf("failed to run migrations: %w", err)
 	}
 
-	fmt.Printf("Seeding database with %q...\n", seedName)
-	if err := seeds.Run(ctx, db.Executor(), seedName); err != nil {
-		return err
-	}
-
-	fmt.Println("Seeding complete!")
+	fmt.Println("Migrations complete!")
 	return nil
 }
 

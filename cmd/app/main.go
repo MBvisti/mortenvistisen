@@ -35,7 +35,26 @@ func main() {
 		fmt.Fprintf(os.Stderr, "failed to initialize inertia: %s\n", err)
 		os.Exit(1)
 	}
-	app := fx.New(
+	app := fx.New(options(ctx)...)
+
+	if err := app.Start(ctx); err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err)
+		os.Exit(1)
+	}
+
+	<-ctx.Done()
+
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := app.Stop(shutdownCtx); err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err)
+		os.Exit(1)
+	}
+}
+
+func options(ctx context.Context) []fx.Option {
+	opts := []fx.Option{
 		fx.Provide(
 			func() context.Context { return ctx },
 			func(cfg config.Config) (email.TransactionalSender, email.MarketingSender) {
@@ -58,30 +77,21 @@ func main() {
 		controllers.Module,
 		router.Module,
 
-		fx.Invoke(startQueueProcessor),
 		fx.Invoke(startServer),
-	)
-
-	if err := app.Start(ctx); err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err)
-		os.Exit(1)
 	}
 
-	<-ctx.Done()
-
-	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	if err := app.Stop(shutdownCtx); err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err)
-		os.Exit(1)
+	if config.Env != server.ProdEnvironment {
+		opts = append(opts, fx.Invoke(startQueueProcessor))
 	}
+
+	return opts
 }
 
 func startQueueProcessor(lc fx.Lifecycle, appCtx context.Context, p queue.Processor) {
 	var done <-chan struct{}
 	lc.Append(fx.Hook{
 		OnStart: func(context.Context) error {
+			slog.InfoContext(appCtx, "starting queue processor")
 			done = startInBackground(appCtx, "queue processor", p.Start)
 			return nil
 		},

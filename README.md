@@ -366,8 +366,8 @@ PROTOCOL=http
 
 # Database
 DB_KIND=postgres
-DB_HOST=127.0.0.1
 DB_PORT=5432
+DB_HOST=127.0.0.1
 DB_NAME=mortenvistisen_development
 DB_USER=postgres
 DB_PASSWORD=postgres

@@ -7,6 +7,7 @@ import (
 	"mortenvistisen/config"
 	"mortenvistisen/internal/server"
 
+	"github.com/gosimple/slug"
 	"github.com/labstack/echo-contrib/v5/session"
 	"github.com/labstack/echo/v5"
 	"github.com/rs/xid"
@@ -22,10 +23,10 @@ type FlashMessage struct {
 var (
 	flashSession = func() string {
 		if config.Env == server.ProdEnvironment {
-			return strings.ToLower(config.ProjectName) + "_" + "flash_key"
+			return slug.Make(strings.ToLower(config.ProjectName) + " " + "flash_key")
 		}
 
-		return strings.ToLower(config.ProjectName) + "_" + "dev_flash_key"
+		return slug.Make(strings.ToLower(config.ProjectName) + " " + "dev_flash_key")
 	}()
 	flashSessionName = "flash_session"
 )

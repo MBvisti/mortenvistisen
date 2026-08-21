@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/lmittmann/tint"
+	"go.opentelemetry.io/otel/sdk/resource"
 )
 
 type StdoutExporter struct {
@@ -24,7 +25,11 @@ func NewStdoutExporterWithLevel(level slog.Level) *StdoutExporter {
 	}
 }
 
-func (s *StdoutExporter) GetSlogHandler(ctx context.Context) (slog.Handler, error) {
+func (s *StdoutExporter) GetSlogHandler(
+	ctx context.Context,
+	res *resource.Resource,
+	cfg *telemetryOptions,
+) (slog.Handler, error) {
 	handler := tint.NewHandler(os.Stdout, &tint.Options{
 		Level:      s.LogLevel,
 		TimeFormat: "15:04:05",

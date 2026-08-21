@@ -76,7 +76,7 @@ func (l Landing) Page() templ.Component {
 					}()
 				}
 				ctx = templ.InitializeContext(ctx)
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<main id=\"main-content\" class=\"flex-1\"><div class=\"public-shell py-3 sm:py-4\"><section id=\"about\" aria-labelledby=\"landing-title\" class=\"grid grid-cols-1 gap-3 lg:grid-cols-12\"><div class=\"public-panel flex min-h-[28rem] flex-col justify-between lg:col-span-12 lg:min-h-[34rem]\"><p class=\"public-label text-[#8df7a4]\">Software engineer</p><div><h1 id=\"landing-title\" class=\"public-display text-[#f2ead8]\">I build practical software with <span class=\"text-[#ff6b1a]\">Go.</span></h1><p class=\"mt-7 max-w-2xl text-lg leading-8 text-[#aaa393] sm:text-xl\">Freelancer, bootstrapper, and writer focused on useful systems that stay understandable.</p></div><p class=\"public-label text-[#8f8a7d]\">Go / distributed systems</p></div></section><section id=\"writing\" aria-labelledby=\"writing-title\" class=\"mt-3 grid grid-cols-1 gap-3 lg:grid-cols-12\"><a class=\"public-panel public-panel-primary flex min-h-64 flex-col justify-between transition hover:border-[#8df7a4] hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#130f0b] lg:col-span-4\" href=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<main id=\"main-content\" class=\"flex-1\"><div class=\"public-shell py-3 sm:py-4\"><section id=\"about\" aria-labelledby=\"landing-title\" class=\"grid grid-cols-1 gap-3 lg:grid-cols-12\"><div class=\"public-panel flex min-h-112 flex-col justify-between lg:col-span-12 lg:min-h-136\"><p class=\"public-label text-[#8df7a4]\">software ENGINEER</p><div><h1 id=\"landing-title\" class=\"public-display text-[#f2ead8]\">I build practical software with <span class=\"text-[#ff6b1a]\">Go.</span></h1><p class=\"mt-7 max-w-2xl text-lg leading-8 text-[#aaa393] sm:text-xl\">freelancer, bootstrapper, and writer focused on useful systems that stay understandable.</p></div><p class=\"public-label text-[#8f8a7d]\">Go / distributed systems</p></div></section><section id=\"writing\" aria-labelledby=\"writing-title\" class=\"mt-3 grid grid-cols-1 gap-3 lg:grid-cols-12\"><a class=\"public-panel public-panel-primary flex min-h-64 flex-col justify-between transition hover:border-[#8df7a4] hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#130f0b] lg:col-span-4\" href=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -89,7 +89,7 @@ func (l Landing) Page() templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\"><p class=\"public-label text-[#130f0b]\">01 / Writing</p><h2 id=\"writing-title\" class=\"public-heading text-[#130f0b]\">Latest transmissions</h2><span aria-hidden=\"true\" class=\"text-5xl leading-none\">↘</span></a> ")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\"><p class=\"public-label text-[#130f0b]\">01 / Writing</p><h2 id=\"writing-title\" class=\"public-heading text-[#130f0b]\">LATEST TRANSMISSIONS</h2><span aria-hidden=\"true\" class=\"text-5xl leading-none\">↘</span></a> ")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}

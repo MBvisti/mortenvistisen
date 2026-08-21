@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"mortenvistisen/config"
+	"mortenvistisen/internal/server"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/sdk/resource"
@@ -33,7 +34,7 @@ type Telemetry struct {
 	config         *telemetryOptions
 }
 
-func New(cfg config.Config) (*Telemetry, error) {
+func New(lc fx.Lifecycle, cfg config.Config) (*Telemetry, error) {
 	ctx := context.Background()
 
 	opts := []Option{
@@ -42,27 +43,22 @@ func New(cfg config.Config) (*Telemetry, error) {
 		WithTraceSampleRate(cfg.Telemetry.TraceSampleRate),
 	}
 
-	opts = append(opts, WithLogExporters(NewStdoutExporter()))
+	logExporters := []LogExporter{NewStdoutExporter()}
+	if config.Env == server.ProdEnvironment && cfg.Telemetry.OtlpEndpoint != "" {
+		if err := requireOTLPHTTPProtocol(cfg.Telemetry.OtlpProtocol); err != nil {
+			return nil, err
+		}
 
-	if cfg.Telemetry.OtlpMetricsEndpoint != "" {
-		opts = append(opts, WithMetricExporters(
-			NewOtlpMetricExporter(
-				cfg.Telemetry.OtlpMetricsEndpoint,
-				parseHeaders(cfg.Telemetry.OtlpHeaders),
-			),
-		))
-	}
-
-	if cfg.Telemetry.OtlpTracesEndpoint != "" {
-		opts = append(opts, WithTraceExporters(
-			NewOtlpTraceExporter(
-				cfg.Telemetry.OtlpTracesEndpoint,
-				parseHeaders(cfg.Telemetry.OtlpHeaders),
-			),
-		))
+		headers := parseHeaders(cfg.Telemetry.OtlpHeaders)
+		logExporters = append(logExporters, NewOtlpLogExporter(cfg.Telemetry.OtlpEndpoint, headers))
+		opts = append(opts,
+			WithMetricExporters(NewOtlpMetricExporter(cfg.Telemetry.OtlpEndpoint, headers)),
+			WithTraceExporters(NewOtlpTraceExporter(cfg.Telemetry.OtlpEndpoint, headers)),
+		)
 	} else {
 		opts = append(opts, WithTraceExporters(NewNoopTraceExporter()))
 	}
+	opts = append(opts, WithLogExporters(logExporters...))
 
 	tel, err := newWithOpts(ctx, opts...)
 	if err != nil {
@@ -72,6 +68,7 @@ func New(cfg config.Config) (*Telemetry, error) {
 	if err := tel.HealthCheck(ctx); err != nil {
 		slog.Warn("telemetry health check failed", "error", err)
 	}
+	lc.Append(fx.Hook{OnStop: tel.Shutdown})
 
 	return tel, nil
 }
@@ -124,7 +121,7 @@ func (t *Telemetry) initLogging(ctx context.Context) error {
 
 	handlers := make([]slog.Handler, 0, len(t.config.logExporters))
 	for _, exporter := range t.config.logExporters {
-		handler, err := exporter.GetSlogHandler(ctx)
+		handler, err := exporter.GetSlogHandler(ctx, t.resource, t.config)
 		if err != nil {
 			return fmt.Errorf("failed to get slog handler from %s: %w", exporter.Name(), err)
 		}
@@ -144,6 +141,17 @@ func (t *Telemetry) initLogging(ctx context.Context) error {
 	slog.SetDefault(logger)
 
 	return nil
+}
+
+func requireOTLPHTTPProtocol(protocol string) error {
+	if strings.EqualFold(strings.TrimSpace(protocol), "http/protobuf") {
+		return nil
+	}
+
+	return fmt.Errorf(
+		"OTEL_EXPORTER_OTLP_PROTOCOL must be http/protobuf when using the configured OTLP HTTP exporters, got %q",
+		protocol,
+	)
 }
 
 func (t *Telemetry) initMetrics(ctx context.Context) error {
